@@ -1,6 +1,6 @@
 # REAN Health Guru Chatbot - Webhook Services
 
-Rean Health Guru Bot is a devided into two parts. One is a Wrapper service that connects multiple type of clients like WhatsApp, Telegram, and Rean unsing APIs for processing user's input messages. Another is webhook a service for providing responce from third party For e.g. NLP (Dialogflow, TensorFlow).  Its user interface is fully conversational. It supports communication flexibility in all the supported languages and also other formats of user’s expression for e.g. user’s current location and speech messages.
+Rean Health Guru Bot is divided into two parts. One is a Wrapper service that connects multiple type of clients like WhatsApp, Telegram, and Rean unsing APIs for processing user's input messages. Another is webhook a service for providing response from third party For e.g. NLP (Dialogflow, TensorFlow).  Its user interface is fully conversational. It supports communication flexibility in all the supported languages and also other formats of user’s expression for e.g. user’s current location and speech messages.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
