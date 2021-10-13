@@ -3,7 +3,7 @@ import { Logger } from '../../common/logger';
 
 import { getRiskAssessment as getRiskAssessments } from '../../services/RiskAssessment.Service';
 
-export const getRiskAssessment = async (intent, eventObj) => {
+export const RiskAssessmentListener = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
         let res;
         try {

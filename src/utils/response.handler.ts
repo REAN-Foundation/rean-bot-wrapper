@@ -22,6 +22,7 @@ export class ResponseHandler {
     }
 
     sendFailureResponse = (response, code, message, request = null, trace = null, details = null, log_data = true) => {
+        console.log("enter end failre")
         const error = details ? details : message;
         const generic_message = details ? message : null;
         const tmp = trace ? trace.split('\n') : null;
@@ -46,7 +47,7 @@ export class ResponseHandler {
         }
 
         this.logger.log_error(JSON.stringify(obj), code, 'error');
-
+        console.log("the response of sendfailure", response.status(code).send(obj))
         return response.status(code).send(obj);
     }
 
