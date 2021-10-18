@@ -13,3 +13,8 @@ export interface response{
     messageImageUrl: string;
     messageImageCaption: string;
 }
+
+export interface handlerequest{
+    botObject: any;
+    message: message;
+}

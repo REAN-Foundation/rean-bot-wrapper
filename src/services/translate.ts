@@ -34,7 +34,7 @@ export class translateService{
             translatedResponse = await this.translateResponse(translate, message.text, detected_language)
             console.log("the response message eeeeeeeeeeeeeeeeeeeeeeeeeeeeee", translatedResponse)
         }
-        return translatedResponse;
+    return translatedResponse;
     }
 
     translateResponse = async (translate, responseMessage, detected_language) => {

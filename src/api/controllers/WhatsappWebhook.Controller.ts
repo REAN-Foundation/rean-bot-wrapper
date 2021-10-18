@@ -5,6 +5,8 @@ import { Logger } from '../../common/logger';
 import { DialogflowResponseService } from '../../services/dialogflow-response.service';
 import { translateService } from '../../services/translate'
 import { autoInjectable } from 'tsyringe';
+import { handlerequest } from '../../Refactor/interface/interface'
+import { handleRequestservice } from '../../services/HandleRequest'
 // const ConverSpeechToText = require('../services/SpeechToTextService');
 // const { isArray } = require('util');
 
@@ -13,6 +15,7 @@ import { autoInjectable } from 'tsyringe';
 export class WhatsappWebhookController {
 
     constructor(private whatsappMessageUtility?: WhatsappMessageService,
+        private handleRequestservice?: handleRequestservice,
         private translateService?: translateService,
         private responseHandler?: ResponseHandler,
         private errorHandler?: ErrorHandler,
@@ -23,6 +26,7 @@ export class WhatsappWebhookController {
             console.log("sendMessage webhook")
             try {
                 let responce = await this.whatsappMessageUtility.SendWhatsappMessage(req.body.contact, req.body.message);
+                // let responce = await this.whatsappMessageUtility.SendWhatsappMediaMessage(req.body.contact,req.body.imageLink, req.body.message);
                 if (responce) this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', responce);
                 else
                     this.responseHandler.sendFailureResponse(res, 200, 'An error occurred while sending messages!', req);
@@ -41,7 +45,20 @@ export class WhatsappWebhookController {
                     // status = sent, received & read
                 }
                 else {
-                    let responce = await this.handleUserRequest(req);
+                    let message = await this.whatsappMessageUtility.getMessage(req);
+                    let returninterface: handlerequest = {botObject:null, message:message}
+                    let responce = await this.handleRequestservice.handleUserRequest(returninterface);
+                    let response_format = await this.whatsappMessageUtility.postResponse(message, responce.processed_message);
+                    if (responce.message_from_dialoglow) {
+                        let message_to_platform;
+                        message_to_platform = await this.whatsappMessageUtility.SendWhatsappMediaMessage(message.sessionId, response_format.messageBody, response_format.messageText)
+                        if (!responce.message_from_dialoglow) {
+                            console.log('An error occurred while sending messages!');
+                        }
+                    }
+                    else {
+                        console.log('An error occurred while processing messages!');
+                    }
                 }
             }
             catch (error) {
@@ -71,34 +88,24 @@ export class WhatsappWebhookController {
             }
         };
 
-        handleUserRequest = async (req) => {
-            let message_from_dialoglow: any;
-            let processed_message: any;
-            let translate_message: any;
-            let message = await this.whatsappMessageUtility.getMessage(req);
-            // this.WhatsappStatistics.saveRequestStatistics(req,message);
+        // handleUserRequest = async (handlerequest) => {
+        //     console.log("the req is RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR", req)
+        //     let message_from_dialoglow: any;
+        //     let processed_message: any;
+        //     let translate_message: any;
+        //     // this.WhatsappStatistics.saveRequestStatistics(req,message);
 
-            //get the translated message
-            translate_message = await this.translateService.translateMessage(message.messageBody)
+        //     //get the translated message
+        //     translate_message = await this.translateService.translateMessage(message.messageBody)
 
-            //send the translate_message to dialogflow and get response
-            message_from_dialoglow = await this.dialogflowMessageUtility.getDialogflowMessage(translate_message.message, message.sessionId);
-            // message_from_dialoglow = await this.dialogflowMessageUtility.getDialogflowMessage(message.messageBody, message.sessionId);
+        //     //send the translate_message to dialogflow and get response
+        //     message_from_dialoglow = await this.dialogflowMessageUtility.getDialogflowMessage(translate_message.message, message.sessionId);
+        //     // message_from_dialoglow = await this.dialogflowMessageUtility.getDialogflowMessage(message.messageBody, message.sessionId);
 
-            // process the message from dialogflow before sending it to whatsapp
-            processed_message = await this.translateService.processdialogflowmessage(message_from_dialoglow)
+        //     // process the message from dialogflow before sending it to whatsapp
+        //     processed_message = await this.translateService.processdialogflowmessage(message_from_dialoglow)
 
-            let response_format = await this.whatsappMessageUtility.postResponse(req, processed_message);
-            if (message_from_dialoglow) {
-                let message_to_platform;
-                message_to_platform = await this.whatsappMessageUtility.SendWhatsappMediaMessage(message.sessionId, response_format.messageBody, response_format.messageText)
-                if (!message_from_dialoglow) {
-                    console.log('An error occurred while sending messages!');
-                }
-            }
-            else {
-                console.log('An error occurred while processing messages!');
-            }
-        };
+        //     return {processed_message, message_from_dialoglow}
+        // };
 
 }

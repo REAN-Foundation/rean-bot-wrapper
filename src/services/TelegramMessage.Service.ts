@@ -23,34 +23,34 @@ export class ReplyTelegramMessage{
         private DialogflowResponseService?: DialogflowResponseService) {
     }
 
-    handleUserRequest = async (botObject, message) => {
-        let message_from_dialoglow:any;
-        let processed_message: any;
-        let translate_message: any;
-        let telegram_id = message.chat.id.toString();
-        let messagetoDialogflow = await this.getMessage(message);
-        this.TelegramStatistics.saveRequestStatistics(message, message.text);
+    // handleUserRequest = async (botObject, message) => {
+    //     let message_from_dialoglow:any;
+    //     let processed_message: any;
+    //     let translate_message: any;
+    //     let telegram_id = message.chat.id.toString();
+    //     let messagetoDialogflow = await this.getMessage(message);
+    //     this.TelegramStatistics.saveRequestStatistics(message, message.text);
 
-        //get the translated message
-        translate_message = await this.translateService.translateMessage(messagetoDialogflow.messageBody)
+    //     //get the translated message
+    //     translate_message = await this.translateService.translateMessage(messagetoDialogflow.messageBody)
 
-        message_from_dialoglow = await this.DialogflowResponseService.getDialogflowMessage(translate_message.message, telegram_id);
+    //     message_from_dialoglow = await this.DialogflowResponseService.getDialogflowMessage(translate_message.message, telegram_id);
 
-        // process the message from dialogflow before sending it to whatsapp
-        processed_message = await this.translateService.processdialogflowmessage(message_from_dialoglow)
+    //     // process the message from dialogflow before sending it to whatsapp
+    //     processed_message = await this.translateService.processdialogflowmessage(message_from_dialoglow)
 
-        let response_format = await this.giveResponse(message, processed_message);
-        if (message_from_dialoglow) {
-            let message_to_platform = null;
-            message_to_platform = await this.SendTelegramMediaMessage(botObject, telegram_id, response_format.messageBody,response_format.messageText)       
-            if (!message_from_dialoglow) {
-                console.log('An error occurred while sending messages!');
-            }
-        }
-        else {
-            console.log('An error occurred while processing messages!');
-        }   
-    }
+    //     let response_format = await this.giveResponse(message, processed_message);
+    //     if (message_from_dialoglow) {
+    //         let message_to_platform = null;
+    //         message_to_platform = await this.SendTelegramMediaMessage(botObject, telegram_id, response_format.messageBody,response_format.messageText)       
+    //         if (!message_from_dialoglow) {
+    //             console.log('An error occurred while sending messages!');
+    //         }
+    //     }
+    //     else {
+    //         console.log('An error occurred while processing messages!');
+    //     }   
+    // }
 
 
     getMessage = async (message) =>{
@@ -87,7 +87,7 @@ export class ReplyTelegramMessage{
     giveResponse = async(message, message_from_dialoglow) => {
         console.log("enter the give response of tele")
         let reaponse_message: response;
-        let telegram_id = message.chat.id.toString();
+        let telegram_id = message.sessionId;
         if (message_from_dialoglow.image && message_from_dialoglow.image.url) {
             reaponse_message = {messageBody:null, messageImageUrl:message_from_dialoglow.image , messageImageCaption: message_from_dialoglow.image.url, sessionId: telegram_id, messageText:null}
         }

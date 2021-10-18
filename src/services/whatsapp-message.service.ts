@@ -315,18 +315,19 @@ export class WhatsappMessageService{
             let ConvertedToText = await this.Speechtotext.SendSpeechRequest(mediaUrl, "whatsapp");
             if (ConvertedToText) {
                 returnMessage = {messageBody:String(ConvertedToText),sessionId:whatsapp_id,replayPath:whatsapp_id,latlong:null,type:req.body.messages[0].type}
-            } else {
+            }
+            else {
                 returnMessage = {messageBody:null,sessionId:whatsapp_id,replayPath:whatsapp_id,latlong:null,type:req.body.messages[0].type}
             }
-        } else {
+        }else {
             returnMessage = {messageBody:null,sessionId:whatsapp_id,replayPath:whatsapp_id,latlong:null,type:req.body.messages[0].type}
         }
         return returnMessage;
     }
 
-    postResponse = async ( req, message_from_dialoglow ) => {
+    postResponse = async ( message, message_from_dialoglow ) => {
         let reaponse_message: response;
-        let whatsapp_id = req.body.contacts[0].wa_id;
+        let whatsapp_id = message.sessionId;
         if (message_from_dialoglow) {
             if (message_from_dialoglow.image && message_from_dialoglow.image.url) {
                 reaponse_message = {messageBody:null, messageImageUrl:message_from_dialoglow.image , messageImageCaption: message_from_dialoglow.image.url, sessionId: whatsapp_id, messageText:null }
