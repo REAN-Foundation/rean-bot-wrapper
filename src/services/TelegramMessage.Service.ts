@@ -2,82 +2,133 @@
 import { DialogflowResponseService } from './dialogflow-response.service';
 import { uploadFile, createFileFromHTML } from './awsfileupload.service';
 import fs from 'fs';
-import { createUserStat } from './statistics/UserStat.service';
+import { message, response } from '../Refactor/interface/interface';
+import { autoInjectable } from 'tsyringe';
+import { TelegramStatistics } from './SaveStatistics';
+import { translateService } from '../services/translate'
 
-import { v4 } from 'uuid';
-import dialogflow from '@google-cloud/dialogflow';
+// import { v4 } from 'uuid';
+// import dialogflow from '@google-cloud/dialogflow';
 const projectId = process.env.DIALOGFLOW_PROJECT_ID;
 
-import { SendSpeechRequest } from './SpeechToTextService';
+import { Speechtotext } from './SpeechToTextService';
 import http from 'https';
 
-let dialoglowinstance = new DialogflowResponseService()
+@autoInjectable()
+export class ReplyTelegramMessage{
 
-export const ReplyTelegramMessage = async (botObject, message) => {
+    constructor(private TelegramStatistics?: TelegramStatistics,
+        private Speechtotext?: Speechtotext,
+        private translateService?:translateService,
+        private DialogflowResponseService?: DialogflowResponseService) {
+    }
 
-    try {
-        console.log(`the botObject is ${botObject} and the message is ${message}`)
-        var response_message : any;//= { text: [], parse_mode:false, image: any };
+    handleUserRequest = async (botObject, message) => {
+        let message_from_dialoglow:any;
+        let processed_message: any;
+        let translate_message: any;
+        let telegram_id = message.chat.id.toString();
+        let messagetoDialogflow = await this.getMessage(message);
+        this.TelegramStatistics.saveRequestStatistics(message, message.text);
+
+        //get the translated message
+        translate_message = await this.translateService.translateMessage(messagetoDialogflow.messageBody)
+
+        message_from_dialoglow = await this.DialogflowResponseService.getDialogflowMessage(translate_message.message, telegram_id);
+
+        // process the message from dialogflow before sending it to whatsapp
+        processed_message = await this.translateService.processdialogflowmessage(message_from_dialoglow)
+
+        let response_format = await this.giveResponse(message, processed_message);
+        if (message_from_dialoglow) {
+            let message_to_platform = null;
+            message_to_platform = await this.SendTelegramMediaMessage(botObject, telegram_id, response_format.messageBody,response_format.messageText)       
+            if (!message_from_dialoglow) {
+                console.log('An error occurred while sending messages!');
+            }
+        }
+        else {
+            console.log('An error occurred while processing messages!');
+        }   
+    }
+
+
+    getMessage = async (message) =>{
+        console.log("enter the getMessage of telegram", message)
+        let returnMessage: message;
+        let telegram_id = message.chat.id.toString();
         if (message.text) {
-            saveRequestStatistics(message, message.text)
-            console.log(`the text is ${message.text} and the id is ${message.chat.id.toString()}`)
-            response_message = await dialoglowinstance.getDialogflowMessage(message.text, message.chat.id.toString());
+            returnMessage = {messageBody:message.text,sessionId:telegram_id,replayPath:telegram_id,latlong:null,type:'text'}
         }
         else if (message.voice) {
             let response;
             response = await GetTelegramMedia(message.voice.file_id)
             if (response.result.file_path) {
-                let ConvertedToText = await SendSpeechRequest('https://api.telegram.org/file/bot' + process.env.TELEGRAM_BOT_TOKEN + '/' + response.result.file_path, "telegram");
+                let ConvertedToText = await this.Speechtotext.SendSpeechRequest('https://api.telegram.org/file/bot' + process.env.TELEGRAM_BOT_TOKEN + '/' + response.result.file_path, "telegram");
                 if (ConvertedToText) {
-                    response_message = await dialoglowinstance.getDialogflowMessage(ConvertedToText, message.chat.id.toString());
+                    returnMessage = {messageBody:String(ConvertedToText),sessionId:telegram_id,replayPath:telegram_id,latlong:null,type:'voice'}
                 } else {
-                    response_message.text[0] = "I'm sorry, I did not understand that. Can you please try again?";
+                    returnMessage = {messageBody:null,sessionId:telegram_id,replayPath:telegram_id,latlong:null,type:'text'}
                 }
             } else {
-                response_message.text[0] = "Audio is not supported";
+                returnMessage = {messageBody:null,sessionId:telegram_id,replayPath:telegram_id,latlong:null,type:'text'}
             }
         }
         else if (message.location) {
             let location_message = `latlong:${message.location.latitude}-${message.location.longitude}`;
-            response_message = await dialoglowinstance.getDialogflowMessage(location_message, message.chat.id.toString());
+            returnMessage = {messageBody:null,sessionId:telegram_id,replayPath:telegram_id,latlong:location_message,type:'location'}
         }
         else {
-            response_message.text[0] = "Please enter text only!!";
+            returnMessage = {messageBody:null,sessionId:telegram_id,replayPath:telegram_id,latlong:null,type:message[0].type}
         }
-        let response;
-        if (response_message.image && response_message.image.url) {
-            response = await SendTelegramMediaMessage(botObject, message.chat.id, response_message.image.url, response_message.image.caption)
-            saveResponseStatistics(message, response, response_message, response_message.image.caption, response_message.image.url)
+        return returnMessage;
+    }
+
+    giveResponse = async(message, message_from_dialoglow) => {
+        console.log("enter the give response of tele")
+        let reaponse_message: response;
+        let telegram_id = message.chat.id.toString();
+        if (message_from_dialoglow.image && message_from_dialoglow.image.url) {
+            reaponse_message = {messageBody:null, messageImageUrl:message_from_dialoglow.image , messageImageCaption: message_from_dialoglow.image.url, sessionId: telegram_id, messageText:null}
         }
-        else if (response_message.text.length > 1) {
+        else if (message_from_dialoglow.text.length > 1) {
 
-            if (response_message.parse_mode && response_message.parse_mode == 'HTML') {
-
-                const staticMessage = "We are working on response...";
-                response = await SendTelegramMessage(botObject, message.chat.id,staticMessage);
-                saveResponseStatistics(message, response, response_message, staticMessage)
+            if (message_from_dialoglow.parse_mode && message_from_dialoglow.parse_mode == 'HTML') {
                 let uploadImageName;
-                uploadImageName = await createFileFromHTML(response_message.text[0])
+                uploadImageName = await createFileFromHTML(message_from_dialoglow.text[0])
                 const vaacinationImageFile = await uploadFile(uploadImageName);
                 if (vaacinationImageFile) {
-                    response = await SendTelegramMediaMessage(botObject, message.chat.id, vaacinationImageFile, response_message.text[1]);
-                    saveResponseStatistics(message, response, response_message, response_message.text[1], vaacinationImageFile)
-                    fs.unlink(uploadImageName, (err => { if (err) console.log(err); }));
+                    reaponse_message = {messageBody:String(vaacinationImageFile), messageImageUrl:null , messageImageCaption: null, sessionId: telegram_id, messageText:message_from_dialoglow.text[1]}
                 }
             }
             else {
-                response = await SendTelegramMessage(botObject, message.chat.id, response_message.text[0]);
-                saveResponseStatistics(message, response, response_message, response_message.text[0]);
-                response = await SendTelegramMessage(botObject, message.chat.id, response_message.text[1]);
-                saveResponseStatistics(message, response, response_message, response_message.text[1])
+                reaponse_message = {messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: telegram_id, messageText:message_from_dialoglow.text[0]}
+                reaponse_message = {messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: telegram_id, messageText:message_from_dialoglow.text[1]}
             }
         } else {
-            response = await SendTelegramMessage(botObject, message.chat.id, response_message.text[0]);
-            saveResponseStatistics(message, response, response_message, response_message.text[0]);
+            reaponse_message = {messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: telegram_id, messageText:message_from_dialoglow.text[0]}
         }
+        return reaponse_message;
     }
-    catch (e) {
-        console.log("Error:", e)
+
+    SendTelegramMediaMessage = async (botObject, contact, imageLink = null, message) => {
+        message = sanitizeMessage(message);
+        return new Promise((resolve, reject) => {
+    
+            if (imageLink === null){
+                botObject.sendMessage(contact, message, { parse_mode: 'HTML' }).then(function (data) {
+                    resolve(data)
+                });
+            }
+            else botObject.sendPhoto(
+                contact,
+                imageLink,
+                { caption: message }
+            )
+                .then(function (data) {
+                    resolve(data)
+                });
+        });
     }
 }
 
@@ -92,29 +143,6 @@ function sanitizeMessage(message) {
     return message;
 }
 
-export const SendTelegramMessage = async (botObject, contact, message) => {
-    message = sanitizeMessage(message)
-    return new Promise((resolve, reject) => {
-        botObject.sendMessage(contact, message, { parse_mode: 'HTML' }).then(function (data) {
-            resolve(data)
-        });
-    });
-}
-
-export const SendTelegramMediaMessage = async (botObject, contact, imageLink, message) => {
-    message = sanitizeMessage(message);
-    return new Promise((resolve, reject) => {
-
-        botObject.sendPhoto(
-            contact,
-            imageLink,
-            { caption: message }
-        )
-            .then(function (data) {
-                resolve(data)
-            });
-    });
-}
 /* get media details send by user */
 export const GetTelegramMedia = async (fileid) => {
 
@@ -136,34 +164,4 @@ export const GetTelegramMedia = async (fileid) => {
         })
         req.end();
     });
-}
-
-function saveRequestStatistics(req, message) {
-
-    const user_data = {
-        name: req.from.first_name + " "+ req.from.last_name,
-        platform: "Telegram",
-        contact: req.from.id,
-        chat_message_id: req.message_id,
-        direction: 'In',
-        message_type: "text",
-        message_content: message
-    };
-    createUserStat(user_data);
-}
-
-function saveResponseStatistics(req, response, service_response, message, image_url = null) {
-    const user_data = {
-        name: req.from.first_name + " "+ req.from.last_name,
-        platform: "Telegram",
-        contact: req.from.id,
-        chat_message_id: response.messages_id,
-        direction: 'Out',
-        message_type: image_url ? "image" : "text",
-        message_content: message,
-        image_url: image_url,
-        raw_response_object: service_response.result && service_response.result.fulfillmentMessages ? JSON.stringify(service_response.result.fulfillmentMessages) : '',
-        intent: service_response.result && service_response.result.intent ? service_response.result.intent.displayName : ''
-    };
-    createUserStat(user_data);
 }

@@ -8,7 +8,8 @@ export interface message{
 
 export interface response{
     sessionId: string;
-    messageBody: string;
+    messageBody: String;
+    messageText: String;
     messageImageUrl: string;
     messageImageCaption: string;
 }

@@ -10,6 +10,7 @@ import { RiskAssessmentListener } from './intentListeners/RiskAssessment.Listene
 import { getRiskAssessmentInfo } from './intentListeners/RiskAssessmentInfo.Listener';
 import { getRiskAssessmentFollowup } from './intentListeners/RiskAssessmentFollowup.Listener';
 import { getMedicationInfo } from './intentListeners/SupportApp.Listener';
+import { getGenericpedia, getGenericpediaChemist} from './intentListeners/Genericpedia.Listener'
 
 /*
  * Init function (being called during application bootstrap)
@@ -44,6 +45,8 @@ export class IntentRegister {
         IntentEmitter.registerListener('liver', getRiskAssessmentFollowup)
         IntentEmitter.registerListener('lungs', getRiskAssessmentFollowup)
         IntentEmitter.registerListener('pregnancy', getRiskAssessmentFollowup)
+        IntentEmitter.registerListener('genericpedia', getGenericpedia)
+        IntentEmitter.registerListener('genericpedia location', getGenericpediaChemist)
 
         IntentEmitter.registerListener('SupportApp.GetMedication', getMedicationInfo)
 

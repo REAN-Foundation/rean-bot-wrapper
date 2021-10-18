@@ -5,6 +5,7 @@ import { v2 } from '@google-cloud/translate';
 import { text } from 'body-parser';
 import { response } from 'express';
 import path from 'path';
+import { combineTableNames } from 'sequelize/types/lib/utils';
 const projectId = process.env.DIALOGFLOW_PROJECT_ID;
 const appSupportProjectId = process.env.DIALOGFLOW_PROJECT_ID_REAN_APP;
 const translateProjectId = process.env.TRANSLATE_PROJECT_ID;
@@ -14,7 +15,7 @@ const translateProjectId = process.env.TRANSLATE_PROJECT_ID;
 @injectable()
 export class DialogflowResponseService {
     getDialogflowMessage = async (message, userSessionId = null, platform = null) => {
-        console.log("ths is message from getdialogflow", message)
+        console.log("this is message from getdialogflow................", message)
         try {
             // set default values
             let detected_language = 'en';        
@@ -37,6 +38,7 @@ export class DialogflowResponseService {
     
                 sessionPath = sessionClient.projectAgentSessionPath(appSupportProjectId, sessionId);
             } else {
+                console.log("Entered the else of Dialogflow..............")
     
                 // init session client for DF using manual explicit file
                 let options = {
@@ -44,23 +46,30 @@ export class DialogflowResponseService {
                 }
                 sessionClient = new dialogflow.SessionsClient(options);
     
-                translate = await initializeTranslate(translateProjectId);
+                // translate = await initializeTranslate(translateProjectId); ////////////////
                 sessionPath = sessionClient.projectAgentSessionPath(projectId, sessionId);
             }
+            ///////////////////////
+            // if (translate) {
+            //     let [detections] = await translate.detect(message);
+            //     console.log("this is detections", translate.detect(message))
+            //     detections = Array.isArray(detections) ? detections : [detections];
+            //     console.log("this is 2nd line detections", detections)
     
-            if (translate) {
-                let [detections] = await translate.detect(message);
-                detections = Array.isArray(detections) ? detections : [detections];
-    
-                detected_language = detections[0].language;
-                if (detected_language != 'en') {
-                    const target = 'en';
-                    let [translation] = await translate.translate(message, target);
-                    message = translation;
-                    dialogflow_language = "en-US";
-                }
-            }
-    
+            //     detected_language = detections[0].language;
+            //     console.log("the language is", detected_language)
+            //     if (detected_language != 'en') {
+            //         const target = 'en';
+            //         let [translation] = await translate.translate(message, target);
+            //         message = translation;
+            //         dialogflow_language = "en-US";
+            //     }
+            // }
+            //////////////////////////
+
+            // let messagefordialogflow;
+            // messagefordialogflow = await translateMessage(message)
+
             console.log("Message to be sent to DF: ", message)
             const request = {
                 session: sessionPath,
@@ -71,6 +80,7 @@ export class DialogflowResponseService {
                     },
                 },
             };
+
             const responses = await sessionClient.detectIntent(request);
             const result = responses[0].queryResult;
             if (result.intent) {
@@ -82,15 +92,16 @@ export class DialogflowResponseService {
             if (responseMessage.text.length == 0) {
                 responseMessage.text[0] = result.fulfillmentText;
             }
-            let translatedResponse;
-            if (responseMessage.parse_mode) {
-                translatedResponse = responseMessage.text;
-            }
-            else {
-                translatedResponse = await translateResponse(translate, responseMessage.text, detected_language)
-            }
+            // let translatedResponse; /////////////////
+            // if (responseMessage.parse_mode) {
+            //     translatedResponse = responseMessage.text;
+            // }
+            // else {
+            //     translatedResponse = await translateResponse(translate, responseMessage.text, detected_language)
+            // }//////////////////
+            console.log("returned dialogflow,",responseMessage )
             return {
-                text: translatedResponse,
+                text: responseMessage, //responseMessage
                 image: responseMessage.image ? responseMessage.image : false,
                 parse_mode: responseMessage.parse_mode ? responseMessage.parse_mode : false,
                 result: result,
@@ -109,31 +120,34 @@ export class DialogflowResponseService {
     
     }
 
-} 
-
-async function initializeTranslate(translateProjectId) {
-    // return false;
-    try {
-        const translateObj = new v2.Translate({projectId: translateProjectId });
-        return translateObj
-    }
-    catch (e) {
-        return false;
-    }
 }
+//
+// async function initializeTranslate(translateProjectId) {
+//     // return false;
+//     try {
+//         const translateObj = new v2.Translate({projectId: translateProjectId });
+//         return translateObj
+//     }
+//     catch (e) {
+//         return false;
+//     }
+// }
+// //
+// async function translateResponse(translate, responseMessage, detected_language) {
+//     try {
+//         if (detected_language != 'en') {
+//             console.log("It is not english loop")
+//             let [translation] = await translate.translate(responseMessage[0], { to: detected_language, format: "text" });
+//             responseMessage = [translation];
+//         }
+//         return responseMessage;
+//     } catch (e) {
+//         console.log("catch translate", e);
+//         return responseMessage;
+//     }
+// }
+//
 
-async function translateResponse(translate, responseMessage, detected_language) {
-    try {
-        if (detected_language != 'en') {
-            let [translation] = await translate.translate(responseMessage[0], { to: detected_language, format: "text" });
-            responseMessage = [translation];
-        }
-        return responseMessage;
-    } catch (e) {
-        console.log("catch translate", e);
-        return responseMessage;
-    }
-}
 
 function getFulfillmentResponse(result) {
     let responseMessage = { text: [], parse_mode: false, image: { url: '', caption:''}};

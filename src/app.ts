@@ -28,6 +28,8 @@ export default class Application {
 
     private _whatsappMessageService: WhatsappMessageService = null;
 
+    private _replyTelegramMessage: ReplyTelegramMessage = null;
+
     private _telegram: TelegramBot = null;
 
     private constructor() {
@@ -35,6 +37,7 @@ export default class Application {
         this._router = new Router(this._app);
         this._intentRegister = new IntentRegister();
         this._whatsappMessageService = new WhatsappMessageService();
+        this._replyTelegramMessage = new ReplyTelegramMessage();
         this._telegram = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN);
     }
 
@@ -90,7 +93,8 @@ export default class Application {
 
             // Process telegram request
             this._telegram.on('message', msg => {
-                ReplyTelegramMessage(this._telegram, msg);
+                // ReplyTelegramMessage(this._telegram, msg);
+                this._replyTelegramMessage.handleUserRequest(this._telegram, msg);
             });
 
             //Start listening

@@ -4,11 +4,12 @@ import http from  'https';
 import fs from 'fs';
 import { DialogflowResponseService } from './dialogflow-response.service';
 import { uploadFile, createFileFromHTML } from './awsfileupload.service';
-import { SendSpeechRequest } from './SpeechToTextService';
-import { createUserStat } from './statistics/UserStat.service';
-import { injectable } from 'tsyringe';
+import { Speechtotext } from './SpeechToTextService';
+import { WhatsappStatistics } from './SaveStatistics';
+import { autoInjectable } from 'tsyringe';
+import { response, message } from '../Refactor/interface/interface';
 
-let dialoglowinstance = new DialogflowResponseService();
+// let dialoglowinstance = new DialogflowResponseService();
 
 
 function emojiUnicode(emoji) {
@@ -38,8 +39,13 @@ function sanitizeMessage(message) {
     }
     return message;
 }
-@injectable()
+@autoInjectable()
 export class WhatsappMessageService{
+
+    constructor(private WhatsappStatistics?: WhatsappStatistics,
+                private Speechtotext?: Speechtotext,
+                private DialogflowResponseService?: DialogflowResponseService) {
+    }
     
     SetWebHook = async () => {
 
@@ -158,133 +164,64 @@ export class WhatsappMessageService{
             request.end();
         });
     }
-    
-    handleUserRequest = async (req) => {
-        let response_message: any;
-        let whatsapp_id = req.body.contacts[0].wa_id;
-        if (req.body.messages[0].type == "text") {
-            let message = req.body.messages[0].text.body;
-    
-            const regexExp = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/gi;
-            if (regexExp.test(message)) {
-                message = emojiUnicode(message) == "1f44e" ? "NegativeFeedback" : "PositiveFeedback"
-            }
-    
-            saveRequestStatistics(req, message);
-            response_message = await dialoglowinstance.getDialogflowMessage(message, whatsapp_id);
-    
-    
-        }
-        else if (req.body.messages[0].type == "location") {
-            let message = `latlong:${req.body.messages[0].location.latitude}-${req.body.messages[0].location.longitude}`;
-            saveRequestStatistics(req, message);
-            response_message = await dialoglowinstance.getDialogflowMessage(message, whatsapp_id);
-        }
-        else if (req.body.messages[0].type == "voice") {
-            let mediaUrl = await this.GetWhatsappMedia(req.body.messages[0].voice.id);
-            let ConvertedToText = await SendSpeechRequest(mediaUrl, "whatsapp");
-            if (ConvertedToText) {
-                response_message = await dialoglowinstance.getDialogflowMessage(ConvertedToText, whatsapp_id);
-            } else {
-                response_message = {text: []};
-                response_message.text[0] = "I'm sorry, I did not understand that. Can you please try again?";
-            }
-        } else {
-            response_message.text[0] = "Please enter Text, Location / voice message only!!";
-        }
-        if (response_message) {
-            let response;
-            if (response_message.image && response_message.image.url) {
-                response = await this.SendWhatsappMediaMessage(whatsapp_id, response_message.image.url, response_message.image.caption);
-                saveResponseStatistics(req, response, response_message, response_message.image.caption, response_message.image.url)
-            }
-            else if (response_message.text.length > 1) {
-                if (response_message.parse_mode && response_message.parse_mode == 'HTML') {
-                    const staticMessage = "We are working on response...";
-                    response = await this.SendWhatsappMessage(whatsapp_id, staticMessage);
-                    saveResponseStatistics(req, response, response_message, staticMessage)
-                    let uploadImageName;
-                    uploadImageName = await createFileFromHTML(response_message.text[0])
-                    const vaacinationImageFile = await uploadFile(uploadImageName);
-                    if (vaacinationImageFile) {
-                        response = await this.SendWhatsappMediaMessage(whatsapp_id, vaacinationImageFile, response_message.text[1]);
-                        saveResponseStatistics(req, response, response_message, response_message.text[1], vaacinationImageFile)
-                        fs.unlink(uploadImageName, (err => { if (err) console.log(err); }));
-                    }
-                }
-                else {
-                    response = await this.SendWhatsappMessage(whatsapp_id, response_message.text[0]);
-                    saveResponseStatistics(req, response, response_message, response_message.text[0]);
-                    response = await this.SendWhatsappMessage(whatsapp_id, response_message.text[1]);
-                    saveResponseStatistics(req, response, response_message, response_message.text[1])
-                }
-            }
-            else {
-                response = await this.SendWhatsappMessage(whatsapp_id, response_message.text[0]);
-                saveResponseStatistics(req, response, response_message, response_message.text[0]);
-            }
-            if (!response) {
-                console.log('An error occurred while sending messages!');
-            }
-        }
-        else {
-            console.log('An error occurred while processing messages!');
-        }
-    }
-    SendWhatsappMessage = async (contact, message) => {
-        console.log("this is SendWhatsappMessage.....")
-        message = sanitizeMessage(message)
+
+    SendWhatsappMediaMessage = async (contact,imageLink, message) => {
         return new Promise((resolve, reject) => {
-            const postData = JSON.stringify({
-                'recipient_type': 'individual',
-                'to': contact,
-                'type': 'text',
-                'text': {
-                    'body': message
-                }
-            });
-    
-            const options = {
-                hostname: process.env.WHATSAPP_LIVE_HOST,
-                path: '/v1/messages',
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'D360-Api-Key': process.env.WHATSAPP_LIVE_API_KEY
-                }
-            };
-            const request = http.request(options, (response) => {
-                response.setEncoding('utf8');
-                response.on('data', (chunk) => {
-                    resolve(chunk);
+                console.log("this is SendWhatsappMediaMessage.....", message)
+                message = sanitizeMessage(message)
+                const postData = imageLink ? JSON.stringify({
+                    'recipient_type': 'individual',
+                    'to': contact,
+                    'type': 'image',
+                    "image": {
+                        "link": imageLink,
+                        "caption": message
+                    }
+                }): JSON.stringify({
+                    'recipient_type': 'individual',
+                    'to': contact,
+                    'type': 'text',
+                    'text': {
+                        'body': message
+                    }
+                })
+                const options = {
+                    hostname: process.env.WHATSAPP_LIVE_HOST,
+                    path: '/v1/messages',
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'D360-Api-Key': process.env.WHATSAPP_LIVE_API_KEY
+                    }
+                };
+                const request = http.request(options, (response) => {
+                    response.setEncoding('utf8');
+                    response.on('data', (chunk) => {
+                        resolve(chunk);
+                    });
+                    response.on('end', () => {
+                        resolve(true);
+                    });
                 });
-                response.on('end', () => {
-                    resolve(true);
+                request.on('error', (e) => {
+                    console.error(`problem with request: ${e.message}`);
+                    reject();
                 });
-            });
-    
-            request.on('error', (e) => {
-                console.error(`problem with request: ${e.message}`);
-                reject();
-            });
-            // Write data to request body
-            request.write(postData);
-            request.end();
+                request.write(postData);
+                request.end();  
         });
     }
     
-    SendWhatsappMediaMessage = async (contact, imageLink, message) => {
-        console.log("this is SendWhatsappMediaMessage.....", imageLink)
+    SendWhatsappMessage = async (contact, message) => {
         message = sanitizeMessage(message);
         return new Promise((resolve, reject) => {
     
             const postData = JSON.stringify({
                 'recipient_type': 'individual',
                 'to': contact,
-                'type': 'image',
-                "image": {
-                    "link": imageLink,
-                    "caption": message
+                'type': 'text',
+                'text': {
+                    'body': message
                 }
             });
     
@@ -353,35 +290,65 @@ export class WhatsappMessageService{
             request.end();
         });
     }
-}
 
-function saveRequestStatistics(req, message) {
+    getMessage = async (req) =>{
+        let returnMessage: message;
+        let whatsapp_id = req.body.contacts[0].wa_id;
+        if (req.body.messages[0].type == "text") {
+            let message = req.body.messages[0].text.body;
+    
+            const regexExp = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/gi;
+            if (regexExp.test(message)) {
+                message = emojiUnicode(message) == "1f44e" ? "NegativeFeedback" : "PositiveFeedback"
+            }
+            
+            returnMessage = {messageBody:message,sessionId:whatsapp_id,replayPath:whatsapp_id,latlong:null,type:'text'}
+    
+        }
+        else if (req.body.messages[0].type == "location") {
+            let loc = `latlong:${req.body.messages[0].location.latitude}-${req.body.messages[0].location.longitude}`;
+            returnMessage = {messageBody:null,sessionId:whatsapp_id,replayPath:whatsapp_id,latlong:loc,type:'location'}
+        }
+        else if (req.body.messages[0].type == "voice") {
+            let mediaUrl = await this.GetWhatsappMedia(req.body.messages[0].voice.id);
+            console.log("the mediaUrl", mediaUrl)
+            let ConvertedToText = await this.Speechtotext.SendSpeechRequest(mediaUrl, "whatsapp");
+            if (ConvertedToText) {
+                returnMessage = {messageBody:String(ConvertedToText),sessionId:whatsapp_id,replayPath:whatsapp_id,latlong:null,type:req.body.messages[0].type}
+            } else {
+                returnMessage = {messageBody:null,sessionId:whatsapp_id,replayPath:whatsapp_id,latlong:null,type:req.body.messages[0].type}
+            }
+        } else {
+            returnMessage = {messageBody:null,sessionId:whatsapp_id,replayPath:whatsapp_id,latlong:null,type:req.body.messages[0].type}
+        }
+        return returnMessage;
+    }
 
-    const user_data = {
-        name: req.body.contacts[0].profile.name,
-        platform: "Whatsapp",
-        contact: req.body.contacts[0].wa_id,
-        chat_message_id: req.body.messages[0].id,
-        direction: 'In',
-        message_type: req.body.messages[0].type,
-        message_content: message
-    };
-    createUserStat(user_data);
-}
-
-function saveResponseStatistics(req, response, service_response, message, image_url = null) {
-    response = JSON.parse(response)
-    const user_data = {
-        name: req.body.contacts[0].profile.name,
-        platform: "Whatsapp",
-        contact: req.body.contacts[0].wa_id,
-        chat_message_id: response.messages[0].id,
-        direction: 'Out',
-        message_type: image_url ? "image" : "text",
-        message_content: message,
-        image_url: image_url,
-        raw_response_object: service_response.result && service_response.result.fulfillmentMessages ? JSON.stringify(service_response.result.fulfillmentMessages) : '',
-        intent: service_response.result && service_response.result.intent ? service_response.result.intent.displayName : ''
-    };
-    createUserStat(user_data);
+    postResponse = async ( req, message_from_dialoglow ) => {
+        let reaponse_message: response;
+        let whatsapp_id = req.body.contacts[0].wa_id;
+        if (message_from_dialoglow) {
+            if (message_from_dialoglow.image && message_from_dialoglow.image.url) {
+                reaponse_message = {messageBody:null, messageImageUrl:message_from_dialoglow.image , messageImageCaption: message_from_dialoglow.image.url, sessionId: whatsapp_id, messageText:null }
+            }
+            else if (message_from_dialoglow.text.length > 1) {
+                if (message_from_dialoglow.parse_mode && message_from_dialoglow.parse_mode == 'HTML') {
+                    let uploadImageName;
+                    uploadImageName = await createFileFromHTML(message_from_dialoglow.text[0])
+                    const vaacinationImageFile = await uploadFile(uploadImageName);
+                    if (vaacinationImageFile) {
+                        reaponse_message = {messageBody:String(vaacinationImageFile), messageImageUrl:null , messageImageCaption: null, sessionId: whatsapp_id, messageText:message_from_dialoglow.text[1] }
+                    }
+                }
+                else {
+                    reaponse_message = {messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: whatsapp_id, messageText:message_from_dialoglow.text[0] }
+                    reaponse_message = {messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: whatsapp_id, messageText:message_from_dialoglow.text[1] }
+                }
+            }
+            else {
+                reaponse_message = {messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: whatsapp_id, messageText:message_from_dialoglow.text[0] }
+            }
+        }
+        return reaponse_message;
+    }
 }
