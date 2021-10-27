@@ -6,8 +6,8 @@ import { text } from 'body-parser';
 import { response } from 'express';
 import path from 'path';
 import { combineTableNames } from 'sequelize/types/lib/utils';
-const projectId = process.env.DIALOGFLOW_PROJECT_ID;
-const appSupportProjectId = process.env.DIALOGFLOW_PROJECT_ID_REAN_APP;
+// const projectId = process.env.DIALOGFLOW_PROJECT_ID;
+// const appSupportProjectId = process.env.DIALOGFLOW_PROJECT_ID_REAN_APP;
 const translateProjectId = process.env.TRANSLATE_PROJECT_ID;
 // A unique identifier for the given session
 
@@ -26,29 +26,34 @@ export class DialogflowResponseService {
             let sessionClient = null;
             let sessionPath = null;
             let translate = null
+            console.log("the platform is PPPPPPPPPPPPPPPPPPPPPPPPPP",platform )
+            let options = {};
+            let projectIdFinal =null;
+
             if (platform == "REAN_SUPPORT") {
                 translate = false
     
                 // init session client for DF using manual explicit file for REAN Support App Bot
                 // check docs here: node_modules/dialogflow/src/v2/sessions_client.js
-                let options = {
+                options = {
                     keyFilename: process.env.REAN_APP_SUPPORT_GCP_PROJ_CREDENTIALS
                 }
-                sessionClient = new dialogflow.SessionsClient(options);
-    
-                sessionPath = sessionClient.projectAgentSessionPath(appSupportProjectId, sessionId);
+                projectIdFinal = process.env.DIALOGFLOW_PROJECT_ID_REAN_APP;
+                
             } else {
                 console.log("Entered the else of Dialogflow..............")
     
                 // init session client for DF using manual explicit file
-                let options = {
+                options = {
                     keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
                 }
-                sessionClient = new dialogflow.SessionsClient(options);
+                projectIdFinal = process.env.DIALOGFLOW_PROJECT_ID;;
+                
+            }
+            sessionClient = new dialogflow.SessionsClient(options);
     
                 // translate = await initializeTranslate(translateProjectId); ////////////////
-                sessionPath = sessionClient.projectAgentSessionPath(projectId, sessionId);
-            }
+            sessionPath = sessionClient.projectAgentSessionPath(projectIdFinal, sessionId);
             ///////////////////////
             // if (translate) {
             //     let [detections] = await translate.detect(message);
@@ -80,7 +85,7 @@ export class DialogflowResponseService {
                     },
                 },
             };
-
+            console.log("B$session CLient detects intent")
             const responses = await sessionClient.detectIntent(request);
             const result = responses[0].queryResult;
             if (result.intent) {
@@ -88,6 +93,8 @@ export class DialogflowResponseService {
             } else {
                 // console.log(`  No intent matched.`);
             }
+
+            console.log("B$getFulfillmentResponse gets response")
             responseMessage = getFulfillmentResponse(result);
             if (responseMessage.text.length == 0) {
                 responseMessage.text[0] = result.fulfillmentText;

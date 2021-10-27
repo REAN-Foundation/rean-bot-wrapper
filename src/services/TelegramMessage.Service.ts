@@ -3,9 +3,12 @@ import { DialogflowResponseService } from './dialogflow-response.service';
 import { uploadFile, createFileFromHTML } from './awsfileupload.service';
 import fs from 'fs';
 import { message, response } from '../Refactor/interface/interface';
-import { autoInjectable } from 'tsyringe';
+import { autoInjectable, singleton } from 'tsyringe';
 import { TelegramStatistics } from './SaveStatistics';
-import { translateService } from '../services/translate'
+import { translateService } from '../services/translate';
+import  TelegramBot  from 'node-telegram-bot-api';
+import { handleRequestservice } from './HandleRequest'
+import { MessageFlow } from './GetPutMessageFLow'
 
 // import { v4 } from 'uuid';
 // import dialogflow from '@google-cloud/dialogflow';
@@ -13,15 +16,37 @@ const projectId = process.env.DIALOGFLOW_PROJECT_ID;
 
 import { Speechtotext } from './SpeechToTextService';
 import http from 'https';
+import { platformServiceInterface } from '../Refactor/interface/PlatformInterface';
 
 @autoInjectable()
-export class ReplyTelegramMessage{
-
+@singleton()
+export class platformMessageService implements platformServiceInterface{
+    public _telegram: TelegramBot = null;
+    public res;
     constructor(private TelegramStatistics?: TelegramStatistics,
-        private Speechtotext?: Speechtotext,
-        private translateService?:translateService,
-        private DialogflowResponseService?: DialogflowResponseService) {
+        private Speechtotext?: Speechtotext, private messageFlow?: MessageFlow ) {
+            this._telegram = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN);
+            let client = null
+            this.init(client);
     }
+
+    handleMessage(msg, client: String){
+        this._telegram.processUpdate(msg)
+        console.log("message sent to events")
+        return null;
+    }
+
+    init(client){
+        this._telegram.setWebHook(process.env.BASE_URL + '/v1/telegram/' + process.env.TELEGRAM_BOT_TOKEN + '/receive');
+        console.log("Telegram webhook set," )
+        this._telegram.on('message', msg => {
+            // ReplyTelegramMessage(this._telegram, msg);
+            this.messageFlow.get_put_msg_Dialogflow(msg, client, this);
+        });
+    }
+    // set responce(res){
+    //     this.res = res;
+    // }
 
     // handleUserRequest = async (botObject, message) => {
     //     let message_from_dialoglow:any;
@@ -84,43 +109,43 @@ export class ReplyTelegramMessage{
         return returnMessage;
     }
 
-    giveResponse = async(message, message_from_dialoglow) => {
+    postResponse = async(message, response) => {
         console.log("enter the give response of tele")
         let reaponse_message: response;
         let telegram_id = message.sessionId;
-        if (message_from_dialoglow.image && message_from_dialoglow.image.url) {
-            reaponse_message = {messageBody:null, messageImageUrl:message_from_dialoglow.image , messageImageCaption: message_from_dialoglow.image.url, sessionId: telegram_id, messageText:null}
+        if (response.text_part_from_DF.image && response.text_part_from_DF.image.url) {
+            reaponse_message = {messageBody:null, messageImageUrl:response.text_part_from_DF.image , messageImageCaption: response.text_part_from_DF.image.url, sessionId: telegram_id, messageText:null}
         }
-        else if (message_from_dialoglow.text.length > 1) {
+        else if (response.processed_message.length > 1) {
 
-            if (message_from_dialoglow.parse_mode && message_from_dialoglow.parse_mode == 'HTML') {
+            if (response.text_part_from_DF.parse_mode && response.text_part_from_DF.parse_mode == 'HTML') {
                 let uploadImageName;
-                uploadImageName = await createFileFromHTML(message_from_dialoglow.text[0])
+                uploadImageName = await createFileFromHTML(response.processed_message[0])
                 const vaacinationImageFile = await uploadFile(uploadImageName);
                 if (vaacinationImageFile) {
-                    reaponse_message = {messageBody:String(vaacinationImageFile), messageImageUrl:null , messageImageCaption: null, sessionId: telegram_id, messageText:message_from_dialoglow.text[1]}
+                    reaponse_message = {messageBody:String(vaacinationImageFile), messageImageUrl:null , messageImageCaption: null, sessionId: telegram_id, messageText:response.processed_message[1]}
                 }
             }
             else {
-                reaponse_message = {messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: telegram_id, messageText:message_from_dialoglow.text[0]}
-                reaponse_message = {messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: telegram_id, messageText:message_from_dialoglow.text[1]}
+                reaponse_message = {messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: telegram_id, messageText:response.processed_message[0]}
+                reaponse_message = {messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: telegram_id, messageText:response.processed_message[1]}
             }
         } else {
-            reaponse_message = {messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: telegram_id, messageText:message_from_dialoglow.text[0]}
+            reaponse_message = {messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: telegram_id, messageText:response.processed_message[0]}
         }
         return reaponse_message;
     }
 
-    SendTelegramMediaMessage = async (botObject, contact, imageLink = null, message) => {
+    SendMediaMessage = async (contact, imageLink = null, message) => {
         message = sanitizeMessage(message);
         return new Promise((resolve, reject) => {
     
             if (imageLink === null){
-                botObject.sendMessage(contact, message, { parse_mode: 'HTML' }).then(function (data) {
+                this._telegram.sendMessage(contact, message, { parse_mode: 'HTML' }).then(function (data) {
                     resolve(data)
                 });
             }
-            else botObject.sendPhoto(
+            else this._telegram.sendPhoto(
                 contact,
                 imageLink,
                 { caption: message }
@@ -165,3 +190,31 @@ export const GetTelegramMedia = async (fileid) => {
         req.end();
     });
 }
+
+
+// postResponse = async(message, message_from_dialoglow) => {
+//     console.log("enter the give response of tele")
+//     let reaponse_message: response;
+//     let telegram_id = message.sessionId;
+//     if (message_from_dialoglow.image && message_from_dialoglow.image.url) {
+//         reaponse_message = {messageBody:null, messageImageUrl:message_from_dialoglow.image , messageImageCaption: message_from_dialoglow.image.url, sessionId: telegram_id, messageText:null}
+//     }
+//     else if (message_from_dialoglow.text.length > 1) {
+
+//         if (message_from_dialoglow.parse_mode && message_from_dialoglow.parse_mode == 'HTML') {
+//             let uploadImageName;
+//             uploadImageName = await createFileFromHTML(message_from_dialoglow.text[0])
+//             const vaacinationImageFile = await uploadFile(uploadImageName);
+//             if (vaacinationImageFile) {
+//                 reaponse_message = {messageBody:String(vaacinationImageFile), messageImageUrl:null , messageImageCaption: null, sessionId: telegram_id, messageText:message_from_dialoglow.text[1]}
+//             }
+//         }
+//         else {
+//             reaponse_message = {messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: telegram_id, messageText:message_from_dialoglow.text[0]}
+//             reaponse_message = {messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: telegram_id, messageText:message_from_dialoglow.text[1]}
+//         }
+//     } else {
+//         reaponse_message = {messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: telegram_id, messageText:message_from_dialoglow.text[0]}
+//     }
+//     return reaponse_message;
+// }
