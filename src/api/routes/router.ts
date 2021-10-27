@@ -13,6 +13,7 @@ import { Logger } from "../../common/logger";
 import { ChatBotRoutes } from './chat-bot.routes';
 import { autoInjectable } from 'tsyringe';
 import { WhatsappWebhookRoutes } from './WhatsappWebhook.Routes';
+// import { TelegramWebhookRoutes } from './Telegram.Routes'
 
 ////////////////////////////////////////////////////////////////////////////////////
 @autoInjectable()
@@ -22,16 +23,19 @@ export class Router {
 
     constructor(app: express.Application, 
                 private chatBotRoutes?: ChatBotRoutes,
-                private whatsappWebhookRoutes?: WhatsappWebhookRoutes) {
+                private whatsappWebhookRoutes?: WhatsappWebhookRoutes){
+                // private telegramWebhookRoutes?: TelegramWebhookRoutes) {
         this._app = app;
     }
 
     public init = async (): Promise<boolean> => {
         return new Promise((resolve, reject) => {
             try {
+                console.log("Inside router.ts")
 
                 //Handling the base route
                 this._app.get('/v1/', (req, res) => {
+                    // console.log("the client is", req.params.client)
                     res.send({
                         message : `REANCare API [Version ${process.env.API_VERSION}]`,
                     });
@@ -39,6 +43,7 @@ export class Router {
 
                 this.chatBotRoutes.register(this._app);
                 this.whatsappWebhookRoutes.register(this._app);
+                // this.telegramWebhookRoutes.register(this._app);
                 // registerAddressRoutes(this._app);
                 // registerClientRoutes(this._app);
                 // registerPatientRoutes(this._app);

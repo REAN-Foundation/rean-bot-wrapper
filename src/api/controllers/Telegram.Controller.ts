@@ -1,37 +1,38 @@
-import { ReplyTelegramMessage } from '../../services/TelegramMessage.Service';
+import { platformMessageService } from '../../services/TelegramMessage.Service';
 import { DialogflowResponseService } from '../../services/dialogflow-response.service';
 import { translateService } from '../../services/translate'
 import { autoInjectable } from 'tsyringe';
-import { handlerequest, message } from '../../../src/Refactor/interface/interface';
-import { handleRequestservice } from '../../services/HandleRequest'
+import { message } from '../../../src/Refactor/interface/interface';
+import { handleRequestservice } from '../../services/HandleRequest';
+// import { MessageFlow } from '../../services/GetPutMessageFLow';
+
 
 @autoInjectable()
 export class TelegramController {
 
-    constructor(private replyTelegramMessage?: ReplyTelegramMessage,
-        private translateService?: translateService,
-        private handleRequestservice?: handleRequestservice,
-        private DialogflowResponseService?: DialogflowResponseService) {
-    }
+    // constructor(private platformMessageService?: platformMessageService,
+    //     private handleRequestservice?: handleRequestservice){
+    //     // private MessageFlow?: MessageFlow) {
+    // }
 
-    async get_put_msg_Dialogflow (botObj, msg) {
-        let messagetoDialogflow: message = await this.replyTelegramMessage.getMessage(msg);
-        let returninterface: handlerequest = {botObject:botObj, message:messagetoDialogflow};
-        this.handleRequestservice.handleUserRequest(returninterface);
-        let process_raw_dialogflow = await this.handleRequestservice.handleUserRequest(returninterface)
 
-        let response_format = await this.replyTelegramMessage.giveResponse(returninterface.message, process_raw_dialogflow.processed_message);
-        if (process_raw_dialogflow.message_from_dialoglow) {
-            let message_to_platform = null;
-            message_to_platform = await this.replyTelegramMessage.SendTelegramMediaMessage(returninterface.botObject, returninterface.message.sessionId, response_format.messageBody,response_format.messageText)       
-            if (!process_raw_dialogflow.message_from_dialoglow) {
-                console.log('An error occurred while sending messages!');
-            }
-        }
-        else {
-            console.log('An error occurred while processing messages!');
-        }
-    }
+    // async get_put_msg_Dialogflow (botObj, msg) {
+    //     console.log("the botoj is",botObj )
+    //     let messagetoDialogflow: message = await this.platformMessageService.getMessage(msg);
+    //     let process_raw_dialogflow = await this.handleRequestservice.handleUserRequest(messagetoDialogflow)
+
+    //     let response_format = await this.platformMessageService.postResponse(messagetoDialogflow, process_raw_dialogflow.processed_message);
+    //     if (process_raw_dialogflow.message_from_dialoglow) {
+    //         let message_to_platform = null;
+    //         message_to_platform = await this.platformMessageService.SendMediaMessage(botObj, messagetoDialogflow.sessionId, response_format.messageBody,response_format.messageText)       
+    //         if (!process_raw_dialogflow.message_from_dialoglow) {
+    //             console.log('An error occurred while sending messages!');
+    //         }
+    //     }
+    //     else {
+    //         console.log('An error occurred while processing messages!');
+    //     }
+    // }
 
     // async handleUserRequest (handlerequest) {
     //     console.log("the hndle request is ", handlerequest)

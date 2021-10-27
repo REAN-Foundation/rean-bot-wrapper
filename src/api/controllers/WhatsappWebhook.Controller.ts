@@ -1,31 +1,36 @@
 import { ResponseHandler } from '../../utils/response.handler';
 import { ErrorHandler } from '../../utils/Error.Handler';
-import { WhatsappMessageService } from '../../services/whatsapp-message.service';
+// import { platformMessageService as whatsappMessageService } from '../../services/whatsapp-message.service';
+import { platformServiceInterface } from '../../Refactor/interface/PlatformInterface';
 import { Logger } from '../../common/logger';
 import { DialogflowResponseService } from '../../services/dialogflow-response.service';
 import { translateService } from '../../services/translate'
 import { autoInjectable } from 'tsyringe';
-import { handlerequest } from '../../Refactor/interface/interface'
 import { handleRequestservice } from '../../services/HandleRequest'
+import { MessageFlow } from '../../services/GetPutMessageFLow';
 // const ConverSpeechToText = require('../services/SpeechToTextService');
 // const { isArray } = require('util');
+import {container} from "tsyringe";
 
 
 @autoInjectable()
 export class WhatsappWebhookController {
+    private _platformMessageService?: platformServiceInterface;
 
-    constructor(private whatsappMessageUtility?: WhatsappMessageService,
-        private handleRequestservice?: handleRequestservice,
-        private translateService?: translateService,
+    constructor(
+        // private handleRequestservice?: handleRequestservice,
+        // private messageFlow?: MessageFlow,
+        // private dialogflowMessageUtility?: DialogflowResponseService
+        // private translateService?: translateService,
+        // private whatsappMessageService?: whatsappMessageService,
         private responseHandler?: ResponseHandler,
-        private errorHandler?: ErrorHandler,
-        private dialogflowMessageUtility?: DialogflowResponseService) {
+        private errorHandler?: ErrorHandler) {
 
         }
         sendMessage = async (req, res) => {
             console.log("sendMessage webhook")
             try {
-                let responce = await this.whatsappMessageUtility.SendWhatsappMessage(req.body.contact, req.body.message);
+                let responce = await this._platformMessageService.SendMediaMessage(req.body.contact, null, req.body.message);
                 // let responce = await this.whatsappMessageUtility.SendWhatsappMediaMessage(req.body.contact,req.body.imageLink, req.body.message);
                 if (responce) this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', responce);
                 else
@@ -39,26 +44,45 @@ export class WhatsappWebhookController {
         receiveMessage = async (req, res) => {
             console.log("receiveMessage webhook")
             try {
+                // console.log("the client", req.params.client )
+                // this.platformMessageService.handleMessage(req.body);
+                // this.messageFlow.get_put_msg_Dialogflow(req, this.platformMessageService)
+
                 //to prevent whatsapp from sending duplicate calls, respond emidiately
-                this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
+                // this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
                 if (req.body.statuses) {
                     // status = sent, received & read
                 }
                 else {
-                    let message = await this.whatsappMessageUtility.getMessage(req);
-                    let returninterface: handlerequest = {botObject:null, message:message}
-                    let responce = await this.handleRequestservice.handleUserRequest(returninterface);
-                    let response_format = await this.whatsappMessageUtility.postResponse(message, responce.processed_message);
-                    if (responce.message_from_dialoglow) {
-                        let message_to_platform;
-                        message_to_platform = await this.whatsappMessageUtility.SendWhatsappMediaMessage(message.sessionId, response_format.messageBody, response_format.messageText)
-                        if (!responce.message_from_dialoglow) {
-                            console.log('An error occurred while sending messages!');
-                        }
+                    if (req.params.client!=="REAN_SUPPORT"){
+                        this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
                     }
-                    else {
-                        console.log('An error occurred while processing messages!');
-                    }
+                    this._platformMessageService = container.resolve(req.params.client);
+                    this._platformMessageService.res = res;
+                    const response = this._platformMessageService.handleMessage(req.body, req.params.client);
+
+                    // if (!response) {
+                    //     this.responseHandler.sendFailureResponse(res, 200, 'An error occurred while processing messages!', req);
+                        
+                    // }
+                    // else {
+                    //     this.responseHandler.sendSuccessResponseForApp(res, 201, "Message processed successfully.", { response_message: response });
+                    // }
+                    // this.messageFlow.get_put_msg_Dialogflow(req, this.platformMessageService)
+
+                    // let messagetoDialogflow = await this.platformMessageService.getMessage(req);
+                    // let process_raw_dialogflow = await this.handleRequestservice.handleUserRequest(messagetoDialogflow);
+                    // let response_format = await this.platformMessageService.postResponse(messagetoDialogflow, process_raw_dialogflow.processed_message);
+                    // if (process_raw_dialogflow.message_from_dialoglow) {
+                    //     let message_to_platform;
+                    //     message_to_platform = await this.platformMessageService.SendMediaMessage(messagetoDialogflow.sessionId, response_format.messageBody, response_format.messageText)
+                    //     if (!process_raw_dialogflow.message_from_dialoglow) {
+                    //         console.log('An error occurred while sending messages!');
+                    //     }
+                    // }
+                    // else {
+                    //     console.log('An error occurred while processing messages!');
+                    // }
                 }
             }
             catch (error) {
@@ -78,7 +102,8 @@ export class WhatsappWebhookController {
                     let whatsapp_id = req.body.contacts[0].wa_id;
         
                     let response_message = "We have migrated REAN Health Guru to a new number. Click this link to chat with REAN Health Guru. Link: https://api.whatsapp.com/send/?phone=15712152682&text=Hey&app_absent=0";
-                    await this.whatsappMessageUtility.SendWhatsappMessageOldNumber(whatsapp_id, response_message);
+                    this._platformMessageService = container.resolve('whatsapp');
+                    // await this._platformMessageService.SendWhatsappMessageOldNumber(whatsapp_id, response_message);
         
                 }
             }

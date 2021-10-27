@@ -21,6 +21,18 @@ export class ResponseHandler {
         return response.status(code).send(responseMessage);
     }
 
+    sendSuccessResponseForApp = (response, code, message, data, log_data = false) => {
+        let obj = {
+            success: true,
+            message: message,
+            data: data ? data : {}
+        }
+        if (log_data) {
+            this.logger.log_info(JSON.stringify(obj))
+        }
+        return response.status(code).send(obj)
+    }
+
     sendFailureResponse = (response, code, message, request = null, trace = null, details = null, log_data = true) => {
         console.log("enter end failre")
         const error = details ? details : message;
