@@ -34,20 +34,10 @@ export class IntentEmitter {
                 const listeners = IntentEmitter.getIntentListeners(intent);
                 const promises = [];
                 for (const listener of listeners) {
-
-                    // Logger.instance().log(`Listener Promise pushed to an array`)
                     promises.push(listener(intent, eventObj));
                 }
-
-                // Logger.instance().log(`Before all-settled...`)
-
                 consolidatedResponse = await Promise.allSettled(promises);
-
-                // Logger.instance().log(`All listeners have settled...`)
-
-                //console.log("Inside main emitter: ", consolidatedResponse)
                 // TODO: implement here - if we need to consolidated output to be sent - varies per Intent
-
                 resolve(consolidatedResponse);
 
             } catch (error) {

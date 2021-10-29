@@ -2,11 +2,8 @@ import 'reflect-metadata';
 import express from 'express';
 import { IAuthenticator } from './authenticator.interface';
 import { injectable, inject } from "tsyringe";
-
 import { ResponseHandler } from '../common/response.handler';
 import { Logger } from '../common/logger';
-
-////////////////////////////////////////////////////////////////////////
 
 @injectable()
 export class Authenticator {
@@ -52,5 +49,3 @@ export class Authenticator {
     };
 
 }
-
-////////////////////////////////////////////////////////////////////////

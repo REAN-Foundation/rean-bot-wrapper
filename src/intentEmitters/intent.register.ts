@@ -2,15 +2,15 @@ import { Logger } from '../common/logger';
 import { IntentEmitter } from './IntentEmitter';
 
 // Register All listener handlers
-import { getVaccinationAppointments, secondListener } from './intentListeners/Vaccination.Listener';
-import { getCovidInfo1s, getCovidResources1s } from './intentListeners/Covid.Listener';
-import { handleIntentFufillmentError } from './intentListeners/Fallback.Listener';
-import { getSymptomAssessment } from './intentListeners/Symptom.listener';
-import { RiskAssessmentListener } from './intentListeners/RiskAssessment.Listener';
-import { getRiskAssessmentInfo } from './intentListeners/RiskAssessmentInfo.Listener';
-import { getRiskAssessmentFollowup } from './intentListeners/RiskAssessmentFollowup.Listener';
-import { getMedicationInfo } from './intentListeners/SupportApp.Listener';
-import { getGenericpedia, getGenericpediaChemist} from './intentListeners/Genericpedia.Listener'
+import { getVaccinationAppointments, secondListener } from './intentListeners/vaccination.listener';
+import { getCovidInfo1s, getCovidResources1s } from './intentListeners/covid.listener';
+import { handleIntentFufillmentError } from './intentListeners/fallback.listener';
+import { getSymptomAssessment } from './intentListeners/symptom.listener';
+import { RiskAssessmentListener } from './intentListeners/risk.assessment.listener';
+import { getRiskAssessmentInfo } from './intentListeners/risk.assessment.info.listener';
+import { getRiskAssessmentFollowup } from './intentListeners/risk.assessment.followup.listener';
+import { getMedicationInfo } from './intentListeners/support.app.listener';
+import { getGenericpedia, getGenericpediaChemist} from './intentListeners/genericpedia.listener'
 
 /*
  * Init function (being called during application bootstrap)

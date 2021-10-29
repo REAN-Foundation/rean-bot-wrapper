@@ -1,4 +1,4 @@
-import { message } from "./interface";
+import { message } from "./message.interface";
 
 export interface platformServiceInterface{
     getMessage (msg: any);

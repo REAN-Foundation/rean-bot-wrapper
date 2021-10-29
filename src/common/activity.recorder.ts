@@ -1,8 +1,4 @@
 
-///////////////////////////////////////////////////////////////////////
-
-//import { Logger } from "./logger";
-
 export class ActivityRecorder {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

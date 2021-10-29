@@ -1,7 +1,7 @@
 import express from 'express';
 
 import { Loader } from '../../startup/loader';
-import { ChatBotController } from '../controllers/chat-bot.controller';
+import { ChatBotController } from '../controllers/chat.bot.controller';
 import { injectable } from 'tsyringe';
 
 @injectable()

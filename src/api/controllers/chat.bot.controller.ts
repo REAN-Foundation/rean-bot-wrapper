@@ -60,8 +60,6 @@ export class ChatBotController {
         // Emit the Intent Processing
         fulfillmentResponse = await IntentEmitter.emit(intent, request);
 
-        // console.log("Inside Controller: ", fulfillmentResponse)
-
         // Either overall fulfillment rejected or all of the listeners rejected to fulfill
         const someListenerFulfilled = fulfillmentResponse.some((listenerResponse) => {
             return listenerResponse.status === 'fulfilled'; });

@@ -10,8 +10,6 @@ import {
     AuthorizationType,
 } from './configs';
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 export class ConfigurationManager {
 
     static _config: Configurations = null;

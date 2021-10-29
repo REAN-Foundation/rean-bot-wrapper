@@ -1,12 +1,7 @@
 import http from 'https';
 import path from 'path';
-
-// Imports the Google Cloud client library
 import speech from '@google-cloud/speech';
-// import { protos } from "@google-cloud/text-to-speech"
 import fs from 'fs';
-
-// Creates a client
 
 export class Speechtotext {
   SendSpeechRequest= async(fileUrl,chatServiceName) => {
@@ -63,7 +58,6 @@ export class Speechtotext {
       resolve(transcription);
      } catch (error) {
         reject(error)
-        //console.log("in error", error)
     }
   }
  });

@@ -7,8 +7,6 @@ import { hashSync, compareSync, genSaltSync } from 'bcryptjs';
 import * as crypto from 'crypto';
 import express from 'express';
 
-////////////////////////////////////////////////////////////////////////
-
 export class Helper {
 
     static getResourceOwner = (request: express.Request): string => {

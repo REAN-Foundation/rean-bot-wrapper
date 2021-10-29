@@ -33,15 +33,7 @@ export class AuthorizationHandler {
         }
 
         try {
-
-            // jwt.verify(token, Config.JWT_SECRET, (error, user) => {
-            //     if (error) {
-            //         this.responseHandler.sendFailureResponse(response, 403, 'Forebidden access', request)
-            //     }
-            //     request.user = user
             next();
-
-            // })
         }
         catch (err) {
             this.logger.log(JSON.stringify(err));

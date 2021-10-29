@@ -1,5 +1,5 @@
-import { DialogflowResponseService } from './dialogflow-response.service';
-import { translateService } from './translate'
+import { DialogflowResponseService } from './dialogflow.response.service';
+import { translateService } from './translate.service'
 import { autoInjectable } from 'tsyringe';
 
 @autoInjectable()
@@ -17,8 +17,6 @@ export class handleRequestservice{
         let processed_message: any;
         let translate_message: any;
         let platform_id = message.sessionId;
-
-        // this.TelegramStatistics.saveRequestStatistics(message, message.text);
 
         //get the translated message
         translate_message = await this.translateService.translateMessage(message.messageBody)

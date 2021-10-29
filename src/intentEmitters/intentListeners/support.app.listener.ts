@@ -1,6 +1,5 @@
-// Load required services here
 import { Logger } from '../../common/logger';
-import { getPatientsByPhoneNumberservice, getMedicationInfoservice } from "../../services/SupportApp.Service";
+import { getPatientsByPhoneNumberservice, getMedicationInfoservice } from "../../services/support.app.service";
 
 export const getMedicationInfo = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {

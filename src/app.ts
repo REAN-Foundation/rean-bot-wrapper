@@ -1,19 +1,14 @@
 import "reflect-metadata";
-
 import express from 'express';
 import fileUpload from 'express-fileupload';
 import cors from 'cors';
 import helmet from 'helmet';
-
 import { Router } from './api/routes/router';
 import { Loader } from './startup/loader';
 import { Logger } from './common/logger';
 import { ConfigurationManager } from "./configs/configuration.manager";
 import { IntentRegister } from './intentEmitters/intent.register';
 import {container} from "tsyringe";
-
-
-/////////////////////////////////////////////////////////////////////////
 
 export default class Application {
 
@@ -25,20 +20,9 @@ export default class Application {
 
     private _intentRegister: IntentRegister = null;
 
-    // private _whatsappMessageService: platformMessageService = null;
-
-    // private _replyTelegramMessage: TelegramController = null;
-
-    // private _telegram: TelegramBot = null;
-
-    // private telegramBot: telegramPlatformservice;
-
     private constructor() {
         this._app = express();
         this._intentRegister = new IntentRegister();
-        // this._whatsappMessageService = new platformMessageService();
-        // this._replyTelegramMessage = new TelegramController();
-        // this._telegram = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN);
     }
 
     public static instance(): Application {
@@ -59,48 +43,15 @@ export default class Application {
             await Loader.init();
             this._router = new Router(this._app);
 
-
-            // this.telegramBot.initiateTelegram()
-
-            // if (process.env.NODE_ENV === 'telegramBot') {
-            //     await Loader.databaseConnector.dropDatabase();
-            // }
-
-            //Connect with database
-            // await Loader.databaseConnector.init();
-
             //Set-up middlewares
             await this.setupMiddlewares();
 
             //Set the routes
             await this._router.init();
 
-            //Seed the service
-            // await Loader.seeder.init();
-
-            //Set-up cron jobs
-
             this._intentRegister.register();
             let me = container.resolve('telegram');
             let me2 = container.resolve('whatsapp');
-            // this._whatsappMessageService.SetWebHook();
-
-            // const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-            // // const baseUrl = process.env.BASE_URL;
-
-            // this._app.post(`/bot${TELEGRAM_TOKEN}`, (req, res) => {
-            //     this.telegramBot._telegram.processUpdate(req.body);
-            //     res.sendStatus(200);
-            // });
-
-            // This informs the Telegram servers of the new webhook.
-            // this.telegramBot._telegram.setWebHook(baseUrl + '/bot' + TELEGRAM_TOKEN);
-
-            // Process telegram request
-            // this.telegramBot._telegram.on('message', msg => {
-            //     // ReplyTelegramMessage(this._telegram, msg);
-            //     this.telegramBot._replyTelegramMessage.get_put_msg_Dialogflow(this.telegramBot._telegram, msg);
-            // });
 
             //Start listening
             await this.listen();

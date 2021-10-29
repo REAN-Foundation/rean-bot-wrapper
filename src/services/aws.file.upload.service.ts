@@ -1,11 +1,9 @@
 import AWS from 'aws-sdk';
 import fs from 'fs';
 import nodeHtmlToImage from 'node-html-to-image';
-// Enter copied or downloaded access ID and secret key here
 const ID = process.env.ACCESS_KEY_ID;
 const SECRET = process.env.ACCESS_KEY_SECRET;
 
-// The name of the bucket that you have created
 const BUCKET_NAME = process.env.BUCKET_NAME;
 
 export const uploadFile = (filePath) => {

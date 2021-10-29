@@ -1,7 +1,5 @@
-// Load required services here
 import { Logger } from '../../common/logger';
-
-import { getCovidInfo1 , getCovidInfo2, getCovidResources1, getCovidResources2 } from '../../services/CovidInfo.Service';
+import { getCovidInfo1 , getCovidInfo2, getCovidResources1, getCovidResources2 } from '../../services/covid.info.service';
 
 export const getCovidInfo1s = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {

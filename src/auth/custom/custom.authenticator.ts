@@ -1,16 +1,10 @@
 import { Logger } from '../../common/logger';
 import { IAuthenticator } from '../authenticator.interface';
-// import { ApiClientService } from '../../services/api.client.service';
 import { AuthenticationResult } from '../../domain.types/auth/auth.domain.types';
-
-//////////////////////////////////////////////////////////////
 
 export class CustomAuthenticator implements IAuthenticator {
 
-    // _clientService: ApiClientService = null;
-
     constructor() {
-        // this._clientService = Loader.container.resolve(ApiClientService);
     }
 
     public authenticateUser = async (

@@ -1,6 +1,5 @@
 import { Logger } from '../common/logger';
 
-///////////////////////////////////////////////////////////////////////////
 export class Scheduler {
 
     private static _instance: Scheduler = null;

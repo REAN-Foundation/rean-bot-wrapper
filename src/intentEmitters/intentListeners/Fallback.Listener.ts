@@ -1,7 +1,5 @@
-// Load required services here
 import { Logger } from '../../common/logger';
-
-import { send_message } from '../../services/Slack.Service';
+import { send_message } from '../../services/slack.service';
 
 export const handleIntentFufillmentError = async (_intent, eventObj) => {
     return new Promise(async (resolve, reject) => {

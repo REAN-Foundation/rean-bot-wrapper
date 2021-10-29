@@ -1,30 +1,18 @@
-//testing purpose
-
 import http from  'https';
 import fs from 'fs';
-import { DialogflowResponseService } from './dialogflow-response.service';
-import { uploadFile, createFileFromHTML } from './awsfileupload.service';
-import { Speechtotext } from './SpeechToTextService';
-import { WhatsappStatistics } from './SaveStatistics';
+import { uploadFile, createFileFromHTML } from './aws.file.upload.service';
+import { Speechtotext } from './speech.to.text.service';
 import { autoInjectable, singleton } from 'tsyringe';
-import { response, message } from '../Refactor/interface/interface';
-import { platformServiceInterface } from '../Refactor/interface/PlatformInterface';
-import { ResponseHandler } from '../utils/response.handler';
-import { ErrorHandler } from '../utils/Error.Handler';
-import { MessageFlow } from './GetPutMessageFLow';
-
-// let dialoglowinstance = new DialogflowResponseService();
+import { response, message } from '../refactor/interface/message.interface';
+import { platformServiceInterface } from '../refactor/interface/platform.interface';
+import { MessageFlow } from './get.put.message.flow.service';
 
 @autoInjectable()
 @singleton()
 export class platformMessageService implements platformServiceInterface{
     public res;
-    constructor(private WhatsappStatistics?: WhatsappStatistics,
-                private Speechtotext?: Speechtotext,
-                private responseHandler?: ResponseHandler,
-                private errorHandler?: ErrorHandler,
-                private messageFlow?: MessageFlow,
-                private DialogflowResponseService?: DialogflowResponseService,) {
+    constructor(private Speechtotext?: Speechtotext,
+                private messageFlow?: MessageFlow) {
                     this.SetWebHook()
     }
 
@@ -35,9 +23,6 @@ export class platformMessageService implements platformServiceInterface{
     init() {
         throw new Error('Method not implemented.');
     }
-    // set res(res){
-    //     this.res = res;
-    // }
     
     SetWebHook = async () => {
 
@@ -188,9 +173,7 @@ export class platformMessageService implements platformServiceInterface{
 
     SendMediaMessage = async (contact,imageLink, message) => {
         return new Promise((resolve, reject) => {
-                console.log("this is SendWhatsappMediaMessage.....", message)
                 message = this.sanitizeMessage(message)
-                // console.log("this is SendWhatsappMediaMessage Senitised.....", message)
                 const postData = imageLink ? JSON.stringify({
                     'recipient_type': 'individual',
                     'to': contact,
@@ -235,51 +218,6 @@ export class platformMessageService implements platformServiceInterface{
         });
     }
     
-    // SendWhatsappMessage = async (contact, message) => {
-    //     message = sanitizeMessage(message);
-    //     return new Promise((resolve, reject) => {
-    
-    //         const postData = JSON.stringify({
-    //             'recipient_type': 'individual',
-    //             'to': contact,
-    //             'type': 'text',
-    //             'text': {
-    //                 'body': message
-    //             }
-    //         });
-    
-    //         const options = {
-    //             hostname: process.env.WHATSAPP_LIVE_HOST,
-    //             path: '/v1/messages',
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //                 'D360-Api-Key': process.env.WHATSAPP_LIVE_API_KEY
-    //             }
-    //         };
-    
-    //         const request = http.request(options, (response) => {
-    //             response.setEncoding('utf8');
-    //             response.on('data', (chunk) => {
-    //                 console.log("on data", chunk)
-    //                 resolve(chunk);
-    //             });
-    //             response.on('end', () => {
-    //                 // console.log("on end")
-    //                 resolve(true);
-    //             });
-    //         });
-    
-    //         request.on('error', (e) => {
-    //             console.error(`problem with request: ${e.message}`);
-    //             reject();
-    //         });
-    //         // Write data to request body
-    //         request.write(postData);
-    //         request.end();
-    //     });
-    // }
-    
     /*retrive whatsapp media */
     GetWhatsappMedia = async (mediaId) => {
         return new Promise((resolve, reject) => {
@@ -317,9 +255,9 @@ export class platformMessageService implements platformServiceInterface{
     getMessage = async (msg) =>{
         let returnMessage: message;
         console.log("entered the get msg in whatsapp msg ser")
-        // console.log("the req is id ", msg.contacts[0].wa_id )
-        // console.log("the req is typeeeeeeeeeeeeeeeeeeeeeeeeee", msg.messages[0].type )
         let whatsapp_id = msg.contacts[0].wa_id;
+        let name = msg.contacts[0].profile.name;
+        let chat_message_id= msg.messages[0].id
         if (msg.messages[0].type == "text") {
             let message = msg.messages[0].text.body;
     
@@ -328,25 +266,25 @@ export class platformMessageService implements platformServiceInterface{
                 message = await this.emojiUnicode(message) == "1f44e" ? "NegativeFeedback" : "PositiveFeedback"
             }
             
-            returnMessage = {messageBody:message,sessionId:whatsapp_id,replayPath:whatsapp_id,latlong:null,type:'text'}
+            returnMessage = {name:name,platform:"Whatsapp",chat_message_id:chat_message_id, direction:"In", messageBody:message,sessionId:whatsapp_id,replayPath:whatsapp_id,latlong:null,type:'text'}
     
         }
         else if (msg.messages[0].type == "location") {
             let loc = `latlong:${msg.messages[0].location.latitude}-${msg.messages[0].location.longitude}`;
-            returnMessage = {messageBody:null,sessionId:whatsapp_id,replayPath:whatsapp_id,latlong:loc,type:'location'}
+            returnMessage = {name:name,platform:"Whatsapp",chat_message_id:chat_message_id, direction:"In",messageBody:null,sessionId:whatsapp_id,replayPath:whatsapp_id,latlong:loc,type:'location'}
         }
         else if (msg.messages[0].type == "voice") {
             let mediaUrl = await this.GetWhatsappMedia(msg.messages[0].voice.id);
             console.log("the mediaUrl", mediaUrl)
             let ConvertedToText = await this.Speechtotext.SendSpeechRequest(mediaUrl, "whatsapp");
             if (ConvertedToText) {
-                returnMessage = {messageBody:String(ConvertedToText),sessionId:whatsapp_id,replayPath:whatsapp_id,latlong:null,type:msg.messages[0].type}
+                returnMessage = {name:name,platform:"Whatsapp",chat_message_id:chat_message_id, direction:"In",messageBody:String(ConvertedToText),sessionId:whatsapp_id,replayPath:whatsapp_id,latlong:null,type:msg.messages[0].type}
             }
             else {
-                returnMessage = {messageBody:null,sessionId:whatsapp_id,replayPath:whatsapp_id,latlong:null,type:msg.messages[0].type}
+                returnMessage = {name:name,platform:"Whatsapp",chat_message_id:chat_message_id, direction:"In",messageBody:null,sessionId:whatsapp_id,replayPath:whatsapp_id,latlong:null,type:msg.messages[0].type}
             }
         }else {
-            returnMessage = {messageBody:null,sessionId:whatsapp_id,replayPath:whatsapp_id,latlong:null,type:msg.messages[0].type}
+            returnMessage = {name:name,platform:"Whatsapp",chat_message_id:chat_message_id, direction:"In",messageBody:null,sessionId:whatsapp_id,replayPath:whatsapp_id,latlong:null,type:msg.messages[0].type}
             console.log("exiting the getMessage in whatsapp mg ser", returnMessage)
         }
         return returnMessage;
@@ -354,14 +292,17 @@ export class platformMessageService implements platformServiceInterface{
 
     postResponse = async (message, response ) => {
         console.log("entered the postresponse msg in whatsapp msg ser")
-        // console.log("msg from DF",response)
-        // console.log("msg from DF",response.processed_message)
-        // console.log("msg from DF",response.text_part_from_DF)
         let reaponse_message: response;
         let whatsapp_id = message.sessionId;
+        let input_message = message.messageBody;
+        let name = message.name;
+        let chat_message_id= message.chat_message_id
+        let raw_response_object = response.text_part_from_DF.result && response.text_part_from_DF.result.fulfillmentMessages ? JSON.stringify(response.text_part_from_DF.result.fulfillmentMessages) : '';
+        let intent = response.text_part_from_DF.result && response.text_part_from_DF.result.intent ? response.text_part_from_DF.result.intent.displayName : '';
+
         if (response.text_part_from_DF) {
             if (response.text_part_from_DF.image && response.text_part_from_DF.image.url) {
-                reaponse_message = {messageBody:null, messageImageUrl:response.text_part_from_DF.image , messageImageCaption: response.text_part_from_DF.image.url, sessionId: whatsapp_id, messageText:null }
+                reaponse_message = {name:name,platform:"Whatsapp",chat_message_id:chat_message_id,direction:"Out",message_type:"image",raw_response_object:raw_response_object,intent:intent,messageBody:null, messageImageUrl:response.text_part_from_DF.image , messageImageCaption: response.text_part_from_DF.image.url, sessionId: whatsapp_id,input_message:input_message,messageText:null }
             }
             else if (response.processed_message.length > 1) {
                 if (response.text_part_from_DF.parse_mode && response.text_part_from_DF.parse_mode == 'HTML') {
@@ -369,49 +310,18 @@ export class platformMessageService implements platformServiceInterface{
                     uploadImageName = await createFileFromHTML(response.processed_message[0])
                     const vaacinationImageFile = await uploadFile(uploadImageName);
                     if (vaacinationImageFile) {
-                        reaponse_message = {messageBody:String(vaacinationImageFile), messageImageUrl:null , messageImageCaption: null, sessionId: whatsapp_id, messageText:response.processed_message[1] }
+                        reaponse_message = {name:name,platform:"Whatsapp",chat_message_id:chat_message_id,direction:"Out",message_type:"image",raw_response_object:raw_response_object,intent:intent,messageBody:String(vaacinationImageFile), messageImageUrl:null , messageImageCaption: null, sessionId: whatsapp_id,input_message:input_message, messageText:response.processed_message[1] }
                     }
                 }
                 else {
-                    reaponse_message = {messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: whatsapp_id, messageText:response.processed_message[0] }
-                    reaponse_message = {messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: whatsapp_id, messageText:response.processed_message[1] }
+                    reaponse_message = {name:name,platform:"Whatsapp",chat_message_id:chat_message_id,direction:"Out",message_type:"text",raw_response_object:raw_response_object,intent:intent,messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: whatsapp_id,input_message:input_message, messageText:response.processed_message[0] }
+                    reaponse_message = {name:name,platform:"Whatsapp",chat_message_id:chat_message_id,direction:"Out",message_type:"text",raw_response_object:raw_response_object,intent:intent,messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: whatsapp_id,input_message:input_message, messageText:response.processed_message[1] }
                 }
             }
             else {
-                reaponse_message = {messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: whatsapp_id, messageText:response.processed_message[0] }
+                reaponse_message = {name:name,platform:"Whatsapp",chat_message_id:chat_message_id,direction:"Out",message_type:"text",raw_response_object:raw_response_object,intent:intent,messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: whatsapp_id,input_message:input_message, messageText:response.processed_message[0] }
             }
         }
         return reaponse_message;
     }
 }
-
-
-
-// postResponse = async ( message, message_from_dialoglow ) => {
-//     console.log("entered the postresponse msg in whatsapp msg ser")
-//     let reaponse_message: response;
-//     let whatsapp_id = message.sessionId;
-//     if (message_from_dialoglow) {
-//         if (message_from_dialoglow.image && message_from_dialoglow.image.url) {
-//             reaponse_message = {messageBody:null, messageImageUrl:message_from_dialoglow.image , messageImageCaption: message_from_dialoglow.image.url, sessionId: whatsapp_id, messageText:null }
-//         }
-//         else if (message_from_dialoglow.text.length > 1) {
-//             if (message_from_dialoglow.parse_mode && message_from_dialoglow.parse_mode == 'HTML') {
-//                 let uploadImageName;
-//                 uploadImageName = await createFileFromHTML(message_from_dialoglow.text[0])
-//                 const vaacinationImageFile = await uploadFile(uploadImageName);
-//                 if (vaacinationImageFile) {
-//                     reaponse_message = {messageBody:String(vaacinationImageFile), messageImageUrl:null , messageImageCaption: null, sessionId: whatsapp_id, messageText:message_from_dialoglow.text[1] }
-//                 }
-//             }
-//             else {
-//                 reaponse_message = {messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: whatsapp_id, messageText:message_from_dialoglow.text[0] }
-//                 reaponse_message = {messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: whatsapp_id, messageText:message_from_dialoglow.text[1] }
-//             }
-//         }
-//         else {
-//             reaponse_message = {messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: whatsapp_id, messageText:message_from_dialoglow.text[0] }
-//         }
-//     }
-//     return reaponse_message;
-// }

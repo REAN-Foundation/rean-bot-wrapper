@@ -1,11 +1,8 @@
-// import dfff from 'dialogflow-fulfillment';
-
 export const getRiskAssessment = async (req, res) => {
     return new Promise(async (resolve, reject) => {
         try {
             console.log('START--------');
             const params = req.body.queryResult.parameters ? req.body.queryResult.parameters : '';
-            // console.log(params);
             // PB code
             const gen = params.Gender;
             const age = params.Age;

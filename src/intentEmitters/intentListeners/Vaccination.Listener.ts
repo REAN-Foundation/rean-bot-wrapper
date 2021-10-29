@@ -1,7 +1,6 @@
-// Load required services here
 import { Logger } from '../../common/logger';
 import moment from 'moment';
-import { getAppointments } from '../../services/CovidVaccination.Service';
+import { getAppointments } from '../../services/covid.vaccination.service';
 
 export const getVaccinationAppointments = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
@@ -24,22 +23,6 @@ export const getVaccinationAppointments = async (intent, eventObj) => {
             let response = null;
             res = 5;
             response = await getAppointments(eventObj, res);
-
-            /*if (requestParams.pincode) {
-                res = 5;
-                //response = await VaccinationService.getAppointmentsByDistrict(requestParams.districtId, requestParams.appointmentDate)
-                console.log('LOG');
-                response = await VaccinationService.getAppointments(eventObj, res);
-            } else if (requestParams.districtId) {
-                res = 5;
-                //response = await VaccinationService.getAppointmentsByDistrict(requestParams.districtId, requestParams.appointmentDate)
-                console.log('LOG');
-                response = await VaccinationService.getAppointments(eventObj, res);
-                //console.log(response);
-                }
-            else {
-                return reject("Missing required parameters.")
-            }*/
 
             console.log('Inside listener: ', response);
 

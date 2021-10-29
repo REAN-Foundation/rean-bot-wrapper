@@ -1,13 +1,8 @@
-
 export const getRiskAssessmentFollowup = async (req, res) => {
     return new Promise(async (resolve, reject) => {
         try {
             console.log('START--------');
             const params = req.body.queryResult.parameters ? req.body.queryResult.parameters : '';
-
-            // console.log(params);
-
-            //PB code
 
             const c = req.body.queryResult.outputContexts;
             let ctx = c[0]['parameters'];

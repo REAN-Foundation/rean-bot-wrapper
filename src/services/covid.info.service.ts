@@ -1,8 +1,6 @@
-//const Logger.instance() = require('../utils/Logger.instance()');
-// const Helper = require('../utils/Helper');
 import needle from 'needle';
 import { Logger } from '../common/logger';
-import { getRequestOptions } from '../utils/Helper';
+import { getRequestOptions } from '../utils/helper';
 export const getCovidInfo1 = async () => {
     return new Promise(async (resolve, reject) => {
         try {

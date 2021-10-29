@@ -1,7 +1,7 @@
-import { message, response } from '../Refactor/interface/interface';
+import { message } from '../refactor/interface/message.interface'; 
 import { autoInjectable, singleton } from 'tsyringe';
-import { platformServiceInterface } from '../Refactor/interface/PlatformInterface';
-import { MessageFlow } from './GetPutMessageFLow'
+import { platformServiceInterface } from '../refactor/interface/platform.interface';
+import { MessageFlow } from './get.put.message.flow.service'
 import { Logger } from '../common/logger';
 import { ResponseHandler } from '../utils/response.handler';
 
@@ -15,14 +15,6 @@ export class platformMessageService implements platformServiceInterface{
             ) {
 
     }
-
-    // set req(req){
-    //     this.req = req;
-    // }
-
-    // set res(res){
-    //     this.res = res;
-    // }
 
     init() {
         throw new Error('Method not implemented.');
@@ -38,41 +30,28 @@ export class platformMessageService implements platformServiceInterface{
     getMessage(msg) {
         let returnMessage: message;
         let phoneNumber = msg.phoneNumber.toString();
-        // let countryCode = msg.countryCode;
 
         if (msg.type == "text") {
             let message = msg.message + ` PhoneNumber is ${phoneNumber}`;
-        returnMessage = {messageBody:message,sessionId:phoneNumber,replayPath:phoneNumber,latlong:null,type:'text'}
+        returnMessage = {name:null,platform:"Rean_Support",chat_message_id:null, direction:"In",messageBody:message,sessionId:phoneNumber,replayPath:phoneNumber,latlong:null,type:'text'}
         return returnMessage;
         }
     }
 
     postResponse (message, response ){
-        // throw new Error('Method not implemented.');
         let reansupport_Id = message.Id;
-        let reaponse_message = {messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: reansupport_Id, messageText:response.processed_message[0]};
+        let message_type = response.text_part_from_DF.image_url ? "image" : "text";
+        let raw_response_object = response.text_part_from_DF.result && response.text_part_from_DF.result.fulfillmentMessages ? JSON.stringify(response.text_part_from_DF.result.fulfillmentMessages) : '';
+        let intent = response.text_part_from_DF.result && response.text_part_from_DF.result.intent ? response.text_part_from_DF.result.intent.displayName : '';
+        
+        let reaponse_message = {name:null,platform:"Whatsapp",chat_message_id:null,direction:"Out",message_type:message_type,raw_response_object:raw_response_object,intent:intent,messageBody:null, messageImageUrl:null , messageImageCaption: null, sessionId: reansupport_Id, messageText:response.processed_message[0]};
         return reaponse_message;
     
     }
 
     SendMediaMessage(contact,imageLink, message){
-        // throw new Error('Method not implemented.');
         this.responseHandler.sendSuccessResponseForApp(this.res, 201, "Message processed successfully.", { response_message: message });
         return message;
-
-
     }
-
-    // sendSuccessResponseForApp = (response, code, message, data, log_data = false) => {
-    //     let obj = {
-    //         success: true,
-    //         message: message,
-    //         data: data ? data : {}
-    //     }
-    //     if (log_data) {
-    //         this.logger.log_info(JSON.stringify(obj))
-    //     }
-    //     return response.status(code).send(obj)
-    // }
 
 }

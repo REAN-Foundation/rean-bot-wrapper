@@ -1,9 +1,7 @@
 import { v2 } from '@google-cloud/translate';
 const translateProjectId = process.env.TRANSLATE_PROJECT_ID;
-
 let detected_language = 'en';
 let dialogflow_language = "en-US";
-let translate = null;
 
 
 export class translateService{
@@ -17,7 +15,6 @@ export class translateService{
         let detectedLanguage = await Array.isArray(detections) ? detections : [detections];
     
         detected_language = detectedLanguage[0].language;
-        // console.log("the language isppppppppppppppppppppppppppp", detected_language)
         if (detected_language != 'en') {
             const target = 'en';
             let [translation] = await translate.translate(message, target);
@@ -34,11 +31,9 @@ export class translateService{
         let translatedResponse;
         if (message.parse_mode) {
             translatedResponse = message.text;
-            // console.log("the response messageooooooooooooooooooooooooooo", translatedResponse)
         }
         else {
             translatedResponse = await this.translateResponse(translate, message, detected_language)
-            // console.log("the response message eeeeeeeeeeeeeeeeeeeeeeeeeeeeee", translatedResponse)
         }
     return translatedResponse;
     }

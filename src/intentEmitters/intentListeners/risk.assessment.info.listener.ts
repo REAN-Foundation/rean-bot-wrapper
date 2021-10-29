@@ -1,19 +1,17 @@
-// Load required services here
 import { Logger } from '../../common/logger';
+import { getRiskAssessmentInfo as getRiskAssessmentInfos } from '../../services/risk.assessment.info.service';
 
-import { getRiskAssessmentFollowup as getRiskAssessmentFollowups } from '../../services/RiskAssessmentFollowup.Service';
-
-export const getRiskAssessmentFollowup = async (intent, eventObj) => {
+export const getRiskAssessmentInfo = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
         let res;
         try {
             Logger.instance()
-                .log('Calling risk assessment followup Service !!!!!!');
+                .log('Calling risk assessment info Service !!!!!!');
 
             // Service Call
             let response = null;
             res = 5;
-            response = await getRiskAssessmentFollowups(eventObj, res);
+            response = await getRiskAssessmentInfos(eventObj, res);
 
             console.log('Inside listener: ', response);
 
@@ -26,7 +24,7 @@ export const getRiskAssessmentFollowup = async (intent, eventObj) => {
 
         } catch (error) {
             Logger.instance()
-                .log_error(error.message, 500, 'Risk followup Listener Error!');
+                .log_error(error.message, 500, 'Risk assessment info Listener Error!');
             reject(error.message);
         }
     });

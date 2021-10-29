@@ -1,6 +1,6 @@
 import { Logger } from '../common/logger';
-import { getRequestOptions } from '../utils/Helper';
-import { districtMapping } from '../utils/DistrictMapping';
+import { getRequestOptions } from '../utils/helper';
+import { districtMapping } from '../utils/district.mapping';
 import needle from 'needle';
 import axios from 'axios';
 import dfff from 'dialogflow-fulfillment';
@@ -8,7 +8,6 @@ import date from 'date-and-time';
 const GEO_API = process.env.GEO_API_KEY;
 const VaccinationServiceBaseUrl = 'https://cdn-api.co-vin.in/api/v2';
 
-// Get Covid Vaccination Slots by Pincode
 export const getAppointmentsByPin = async (pincode, date) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -21,8 +20,6 @@ export const getAppointmentsByPin = async (pincode, date) => {
 
             const api_response = await needle('get', url, options);
 
-            // Do any sanitisation here...
-
             resolve({ appointment_sessions: api_response.body });
 
         } catch (error) {
@@ -32,7 +29,6 @@ export const getAppointmentsByPin = async (pincode, date) => {
     });
 };
 
-// Get Vaccination Slots by District
 export const getAppointmentsByDistrict = async (districtId, date) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -44,8 +40,6 @@ export const getAppointmentsByDistrict = async (districtId, date) => {
             const options = getRequestOptions('vaccine');
 
             const api_response = await needle('get', url, options);
-
-            // Do any sanitisation here...
 
             resolve({ appointment_sessions: api_response.body });
 
@@ -76,13 +70,11 @@ export const getAppointments = async(req, res) => {
             const dict = null;
             const today = date.format(new Date(), 'DD-MM-YYYY');
             console.log(today);
-
-            //const data = fs.readFileSync('./CoWinDistricts.txt', {encoding: 'utf-8', flag: 'r'})
             const obj = districtMapping;
             const di_code = obj[district];
             console.log("HI" + di_code);
             const coWin = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id=" +
-            di_code + "&date=" + today;//12-06-2021";
+            di_code + "&date=" + today;
             const answer = await axios.get(coWin, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36' } });
             return answer.data;
         } catch (error) {
@@ -91,14 +83,14 @@ export const getAppointments = async(req, res) => {
         }
     }
 
-    async function findNearestPin(lat, long) { //get pinCode from latitude and longitude
+    async function findNearestPin(lat, long) {
         try {
             let pin = undefined;
             const locationURL = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' + lat + ',' + long + '&key=' + GEO_API;
             console.log(locationURL);
             let response: any = await axios.get(locationURL);
             response = response.data;
-            if (response.status === 'OK') { //check if this API is working
+            if (response.status === 'OK') {
                 response.results[0].address_components.forEach(address => {
                     if (address.types[0] === 'postal_code') {
                         pin = address.long_name;
@@ -122,14 +114,13 @@ export const getAppointments = async(req, res) => {
     async function demo(agent) {                //function called by DialogFlow; requires agent to be passed
         /*Extracting parameters from Dialogflow*/
         console.log('START--------');
-        //console.log(req.body);
         const params = req.body.queryResult.outputContexts[0].parameters;
         let age = params.age;
         let age_no = params["age-no.original"];
         if (age[0] !== undefined) {
-            if (parseInt(age[0].slice(0, 2)) > 18 && parseInt(age[0].slice(0, 2)) < 45) //between the ages of 18-45
+            if (parseInt(age[0].slice(0, 2)) > 18 && parseInt(age[0].slice(0, 2)) < 45)
                 age[0] = "18+";
-            if (parseInt(age[0].slice(0, 2)) > 45) //from 45-99
+            if (parseInt(age[0].slice(0, 2)) > 45)
                 age[0] = "45+";
         }
         if (age_no !== undefined) {
@@ -142,8 +133,6 @@ export const getAppointments = async(req, res) => {
         const dose = params.dose;
         const vaccine = params.vac;
         const fee = params.fee;
-
-        //figuring out which location to extract
         let pinCode = params.loc['zip-code'];
 
         let districtCode = null;
@@ -151,13 +140,13 @@ export const getAppointments = async(req, res) => {
         let latlong = null;
         let lat, long = 0;
         if (pinCode === undefined) {
-            latlong = params.loc['latlong'];  //parse lat long input to feed to findNearestPin()
+            latlong = params.loc['latlong'];
             if (latlong != undefined) {
                 latlong = latlong.slice(8);
                 const index = latlong.indexOf('-');
                 lat = latlong.slice(0, index);
                 long = latlong.slice(index + 1);
-                pinCode = await findNearestPin(lat, long); //pinCode will equal the output of this function
+                pinCode = await findNearestPin(lat, long);
             }
         }
         if (pinCode === undefined && latlong === undefined) {
@@ -241,8 +230,6 @@ export const getAppointments = async(req, res) => {
                     }
                 }
             })
-            //console.log(dates);
-
 
             function filterPush(time, details) {
                 if (dateBool === true) {
@@ -318,7 +305,6 @@ export const getAppointments = async(req, res) => {
 
             let appointment_info;
             available.centers.forEach(center => {
-                //ret.centers.push({name: center.name, fee_type: center.fee_type, sessions: []});
                 center.sessions.forEach((session) => {
                     appointment_info = {
                         center_id: center.name,
@@ -386,9 +372,6 @@ export const getAppointments = async(req, res) => {
             })
 
             dateBool = true;
-            //console.log('DOESTHISWORKTESTETSTETSTST')
-            //console.log(ret)
-
             available.centers.forEach(center => {
                 center.sessions.forEach(session => {
                     appointment_info = {
@@ -515,9 +498,6 @@ export const getAppointments = async(req, res) => {
                 for (let i = 0; i < table.length; i++) {
                     table[i] = new Array(DATELENGTH + 1);
                 }
-                //console.log(table.length)
-                //console.log(dateArray)
-                //console.log(table[0].length)
                 for (let i = 1; i < DATELENGTH + 1; i++) {
                     table[0][i] = dateArray[i - 1]
                 }
@@ -563,23 +543,7 @@ export const getAppointments = async(req, res) => {
                 else if (params.loc['District'] != undefined) {
                     location = params.loc['District'] + " ,";
                     location = location.charAt(0).toUpperCase() + location.substr(1).toLowerCase();
-                }
-                // if(params.vac.length > 0)
-                //     params.vac.forEach(vac => {
-                //         vaccineName += vac + " ,";
-                //     });
-                // if(params.fee.length > 0)
-                //     params.fee.forEach(fee => {
-                //         price += fee + " ,";
-                //     });
-                // if(params.dose.length > 0)
-                //     params.dose.forEach(dose => {
-                //         doses += "Dose" + dose + " ,";
-                //     });
-                // if(params.age.length > 0)
-                // params.age.forEach(agee => {
-                //     age += agee + " ,";
-                // });                    
+                }                  
 
                 filterString += location; // + vaccineName + price + doses +  age;
                 filterString = filterString.substring(0, filterString.length - 1)
@@ -595,11 +559,6 @@ export const getAppointments = async(req, res) => {
                     string += '<div style="width:65%;"><p style="font-size:20px; padding-bottom:10px;margin-left: 40px;"><span style="font-size:20px; padding-bottom:10px;">' + filterString + '</span></p></div>'
                     string += '<div style="width:35%;"> <p style="font-size:20px; padding-bottom:10px;"><span style="background-color:#b5f0b5;width: 100px;">Vaccine(s) Available</span> <span style="padding-left:20px">NA = Not Applicable</span>  </p> </div>'
                     string += '</div>';
-                    //string += '<span style="float:left; font-size: 20px;"> NA = Not Applicable <span style="float:right; background-color:#b5f0b5; padding: 10px; width: 100px; font-size: 20px;"> Vaccine(s) Available</span> </span>'
-                    //string += '<span style="background-color:#b5f0b5; padding: 10px; width: 100px; font-size: 20px;"> Vaccines(s) Available </span> '
-                    //string += '<span style="font-size: 20px"> <p>NA = Not Applicable</p> </span>'           
-                    //string += '<span style="font-size: 20px"> Vaccine(s) Available </span>'
-                    //string += '</div>'
                     string += '<div> </div>'
                     string += '<table border="1" style="border-collapse:collapse; margin: 2px; border:1px solid;">'
                     for (let i = 0; i < tableData.length && i < 10; i++) {
@@ -663,9 +622,6 @@ export const getAppointments = async(req, res) => {
                 else {
                     agent.add("Would you like to search with additional details?")
                 }
-                //agent.context.set('VaccinationAppointmentAvailability-followup', 0, {loc: {'District': 'Hyderabad'}});
-
-                //console.log(actual_ret);
             }
         }
     }

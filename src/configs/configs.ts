@@ -9,8 +9,6 @@ export type EHRProvider = FHIRProvider | OpenEHRProvider;
 export type AuthorizationType = 'Custom'; //TBD: Other options need to be supported
 export type AuthenticationType = 'Custom'; //TBD: Other options need to be supported
 
-///////////////////////////////////////////////////////////////////////////////////////////
-
 export interface AuthConfig {
     Authentication: AuthenticationType;
     Authorization: AuthorizationType;

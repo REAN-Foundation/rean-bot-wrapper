@@ -1,7 +1,5 @@
-// import dfff from 'dialogflow-fulfillment'; these values are not used
-// import Config from '../config/config';
 import { Logger } from '../common/logger';
-import { getRequestOptions } from '../utils/Helper';
+import { getRequestOptions } from '../utils/helper';
 import needle from "needle";
 const ReanBackendBaseUrl = process.env.REAN_APP_BACKEND_BASE_URL;
 
@@ -32,11 +30,6 @@ export const getPatientsByPhoneNumberservice = async (phoneNumber, patientNumber
             let sendDff = false
             let data = response.body.data.Patients
             if (response.body.data.Patients.length > 1) {
-                /**
-                 * TODO: In case of multiple patient profiles attached to same phone,
-                 * let use select the profile and send the context again to get intent fulfilled
-                 * Remove below line once that support is needed (as of now we are selecting 1st profile by default)
-                 */
                 patientNumber = 1
 
                 if (patientNumber > 0) {

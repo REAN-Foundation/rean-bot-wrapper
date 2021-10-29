@@ -3,11 +3,6 @@ import { cron } from 'node-cron';
 
 Logger.instance().log('Enabling Cron process for Rean Bot.');
 
-/*
- * Test cron running every min
- * doc: https://www.npmjs.com/package/node-cron
- */
-// MIN HOUR DOM MON DOW
 export const scheduleCron = () =>{
     cron.schedule('* * * * *', () => {
         var time = new Date().toString();

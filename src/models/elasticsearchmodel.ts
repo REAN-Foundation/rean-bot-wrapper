@@ -1,17 +1,8 @@
-import client from '../configs/elasticsearch.config';
+import { elasticsearchUtilities } from '../utils/elasticsearch.utility';
 
+let esinstance = new elasticsearchUtilities()
 export const createIndexes = () => {
-    // client.indices.create({
-    //     index: 'user_stat'
-    // }, function (err, resp, status) {
-    //     if (err) {
-    //         console.log(err);
-    //     }
-    //     else {
-    //         console.log("create", resp);
-    //     }
-    // });
-    client.indices.create({
+    esinstance.client.indices.create({
         index: 'test_chat_message'
     }, function (err, resp, status) {
         if (err) {

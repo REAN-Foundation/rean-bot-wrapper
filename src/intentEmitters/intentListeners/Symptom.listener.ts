@@ -1,6 +1,5 @@
-// Load required services here
 import { Logger } from '../../common/logger';
-import { getSymptoms } from '../../services/CovidSymptom.Service';
+import { getSymptoms } from '../../services/covid.symptom.service';
 
 export const getSymptomAssessment = async (intent, eventObj) => {
     // eslint-disable-next-line no-async-promise-executor

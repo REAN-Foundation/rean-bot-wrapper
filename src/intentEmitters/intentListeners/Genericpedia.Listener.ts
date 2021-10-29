@@ -1,6 +1,5 @@
-// Load required services here
 import { Logger } from '../../common/logger';
-import { getGenericpediaservice, getGenericpediaChemistservice } from "../../services/Genericpedia.service"
+import { getGenericpediaservice, getGenericpediaChemistservice } from "../../services/genericpedia.service"
 
 export const getGenericpedia = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
