@@ -9,10 +9,7 @@ export class handleRequestservice{
                 private translateService?: translateService ) {
                 }
 
-    async handleUserRequest (message, client) {
-        console.log("entered the handleUserRequest OOOOOOOOOOOOOOOOOO")
-        console.log("the hndle request is ", message)
-        
+    async handleUserRequest (message, client) {        
         let message_from_dialoglow:any;
         let processed_message: any;
         let translate_message: any;
