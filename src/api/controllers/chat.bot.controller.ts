@@ -1,7 +1,7 @@
 import { Logger } from '../../common/logger';
 import { ResponseHandler } from '../../utils/response.handler';
 import { autoInjectable } from 'tsyringe';
-import { IntentEmitter } from '../../intentEmitters/IntentEmitter';
+import { IntentEmitter } from '../../intentEmitters/intent.emitter';
 
 @autoInjectable()
 export class ChatBotController {

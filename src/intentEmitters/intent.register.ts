@@ -1,5 +1,5 @@
 import { Logger } from '../common/logger';
-import { IntentEmitter } from './IntentEmitter';
+import { IntentEmitter } from './intent.emitter';
 
 // Register All listener handlers
 import { getVaccinationAppointments, secondListener } from './intentListeners/vaccination.listener';
