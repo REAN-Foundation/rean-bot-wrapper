@@ -42,7 +42,7 @@ export class AuthorizationHandler {
     };
 
     generateToken = (user) => {
-
+        console.log("TO generate token");
     };
 
 }
