@@ -5,7 +5,8 @@ export interface platformServiceInterface{
     handleMessage (msg: any, client);
     init (client);
     postResponse(messagetoDialogflow: message, process_raw_dialogflow:any);
-    SendMediaMessage(SmessagetoDialogflow_sessionId: String, response_format_messageBody: String,response_format_messageText:String );
+    // eslint-disable-next-line max-len
+    SendMediaMessage(SmessagetoDialogflow_sessionId: string, response_format_messageBody: string,response_format_messageText:string );
     set res(res);
 
 }

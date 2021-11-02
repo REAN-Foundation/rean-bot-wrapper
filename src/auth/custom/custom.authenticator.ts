@@ -4,8 +4,8 @@ import { AuthenticationResult } from '../../domain.types/auth/auth.domain.types'
 
 export class CustomAuthenticator implements IAuthenticator {
 
-    constructor() {
-    }
+    // constructor() {
+    // }
 
     public authenticateUser = async (
         request: any
@@ -20,7 +20,7 @@ export class CustomAuthenticator implements IAuthenticator {
             const authHeader = request.headers['authorization'];
             const token = authHeader && authHeader.split(' ')[1];
 
-            if (token == null) {
+            if (token === null) {
                 res = {
                     Result        : false,
                     Message       : 'Unauthorized user access',
@@ -48,6 +48,7 @@ export class CustomAuthenticator implements IAuthenticator {
         return res;
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     authenticateClient(request: any, response: any): Promise<AuthenticationResult> {
         return Promise.resolve(undefined);
     }

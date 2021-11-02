@@ -10,7 +10,7 @@ import { RiskAssessmentListener } from './intentListeners/risk.assessment.listen
 import { getRiskAssessmentInfo } from './intentListeners/risk.assessment.info.listener';
 import { getRiskAssessmentFollowup } from './intentListeners/risk.assessment.followup.listener';
 import { getMedicationInfo } from './intentListeners/support.app.listener';
-import { getGenericpedia, getGenericpediaChemist} from './intentListeners/genericpedia.listener'
+import { getGenericpedia, getGenericpediaChemist } from './intentListeners/genericpedia.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -21,43 +21,50 @@ import { getGenericpedia, getGenericpediaChemist} from './intentListeners/generi
 export class IntentRegister {
 
     register(){
-        Logger.instance().log("Begin registering Intents...")
+        Logger.instance().log("Begin registering Intents...");
 
-        IntentEmitter.registerListener('Vaccination.AppointmentAvailability', getVaccinationAppointments)
-        IntentEmitter.registerListener('vaccination:appointments', secondListener)
+        IntentEmitter.registerListener('Vaccination.AppointmentAvailability', getVaccinationAppointments);
+        IntentEmitter.registerListener('vaccination:appointments', secondListener);
 
-        IntentEmitter.registerListener('covid-info', getCovidInfo1s)
+        IntentEmitter.registerListener('covid-info', getCovidInfo1s);
 
-        IntentEmitter.registerListener('covid-resources', getCovidResources1s)
+        IntentEmitter.registerListener('covid-resources', getCovidResources1s);
 
-        IntentEmitter.registerListener('life - no', getSymptomAssessment)
+        IntentEmitter.registerListener('life - no', getSymptomAssessment);
 
-        IntentEmitter.registerListener('Risk.Assessment', RiskAssessmentListener)
+        IntentEmitter.registerListener('Risk.Assessment', RiskAssessmentListener);
 
-        IntentEmitter.registerListener('Risk.assessment.info', getRiskAssessmentInfo)
-        IntentEmitter.registerListener('risk.assessment.info-no', getRiskAssessmentInfo)
+        IntentEmitter.registerListener('Risk.assessment.info', getRiskAssessmentInfo);
+        IntentEmitter.registerListener('risk.assessment.info-no', getRiskAssessmentInfo);
 
-        IntentEmitter.registerListener('diabetes', getRiskAssessmentFollowup)
-        IntentEmitter.registerListener('cancer', getRiskAssessmentFollowup)
-        IntentEmitter.registerListener('heart', getRiskAssessmentFollowup)
-        IntentEmitter.registerListener('immunosuppressant', getRiskAssessmentFollowup)
-        IntentEmitter.registerListener('kidney', getRiskAssessmentFollowup)
-        IntentEmitter.registerListener('liver', getRiskAssessmentFollowup)
-        IntentEmitter.registerListener('lungs', getRiskAssessmentFollowup)
-        IntentEmitter.registerListener('pregnancy', getRiskAssessmentFollowup)
-        IntentEmitter.registerListener('genericpedia', getGenericpedia)
-        IntentEmitter.registerListener('genericpedia location', getGenericpediaChemist)
+        IntentEmitter.registerListener('diabetes', getRiskAssessmentFollowup);
+        IntentEmitter.registerListener('cancer', getRiskAssessmentFollowup);
+        IntentEmitter.registerListener('heart', getRiskAssessmentFollowup);
+        IntentEmitter.registerListener('immunosuppressant', getRiskAssessmentFollowup);
+        IntentEmitter.registerListener('kidney', getRiskAssessmentFollowup);
+        IntentEmitter.registerListener('liver', getRiskAssessmentFollowup);
+        IntentEmitter.registerListener('lungs', getRiskAssessmentFollowup);
+        IntentEmitter.registerListener('pregnancy', getRiskAssessmentFollowup);
+        IntentEmitter.registerListener('genericpedia', getGenericpedia);
+        IntentEmitter.registerListener('genericpedia location', getGenericpediaChemist);
 
-        IntentEmitter.registerListener('SupportApp.GetMedication', getMedicationInfo)
-
+        IntentEmitter.registerListener('SupportApp.GetMedication', getMedicationInfo);
 
         // Intent Failure/fallback listener
-        IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError)
+        IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
 
         // Intent fulfillement - Success listener
         // TODO: Pending implementation
-        IntentEmitter.registerListener('IntentFulfillment:Success', () => { Logger.instance().log("Intent fulfilled successfully."); return true })
+        // eslint-disable-next-line max-len
+        // IntentEmitter.registerListener('IntentFulfillment:Success', () => { Logger.instance().log("Intent fulfilled successfully."); return true; });
+        IntentEmitter.registerListener('IntentFulfillment:Success', this.logSuccessfulIntent);
 
-        Logger.instance().log("Intent registration completed...")
+        Logger.instance().log("Intent registration completed...");
     }
+
+    logSuccessfulIntent (){
+        Logger.instance().log("Intent fulfilled successfully.");
+        return true;
+    }
+
 }

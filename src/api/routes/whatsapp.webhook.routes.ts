@@ -1,6 +1,6 @@
 import express from 'express';
 import { Logger } from '../../common/logger';
-import { injectable, inject } from 'tsyringe';
+import { injectable } from 'tsyringe';
 import { WhatsappWebhookController } from '../controllers/whatsapp.webhook.controller';
 
 @injectable()
@@ -20,4 +20,4 @@ export class WhatsappWebhookRoutes{
         app.use('/v1/', router);
     }
 
-} 
+}

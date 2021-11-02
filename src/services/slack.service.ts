@@ -6,7 +6,7 @@ const slackClient = new WebClient(process.env.SLACK_TOKEN);
 const slackChannel = process.env.SLACK_CHANNEL_ID;
 
 // Slack Service to Send Message to Slack Channel
-export const send_message = async (message, failureReason, params, eventObj) => {
+export const send_message = async (message, failureReason, params) => {
     return new Promise(async (resolve, reject) => {
         try {
             Logger.instance().log(`Sending message to Slack Channel: ${message}`);

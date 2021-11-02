@@ -25,7 +25,7 @@ export class ResponseHandler {
         const obj = {
             success : true,
             message : message,
-            data : data ? data : {}
+            data    : data ? data : {}
         };
         if (log_data) {
             this.logger.log_info(JSON.stringify(obj));
@@ -33,7 +33,7 @@ export class ResponseHandler {
         return response.status(code).send(obj);
     }
 
-    sendFailureResponse = (response, code, message, request = null, trace = null, details = null, log_data = true) => {
+    sendFailureResponse = (response, code, message, request = null, trace = null, details = null) => {
         const error = details ? details : message;
         const generic_message = details ? message : null;
         const tmp = trace ? trace.split('\n') : null;
@@ -58,6 +58,7 @@ export class ResponseHandler {
         }
 
         this.logger.log_error(JSON.stringify(obj), code, 'error');
+
         // console.log("the response of sendfailure", response.status(code).send(obj));
         return response.status(code).send(obj);
     }

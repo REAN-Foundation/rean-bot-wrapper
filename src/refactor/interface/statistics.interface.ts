@@ -1,24 +1,24 @@
 export interface requestStatistics{
-    name : String;
-    platform : String;
-    contact : String;
-    chat_message_id : String;
-    direction : String;
-    message_type : String;
-    message_content : String;
+    name : string;
+    platform : string;
+    contact : string;
+    chat_message_id : string;
+    direction : string;
+    message_type : string;
+    message_content : string;
 }
 
 export interface responseStatistics{
-    name : String;
-    platform : String;
-    contact : String;
-    chat_message_id : String;
-    direction : String;
-    message_type : String;
-    message_content : String;
-    image_url : String;
-    raw_response_object : String;
-    intent : String;
+    name : string;
+    platform : string;
+    contact : string;
+    chat_message_id : string;
+    direction : string;
+    message_type : string;
+    message_content : string;
+    image_url : string;
+    raw_response_object : string;
+    intent : string;
 }
 
 export interface saveStatisticsInterface{

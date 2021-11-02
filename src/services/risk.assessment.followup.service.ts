@@ -1,4 +1,4 @@
-export const getRiskAssessmentFollowup = async (req, res) => {
+export const getRiskAssessmentFollowup = async (req) => {
     return new Promise(async (resolve, reject) => {
         try {
             console.log('START--------');
@@ -12,8 +12,9 @@ export const getRiskAssessmentFollowup = async (req, res) => {
                         ctx = c[i]['parameters'];
                         break;
                     }
-                } catch {
-
+                } catch (error) {
+                    console.log(error.message, 500, "Covid Info Service Error!");
+                    reject(error.message);
                 }
             }
             const int_name = req['body']['queryResult']['intent']['displayName'];
@@ -48,7 +49,7 @@ export const getRiskAssessmentFollowup = async (req, res) => {
                 height = ctx['height'];
                 height = height['amount'];
                 const bmi = weight / ((height / 100) ** 2);
-                if (bmi > 35) { tot_score += 1; }
+                if (bmi > 35) tot_score += 1;
 
                 const val = parseInt(ctx[int_name]);
                 if (!isNaN(val)) {

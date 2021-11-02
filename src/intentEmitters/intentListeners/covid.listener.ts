@@ -1,6 +1,7 @@
 import { Logger } from '../../common/logger';
 import { getCovidInfo1 , getCovidInfo2, getCovidResources1, getCovidResources2 } from '../../services/covid.info.service';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const getCovidInfo1s = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -20,6 +21,7 @@ export const getCovidInfo1s = async (intent, eventObj) => {
     });
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const getCovidInfo2s = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -40,6 +42,7 @@ export const getCovidInfo2s = async (intent, eventObj) => {
     });
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const getCovidResources1s = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -60,6 +63,7 @@ export const getCovidResources1s = async (intent, eventObj) => {
     });
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const getCovidResources2s = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
         try {

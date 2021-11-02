@@ -49,7 +49,7 @@ export class Logger {
         };
         msg = dateTime + '> ' + JSON.stringify(msg);
 
-        if (process.env.NODE_ENV == 'DEVELOPMENT') {
+        if (process.env.NODE_ENV === 'DEVELOPMENT') {
             console.log('[INFO] ', msg);
         }
     }
@@ -62,7 +62,7 @@ export class Logger {
         };
         msg = dateTime + '> ' + JSON.stringify(msg);
 
-        if (process.env.NODE_ENV == 'DEVELOPMENT') {
+        if (process.env.NODE_ENV === 'DEVELOPMENT') {
             console.log('[WARNING] ', msg);
         }
     }

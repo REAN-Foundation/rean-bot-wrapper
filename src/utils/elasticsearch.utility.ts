@@ -3,14 +3,17 @@ import { singleton } from 'tsyringe';
 
 @singleton()
 export class elasticsearchUtilities{
+
   public client:elasticsearch.Client ;
+
   constructor(){
       this.createclient();
   }
+
   async createclient() {
-      if (process.env.ELASTICSEARCH_HOST) {  
+      if (process.env.ELASTICSEARCH_HOST) {
           this.client = new elasticsearch.Client({
-              hosts: [
+              hosts : [
                   process.env.ELASTICSEARCH_HOST
               ]
           });
@@ -20,10 +23,10 @@ export class elasticsearchUtilities{
     save = (data, model) => {
         if (this.client) {
             this.client.index({
-                index: model,
-                type: 'constituencies',
-                body: data
-            }, function (err, resp, status) {
+                index : model,
+                type  : 'constituencies',
+                body  : data
+            }, function (err, resp) {
                 if (err) console.log("saving err", err);
                 return resp;
             });
@@ -32,16 +35,16 @@ export class elasticsearchUtilities{
 
     getAll = (model) => {
 
-        return new Promise((resolve, reject) => {    
+        return new Promise((resolve, reject) => {
             this.client.search({
-                index: model,
-                type: 'constituencies',
-                body: {
-                    query: {
-                        "match_all": {}
+                index : model,
+                type  : 'constituencies',
+                body  : {
+                    query : {
+                        "match_all" : {}
                     },
                 }
-            }, function (error, response, status) {
+            }, function (error, response) {
                 if (error) {
                     console.log("search error: " + error);
                     reject(error);
@@ -58,4 +61,5 @@ export class elasticsearchUtilities{
             });
         });
     }
+
 }

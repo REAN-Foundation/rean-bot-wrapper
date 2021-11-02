@@ -8,7 +8,7 @@ import { Loader } from './startup/loader';
 import { Logger } from './common/logger';
 import { ConfigurationManager } from "./configs/configuration.manager";
 import { IntentRegister } from './intentEmitters/intent.register';
-import {container} from "tsyringe";
+import { container } from "tsyringe";
 
 export default class Application {
 
@@ -50,8 +50,10 @@ export default class Application {
             await this._router.init();
 
             this._intentRegister.register();
-            let me = container.resolve('telegram');
-            let me2 = container.resolve('whatsapp');
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const me = container.resolve('telegram');
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const me2 = container.resolve('whatsapp');
 
             //Start listening
             await this.listen();

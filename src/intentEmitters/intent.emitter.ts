@@ -37,6 +37,7 @@ export class IntentEmitter {
                     promises.push(listener(intent, eventObj));
                 }
                 consolidatedResponse = await Promise.allSettled(promises);
+
                 // TODO: implement here - if we need to consolidated output to be sent - varies per Intent
                 resolve(consolidatedResponse);
 

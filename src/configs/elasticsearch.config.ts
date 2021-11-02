@@ -3,7 +3,7 @@
 // export class elasticsearchClient{
 //   async createclient() {
 //     let client;
-//     if (process.env.ELASTICSEARCH_HOST) {  
+//     if (process.env.ELASTICSEARCH_HOST) {
 //       client = new elasticsearch.Client({
 //         hosts: [
 //           process.env.ELASTICSEARCH_HOST

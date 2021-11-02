@@ -2,8 +2,8 @@ import 'reflect-metadata';
 import { DependencyContainer } from 'tsyringe';
 import { AuthInjector } from '../auth/auth.injector';
 import { platformMessageService } from '../services/whatsapp.message.service';
-import { platformMessageService as telegramPlatformservice} from '../services/telegram.message.service';
-import { platformMessageService as rean_SUPPORT_Platformservice} from '../services/app.support.service';
+import { platformMessageService as telegramPlatformservice } from '../services/telegram.message.service';
+import { platformMessageService as rean_SUPPORT_Platformservice } from '../services/app.support.service';
 
 export class Injector {
 

@@ -14,14 +14,14 @@ export class ErrorHandler{
         var request = req;
         var trace = '';
         var details = null;
-        
+
         if (error.message) {
             message = error.message;
         }
 
         if (error.data) {
             var data = error.data;
-            if (data != null) {
+            if (data !== null) {
                 trace = error.data.trace;
                 if (data.errorCode) {
                     error_code = error.data.errorCode;
@@ -44,4 +44,5 @@ export class ErrorHandler{
     throw_service_error = (error, msg) => {
         throw new Error(msg ? msg : 'An unknown error has occurred.');
     };
+
 }

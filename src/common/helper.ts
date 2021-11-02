@@ -26,7 +26,7 @@ export class Helper {
         const txt = JSON.stringify(obj, null, '    ');
         fs.writeFileSync(filename, txt);
     }
-    
+
     static jsonToObj = (jsonPath) => {
 
         if (!fs.existsSync(jsonPath)) {
@@ -298,7 +298,7 @@ export class Helper {
         }
         return Promise.resolve();
     }
-    
+
     public static sleep = (miliseconds) => {
         return new Promise((resolve) => {
             setTimeout(resolve, miliseconds);
@@ -354,10 +354,10 @@ export class Helper {
 
     public static getPossiblePhoneNumbers = (phone) => {
 
-        if (phone == null) {
+        if (phone === null) {
             return [];
         }
-        
+
         let phoneTemp = phone;
         phoneTemp = phoneTemp.trim();
         const searchFors = ['+91', '+1'];
@@ -372,16 +372,16 @@ export class Helper {
                 phoneTemp = phoneTemp.replace('-', '');
             }
         }
-    
+
         if (phonePrefix) {
             possiblePhoneNumbers.push(phonePrefix + phoneTemp);
             possiblePhoneNumbers.push(phonePrefix + "-" + phoneTemp);
             possiblePhoneNumbers.push(phoneTemp);
-    
+
         } else {
             possiblePhoneNumbers.push("+91" + phoneTemp);
             possiblePhoneNumbers.push("+91-" + phoneTemp);
-    
+
             possiblePhoneNumbers.push("+1" + phoneTemp);
             possiblePhoneNumbers.push("+1-" + phoneTemp);
             possiblePhoneNumbers.push(phoneTemp);

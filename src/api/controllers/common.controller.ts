@@ -10,4 +10,5 @@ export class CommonController {
     ping = async (request, response) => {
         return this.responseHandler.sendSuccessResponse(response, 200, 'pong', {}, true);
     };
+
 }

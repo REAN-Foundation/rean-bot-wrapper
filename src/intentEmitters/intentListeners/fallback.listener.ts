@@ -3,6 +3,7 @@ import { send_message } from '../../services/slack.service';
 
 export const handleIntentFufillmentError = async (_intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
+        // eslint-disable-next-line init-declarations
         let response;
         try {
             const intentName = eventObj.queryResult ? eventObj.queryResult.intent.displayName : null;
@@ -14,7 +15,7 @@ export const handleIntentFufillmentError = async (_intent, eventObj) => {
 
             // TODO: Send message to slack channel
             const message = `Failed to fulfill intent \`${intentName}\``;
-            response = await send_message(message, failureReason, params, eventObj);
+            response = await send_message(message, failureReason, params);
 
             // TODO: Send message to other channels/JIRA
 

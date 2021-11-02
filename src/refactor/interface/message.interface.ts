@@ -1,27 +1,27 @@
 export interface message{
-    name : String;
-    platform : String;
-    sessionId : String;
-    chat_message_id : String;
-    direction: String;
-    type : String;
-    messageBody : String;
-    latlong : String;
-    replayPath : String;
+    name : string;
+    platform : string;
+    sessionId : string;
+    chat_message_id : string;
+    direction: string;
+    type : string;
+    messageBody : string;
+    latlong : string;
+    replayPath : string;
 }
 
 export interface response{
-    name : String;
-    platform : String;
+    name : string;
+    platform : string;
     sessionId: string;
-    chat_message_id : String;
-    direction: String;
+    chat_message_id : string;
+    direction: string;
     input_message;
-    message_type: String;
-    messageBody: String;
-    messageText: String;
-    raw_response_object: String;
-    intent: String;
+    message_type: string;
+    messageBody: string;
+    messageText: string;
+    raw_response_object: string;
+    intent: string;
     messageImageUrl: string;
     messageImageCaption: string;
 }

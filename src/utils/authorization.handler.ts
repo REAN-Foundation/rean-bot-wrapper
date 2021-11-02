@@ -28,7 +28,7 @@ export class AuthorizationHandler {
 
         const auth_header = request.headers.authorization;
         const token = auth_header && auth_header.split(' ')[1];
-        if (token == null) {
+        if (token === null) {
             this.responseHandler.sendFailureResponse(response, 401, 'Unauthorized access', request);
         }
 
@@ -41,7 +41,7 @@ export class AuthorizationHandler {
         }
     };
 
-    generateToken = (user) => {
+    generateToken = () => {
         console.log("TO generate token");
     };
 

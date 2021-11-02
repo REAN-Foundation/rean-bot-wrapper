@@ -9,7 +9,7 @@ export class Router {
 
     private _app = null;
 
-    constructor(app: express.Application, 
+    constructor(app: express.Application,
                 private chatBotRoutes?: ChatBotRoutes,
                 private whatsappWebhookRoutes?: WhatsappWebhookRoutes){
         this._app = app;
@@ -18,7 +18,7 @@ export class Router {
     public init = async (): Promise<boolean> => {
         return new Promise((resolve, reject) => {
             try {
-                console.log("Inside router.ts")
+                console.log("Inside router.ts");
 
                 //Handling the base route
                 this._app.get('/v1/', (req, res) => {

@@ -9,7 +9,7 @@ export const getCovidInfo1 = async () => {
             const options = getRequestOptions();
             const url = 'https://test.api.net';
             const response = await needle("get", url, options);
-            if (response.statusCode != 200) {
+            if (response.statusCode !== 200) {
                 reject("Failed to get response from API-1.");
             }
 
@@ -31,7 +31,7 @@ export const getCovidInfo2 = async () => {
             const url = 'https://test.api.net';
             const response = await needle("get", url, options);
 
-            if (response.statusCode != 200) {
+            if (response.statusCode !== 200) {
                 reject("Failed to get response from API-2.");
             }
 

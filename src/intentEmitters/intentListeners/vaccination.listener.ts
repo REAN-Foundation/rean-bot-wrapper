@@ -4,6 +4,7 @@ import { getAppointments } from '../../services/covid.vaccination.service';
 
 export const getVaccinationAppointments = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
+        // eslint-disable-next-line init-declarations
         let res;
         try {
             Logger.instance()
@@ -41,6 +42,7 @@ export const getVaccinationAppointments = async (intent, eventObj) => {
     });
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const secondListener = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
         Logger.instance().log(`event in second listener`);

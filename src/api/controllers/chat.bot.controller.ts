@@ -13,14 +13,14 @@ export class ChatBotController {
     }
 
     ping = async (request, response) => {
-        return this.responseHandler.sendSuccessResponse(response, 200, 'pong', {'pong':true}, true);
+        return this.responseHandler.sendSuccessResponse(response, 200, 'pong', { 'pong': true }, true);
     }
 
     validateIntent = async (request, response) => {
         const intent = request.query.intent_name;
         this.logger.log("Checking Event Emitter details for Intent Name: " + intent);
 
-        if (!intent || intent.trim() == '') {
+        if (!intent || intent.trim() === '') {
             return this.responseHandler.sendFailureResponse(response, 400, 'Missing required parameter [intent].', request);
         }
 
@@ -37,7 +37,7 @@ export class ChatBotController {
         // Emit the event for given intent
         const intent = request.body.queryResult ? request.body.queryResult.intent.displayName : null;
 
-        if (!intent || intent.trim() == '') {
+        if (!intent || intent.trim() === '') {
             return this.responseHandler.sendFailureResponse(response, 400, 'Missing required parameter [intent].', request);
         }
 
@@ -47,7 +47,7 @@ export class ChatBotController {
         this.logger.log(`Emitting Intent:: ${intent}, Total Listeners:: ${total_listeners}`);
 
         // No listeners registered. Invoke fallback mechanism.
-        if (total_listeners == 0) {
+        if (total_listeners === 0) {
             this.logger.log("No listeners registered for this Intent. Calling fallback mechanism to notify.");
             fulfillmentResponse = 'Opps! Intent cannot be fulfilled. Please try again after some time.';
 

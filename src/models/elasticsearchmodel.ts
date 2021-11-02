@@ -1,10 +1,10 @@
 import { elasticsearchUtilities } from '../utils/elasticsearch.utility';
 
-let esinstance = new elasticsearchUtilities()
+const esinstance = new elasticsearchUtilities();
 export const createIndexes = () => {
     esinstance.client.indices.create({
-        index: 'test_chat_message'
-    }, function (err, resp, status) {
+        index : 'test_chat_message'
+    }, function (err, resp) {
         if (err) {
             console.log(err);
         }
@@ -12,4 +12,4 @@ export const createIndexes = () => {
             console.log("create", resp);
         }
     });
-}
+};

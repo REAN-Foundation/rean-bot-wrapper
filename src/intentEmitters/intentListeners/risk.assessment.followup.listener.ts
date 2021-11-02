@@ -3,15 +3,17 @@ import { getRiskAssessmentFollowup as getRiskAssessmentFollowups } from '../../s
 
 export const getRiskAssessmentFollowup = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
-        let res;
+
+        // let res;
         try {
             Logger.instance()
                 .log('Calling risk assessment followup Service !!!!!!');
 
             // Service Call
             let response = null;
-            res = 5;
-            response = await getRiskAssessmentFollowups(eventObj, res);
+            
+            // res = 5;
+            response = await getRiskAssessmentFollowups(eventObj);
 
             console.log('Inside listener: ', response);
 

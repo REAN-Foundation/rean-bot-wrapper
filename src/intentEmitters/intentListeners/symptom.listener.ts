@@ -4,15 +4,14 @@ import { getSymptoms } from '../../services/covid.symptom.service';
 export const getSymptomAssessment = async (intent, eventObj) => {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
-        let res;
+        // eslint-disable-next-line init-declarations
         try {
             Logger.instance()
                 .log('Calling symptom Service !!!!!!');
 
             // Service Call
             let response = null;
-            res = 5;
-            response = await getSymptoms(eventObj, res);
+            response = await getSymptoms(eventObj);
 
             console.log('Inside listener: ', response);
 

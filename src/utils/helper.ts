@@ -1,6 +1,6 @@
 import { Logger } from '../common/logger';
 
-export const someHelper = (data) => {
+export const someHelper = () => {
     Logger.instance().log("Hello some helper");
     return true;
 };

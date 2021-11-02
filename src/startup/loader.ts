@@ -5,6 +5,7 @@ import { Injector } from './injector';
 import { Logger } from '../common/logger';
 
 export class Loader {
+
     private static _authenticator: Authenticator = null;
 
     private static _container: DependencyContainer = container;
