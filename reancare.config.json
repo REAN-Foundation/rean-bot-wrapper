@@ -1,0 +1,16 @@
+{
+    "Auth" : {
+        "Authentication": "Custom",
+        "Authorization": "Custom"
+    },
+    "Database" : {
+        "Type": "SQL",
+        "ORM": "Sequelize",
+        "Flavour": "MySQL"
+    },
+    "Ehr" : {
+        "Specification": "FHIR",
+        "Provider": "GCP-FHIR"
+    },
+    "MaxUploadFileSize": 104857600
+}

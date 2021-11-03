@@ -1,0 +1,7 @@
+node_modules
+dist
+src/**/*.json
+src/**/*.zip
+src/assets
+src/tests
+src/views
