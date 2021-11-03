@@ -27,6 +27,33 @@ export class platformMessageService implements platformServiceInterface{
         throw new Error('Method not implemented.');
     }
 
+    createRequestforWebhook(resolve,reject,apiKey) {
+        const options = {
+            hostname : process.env.WHATSAPP_LIVE_HOST,
+            path     : '/v1/configs/webhook',
+            method   : 'POST',
+            headers  : {
+                'Content-Type' : 'application/json',
+                'D360-Api-Key' : apiKey
+            }
+        };
+        const request = http.request(options, (response) => {
+            response.setEncoding('utf8');
+            response.on('data', () => {
+                resolve(true);
+            });
+            response.on('end', () => {
+                console.log("Whbhook URL set for Whatsapp");
+                resolve(true);
+            });
+        });
+        request.on('error', (e) => {
+            console.error(`problem with request: ${e.message}`);
+            reject();
+        });
+        return request;
+    }
+
     SetWebHook = async () => {
 
         return new Promise((resolve, reject) => {
@@ -34,30 +61,14 @@ export class platformMessageService implements platformServiceInterface{
                 'url' : `${process.env.BASE_URL}/v1/whatsapp/${process.env.TELEGRAM_BOT_TOKEN}/receive`,
             });
 
-            const options = {
-                hostname : process.env.WHATSAPP_LIVE_HOST,
-                path     : '/v1/configs/webhook',
-                method   : 'POST',
-                headers  : {
-                    'Content-Type' : 'application/json',
-                    'D360-Api-Key' : process.env.WHATSAPP_LIVE_API_KEY
-                }
-            };
-            const request = http.request(options, (response) => {
-                response.setEncoding('utf8');
-                response.on('data', () => {
-                    resolve(true);
-                });
-                response.on('end', () => {
-                    console.log("Whbhook URL set for Whatsapp");
-                    resolve(true);
-                });
-            });
+            const apiKey = process.env.WHATSAPP_LIVE_API_KEY;
 
-            request.on('error', (e) => {
-                console.error(`problem with request: ${e.message}`);
-                reject();
-            });
+            const request = this.createRequestforWebhook(resolve,reject,apiKey);
+
+            // request.on('error', (e) => {
+            //     console.error(`problem with request: ${e.message}`);
+            //     reject();
+            // });
 
             // Write data to request body
             request.write(postData);
@@ -74,30 +85,14 @@ export class platformMessageService implements platformServiceInterface{
                     'url' : `${process.env.BASE_URL}/v1/whatsapp/old-number/receive`,
                 });
 
-                const options = {
-                    hostname : process.env.WHATSAPP_LIVE_HOST,
-                    path     : '/v1/configs/webhook',
-                    method   : 'POST',
-                    headers  : {
-                        'Content-Type' : 'application/json',
-                        'D360-Api-Key' : process.env.WHATSAPP_LIVE_API_KEY_OLD_NUMBER
-                    }
-                };
-                const request = http.request(options, (response) => {
-                    response.setEncoding('utf8');
-                    response.on('data', () => {
-                        resolve(true);
-                    });
-                    response.on('end', () => {
-                        console.log("Whbhook URL set for old Whatsapp number");
-                        resolve(true);
-                    });
-                });
+                const apiKey = process.env.WHATSAPP_LIVE_API_KEY_OLD_NUMBER;
 
-                request.on('error', (e) => {
-                    console.error(`problem with request: ${e.message}`);
-                    reject();
-                });
+                const request = this.createRequestforWebhook(resolve,reject,apiKey);
+
+                // request.on('error', (e) => {
+                //     console.error(`problem with request: ${e.message}`);
+                //     reject();
+                // });
 
                 // Write data to request body
                 request.write(postData);
