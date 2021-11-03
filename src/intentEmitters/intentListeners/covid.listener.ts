@@ -1,5 +1,10 @@
 import { Logger } from '../../common/logger';
-import { getCovidInfo1 , getCovidInfo2, getCovidResources1, getCovidResources2 } from '../../services/covid.info.service';
+
+// eslint-disable-next-line max-len
+// import { getCovidInfo1 , getCovidInfo2, getCovidResources1, getCovidResources2 } from '../../services/covid.info.service';
+import { getCovidInfoResources } from '../../services/covid.info.service';
+
+const getCovidInfoResourcesobj = new getCovidInfoResources();
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const getCovidInfo1s = async (intent, eventObj) => {
@@ -7,7 +12,7 @@ export const getCovidInfo1s = async (intent, eventObj) => {
         try {
             Logger.instance().log('Calling Covid Info-1 Service');
 
-            const response: any = await getCovidInfo1();
+            const response: any = await getCovidInfoResourcesobj.covidInfoResourcesforAPIs("API-1");
 
             if (!response || !response.covid_info) {
                 reject(response);
@@ -27,7 +32,7 @@ export const getCovidInfo2s = async (intent, eventObj) => {
         try {
             Logger.instance().log('Calling Covid Info-2 Service');
 
-            const response: any = await getCovidInfo2();
+            const response: any = await getCovidInfoResourcesobj.covidInfoResourcesforAPIs("API-2");
 
             if (!response || !response.covid_info) {
                 reject(response);
@@ -48,7 +53,7 @@ export const getCovidResources1s = async (intent, eventObj) => {
         try {
             Logger.instance().log('Calling Covid Resource-2 Service');
 
-            const response: any = await getCovidResources1();
+            const response: any = await getCovidInfoResourcesobj.covidInfoResourcesforAPIs("API-1");
 
             if (!response || !response.covid_resources) {
                 reject(response);
@@ -69,7 +74,7 @@ export const getCovidResources2s = async (intent, eventObj) => {
         try {
             Logger.instance().log('Calling Covid Resource-2 Service');
 
-            const response: any = await getCovidResources2();
+            const response: any = await getCovidInfoResourcesobj.covidInfoResourcesforAPIs("API-2");
 
             if (!response || !response.covid_resources) {
                 reject(response);

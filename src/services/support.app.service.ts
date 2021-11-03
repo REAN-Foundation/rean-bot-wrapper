@@ -3,7 +3,7 @@ import { getRequestOptions } from '../utils/helper';
 import needle from "needle";
 const ReanBackendBaseUrl = process.env.REAN_APP_BACKEND_BASE_URL;
 
-export const getPatientsByPhoneNumberservice = async (phoneNumber, patientNumber = null) => {
+export const getPatientsByPhoneNumberservice = async (phoneNumber) => {
     return new Promise(async (resolve, reject) => {
         try {
             Logger.instance().log(`Get Patient Info API`);
@@ -30,7 +30,7 @@ export const getPatientsByPhoneNumberservice = async (phoneNumber, patientNumber
             let sendDff = false;
             let data = response.body.data.Patients;
             if (response.body.data.Patients.length > 1) {
-                patientNumber = 1;
+                const patientNumber = 1;
 
                 if (patientNumber > 0) {
                     const selectedPatient = response.body.data.Patients[patientNumber - 1];

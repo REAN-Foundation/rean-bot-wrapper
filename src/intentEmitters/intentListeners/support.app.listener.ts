@@ -14,10 +14,12 @@ export const getMedicationInfo = async (intent, eventObj) => {
             }
             const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
             // eslint-disable-next-line max-len
-            const patientNumber = eventObj.body.queryResult.parameters.PatientNumber ? eventObj.body.queryResult.parameters.PatientNumber : null;
+
+            // eslint-disable-next-line max-len
+            // const patientNumber = eventObj.body.queryResult.parameters.PatientNumber ? eventObj.body.queryResult.parameters.PatientNumber : null;
             // eslint-disable-next-line init-declarations
             let result;
-            result = await getPatientsByPhoneNumberservice(phoneNumber, patientNumber);
+            result = await getPatientsByPhoneNumberservice(phoneNumber);
             console.log("Result", result);
 
             if (result.sendDff) {
