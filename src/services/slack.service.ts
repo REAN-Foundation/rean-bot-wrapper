@@ -6,6 +6,7 @@ const slackClient = new WebClient(process.env.SLACK_TOKEN);
 const slackChannel = process.env.SLACK_CHANNEL_ID;
 
 // Slack Service to Send Message to Slack Channel
+
 export const send_message = async (message, failureReason, params, eventObj) => {
     var sessionString = eventObj.session.lastIndexOf('/');
     var client_Id = eventObj.session.substring(sessionString + 1);
@@ -40,6 +41,7 @@ export const send_message = async (message, failureReason, params, eventObj) => 
                 {
                     type : "section",
                     text : {
+
                         type : "mrkdwn", text : ":incoming_envelope: *User ID*\n```" + client_Id + "```"
                     }
                 },
@@ -63,6 +65,7 @@ export const send_message = async (message, failureReason, params, eventObj) => 
                 channel : slackChannel
             });
 
+
             console.log("asfjgbsk;abfds", result);
 
             Logger.instance().log(`Slack Message Sent: ${result.ok}`);
@@ -70,6 +73,7 @@ export const send_message = async (message, failureReason, params, eventObj) => 
 
         } catch (error) {
             Logger.instance().log_error(error.message, 500, "Slack Service Error!");
+
             console.log("the Error is", error);
             reject(error.message);
         }
