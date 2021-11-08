@@ -1,13 +1,13 @@
 import express from 'express';
 import { Logger } from '../../common/logger';
 import { injectable } from 'tsyringe';
-import { clientWebhookController } from '../controllers/client.webhook.controller';
+import { ClientWebhookController } from '../controllers/client.webhook.controller';
 
 @injectable()
 export class WhatsappWebhookRoutes{
 
     constructor(private logger?: Logger,
-        private _clientWebhookController?: clientWebhookController){
+        private _clientWebhookController?: ClientWebhookController){
         this.logger.log("Inside whatsapp Routes...");
     }
 

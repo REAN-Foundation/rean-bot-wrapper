@@ -1,12 +1,10 @@
 import { ResponseHandler } from '../../utils/response.handler';
 import { ErrorHandler } from '../../utils/error.handler';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { autoInjectable } from 'tsyringe';
-
-import { container } from "tsyringe";
+import { autoInjectable, container } from 'tsyringe';
 
 @autoInjectable()
-export class clientWebhookController {
+export class ClientWebhookController {
 
     private _platformMessageService?: platformServiceInterface;
 
@@ -45,33 +43,7 @@ export class clientWebhookController {
                     this._platformMessageService = container.resolve(req.params.client);
                     this._platformMessageService.res = res;
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    const response = this._platformMessageService.handleMessage(req.body, req.params.client);
-                }
-            }
-            catch (error) {
-                console.log("in error", error);
-                this.errorHandler.handle_controller_error(error, res, req);
-            }
-        };
-
-        receiveMessageOldNumber = async (req, res) => {
-            console.log("receiveMessageold webhook");
-            try {
-                this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
-                if (req.body.statuses) {
-
-                    // status = sent, received & read
-                }
-                else {
-
-                    // const whatsapp_id = req.body.contacts[0].wa_id;
-
-                    // eslint-disable-next-line max-len
-                    // const response_message = "We have migrated REAN Health Guru to a new number. Click this link to chat with REAN Health Guru. Link: https://api.whatsapp.com/send/?phone=15712152682&text=Hey&app_absent=0";
-                    this._platformMessageService = container.resolve('whatsapp');
-
-                    // await this._platformMessageService.SendWhatsappMessageOldNumber(whatsapp_id, response_message);
-
+                    this._platformMessageService.handleMessage(req.body, req.params.client);
                 }
             }
             catch (error) {
