@@ -6,7 +6,7 @@ import { autoInjectable } from 'tsyringe';
 import { container } from "tsyringe";
 
 @autoInjectable()
-export class WhatsappWebhookController {
+export class clientWebhookController {
 
     private _platformMessageService?: platformServiceInterface;
 
