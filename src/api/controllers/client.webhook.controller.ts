@@ -42,7 +42,7 @@ export class ClientWebhookController {
                 this._platformMessageService = container.resolve(req.params.client);
                 this._platformMessageService.res = res;
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                this._platformMessageService.handleMessage(req.body, req.params.client);
+                const response = this._platformMessageService.handleMessage(req.body, req.params.client);
             }
         }
         catch (error) {
