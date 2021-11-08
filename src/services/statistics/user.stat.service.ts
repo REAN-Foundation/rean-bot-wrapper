@@ -8,7 +8,8 @@ export class elasticsearchUserstat{
 
   createUserStat = async (req) => {
       req.created_at = new Date();
-      const userStatModel = "test_chat_message";
+      const index_prefix = process.env.ELASTICSEARCH_INDEX_PREFIX ? process.env.ELASTICSEARCH_INDEX_PREFIX : 'test_';
+      const userStatModel = index_prefix + "chat_message";
       this._elasticsearchUtilities.save(req, userStatModel);
   }
 
