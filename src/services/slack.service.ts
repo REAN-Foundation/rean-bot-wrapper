@@ -70,7 +70,7 @@ export const send_message = async (message, failureReason, params, eventObj) => 
 
         } catch (error) {
             Logger.instance().log_error(error.message, 500, "Slack Service Error!");
-            console.log("the Error is", error)
+            console.log("the Error is", error);
             reject(error.message);
         }
     });
