@@ -13,43 +13,41 @@ export class ClientWebhookController {
         private errorHandler?: ErrorHandler) {
 
     }
+    
+    sendMessage = async (req, res) => {
+        console.log("sendMessage webhook");
+        try {
+            // eslint-disable-next-line max-len
+            const responce = await this._platformMessageService.SendMediaMessage(req.body.contact, null, req.body.message);
+            if (responce) this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', responce);
+            else
+                this.responseHandler.sendFailureResponse(res, 200, 'An error occurred while sending messages!', req);
+        }
+        catch (error) {
+            this.errorHandler.handle_controller_error(error, res, req);
+        }
+    };
 
-        sendMessage = async (req, res) => {
-            console.log("sendMessage webhook");
-            try {
-                // eslint-disable-next-line max-len
-                const responce = await this._platformMessageService.SendMediaMessage(req.body.contact, null, req.body.message);
-                if (responce) this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', responce);
-                else
-                    this.responseHandler.sendFailureResponse(res, 200, 'An error occurred while sending messages!', req);
+    receiveMessage = async (req, res) => {
+        console.log("receiveMessage webhook");
+        try {
+            if (req.body.statuses) {
+                // status = sent, received & read
             }
-            catch (error) {
-                this.errorHandler.handle_controller_error(error, res, req);
-            }
-        };
-
-        receiveMessage = async (req, res) => {
-            console.log("receiveMessage webhook");
-            try {
-
-                if (req.body.statuses) {
-
-                    // status = sent, received & read
+            else {
+                if (req.params.client !== "REAN_SUPPORT"){
+                    this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
                 }
-                else {
-                    if (req.params.client !== "REAN_SUPPORT"){
-                        this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
-                    }
-                    this._platformMessageService = container.resolve(req.params.client);
-                    this._platformMessageService.res = res;
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    this._platformMessageService.handleMessage(req.body, req.params.client);
-                }
+                this._platformMessageService = container.resolve(req.params.client);
+                this._platformMessageService.res = res;
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                this._platformMessageService.handleMessage(req.body, req.params.client);
             }
-            catch (error) {
-                console.log("in error", error);
-                this.errorHandler.handle_controller_error(error, res, req);
-            }
-        };
+        }
+        catch (error) {
+            console.log("in error", error);
+            this.errorHandler.handle_controller_error(error, res, req);
+        }
+    };
 
 }
