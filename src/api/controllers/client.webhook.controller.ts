@@ -13,7 +13,7 @@ export class ClientWebhookController {
         private errorHandler?: ErrorHandler) {
 
     }
-    
+
     sendMessage = async (req, res) => {
         console.log("sendMessage webhook");
         try {
@@ -32,6 +32,7 @@ export class ClientWebhookController {
         console.log("receiveMessage webhook");
         try {
             if (req.body.statuses) {
+
                 // status = sent, received & read
             }
             else {
@@ -68,7 +69,7 @@ export class ClientWebhookController {
             }
         }
         catch (error) {
-        console.log("in error", error);
+            console.log("in error", error);
             this.errorHandler.handle_controller_error(error, res, req);
         }
     };
