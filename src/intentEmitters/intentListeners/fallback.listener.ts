@@ -15,7 +15,7 @@ export const handleIntentFufillmentError = async (_intent, eventObj) => {
 
             // TODO: Send message to slack channel
             const message = `Failed to fulfill intent \`${intentName}\``;
-            response = await send_message(message, failureReason, params);
+            response = await send_message(message, failureReason, params, eventObj);
 
             // TODO: Send message to other channels/JIRA
 
