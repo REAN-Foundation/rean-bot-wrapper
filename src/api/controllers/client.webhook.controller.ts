@@ -15,8 +15,9 @@ export class ClientWebhookController {
     }
 
     sendMessage = async (req, res) => {
-        console.log("sendMessage webhook");
+        console.log("sendMessage webhook", req.body);
         try {
+            this._platformMessageService = container.resolve(req.params.client);
             // eslint-disable-next-line max-len
             const responce = await this._platformMessageService.SendMediaMessage(req.body.contact, null, req.body.message);
             if (responce) this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', responce);
@@ -42,7 +43,7 @@ export class ClientWebhookController {
                 this._platformMessageService = container.resolve(req.params.client);
                 this._platformMessageService.res = res;
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                this._platformMessageService.handleMessage(req.body, req.params.client);
+                const response = this._platformMessageService.handleMessage(req.body, req.params.client);
             }
         }
         catch (error) {
