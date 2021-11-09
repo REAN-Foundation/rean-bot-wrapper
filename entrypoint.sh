@@ -11,4 +11,4 @@ cd /app
 
 # Start the service
 
-pm2-runtime src/index.js
+pm2-runtime dist/src/index.js
