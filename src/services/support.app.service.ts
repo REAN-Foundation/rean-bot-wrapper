@@ -29,8 +29,8 @@ export const getPatientsByPhoneNumberservice = async (phoneNumber) => {
             Logger.instance().log(`Got patients count : ${response.body.Data.Patients.Items.length}`);
 
             if (response.body.Data.Patients.Items.length === 0) {
-                reject("No patient found for given phone number.");
-                return;
+                resolve({ sendDff: true, message: { "fulfillmentMessages": [{ "text": { "text": ['No patient found for given phone number'] } }]  } });
+
             }
 
             let sendDff = false;
