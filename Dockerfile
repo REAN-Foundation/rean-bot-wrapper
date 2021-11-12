@@ -7,8 +7,9 @@ RUN apk add --no-cache \
     && pip3 install \
         awscli \
     && rm -rf /var/cache/apk/*
-RUN apk add chromium
 RUN apk add --update alpine-sdk
+RUN apk add chromium \
+    harfbuzz
 ADD . /app
 WORKDIR /app
 
