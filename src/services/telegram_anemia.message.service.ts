@@ -37,6 +37,10 @@ export class platformMessageService implements platformServiceInterface{
         console.log("Telegram webhook set anemia," );
         
         this._telegram.on('message', msg => {
+            if(!Array.isArray(msg.photo)){
+                this.SendMediaMessage(msg.chat.id.toString(),null,'Please Share Image Only')
+                return
+            }
             let media = this.GetTelegramMedia(msg.photo[3].file_id);
             media.then((res:any)=>{
                 const options = {
@@ -50,10 +54,16 @@ export class platformMessageService implements platformServiceInterface{
                 const request = http.request(options, (response) => {
                     response.setEncoding('utf8');
                     response.on('data', (res) => {
-                        res = JSON.parse(res)
-                        console.log(res);
-                        let ress = res.isAnemic ? 'The Case is Anemic' : 'The Case is not Anemic'
-                        this.SendMediaMessage(msg.chat.id.toString(),null,ress)
+                        try{
+                            res = JSON.parse(res)
+                            console.log(res);
+                            let ress = res.isAnemic ? 'The Case is Anemic' : 'The Case is not Anemic'
+                            this.SendMediaMessage(msg.chat.id.toString(),null,ress)
+                        }catch(e){
+                            console.log('Error ',e);
+                            this.SendMediaMessage(msg.chat.id.toString(),null,'Please try again later')
+                        }
+                        
                     });
                 });
                 request.on('error', (e) => {
