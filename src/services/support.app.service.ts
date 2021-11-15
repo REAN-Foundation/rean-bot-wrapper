@@ -12,28 +12,34 @@ export const getPatientsByPhoneNumberservice = async (phoneNumber) => {
                 phoneNumber = '+' + phoneNumber;
             }
 
-            const options = getRequestOptions();
-            console.log("Phone Number", phoneNumber);
+            // adding "-" if phone number does not contain one.
+            const ten_digit = phoneNumber.substr(phoneNumber.length - 10);
+            const country_code = phoneNumber.split(ten_digit)[0];
+            if (phoneNumber.length > 10 && phoneNumber.indexOf('-') === -1) {
+                phoneNumber = `${country_code}-${ten_digit}`;
+            }
 
-            const apiUrl = `${ReanBackendBaseUrl}/patient/get-by-phone?phoneNumber=${encodeURIComponent(phoneNumber)}`;
+            const options = getRequestOptions();
+
+            const apiUrl = `${ReanBackendBaseUrl}patients/internal/search?phone=${encodeURIComponent(phoneNumber)}`;
             const response = await needle("get", apiUrl, options);
             if (response.statusCode !== 200) {
                 reject("Failed to get response from API.");
             }
-            Logger.instance().log(`Got patients count : ${response.body.data.Patients.length}`);
+            Logger.instance().log(`Got patients count : ${response.body.Data.Patients.Items.length}`);
 
-            if (response.body.data.Patients.length === 0) {
-                reject("No patient found for given phone number.");
-                return;
+            if (response.body.Data.Patients.Items.length === 0) {
+                resolve({ sendDff: true, message: { "fulfillmentMessages": [{ "text": { "text": ['No patient found for given phone number'] } }]  } });
+
             }
 
             let sendDff = false;
-            let data = response.body.data.Patients;
-            if (response.body.data.Patients.length > 1) {
+            let data = response.body.Data.Patients.Items;
+            if (response.body.Data.Patients.Items.length > 1) {
                 const patientNumber = 1;
 
                 if (patientNumber > 0) {
-                    const selectedPatient = response.body.data.Patients[patientNumber - 1];
+                    const selectedPatient = response.body.Data.Patients.Items[patientNumber - 1];
                     data = [selectedPatient];
 
                 } else {
@@ -41,8 +47,8 @@ export const getPatientsByPhoneNumberservice = async (phoneNumber) => {
                     let dffMessage = 'Hi, looks like you have multiple profiles connected with given phone number. Please select one from below: \n';
                     let count = 1;
 
-                    response.body.data.Patients.forEach((patient) => {
-                        dffMessage += `${count}. ${patient.FirstName} ${patient.LastName} (${patient.DisplayId}) \n`;
+                    response.body.Data.Patients.Items.forEach((patient) => {
+                        dffMessage += `${count}. ${patient.DisplayName} (${patient.DisplayId}) \n`;
                         count++;
                     });
 
@@ -68,7 +74,7 @@ export const getMedicationInfoservice = async (patientUserId, accessToken) => {
 
             const options = getRequestOptions("rean_app");
             options.headers["authorization"] = `Bearer ${accessToken}`;
-            const apiUrl = `${ReanBackendBaseUrl}/medication?patientUserId=${patientUserId}`;
+            const apiUrl = `${ReanBackendBaseUrl}clinical/medications/current/intetnal/${patientUserId}`;
 
             const response = await needle("get", apiUrl, options);
 
@@ -78,14 +84,14 @@ export const getMedicationInfoservice = async (patientUserId, accessToken) => {
             }
 
             let dffMessage = '';
-            if (response.body.data.medications.length === 0) {
+            if (response.body.Data.CurrentMedications.length === 0) {
                 dffMessage = 'Looks like you dont have any medications right now.';
             } else {
                 dffMessage = 'Below are your medications: \n';
                 let count = 1;
 
-                response.body.data.medications.forEach((medication) => {
-                    dffMessage += `${count}. Name: ${medication.Drug} - Dose: ${medication.Dose} ${medication.DosageUnit} \n`;
+                response.body.Data.CurrentMedications.forEach((medication) => {
+                    dffMessage += `${count}. Name: ${medication.DrugName} - Dose: ${medication.Dose} ${medication.DosageUnit} \n`;
                     count++;
                 });
             }
