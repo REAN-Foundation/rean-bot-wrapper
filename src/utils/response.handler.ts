@@ -18,7 +18,7 @@ export class ResponseHandler {
         }
         code = 200;
         const responseMessage = data && data[0]?.value ? data[0].value : {};
-        return response.status(code).send(responseMessage);
+        return response.status(code).send(obj);
     }
 
     sendSuccessResponseForApp = (response, code, message, data, log_data = false) => {
