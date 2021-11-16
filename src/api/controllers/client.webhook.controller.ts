@@ -18,7 +18,8 @@ export class ClientWebhookController {
         console.log("sendMessage webhook");
         try {
             // eslint-disable-next-line max-len
-            const responce = await this._platformMessageService.SendMediaMessage(req.body.contact, null, req.body.message);
+            this._platformMessageService = container.resolve(req.params.client);
+            const responce = await this._platformMessageService.SendMediaMessage(req.body.messageId, null, req.body.message);
             if (responce) this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', responce);
             else
                 this.responseHandler.sendFailureResponse(res, 200, 'An error occurred while sending messages!', req);
