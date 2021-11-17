@@ -32,11 +32,10 @@ export class platformMessageService implements platformServiceInterface{
         return null;
     }
 
-     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-     sendManualMesage(msg){
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    sendManualMesage(msg){
         return this.messageFlow.send_manual_msg(msg, this);
     }
-
 
     init(client){
         this._telegram.setWebHook(process.env.BASE_URL + '/v1/telegram/' + process.env.TELEGRAM_BOT_TOKEN + '/receive');
@@ -116,8 +115,21 @@ export class platformMessageService implements platformServiceInterface{
     }
 
     createFinalMessageFromHumanhandOver(requestBody) {
-        let response_message: response;
-        response_message = { name: requestBody.agentName ,platform: "Telegram",chat_message_id: null,direction: "Out",input_message: null, message_type: "text", raw_response_object: null, intent: null,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: requestBody.userId, messageText: requestBody.message };
+        const response_message: response = {
+            name                : requestBody.agentName,
+            platform            : "Telegram",
+            chat_message_id     : null,
+            direction           : "Out",
+            input_message       : null,
+            message_type        : "text",
+            raw_response_object : null,
+            intent              : null,
+            messageBody         : null,
+            messageImageUrl     : null,
+            messageImageCaption : null,
+            sessionId           : requestBody.userId,
+            messageText         : requestBody.message
+        };
         return response_message;
     }
 
