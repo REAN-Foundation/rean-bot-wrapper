@@ -23,6 +23,10 @@ export class platformMessageService implements platformServiceInterface{
         return this.messageFlow.get_put_msg_Dialogflow(msg, client, this);
     }
 
+    sendManualMesage(msg) {
+        return this.messageFlow.send_manual_msg(msg, this);
+    }
+
     init() {
         throw new Error('Method not implemented.');
     }
@@ -208,7 +212,14 @@ export class platformMessageService implements platformServiceInterface{
             const request = http.request(options, (response) => {
                 response.setEncoding('utf8');
                 response.on('data', (chunk) => {
-                    resolve(chunk);
+                    chunk = JSON.parse(chunk);
+                    // eslint-disable-next-line init-declarations
+                    let responseStatus: any;
+                    console.log("chunk", chunk);
+                    if (chunk.meta.success === undefined) {
+                        responseStatus = chunk;
+                    }
+                    resolve(responseStatus);
                 });
                 response.on('end', () => {
                     resolve(true);
@@ -328,6 +339,27 @@ export class platformMessageService implements platformServiceInterface{
             }
         }
         return reaponse_message;
+    }
+
+    createFinalMessageFromHumanhandOver(requestBody) {
+        const response_message: response = {
+            name                : requestBody.agentName,
+            platform            : "whatsapp",
+            chat_message_id     : null,
+            direction           : "Out",
+            input_message       : null,
+            message_type        : "text",
+            raw_response_object : null,
+            intent              : null,
+            messageBody         : null,
+            messageImageUrl     : null,
+            messageImageCaption : null,
+            sessionId           : requestBody.userId,
+            messageText         : requestBody.message
+        };
+        return response_message;
+
+        // return response_message;
     }
 
 }

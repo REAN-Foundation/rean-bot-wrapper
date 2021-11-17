@@ -38,4 +38,15 @@ export class MessageFlow{
         }
     }
 
+    async send_manual_msg (msg,platformMessageService: platformServiceInterface) {
+        const response_format = await platformMessageService.createFinalMessageFromHumanhandOver(msg);
+        this._elasticsearchUserstat.createUserStat(response_format);
+
+        let message_to_platform = null;
+        // eslint-disable-next-line max-len
+        message_to_platform = await platformMessageService.SendMediaMessage(response_format.sessionId, response_format.messageBody,response_format.messageText);
+        
+        return message_to_platform;
+    }
+
 }
