@@ -9,6 +9,7 @@ import { Logger } from './common/logger';
 import { ConfigurationManager } from "./configs/configuration.manager";
 import { IntentRegister } from './intentEmitters/intent.register';
 import { container } from "tsyringe";
+import { IndexCreation } from './models/elasticsearchmodel';
 
 export default class Application {
 
@@ -20,9 +21,12 @@ export default class Application {
 
     private _intentRegister: IntentRegister = null;
 
+    private _IndexCreation: IndexCreation = null;
+
     private constructor() {
         this._app = express();
         this._intentRegister = new IntentRegister();
+        this._IndexCreation = new IndexCreation();
     }
 
     public static instance(): Application {
@@ -50,6 +54,8 @@ export default class Application {
             await this._router.init();
 
             this._intentRegister.register();
+
+            this._IndexCreation.createIndexes();
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const me = container.resolve('telegram');
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
