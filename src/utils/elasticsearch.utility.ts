@@ -13,9 +13,10 @@ export class elasticsearchUtilities{
   async createclient() {
       if (process.env.ELASTICSEARCH_HOST) {
           this.client = new elasticsearch.Client({
-              hosts : [
-                  process.env.ELASTICSEARCH_HOST
-              ]
+              hosts :
+                process.env.ELASTICSEARCH_HOST,
+              ssl : { rejectUnauthorized: false, pfx: [] }
+              
           });
       }
   }
