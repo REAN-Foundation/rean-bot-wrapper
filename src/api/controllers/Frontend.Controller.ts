@@ -1,6 +1,6 @@
 import { ResponseHandler } from '../../utils/response.handler';
 import { autoInjectable } from 'tsyringe';
-import { elasticsearchUtilities } from '../../utils/elasticsearch.Utility';
+import { elasticsearchUtilities } from '../../utils/elasticsearch.utility';
 @autoInjectable()
 export class FrontendController {
 
