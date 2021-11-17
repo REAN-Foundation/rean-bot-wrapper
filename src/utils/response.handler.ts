@@ -18,8 +18,8 @@ export class ResponseHandler {
         }
         code = 200;
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const responseMessage = data && data[0]?.value ? data[0].value : {};
-        return response.status(code).send(obj);
+        const responseMessage = data && data[0]?.value ? data[0].value : obj;
+        return response.status(code).send(responseMessage);
     }
 
     sendSuccessResponseForApp = (response, code, message, data, log_data = false) => {
