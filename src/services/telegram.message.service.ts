@@ -32,6 +32,11 @@ export class platformMessageService implements platformServiceInterface{
         return null;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    sendManualMesage(msg){
+        return this.messageFlow.send_manual_msg(msg, this);
+    }
+
     init(client){
         this._telegram.setWebHook(process.env.BASE_URL + '/v1/telegram/' + process.env.TELEGRAM_BOT_TOKEN + '/receive');
         console.log("Telegram webhook set," );
@@ -107,6 +112,25 @@ export class platformMessageService implements platformServiceInterface{
             reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "text",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: response.processed_message[0] };
         }
         return reaponse_message;
+    }
+
+    createFinalMessageFromHumanhandOver(requestBody) {
+        const response_message: response = {
+            name                : requestBody.agentName,
+            platform            : "Telegram",
+            chat_message_id     : null,
+            direction           : "Out",
+            input_message       : null,
+            message_type        : "text",
+            raw_response_object : null,
+            intent              : null,
+            messageBody         : null,
+            messageImageUrl     : null,
+            messageImageCaption : null,
+            sessionId           : requestBody.userId,
+            messageText         : requestBody.message
+        };
+        return response_message;
     }
 
     SendMediaMessage = async (contact, imageLink = null, message) => {
