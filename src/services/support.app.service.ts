@@ -24,9 +24,6 @@ export const getPatientsByPhoneNumberservice = async (phoneNumber) => {
             const apiUrl = `${ReanBackendBaseUrl}patients/internal/search?phone=${encodeURIComponent(phoneNumber)}`;
             const response = await needle("get", apiUrl, options);
             Logger.instance().log(`Response: ${apiUrl}`);
-            Logger.instance().log(`Response: ${JSON.stringify(response, null, 2)}`);
-            Logger.instance().log(`Options: ${JSON.stringify(options, null, 2)}`);
-            Logger.instance().log(`Status code: ${response.statusCode}`);
 
             if (response.statusCode !== 200) {
                 reject("Failed to get response from API.");
