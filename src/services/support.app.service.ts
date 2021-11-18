@@ -25,7 +25,7 @@ export const getPatientsByPhoneNumberservice = async (phoneNumber) => {
             const response = await needle("get", apiUrl, options);
             Logger.instance().log(`Response: ${apiUrl}`);
             Logger.instance().log(`Status code: ${response.statusCode}`);
-            Logger.instance().log(`Message: ${response.message}`);
+            Logger.instance().log(`Message: ${response.body.message}`);
 
             if (response.statusCode !== 200) {
                 reject("Failed to get response from API.");
