@@ -65,7 +65,7 @@ export class elasticsearchUtilities {
         });
     };
 
-    getAllConversation = (model) => {
+    fetchUserList = (model) => {
         return new Promise((resolve, reject) => {
             this.client.search(
                 {
@@ -108,7 +108,7 @@ export class elasticsearchUtilities {
         });
     };
 
-    getConversationMessages = (model,chatId) => {
+    fetchConversation = (model,chatId) => {
         return new Promise((resolve, reject) => {
             this.client.search(
                 {

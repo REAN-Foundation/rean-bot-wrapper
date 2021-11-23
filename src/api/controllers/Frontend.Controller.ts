@@ -13,20 +13,18 @@ export class FrontendController {
         return this.responseHandler.sendSuccessResponse(response, 200, 'pong', {}, true);
     };
 
-    getConversation = async (req,res) =>{
-        const model = process.env.ELASTICSEARCH_MODEL;
-        let response = this._elasticsearchUtilities.getAllConversation(model);
-        response.then((data)=>{
+    getUserList = async (req,res) =>{
+        let userList = this._elasticsearchUtilities.fetchUserList(process.env.ELASTICSEARCH_MODEL);
+        userList.then((data)=>{
             res.write(JSON.stringify(data));
             res.end();
         });
         
     }
 
-    getConversationMessages = async (req,res) =>{
-        const model = process.env.ELASTICSEARCH_MODEL;
-        let response = this._elasticsearchUtilities.getConversationMessages(model,req.query.chatId);
-        response.then((data)=>{
+    getConversation = async (req,res) =>{
+        let conversation = this._elasticsearchUtilities.fetchConversation(process.env.ELASTICSEARCH_MODEL,req.query.chatId);
+        conversation.then((data)=>{
             res.write(JSON.stringify(data));
             res.end();
         });

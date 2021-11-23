@@ -15,8 +15,8 @@ export class FrontendRoutes {
             this.frontendController.ping(_request,response);
         });
 
-        router.get('/getconversations', this.frontendController.getConversation);
-        router.get('/getconversationsmessages', this.frontendController.getConversationMessages);
+        router.get('/get_user_list', this.frontendController.getUserList);
+        router.get('/get_conversation', this.frontendController.getConversation);
 
         app.use('/v1', router);
     }

@@ -43,7 +43,8 @@ export class platformMessageService implements platformServiceInterface{
         
         this._telegram.on('message', msg => {
             if(!Array.isArray(msg.photo)){
-                this.SendMediaMessage(msg.chat.id.toString(),null,'Please Share Image Only')
+                this.SendMediaMessage(msg.chat.id.toString(),null,`Hey, I'm  REAN Anemia Detection Bot. Please share an image of your eye conjunctiva similar to the one shown below.`);
+                this.SendMediaMessage(msg.chat.id.toString(),'https://t4.ftcdn.net/jpg/02/52/68/73/240_F_252687355_x6qCu70kdEjb1RRygVreCZXslqq7EDi1.jpg','Instructions: \n 1. Gently pull your lower eyelid  with your index finger. \n 2. Try focusing the camera on the conjunctiva region and take a picture under good lighting.')
                 return
             }
             let media = this.GetTelegramMedia(msg.photo[3].file_id);
@@ -61,8 +62,7 @@ export class platformMessageService implements platformServiceInterface{
                     response.on('data', (res) => {
                         try{
                             res = JSON.parse(res)
-                            console.log(res);
-                            let ress = res.isAnemic ? 'The Case is Anemic' : 'The Case is not Anemic'
+                            let ress = res.isAnemic ? 'This case is anemic. \nDisclaimer: The bot is only for screening purposes. Please consult a doctor for further diagnosis.' : 'This case is not anemic. \nDisclaimer: The bot is only for screening purposes. This is not a confirmative test.'
                             this.SendMediaMessage(msg.chat.id.toString(),null,ress)
                         }catch(e){
                             console.log('Error ',e);
