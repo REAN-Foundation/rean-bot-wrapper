@@ -26,11 +26,11 @@ export class elasticsearchUtilities{
             console.log("wnter ES utility 'save'");
             this.client.index(
                 {
-                    index: model,
-                    type: 'constituencies',
-                    body: data,
+                    index : model,
+                    type  : 'constituencies',
+                    body  : data,
                 },
-                function (err, resp, status) {
+                function (err, resp) {
                     if (err) console.log('saving err', err);
                     return resp;
                 }
@@ -44,15 +44,15 @@ export class elasticsearchUtilities{
 
             this.client.search(
                 {
-                    index: model,
-                    type: 'constituencies',
-                    body: {
-                        query: {
-                            match_all: {},
+                    index : model,
+                    type  : 'constituencies',
+                    body  : {
+                        query : {
+                            match_all : {},
                         },
                     },
                 },
-                function (error, response, status) {
+                function (error, response) {
                     if (error) {
                         console.log('search error: ' + error);
                         reject(error);
@@ -74,21 +74,21 @@ export class elasticsearchUtilities{
         return new Promise((resolve, reject) => {
             this.client.search(
                 {
-                    index: model,
-                    type: 'constituencies',
-                    body: {
-                        size: 0,
-                        aggs: {
-                            group_by_mobile: {
-                                terms: {
-                                    field: 'sessionId.keyword',
+                    index : model,
+                    type  : 'constituencies',
+                    body  : {
+                        size : 0,
+                        aggs : {
+                            group_by_mobile : {
+                                terms : {
+                                    field : 'sessionId.keyword',
                                 },
-                                aggs: {
-                                    group_by_mobile: {
-                                        top_hits: {
-                                            size: 1,
-                                            _source: {
-                                                include: ['name', 'sessionId','platform'],
+                                aggs : {
+                                    group_by_mobile : {
+                                        top_hits : {
+                                            size    : 1,
+                                            _source : {
+                                                include : ['name', 'sessionId','platform'],
                                             },
                                         },
                                     },
@@ -97,12 +97,12 @@ export class elasticsearchUtilities{
                         },
                     },
                 },
-                function (error, response, status) {
+                function (error, response) {
                     if (error) {
                         console.log('search error: ' + error);
                         reject(error);
                     } else {
-                        let result = [];
+                        const result = [];
                         response.aggregations.group_by_mobile.buckets.forEach(function (bucket) {
                             result.push(bucket.group_by_mobile.hits.hits[0]._source);
                         });
@@ -115,32 +115,34 @@ export class elasticsearchUtilities{
 
     fetchConversation = (model,chatId) => {
         return new Promise((resolve, reject) => {
+            const newLocal = 'constituencies';
             this.client.search(
                 {
-                    index: model,
-                    type: 'constituencies',
-                    body: {
-                        query: {
-                            match: {
-                                sessionId: chatId,
+                    index : model,
+                    type  : newLocal,
+                    body  : {
+                        query : {
+                            match : {
+                                sessionId : chatId,
                             },
                         },
-                        sort: [{ created_at: { order: 'asc' } }],
+                        sort : [{ created_at: { order: 'asc' } }],
                     },
                 },
-                function (error, response, status) {
+                function (error, response) {
                     if (error) {
                         console.log('search error: ' + error);
                         reject(error);
                     } else {
-                        let result = [];
+                        const result = [];
                         response.hits.hits.forEach(function (bucket) {
-                          result.push(bucket._source);
-                        })
+                            result.push(bucket._source);
+                        });
                         resolve(result);
                     }
                 }
             );
         });
     }
+
 }

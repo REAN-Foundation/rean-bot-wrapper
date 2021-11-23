@@ -11,7 +11,7 @@ export class FrontendRoutes {
     register (app: express.Application) {
         const router = express.Router();
 
-        router.get('/ping', (_request, response) => { 
+        router.get('/ping', (_request, response) => {
             this.frontendController.ping(_request,response);
         });
 
@@ -20,4 +20,5 @@ export class FrontendRoutes {
 
         app.use('/v1', router);
     }
+
 }

@@ -16,8 +16,6 @@ export class WhatsappWebhookRoutes{
 
         router.post(`/:client/${process.env.TELEGRAM_BOT_TOKEN}/send`, this._clientWebhookController.sendMessage);
         router.post(`/:client/${process.env.TELEGRAM_BOT_TOKEN}/receive`, this._clientWebhookController.receiveMessage);
-        router.post(`/:client/${process.env.TELEGRAM_ANEMIA_BOT_TOKEN}/receive`, this._clientWebhookController.receiveMessage);
-
         app.use('/v1/', router);
     }
 

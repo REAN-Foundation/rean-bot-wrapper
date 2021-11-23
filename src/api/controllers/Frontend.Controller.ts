@@ -6,7 +6,7 @@ export class FrontendController {
 
     constructor(private responseHandler?: ResponseHandler,
                 private _elasticsearchUtilities ?: elasticsearchUtilities
-                ) {
+    ) {
     }
     
     ping = async (request, response) => {
@@ -14,7 +14,7 @@ export class FrontendController {
     };
 
     getUserList = async (req,res) =>{
-        let userList = this._elasticsearchUtilities.fetchUserList(process.env.ELASTICSEARCH_MODEL);
+        const userList = this._elasticsearchUtilities.fetchUserList(process.env.ELASTICSEARCH_MODEL);
         userList.then((data)=>{
             res.write(JSON.stringify(data));
             res.end();
@@ -23,11 +23,13 @@ export class FrontendController {
     }
 
     getConversation = async (req,res) =>{
-        let conversation = this._elasticsearchUtilities.fetchConversation(process.env.ELASTICSEARCH_MODEL,req.query.chatId);
+        const conversation = this._elasticsearchUtilities.
+            fetchConversation(process.env.ELASTICSEARCH_MODEL,req.query.chatId);
         conversation.then((data)=>{
             res.write(JSON.stringify(data));
             res.end();
         });
         
     }
+
 }
