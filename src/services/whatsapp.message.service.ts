@@ -219,6 +219,7 @@ export class platformMessageService implements platformServiceInterface{
                     if (chunk.meta.success === undefined) {
                         responseStatus = chunk;
                     }
+                    console.log("exiting!!!!!!!!!!!!");
                     resolve(responseStatus);
                 });
                 response.on('end', () => {
@@ -278,6 +279,7 @@ export class platformMessageService implements platformServiceInterface{
             let message = msg.messages[0].text.body;
             // eslint-disable-next-line max-len
             const regexExp = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/gi;
+            console.log("regexExp", regexExp.test(message));
             if (regexExp.test(message)) {
                 message = await this.emojiUnicode(message) === "1f44e" ? "NegativeFeedback" : "PositiveFeedback";
             }
@@ -307,37 +309,39 @@ export class platformMessageService implements platformServiceInterface{
         return returnMessage;
     }
 
-    postResponse = async (message, response ) => {
+    postResponse = async (message, processedResponse ) => {
         // eslint-disable-next-line init-declarations
         let reaponse_message: response;
         const whatsapp_id = message.sessionId;
         const input_message = message.messageBody;
         const name = message.name;
         const chat_message_id = message.chat_message_id;
-        const raw_response_object = response.text_part_from_DF.result && response.text_part_from_DF.result.fulfillmentMessages ? JSON.stringify(response.text_part_from_DF.result.fulfillmentMessages) : '';
-        const intent = response.text_part_from_DF.result && response.text_part_from_DF.result.intent ? response.text_part_from_DF.result.intent.displayName : '';
+        console.log("processedResponse.result",processedResponse.result);
+        const raw_response_object = processedResponse.message_from_dialoglow.result && processedResponse.message_from_dialoglow.result.fulfillmentMessages ? JSON.stringify(processedResponse.message_from_dialoglow.result.fulfillmentMessages) : '';
+        const intent = processedResponse.message_from_dialoglow.result && processedResponse.message_from_dialoglow.result.intent ? processedResponse.message_from_dialoglow.result.intent.displayName : '';
 
-        if (response.text_part_from_DF) {
-            if (response.text_part_from_DF.image && response.text_part_from_DF.image.url) {
-                reaponse_message = { name: name,platform: "Whatsapp",chat_message_id: chat_message_id,direction: "Out",message_type: "image",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: response.text_part_from_DF.image , messageImageCaption: response.text_part_from_DF.image.url, sessionId: whatsapp_id,input_message: input_message,messageText: null };
+        if (processedResponse) {
+            if (processedResponse.message_from_dialoglow.image && processedResponse.message_from_dialoglow.image.url) {
+                reaponse_message = { name: name,platform: "Whatsapp",chat_message_id: chat_message_id,direction: "Out",message_type: "image",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: processedResponse.image , messageImageCaption: processedResponse.image.url, sessionId: whatsapp_id,input_message: input_message,messageText: null };
             }
-            else if (response.processed_message.length > 1) {
-                if (response.text_part_from_DF.parse_mode && response.text_part_from_DF.parse_mode === 'HTML') {
-                    const uploadImageName = await createFileFromHTML(response.processed_message[0]);
+            else if (processedResponse.processed_message.length > 1) {
+                if (processedResponse.message_from_dialoglow.parse_mode && processedResponse.message_from_dialoglow.parse_mode === 'HTML') {
+                    const uploadImageName = await createFileFromHTML(processedResponse.processed_message[0]);
                     const vaacinationImageFile = await uploadFile(uploadImageName);
                     if (vaacinationImageFile) {
-                        reaponse_message = { name: name,platform: "Whatsapp",chat_message_id: chat_message_id,direction: "Out",message_type: "image",raw_response_object: raw_response_object,intent: intent,messageBody: String(vaacinationImageFile), messageImageUrl: null , messageImageCaption: null, sessionId: whatsapp_id,input_message: input_message, messageText: response.processed_message[1] };
+                        reaponse_message = { name: name,platform: "Whatsapp",chat_message_id: chat_message_id,direction: "Out",message_type: "image",raw_response_object: raw_response_object,intent: intent,messageBody: String(vaacinationImageFile), messageImageUrl: null , messageImageCaption: null, sessionId: whatsapp_id,input_message: input_message, messageText: processedResponse.processed_message[1] };
                     }
                 }
                 else {
-                    reaponse_message = { name: name,platform: "Whatsapp",chat_message_id: chat_message_id,direction: "Out",message_type: "text",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: whatsapp_id,input_message: input_message, messageText: response.processed_message[0] };
-                    reaponse_message = { name: name,platform: "Whatsapp",chat_message_id: chat_message_id,direction: "Out",message_type: "text",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: whatsapp_id,input_message: input_message, messageText: response.processed_message[1] };
+                    reaponse_message = { name: name,platform: "Whatsapp",chat_message_id: chat_message_id,direction: "Out",message_type: "text",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: whatsapp_id,input_message: input_message, messageText: processedResponse.processed_message[0] };
+                    reaponse_message = { name: name,platform: "Whatsapp",chat_message_id: chat_message_id,direction: "Out",message_type: "text",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: whatsapp_id,input_message: input_message, messageText: processedResponse.processed_message[1] };
                 }
             }
             else {
-                reaponse_message = { name: name,platform: "Whatsapp",chat_message_id: chat_message_id,direction: "Out",message_type: "text",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: whatsapp_id,input_message: input_message, messageText: response.processed_message[0] };
+                reaponse_message = { name: name,platform: "Whatsapp",chat_message_id: chat_message_id,direction: "Out",message_type: "text",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: whatsapp_id,input_message: input_message, messageText: processedResponse.processed_message[0] };
             }
         }
+        console.log("postresponse format", reaponse_message);
         return reaponse_message;
     }
 

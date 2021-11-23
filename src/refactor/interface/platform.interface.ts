@@ -10,5 +10,6 @@ export interface platformServiceInterface{
     SendMediaMessage(SmessagetoDialogflow_sessionId: string, response_format_messageBody: string,response_format_messageText:string );
     set res(res);
     createFinalMessageFromHumanhandOver(requestBody:any);
+    emojiUnicode (emoji);
 
 }
