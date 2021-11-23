@@ -16,9 +16,6 @@ export class platformMessageService implements platformServiceInterface{
     ) {
 
     }
-    emojiUnicode(emoji: any) {
-        throw new Error('Method not implemented.');
-    }
 
     init() {
         throw new Error('Method not implemented.');
