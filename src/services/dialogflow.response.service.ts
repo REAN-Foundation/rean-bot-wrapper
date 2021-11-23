@@ -63,7 +63,7 @@ export class DialogflowResponseService {
                 text       : responseMessage,
                 image      : responseMessage.image ? responseMessage.image : false,
                 parse_mode : responseMessage.parse_mode ? responseMessage.parse_mode : false,
-                result     : result
+                result     : result,
             };
         }
         catch (e) {
