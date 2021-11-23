@@ -20,9 +20,11 @@ export class platformMessageService implements platformServiceInterface{
     init() {
         throw new Error('Method not implemented.');
     }
+
     sendManualMesage() {
         throw new Error('Method not implemented.');
     }
+
     createFinalMessageFromHumanhandOver() {
         throw new Error('Method not implemented.');
     }
