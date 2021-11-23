@@ -1,7 +1,7 @@
 import emojiRegex = require('emoji-regex');
 
 export class EmojiFilter{
-    
+
     checkForEmoji = async (message) => {
         const regex = emojiRegex();
         let positiveEmoji: String[] = ['1f44d', '1f604', '1f601'];
@@ -34,7 +34,7 @@ export class EmojiFilter{
             }
         }
         else {
-            message = message;
+            message;
         }
         return message
     }
