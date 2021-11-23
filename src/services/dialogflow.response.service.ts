@@ -25,7 +25,8 @@ export class DialogflowResponseService {
 
             } else {
                 console.log("Entered the else of Dialogflow..............");
-                const dialogflowApplicationCredentialsFile = process.env.DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS ? process.env.DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS : process.env.GOOGLE_APPLICATION_CREDENTIALS;
+                const dialogflowApplicationCredentialsFile = process.env.DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS ?
+                    process.env.DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS : process.env.GOOGLE_APPLICATION_CREDENTIALS;
                 options = {
                     keyFilename : dialogflowApplicationCredentialsFile
                 };
