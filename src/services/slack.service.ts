@@ -65,7 +65,6 @@ export const send_message = async (message, failureReason, params, eventObj) => 
                 channel : slackChannel
             });
 
-
             console.log("asfjgbsk;abfds", result);
 
             Logger.instance().log(`Slack Message Sent: ${result.ok}`);
