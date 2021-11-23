@@ -5,12 +5,13 @@ export class EmojiFilter{
     async checkForEmoji (message) {
         console.log("inside checkForEmoji",message);
         const regex = emojiRegex();
-        let positiveEmoji: String[] = ['1f44d', '1f604', '1f601'];
-        let negativeEmoji: String[] = ['1f44e', '1f621', '1f92c'];
+        const positiveEmoji: string[] = ['1f44d', '1f604', '1f601'];
+        const negativeEmoji: string[] = ['1f44e', '1f621', '1f92c'];
+
         // let UnicodeEmoji: String[] = [];
-        let filteredMessage: String = message;
+        let filteredMessage: string = message;
         for (const match of message.matchAll(regex)) {
-            let convertToUnicodeEmoji = await this.emojiUnicode(match[0]);
+            const convertToUnicodeEmoji = await this.emojiUnicode(match[0]);
             if (convertToUnicodeEmoji !== undefined){
                 if (positiveEmoji.includes(convertToUnicodeEmoji)){
                     filteredMessage = "PositiveFeedback";
@@ -18,7 +19,7 @@ export class EmojiFilter{
                 else if (negativeEmoji.includes(convertToUnicodeEmoji)){
                     filteredMessage = "NegativeFeedback";
                 }
-                else{
+                else {
                     console.log("Emoji not present in either of the list!!!");
                 }
             }
@@ -27,6 +28,7 @@ export class EmojiFilter{
                 filteredMessage = message;
             }
         }
+
         // ------------ block for future, if consider more than 1 emoji in the message -------///
         // if (UnicodeEmoji !== null) {
         //     let missingPositive = positiveEmoji.filter(item => UnicodeEmoji.indexOf(item) < 0);
@@ -51,7 +53,7 @@ export class EmojiFilter{
         //     filteredMessage = message;
         // }
         //----------------xxxxx--------------------------//
-        return filteredMessage
+        return filteredMessage;
     }
 
     emojiUnicode = async (emoji) => {
@@ -69,4 +71,5 @@ export class EmojiFilter{
         }
         return comp.toString("16");
     };
+
 }

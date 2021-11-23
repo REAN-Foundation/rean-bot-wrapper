@@ -15,23 +15,20 @@ export class FeedbackService implements feedbackInterface{
             initialThreeLettersOfIntent += intent.charAt(i);
         }
         if (initialThreeLettersOfIntent === "QID"){
-            // let message_to_platform = this.sendFeedback(intent,sessionId, platformMessageService);
-            let message_to_platform = this.triggerFeedbackIntent(intent,message,client, platformMessageService);
-            return message_to_platform
-        }
-        else {
-            console.log("Intent is not QID")
 
+            // let message_to_platform = this.sendFeedback(intent,sessionId, platformMessageService);
+            return this.triggerFeedbackIntent(message, client, platformMessageService);
         }
     }
 
-    triggerFeedbackIntent(intent,message,client,platformMessageService: platformServiceInterface) {
+    triggerFeedbackIntent(message,client,platformMessageService: platformServiceInterface) {
         message.messageBody = "suggestions";
+        // eslint-disable-next-line max-len
         this.waiting(5000).then(() => this.messageFlow.processMessage(message,client,platformMessageService).catch((err) => console.error(err)));
     }
 
     waiting (time){
-        return new Promise ((resolve,reject) => {
+        return new Promise((resolve) => {
             setTimeout(resolve,time);
         });
     }
