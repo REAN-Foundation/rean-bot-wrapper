@@ -8,12 +8,14 @@ export class EmojiFilter{
         let negativeEmoji: String[] = ['1f44e', '1f621', '1f92c'];
         // let emoji: String[] = [];
         let UnicodeEmoji: String[] = [];
+        let filteredMessage: String = message;
         for (const match of message.matchAll(regex)) {
             // emoji.push(match)
             let convertToUnicodeEmoji = await this.emojiUnicode(match[0]);
             UnicodeEmoji.push(convertToUnicodeEmoji);
             console.log("the emoji is ", UnicodeEmoji);
         }
+        console.log("the emoji is ", UnicodeEmoji);
 
         if (UnicodeEmoji !== null) {
             let missingPositive = positiveEmoji.filter(item => UnicodeEmoji.indexOf(item) < 0);
@@ -21,22 +23,23 @@ export class EmojiFilter{
             let missingnegative = negativeEmoji.filter(item => UnicodeEmoji.indexOf(item) < 0);
             console.log("missing negative", missingnegative);
             if (missingPositive.length <= (positiveEmoji.length - 1)) {
-                message = "PositiveFeedback";
+                filteredMessage = "PositiveFeedback";
             }
             else {
                 console.log("No positive emoji");
             }
             if (missingnegative.length <= (negativeEmoji.length - 1)) {
-                message = "NegativeFeedback";
+                filteredMessage = "NegativeFeedback";
             }
             else {
                 console.log("No negative emoji");
             }
         }
         else {
-            message;
+            console.log("inside else")
+            filteredMessage = message;
         }
-        return message
+        return filteredMessage
     }
 
     emojiUnicode = async (emoji) => {
