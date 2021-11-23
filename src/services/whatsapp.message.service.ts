@@ -7,8 +7,7 @@ import { autoInjectable, singleton } from 'tsyringe';
 import { response, message } from '../refactor/interface/message.interface';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { MessageFlow } from './get.put.message.flow.service';
-import { EmojiFilter } from './filter.message.for.emoji.service'; 
-
+import { EmojiFilter } from './filter.message.for.emoji.service';
 
 @autoInjectable()
 @singleton()
@@ -36,12 +35,12 @@ export class platformMessageService implements platformServiceInterface {
 
     createRequestforWebhook(resolve, reject, apiKey) {
         const options = {
-            hostname: process.env.WHATSAPP_LIVE_HOST,
-            path: '/v1/configs/webhook',
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'D360-Api-Key': apiKey
+            hostname : process.env.WHATSAPP_LIVE_HOST,
+            path     : '/v1/configs/webhook',
+            method   : 'POST',
+            headers  : {
+                'Content-Type' : 'application/json',
+                'D360-Api-Key' : apiKey
             }
         };
         const request = http.request(options, (response) => {
@@ -65,7 +64,7 @@ export class platformMessageService implements platformServiceInterface {
 
         return new Promise((resolve, reject) => {
             const postData = JSON.stringify({
-                'url': `${process.env.BASE_URL}/v1/whatsapp/${process.env.TELEGRAM_BOT_TOKEN}/receive`,
+                'url' : `${process.env.BASE_URL}/v1/whatsapp/${process.env.TELEGRAM_BOT_TOKEN}/receive`,
             });
 
             const apiKey = process.env.WHATSAPP_LIVE_API_KEY;
@@ -89,7 +88,7 @@ export class platformMessageService implements platformServiceInterface {
             if (process.env.WHATSAPP_LIVE_API_KEY_OLD_NUMBER) {
 
                 const postData = JSON.stringify({
-                    'url': `${process.env.BASE_URL}/v1/whatsapp/old-number/receive`,
+                    'url' : `${process.env.BASE_URL}/v1/whatsapp/old-number/receive`,
                 });
 
                 const apiKey = process.env.WHATSAPP_LIVE_API_KEY_OLD_NUMBER;
@@ -112,21 +111,21 @@ export class platformMessageService implements platformServiceInterface {
 
         return new Promise((resolve, reject) => {
             const postData = JSON.stringify({
-                'recipient_type': 'individual',
-                'to': contact,
-                'type': 'text',
-                'text': {
-                    'body': message
+                'recipient_type' : 'individual',
+                'to'             : contact,
+                'type'           : 'text',
+                'text'           : {
+                    'body' : message
                 }
             });
 
             const options = {
-                hostname: process.env.WHATSAPP_LIVE_HOST,
-                path: '/v1/messages',
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'D360-Api-Key': process.env.WHATSAPP_LIVE_API_KEY_OLD_NUMBER
+                hostname : process.env.WHATSAPP_LIVE_HOST,
+                path     : '/v1/messages',
+                method   : 'POST',
+                headers  : {
+                    'Content-Type' : 'application/json',
+                    'D360-Api-Key' : process.env.WHATSAPP_LIVE_API_KEY_OLD_NUMBER
                 }
             };
             const request = http.request(options, (response) => {
@@ -171,29 +170,29 @@ export class platformMessageService implements platformServiceInterface {
         return new Promise((resolve, reject) => {
             message = this.sanitizeMessage(message);
             const postData = imageLink ? JSON.stringify({
-                'recipient_type': 'individual',
-                'to': contact,
-                'type': 'image',
-                "image": {
-                    "link": imageLink,
-                    "caption": message
+                'recipient_type' : 'individual',
+                'to'             : contact,
+                'type'           : 'image',
+                "image"          : {
+                    "link"    : imageLink,
+                    "caption" : message
                 }
             }) : JSON.stringify({
-                'recipient_type': 'individual',
-                'to': contact,
-                'type': 'text',
-                'text': {
-                    'body': message
+                'recipient_type' : 'individual',
+                'to'             : contact,
+                'type'           : 'text',
+                'text'           : {
+                    'body' : message
                 }
             });
             console.log("this is the postData", postData);
             const options = {
-                hostname: process.env.WHATSAPP_LIVE_HOST,
-                path: '/v1/messages',
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'D360-Api-Key': process.env.WHATSAPP_LIVE_API_KEY
+                hostname : process.env.WHATSAPP_LIVE_HOST,
+                path     : '/v1/messages',
+                method   : 'POST',
+                headers  : {
+                    'Content-Type' : 'application/json',
+                    'D360-Api-Key' : process.env.WHATSAPP_LIVE_API_KEY
                 }
             };
             const request = http.request(options, (response) => {
@@ -226,12 +225,12 @@ export class platformMessageService implements platformServiceInterface {
     GetWhatsappMedia = async (mediaId) => {
         return new Promise((resolve, reject) => {
             const options = {
-                hostname: process.env.WHATSAPP_LIVE_HOST,
-                path: '/v1/media/' + mediaId,
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'D360-Api-Key': process.env.WHATSAPP_LIVE_API_KEY
+                hostname : process.env.WHATSAPP_LIVE_HOST,
+                path     : '/v1/media/' + mediaId,
+                method   : 'GET',
+                headers  : {
+                    'Content-Type' : 'application/json',
+                    'D360-Api-Key' : process.env.WHATSAPP_LIVE_API_KEY
                 }
             };
 
@@ -329,19 +328,19 @@ export class platformMessageService implements platformServiceInterface {
 
     createFinalMessageFromHumanhandOver(requestBody) {
         const response_message: response = {
-            name: requestBody.agentName,
-            platform: "whatsapp",
-            chat_message_id: null,
-            direction: "Out",
-            input_message: null,
-            message_type: "text",
-            raw_response_object: null,
-            intent: null,
-            messageBody: null,
-            messageImageUrl: null,
-            messageImageCaption: null,
-            sessionId: requestBody.userId,
-            messageText: requestBody.message
+            name                : requestBody.agentName,
+            platform            : "whatsapp",
+            chat_message_id     : null,
+            direction           : "Out",
+            input_message       : null,
+            message_type        : "text",
+            raw_response_object : null,
+            intent              : null,
+            messageBody         : null,
+            messageImageUrl     : null,
+            messageImageCaption : null,
+            sessionId           : requestBody.userId,
+            messageText         : requestBody.message
         };
         return response_message;
 
