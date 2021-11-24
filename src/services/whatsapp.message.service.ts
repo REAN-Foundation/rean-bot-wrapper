@@ -3,10 +3,11 @@ import fs from 'fs';
 import { uploadFile, createFileFromHTML } from './aws.file.upload.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Speechtotext } from './speech.to.text.service';
-import { autoInjectable, singleton } from 'tsyringe';
+import { autoInjectable, singleton, inject } from 'tsyringe';
 import { response, message } from '../refactor/interface/message.interface';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { MessageFlow } from './get.put.message.flow.service';
+import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface';
 
 @autoInjectable()
 @singleton()
@@ -15,6 +16,7 @@ export class platformMessageService implements platformServiceInterface{
     public res;
 
     constructor(private Speechtotext?: Speechtotext,
+        @inject("whatsapp.authenticator") private clientAuthenticator?: clientAuthenticator,
                 private messageFlow?: MessageFlow) {
         this.SetWebHook();
     }
@@ -33,7 +35,7 @@ export class platformMessageService implements platformServiceInterface{
 
     createRequestforWebhook(resolve,reject,apiKey) {
         const options = {
-            hostname : process.env.WHATSAPP_LIVE_HOST,
+            hostname : process.env.WHATSAPP_HOST,
             path     : '/v1/configs/webhook',
             method   : 'POST',
             headers  : {
@@ -62,10 +64,13 @@ export class platformMessageService implements platformServiceInterface{
 
         return new Promise((resolve, reject) => {
             const postData = JSON.stringify({
-                'url' : `${process.env.BASE_URL}/v1/whatsapp/${process.env.TELEGRAM_BOT_TOKEN}/receive`,
+                'url' : `${process.env.BASE_URL}/v1/whatsapp/${this.clientAuthenticator.urlToken}/receive`,
+                "headers": {
+                    "authentication": this.clientAuthenticator.headerToken
+                  }
             });
 
-            const apiKey = process.env.WHATSAPP_LIVE_API_KEY;
+            const apiKey = process.env.WHATSAPP_API_KEY;
 
             const request = this.createRequestforWebhook(resolve,reject,apiKey);
 
@@ -118,7 +123,7 @@ export class platformMessageService implements platformServiceInterface{
             });
 
             const options = {
-                hostname : process.env.WHATSAPP_LIVE_HOST,
+                hostname : process.env.WHATSAPP_HOST,
                 path     : '/v1/messages',
                 method   : 'POST',
                 headers  : {
@@ -201,12 +206,12 @@ export class platformMessageService implements platformServiceInterface{
             });
             console.log("this is the postData", postData);
             const options = {
-                hostname : process.env.WHATSAPP_LIVE_HOST,
+                hostname : process.env.WHATSAPP_HOST,
                 path     : '/v1/messages',
                 method   : 'POST',
                 headers  : {
                     'Content-Type' : 'application/json',
-                    'D360-Api-Key' : process.env.WHATSAPP_LIVE_API_KEY
+                    'D360-Api-Key' : process.env.WHATSAPP_API_KEY
                 }
             };
             const request = http.request(options, (response) => {
@@ -238,12 +243,12 @@ export class platformMessageService implements platformServiceInterface{
     GetWhatsappMedia = async (mediaId) => {
         return new Promise((resolve, reject) => {
             const options = {
-                hostname : process.env.WHATSAPP_LIVE_HOST,
+                hostname : process.env.WHATSAPP_HOST,
                 path     : '/v1/media/' + mediaId,
                 method   : 'GET',
                 headers  : {
                     'Content-Type' : 'application/json',
-                    'D360-Api-Key' : process.env.WHATSAPP_LIVE_API_KEY
+                    'D360-Api-Key' : process.env.WHATSAPP_API_KEY
                 }
             };
 

@@ -2,11 +2,12 @@
 // import { DialogflowResponseService } from './dialogflow-response.service';
 import { uploadFile, createFileFromHTML } from './aws.file.upload.service';
 import { message, response } from '../refactor/interface/message.interface';
-import { autoInjectable, singleton } from 'tsyringe';
+import { autoInjectable, singleton, inject } from 'tsyringe';
 import  TelegramBot  from 'node-telegram-bot-api';
 import { MessageFlow } from './get.put.message.flow.service';
 import http from 'https';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
+import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Speechtotext } from './speech.to.text.service';
 
@@ -19,7 +20,8 @@ export class platformMessageService implements platformServiceInterface{
     public res;
 
     // public req;
-    constructor(private Speechtotext?: Speechtotext, private messageFlow?: MessageFlow ) {
+    constructor(private Speechtotext?: Speechtotext, private messageFlow?: MessageFlow,
+        @inject("telegram.authenticator") private clientAuthenticator?: clientAuthenticator ) {
         this._telegram = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN);
         const client = null;
         this.init(client);
@@ -38,7 +40,7 @@ export class platformMessageService implements platformServiceInterface{
     }
 
     init(client){
-        this._telegram.setWebHook(process.env.BASE_URL + '/v1/telegram/' + process.env.TELEGRAM_BOT_TOKEN + '/receive');
+        this._telegram.setWebHook(process.env.BASE_URL + '/v1/telegram/' + this.clientAuthenticator.urlToken + '/receive');
         console.log("Telegram webhook set," );
         this._telegram.on('message', msg => {
             this.messageFlow.get_put_msg_Dialogflow(msg, client, this);

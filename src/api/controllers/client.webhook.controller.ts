@@ -2,11 +2,13 @@ import { ResponseHandler } from '../../utils/response.handler';
 import { ErrorHandler } from '../../utils/error.handler';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { autoInjectable, container } from 'tsyringe';
+import { clientAuthenticator } from '../../services/clientAuthenticator/client.authenticator.interface';
 
 @autoInjectable()
 export class ClientWebhookController {
 
     private _platformMessageService?: platformServiceInterface;
+    private _clientAuthenticatorService?: clientAuthenticator;
 
     constructor(
         private responseHandler?: ResponseHandler,
@@ -30,8 +32,11 @@ export class ClientWebhookController {
     };
 
     receiveMessage = async (req, res) => {
+        console.log(`the req is from ${req.params.client} and the req body is ${req.body}`)
         console.log("receiveMessage webhook");
         try {
+            this._clientAuthenticatorService = container.resolve(req.params.client + '.authenticator');
+            this._clientAuthenticatorService.authenticate(req,res);
             if (req.body.statuses) {
 
                 // status = sent, received & read

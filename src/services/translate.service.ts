@@ -8,9 +8,8 @@ export class translateService{
     translateMessage = async (message) => {
         console.log("entered the translateMessage of translateService JJJJJJJJJJJ", message);
         const translate = new v2.Translate({ projectId: translateProjectId });
-        console.log("before entering translate.detect");
+        console.log(`the response from v2.Translate is ${translate}`);
         const [detections] = await translate.detect(message);
-        console.log("after entering translate.detect");
         const detectedLanguage = await Array.isArray(detections) ? detections : [detections];
 
         detected_language = detectedLanguage[0].language;
@@ -44,6 +43,7 @@ export class translateService{
         try {
             if (detected_language !== 'en') {
                 const [translation] = await translate.translate(responseMessage.text[0], { to: detected_language, format: "text" });
+                console.log(`the response from v2.Translate.translate is ${[translation]}`);
                 responseMessage = [translation];
             }
             else {
