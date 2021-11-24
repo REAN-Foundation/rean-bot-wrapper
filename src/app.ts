@@ -58,6 +58,7 @@ export default class Application {
             this._IndexCreation.createIndexes();
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const me = container.resolve('telegram');
+
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const me2 = container.resolve('whatsapp');
 

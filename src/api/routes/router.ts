@@ -3,6 +3,7 @@ import { Logger } from "../../common/logger";
 import { ChatBotRoutes } from './chat.bot.routes';
 import { autoInjectable } from 'tsyringe';
 import { WhatsappWebhookRoutes } from './whatsapp.webhook.routes';
+import { FrontendRoutes } from "./Frontend.routes";
 
 @autoInjectable()
 export class Router {
@@ -11,7 +12,8 @@ export class Router {
 
     constructor(app: express.Application,
                 private chatBotRoutes?: ChatBotRoutes,
-                private whatsappWebhookRoutes?: WhatsappWebhookRoutes){
+                private whatsappWebhookRoutes?: WhatsappWebhookRoutes,
+                private frontendRoutes?: FrontendRoutes,){
         this._app = app;
     }
 
@@ -29,6 +31,7 @@ export class Router {
 
                 this.chatBotRoutes.register(this._app);
                 this.whatsappWebhookRoutes.register(this._app);
+                this.frontendRoutes.register(this._app);
                 resolve(true);
 
             } catch (error) {
