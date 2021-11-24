@@ -25,7 +25,7 @@ export class handleRequestservice{
         // eslint-disable-next-line max-len
         const processed_message = await this.translateService.processdialogflowmessage(text_part_from_DF, translate_message.detected_language);
 
-        return { processed_message, text_part_from_DF };
+        return { processed_message, message_from_dialoglow };
     }
 
 }
