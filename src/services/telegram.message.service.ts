@@ -9,6 +9,7 @@ import http from 'https';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Speechtotext } from './speech.to.text.service';
+import { EmojiFilter } from './filter.message.for.emoji.service';
 
 @autoInjectable()
 @singleton()
@@ -19,7 +20,8 @@ export class platformMessageService implements platformServiceInterface{
     public res;
 
     // public req;
-    constructor(private Speechtotext?: Speechtotext, private messageFlow?: MessageFlow ) {
+    constructor(private Speechtotext?: Speechtotext, private messageFlow?: MessageFlow,
+        private emojiFilter?: EmojiFilter ) {
         this._telegram = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN);
         const client = null;
         this.init(client);
@@ -53,7 +55,8 @@ export class platformMessageService implements platformServiceInterface{
         const name = message.from.first_name;
         const chat_message_id = message.message_id;
         if (message.text) {
-            returnMessage = { name: name, platform: "Telegram",chat_message_id: chat_message_id,direction: "In",messageBody: message.text,sessionId: telegram_id,replayPath: telegram_id,latlong: null,type: 'text' };
+            message = await this.emojiFilter.checkForEmoji(message.text);
+            returnMessage = { name: name, platform: "Telegram",chat_message_id: chat_message_id,direction: "In",messageBody: message,sessionId: telegram_id,replayPath: telegram_id,latlong: null,type: 'text' };
         }
         else if (message.voice) {
             let response: any = {};
@@ -82,7 +85,7 @@ export class platformMessageService implements platformServiceInterface{
         return returnMessage;
     }
 
-    postResponse = async(message, response) => {
+    postResponse = async(message, processedResponse) => {
         console.log("enter the give response of tele");
         // eslint-disable-next-line init-declarations
         let reaponse_message: response;
@@ -90,26 +93,27 @@ export class platformMessageService implements platformServiceInterface{
         const input_message = message.messageBody;
         const name = message.name;
         const chat_message_id = message.chat_message_id;
-        const raw_response_object = response.text_part_from_DF.result && response.text_part_from_DF.result.fulfillmentMessages ? JSON.stringify(response.text_part_from_DF.result.fulfillmentMessages) : '';
-        const intent = response.text_part_from_DF.result && response.text_part_from_DF.result.intent ? response.text_part_from_DF.result.intent.displayName : '';
-        if (response.text_part_from_DF.image && response.text_part_from_DF.image.url) {
-            reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: response.text_part_from_DF.image , messageImageCaption: response.text_part_from_DF.image.url, sessionId: telegram_id, messageText: null };
-        }
-        else if (response.processed_message.length > 1) {
+        const raw_response_object = processedResponse.message_from_dialoglow.result && processedResponse.message_from_dialoglow.result.fulfillmentMessages ? JSON.stringify(processedResponse.message_from_dialoglow.result.fulfillmentMessages) : '';
+        const intent = processedResponse.message_from_dialoglow.result && processedResponse.message_from_dialoglow.result.intent ? processedResponse.message_from_dialoglow.result.intent.displayName : '';
 
-            if (response.text_part_from_DF.parse_mode && response.text_part_from_DF.parse_mode === 'HTML') {
-                const uploadImageName = await createFileFromHTML(response.processed_message[0]);
+        if (processedResponse.message_from_dialoglow.image && processedResponse.message_from_dialoglow.image.url) {
+            reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: processedResponse.image , messageImageCaption: processedResponse.image.url, sessionId: telegram_id, messageText: null };
+        }
+        else if (processedResponse.processed_message.length > 1) {
+
+            if (processedResponse.message_from_dialoglow.parse_mode && processedResponse.message_from_dialoglow.parse_mode === 'HTML') {
+                const uploadImageName = await createFileFromHTML(processedResponse.processed_message[0]);
                 const vaacinationImageFile = await uploadFile(uploadImageName);
                 if (vaacinationImageFile) {
-                    reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",raw_response_object: raw_response_object,intent: intent,messageBody: String(vaacinationImageFile), messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: response.processed_message[1] };
+                    reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",raw_response_object: raw_response_object,intent: intent,messageBody: String(vaacinationImageFile), messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[1] };
                 }
             }
             else {
-                reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "text",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: response.processed_message[0] };
-                reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "text",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: response.processed_message[1] };
+                reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "text",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[0] };
+                reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "text",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[1] };
             }
         } else {
-            reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "text",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: response.processed_message[0] };
+            reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "text",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[0] };
         }
         return reaponse_message;
     }

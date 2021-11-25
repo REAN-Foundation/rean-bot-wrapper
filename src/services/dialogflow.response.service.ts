@@ -60,7 +60,6 @@ export class DialogflowResponseService {
             if (responseMessage.text.length === 0) {
                 responseMessage.text[0] = result.fulfillmentText;
             }
-            console.log("returned dialogflow,",responseMessage );
             return {
                 text       : responseMessage,
                 image      : responseMessage.image ? responseMessage.image : false,
