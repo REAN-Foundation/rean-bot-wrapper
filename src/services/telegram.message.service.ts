@@ -1,14 +1,14 @@
 
 // import { DialogflowResponseService } from './dialogflow-response.service';
 import { uploadFile, createFileFromHTML } from './aws.file.upload.service';
-import { message, response } from '../refactor/interface/message.interface';
+import { response } from '../refactor/interface/message.interface';
 import { autoInjectable, singleton, inject } from 'tsyringe';
 import  TelegramBot  from 'node-telegram-bot-api';
 import { MessageFlow } from './get.put.message.flow.service';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { TelegramMessageServiceFunctionalities } from '../services/telegram.message.service.functionalities';
-import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface';
 
 @autoInjectable()
 @singleton()

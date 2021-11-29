@@ -7,6 +7,7 @@ import { response, message } from '../refactor/interface/message.interface';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { MessageFlow } from './get.put.message.flow.service';
 import { MessageFunctionalities } from './whatsapp.message.sevice.functionalities';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface';
 
 @autoInjectable()
@@ -18,8 +19,8 @@ export class platformMessageService implements platformServiceInterface {
     constructor(private messageFlow?: MessageFlow,
         private messageFunctionalities?: MessageFunctionalities,
         @inject("whatsapp.authenticator") private clientAuthenticator?: clientAuthenticator){
-            this.SetWebHook();
-        }
+        this.SetWebHook();
+    }
 
     handleMessage(msg: any, client: string) {
         return this.messageFlow.get_put_msg_Dialogflow(msg, client, this);
@@ -64,10 +65,10 @@ export class platformMessageService implements platformServiceInterface {
 
         return new Promise((resolve, reject) => {
             const postData = JSON.stringify({
-                'url' : `${process.env.BASE_URL}/v1/whatsapp/${this.clientAuthenticator.urlToken}/receive`,
-                "headers": {
-                    "authentication": this.clientAuthenticator.headerToken
-                  }
+                'url'     : `${process.env.BASE_URL}/v1/whatsapp/${this.clientAuthenticator.urlToken}/receive`,
+                "headers" : {
+                    "authentication" : this.clientAuthenticator.headerToken
+                }
             });
 
             const apiKey = process.env.WHATSAPP_API_KEY;
@@ -223,7 +224,6 @@ export class platformMessageService implements platformServiceInterface {
             request.end();
         });
     }
-
 
     getMessage = async (msg) => {
         if (msg.messages[0].type === "text") {
