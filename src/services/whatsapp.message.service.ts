@@ -242,13 +242,12 @@ export class platformMessageService implements platformServiceInterface {
         const input_message = message.messageBody;
         const name = message.name;
         const chat_message_id = message.chat_message_id;
-        console.log("processedResponse.result", processedResponse.result);
         const raw_response_object = processedResponse.message_from_dialoglow.result && processedResponse.message_from_dialoglow.result.fulfillmentMessages ? JSON.stringify(processedResponse.message_from_dialoglow.result.fulfillmentMessages) : '';
         const intent = processedResponse.message_from_dialoglow.result && processedResponse.message_from_dialoglow.result.intent ? processedResponse.message_from_dialoglow.result.intent.displayName : '';
 
         if (processedResponse) {
             if (processedResponse.message_from_dialoglow.image && processedResponse.message_from_dialoglow.image.url) {
-                reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: "image", raw_response_object: raw_response_object, intent: intent, messageBody: null, messageImageUrl: processedResponse.image, messageImageCaption: processedResponse.image.url, sessionId: whatsapp_id, input_message: input_message, messageText: null };
+                reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: "image", raw_response_object: raw_response_object, intent: intent, messageBody: null, messageImageUrl: processedResponse.message_from_dialoglow.image, messageImageCaption: processedResponse.message_from_dialoglow.image.url, sessionId: whatsapp_id, input_message: input_message, messageText: null };
             }
             else if (processedResponse.processed_message.length > 1) {
                 if (processedResponse.message_from_dialoglow.parse_mode && processedResponse.message_from_dialoglow.parse_mode === 'HTML') {
