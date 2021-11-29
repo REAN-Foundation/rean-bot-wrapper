@@ -3,13 +3,13 @@
   message: {
     message_id: 587,
     from: {
-      id: 2077778107,
+      id: 2********7,
       is_bot: false,
       first_name: 'Rohit',
       language_code: 'en'
     },
     chat: { id: 2********7, first_name: 'Rohit', type: 'private' },
     date: 1637836887,
-    location: { latitude: 25.168998, longitude: 93.010648 }
+    location: { latitude: 2*.****8, longitude: 9*.*****8 }
   }
 }

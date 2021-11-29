@@ -1,7 +1,7 @@
 {
   messages: [
     {
-      from: '918473906855',
+      from: '918********5',
       id: 'ABEGkYRzkGhVAhDmch3rORw_-GmhRFZMOm-S',
       timestamp: '1637836599',
       type: 'voice',
@@ -12,5 +12,5 @@
       }
     }
   ],
-  contacts: [ { profile: { name: 'Ango' }, wa_id: '918473906855' } ]
+  contacts: [ { profile: { name: '****' }, wa_id: '918********5' } ]
 }

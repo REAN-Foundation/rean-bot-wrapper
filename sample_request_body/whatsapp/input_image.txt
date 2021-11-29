@@ -1,7 +1,7 @@
 {
   messages: [
     {
-      from: '918473906855',
+      from: '918********5',
       id: 'ABEGkYRzkGhVAhBxGiSWBkc05QFWwqR8UdVk',
       image: {
         id: '1eb1d1be-01ec-4c8b-8143-ffc0a0589d25',
@@ -12,5 +12,5 @@
       type: 'image'
     }
   ],
-  contacts: [ { profile: { name: 'Ango' }, wa_id: '918473906855' } ]
+  contacts: [ { profile: { name: '****' }, wa_id: '918********5' } ]
 }
