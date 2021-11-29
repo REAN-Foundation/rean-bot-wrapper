@@ -2,12 +2,11 @@ import http from 'https';
 import fs from 'fs';
 import { uploadFile, createFileFromHTML } from './aws.file.upload.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Speechtotext } from './speech.to.text.service';
 import { autoInjectable, singleton } from 'tsyringe';
 import { response, message } from '../refactor/interface/message.interface';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { MessageFlow } from './get.put.message.flow.service';
-import { EmojiFilter } from './filter.message.for.emoji.service';
+import { MessageFunctionalities } from './whatsapp.message.sevice.functionalities';
 
 @autoInjectable()
 @singleton()
@@ -15,9 +14,8 @@ export class platformMessageService implements platformServiceInterface {
 
     public res;
 
-    constructor(private Speechtotext?: Speechtotext,
-        private messageFlow?: MessageFlow,
-        private emojiFilter?: EmojiFilter) {
+    constructor(private messageFlow?: MessageFlow,
+                private messageFunctionalities?: MessageFunctionalities) {
         this.SetWebHook();
     }
 
@@ -221,73 +219,20 @@ export class platformMessageService implements platformServiceInterface {
         });
     }
 
-    /*retrive whatsapp media */
-    GetWhatsappMedia = async (mediaId) => {
-        return new Promise((resolve, reject) => {
-            const options = {
-                hostname : process.env.WHATSAPP_LIVE_HOST,
-                path     : '/v1/media/' + mediaId,
-                method   : 'GET',
-                headers  : {
-                    'Content-Type' : 'application/json',
-                    'D360-Api-Key' : process.env.WHATSAPP_LIVE_API_KEY
-                }
-            };
-
-            const request = http.request(options, (response) => {
-                response.on('data', (chunk) => {
-                    const file_name = 'audio/' + Date.now() + '_voice.ogg';
-                    fs.writeFile('./' + file_name, chunk, err => {
-                        if (err) {
-                            reject(err);
-                            return;
-                        } else {
-                            resolve(file_name);
-                        }
-                    });
-                });
-            });
-
-            request.on('error', (e) => {
-                reject(e);
-            });
-            request.end();
-        });
-    }
-
     getMessage = async (msg) => {
-        // eslint-disable-next-line init-declarations
-        let returnMessage: message;
-        const whatsapp_id = msg.contacts[0].wa_id;
-        const name = msg.contacts[0].profile.name;
-        const chat_message_id = msg.messages[0].id;
         if (msg.messages[0].type === "text") {
-            let message = msg.messages[0].text.body;
             // eslint-disable-next-line max-len
-            message = await this.emojiFilter.checkForEmoji(message);
-            returnMessage = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "In", messageBody: message, sessionId: whatsapp_id, replayPath: whatsapp_id, latlong: null, type: 'text' };
-
+            return await this.messageFunctionalities.textMessageFormat(msg);
         }
         else if (msg.messages[0].type === "location") {
-            const loc = `latlong:${msg.messages[0].location.latitude}-${msg.messages[0].location.longitude}`;
-            returnMessage = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "In", messageBody: null, sessionId: whatsapp_id, replayPath: whatsapp_id, latlong: loc, type: 'location' };
+            return await this.messageFunctionalities.locationMessageFormat(msg);
         }
         else if (msg.messages[0].type === "voice") {
-            const mediaUrl = await this.GetWhatsappMedia(msg.messages[0].voice.id);
-            console.log("the mediaUrl", mediaUrl);
-            const ConvertedToText = await this.Speechtotext.SendSpeechRequest(mediaUrl, "whatsapp");
-            if (ConvertedToText) {
-                returnMessage = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "In", messageBody: String(ConvertedToText), sessionId: whatsapp_id, replayPath: whatsapp_id, latlong: null, type: msg.messages[0].type };
-            }
-            else {
-                returnMessage = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "In", messageBody: null, sessionId: whatsapp_id, replayPath: whatsapp_id, latlong: null, type: msg.messages[0].type };
-            }
+            return await this.messageFunctionalities.voiceMessageFormat(msg);
         }
         else {
-            returnMessage = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "In", messageBody: null, sessionId: whatsapp_id, replayPath: whatsapp_id, latlong: null, type: msg.messages[0].type };
-            console.log("exiting the getMessage in whatsapp mg ser", returnMessage);
+            throw new Error("Message is neither text, voice nor location");
         }
-        return returnMessage;
     }
 
     postResponse = async (message, processedResponse) => {
@@ -297,13 +242,12 @@ export class platformMessageService implements platformServiceInterface {
         const input_message = message.messageBody;
         const name = message.name;
         const chat_message_id = message.chat_message_id;
-        console.log("processedResponse.result", processedResponse.result);
         const raw_response_object = processedResponse.message_from_dialoglow.result && processedResponse.message_from_dialoglow.result.fulfillmentMessages ? JSON.stringify(processedResponse.message_from_dialoglow.result.fulfillmentMessages) : '';
         const intent = processedResponse.message_from_dialoglow.result && processedResponse.message_from_dialoglow.result.intent ? processedResponse.message_from_dialoglow.result.intent.displayName : '';
 
         if (processedResponse) {
             if (processedResponse.message_from_dialoglow.image && processedResponse.message_from_dialoglow.image.url) {
-                reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: "image", raw_response_object: raw_response_object, intent: intent, messageBody: null, messageImageUrl: processedResponse.image, messageImageCaption: processedResponse.image.url, sessionId: whatsapp_id, input_message: input_message, messageText: null };
+                reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: "image", raw_response_object: raw_response_object, intent: intent, messageBody: null, messageImageUrl: processedResponse.message_from_dialoglow.image, messageImageCaption: processedResponse.message_from_dialoglow.image.url, sessionId: whatsapp_id, input_message: input_message, messageText: null };
             }
             else if (processedResponse.processed_message.length > 1) {
                 if (processedResponse.message_from_dialoglow.parse_mode && processedResponse.message_from_dialoglow.parse_mode === 'HTML') {
