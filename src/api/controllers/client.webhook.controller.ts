@@ -32,7 +32,6 @@ export class ClientWebhookController {
     };
 
     receiveMessage = async (req, res) => {
-        console.log(`the req is from ${req.params.client} and the req body is ${req.body}`)
         console.log("receiveMessage webhook");
         try {
             this._clientAuthenticatorService = container.resolve(req.params.client + '.authenticator');
