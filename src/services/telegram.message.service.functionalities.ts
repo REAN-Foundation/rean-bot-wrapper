@@ -2,9 +2,8 @@ import http from  'https';
 import { getMessageFunctionalities } from "../refactor/interface/message.service.functionalities.interface";
 import { message } from '../refactor/interface/message.interface';
 import { EmojiFilter } from './filter.message.for.emoji.service';
-// import { platformMessageService } from "./telegram.message.service";
 import { Speechtotext } from './speech.to.text.service';
-import { autoInjectable, delay, inject } from "tsyringe";
+import { autoInjectable } from "tsyringe";
 
 @autoInjectable()
 export class TelegramMessageServiceFunctionalities implements getMessageFunctionalities{
@@ -31,7 +30,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
                 const returnMessage = this.inputMessageFormat(message);
                 returnMessage.messageBody = String(ConvertedToText);
                 returnMessage.type = 'voice';
-                return returnMessage
+                return returnMessage;
             } else {
                 throw new Error("Unable to convert the audio file to text");
             }

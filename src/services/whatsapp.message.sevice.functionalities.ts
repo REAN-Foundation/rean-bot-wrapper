@@ -37,7 +37,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
             const returnMessage = this.inputMessageFormat(msg);
             returnMessage.messageBody = String(ConvertedToText);
             returnMessage.type = 'voice';
-            return returnMessage
+            return returnMessage;
         }
         else {
             throw new Error("Unable to convert the audio file to text");
