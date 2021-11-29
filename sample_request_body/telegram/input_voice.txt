@@ -1,0 +1,21 @@
+{
+  update_id: 2xxxxxxx7,
+  message: {
+    message_id: 589,
+    from: {
+      id: 2********7,
+      is_bot: false,
+      first_name: 'John',
+      language_code: 'en'
+    },
+    chat: { id: 2********7, first_name: 'John', type: 'private' },
+    date: 1637837023,
+    voice: {
+      duration: 2,
+      mime_type: 'audio/ogg',
+      file_id: 'AwACAgUAAxkBAAICTWGfaN-kNxFtRSUQGAALHAwACjtr5VOULfErhk3buIgQ',
+      file_unique_id: 'AgADxwMAAo7a-VQ',
+      file_size: 10882
+    }
+  }
+}

@@ -5,11 +5,8 @@ import { message, response } from '../refactor/interface/message.interface';
 import { autoInjectable, singleton } from 'tsyringe';
 import  TelegramBot  from 'node-telegram-bot-api';
 import { MessageFlow } from './get.put.message.flow.service';
-import http from 'https';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Speechtotext } from './speech.to.text.service';
-import { EmojiFilter } from './filter.message.for.emoji.service';
+import { TelegramMessageServiceFunctionalities } from '../services/telegram.message.service.functionalities';
 
 @autoInjectable()
 @singleton()
@@ -20,8 +17,8 @@ export class platformMessageService implements platformServiceInterface{
     public res;
 
     // public req;
-    constructor(private Speechtotext?: Speechtotext, private messageFlow?: MessageFlow,
-        private emojiFilter?: EmojiFilter ) {
+    constructor(private messageFlow?: MessageFlow,
+        private telegramMessageServiceFunctionalities?: TelegramMessageServiceFunctionalities ) {
         this._telegram = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN);
         const client = null;
         this.init(client);
@@ -49,40 +46,16 @@ export class platformMessageService implements platformServiceInterface{
 
     getMessage = async (message) =>{
         console.log("enter the getMessage of telegram", message);
-        // eslint-disable-next-line init-declarations
-        let returnMessage: message;
-        const telegram_id = message.chat.id.toString();
-        const name = message.from.first_name;
-        const chat_message_id = message.message_id;
+
         if (message.text) {
-            message = await this.emojiFilter.checkForEmoji(message.text);
-            returnMessage = { name: name, platform: "Telegram",chat_message_id: chat_message_id,direction: "In",messageBody: message,sessionId: telegram_id,replayPath: telegram_id,latlong: null,type: 'text' };
+            return await this.telegramMessageServiceFunctionalities.textMessageFormat(message);
+        } else if (message.voice) {
+            return await this.telegramMessageServiceFunctionalities.voiceMessageFormat(message);
+        } else if (message.location) {
+            return await this.telegramMessageServiceFunctionalities.locationMessageFormat(message);
+        } else {
+            throw new Error('Message is neither text, voice nor location');
         }
-        else if (message.voice) {
-            let response: any = {};
-            console.log("this is voice", message.voice);
-            response = await this.GetTelegramMedia(message.voice.file_id);
-            console.log("response of telegram media is", response);
-            const file_path = response.result.file_path;
-            if (file_path) {
-                const ConvertedToText = await this.Speechtotext.SendSpeechRequest('https://api.telegram.org/file/bot' + process.env.TELEGRAM_BOT_TOKEN + '/' + response.result.file_path, "telegram");
-                if (ConvertedToText) {
-                    returnMessage = { name: name, platform: "Telegram",chat_message_id: chat_message_id,direction: "In",messageBody: String(ConvertedToText),sessionId: telegram_id,replayPath: telegram_id,latlong: null,type: 'voice' };
-                } else {
-                    returnMessage = { name: name, platform: "Telegram",chat_message_id: chat_message_id,direction: "In",messageBody: null,sessionId: telegram_id,replayPath: telegram_id,latlong: null,type: 'text' };
-                }
-            } else {
-                returnMessage = { name: name, platform: "Telegram",chat_message_id: chat_message_id,direction: "In",messageBody: null,sessionId: telegram_id,replayPath: telegram_id,latlong: null,type: 'text' };
-            }
-        }
-        else if (message.location) {
-            const location_message = `latlong:${message.location.latitude}-${message.location.longitude}`;
-            returnMessage = { name: name, platform: "Telegram",chat_message_id: chat_message_id,direction: "In",messageBody: null,sessionId: telegram_id,replayPath: telegram_id,latlong: location_message,type: 'location' };
-        }
-        else {
-            returnMessage = { name: name, platform: "Telegram",chat_message_id: chat_message_id,direction: "In",messageBody: null,sessionId: telegram_id,replayPath: telegram_id,latlong: null,type: message[0].type };
-        }
-        return returnMessage;
     }
 
     postResponse = async(message, processedResponse) => {
@@ -97,7 +70,7 @@ export class platformMessageService implements platformServiceInterface{
         const intent = processedResponse.message_from_dialoglow.result && processedResponse.message_from_dialoglow.result.intent ? processedResponse.message_from_dialoglow.result.intent.displayName : '';
 
         if (processedResponse.message_from_dialoglow.image && processedResponse.message_from_dialoglow.image.url) {
-            reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: processedResponse.image , messageImageCaption: processedResponse.image.url, sessionId: telegram_id, messageText: null };
+            reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: processedResponse.message_from_dialoglow.image , messageImageCaption: processedResponse.message_from_dialoglow.image.url, sessionId: telegram_id, messageText: null };
         }
         else if (processedResponse.processed_message.length > 1) {
 
@@ -156,27 +129,6 @@ export class platformMessageService implements platformServiceInterface{
                 });
         });
     }
-
-    GetTelegramMedia = async (fileid) => {
-
-        return new Promise((resolve, reject) => {
-            console.log("afgshhhhhhhhhhhhh", process.env.TELEGRAM_MEDIA_PATH_URL + '?file_id=' + fileid);
-            const req = http.request(process.env.TELEGRAM_MEDIA_PATH_URL + '?file_id=' + fileid, res => {
-                let data = " ";
-                res.on('data', d => {
-                    data += d;
-                });
-                res.on("end", () => {
-                    resolve(JSON.parse(data));
-                });
-            });
-
-            req.on('error', error => {
-                reject(error);
-            });
-            req.end();
-        });
-    };
 
     sanitizeMessage(message) {
         if (message > 4096) {
