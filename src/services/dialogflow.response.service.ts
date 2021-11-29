@@ -25,7 +25,8 @@ export class DialogflowResponseService {
 
             } else {
                 console.log("Entered the else of Dialogflow..............");
-                const dialogflowApplicationCredentialsFile = process.env.DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS ? process.env.DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS : process.env.GOOGLE_APPLICATION_CREDENTIALS;
+                const dialogflowApplicationCredentialsFile = process.env.DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS ?
+                    process.env.DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS : process.env.GOOGLE_APPLICATION_CREDENTIALS;
                 options = {
                     keyFilename : dialogflowApplicationCredentialsFile
                 };
@@ -62,7 +63,6 @@ export class DialogflowResponseService {
             if (responseMessage.text.length === 0) {
                 responseMessage.text[0] = result.fulfillmentText;
             }
-            console.log("returned dialogflow,",responseMessage );
             return {
                 text       : responseMessage,
                 image      : responseMessage.image ? responseMessage.image : false,

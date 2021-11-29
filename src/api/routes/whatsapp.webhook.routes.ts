@@ -16,7 +16,6 @@ export class WhatsappWebhookRoutes{
 
         router.post(`/:client/:unique_token/send`, this._clientWebhookController.sendMessage);
         router.post(`/:client/:unique_token/receive`, this._clientWebhookController.receiveMessage);
-
         app.use('/v1/', router);
     }
 

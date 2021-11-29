@@ -1,0 +1,15 @@
+{
+  update_id: 2xxxxxxx6,
+  message: {
+    message_id: 587,
+    from: {
+      id: 2********7,
+      is_bot: false,
+      first_name: 'John',
+      language_code: 'en'
+    },
+    chat: { id: 2********7, first_name: 'John', type: 'private' },
+    date: 1637836887,
+    location: { latitude: 2*.****8, longitude: 9*.*****8 }
+  }
+}
