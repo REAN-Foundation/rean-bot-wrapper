@@ -34,9 +34,7 @@ export class DialogflowResponseService {
 
             }
             sessionClient = new dialogflow.SessionsClient(options);
-            console.log(`the dialogflow.sessionClient is  ${sessionClient}`);
             sessionPath = sessionClient.projectAgentSessionPath(projectIdFinal, sessionId);
-            console.log(`the dialogflow.sessionClient.projectAgentSessionPath is  ${sessionPath}`);
             console.log("Message to be sent to DF: ", message);
             const request = {
                 session    : sessionPath,
@@ -49,7 +47,6 @@ export class DialogflowResponseService {
             };
             console.log("B$session CLient detects intent");
             const responses = await sessionClient.detectIntent(request);
-            console.log(`the dialogflow.sessionClient.detectIntent is  ${responses}`);
             const result = responses[0].queryResult;
             if (result.intent) {
                 console.log(`  Intent: ${result.intent.displayName}`);
