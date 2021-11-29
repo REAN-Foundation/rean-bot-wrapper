@@ -46,21 +46,16 @@ export class platformMessageService implements platformServiceInterface{
 
     getMessage = async (message) =>{
         console.log("enter the getMessage of telegram", message);
-        let returnMessage: message;
+
         if (message.text) {
-            returnMessage = await this.telegramMessageServiceFunctionalities.textMessageFormat(message);
+            return await this.telegramMessageServiceFunctionalities.textMessageFormat(message);
+        } else if (message.voice) {
+            return await this.telegramMessageServiceFunctionalities.voiceMessageFormat(message);
+        } else if (message.location) {
+            return await this.telegramMessageServiceFunctionalities.locationMessageFormat(message);
+        } else {
+            throw new Error('Message is neither text, voice nor location');
         }
-        else if (message.voice) {
-            returnMessage = await this.telegramMessageServiceFunctionalities.voiceMessageFormat(message);
-            console.log("return voice",returnMessage);
-        }
-        else if (message.location) {
-            returnMessage = await this.telegramMessageServiceFunctionalities.locationMessageFormat(message)
-        }
-        else {
-            throw new Error("Message is neither text, voice nor location");
-        }
-        return returnMessage;
     }
 
     postResponse = async(message, processedResponse) => {

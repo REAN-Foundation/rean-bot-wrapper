@@ -220,22 +220,19 @@ export class platformMessageService implements platformServiceInterface {
     }
 
     getMessage = async (msg) => {
-        // eslint-disable-next-line init-declarations
-        let returnMessage: message;
         if (msg.messages[0].type === "text") {
             // eslint-disable-next-line max-len
-            returnMessage = await this.messageFunctionalities.textMessageFormat(msg);
+            return await this.messageFunctionalities.textMessageFormat(msg);
         }
         else if (msg.messages[0].type === "location") {
-            returnMessage = await this.messageFunctionalities.locationMessageFormat(msg);
+            return await this.messageFunctionalities.locationMessageFormat(msg);
         }
         else if (msg.messages[0].type === "voice") {
-            returnMessage = await this.messageFunctionalities.voiceMessageFormat(msg);
+            return await this.messageFunctionalities.voiceMessageFormat(msg);
         }
         else {
             throw new Error("Message is neither text, voice nor location");
         }
-        return returnMessage;
     }
 
     postResponse = async (message, processedResponse) => {
