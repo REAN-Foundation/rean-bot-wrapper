@@ -49,9 +49,9 @@ export class platformMessageService implements platformServiceInterface{
 
     postResponse (message, response ){
         const reansupport_Id = message.Id;
-        const message_type = response.text_part_from_DF.image_url ? "image" : "text";
-        const raw_response_object = response.text_part_from_DF.result && response.text_part_from_DF.result.fulfillmentMessages ? JSON.stringify(response.text_part_from_DF.result.fulfillmentMessages) : '';
-        const intent = response.text_part_from_DF.result && response.text_part_from_DF.result.intent ? response.text_part_from_DF.result.intent.displayName : '';
+        const message_type = response.message_from_dialoglow.text.image.url ? "image" : "text";
+        const raw_response_object = response.message_from_dialoglow.result && response.message_from_dialoglow.result.fulfillmentMessages ? JSON.stringify(response.message_from_dialoglow.result.fulfillmentMessages) : '';
+        const intent = response.message_from_dialoglow.result && response.message_from_dialoglow.result.intent ? response.message_from_dialoglow.result.intent.displayName : '';
 
         const reaponse_message = { name: null,platform: "Whatsapp",chat_message_id: null,direction: "Out",message_type: message_type,raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: reansupport_Id, messageText: response.processed_message[0] };
         return reaponse_message;
