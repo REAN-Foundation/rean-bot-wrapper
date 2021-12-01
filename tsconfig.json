@@ -1,0 +1,35 @@
+{
+    "compilerOptions": {
+        "declaration": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "module": "commonjs",
+        "esModuleInterop": true,
+        "target": "es2020",
+        "listFiles":true,
+        "noImplicitAny": false,
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "noEmitHelpers":false,
+        "alwaysStrict": true,
+        "suppressImplicitAnyIndexErrors": false,
+        "forceConsistentCasingInFileNames": true,
+        "resolveJsonModule" : true,
+        "outDir": "dist/",
+        "diagnostics": true,
+        "baseUrl": ".",
+        "paths": {
+            "*": [
+                "node_modules/*"
+            ]
+        },
+        "typeRoots": ["@types", "node_modules/@types"]
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "exclude":[
+        "node_modules"
+     ],
+}
+
