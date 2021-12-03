@@ -24,8 +24,6 @@ export class ReanAppAuthenticator implements clientAuthenticator{
     }
 
     authenticate(req: any) {
-        console.log("req.headers.authentication", req.headers.authentication);
-        console.log("req.headers.authentication", req.params.unique_token);
         if (this._headerToken === req.headers.authentication && this._urlToken === req.params.unique_token){
             return;
         }
