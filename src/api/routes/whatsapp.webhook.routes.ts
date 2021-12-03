@@ -14,8 +14,8 @@ export class WhatsappWebhookRoutes{
     register (app: express.Application) {
         const router = express.Router();
 
-        router.post(`/:client/${process.env.TELEGRAM_BOT_TOKEN}/send`, this._clientWebhookController.sendMessage);
-        router.post(`/:client/${process.env.TELEGRAM_BOT_TOKEN}/receive`, this._clientWebhookController.receiveMessage);
+        router.post(`/:client/:unique_token/send`, this._clientWebhookController.sendMessage);
+        router.post(`/:client/:unique_token/receive`, this._clientWebhookController.receiveMessage);
         app.use('/v1/', router);
     }
 

@@ -8,9 +8,7 @@ export class translateService{
     translateMessage = async (message) => {
         console.log("entered the translateMessage of translateService JJJJJJJJJJJ", message);
         const translate = new v2.Translate({ projectId: translateProjectId });
-        console.log("before entering translate.detect");
         const [detections] = await translate.detect(message);
-        console.log("after entering translate.detect");
         const detectedLanguage = await Array.isArray(detections) ? detections : [detections];
 
         detected_language = detectedLanguage[0].language;
