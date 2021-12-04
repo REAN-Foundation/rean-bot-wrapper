@@ -51,6 +51,7 @@ export class platformMessageService implements platformServiceInterface{
             media.then((res:any)=>{
                 const options = {
                     hostname : process.env.ANEMIA_CHECK_URL,
+                    port:6868,
                     path     : "/?filePath="+'https://api.telegram.org/file/bot' + process.env.TELEGRAM_ANEMIA_BOT_TOKEN + '/' + res.result.file_path,
                     method   : 'GET',
                     headers : {
