@@ -53,12 +53,13 @@ export default class Application {
                 this.clientsList.push(envConfig.NAME);
                 for (const k in envConfig) {
                     process.env[envConfig.NAME + "_" + k.toUpperCase()] = envConfig[k];
+
                     // console.log(envConfig.NAME + "_" + k.toUpperCase())
                 }
             }
 
         } catch (e) {
-            console.log(e)
+            console.log(e);
         }
 
     }
@@ -75,10 +76,11 @@ export default class Application {
         }
             
     }
+    
     public start = async (): Promise<void> => {
         try {
             this.processClientEnvVariables();
-            
+
             //Load configurations
             ConfigurationManager.loadConfigurations();
 
