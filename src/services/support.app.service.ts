@@ -2,12 +2,12 @@ import { Logger } from '../common/logger';
 import { getRequestOptions } from '../utils/helper';
 import needle from "needle";
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { autoInjectable, container,  } from 'tsyringe';
+import { container,  } from 'tsyringe';
 
+// eslint-disable-next-line max-len
 const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
-@autoInjectable()
+
 export class GetPatientInfoService{
-    // constructor (private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     async getPatientsByPhoneNumberservice (phoneNumber) {
         return new Promise(async (resolve, reject) => {
@@ -76,12 +76,12 @@ export class GetPatientInfoService{
                 reject(error.message);
             }
         });
-    };
+    }
     
     async getMedicationInfoservice (patientUserId, accessToken) {
         return new Promise(async (resolve, reject) => {
             try {
-                Logger.instance().log(`Get MedicationInfo API`);    
+                Logger.instance().log(`Get MedicationInfo API`);
                 const options = getRequestOptions("rean_app");
                 options.headers["authorization"] = `Bearer ${accessToken}`;
                 const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
@@ -116,6 +116,6 @@ export class GetPatientInfoService{
                 reject(error.message);
             }
         });
-    };
+    }
     
 }

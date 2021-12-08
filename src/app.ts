@@ -28,6 +28,7 @@ export default class Application {
     private _IndexCreation: IndexCreation = null;
 
     private clientsList = [];
+
     private constructor() {
         this._app = express();
         this._intentRegister = new IntentRegister();
@@ -43,20 +44,18 @@ export default class Application {
     }
 
     processClientEnvVariables() {
-        let dotenvPath = path.resolve(process.cwd(), 'env.config\\')
+        const dotenvPath = path.resolve(process.cwd(), 'env.config\\');
         try {
-            const arrayOfFiles = fs.readdirSync(dotenvPath)
-            console.log("arrayOfFiles", arrayOfFiles)
+            const arrayOfFiles = fs.readdirSync(dotenvPath);
             for (const configFile of arrayOfFiles) {
-                let configFilePath = path.resolve(dotenvPath, configFile)
-                const envConfig = JSON.parse(fs.readFileSync(configFilePath, 'utf8'))
-                this.clientsList.push(envConfig.NAME)
+                const configFilePath = path.resolve(dotenvPath, configFile);
+                const envConfig = JSON.parse(fs.readFileSync(configFilePath, 'utf8'));
+                this.clientsList.push(envConfig.NAME);
                 for (const k in envConfig) {
-                    process.env[envConfig.NAME + "_" + k.toUpperCase()] = envConfig[k]
-                    console.log(envConfig.NAME + "_" + k.toUpperCase())
+                    process.env[envConfig.NAME + "_" + k.toUpperCase()] = envConfig[k];
+                    // console.log(envConfig.NAME + "_" + k.toUpperCase())
                 }
             }
-            console.log(process.env);
 
         } catch (e) {
             console.log(e)
@@ -65,22 +64,21 @@ export default class Application {
     }
 
     setWebhooksForClients(){
+        // eslint-disable-next-line max-len
         const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
         const telegram: platformServiceInterface = container.resolve('telegram');
         const whatsapp: platformServiceInterface = container.resolve('whatsapp');
         for (const clientName of this.clientsList){
-            console.log("clientName",clientName)
             clientEnvironmentProviderService.setClientName(clientName);
             telegram.setWebhook(clientName);
             whatsapp.setWebhook(clientName);
         }
-        
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             
     }
     public start = async (): Promise<void> => {
         try {
-            this.processClientEnvVariables()
+            this.processClientEnvVariables();
+            
             //Load configurations
             ConfigurationManager.loadConfigurations();
 
