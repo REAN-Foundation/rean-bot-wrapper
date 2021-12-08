@@ -1,4 +1,6 @@
 import "reflect-metadata";
+import * as fs from 'fs';
+import path from 'path';
 import express from 'express';
 import fileUpload from 'express-fileupload';
 import cors from 'cors';
@@ -10,6 +12,8 @@ import { ConfigurationManager } from "./configs/configuration.manager";
 import { IntentRegister } from './intentEmitters/intent.register';
 import { container } from "tsyringe";
 import { IndexCreation } from './models/elasticsearchmodel';
+import { platformServiceInterface } from "./refactor/interface/platform.interface";
+import { ClientEnvironmentProviderService } from "./services/set.client/client.environment.provider.service";
 
 export default class Application {
 
@@ -23,6 +27,7 @@ export default class Application {
 
     private _IndexCreation: IndexCreation = null;
 
+    private clientsList = [];
     private constructor() {
         this._app = express();
         this._intentRegister = new IntentRegister();
@@ -37,9 +42,45 @@ export default class Application {
         return this._app;
     }
 
-    public start = async(): Promise<void> => {
+    processClientEnvVariables() {
+        let dotenvPath = path.resolve(process.cwd(), 'env.config\\')
         try {
+            const arrayOfFiles = fs.readdirSync(dotenvPath)
+            console.log("arrayOfFiles", arrayOfFiles)
+            for (const configFile of arrayOfFiles) {
+                let configFilePath = path.resolve(dotenvPath, configFile)
+                const envConfig = JSON.parse(fs.readFileSync(configFilePath, 'utf8'))
+                this.clientsList.push(envConfig.NAME)
+                for (const k in envConfig) {
+                    process.env[envConfig.NAME + "_" + k.toUpperCase()] = envConfig[k]
+                    console.log(envConfig.NAME + "_" + k.toUpperCase())
+                }
+            }
+            console.log(process.env);
 
+        } catch (e) {
+            console.log(e)
+        }
+
+    }
+
+    setWebhooksForClients(){
+        const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
+        const telegram: platformServiceInterface = container.resolve('telegram');
+        const whatsapp: platformServiceInterface = container.resolve('whatsapp');
+        for (const clientName of this.clientsList){
+            console.log("clientName",clientName)
+            clientEnvironmentProviderService.setClientName(clientName);
+            telegram.setWebhook(clientName);
+            whatsapp.setWebhook(clientName);
+        }
+        
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            
+    }
+    public start = async (): Promise<void> => {
+        try {
+            this.processClientEnvVariables()
             //Load configurations
             ConfigurationManager.loadConfigurations();
 
@@ -57,16 +98,13 @@ export default class Application {
 
             this._IndexCreation.createIndexes();
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const me = container.resolve('telegram');
-
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const me2 = container.resolve('whatsapp');
+            this.setWebhooksForClients();
 
             //Start listening
             await this.listen();
 
         }
-        catch (error){
+        catch (error) {
             Logger.instance().log('An error occurred while starting reancare-api service.' + error.message);
         }
     }

@@ -9,6 +9,7 @@ import { platformServiceInterface } from '../refactor/interface/platform.interfa
 import { TelegramMessageServiceFunctionalities } from '../services/telegram.message.service.functionalities';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 
 @autoInjectable()
 @singleton()
@@ -21,14 +22,14 @@ export class platformMessageService implements platformServiceInterface{
     // public req;
     constructor(private messageFlow?: MessageFlow,
         private telegramMessageServiceFunctionalities?: TelegramMessageServiceFunctionalities,
-        @inject("telegram.authenticator") private clientAuthenticator?: clientAuthenticator ) {
-        this._telegram = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN);
-        const client = null;
-        this.init(client);
+        private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject("telegram.authenticator") private clientAuthenticator?: clientAuthenticator) {
+        this._telegram = new TelegramBot(this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
+        this.init();
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    handleMessage(msg, client: string){
+    handleMessage(msg, channel: string){
         this._telegram.processUpdate(msg);
         console.log("message sent to events");
         return null;
@@ -39,12 +40,18 @@ export class platformMessageService implements platformServiceInterface{
         return this.messageFlow.send_manual_msg(msg, this);
     }
 
-    init(client){
-        this._telegram.setWebHook(process.env.BASE_URL + '/v1/telegram/' + this.clientAuthenticator.urlToken + '/receive');
-        console.log("Telegram webhook set," );
+    init(){
         this._telegram.on('message', msg => {
-            this.messageFlow.get_put_msg_Dialogflow(msg, client, this);
+            this.messageFlow.get_put_msg_Dialogflow(msg, "telegram", this);
         });
+    }
+
+    setWebhook(clientName){
+        this._telegram = new TelegramBot(this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
+        const webhookUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL") + '/v1/' + clientName + '/telegram/' + this.clientAuthenticator.urlToken + '/receive';
+        this._telegram.setWebHook(webhookUrl);
+        // console.log("url tele",webhookUrl)
+        console.log("Telegram webhook set," );
     }
 
     getMessage = async (message) =>{

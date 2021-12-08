@@ -1,8 +1,10 @@
 import dialogflow from '@google-cloud/dialogflow';
 import { v4 } from 'uuid';
 import { injectable } from 'tsyringe';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 @injectable()
 export class DialogflowResponseService {
+    constructor(private clientEnvironment?: ClientEnvironmentProviderService){}
 
     getDialogflowMessage = async (message, userSessionId = null, platform = null) => {
         try {
@@ -19,18 +21,19 @@ export class DialogflowResponseService {
 
             if (platform === "REAN_SUPPORT") {
                 options = {
-                    keyFilename : process.env.REAN_APP_SUPPORT_GCP_PROJ_CREDENTIALS
+                    keyFilename : this.clientEnvironment.getClientEnvironmentVariable("REAN_APP_SUPPORT_GCP_PROJ_CREDENTIALS")
                 };
-                projectIdFinal = process.env.DIALOGFLOW_PROJECT_ID_REAN_APP;
+                projectIdFinal = this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_PROJECT_ID_REAN_APP");
 
             } else {
                 console.log("Entered the else of Dialogflow..............");
-                const dialogflowApplicationCredentialsFile = process.env.DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS ?
-                    process.env.DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS : process.env.GOOGLE_APPLICATION_CREDENTIALS;
+                const dfBotGCPCredentials = this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS");
+                const GCPCredentials = this.clientEnvironment.getClientEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
+                const dialogflowApplicationCredentialsFile = dfBotGCPCredentials?dfBotGCPCredentials:GCPCredentials;
                 options = {
                     keyFilename : dialogflowApplicationCredentialsFile
                 };
-                projectIdFinal = process.env.DIALOGFLOW_PROJECT_ID;
+                projectIdFinal = this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_PROJECT_ID");
 
             }
             sessionClient = new dialogflow.SessionsClient(options);

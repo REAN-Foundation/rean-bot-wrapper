@@ -26,6 +26,7 @@
     "@types/bcryptjs": "^2.4.2",
     "@types/sequelize": "^4.28.9",
     "actions-on-google": "^3.0.0",
+    "app-root-path": "^3.0.0",
     "approx-string-match": "^1.1.0",
     "async-request": "^1.0.0",
     "aws-sdk": "^2.997.0",

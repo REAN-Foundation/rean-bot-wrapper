@@ -20,7 +20,7 @@ export class ClientWebhookController {
         console.log("sendMessage webhook");
         try {
             // eslint-disable-next-line max-len
-            this._platformMessageService = container.resolve(req.params.client);
+            this._platformMessageService = container.resolve(req.params.channel);
             const responce = await this._platformMessageService.sendManualMesage(req.body);
             if (responce) this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', responce);
             else
@@ -34,20 +34,20 @@ export class ClientWebhookController {
     receiveMessage = async (req, res) => {
         console.log("receiveMessage webhook");
         try {
-            this._clientAuthenticatorService = container.resolve(req.params.client + '.authenticator');
+            this._clientAuthenticatorService = container.resolve(req.params.channel + '.authenticator');
             this._clientAuthenticatorService.authenticate(req,res);
             if (req.body.statuses) {
 
                 // status = sent, received & read
             }
             else {
-                if (req.params.client !== "REAN_SUPPORT"){
+                if (req.params.channel !== "REAN_SUPPORT"){
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
                 }
-                this._platformMessageService = container.resolve(req.params.client);
+                this._platformMessageService = container.resolve(req.params.channel);
                 this._platformMessageService.res = res;
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                const response = this._platformMessageService.handleMessage(req.body, req.params.client);
+                const response = this._platformMessageService.handleMessage(req.body, req.params.channel);
             }
         }
         catch (error) {

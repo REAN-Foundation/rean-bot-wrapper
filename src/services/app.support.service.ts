@@ -16,6 +16,9 @@ export class platformMessageService implements platformServiceInterface{
     ) {
 
     }
+    setWebhook(client: any) {
+        throw new Error('Method not implemented.');
+    }
 
     init() {
         throw new Error('Method not implemented.');
@@ -30,8 +33,7 @@ export class platformMessageService implements platformServiceInterface{
     }
 
     handleMessage(msg, client) {
-        console.log("entered the handle msg in whatsapp msg ser");
-        console.log("the msg sent ", msg);
+        // console.log("the msg sent ", msg);
         return this.messageFlow.get_put_msg_Dialogflow(msg, client, this);
     }
 
