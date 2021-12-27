@@ -3,6 +3,7 @@ import { message } from '../refactor/interface/message.interface';
 import { autoInjectable } from 'tsyringe';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { TelegramMessageService } from './telegram.message.service';
 import needle from "needle";
 import { getRequestOptions } from '../utils/helper';
 import  TelegramBot  from 'node-telegram-bot-api';
@@ -13,16 +14,17 @@ export class AnemiaModel{
     public _telegram: TelegramBot = null;
 
     constructor(
-        private clientEnvironmentProviderService?:ClientEnvironmentProviderService) {
+        private clientEnvironmentProviderService?:ClientEnvironmentProviderService,
+        private telegramMessageService?: TelegramMessageService) {
     }
 
-    async get_put_AnemiaResult (msg, channel, platformMessageService: platformServiceInterface) {
+    async get_put_AnemiaResult (msg, channel) {
         console.log("entered the get_put_AnemiaResult");
-        const messagetoAnemiaModel: message = await platformMessageService.getMessage(msg);
-        return this.processMessage(messagetoAnemiaModel, channel ,platformMessageService);
+        const messagetoAnemiaModel: message = await this.telegramMessageService.getMessage(msg);
+        return this.processMessage(messagetoAnemiaModel);
     }
 
-    async processMessage(messagetoAnemiaModel, channel ,platformMessageService: platformServiceInterface) {
+    async processMessage(messagetoAnemiaModel) {
 
         // eslint-disable-next-line max-len
         const imagePath = 'https://api.telegram.org/file/bot' + this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN") + '/' + messagetoAnemiaModel.messageBody;
@@ -42,9 +44,9 @@ export class AnemiaModel{
         let anemiaResult: string;
         if (messagetoAnemiaModel.type !== "image"){
             // eslint-disable-next-line max-len
-            platformMessageService.SendMediaMessage(messagetoAnemiaModel.sessionId, null, "Hey, I'm  REAN Anemia Detection Bot. Please share an image of your eye conjunctiva similar to the one shown below");
+            this.telegramMessageService.SendMediaMessage(messagetoAnemiaModel.sessionId, null, "Hey, I'm  REAN Anemia Detection Bot. Please share an image of your eye conjunctiva similar to the one shown below");
             // eslint-disable-next-line max-len
-            platformMessageService.SendMediaMessage(messagetoAnemiaModel.sessionId, "https://t4.ftcdn.net/jpg/02/52/68/73/240_F_252687355_x6qCu70kdEjb1RRygVreCZXslqq7EDi1.jpg","Instructions: \n 1. Gently pull your lower eyelid  with your index finger. \n 2. Try focusing the camera on the conjunctiva region and take a picture under good lighting.");
+            this.telegramMessageService.SendMediaMessage(messagetoAnemiaModel.sessionId, "https://t4.ftcdn.net/jpg/02/52/68/73/240_F_252687355_x6qCu70kdEjb1RRygVreCZXslqq7EDi1.jpg","Instructions: \n 1. Gently pull your lower eyelid  with your index finger. \n 2. Try focusing the camera on the conjunctiva region and take a picture under good lighting.");
             return;
         }
         else {
@@ -58,7 +60,7 @@ export class AnemiaModel{
                 anemiaResult = "Result not found";
             }
         }
-        return platformMessageService.SendMediaMessage(messagetoAnemiaModel.sessionId, null, anemiaResult);
+        return this.telegramMessageService.SendMediaMessage(messagetoAnemiaModel.sessionId, null, anemiaResult);
 
     }
 

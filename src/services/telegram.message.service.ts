@@ -13,7 +13,7 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 
 @autoInjectable()
 @singleton()
-export class platformMessageService implements platformServiceInterface{
+export class TelegramMessageService implements platformServiceInterface{
 
     public _telegram: TelegramBot = null;
 
@@ -63,6 +63,8 @@ export class platformMessageService implements platformServiceInterface{
             return await this.telegramMessageServiceFunctionalities.voiceMessageFormat(message);
         } else if (message.location) {
             return await this.telegramMessageServiceFunctionalities.locationMessageFormat(message);
+        } else if(message.photo){
+            return await this.telegramMessageServiceFunctionalities.imageMessaegFormat(message);
         } else {
             throw new Error('Message is neither text, voice nor location');
         }

@@ -86,7 +86,7 @@ export default class Application {
         const whatsapp: platformServiceInterface = container.resolve('whatsapp');
         for (const clientName of this.clientsList) {
             clientEnvironmentProviderService.setClientName(clientName);
-            if (clientName === "Anemia"){
+            if (clientName === "ANEMIA"){
                 anemiaTelegram.setWebhook(clientName);
             } else {
                 telegram.setWebhook(clientName);
