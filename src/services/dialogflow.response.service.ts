@@ -24,11 +24,11 @@ export class DialogflowResponseService {
             if (platform === "REAN_SUPPORT") {
                 const ReanAppGcpCredentials = JSON.parse(this.clientEnvironment.getClientEnvironmentVariable("REAN_APP_SUPPORT_GCP_PROJ_CREDENTIALS"));
                 options = {
-                    credentials: {
-                        client_email: ReanAppGcpCredentials.client_email,
-                        private_key: ReanAppGcpCredentials.private_key
+                    credentials : {
+                        client_email : ReanAppGcpCredentials.client_email,
+                        private_key : ReanAppGcpCredentials.private_key
                     },
-                    projectId: ReanAppGcpCredentials.private_key
+                    projectId : ReanAppGcpCredentials.private_key
                 };
                 projectIdFinal = this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_PROJECT_ID_REAN_APP");
 
@@ -36,13 +36,13 @@ export class DialogflowResponseService {
                 console.log("Entered the else of Dialogflow..............");
                 const dfBotGCPCredentials = JSON.parse(this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS"));
                 const GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
-                let dialogflowApplicationCredentialsobj = dfBotGCPCredentials ? dfBotGCPCredentials : GCPCredentials;
+                const dialogflowApplicationCredentialsobj = dfBotGCPCredentials ? dfBotGCPCredentials : GCPCredentials;
                 options = {
-                    credentials: {
-                        client_email: dialogflowApplicationCredentialsobj.client_email,
-                        private_key: dialogflowApplicationCredentialsobj.private_key
+                    credentials : {
+                        client_email : dialogflowApplicationCredentialsobj.client_email,
+                        private_key : dialogflowApplicationCredentialsobj.private_key
                     },
-                    projectId: dialogflowApplicationCredentialsobj.private_key
+                    projectId : dialogflowApplicationCredentialsobj.private_key
                 };
                 projectIdFinal = this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_PROJECT_ID");
 
@@ -51,11 +51,11 @@ export class DialogflowResponseService {
             sessionPath = sessionClient.projectAgentSessionPath(projectIdFinal, sessionId);
             console.log("Message to be sent to DF: ", message);
             const request = {
-                session: sessionPath,
-                queryInput: {
-                    text: {
-                        text: message,
-                        languageCode: dialogflow_language,
+                session : sessionPath,
+                queryInput : {
+                    text : {
+                        text : message,
+                        languageCode : dialogflow_language,
                     },
                 },
             };
@@ -75,19 +75,19 @@ export class DialogflowResponseService {
                 responseMessage.text[0] = result.fulfillmentText;
             }
             return {
-                text: responseMessage,
-                image: responseMessage.image ? responseMessage.image : false,
-                parse_mode: responseMessage.parse_mode ? responseMessage.parse_mode : false,
-                result: result,
+                text : responseMessage,
+                image : responseMessage.image ? responseMessage.image : false,
+                parse_mode : responseMessage.parse_mode ? responseMessage.parse_mode : false,
+                result : result,
             };
         }
         catch (e) {
             console.log(e);
             return {
-                text: ["Sorry, something went wrong. Let me consult an expert and get back to you!"],
-                image: { url: '', caption: '' },
-                parse_mode: false,
-                result: false
+                text : ["Sorry, something went wrong. Let me consult an expert and get back to you!"],
+                image : { url: '', caption: '' },
+                parse_mode : false,
+                result : false
             };
         }
 

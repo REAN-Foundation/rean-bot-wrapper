@@ -50,6 +50,7 @@ export class TelegramMessageService implements platformServiceInterface{
         this._telegram = new TelegramBot(this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
         const webhookUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL") + '/v1/' + clientName + '/telegram/' + this.clientAuthenticator.urlToken + '/receive';
         this._telegram.setWebHook(webhookUrl);
+
         // console.log("url tele",webhookUrl)
         console.log("Telegram webhook set," );
     }
@@ -63,7 +64,7 @@ export class TelegramMessageService implements platformServiceInterface{
             return await this.telegramMessageServiceFunctionalities.voiceMessageFormat(message);
         } else if (message.location) {
             return await this.telegramMessageServiceFunctionalities.locationMessageFormat(message);
-        } else if(message.photo){
+        } else if (message.photo){
             return await this.telegramMessageServiceFunctionalities.imageMessaegFormat(message);
         } else {
             throw new Error('Message is neither text, voice nor location');
