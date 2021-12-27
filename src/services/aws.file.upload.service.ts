@@ -1,12 +1,12 @@
 import AWS from 'aws-sdk';
 import fs from 'fs';
 import nodeHtmlToImage from 'node-html-to-image';
-const ID = process.env.ACCESS_KEY_ID;
-const SECRET = process.env.ACCESS_KEY_SECRET;
-
-const BUCKET_NAME = process.env.BUCKET_NAME;
 
 export const uploadFile = (filePath) => {
+    const ID = process.env.ACCESS_KEY_ID;
+    const SECRET = process.env.ACCESS_KEY_SECRET;
+    const BUCKET_NAME = process.env.BUCKET_NAME;
+    
     console.log('FILE UPLOAD STARTING', BUCKET_NAME, ID, SECRET);
     return new Promise(async (resolve, reject) => {
 

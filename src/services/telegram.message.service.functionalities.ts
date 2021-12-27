@@ -4,12 +4,14 @@ import { message } from '../refactor/interface/message.interface';
 import { EmojiFilter } from './filter.message.for.emoji.service';
 import { Speechtotext } from './speech.to.text.service';
 import { autoInjectable } from "tsyringe";
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 
 @autoInjectable()
 export class TelegramMessageServiceFunctionalities implements getMessageFunctionalities{
 
     constructor(private emojiFilter?: EmojiFilter,
-        private speechtotext?: Speechtotext){}
+        private speechtotext?: Speechtotext,
+        private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     async textMessageFormat(message) {
         const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(message.text);
@@ -24,7 +26,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         console.log("response of telegram media is", response);
         const file_path = response.result.file_path;
         if (file_path) {
-            const ConvertedToText = await this.speechtotext.SendSpeechRequest('https://api.telegram.org/file/bot' + process.env.TELEGRAM_BOT_TOKEN + '/' + response.result.file_path, "telegram");
+            const ConvertedToText = await this.speechtotext.SendSpeechRequest('https://api.telegram.org/file/bot' + this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN") + '/' + response.result.file_path, "telegram");
             console.log("Converted to text",ConvertedToText);
             if (ConvertedToText) {
                 const returnMessage = this.inputMessageFormat(message);
@@ -48,6 +50,21 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         return returnMessage;
     }
 
+    async imageMessaegFormat(message) {
+        let response: any = {};
+        response = await this.GetTelegramMedia(message.photo[3].file_id);
+        console.log("response image get telegram", response);
+        if (response.result.file_path){
+            const returnMessage = this.inputMessageFormat(message);
+            returnMessage.type = 'image';
+            returnMessage.messageBody = response.result.file_path;
+            return returnMessage;
+        } else {
+            throw new Error("Unable to find the image file path");
+        }
+        
+    }
+
     inputMessageFormat (message){
         console.log("the message", message);
         const response_message: message = {
@@ -67,8 +84,10 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
     GetTelegramMedia = async (fileid) => {
 
         return new Promise((resolve, reject) => {
-            console.log("afgshhhhhhhhhhhhh", process.env.TELEGRAM_MEDIA_PATH_URL + '?file_id=' + fileid);
-            const req = http.request(process.env.TELEGRAM_MEDIA_PATH_URL + '?file_id=' + fileid, res => {
+            const telgramMediaPath = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_MEDIA_PATH_URL");
+            
+            // console.log("afgshhhhhhhhhhhhh", (telgramMediaPath + '?file_id=' + fileid));
+            const req = http.request(telgramMediaPath + '?file_id=' + fileid, res => {
                 let data = " ";
                 res.on('data', d => {
                     data += d;

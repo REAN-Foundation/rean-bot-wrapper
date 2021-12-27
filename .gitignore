@@ -108,3 +108,4 @@ package-lock.json
 .idea/modules.xml
 .idea/rean-bot.iml
 .idea/vcs.xml
+.pre-commit-config.yaml

@@ -2,11 +2,15 @@ import http from 'https';
 import fs from 'fs';
 import { uploadFile, createFileFromHTML } from './aws.file.upload.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { autoInjectable, singleton } from 'tsyringe';
+import { autoInjectable, singleton, inject } from 'tsyringe';
 import { response, message } from '../refactor/interface/message.interface';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { MessageFlow } from './get.put.message.flow.service';
 import { MessageFunctionalities } from './whatsapp.message.sevice.functionalities';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+
 
 @autoInjectable()
 @singleton()
@@ -15,12 +19,12 @@ export class platformMessageService implements platformServiceInterface {
     public res;
 
     constructor(private messageFlow?: MessageFlow,
-                private messageFunctionalities?: MessageFunctionalities) {
-        this.SetWebHook();
-    }
+        private messageFunctionalities?: MessageFunctionalities,
+        @inject("whatsapp.authenticator") private clientAuthenticator?: clientAuthenticator,
+        private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
-    handleMessage(msg: any, client: string) {
-        return this.messageFlow.get_put_msg_Dialogflow(msg, client, this);
+    handleMessage(msg: any, channel: string) {
+        return this.messageFlow.get_put_msg_Dialogflow(msg, channel, this);
     }
 
     sendManualMesage(msg) {
@@ -33,7 +37,7 @@ export class platformMessageService implements platformServiceInterface {
 
     createRequestforWebhook(resolve, reject, apiKey) {
         const options = {
-            hostname : process.env.WHATSAPP_LIVE_HOST,
+            hostname : this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST"),
             path     : '/v1/configs/webhook',
             method   : 'POST',
             headers  : {
@@ -58,14 +62,18 @@ export class platformMessageService implements platformServiceInterface {
         return request;
     }
 
-    SetWebHook = async () => {
+    setWebhook(clientName){
 
         return new Promise((resolve, reject) => {
+            const webhookUrl = `${this.clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL")}/v1/${clientName}/whatsapp/${this.clientAuthenticator.urlToken}/receive`;
+            // console.log("whatsapp url",webhookUrl)
             const postData = JSON.stringify({
-                'url' : `${process.env.BASE_URL}/v1/whatsapp/${process.env.TELEGRAM_BOT_TOKEN}/receive`,
+                'url'     : webhookUrl,
+                "headers" : {
+                    "authentication" : this.clientAuthenticator.headerToken
+                }
             });
-
-            const apiKey = process.env.WHATSAPP_LIVE_API_KEY;
+            const apiKey = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY");
 
             const request = this.createRequestforWebhook(resolve, reject, apiKey);
 
@@ -80,16 +88,17 @@ export class platformMessageService implements platformServiceInterface {
         });
     }
 
-    SetWebHookOldNumber = async () => {
+    SetWebHookOldNumber = async (clientName) => {
 
         return new Promise((resolve, reject) => {
-            if (process.env.WHATSAPP_LIVE_API_KEY_OLD_NUMBER) {
+            const webhookUrl = `${this.clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL")}/v1/${clientName}/whatsapp/${this.clientAuthenticator.urlToken}/receive`;
+            if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY_OLD_NUMBER")) {
 
                 const postData = JSON.stringify({
-                    'url' : `${process.env.BASE_URL}/v1/whatsapp/old-number/receive`,
+                    'url' : webhookUrl,
                 });
 
-                const apiKey = process.env.WHATSAPP_LIVE_API_KEY_OLD_NUMBER;
+                const apiKey = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY_OLD_NUMBER");
 
                 const request = this.createRequestforWebhook(resolve, reject, apiKey);
 
@@ -118,12 +127,12 @@ export class platformMessageService implements platformServiceInterface {
             });
 
             const options = {
-                hostname : process.env.WHATSAPP_LIVE_HOST,
+                hostname : this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST"),
                 path     : '/v1/messages',
                 method   : 'POST',
                 headers  : {
                     'Content-Type' : 'application/json',
-                    'D360-Api-Key' : process.env.WHATSAPP_LIVE_API_KEY_OLD_NUMBER
+                    'D360-Api-Key' : this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY_OLD_NUMBER")
                 }
             };
             const request = http.request(options, (response) => {
@@ -185,12 +194,12 @@ export class platformMessageService implements platformServiceInterface {
             });
             console.log("this is the postData", postData);
             const options = {
-                hostname : process.env.WHATSAPP_LIVE_HOST,
+                hostname : this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST"),
                 path     : '/v1/messages',
                 method   : 'POST',
                 headers  : {
                     'Content-Type' : 'application/json',
-                    'D360-Api-Key' : process.env.WHATSAPP_LIVE_API_KEY
+                    'D360-Api-Key' : this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY")
                 }
             };
             const request = http.request(options, (response) => {

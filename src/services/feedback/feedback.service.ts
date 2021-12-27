@@ -9,7 +9,7 @@ export class FeedbackService implements feedbackInterface{
     constructor(@inject(delay(() => MessageFlow) ) public messageFlow){
     }
 
-    checkIntentAndSendFeedback (intent,message,client,platformMessageService) {
+    checkIntentAndSendFeedback (intent,message,channel,platformMessageService) {
         let initialThreeLettersOfIntent = "";
         for (let i = 0; i < 3; i++) {
             initialThreeLettersOfIntent += intent.charAt(i);
@@ -17,14 +17,14 @@ export class FeedbackService implements feedbackInterface{
         if (initialThreeLettersOfIntent === "QID"){
 
             // let message_to_platform = this.sendFeedback(intent,sessionId, platformMessageService);
-            return this.triggerFeedbackIntent(message, client, platformMessageService);
+            return this.triggerFeedbackIntent(message, channel, platformMessageService);
         }
     }
 
-    triggerFeedbackIntent(message,client,platformMessageService: platformServiceInterface) {
+    triggerFeedbackIntent(message,channel,platformMessageService: platformServiceInterface) {
         message.messageBody = "suggestions";
         // eslint-disable-next-line max-len
-        this.waiting(5000).then(() => this.messageFlow.processMessage(message,client,platformMessageService).catch((err) => console.error(err)));
+        this.waiting(5000).then(() => this.messageFlow.processMessage(message,channel,platformMessageService).catch((err) => console.error(err)));
     }
 
     waiting (time){
