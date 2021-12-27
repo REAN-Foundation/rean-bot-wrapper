@@ -14,7 +14,7 @@ import { AnemiaModel } from './anemia.service';
 
 @autoInjectable()
 @singleton()
-export class platformMessageService implements platformServiceInterface{
+export class TelegramAnemiaMessageService implements platformServiceInterface{
 
     public _telegram: TelegramBot = null;
 
