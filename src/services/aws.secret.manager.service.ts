@@ -25,7 +25,7 @@ export class AwsSecretsManager {
             });
         });
     }
-
+    
     async getSecrets() {
 
         let responseCredentials:any = await this.getCrossAccountCredentials();
