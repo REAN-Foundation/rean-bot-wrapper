@@ -1,4 +1,12 @@
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { container,  } from 'tsyringe';
+
 export const getRiskAssessmentInfo = async (req) => {
+
+    // eslint-disable-next-line max-len
+    const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
+    const baseURL = clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL");
+    
     return new Promise(async (resolve, reject) => {
         try {
             console.log('START--------');
@@ -108,7 +116,7 @@ export const getRiskAssessmentInfo = async (req) => {
                 response = risk_level.toUpperCase() + " RISK!!! Of developing complication if you get infected with COVID-19.\n\n" +
                     " Based on Age -" + agenum + ", Gender - " + genderText + ", BMI " + BMIValue + " and given complications Final risk score is " + finalScore + "  \n\n(Reference - https://www.reanfoundation.org/risk-assessment-tool/) \n\n" +
                     " We can also  help you  with covid related questions, symptom assessment or vaccination availability.";
-                const imagePath = risk_level.toLocaleLowerCase() === 'low' ? process.env.BASE_URL + '/uploads/L.png' : (risk_level.toLocaleLowerCase() === 'high' ? process.env.BASE_URL + '/uploads/H.png' : process.env.BASE_URL + '/uploads/M.png');
+                const imagePath = risk_level.toLocaleLowerCase() === 'low' ? baseURL + '/uploads/L.png' : (risk_level.toLocaleLowerCase() === 'high' ? baseURL + '/uploads/H.png' : baseURL + '/uploads/M.png');
                 const data = {
                     "fulfillmentMessages" : [
                         {

@@ -10,6 +10,7 @@ import { TelegramMessageServiceFunctionalities } from '../services/telegram.mess
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { AnemiaModel } from './anemia.service';
 
 @autoInjectable()
 @singleton()
@@ -23,6 +24,7 @@ export class platformMessageService implements platformServiceInterface{
     constructor(private messageFlow?: MessageFlow,
         private telegramMessageServiceFunctionalities?: TelegramMessageServiceFunctionalities,
         private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        private anemiaModel?: AnemiaModel,
         @inject("telegram.authenticator") private clientAuthenticator?: clientAuthenticator) {
         this._telegram = new TelegramBot(this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
         this.init();
@@ -42,16 +44,19 @@ export class platformMessageService implements platformServiceInterface{
 
     init(){
         this._telegram.on('message', msg => {
-            this.messageFlow.get_put_msg_Dialogflow(msg, "telegram", this);
+
+            // this.messageFlow.get_put_msg_Dialogflow(msg, "telegram", this);
+            this.anemiaModel.get_put_AnemiaResult(msg, "telegram", this);
         });
     }
 
     setWebhook(clientName){
         this._telegram = new TelegramBot(this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
-        const webhookUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL") + '/v1/' + clientName + '/telegram/' + this.clientAuthenticator.urlToken + '/receive';
+        const webhookUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL") + '/v1/' + clientName + '/anemiaTelegram/' + this.clientAuthenticator.urlToken + '/receive';
         this._telegram.setWebHook(webhookUrl);
+
         // console.log("url tele",webhookUrl)
-        console.log("Telegram webhook set," );
+        console.log("Telegram webhook for anemia set," );
     }
 
     getMessage = async (message) =>{
@@ -63,7 +68,10 @@ export class platformMessageService implements platformServiceInterface{
             return await this.telegramMessageServiceFunctionalities.voiceMessageFormat(message);
         } else if (message.location) {
             return await this.telegramMessageServiceFunctionalities.locationMessageFormat(message);
-        } else {
+        } else if(message.photo){
+            return await this.telegramMessageServiceFunctionalities.imageMessaegFormat(message);
+        }
+        else {
             throw new Error('Message is neither text, voice nor location');
         }
     }

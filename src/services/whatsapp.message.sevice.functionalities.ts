@@ -2,7 +2,7 @@ import { getMessageFunctionalities } from "../refactor/interface/message.service
 import http from  'https';
 import fs from 'fs';
 import { message } from '../refactor/interface/message.interface';
-
+import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 // import { platformMessageService } from './whatsapp.message.service';
 import { Speechtotext } from './speech.to.text.service';
 import { autoInjectable } from "tsyringe";
@@ -12,7 +12,8 @@ import { EmojiFilter } from './filter.message.for.emoji.service';
 export class MessageFunctionalities implements getMessageFunctionalities {
 
     constructor(private emojiFilter?: EmojiFilter,
-        private speechtotext?: Speechtotext){}
+        private speechtotext?: Speechtotext,
+        private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     async textMessageFormat (msg) {
         const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(msg.messages[0].text.body);
@@ -48,12 +49,12 @@ export class MessageFunctionalities implements getMessageFunctionalities {
     GetWhatsappMedia = async (mediaId) => {
         return new Promise((resolve, reject) => {
             const options = {
-                hostname : process.env.WHATSAPP_LIVE_HOST,
+                hostname : this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST"),
                 path     : '/v1/media/' + mediaId,
                 method   : 'GET',
                 headers  : {
                     'Content-Type' : 'application/json',
-                    'D360-Api-Key' : process.env.WHATSAPP_LIVE_API_KEY
+                    'D360-Api-Key' : this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY")
                 }
             };
 

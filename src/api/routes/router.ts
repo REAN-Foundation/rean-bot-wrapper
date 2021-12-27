@@ -4,15 +4,17 @@ import { ChatBotRoutes } from './chat.bot.routes';
 import { autoInjectable } from 'tsyringe';
 import { WhatsappWebhookRoutes } from './whatsapp.webhook.routes';
 import { FrontendRoutes } from "./Frontend.routes";
+import { ClientEnvironmentProviderService } from "../../services/set.client/client.environment.provider.service";
 
 @autoInjectable()
 export class Router {
 
-    private _app = null;
+    private _app: express.Application = null;
 
     constructor(app: express.Application,
                 private chatBotRoutes?: ChatBotRoutes,
                 private whatsappWebhookRoutes?: WhatsappWebhookRoutes,
+                private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
                 private frontendRoutes?: FrontendRoutes,){
         this._app = app;
     }
@@ -21,11 +23,10 @@ export class Router {
         return new Promise((resolve, reject) => {
             try {
                 console.log("Inside router.ts");
-
                 //Handling the base route
                 this._app.get('/v1/', (req, res) => {
                     res.send({
-                        message : `REANCare API [Version ${process.env.API_VERSION}]`,
+                        message : `REANCare API [Version ${this.clientEnvironmentProviderService.getClientEnvironmentVariable("API_VERSION")}]`,
                     });
                 });
 

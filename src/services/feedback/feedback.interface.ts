@@ -1,4 +1,4 @@
 export interface feedbackInterface{
-    checkIntentAndSendFeedback (intent,message,client,platformMessageService)
-    triggerFeedbackIntent(intent,message,client,platformMessageService)
+    checkIntentAndSendFeedback (intent,message,channel,platformMessageService)
+    triggerFeedbackIntent(intent,message,channel,platformMessageService)
 }

@@ -1,18 +1,23 @@
 import { v2 } from '@google-cloud/translate';
-const translateProjectId = process.env.TRANSLATE_PROJECT_ID;
+
 let detected_language = 'en';
 let dialogflow_language = "en-US";
 
+
 export class translateService{
 
-    translateMessage = async (message) => {
-        console.log("entered the translateMessage of translateService JJJJJJJJJJJ", message);
-        const translate = new v2.Translate({ projectId: translateProjectId });
-        console.log("before entering translate.detect");
-        const [detections] = await translate.detect(message);
-        console.log("after entering translate.detect");
-        const detectedLanguage = await Array.isArray(detections) ? detections : [detections];
+    private translateProjectId = process.env.TRANSLATE_PROJECT_ID;
 
+    translateMessage = async (message) => {
+        const GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+        const obj = {
+            credentials: GCPCredentials,
+            projectId: GCPCredentials.project_id
+        };
+        console.log("entered the translateMessage of translateService JJJJJJJJJJJ", message);
+        const translate = new v2.Translate(obj);
+        const [detections] = await translate.detect(message);
+        const detectedLanguage = await Array.isArray(detections) ? detections : [detections];
         detected_language = detectedLanguage[0].language;
         if (detected_language !== 'en') {
             const target = 'en';
@@ -26,7 +31,7 @@ export class translateService{
     }
 
     processdialogflowmessage = async (message, detected_language) => {
-        const translate = new v2.Translate({ projectId: translateProjectId });
+        const translate = new v2.Translate({ projectId: this.translateProjectId });
         console.log("entered the processdialogflowmessage of translateService JJJJJJJJJJJ");
         // eslint-disable-next-line init-declarations
         let translatedResponse;
