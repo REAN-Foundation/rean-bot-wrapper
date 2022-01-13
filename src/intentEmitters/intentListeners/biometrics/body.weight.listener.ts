@@ -50,7 +50,6 @@ export const createWeightInfo = async (intent, eventObj) => {
                 return;
             }
 
-            // if there is only one patient profile associated, get medication for the same
             const patientUserId = result.message[0].UserId;
 
             const accessToken = result.message[0].accessToken;
@@ -76,7 +75,6 @@ export const createWeightInfo = async (intent, eventObj) => {
 export const updateWeightInfo = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
         try {
-            Logger.instance().log('Calling support app Service !!!!!!');
             console.log("Calling support app Service updateWeightInfo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
             // Service Call
@@ -112,7 +110,6 @@ export const updateWeightInfo = async (intent, eventObj) => {
                 return;
             }
 
-            // if there is only one patient profile associated, get medication for the same
             const patientUserId = result.message[0].UserId;
 
             const accessToken = result.message[0].accessToken;
@@ -123,7 +120,6 @@ export const updateWeightInfo = async (intent, eventObj) => {
             options.headers["authorization"] = `Bearer ${accessToken}`;
             options.headers["x-api-key"] = `${reancare_api_key}`;
             const resp = await needle("get", url, options);
-            console.log("resppppppppppppppppppppppppp", resp.body);
             const bodyWeightId = resp.body.Data.BodyWeightRecords.Items[0].id;
 
             Logger.instance().log(`Fetching medication info for PatientUserId: ${patientUserId} & Access Token: ${accessToken}`);

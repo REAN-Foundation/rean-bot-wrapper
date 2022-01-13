@@ -8,6 +8,23 @@ const clientEnvironmentProviderService: ClientEnvironmentProviderService = conta
 const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
 const reancare_api_key = clientEnvironmentProviderService.getClientEnvironmentVariable("ReancareApiKey");
 
+let remark = '';
+const getremark = function (Systolic,Diastolic) {
+
+    if (Systolic <= 120 && Diastolic < 80) {
+        remark = 'in normal range. Stay healthy!';
+    } else if (Systolic <= 129 && Diastolic < 80) {
+        remark = 'in elevated range.';
+    } else if (Systolic <= 139 || Diastolic <= 89) {
+        remark = 'high blood pressure stage 1.';
+    } else if (Systolic < 180 || Diastolic < 120) {
+        remark = 'high blood pressure stage 2. Please consult your Doctor.';
+    } else if (Systolic < 300 || Diastolic < 150) {
+        remark = 'high blood pressure stage 3. Please consult your Doctor.';
+    }
+    return remark;
+};
+
 // eslint-disable-next-line max-len
 export const updateBloodPressureInfoService = async (patientUserId, accessToken, Systolic,Diastolic,BloodPressure_Unit, bloodPressureId) => {
     return new Promise(async (resolve, reject) => {
@@ -47,19 +64,7 @@ export const updateBloodPressureInfoService = async (patientUserId, accessToken,
                     return;
                 }
 
-                let remark = '';
-
-                if (Systolic <= 120 && Diastolic < 80) {
-                    remark = 'in normal range. Stay healthy!';
-                } else if (Systolic <= 129 && Diastolic < 80) {
-                    remark = 'in elevated range.';
-                } else if (Systolic <= 139 || Diastolic <= 89) {
-                    remark = 'high blood pressure stage 1.';
-                } else if (Systolic < 180 || Diastolic < 120) {
-                    remark = 'high blood pressure stage 2. Please consult your Doctor.';
-                } else if (Systolic < 300 || Diastolic < 150) {
-                    remark = 'high blood pressure stage 3. Please consult your Doctor.';
-                }
+                remark = getremark(Systolic,Diastolic);
 
                 const dffMessage = `${unitmsg}Your updated BloodPressure Systolic: ${response.body.Data.BloodPressure.Systolic} Diastolic:${response.body.Data.BloodPressure.Diastolic} ${response.body.Data.BloodPressure.Unit} is ${remark}`;
 
@@ -117,19 +122,7 @@ export const createBloodPressureInfoService = async (patientUserId, accessToken,
                     return;
                 }
 
-                let remark = '';
-
-                if (Systolic <= 120 && Diastolic < 80) {
-                    remark = 'in normal range. Stay healthy!';
-                } else if (Systolic <= 129 && Diastolic < 80) {
-                    remark = 'in elevated range.';
-                } else if (Systolic <= 139 || Diastolic <= 89) {
-                    remark = 'high blood pressure stage 1.';
-                } else if (Systolic < 180 || Diastolic < 120) {
-                    remark = 'high blood pressure stage 2 Please consult your Doctor.';
-                } else if (Systolic < 300 || Diastolic < 150) {
-                    remark = 'high blood pressure stage 3. Please consult your Doctor.';
-                }
+                remark = getremark(Systolic,Diastolic);
 
                 const dffMessage = `${unitmsg}Your newly added BloodPressure Systolic: ${response.body.Data.BloodPressure.Systolic} Diastolic:${response.body.Data.BloodPressure.Diastolic} ${response.body.Data.BloodPressure.Unit} is ${remark}`;
 

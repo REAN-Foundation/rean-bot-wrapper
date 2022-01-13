@@ -14,10 +14,8 @@ const reancare_api_key = clientEnvironmentProviderService.getClientEnvironmentVa
 export const updateBloodPressureInfo = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
         try {
-            Logger.instance().log('Calling support app Service !!!!!!');
             console.log("Calling support app Service updateBloodPressureInfo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
-            // Service Call
             console.log("Request parameter", eventObj.body.queryResult.parameters);
             // eslint-disable-next-line max-len
             if (!eventObj.body.queryResult.parameters.PhoneNumber && !eventObj.body.queryResult.parameters.Systolic) {
@@ -40,7 +38,6 @@ export const updateBloodPressureInfo = async (intent, eventObj) => {
                 return;
             }
 
-            // if there is only one patient profile associated, get medication for the same
             const patientUserId = result.message[0].UserId;
             console.log("patient Iddddddddddd", patientUserId);
 
@@ -81,7 +78,6 @@ export const updateBloodPressureInfo = async (intent, eventObj) => {
 export const createBloodPressureInfo = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
         try {
-            Logger.instance().log('Calling support app Service !!!!!!');
             console.log("Calling support app Service createBloodPressureInfo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
             // Service Call
@@ -107,7 +103,6 @@ export const createBloodPressureInfo = async (intent, eventObj) => {
                 return;
             }
 
-            // if there is only one patient profile associated, get medication for the same
             const patientUserId = result.message[0].UserId;
             console.log("patient Iddddddddddd", patientUserId);
 

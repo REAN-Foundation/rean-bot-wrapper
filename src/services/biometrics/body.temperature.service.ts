@@ -8,6 +8,39 @@ const clientEnvironmentProviderService: ClientEnvironmentProviderService = conta
 const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
 const reancare_api_key = clientEnvironmentProviderService.getClientEnvironmentVariable("ReancareApiKey");
 
+let remark = '';
+const getremark = function (BodyTemperature_Unit,BodyTemperature) {
+
+    if (BodyTemperature_Unit === '°F') {
+                    
+        if (BodyTemperature < 95) {
+            remark = 'in low range.';
+        } else if (BodyTemperature < 99 && BodyTemperature > 95) {
+            remark = 'in normal range. Stay healthy!';
+        } else if (BodyTemperature < 100 && BodyTemperature >= 99) {
+            remark = 'mild fever.';
+        } else if (BodyTemperature < 102 && BodyTemperature >= 100) {
+            remark = 'high. Please consult your Doctor.';
+        } else if (BodyTemperature >= 102) {
+            remark = 'very high. Please consult your Doctor.';
+        }
+    }
+
+    if (BodyTemperature_Unit === '°C') {
+            
+        if (BodyTemperature < 37) {
+            remark = 'in low range.';
+        } else if (BodyTemperature <= 38) {
+            remark = 'in normal range. Stay healthy!';
+        } else if (BodyTemperature < 39) {
+            remark = 'mild fever.';
+        } else if (BodyTemperature < 42) {
+            remark = 'very high. Please consult your Doctor.';
+        }
+    }
+    return remark;
+};
+
 // eslint-disable-next-line max-len
 export const updateBodyTemperatureInfoService = async (patientUserId, accessToken, BodyTemperature,BodyTemperature_Unit, bodyTemperatureId) => {
     return new Promise(async (resolve, reject) => {
@@ -50,35 +83,7 @@ export const updateBodyTemperatureInfoService = async (patientUserId, accessToke
                 return;
             }
 
-            let remark = '';
-
-            if (BodyTemperature_Unit === '°F') {
-                    
-                if (BodyTemperature < 95) {
-                    remark = 'in low range.';
-                } else if (BodyTemperature < 99 && BodyTemperature > 95) {
-                    remark = 'in normal range. Stay healthy!';
-                } else if (BodyTemperature < 100 && BodyTemperature >= 99) {
-                    remark = 'mild fever.';
-                } else if (BodyTemperature < 102 && BodyTemperature >= 100) {
-                    remark = 'high. Please consult your Doctor.';
-                } else if (BodyTemperature >= 102) {
-                    remark = 'very high. Please consult your Doctor.';
-                }
-            }
-
-            if (BodyTemperature_Unit === '°C') {
-                    
-                if (BodyTemperature < 37) {
-                    remark = 'in low range.';
-                } else if (BodyTemperature <= 38) {
-                    remark = 'in normal range. Stay healthy!';
-                } else if (BodyTemperature < 39) {
-                    remark = 'mild fever.';
-                } else if (BodyTemperature < 42) {
-                    remark = 'very high. Please consult your Doctor.';
-                }
-            }
+            remark = getremark(BodyTemperature_Unit,BodyTemperature);
 
             const dffMessage = `${unitmsg}Your updated BodyTemperature ${response.body.Data.BodyTemperature.BodyTemperature} ${response.body.Data.BodyTemperature.Unit} is ${remark}`;
 
@@ -137,35 +142,7 @@ export const createBodyTemperatureInfoService = async (patientUserId, accessToke
                 return;
             }
 
-            let remark = '';
-
-            if (BodyTemperature_Unit === '°F') {
-                    
-                if (BodyTemperature < 95) {
-                    remark = 'in low range.';
-                } else if (BodyTemperature < 99 && BodyTemperature > 95) {
-                    remark = 'in normal range. Stay healthy!';
-                } else if (BodyTemperature < 100 && BodyTemperature >= 99) {
-                    remark = 'mild fever.';
-                } else if (BodyTemperature < 102 && BodyTemperature >= 100) {
-                    remark = 'high. Please consult your Doctor.';
-                } else if (BodyTemperature >= 102) {
-                    remark = 'very high. Please consult your Doctor.';
-                }
-            }
-
-            if (BodyTemperature_Unit === '°C') {
-                    
-                if (BodyTemperature < 37) {
-                    remark = 'in low range.';
-                } else if (BodyTemperature <= 38) {
-                    remark = 'in normal range. Stay healthy!';
-                } else if (BodyTemperature < 39) {
-                    remark = 'mild fever.';
-                } else if (BodyTemperature < 42) {
-                    remark = 'very high. Please consult your Doctor.';
-                }
-            }
+            remark = getremark(BodyTemperature_Unit,BodyTemperature);
 
             const dffMessage = `${unitmsg}Your newly added BodyTemperature ${response.body.Data.BodyTemperature.BodyTemperature} ${response.body.Data.BodyTemperature.Unit} is ${remark}`;
 

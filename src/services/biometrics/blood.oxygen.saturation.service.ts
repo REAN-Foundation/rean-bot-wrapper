@@ -7,6 +7,22 @@ import needle from "needle";
 const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
 const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
 const reancare_api_key = clientEnvironmentProviderService.getClientEnvironmentVariable("ReancareApiKey");
+
+let remark = '';
+const getremark = function (BloodOxygenSaturation) {
+
+    if (BloodOxygenSaturation >= 96) {
+        remark = 'in normal range.';
+    } else if (BloodOxygenSaturation < 96 && BloodOxygenSaturation >= 95) {
+        remark = 'little low. We suggest please continue home monitoring.';
+    } else if (BloodOxygenSaturation < 95 && BloodOxygenSaturation >= 93) {
+        remark = 'low. Please consult your Doctor.';
+    } else if (BloodOxygenSaturation < 93) {
+        remark = 'very low. Please consult your Doctor.';
+    }
+    return remark;
+};
+
 // eslint-disable-next-line max-len
 export const updateBloodOxygenSaturationInfoService = async (patientUserId, accessToken, BloodOxygenSaturation,BloodOxygenSaturation_Unit, bloodOxygenSaturationId) => {
     return new Promise(async (resolve, reject) => {
@@ -38,17 +54,7 @@ export const updateBloodOxygenSaturationInfoService = async (patientUserId, acce
                     reject("Failed to get response from API.");
                     return;
                 }
-                let remark = '';
-
-                if (BloodOxygenSaturation >= 96) {
-                    remark = 'in normal range.';
-                } else if (BloodOxygenSaturation < 96 && BloodOxygenSaturation >= 95) {
-                    remark = 'little low. We suggest please continue home monitoring.';
-                } else if (BloodOxygenSaturation < 95 && BloodOxygenSaturation >= 93) {
-                    remark = 'low. Please consult your Doctor.';
-                } else if (BloodOxygenSaturation < 93) {
-                    remark = 'very low. Please consult your Doctor.';
-                }
+                remark = getremark(BloodOxygenSaturation);
 
                 const dffMessage = `Your updated BloodOxygenSaturation ${response.body.Data.BloodOxygenSaturation.BloodOxygenSaturation}${response.body.Data.BloodOxygenSaturation.Unit} is ${remark}`;
 
@@ -98,18 +104,8 @@ export const createBloodOxygenSaturationInfoService = async (patientUserId, acce
                     reject("Failed to get response from API.");
                     return;
                 }
-                let remark = '';
-
-                if (BloodOxygenSaturation >= 96) {
-                    remark = 'in normal range.';
-                } else if (BloodOxygenSaturation < 96 && BloodOxygenSaturation >= 95) {
-                    remark = 'little low. We suggest please continue home monitoring.';
-                } else if (BloodOxygenSaturation < 95 && BloodOxygenSaturation >= 93) {
-                    remark = 'low. Please consult your Doctor.';
-                } else if (BloodOxygenSaturation < 93) {
-                    remark = 'very low. Please consult your Doctor.';
-                }
-
+                remark = getremark(BloodOxygenSaturation);
+                
                 const dffMessage = `Your newly added BloodOxygenSaturation ${response.body.Data.BloodOxygenSaturation.BloodOxygenSaturation}${response.body.Data.BloodOxygenSaturation.Unit} is ${remark}`;
 
                 const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };

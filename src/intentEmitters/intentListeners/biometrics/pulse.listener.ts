@@ -14,10 +14,8 @@ const reancare_api_key = clientEnvironmentProviderService.getClientEnvironmentVa
 export const updatePulseInfo = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
         try {
-            Logger.instance().log('Calling support app Service !!!!!!');
             console.log("Calling support app Service updatePulseInfo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
-            // Service Call
             console.log("Request parameter", eventObj.body.queryResult.parameters);
             // eslint-disable-next-line max-len
             if (!eventObj.body.queryResult.parameters.PhoneNumber && !eventObj.body.queryResult.parameters.Pulse) {
@@ -43,28 +41,22 @@ export const updatePulseInfo = async (intent, eventObj) => {
                 return;
             }
 
-            // if there is only one patient profile associated, get medication for the same
             const patientUserId = result.message[0].UserId;
 
-            // console.log("patientUserId", patientUserId);
             const accessToken = result.message[0].accessToken;
 
             console.log("accessToken", accessToken);
             const url = `${ReanBackendBaseUrl}clinical/biometrics/pulse/search?patientUserId=${patientUserId}`;
 
-            // console.log("url", url)
             const options = getRequestOptions("rean_app");
             options.headers["authorization"] = `Bearer ${accessToken}`;
             options.headers["x-api-key"] = `${reancare_api_key}`;
             const resp = await needle("get", url, options);
-            console.log("resppppppppppppppppppppppppp", resp.body);
             const pulseId = resp.body.Data.PulseRecords.Items[0].id;
 
             Logger.instance().log(`Fetching medication info for PatientUserId: ${patientUserId} & Access Token: ${accessToken}`);
 
-            result = await
-            // eslint-disable-next-line max-len
-            updatePulseInfoService(patientUserId, accessToken, Pulse, Pulse_Unit, pulseId);
+            result = await updatePulseInfoService(patientUserId, accessToken, Pulse, Pulse_Unit, pulseId);
 
             console.log("Inside listener: ", result);
 
@@ -85,10 +77,8 @@ export const updatePulseInfo = async (intent, eventObj) => {
 export const createPulseInfo = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
         try {
-            Logger.instance().log('Calling support app Service !!!!!!');
             console.log("Calling support app Service createPulseInfo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
-            // Service Call
             console.log("Request parameter", eventObj.body.queryResult.parameters);
             // eslint-disable-next-line max-len
             if (!eventObj.body.queryResult.parameters.PhoneNumber && !eventObj.body.queryResult.parameters.Pulse) {
@@ -114,13 +104,9 @@ export const createPulseInfo = async (intent, eventObj) => {
                 return;
             }
 
-            // if there is only one patient profile associated, get medication for the same
             const patientUserId = result.message[0].UserId;
 
-            // console.log("patientUserId", patientUserId);
             const accessToken = result.message[0].accessToken;
-
-            console.log("accessToken", accessToken);
 
             // eslint-disable-next-line max-len
             result = await createPulseInfoService(patientUserId, accessToken, Pulse, Pulse_Unit);

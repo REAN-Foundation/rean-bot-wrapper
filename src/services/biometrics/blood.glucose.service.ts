@@ -8,11 +8,27 @@ const clientEnvironmentProviderService: ClientEnvironmentProviderService = conta
 const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
 const reancare_api_key = clientEnvironmentProviderService.getClientEnvironmentVariable("ReancareApiKey");
 
+let remark = '';
+const getremark = function (BloodGlucose) {
+
+    if (BloodGlucose < 53) {
+        remark = 'very low. Please consult your doctor.';
+    } else if (BloodGlucose < 70 && BloodGlucose >= 53) {
+        remark = 'low. We suggest please continue home monitoring.';
+    } else if (BloodGlucose < 125 && BloodGlucose >= 70) {
+        remark = 'in normal range. Stay healthy!';
+    } else if (BloodGlucose < 200 && BloodGlucose >= 125) {
+        remark = 'high. Please consult your Doctor.';
+    } else if (BloodGlucose >= 200) {
+        remark = 'very high. Please consult your Doctor.';
+    }
+    return remark;
+};
+
 // eslint-disable-next-line max-len
 export const updateBloodGlucoseInfoService = async (patientUserId, accessToken, BloodGlucose,BloodGlucose_Unit, bloodGlucoseId) => {
     return new Promise(async (resolve, reject) => {
         try {
-            console.log("PUT BloodGlucoseInfo API");
             Logger.instance().log(`PUT BloodGlucoseInfo API`);
 
             if (BloodGlucose) {
@@ -45,19 +61,7 @@ export const updateBloodGlucoseInfoService = async (patientUserId, accessToken, 
                     return;
                 }
 
-                let remark = '';
-
-                if (BloodGlucose < 53) {
-                    remark = 'very low. Please consult your doctor.';
-                } else if (BloodGlucose < 70 && BloodGlucose >= 53) {
-                    remark = 'low. We suggest please continue home monitoring.';
-                } else if (BloodGlucose < 125 && BloodGlucose >= 70) {
-                    remark = 'in normal range. Stay healthy!';
-                } else if (BloodGlucose < 200 && BloodGlucose >= 125) {
-                    remark = 'high. Please consult your Doctor.';
-                } else if (BloodGlucose >= 200) {
-                    remark = 'very high. Please consult your Doctor.';
-                }
+                remark = getremark(BloodGlucose);
 
                 const dffMessage = `${unitmsg}Your updated BloodGlucose ${response.body.Data.BloodGlucose.BloodGlucose} ${response.body.Data.BloodGlucose.Unit} is ${remark}`;
 
@@ -113,20 +117,8 @@ export const createBloodGlucoseInfoService = async (patientUserId, accessToken, 
                     return;
                 }
 
-                let remark = '';
-
-                if (BloodGlucose < 53) {
-                    remark = 'very low. Please consult your doctor.';
-                } else if (BloodGlucose < 70 && BloodGlucose >= 53) {
-                    remark = 'low. We suggest please continue home monitoring.';
-                } else if (BloodGlucose < 125 && BloodGlucose >= 70) {
-                    remark = 'in normal range. Stay healthy!';
-                } else if (BloodGlucose < 200 && BloodGlucose >= 125) {
-                    remark = 'high. Please consult your Doctor.';
-                } else if (BloodGlucose >= 200) {
-                    remark = 'very high. Please consult your Doctor.';
-                }
-
+                remark = getremark(BloodGlucose);
+                
                 const dffMessage = `${unitmsg}Your newly added BloodGlucose ${response.body.Data.BloodGlucose.BloodGlucose} ${response.body.Data.BloodGlucose.Unit} is ${remark}`;
 
                 const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };

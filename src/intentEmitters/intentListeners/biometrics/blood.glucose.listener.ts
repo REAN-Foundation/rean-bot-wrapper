@@ -14,10 +14,8 @@ const reancare_api_key = clientEnvironmentProviderService.getClientEnvironmentVa
 export const updateBloodGlucoseInfo = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
         try {
-            Logger.instance().log('Calling support app Service !!!!!!');
             console.log("Calling support app Service updateBloodGlucoseInfo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
-            // Service Call
             console.log("Request parameter", eventObj.body.queryResult.parameters);
             // eslint-disable-next-line max-len
             if (!eventObj.body.queryResult.parameters.PhoneNumber && !eventObj.body.queryResult.parameters.BloodGlucose_Amount) {
@@ -39,16 +37,13 @@ export const updateBloodGlucoseInfo = async (intent, eventObj) => {
                 return;
             }
 
-            // if there is only one patient profile associated, get medication for the same
             const patientUserId = result.message[0].UserId;
 
-            // console.log("patientUserId", patientUserId);
             const accessToken = result.message[0].accessToken;
 
             console.log("accessToken", accessToken);
             const url = `${ReanBackendBaseUrl}clinical/biometrics/blood-glucose/search?patientUserId=${patientUserId}`;
 
-            // console.log("url", url)
             const options = getRequestOptions("rean_app");
             options.headers["authorization"] = `Bearer ${accessToken}`;
             options.headers["x-api-key"] = `${reancare_api_key}`;
@@ -58,9 +53,8 @@ export const updateBloodGlucoseInfo = async (intent, eventObj) => {
 
             Logger.instance().log(`Fetching medication info for PatientUserId: ${patientUserId} & Access Token: ${accessToken}`);
 
-            result = await
             // eslint-disable-next-line max-len
-            updateBloodGlucoseInfoService(patientUserId, accessToken, BloodGlucose,BloodGlucose_Unit, bloodGlucoseId);
+            result = await updateBloodGlucoseInfoService(patientUserId, accessToken, BloodGlucose,BloodGlucose_Unit, bloodGlucoseId);
 
             console.log("Inside listener: ", result);
 
@@ -81,10 +75,8 @@ export const updateBloodGlucoseInfo = async (intent, eventObj) => {
 export const createBloodGlucoseInfo = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
         try {
-            Logger.instance().log('Calling support app Service !!!!!!');
             console.log("Calling support app Service createBloodGlucoseInfo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
-            // Service Call
             console.log("Request parameter", eventObj.body.queryResult.parameters);
             // eslint-disable-next-line max-len
             if (!eventObj.body.queryResult.parameters.PhoneNumber && !eventObj.body.queryResult.parameters.BloodGlucose_Amount) {
@@ -106,17 +98,11 @@ export const createBloodGlucoseInfo = async (intent, eventObj) => {
                 return;
             }
 
-            // if there is only one patient profile associated, get medication for the same
             const patientUserId = result.message[0].UserId;
 
-            // console.log("patientUserId", patientUserId);
             const accessToken = result.message[0].accessToken;
 
-            console.log("accessToken", accessToken);
-
             result = await createBloodGlucoseInfoService(patientUserId, accessToken, BloodGlucose, BloodGlucose_Unit);
-
-            console.log("Inside listener: ", result);
 
             if (!result.sendDff) {
                 console.log("I am failed");

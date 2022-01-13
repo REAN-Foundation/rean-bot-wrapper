@@ -14,10 +14,8 @@ const reancare_api_key = clientEnvironmentProviderService.getClientEnvironmentVa
 export const updateBloodOxygenSaturationInfo = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
         try {
-            Logger.instance().log('Calling support app Service !!!!!!');
             console.log("Calling support app Service updateBloodOxygenSaturationInfo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
-            // Service Call
             console.log("Request parameter", eventObj.body.queryResult.parameters);
             // eslint-disable-next-line max-len
             if (!eventObj.body.queryResult.parameters.PhoneNumber && !eventObj.body.queryResult.parameters.BloodOxygenSaturation) {
@@ -36,20 +34,16 @@ export const updateBloodOxygenSaturationInfo = async (intent, eventObj) => {
 
             let result;
             result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
-            console.log("Result", result);
 
             if (result.sendDff) {
                 resolve(result.message);
                 return;
             }
 
-            // if there is only one patient profile associated, get medication for the same
             const patientUserId = result.message[0].UserId;
 
-            // console.log("patientUserId", patientUserId);
             const accessToken = result.message[0].accessToken;
 
-            console.log("accessToken", accessToken);
             const url = `${ReanBackendBaseUrl}clinical/biometrics/blood-oxygen-saturations/search?patientUserId=${patientUserId}`;
 
             // console.log("url", url)
@@ -61,10 +55,8 @@ export const updateBloodOxygenSaturationInfo = async (intent, eventObj) => {
             const bloodOxygenSaturationId = resp.body.Data.BloodOxygenSaturationRecords.Items[0].id;
 
             Logger.instance().log(`Fetching medication info for PatientUserId: ${patientUserId} & Access Token: ${accessToken}`);
-
-            result = await
             // eslint-disable-next-line max-len
-            updateBloodOxygenSaturationInfoService(patientUserId, accessToken, BloodOxygenSaturation, BloodOxygenSaturation_Unit, bloodOxygenSaturationId);
+            result = await updateBloodOxygenSaturationInfoService(patientUserId, accessToken, BloodOxygenSaturation, BloodOxygenSaturation_Unit, bloodOxygenSaturationId);
 
             console.log("Inside listener: ", result);
 
@@ -85,7 +77,6 @@ export const updateBloodOxygenSaturationInfo = async (intent, eventObj) => {
 export const createBloodOxygenSaturationInfo = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
         try {
-            Logger.instance().log('Calling support app Service !!!!!!');
             console.log("Calling support app Service createBloodOxygenSaturationInfo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
             // Service Call

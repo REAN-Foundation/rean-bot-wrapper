@@ -8,6 +8,21 @@ const clientEnvironmentProviderService: ClientEnvironmentProviderService = conta
 const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
 const reancare_api_key = clientEnvironmentProviderService.getClientEnvironmentVariable("ReancareApiKey");
 
+let remark = '';
+const getremark = function (Pulse) {
+
+    if (Pulse <= 100 && Pulse > 40) {
+        remark = 'in normal range. Stay healthy!';
+    } else if (Pulse <= 109 && Pulse > 100) {
+        remark = 'little high. We suggest please continue home monitoring.';
+    } else if (Pulse <= 130 && Pulse > 109) {
+        remark = 'high. Please consult your Doctor.';
+    } else if (Pulse > 130) {
+        remark = 'very high. Please consult your Doctor.';
+    }
+    return remark;
+};
+
 // eslint-disable-next-line max-len
 export const updatePulseInfoService = async (patientUserId, accessToken, Pulse, Pulse_Unit, pulseId) => {
     return new Promise(async (resolve, reject) => {
@@ -39,17 +54,7 @@ export const updatePulseInfoService = async (patientUserId, accessToken, Pulse, 
                     return;
                 }
 
-                let remark = '';
-
-                if (Pulse <= 100 && Pulse > 40) {
-                    remark = 'in normal range. Stay healthy!';
-                } else if (Pulse <= 109 && Pulse > 100) {
-                    remark = 'little high. We suggest please continue home monitoring.';
-                } else if (Pulse <= 130 && Pulse > 109) {
-                    remark = 'high. Please consult your Doctor.';
-                } else if (Pulse > 130) {
-                    remark = 'very high. Please consult your Doctor.';
-                }
+                remark = getremark(Pulse);
 
                 const dffMessage = `Your updated Pulse ${response.body.Data.Pulse.Pulse} ${response.body.Data.Pulse.Unit} is ${remark}`;
 
@@ -99,17 +104,7 @@ export const createPulseInfoService = async (patientUserId, accessToken, Pulse, 
                     return;
                 }
 
-                let remark = '';
-
-                if (Pulse <= 100 && Pulse > 40) {
-                    remark = 'in normal range. Stay healthy!';
-                } else if (Pulse <= 109 && Pulse > 100) {
-                    remark = 'little high. We suggest please continue home monitoring.';
-                } else if (Pulse <= 130 && Pulse > 109) {
-                    remark = 'high. Please consult your Doctor.';
-                } else if (Pulse > 130) {
-                    remark = 'very high. Please consult your Doctor.';
-                }
+                remark = getremark(Pulse);
 
                 const dffMessage = `Your newly added Pulse ${response.body.Data.Pulse.Pulse} ${response.body.Data.Pulse.Unit} is ${remark}`;
 

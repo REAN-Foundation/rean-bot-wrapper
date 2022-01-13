@@ -14,7 +14,6 @@ const reancare_api_key = clientEnvironmentProviderService.getClientEnvironmentVa
 export const updateBodyHeightInfo = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
         try {
-            Logger.instance().log('Calling support app Service !!!!!!');
             console.log("Calling support app Service updateBodyHeightInfo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
             // Service Call
@@ -28,8 +27,6 @@ export const updateBodyHeightInfo = async (intent, eventObj) => {
             let BodyHeight = eventObj.body.queryResult.parameters.BodyHeight;
             let BodyHeight_Unit = eventObj.body.queryResult.parameters.BodyHeight_Unit;
             const Inch = eventObj.body.queryResult.parameters.Inch;
-            
-            //const Inch_Unit = eventObj.body.queryResult.parameters.Inch_Unit;
 
             const ten_digit = phoneNumber.substr(phoneNumber.length - 10);
             const country_code = phoneNumber.split(ten_digit)[0];
@@ -113,8 +110,6 @@ export const createBodyHeightInfo = async (intent, eventObj) => {
             let BodyHeight = eventObj.body.queryResult.parameters.BodyHeight;
             let BodyHeight_Unit = eventObj.body.queryResult.parameters.BodyHeight_Unit;
             const Inch = eventObj.body.queryResult.parameters.Inch;
-            
-            //const Inch_Unit = eventObj.body.queryResult.parameters.Inch_Unit;
 
             const ten_digit = phoneNumber.substr(phoneNumber.length - 10);
             const country_code = phoneNumber.split(ten_digit)[0];
@@ -142,10 +137,8 @@ export const createBodyHeightInfo = async (intent, eventObj) => {
                 return;
             }
 
-            // if there is only one patient profile associated, get medication for the same
             const patientUserId = result.message[0].UserId;
 
-            // console.log("patientUserId", patientUserId);
             const accessToken = result.message[0].accessToken;
 
             console.log("accessToken", accessToken);
