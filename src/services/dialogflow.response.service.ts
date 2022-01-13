@@ -1,8 +1,12 @@
 import dialogflow from '@google-cloud/dialogflow';
 import { v4 } from 'uuid';
 import { injectable } from 'tsyringe';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+
 @injectable()
 export class DialogflowResponseService {
+
+    constructor(private clientEnvironment?: ClientEnvironmentProviderService) { }
 
     getDialogflowMessage = async (message, userSessionId = null, platform = null) => {
         try {
@@ -18,29 +22,39 @@ export class DialogflowResponseService {
             let projectIdFinal = null;
 
             if (platform === "REAN_SUPPORT") {
+                const ReanAppGcpCredentials = JSON.parse(this.clientEnvironment.getClientEnvironmentVariable("REAN_APP_SUPPORT_GCP_PROJ_CREDENTIALS"));
                 options = {
-                    keyFilename : process.env.REAN_APP_SUPPORT_GCP_PROJ_CREDENTIALS
+                    credentials : {
+                        client_email : ReanAppGcpCredentials.client_email,
+                        private_key : ReanAppGcpCredentials.private_key
+                    },
+                    projectId : ReanAppGcpCredentials.private_key
                 };
-                projectIdFinal = process.env.DIALOGFLOW_PROJECT_ID_REAN_APP;
+                projectIdFinal = this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_PROJECT_ID_REAN_APP");
 
             } else {
                 console.log("Entered the else of Dialogflow..............");
-                const dialogflowApplicationCredentialsFile = process.env.DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS ?
-                    process.env.DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS : process.env.GOOGLE_APPLICATION_CREDENTIALS;
+                const dfBotGCPCredentials = JSON.parse(this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS"));
+                const GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+                const dialogflowApplicationCredentialsobj = dfBotGCPCredentials ? dfBotGCPCredentials : GCPCredentials;
                 options = {
-                    keyFilename : dialogflowApplicationCredentialsFile
+                    credentials : {
+                        client_email : dialogflowApplicationCredentialsobj.client_email,
+                        private_key : dialogflowApplicationCredentialsobj.private_key
+                    },
+                    projectId : dialogflowApplicationCredentialsobj.private_key
                 };
-                projectIdFinal = process.env.DIALOGFLOW_PROJECT_ID;
+                projectIdFinal = this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_PROJECT_ID");
 
             }
             sessionClient = new dialogflow.SessionsClient(options);
             sessionPath = sessionClient.projectAgentSessionPath(projectIdFinal, sessionId);
             console.log("Message to be sent to DF: ", message);
             const request = {
-                session    : sessionPath,
+                session : sessionPath,
                 queryInput : {
                     text : {
-                        text         : message,
+                        text : message,
                         languageCode : dialogflow_language,
                     },
                 },
@@ -61,19 +75,19 @@ export class DialogflowResponseService {
                 responseMessage.text[0] = result.fulfillmentText;
             }
             return {
-                text       : responseMessage,
-                image      : responseMessage.image ? responseMessage.image : false,
+                text : responseMessage,
+                image : responseMessage.image ? responseMessage.image : false,
                 parse_mode : responseMessage.parse_mode ? responseMessage.parse_mode : false,
-                result     : result,
+                result : result,
             };
         }
         catch (e) {
             console.log(e);
             return {
-                text       : ["Sorry, something went wrong. Let me consult an expert and get back to you!"],
-                image      : { url: '', caption: '' },
+                text : ["Sorry, something went wrong. Let me consult an expert and get back to you!"],
+                image : { url: '', caption: '' },
                 parse_mode : false,
-                result     : false
+                result : false
             };
         }
 

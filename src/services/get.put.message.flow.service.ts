@@ -16,15 +16,15 @@ export class MessageFlow{
         private _feedbackService?:FeedbackService) {
     }
 
-    async get_put_msg_Dialogflow (msg, client ,platformMessageService: platformServiceInterface) {
+    async get_put_msg_Dialogflow (msg, channel ,platformMessageService: platformServiceInterface) {
         console.log("entered the get_put_msg_Dialogflow,,,,,,,,,,,,,,,,,,,,,,,,,");
         const messagetoDialogflow: message = await platformMessageService.getMessage(msg);
         this._elasticsearchUserstat.createUserStat(messagetoDialogflow);
-        return this.processMessage(messagetoDialogflow, client ,platformMessageService);
+        return this.processMessage(messagetoDialogflow, channel ,platformMessageService);
     }
 
-    async processMessage(messagetoDialogflow, client ,platformMessageService: platformServiceInterface) {
-        const processedResponse = await this.handleRequestservice.handleUserRequest(messagetoDialogflow, client);
+    async processMessage(messagetoDialogflow, channel ,platformMessageService: platformServiceInterface) {
+        const processedResponse = await this.handleRequestservice.handleUserRequest(messagetoDialogflow, channel);
         // eslint-disable-next-line max-len
         const response_format: response = await platformMessageService.postResponse(messagetoDialogflow, processedResponse);
         this._elasticsearchUserstat.createUserStat(response_format);
@@ -34,7 +34,7 @@ export class MessageFlow{
 
             const intent = processedResponse.message_from_dialoglow.result && processedResponse.message_from_dialoglow.result.intent ? processedResponse.message_from_dialoglow.result.intent.displayName : '';
             // eslint-disable-next-line max-len
-            message_to_platform = this._feedbackService.checkIntentAndSendFeedback(intent,messagetoDialogflow,client, platformMessageService);
+            message_to_platform = this._feedbackService.checkIntentAndSendFeedback(intent,messagetoDialogflow,channel, platformMessageService);
             // eslint-disable-next-line max-len
             message_to_platform = await platformMessageService.SendMediaMessage(messagetoDialogflow.sessionId, response_format.messageBody,response_format.messageText);
 

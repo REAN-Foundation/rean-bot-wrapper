@@ -10,6 +10,9 @@ import { ConfigurationManager } from "./configs/configuration.manager";
 import { IntentRegister } from './intentEmitters/intent.register';
 import { container } from "tsyringe";
 import { IndexCreation } from './models/elasticsearchmodel';
+import { platformServiceInterface } from "./refactor/interface/platform.interface";
+import { ClientEnvironmentProviderService } from "./services/set.client/client.environment.provider.service";
+import { AwsSecretsManager } from "./services/aws.secret.manager.service";
 
 export default class Application {
 
@@ -23,10 +26,15 @@ export default class Application {
 
     private _IndexCreation: IndexCreation = null;
 
+    private _awsSecretsManager: AwsSecretsManager = null;
+
+    private clientsList = [];
+
     private constructor() {
         this._app = express();
         this._intentRegister = new IntentRegister();
         this._IndexCreation = new IndexCreation();
+        this._awsSecretsManager = new AwsSecretsManager();
     }
 
     public static instance(): Application {
@@ -37,8 +45,61 @@ export default class Application {
         return this._app;
     }
 
-    public start = async(): Promise<void> => {
+    async processClientEnvVariables() {
+
         try {
+            const secretObjectList = await this._awsSecretsManager.getSecrets();
+            
+            for (const ele of secretObjectList) {
+                if (!ele.NAME) {
+                    for (const k in ele) {
+                        if (typeof ele[k] === "object"){
+                            process.env[k.toUpperCase()] = JSON.stringify(ele[k]);
+                        }
+                        else {
+                            process.env[k.toUpperCase()] = ele[k];
+                        }
+                    }
+                }
+                else {
+                    this.clientsList.push(ele.NAME);
+                    for (const k in ele) {
+                        if (typeof ele[k] === "object"){
+                            process.env[ele.NAME + "_" + k.toUpperCase()] = JSON.stringify(ele[k]);
+                        }
+                        else {
+                            process.env[ele.NAME + "_" + k.toUpperCase()] = ele[k];
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    setWebhooksForClients() {
+        // eslint-disable-next-line max-len
+        const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
+        const telegram: platformServiceInterface = container.resolve('telegram');
+        const anemiaTelegram: platformServiceInterface = container.resolve('anemiaTelegram');
+        const whatsapp: platformServiceInterface = container.resolve('whatsapp');
+        for (const clientName of this.clientsList) {
+            clientEnvironmentProviderService.setClientName(clientName);
+            if (clientName === "ANEMIA"){
+                anemiaTelegram.setWebhook(clientName);
+            } else {
+                telegram.setWebhook(clientName);
+                whatsapp.setWebhook(clientName);
+            }
+            
+        }
+
+    }
+
+    public start = async (): Promise<void> => {
+        try {
+            await this.processClientEnvVariables();
 
             //Load configurations
             ConfigurationManager.loadConfigurations();
@@ -57,16 +118,13 @@ export default class Application {
 
             this._IndexCreation.createIndexes();
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const me = container.resolve('telegram');
-
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const me2 = container.resolve('whatsapp');
+            this.setWebhooksForClients();
 
             //Start listening
             await this.listen();
 
         }
-        catch (error){
+        catch (error) {
             Logger.instance().log('An error occurred while starting reancare-api service.' + error.message);
         }
     }
@@ -83,12 +141,12 @@ export default class Application {
                 const MAX_UPLOAD_FILE_SIZE = ConfigurationManager.MaxUploadFileSize();
 
                 this._app.use(fileUpload({
-                    limits            : { fileSize: MAX_UPLOAD_FILE_SIZE },
+                    limits : { fileSize: MAX_UPLOAD_FILE_SIZE },
                     preserveExtension : true,
-                    createParentPath  : true,
-                    parseNested       : true,
-                    useTempFiles      : true,
-                    tempFileDir       : '/tmp/uploads/'
+                    createParentPath : true,
+                    parseNested : true,
+                    useTempFiles : true,
+                    tempFileDir : '/tmp/uploads/'
                 }));
                 resolve(true);
             }
