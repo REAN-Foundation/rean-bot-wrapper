@@ -54,16 +54,13 @@ export const updateBodyHeightInfo = async (intent, eventObj) => {
                 return;
             }
 
-            // if there is only one patient profile associated, get medication for the same
             const patientUserId = result.message[0].UserId;
 
-            // console.log("patientUserId", patientUserId);
             const accessToken = result.message[0].accessToken;
 
             console.log("accessToken", accessToken);
             const url = `${ReanBackendBaseUrl}clinical/biometrics/body-heights/search?patientUserId=${patientUserId}`;
 
-            // console.log("url", url)
             const options = getRequestOptions("rean_app");
             options.headers["authorization"] = `Bearer ${accessToken}`;
             options.headers["x-api-key"] = `${reancare_api_key}`;

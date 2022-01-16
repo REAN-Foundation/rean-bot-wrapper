@@ -17,7 +17,6 @@ export const updateBodyTemperatureInfo = async (intent, eventObj) => {
             Logger.instance().log('Calling support app Service !!!!!!');
             console.log("Calling support app Service updateBodyTemperatureInfo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
-            // Service Call
             console.log("Request parameter", eventObj.body.queryResult.parameters);
             // eslint-disable-next-line max-len
             if (!eventObj.body.queryResult.parameters.PhoneNumber && !eventObj.body.queryResult.parameters.BodyTemperature) {
@@ -39,16 +38,13 @@ export const updateBodyTemperatureInfo = async (intent, eventObj) => {
                 return;
             }
 
-            // if there is only one patient profile associated, get medication for the same
             const patientUserId = result.message[0].UserId;
 
-            // console.log("patientUserId", patientUserId);
             const accessToken = result.message[0].accessToken;
 
             console.log("accessToken", accessToken);
             const url = `${ReanBackendBaseUrl}clinical/biometrics/body-temperatures/search?patientUserId=${patientUserId}`;
 
-            // console.log("url", url)
             const options = getRequestOptions("rean_app");
             options.headers["authorization"] = `Bearer ${accessToken}`;
             options.headers["x-api-key"] = `${reancare_api_key}`;
@@ -82,8 +78,8 @@ export const createBodyTemperatureInfo = async (intent, eventObj) => {
         try {
             console.log("Calling support app Service createBodyTemperatureInfo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
-            // Service Call
             console.log("Request parameter", eventObj.body.queryResult.parameters);
+
             // eslint-disable-next-line max-len
             if (!eventObj.body.queryResult.parameters.PhoneNumber && !eventObj.body.queryResult.parameters.BodyTemperature) {
                 reject("Missing required parameter PhoneNumber and/or BodyTemperature");

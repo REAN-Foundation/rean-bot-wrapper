@@ -25,19 +25,7 @@ const getremark = function (BodyTemperature_Unit,BodyTemperature) {
             remark = 'very high. Please consult your Doctor.';
         }
     }
-
-    if (BodyTemperature_Unit === '°C') {
-            
-        if (BodyTemperature < 37) {
-            remark = 'in low range.';
-        } else if (BodyTemperature <= 38) {
-            remark = 'in normal range. Stay healthy!';
-        } else if (BodyTemperature < 39) {
-            remark = 'mild fever.';
-        } else if (BodyTemperature < 42) {
-            remark = 'very high. Please consult your Doctor.';
-        }
-    }
+    checkForC(BodyTemperature_Unit, BodyTemperature);
     return remark;
 };
 
@@ -46,24 +34,9 @@ export const updateBodyTemperatureInfoService = async (patientUserId, accessToke
     return new Promise(async (resolve, reject) => {
         try {
 
-            let unitmsg = '';
-            if (BodyTemperature_Unit === '') {
-                
-                if (BodyTemperature < 50) {
-                    BodyTemperature_Unit = '°C';
-                    unitmsg = `Temperature unit assumed to °C. `;
-                } else {
-                    BodyTemperature_Unit = '°F';
-                    unitmsg = `Temperature unit assumed to °F. `;
-                }
-
-            }
-            console.log("PUT BodyTemperatureInfo API");
-            Logger.instance().log(`PUT BodyTemperatureInfo API`);
-
-            const options = getRequestOptions("rean_app");
-            options.headers["authorization"] = `Bearer ${accessToken}`;
-            options.headers["x-api-key"] = `${reancare_api_key}`;
+            let options;
+            let unitmsg;
+            ({ options, unitmsg, BodyTemperature_Unit } = getUrl(BodyTemperature_Unit, BodyTemperature, accessToken));
             const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/body-temperatures/${bodyTemperatureId}`;
 
             const obj = {
@@ -104,24 +77,9 @@ export const createBodyTemperatureInfoService = async (patientUserId, accessToke
     return new Promise(async (resolve, reject) => {
         try {
 
-            let unitmsg = '';
-            if (BodyTemperature_Unit === '') {
-                
-                if (BodyTemperature < 50) {
-                    BodyTemperature_Unit = '°C';
-                    unitmsg = `Temperature unit assumed to °C. `;
-                } else {
-                    BodyTemperature_Unit = '°F';
-                    unitmsg = `Temperature unit assumed to °F. `;
-                }
-
-            }
-            console.log("POST BodyTemperatureInfo API");
-            Logger.instance().log(`POST BodyTemperatureInfo API`);
-
-            const options = getRequestOptions("rean_app");
-            options.headers["authorization"] = `Bearer ${accessToken}`;
-            options.headers["x-api-key"] = `${reancare_api_key}`;
+            let options;
+            let unitmsg;
+            ({ options, unitmsg, BodyTemperature_Unit } = getUrl(BodyTemperature_Unit, BodyTemperature, accessToken));
             const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/body-temperatures`;
 
             const obj = {
@@ -157,3 +115,40 @@ export const createBodyTemperatureInfoService = async (patientUserId, accessToke
         }
     });
 };
+
+function getUrl(BodyTemperature_Unit: any, BodyTemperature: any, accessToken: any) {
+    let unitmsg = '';
+    if (BodyTemperature_Unit === '') {
+
+        if (BodyTemperature < 50) {
+            BodyTemperature_Unit = '°C';
+            unitmsg = `Temperature unit assumed to °C. `;
+        } else {
+            BodyTemperature_Unit = '°F';
+            unitmsg = `Temperature unit assumed to °F. `;
+        }
+
+    }
+    console.log("PUT BodyTemperatureInfo API");
+    Logger.instance().log(`PUT BodyTemperatureInfo API`);
+
+    const options = getRequestOptions("rean_app");
+    options.headers["authorization"] = `Bearer ${accessToken}`;
+    options.headers["x-api-key"] = `${reancare_api_key}`;
+    return { options, unitmsg, BodyTemperature_Unit };
+}
+
+function checkForC(BodyTemperature_Unit: any, BodyTemperature: any) {
+    if (BodyTemperature_Unit === '°C') {
+
+        if (BodyTemperature < 37) {
+            remark = 'in low range.';
+        } else if (BodyTemperature <= 38) {
+            remark = 'in normal range. Stay healthy!';
+        } else if (BodyTemperature < 39) {
+            remark = 'mild fever.';
+        } else if (BodyTemperature < 42) {
+            remark = 'very high. Please consult your Doctor.';
+        }
+    }
+}
