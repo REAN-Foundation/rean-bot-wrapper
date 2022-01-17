@@ -24,22 +24,7 @@ export const createWeightInfo = async (intent, eventObj) => {
                 reject("Missing required parameter PhoneNumber and/or BodyWeight");
                 return;
             }
-            const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
-            const BodyWeight = eventObj.body.queryResult.parameters.Weight_Amount;
-            let BodyWeight_Unit = eventObj.body.queryResult.parameters.Weight_unit;
-
-            const ten_digit = phoneNumber.substr(phoneNumber.length - 10);
-            const country_code = phoneNumber.split(ten_digit)[0];
-
-            if (BodyWeight_Unit === '') {
-                if (country_code === '+91') {
-                    BodyWeight_Unit = 'Kg';
-                } else if (country_code === '1') {
-                    BodyWeight_Unit = 'lb';
-                }
-            }
-
-            console.log("phoneNumber, BodyWeigh and Unit", phoneNumber, BodyWeight, BodyWeight_Unit);
+            var { phoneNumber, BodyWeight, BodyWeight_Unit } = checkEntry(eventObj);
 
             let result;
             result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
@@ -56,17 +41,10 @@ export const createWeightInfo = async (intent, eventObj) => {
 
             result = await createWeightInfoService(patientUserId, accessToken, BodyWeight,BodyWeight_Unit);
 
-            console.log("Inside listener: ", result);
-
-            if (!result.sendDff) {
-                console.log("I am failed");
-                reject(result.message);
-            }
-
-            resolve(result.message);
+            giveResponse(result, reject, resolve);
 
         } catch (error) {
-            Logger.instance().log_error(error.message, 500, "Weight Info Listener Error!");
+            Logger.instance().log_error(error.message, 500, "WeightCreate Info Listener Error!");
             reject(error.message);
         }
     });
@@ -78,32 +56,17 @@ export const updateWeightInfo = async (intent, eventObj) => {
             console.log("Calling support app Service updateWeightInfo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
             // Service Call
-            console.log("Request parameter", eventObj.body.queryResult.parameters);
+            console.log("Request Parameter", eventObj.body.queryResult.parameters);
             // eslint-disable-next-line max-len
             if (!eventObj.body.queryResult.parameters.PhoneNumber && !eventObj.body.queryResult.parameters.Weight_Amount) {
-                reject("Missing required parameter PhoneNumber and/or BodyWeight");
+                reject("Missing required parameter PhoneNumber and/or BodyWeight.");
                 return;
             }
-            const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
-            const BodyWeight = eventObj.body.queryResult.parameters.Weight_Amount;
-            let BodyWeight_Unit = eventObj.body.queryResult.parameters.Weight_unit;
-
-            const ten_digit = phoneNumber.substr(phoneNumber.length - 10);
-            const country_code = phoneNumber.split(ten_digit)[0];
-
-            if (BodyWeight_Unit === '') {
-                if (country_code === '+91') {
-                    BodyWeight_Unit = 'Kg';
-                } else if (country_code === '1') {
-                    BodyWeight_Unit = 'lb';
-                }
-            }
-
-            console.log("phoneNumber, BodyWeigh and Unit", phoneNumber, BodyWeight, BodyWeight_Unit);
+            var { phoneNumber, BodyWeight, BodyWeight_Unit } = checkEntry(eventObj);
 
             let result;
             result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
-            console.log("Result", result);
+            console.log("result", result);
 
             if (result.sendDff) {
                 resolve(result.message);
@@ -127,18 +90,43 @@ export const updateWeightInfo = async (intent, eventObj) => {
             // eslint-disable-next-line max-len
             result = await updateWeightInfoService(patientUserId, accessToken, BodyWeight,BodyWeight_Unit, bodyWeightId);
 
-            console.log("Inside listener: ", result);
-
-            if (!result.sendDff) {
-                console.log("I am failed");
-                reject(result.message);
-            }
-
-            resolve(result.message);
+            giveResponse(result, reject, resolve);
 
         } catch (error) {
-            Logger.instance().log_error(error.message, 500, "Weight Info Listener Error!");
+            Logger.instance().log_error(error.message, 500, "WeightUpdate Info Listener Error!");
             reject(error.message);
         }
     });
 };
+
+function giveResponse(result: any, reject: (reason?: any) => void, resolve: (value: unknown) => void) {
+    console.log("Inside listener: ", result);
+
+    if (!result.sendDff) {
+        console.log("I am failed");
+        reject(result.message);
+    }
+
+    resolve(result.message);
+}
+
+function checkEntry(eventObj: any) {
+    const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
+    const BodyWeight = eventObj.body.queryResult.parameters.Weight_Amount;
+    let BodyWeight_Unit = eventObj.body.queryResult.parameters.Weight_unit;
+
+    const ten_digit = phoneNumber.substr(phoneNumber.length - 10);
+    const country_code = phoneNumber.split(ten_digit)[0];
+
+    if (BodyWeight_Unit === '') {
+        if (country_code === '+91') {
+            BodyWeight_Unit = 'Kg';
+        } else if (country_code === '1') {
+            BodyWeight_Unit = 'lb';
+        }
+    }
+
+    console.log("phoneNumber, BodyWeigh and Unit", phoneNumber, BodyWeight, BodyWeight_Unit);
+    return { phoneNumber, BodyWeight, BodyWeight_Unit };
+}
+

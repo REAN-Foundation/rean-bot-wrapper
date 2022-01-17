@@ -27,14 +27,12 @@ const getremark = function (Pulse) {
 export const updatePulseInfoService = async (patientUserId, accessToken, Pulse, Pulse_Unit, pulseId) => {
     return new Promise(async (resolve, reject) => {
         try {
-            console.log("PUT PulseInfo API");
+            
             Logger.instance().log(`PUT PulseInfo API`);
 
             if (Pulse) {
 
-                const options = getRequestOptions("rean_app");
-                options.headers["authorization"] = `Bearer ${accessToken}`;
-                options.headers["x-api-key"] = `${reancare_api_key}`;
+                const options = getOptions(accessToken);
                 const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/Pulse/${pulseId}`;
 
                 const obj = {
@@ -50,7 +48,7 @@ export const updatePulseInfoService = async (patientUserId, accessToken, Pulse, 
                 console.log("response", response);
 
                 if (response.statusCode !== 200) {
-                    reject("Failed to get response from API.");
+                    reject("Failed to get update response from API.");
                     return;
                 }
 
@@ -76,14 +74,12 @@ export const updatePulseInfoService = async (patientUserId, accessToken, Pulse, 
 export const createPulseInfoService = async (patientUserId, accessToken, Pulse, Pulse_Unit) => {
     return new Promise(async (resolve, reject) => {
         try {
-            console.log("POST PulseInfo API");
+            
             Logger.instance().log(`POST PulseInfo API`);
 
             if (Pulse) {
 
-                const options = getRequestOptions("rean_app");
-                options.headers["authorization"] = `Bearer ${accessToken}`;
-                options.headers["x-api-key"] = `${reancare_api_key}`;
+                const options = getOptions(accessToken);
                 const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/Pulse`;
 
                 const obj = {
@@ -93,14 +89,10 @@ export const createPulseInfoService = async (patientUserId, accessToken, Pulse, 
                     "RecordDate"    : Date()
                 };
 
-                console.log("the obj is", obj);
-
                 const response = await needle("post", apiUrl, obj, options);
 
-                console.log("response", response);
-
                 if (response.statusCode !== 201) {
-                    reject("Failed to get response from API.");
+                    reject("Failed to get create response from API.");
                     return;
                 }
 
@@ -121,3 +113,11 @@ export const createPulseInfoService = async (patientUserId, accessToken, Pulse, 
         }
     });
 };
+
+function getOptions(accessToken: any) {
+    const options = getRequestOptions("rean_app");
+    options.headers["authorization"] = `Bearer ${accessToken}`;
+    options.headers["x-api-key"] = `${reancare_api_key}`;
+    return options;
+}
+

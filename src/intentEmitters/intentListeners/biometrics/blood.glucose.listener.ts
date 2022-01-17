@@ -16,32 +16,26 @@ export const updateBloodGlucoseInfo = async (intent, eventObj) => {
         try {
             console.log("Calling support app Service updateBloodGlucoseInfo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
-            console.log("Request parameter", eventObj.body.queryResult.parameters);
             // eslint-disable-next-line max-len
             if (!eventObj.body.queryResult.parameters.PhoneNumber && !eventObj.body.queryResult.parameters.BloodGlucose_Amount) {
                 reject("Missing required parameter PhoneNumber and/or BloodGlucose");
                 return;
             }
-            const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
-            const BloodGlucose = eventObj.body.queryResult.parameters.BloodGlucose_Amount;
-            const BloodGlucose_Unit = eventObj.body.queryResult.parameters.BloodGlucose_unit;
-
-            console.log("phoneNumber, BloodGlucose and Unit", phoneNumber, BloodGlucose, BloodGlucose_Unit);
+            const { phoneNumber, BloodGlucose, BloodGlucose_Unit } = checkEntry(eventObj);
 
             let result;
             result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
             console.log("Result", result);
+
+            const patientUserId = result.message[0].UserId;
+
+            const accessToken = result.message[0].accessToken;
 
             if (result.sendDff) {
                 resolve(result.message);
                 return;
             }
 
-            const patientUserId = result.message[0].UserId;
-
-            const accessToken = result.message[0].accessToken;
-
-            console.log("accessToken", accessToken);
             const url = `${ReanBackendBaseUrl}clinical/biometrics/blood-glucose/search?patientUserId=${patientUserId}`;
 
             const options = getRequestOptions("rean_app");
@@ -56,17 +50,10 @@ export const updateBloodGlucoseInfo = async (intent, eventObj) => {
             // eslint-disable-next-line max-len
             result = await updateBloodGlucoseInfoService(patientUserId, accessToken, BloodGlucose,BloodGlucose_Unit, bloodGlucoseId);
 
-            console.log("Inside listener: ", result);
-
-            if (!result.sendDff) {
-                console.log("I am failed");
-                reject(result.message);
-            }
-
-            resolve(result.message);
+            giveResponse(result, reject, resolve);
 
         } catch (error) {
-            Logger.instance().log_error(error.message, 500, "BloodGlucose Info Listener Error!");
+            Logger.instance().log_error(error.message, 500, "BloodGlucoseUpdate Info Listener Error!");
             reject(error.message);
         }
     });
@@ -77,17 +64,12 @@ export const createBloodGlucoseInfo = async (intent, eventObj) => {
         try {
             console.log("Calling support app Service createBloodGlucoseInfo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
-            console.log("Request parameter", eventObj.body.queryResult.parameters);
             // eslint-disable-next-line max-len
             if (!eventObj.body.queryResult.parameters.PhoneNumber && !eventObj.body.queryResult.parameters.BloodGlucose_Amount) {
-                reject("Missing required parameter PhoneNumber and/or BloodGlucose");
+                reject("Missing required parameter PhoneNumber and/or BloodGlucose.");
                 return;
             }
-            const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
-            const BloodGlucose = eventObj.body.queryResult.parameters.BloodGlucose_Amount;
-            const BloodGlucose_Unit = eventObj.body.queryResult.parameters.BloodGlucose_unit;
-
-            console.log("phoneNumber, BloodGlucose and Unit", phoneNumber, BloodGlucose, BloodGlucose_Unit);
+            const { phoneNumber, BloodGlucose, BloodGlucose_Unit } = checkEntry(eventObj);
 
             var result;
             result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
@@ -104,17 +86,32 @@ export const createBloodGlucoseInfo = async (intent, eventObj) => {
 
             result = await createBloodGlucoseInfoService(patientUserId, accessToken, BloodGlucose, BloodGlucose_Unit);
 
-            if (!result.sendDff) {
-                console.log("I am failed");
-                reject(result.message);
-            }
-
-            resolve(result.message);
+            giveResponse(result, reject, resolve);
 
         } catch (error) {
-            Logger.instance().log_error(error.message, 500, "BloodGlucose Info Listener Error!");
+            Logger.instance().log_error(error.message, 500, "BloodGlucoseCreate Info Listener Error!");
             reject(error.message);
         }
     });
 };
+
+function giveResponse(result: any, reject: (reason?: any) => void, resolve: (value: unknown) => void) {
+    console.log("Inside listener: ", result);
+
+    if (!result.sendDff) {
+        console.log("I am failed");
+        reject(result.message);
+    }
+
+    resolve(result.message);
+}
+
+function checkEntry(eventObj: any) {
+    const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
+    const BloodGlucose = eventObj.body.queryResult.parameters.BloodGlucose_Amount;
+    const BloodGlucose_Unit = eventObj.body.queryResult.parameters.BloodGlucose_unit;
+
+    console.log("phoneNumber, BloodGlucose and Unit", phoneNumber, BloodGlucose, BloodGlucose_Unit);
+    return { phoneNumber, BloodGlucose, BloodGlucose_Unit };
+}
 

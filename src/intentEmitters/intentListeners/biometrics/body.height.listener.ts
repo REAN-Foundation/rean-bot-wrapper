@@ -20,30 +20,10 @@ export const updateBodyHeightInfo = async (intent, eventObj) => {
             console.log("Request parameter", eventObj.body.queryResult.parameters);
             // eslint-disable-next-line max-len
             if (!eventObj.body.queryResult.parameters.PhoneNumber && !eventObj.body.queryResult.parameters.BodyHeight) {
-                reject("Missing required parameter PhoneNumber and/or BodyHeight");
+                reject("Missing required parameter PhoneNumber and/or BodyHeight.");
                 return;
             }
-            const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
-            let BodyHeight = eventObj.body.queryResult.parameters.BodyHeight;
-            let BodyHeight_Unit = eventObj.body.queryResult.parameters.BodyHeight_Unit;
-            const Inch = eventObj.body.queryResult.parameters.Inch;
-
-            const ten_digit = phoneNumber.substr(phoneNumber.length - 10);
-            const country_code = phoneNumber.split(ten_digit)[0];
-
-            if (BodyHeight_Unit === '') {
-                if (country_code === '+91') {
-                    BodyHeight_Unit = 'cm';
-                } else if (country_code === '1') {
-                    BodyHeight_Unit = 'ft';
-                }
-            }
-
-            if (Inch !== '') {
-                BodyHeight = BodyHeight + (Inch / 12);
-            }
-
-            console.log("phoneNumber, BodyHeight and Unit", phoneNumber, BodyHeight, BodyHeight_Unit);
+            var { phoneNumber, BodyHeight, BodyHeight_Unit } = checkEntry(eventObj);
 
             let result;
             result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
@@ -58,7 +38,7 @@ export const updateBodyHeightInfo = async (intent, eventObj) => {
 
             const accessToken = result.message[0].accessToken;
 
-            console.log("accessToken", accessToken);
+            console.log("AccessToken", accessToken);
             const url = `${ReanBackendBaseUrl}clinical/biometrics/body-heights/search?patientUserId=${patientUserId}`;
 
             const options = getRequestOptions("rean_app");
@@ -74,17 +54,10 @@ export const updateBodyHeightInfo = async (intent, eventObj) => {
             // eslint-disable-next-line max-len
             updateBodyHeightInfoService(patientUserId, accessToken, BodyHeight, BodyHeight_Unit, bodyHeightId);
 
-            console.log("Inside listener: ", result);
-
-            if (!result.sendDff) {
-                console.log("I am failed");
-                reject(result.message);
-            }
-
-            resolve(result.message);
-
+            giveResponse(result, reject, resolve);
+            
         } catch (error) {
-            Logger.instance().log_error(error.message, 500, "BodyHeight Info Listener Error!");
+            Logger.instance().log_error(error.message, 500, "BodyHeightUpdate Info Listener Error!");
             reject(error.message);
         }
     });
@@ -103,27 +76,7 @@ export const createBodyHeightInfo = async (intent, eventObj) => {
                 reject("Missing required parameter PhoneNumber and/or BodyHeight");
                 return;
             }
-            const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
-            let BodyHeight = eventObj.body.queryResult.parameters.BodyHeight;
-            let BodyHeight_Unit = eventObj.body.queryResult.parameters.BodyHeight_Unit;
-            const Inch = eventObj.body.queryResult.parameters.Inch;
-
-            const ten_digit = phoneNumber.substr(phoneNumber.length - 10);
-            const country_code = phoneNumber.split(ten_digit)[0];
-
-            if (BodyHeight_Unit === '') {
-                if (country_code === '+91') {
-                    BodyHeight_Unit = 'cm';
-                } else if (country_code === '1') {
-                    BodyHeight_Unit = 'ft';
-                }
-            }
-
-            if (Inch !== '') {
-                BodyHeight = BodyHeight + (Inch / 12);
-            }
-
-            console.log("phoneNumber, BodyHeight and Unit", phoneNumber, BodyHeight, BodyHeight_Unit);
+            var { phoneNumber, BodyHeight, BodyHeight_Unit } = checkEntry(eventObj);
 
             let result;
             result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
@@ -142,19 +95,48 @@ export const createBodyHeightInfo = async (intent, eventObj) => {
 
             result = await createBodyHeightInfoService(patientUserId, accessToken, BodyHeight, BodyHeight_Unit);
 
-            console.log("Inside listener: ", result);
-
-            if (!result.sendDff) {
-                console.log("I am failed");
-                reject(result.message);
-            }
-
-            resolve(result.message);
+            giveResponse(result, reject, resolve);
 
         } catch (error) {
-            Logger.instance().log_error(error.message, 500, "BodyHeight Info Listener Error!");
+            Logger.instance().log_error(error.message, 500, "BodyHeightCreate Info Listener Error!");
             reject(error.message);
         }
     });
 };
+
+function giveResponse(result: any, reject: (reason?: any) => void, resolve: (value: unknown) => void) {
+    console.log("Inside listener: ", result);
+
+    if (!result.sendDff) {
+        console.log("I am failed");
+        reject(result.message);
+    }
+
+    resolve(result.message);
+}
+
+function checkEntry(eventObj: any) {
+    const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
+    let BodyHeight = eventObj.body.queryResult.parameters.BodyHeight;
+    let BodyHeight_Unit = eventObj.body.queryResult.parameters.BodyHeight_Unit;
+    const Inch = eventObj.body.queryResult.parameters.Inch;
+
+    const ten_digit = phoneNumber.substr(phoneNumber.length - 10);
+    const country_code = phoneNumber.split(ten_digit)[0];
+
+    if (BodyHeight_Unit === '') {
+        if (country_code === '+91') {
+            BodyHeight_Unit = 'cm';
+        } else if (country_code === '1') {
+            BodyHeight_Unit = 'ft';
+        }
+    }
+
+    if (Inch !== '') {
+        BodyHeight = BodyHeight + (Inch / 12);
+    }
+
+    console.log("phoneNumber, BodyHeight and Unit", phoneNumber, BodyHeight, BodyHeight_Unit);
+    return { phoneNumber, BodyHeight, BodyHeight_Unit };
+}
 

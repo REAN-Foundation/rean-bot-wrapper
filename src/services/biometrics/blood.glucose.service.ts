@@ -33,15 +33,9 @@ export const updateBloodGlucoseInfoService = async (patientUserId, accessToken, 
 
             if (BloodGlucose) {
 
-                let unitmsg = '';
-                if (BloodGlucose_Unit === '') {
-                    BloodGlucose_Unit = 'mg/dL';
-                    unitmsg = `BloodGlucose unit assumed to mg/dL. `;
-
-                }
-                const options = getRequestOptions("rean_app");
-                options.headers["authorization"] = `Bearer ${accessToken}`;
-                options.headers["x-api-key"] = `${reancare_api_key}`;
+                let options;
+                let unitmsg;
+                ({ options, unitmsg, BloodGlucose_Unit } = getUrl(BloodGlucose_Unit, accessToken));
                 const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/blood-glucose/${bloodGlucoseId}`;
 
                 const obj = {
@@ -49,8 +43,6 @@ export const updateBloodGlucoseInfoService = async (patientUserId, accessToken, 
                     "BloodGlucose"  : BloodGlucose,
                     "Unit"          : BloodGlucose_Unit
                 };
-
-                console.log("the obj is", obj);
 
                 const response = await needle("put", apiUrl, obj, options);
 
@@ -87,16 +79,9 @@ export const createBloodGlucoseInfoService = async (patientUserId, accessToken, 
 
             if (BloodGlucose) {
 
-                let unitmsg = '';
-                if (BloodGlucose_Unit === '') {
-                    BloodGlucose_Unit = 'mg/dL';
-                    unitmsg = `BloodGlucose unit assumed to mg/dL. `;
-
-                }
-
-                const options = getRequestOptions("rean_app");
-                options.headers["authorization"] = `Bearer ${accessToken}`;
-                options.headers["x-api-key"] = `${reancare_api_key}`;
+                let options;
+                let unitmsg;
+                ({ options, unitmsg, BloodGlucose_Unit } = getUrl(BloodGlucose_Unit, accessToken));
                 const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/blood-glucose`;
 
                 const obj = {
@@ -134,3 +119,16 @@ export const createBloodGlucoseInfoService = async (patientUserId, accessToken, 
         }
     });
 };
+function getUrl(BloodGlucose_Unit: any, accessToken: any) {
+    let unitmsg = '';
+    if (BloodGlucose_Unit === '') {
+        BloodGlucose_Unit = 'mg/dL';
+        unitmsg = `BloodGlucose unit assumed to mg/dL. `;
+
+    }
+    const options = getRequestOptions("rean_app");
+    options.headers["authorization"] = `Bearer ${accessToken}`;
+    options.headers["x-api-key"] = `${reancare_api_key}`;
+    return { options, unitmsg, BloodGlucose_Unit };
+}
+

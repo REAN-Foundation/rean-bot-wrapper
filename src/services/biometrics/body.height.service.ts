@@ -12,15 +12,11 @@ const reancare_api_key = clientEnvironmentProviderService.getClientEnvironmentVa
 export const updateBodyHeightInfoService = async (patientUserId, accessToken, BodyHeight,BodyHeight_Unit, bodyHeightId) => {
     return new Promise(async (resolve, reject) => {
         try {
-            console.log("PUT BodyHeightInfo API");
-            console.log(`patientUserId ${patientUserId}`);
             Logger.instance().log(`PUT BodyHeightInfo API`);
 
             if (BodyHeight) {
 
-                const options = getRequestOptions("rean_app");
-                options.headers["authorization"] = `Bearer ${accessToken}`;
-                options.headers["x-api-key"] = `${reancare_api_key}`;
+                const options = getOptions(accessToken);
                 const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/body-heights/${bodyHeightId}`;
 
                 const obj = {
@@ -36,7 +32,7 @@ export const updateBodyHeightInfoService = async (patientUserId, accessToken, Bo
                 console.log("response", response);
 
                 if (response.statusCode !== 200) {
-                    reject("Failed to get response from API.");
+                    reject("Failed to get update response from API.");
                     return;
                 }
 
@@ -60,15 +56,11 @@ export const updateBodyHeightInfoService = async (patientUserId, accessToken, Bo
 export const createBodyHeightInfoService = async (patientUserId, accessToken, BodyHeight,BodyHeight_Unit) => {
     return new Promise(async (resolve, reject) => {
         try {
-            console.log("POST BodyHeightInfo API");
-            console.log(`patientUserId ${patientUserId}`);
             Logger.instance().log(`POST BodyHeightInfo API`);
 
             if (BodyHeight) {
 
-                const options = getRequestOptions("rean_app");
-                options.headers["authorization"] = `Bearer ${accessToken}`;
-                options.headers["x-api-key"] = `${reancare_api_key}`;
+                const options = getOptions(accessToken);
                 const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/body-heights`;
 
                 const obj = {
@@ -78,14 +70,10 @@ export const createBodyHeightInfoService = async (patientUserId, accessToken, Bo
                     "RecordDate"    : Date()
                 };
 
-                console.log("the obj is", obj);
-
                 const response = await needle("post", apiUrl, obj, options);
 
-                console.log("response", response);
-
                 if (response.statusCode !== 201) {
-                    reject("Failed to get response from API.");
+                    reject("Failed to get create response from API.");
                     return;
                 }
 
@@ -104,3 +92,10 @@ export const createBodyHeightInfoService = async (patientUserId, accessToken, Bo
         }
     });
 };
+function getOptions(accessToken: any) {
+    const options = getRequestOptions("rean_app");
+    options.headers["authorization"] = `Bearer ${accessToken}`;
+    options.headers["x-api-key"] = `${reancare_api_key}`;
+    return options;
+}
+

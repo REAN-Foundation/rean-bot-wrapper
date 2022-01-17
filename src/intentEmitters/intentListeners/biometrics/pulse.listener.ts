@@ -16,25 +16,17 @@ export const updatePulseInfo = async (intent, eventObj) => {
         try {
             console.log("Calling support app Service updatePulseInfo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
-            console.log("Request parameter", eventObj.body.queryResult.parameters);
+            console.log("Request Parameter", eventObj.body.queryResult.parameters);
             // eslint-disable-next-line max-len
             if (!eventObj.body.queryResult.parameters.PhoneNumber && !eventObj.body.queryResult.parameters.Pulse) {
-                reject("Missing required parameter PhoneNumber and/or Pulse");
+                reject("Missing required parameter PhoneNumber and/or Pulse.");
                 return;
             }
-            const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
-            const Pulse = eventObj.body.queryResult.parameters.Pulse;
-            let Pulse_Unit = eventObj.body.queryResult.parameters.Pulse_Unit;
-
-            if (Pulse_Unit === '') {
-                Pulse_Unit = 'bpm';
-            }
-
-            console.log("phoneNumber, Pulse and Unit", phoneNumber, Pulse, Pulse_Unit);
+            var { phoneNumber, Pulse, Pulse_Unit } = checkEntry(eventObj);
 
             let result;
             result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
-            console.log("Result", result);
+            console.log("result", result);
 
             if (result.sendDff) {
                 resolve(result.message);
@@ -45,7 +37,7 @@ export const updatePulseInfo = async (intent, eventObj) => {
 
             const accessToken = result.message[0].accessToken;
 
-            console.log("accessToken", accessToken);
+            console.log("AccessToken", accessToken);
             const url = `${ReanBackendBaseUrl}clinical/biometrics/pulse/search?patientUserId=${patientUserId}`;
 
             const options = getRequestOptions("rean_app");
@@ -58,17 +50,10 @@ export const updatePulseInfo = async (intent, eventObj) => {
 
             result = await updatePulseInfoService(patientUserId, accessToken, Pulse, Pulse_Unit, pulseId);
 
-            console.log("Inside listener: ", result);
-
-            if (!result.sendDff) {
-                console.log("I am failed");
-                reject(result.message);
-            }
-
-            resolve(result.message);
+            giveResponse(result, reject, resolve);
 
         } catch (error) {
-            Logger.instance().log_error(error.message, 500, "Pulse Info Listener Error!");
+            Logger.instance().log_error(error.message, 500, "PulseUpdate Info Listener Error!");
             reject(error.message);
         }
     });
@@ -85,15 +70,7 @@ export const createPulseInfo = async (intent, eventObj) => {
                 reject("Missing required parameter PhoneNumber and/or Pulse");
                 return;
             }
-            const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
-            const Pulse = eventObj.body.queryResult.parameters.Pulse;
-            let Pulse_Unit = eventObj.body.queryResult.parameters.Pulse_Unit;
-
-            if (Pulse_Unit === '') {
-                Pulse_Unit = 'bpm';
-            }
-
-            console.log("phoneNumber, Pulse and Unit", phoneNumber, Pulse, Pulse_Unit);
+            var { phoneNumber, Pulse, Pulse_Unit } = checkEntry(eventObj);
 
             let result;
             result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
@@ -111,18 +88,36 @@ export const createPulseInfo = async (intent, eventObj) => {
             // eslint-disable-next-line max-len
             result = await createPulseInfoService(patientUserId, accessToken, Pulse, Pulse_Unit);
 
-            console.log("Inside listener: ", result);
-
-            if (!result.sendDff) {
-                console.log("I am failed");
-                reject(result.message);
-            }
-
-            resolve(result.message);
+            giveResponse(result, reject, resolve);
 
         } catch (error) {
-            Logger.instance().log_error(error.message, 500, "Pulse Info Listener Error!");
+            Logger.instance().log_error(error.message, 500, "PulseCreate Info Listener Error!");
             reject(error.message);
         }
     });
 };
+
+function giveResponse(result: any, reject: (reason?: any) => void, resolve: (value: unknown) => void) {
+    console.log("Inside listener: ", result);
+
+    if (!result.sendDff) {
+        console.log("I am failed");
+        reject(result.message);
+    }
+
+    resolve(result.message);
+}
+
+function checkEntry(eventObj: any) {
+    const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
+    const Pulse = eventObj.body.queryResult.parameters.Pulse;
+    let Pulse_Unit = eventObj.body.queryResult.parameters.Pulse_Unit;
+
+    if (Pulse_Unit === '') {
+        Pulse_Unit = 'bpm';
+    }
+
+    console.log("phoneNumber, Pulse and Unit", phoneNumber, Pulse, Pulse_Unit);
+    return { phoneNumber, Pulse, Pulse_Unit };
+}
+

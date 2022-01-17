@@ -27,15 +27,9 @@ const getremark = function (BloodOxygenSaturation) {
 export const updateBloodOxygenSaturationInfoService = async (patientUserId, accessToken, BloodOxygenSaturation,BloodOxygenSaturation_Unit, bloodOxygenSaturationId) => {
     return new Promise(async (resolve, reject) => {
         try {
-            console.log("PUT BloodOxygenSaturationInfo API");
-            console.log(`patientUserId is ${patientUserId}`);
-            Logger.instance().log(`PUT BloodOxygenSaturationInfo API`);
-
             if (BloodOxygenSaturation) {
 
-                const options = getRequestOptions("rean_app");
-                options.headers["authorization"] = `Bearer ${accessToken}`;
-                options.headers["x-api-key"] = `${reancare_api_key}`;
+                const options = getOptions(accessToken);
                 const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/blood-oxygen-saturations/${bloodOxygenSaturationId}`;
 
                 const obj = {
@@ -43,8 +37,6 @@ export const updateBloodOxygenSaturationInfoService = async (patientUserId, acce
                     "BloodOxygenSaturation" : BloodOxygenSaturation,
                     "Unit"                  : BloodOxygenSaturation_Unit
                 };
-
-                console.log("the obj is", obj);
 
                 const response = await needle("put", apiUrl, obj, options);
 
@@ -76,15 +68,12 @@ export const updateBloodOxygenSaturationInfoService = async (patientUserId, acce
 export const createBloodOxygenSaturationInfoService = async (patientUserId, accessToken, BloodOxygenSaturation,BloodOxygenSaturation_Unit) => {
     return new Promise(async (resolve, reject) => {
         try {
-            console.log("POST BloodOxygenSaturationInfo API");
-            console.log(`patientUserId is ${patientUserId}`);
+
             Logger.instance().log(`POST BloodOxygenSaturationInfo API`);
 
             if (BloodOxygenSaturation) {
 
-                const options = getRequestOptions("rean_app");
-                options.headers["authorization"] = `Bearer ${accessToken}`;
-                options.headers["x-api-key"] = `${reancare_api_key}`;
+                const options = getOptions(accessToken);
                 const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/blood-oxygen-saturations`;
 
                 const obj = {
@@ -97,8 +86,6 @@ export const createBloodOxygenSaturationInfoService = async (patientUserId, acce
                 console.log("the obj is", obj);
 
                 const response = await needle("post", apiUrl, obj, options);
-
-                console.log("response", response);
 
                 if (response.statusCode !== 201) {
                     reject("Failed to get response from API.");
@@ -121,3 +108,10 @@ export const createBloodOxygenSaturationInfoService = async (patientUserId, acce
         }
     });
 };
+
+function getOptions(accessToken: any) {
+    const options = getRequestOptions("rean_app");
+    options.headers["authorization"] = `Bearer ${accessToken}`;
+    options.headers["x-api-key"] = `${reancare_api_key}`;
+    return options;
+}

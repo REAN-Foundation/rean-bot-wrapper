@@ -29,21 +29,13 @@ const getremark = function (Systolic,Diastolic) {
 export const updateBloodPressureInfoService = async (patientUserId, accessToken, Systolic,Diastolic,BloodPressure_Unit, bloodPressureId) => {
     return new Promise(async (resolve, reject) => {
         try {
-            console.log("PUT BloodPressureInfo API");
             Logger.instance().log(`PUT BloodPressureInfo API`);
 
             if (Systolic) {
 
-                let unitmsg = '';
-                if (BloodPressure_Unit === '') {
-                    BloodPressure_Unit = 'mmHg';
-                    unitmsg = `BloodPressure unit assumed to mmHg. `;
-
-                }
-
-                const options = getRequestOptions("rean_app");
-                options.headers["authorization"] = `Bearer ${accessToken}`;
-                options.headers["x-api-key"] = `${reancare_api_key}`;
+                let options;
+                let unitmsg;
+                ({ options, unitmsg, BloodPressure_Unit } = getOptions(BloodPressure_Unit, accessToken));
                 const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/blood-pressures/${bloodPressureId}`;
 
                 const obj = {
@@ -60,7 +52,7 @@ export const updateBloodPressureInfoService = async (patientUserId, accessToken,
                 console.log("response", response);
 
                 if (response.statusCode !== 200) {
-                    reject("Failed to get response from API.");
+                    reject("Failed to get update response from API.");
                     return;
                 }
 
@@ -76,7 +68,7 @@ export const updateBloodPressureInfoService = async (patientUserId, accessToken,
             
         }
         catch (error) {
-            Logger.instance().log_error(error.message, 500, "BloodPressure Info Service Error!");
+            Logger.instance().log_error(error.message, 500, "UpdateBloodPressure Info Service Error!");
             reject(error.message);
         }
     });
@@ -91,16 +83,9 @@ export const createBloodPressureInfoService = async (patientUserId, accessToken,
 
             if (Systolic) {
 
-                let unitmsg = '';
-                if (BloodPressure_Unit === '') {
-                    BloodPressure_Unit = 'mmHg';
-                    unitmsg = `BloodPressure unit assumed to mmHg. `;
-
-                }
-
-                const options = getRequestOptions("rean_app");
-                options.headers["authorization"] = `Bearer ${accessToken}`;
-                options.headers["x-api-key"] = `${reancare_api_key}`;
+                let options;
+                let unitmsg;
+                ({ options, unitmsg, BloodPressure_Unit } = getOptions(BloodPressure_Unit, accessToken));
                 const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/blood-pressures`;
 
                 const obj = {
@@ -111,14 +96,10 @@ export const createBloodPressureInfoService = async (patientUserId, accessToken,
                     "RecordDate"    : Date()
                 };
 
-                console.log("the obj is", obj);
-
                 const response = await needle("post", apiUrl, obj, options);
 
-                console.log("response", response);
-
                 if (response.statusCode !== 201) {
-                    reject("Failed to get response from API.");
+                    reject("Failed to get create response from API.");
                     return;
                 }
 
@@ -134,8 +115,22 @@ export const createBloodPressureInfoService = async (patientUserId, accessToken,
             
         }
         catch (error) {
-            Logger.instance().log_error(error.message, 500, "BloodPressure Info Service Error!");
+            Logger.instance().log_error(error.message, 500, "CreateBloodPressure Info Service Error!");
             reject(error.message);
         }
     });
 };
+function getOptions(BloodPressure_Unit: any, accessToken: any) {
+    let unitmsg = '';
+    if (BloodPressure_Unit === '') {
+        BloodPressure_Unit = 'mmHg';
+        unitmsg = `BloodPressure unit assumed to mmHg. `;
+
+    }
+
+    const options = getRequestOptions("rean_app");
+    options.headers["authorization"] = `Bearer ${accessToken}`;
+    options.headers["x-api-key"] = `${reancare_api_key}`;
+    return { options, unitmsg, BloodPressure_Unit };
+}
+

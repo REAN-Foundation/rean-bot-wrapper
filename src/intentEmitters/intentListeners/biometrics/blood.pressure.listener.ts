@@ -16,22 +16,15 @@ export const updateBloodPressureInfo = async (intent, eventObj) => {
         try {
             console.log("Calling support app Service updateBloodPressureInfo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
-            console.log("Request parameter", eventObj.body.queryResult.parameters);
             // eslint-disable-next-line max-len
             if (!eventObj.body.queryResult.parameters.PhoneNumber && !eventObj.body.queryResult.parameters.Systolic) {
-                reject("Missing required parameter PhoneNumber and/or BloodPressure");
+                reject("Missing required parameter PhoneNumber and/or BloodPressure.");
                 return;
             }
-            const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
-            const Systolic = eventObj.body.queryResult.parameters.Systolic;
-            const Diastolic = eventObj.body.queryResult.parameters.Diastolic;
-            const BloodPressure_Unit = eventObj.body.queryResult.parameters.Unit;
-
-            console.log("phoneNumber, Systole, Diastole and Unit", phoneNumber, Systolic, Diastolic, BloodPressure_Unit);
+            const { phoneNumber, Systolic, Diastolic, BloodPressure_Unit } = checkEntry(eventObj);
 
             let result;
             result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
-            console.log("Result", result);
 
             if (result.sendDff) {
                 resolve(result.message);
@@ -59,17 +52,10 @@ export const updateBloodPressureInfo = async (intent, eventObj) => {
             // eslint-disable-next-line max-len
             updateBloodPressureInfoService(patientUserId, accessToken, Systolic,Diastolic,BloodPressure_Unit, bloodPressureId);
 
-            console.log("Inside listener: ", result);
-
-            if (!result.sendDff) {
-                console.log("I am failed");
-                reject(result.message);
-            }
-
-            resolve(result.message);
+            giveResponse(result, reject, resolve);
 
         } catch (error) {
-            Logger.instance().log_error(error.message, 500, "BloodPressure Info Listener Error!");
+            Logger.instance().log_error(error.message, 500, "BloodPressureUpdate Info Listener Error!");
             reject(error.message);
         }
     });
@@ -87,12 +73,7 @@ export const createBloodPressureInfo = async (intent, eventObj) => {
                 reject("Missing required parameter PhoneNumber and/or BloodPressure");
                 return;
             }
-            const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
-            const Systolic = eventObj.body.queryResult.parameters.Systolic;
-            const Diastolic = eventObj.body.queryResult.parameters.Diastolic;
-            const BloodPressure_Unit = eventObj.body.queryResult.parameters.Unit;
-
-            console.log("phoneNumber, Systole, Diastole and Unit", phoneNumber, Systolic, Diastolic, BloodPressure_Unit);
+            const { phoneNumber, Systolic, Diastolic, BloodPressure_Unit } = checkEntry(eventObj);
 
             let result;
             result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
@@ -104,25 +85,39 @@ export const createBloodPressureInfo = async (intent, eventObj) => {
             }
 
             const patientUserId = result.message[0].UserId;
-            console.log("patient Iddddddddddd", patientUserId);
+            console.log("patient Idddddddddddd", patientUserId);
 
             const accessToken = result.message[0].accessToken;
 
             // eslint-disable-next-line max-len
             result = await createBloodPressureInfoService(patientUserId, accessToken, Systolic,Diastolic,BloodPressure_Unit);
 
-            console.log("Inside listener: ", result);
-
-            if (!result.sendDff) {
-                console.log("I am failed");
-                reject(result.message);
-            }
-
-            resolve(result.message);
+            giveResponse(result, reject, resolve);
 
         } catch (error) {
-            Logger.instance().log_error(error.message, 500, "BloodPressure Info Listener Error!");
+            Logger.instance().log_error(error.message, 500, "BloodPressureCreate Info Listener Error!");
             reject(error.message);
         }
     });
 };
+function giveResponse(result: any, reject: (reason?: any) => void, resolve: (value: unknown) => void) {
+    console.log("Inside listener: ", result);
+
+    if (!result.sendDff) {
+        console.log("I am failed");
+        reject(result.message);
+    }
+
+    resolve(result.message);
+}
+
+function checkEntry(eventObj: any) {
+    const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
+    const Systolic = eventObj.body.queryResult.parameters.Systolic;
+    const Diastolic = eventObj.body.queryResult.parameters.Diastolic;
+    const BloodPressure_Unit = eventObj.body.queryResult.parameters.Unit;
+
+    console.log("phoneNumber, Systole, Diastole and Unit", phoneNumber, Systolic, Diastolic, BloodPressure_Unit);
+    return { phoneNumber, Systolic, Diastolic, BloodPressure_Unit };
+}
+

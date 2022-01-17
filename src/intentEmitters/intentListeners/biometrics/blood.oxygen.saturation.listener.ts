@@ -16,21 +16,12 @@ export const updateBloodOxygenSaturationInfo = async (intent, eventObj) => {
         try {
             console.log("Calling support app Service updateBloodOxygenSaturationInfo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
-            console.log("Request parameter", eventObj.body.queryResult.parameters);
             // eslint-disable-next-line max-len
             if (!eventObj.body.queryResult.parameters.PhoneNumber && !eventObj.body.queryResult.parameters.BloodOxygenSaturation) {
-                reject("Missing required parameter PhoneNumber and/or BloodOxygenSaturation");
+                reject("Missing required parameter PhoneNumber and/or BloodOxygenSaturation.");
                 return;
             }
-            const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
-            const BloodOxygenSaturation = eventObj.body.queryResult.parameters.BloodOxygenSaturation;
-            let BloodOxygenSaturation_Unit = eventObj.body.queryResult.parameters.Unit;
-
-            if (BloodOxygenSaturation_Unit === '') {
-                BloodOxygenSaturation_Unit = '%';
-            }
-
-            console.log("phoneNumber, BloodOxygenSaturation and Unit", phoneNumber, BloodOxygenSaturation, BloodOxygenSaturation_Unit);
+            var { phoneNumber, BloodOxygenSaturation, BloodOxygenSaturation_Unit } = checkEntry(eventObj);
 
             let result;
             result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
@@ -58,17 +49,10 @@ export const updateBloodOxygenSaturationInfo = async (intent, eventObj) => {
             // eslint-disable-next-line max-len
             result = await updateBloodOxygenSaturationInfoService(patientUserId, accessToken, BloodOxygenSaturation, BloodOxygenSaturation_Unit, bloodOxygenSaturationId);
 
-            console.log("Inside listener: ", result);
-
-            if (!result.sendDff) {
-                console.log("I am failed");
-                reject(result.message);
-            }
-
-            resolve(result.message);
+            giveResponse(result, reject, resolve);
 
         } catch (error) {
-            Logger.instance().log_error(error.message, 500, "BloodOxygenSaturation Info Listener Error!");
+            Logger.instance().log_error(error.message, 500, "BloodOxygenSaturationUpdate Info Listener Error!");
             reject(error.message);
         }
     });
@@ -86,15 +70,7 @@ export const createBloodOxygenSaturationInfo = async (intent, eventObj) => {
                 reject("Missing required parameter PhoneNumber and/or BloodOxygenSaturation");
                 return;
             }
-            const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
-            const BloodOxygenSaturation = eventObj.body.queryResult.parameters.BloodOxygenSaturation;
-            let BloodOxygenSaturation_Unit = eventObj.body.queryResult.parameters.Unit;
-
-            if (BloodOxygenSaturation_Unit === '') {
-                BloodOxygenSaturation_Unit = '%';
-            }
-
-            console.log("phoneNumber, BloodOxygenSaturation and Unit", phoneNumber, BloodOxygenSaturation, BloodOxygenSaturation_Unit);
+            var { phoneNumber, BloodOxygenSaturation, BloodOxygenSaturation_Unit } = checkEntry(eventObj);
 
             let result;
             result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
@@ -109,24 +85,39 @@ export const createBloodOxygenSaturationInfo = async (intent, eventObj) => {
 
             const accessToken = result.message[0].accessToken;
 
-            console.log("accessToken", accessToken);
-
             // eslint-disable-next-line max-len
             result = await createBloodOxygenSaturationInfoService(patientUserId, accessToken, BloodOxygenSaturation, BloodOxygenSaturation_Unit);
 
-            console.log("Inside listener: ", result);
-
-            if (!result.sendDff) {
-                console.log("I am failed");
-                reject(result.message);
-            }
-
-            resolve(result.message);
+            giveResponse(result, reject, resolve);
 
         } catch (error) {
-            Logger.instance().log_error(error.message, 500, "BloodOxygenSaturation Info Listener Error!");
+            Logger.instance().log_error(error.message, 500, "BloodOxygenSaturationCreate Info Listener Error!");
             reject(error.message);
         }
     });
 };
+
+function giveResponse(result: any, reject: (reason?: any) => void, resolve: (value: unknown) => void) {
+    console.log("Inside listener: ", result);
+
+    if (!result.sendDff) {
+        console.log("I am failed");
+        reject(result.message);
+    }
+
+    resolve(result.message);
+}
+
+function checkEntry(eventObj: any) {
+    const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
+    const BloodOxygenSaturation = eventObj.body.queryResult.parameters.BloodOxygenSaturation;
+    let BloodOxygenSaturation_Unit = eventObj.body.queryResult.parameters.Unit;
+
+    if (BloodOxygenSaturation_Unit === '') {
+        BloodOxygenSaturation_Unit = '%';
+    }
+
+    console.log("phoneNumber, BloodOxygenSaturation and Unit", phoneNumber, BloodOxygenSaturation, BloodOxygenSaturation_Unit);
+    return { phoneNumber, BloodOxygenSaturation, BloodOxygenSaturation_Unit };
+}
 

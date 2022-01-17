@@ -11,14 +11,11 @@ const reancare_api_key = clientEnvironmentProviderService.getClientEnvironmentVa
 export const createWeightInfoService = async (patientUserId, accessToken, BodyWeight,BodyWeight_Unit) => {
     return new Promise(async (resolve, reject) => {
         try {
-            console.log("POST WeightInfo API");
             Logger.instance().log(`POST WeightInfo API`);
 
             if (BodyWeight) {
 
-                const options = getRequestOptions("rean_app");
-                options.headers["authorization"] = `Bearer ${accessToken}`;
-                options.headers["x-api-key"] = `${reancare_api_key}`;
+                const options = getOptions(accessToken);
                 const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/body-weights`;
 
                 const obj = {
@@ -35,7 +32,7 @@ export const createWeightInfoService = async (patientUserId, accessToken, BodyWe
                 console.log("response", response);
 
                 if (response.statusCode !== 201) {
-                    reject("Failed to get response from API.");
+                    reject("Failed to get create response from API.");
                     return;
                 }
 
@@ -58,14 +55,12 @@ export const createWeightInfoService = async (patientUserId, accessToken, BodyWe
 export const updateWeightInfoService = async (patientUserId, accessToken, BodyWeight,BodyWeight_Unit, bodyWeightId) => {
     return new Promise(async (resolve, reject) => {
         try {
-            console.log("PUT WeightInfo API");
+            
             Logger.instance().log(`PUT WeightInfo API`);
 
             if (BodyWeight) {
 
-                const options = getRequestOptions("rean_app");
-                options.headers["authorization"] = `Bearer ${accessToken}`;
-                options.headers["x-api-key"] = `${reancare_api_key}`;
+                const options = getOptions(accessToken);
                 const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/body-weights/${bodyWeightId}`;
 
                 const obj = {
@@ -74,14 +69,10 @@ export const updateWeightInfoService = async (patientUserId, accessToken, BodyWe
                     "Unit"          : BodyWeight_Unit
                 };
 
-                console.log("the obj is", obj);
-
                 const response = await needle("put", apiUrl, obj, options);
 
-                console.log("response", response);
-
                 if (response.statusCode !== 200) {
-                    reject("Failed to get response from API.");
+                    reject("Failed to get update response from API.");
                     return;
                 }
 
@@ -100,3 +91,11 @@ export const updateWeightInfoService = async (patientUserId, accessToken, BodyWe
         }
     });
 };
+
+function getOptions(accessToken: any) {
+    const options = getRequestOptions("rean_app");
+    options.headers["authorization"] = `Bearer ${accessToken}`;
+    options.headers["x-api-key"] = `${reancare_api_key}`;
+    return options;
+}
+
