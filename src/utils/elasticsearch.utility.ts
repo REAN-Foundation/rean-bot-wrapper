@@ -4,22 +4,20 @@ import { singleton } from 'tsyringe';
 @singleton()
 export class elasticsearchUtilities{
 
-  public client:elasticsearch.Client ;
+    public client:elasticsearch.Client ;
 
-  constructor(){
-      this.createclient();
-  }
+    constructor(){
+        this.createclient();}
 
-  async createclient() {
-      if (process.env.ELASTICSEARCH_HOST) {
-          this.client = new elasticsearch.Client({
-              hosts :
-                process.env.ELASTICSEARCH_HOST,
-              ssl : { rejectUnauthorized: false, pfx: [] }
-              
-          });
-      }
-  }
+    async createclient() {
+        if (process.env.ELASTICSEARCH_HOST) {
+            this.client = new elasticsearch.Client({
+                hosts :
+                    process.env.ELASTICSEARCH_HOST,
+                    ssl : { rejectUnauthorized: false, pfx: [] }
+                });
+            }
+        }
 
     save = (data, model) => {
         if (this.client) {

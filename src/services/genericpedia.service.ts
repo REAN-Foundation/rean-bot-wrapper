@@ -1,4 +1,4 @@
-import dfff from 'dialogflow-fulfillment';
+import dfff from '../libs/dialogflow-fulfillment';
 import axios from 'axios';
 const genericPediaUrl = 'https://genericpedia.lamne.com/api/brands?page=1&perPage=10&agg%5B%5D=prepType&query=';
 const genericPediaChemistUrl = 'https://genericpedia.lamne.com/api/pharmacies?perPage=10&';
