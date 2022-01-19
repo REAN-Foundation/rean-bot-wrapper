@@ -331,7 +331,7 @@ class V1Agent {
           consoleMessageJson,
           V1_TO_V2_PLATFORM_NAME[consoleMessageJson.platform]
         );
-        richResponse ? richConsoleMessages = richConsoleMessages.concat(richResponse) : null;
+        richConsoleMessages = richResponse ? richConsoleMessages.concat(richResponse) : richConsoleMessages;
       } else {
         debug(`Unsupported console message type "${richMessageType}"`);
       }

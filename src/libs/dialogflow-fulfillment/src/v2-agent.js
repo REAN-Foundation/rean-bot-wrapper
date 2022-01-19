@@ -377,7 +377,7 @@ class V2Agent {
         const messagePlatform = consoleMessageJson.platform ? consoleMessageJson.platform : undefined;
         // convert the JSON to fufillment classes
         let richResponse = richResponseMapping[richMessageType](consoleMessageJson, messagePlatform);
-        richResponse ? richConsoleMessages = richConsoleMessages.concat(richResponse) : null;
+        richConsoleMessages = richResponse ? richConsoleMessages.concat(richResponse) : richConsoleMessages;
       } else {
         debug(`Unsupported console message type "${richMessageType}"`);
       }

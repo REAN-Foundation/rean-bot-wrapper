@@ -26,7 +26,7 @@ const {
   SUPPORTED_PLATFORMS,
   SUPPORTED_RICH_MESSAGE_PLATFORMS,
 } = require('./rich-responses/rich-response');
-const V1Agent = require('./v1-agent');
+// const V1Agent = require('./v1-agent');
 const V2Agent = require('./v2-agent');
 
 const RESPONSE_CODE_BAD_REQUEST = 400;
