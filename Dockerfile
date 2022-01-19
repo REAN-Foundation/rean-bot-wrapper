@@ -1,12 +1,5 @@
 FROM node:14.17-alpine
 RUN apk add bash
-RUN apk add --no-cache \
-        python3 \
-        py3-pip \
-    && pip3 install --upgrade pip \
-    && pip3 install \
-        awscli \
-    && rm -rf /var/cache/apk/*
 RUN apk add --update alpine-sdk
 RUN apk add chromium \
     harfbuzz
