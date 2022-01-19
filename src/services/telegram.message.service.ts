@@ -1,6 +1,6 @@
 
 // import { DialogflowResponseService } from './dialogflow-response.service';
-import { uploadFile, createFileFromHTML } from './aws.file.upload.service';
+import { AwsS3manager } from './aws.file.upload.service';
 import { response } from '../refactor/interface/message.interface';
 import { autoInjectable, singleton, inject } from 'tsyringe';
 import  TelegramBot  from 'node-telegram-bot-api';
@@ -21,6 +21,7 @@ export class TelegramMessageService implements platformServiceInterface{
 
     // public req;
     constructor(private messageFlow?: MessageFlow,
+        private awsS3manager?: AwsS3manager,
         private telegramMessageServiceFunctionalities?: TelegramMessageServiceFunctionalities,
         private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject("telegram.authenticator") private clientAuthenticator?: clientAuthenticator) {
@@ -88,8 +89,8 @@ export class TelegramMessageService implements platformServiceInterface{
         else if (processedResponse.processed_message.length > 1) {
 
             if (processedResponse.message_from_dialoglow.parse_mode && processedResponse.message_from_dialoglow.parse_mode === 'HTML') {
-                const uploadImageName = await createFileFromHTML(processedResponse.processed_message[0]);
-                const vaacinationImageFile = await uploadFile(uploadImageName);
+                const uploadImageName = await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
+                const vaacinationImageFile = await this.awsS3manager.uploadFile(uploadImageName);
                 if (vaacinationImageFile) {
                     reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",raw_response_object: raw_response_object,intent: intent,messageBody: String(vaacinationImageFile), messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[1] };
                 }
