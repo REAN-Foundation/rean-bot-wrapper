@@ -39,7 +39,6 @@ export class AwsSecretsManager {
 
         // eslint-disable-next-line max-len
         const client = new AWS.SecretsManager({ region: region, accessKeyId: responseCredentials.accessKeyId, secretAccessKey: responseCredentials.secretAccessKey, sessionToken: responseCredentials.sessionToken });
-        // const client = new AWS.SecretsManager({ region: 'us-west-2'});
 
         // var params = {
         //     Filters: [
