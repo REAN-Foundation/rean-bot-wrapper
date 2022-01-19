@@ -10,24 +10,28 @@ export const getRiskAssessmentInfo = async (req) => {
     return new Promise(async (resolve, reject) => {
         try {
 
-            
             let params: any = {};
+            var imagePath = '';
+            const image = {
+                'low' : baseURL + '/uploads/L.png',
+                'high' : baseURL + '/uploads/H.png',
+                'moderate' : baseURL + '/uploads/M.png'
+            }
             if (req['body']['queryResult']['intent']['displayName'] !== "Risk.assessment.info-no") {
                 params = req.body.queryResult.parameters ? req.body.queryResult.parameters : {};
                 
             }
             else {
-                params = req.body.queryResult.outputContexts[0].parameters ? req.body.queryResult.outputContexts[0].parameters : {};
+                params = req.body.queryResult.outputContexts[0].parameters ? 
+                req.body.queryResult.outputContexts[0].parameters : {};
             }
             
-
             //PB code
             let response = '';
 
-            let output = calculateRisk(params);
+            const output = calculateRisk(params);
             console.log(output.risk_level);
             
-
             if (req['body']['queryResult']['intent']['displayName'] !== "Risk.assessment.info-no") {
                 
                 params.previousscore = params.score;
@@ -54,81 +58,66 @@ export const getRiskAssessmentInfo = async (req) => {
                     };
                     resolve(data);
 
-                }else{                    
+                } else {                    
 
-                    if(isEmpty(params.previouscomplication)){
-                        for(let j=0; j < params.complication.length; j++){
-
-                            var json_data = {};
-                            json_data[params.complication[0]] = params.score;
-                            params.previouscomplication = json_data;
-                            
-
-                            let first_val = params.complication[0];                    
-                            first_val = "trigger_" + first_val;
-                            const data = {
-                                "followupEventInput" : {
-                                    "name"         : first_val,
-                                    "languageCode" : "en-US",
-                                    "parameters"   : params
-                                }
+                    if (isEmpty(params.previouscomplication)){
+                        var json_data = {};
+                        json_data[params.complication[0]] = params.score;
+                        params.previouscomplication = json_data;
+                        
+                        let first_val = params.complication[0];
+                        first_val = "trigger_" + first_val;
+                        const data = {
+                            "followupEventInput" : {
+                                "name"         : first_val,
+                                "languageCode" : "en-US",
+                                "parameters"   : params
                             }
-                            resolve(data);
-                        }
-                    }else{
+                        };
+                        resolve(data);
+                    } else {
                         
-                        json_data = params.previouscomplication[0];                        
-                        
-                        for(let i =0; i< params.complication.length; i++){
-                            
-                            if(params.complication[i] in json_data){
+                        json_data = params.previouscomplication[0];
+
+                        for (let i = 0; i < params.complication.length; i++){
+
+                            if (params.complication[i] in json_data){
                                 if (params.previousscore.length > 1){
                                     var previous_score = 0;
-                                    for(let pre_score; pre_score<params.previousscore.length ; pre_score++){
+                                    for (let pre_score; pre_score < params.previousscore.length ; pre_score++){
                                         previous_score = previous_score + params.previousscore[pre_score];
                                     }
                                 }
                                 
                                 const genderText = params.Gender === "1" ? 'Male' : 'Female';
                                 output.risk_level = '';
-                                if (params.previousscore <= 3) {
-                                    output.risk_level = 'low';
-                                } else if (params.previousscore < 5) {
-                                    output.risk_level = 'moderate';
-                                } else { output.risk_level = 'high'; }
+
                                 let finalScore = 0;
                                 
                                 if (params.previousscore.length > 0) {
                 
-                                    for (let i = 0; i < params.previousscore.length; i++) {                                     
-                                        if (!isNaN(params.previousscore[i]) && params.previousscore[i]) finalScore = finalScore + parseInt(params.previousscore[i]);
+                                    for (let i = 0; i < params.previousscore.length; i++) {
+                                        if (!isNaN(params.previousscore[i]) && params.previousscore[i]) finalScore = 
+                                        finalScore + parseInt(params.previousscore[i]);
                                     }
+                                } else {
+                                    finalScore = params.previousscore[0];
                                 }
+                                if (finalScore <= 3) {
+                                    output.risk_level = 'low';
+                                } else if (finalScore < 5) {
+                                    output.risk_level = 'moderate';
+                                } else { output.risk_level = 'high'; }
                                 
                                 const BMIValue = !isNaN(output.bmi) ? "- " + output.bmi : '';
                                 response = 'The medical conditions entered have already been considered for calculating your risk.' + output.risk_level.toUpperCase() + " RISK!!! Of developing complication if you get infected with COVID-19.\n\n" +
                                     " Based on Age -" + params.Age.amount + ", Gender - " + genderText + ", BMI " + BMIValue + " and given complications Final risk score is " + finalScore + "  \n\n(Reference - https://www.reanfoundation.org/risk-assessment-tool/) \n\n" +
                                     " We can also  help you  with covid related questions, symptom assessment or vaccination availability.";
-                                const imagePath = output.risk_level.toLocaleLowerCase() === 'low' ? baseURL + './uploads/L.png' : (output.risk_level.toLocaleLowerCase() === 'high' ? baseURL + './uploads/H.png' : baseURL + './uploads/M.png');
-                                const data = {
-                                    "fulfillmentMessages" : [
-                                        {
-                                            "text" : {
-                                                "text" : [
-                                                    response
-                                                ]
-                                            }
-                                        },
-                                        {
-                                            "image" : {
-                                                "imageUri"          : imagePath,
-                                                "accessibilityText" : response
-                                            },
-                                        },
-                                    ],
-                                };
-                            resolve(data);
-                            }else{
+                                
+                                imagePath = image[output.risk_level.toLocaleLowerCase()];
+                                const data = getEndofConvData(imagePath,response);
+                                resolve(data);
+                            } else {
                                 json_data[params.complication[i]] = 0;
                                 let first_val = params.complication[i];
                                 first_val = "trigger_" + first_val;
@@ -138,7 +127,7 @@ export const getRiskAssessmentInfo = async (req) => {
                                         "languageCode" : "en-US",
                                         "parameters"   : params
                                     }
-                                }
+                                };
                                 resolve(data);
                             }
                         }
@@ -148,58 +137,45 @@ export const getRiskAssessmentInfo = async (req) => {
             else {
                 const genderText = params.Gender === "1" ? 'Male' : 'Female';
                 output.risk_level = '';
-                if (params.previousscore <= 3) {
-                    output.risk_level = 'low';
-                } else if (params.previousscore < 5) {
-                    output.risk_level = 'moderate';
-                } else { output.risk_level = 'high'; }
+
                 let finalScore = 0;
                 
                 if (params.previousscore.length > 0) {
                     console.log("The length of score is " + params.previousscore.length);
                     
-
                     for (let i = 0; i < params.previousscore.length; i++) {
-                        if (!isNaN(params.previousscore[i]) && params.previousscore[i]) finalScore = finalScore + parseInt(params.previousscore[i]);
+                        if (!isNaN(params.previousscore[i]) && params.previousscore[i]) finalScore = 
+                        finalScore + parseInt(params.previousscore[i]);
                     }
-                }else{
-
+                } else {
+                    finalScore = params.previousscore[0];
                 }
+
+                if (finalScore <= 3) {
+                    output.risk_level = 'low';
+                } else if (finalScore < 5) {
+                    output.risk_level = 'moderate';
+                } else { output.risk_level = 'high'; }
+
                 const BMIValue = !isNaN(output.bmi) ? "- " + output.bmi : '';
                 response = output.risk_level.toUpperCase() + " RISK!!! Of developing complication if you get infected with COVID-19.\n\n" +
                     " Based on Age -" + params.Age.amount + ", Gender - " + genderText + ", BMI " + BMIValue + " and given complications Final risk score is " + finalScore + "  \n\n(Reference - https://www.reanfoundation.org/risk-assessment-tool/) \n\n" +
                     " We can also  help you  with covid related questions, symptom assessment or vaccination availability.";
-                const imagePath = output.risk_level.toLocaleLowerCase() === 'low' ? baseURL + './uploads/L.png' : (output.risk_level.toLocaleLowerCase() === 'high' ? baseURL + './uploads/H.png' : baseURL + './uploads/M.png');
-                const data = {
-                    "fulfillmentMessages" : [
-                        {
-                            "text" : {
-                                "text" : [
-                                    response
-                                ]
-                            }
-                        },
-                        {
-                            "image" : {
-                                "imageUri"          : imagePath,
-                                "accessibilityText" : response
-                            },
-                        },
-                    ],
-                };
+
+                imagePath = image[output.risk_level.toLocaleLowerCase()];
+                const data = getEndofConvData(imagePath,response);
                 resolve(data);
             }
-
         }
         catch (error) {
             console.log(error.message, 500, "Covid Info Service Error!");
             reject(error.message);
         }
     });
-
 };
 
 function calculateRisk(params){
+
     //To calculate the risk of patient
     //Input - params
     //output - risk_level, bmi, tot_score
@@ -232,10 +208,31 @@ function calculateRisk(params){
     } else if (tot_score < 5) {
         risk_level = 'moderate';
     } else { risk_level = 'high'; }
-    const returnArray = {'risk_level':risk_level,'bmi':bmi,'tot_score':tot_score}
+    const returnArray = { 'risk_level': risk_level, 'bmi': bmi, 'tot_score': tot_score };
 
     console.log("We are here in the function we pushed");
     
-
     return returnArray;
-};
+}
+
+function getEndofConvData(imagePath,response){
+    const data = {
+        "fulfillmentMessages" : [
+            {
+                "text" : {
+                    "text" : [
+                        response
+                    ]
+                }
+            },
+            {
+                "image" : {
+                    "imageUri"          : imagePath,
+                    "accessibilityText" : response
+                },
+            },
+        ],
+    };
+
+    return data;
+}

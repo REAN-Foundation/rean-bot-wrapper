@@ -1,4 +1,3 @@
-import { isEmpty } from "lodash";
 
 export const getRiskAssessmentFollowup = async (req) => {
     return new Promise(async (resolve, reject) => {
@@ -7,7 +6,6 @@ export const getRiskAssessmentFollowup = async (req) => {
             const params = req.body.queryResult.parameters ? req.body.queryResult.parameters : '';
 
             const c = req.body.queryResult.outputContexts;
-            // console.log(c[0]['parameters']);
             
             let ctx = c[0]['parameters'];
             for (let i = 0; i < c.length; i++) {
@@ -23,21 +21,18 @@ export const getRiskAssessmentFollowup = async (req) => {
                 }
             }
             const int_name = req['body']['queryResult']['intent']['displayName'];
-
-
+            
             ctx.previouscomplication[0][int_name] = params.severity;
 
             var json_data = params.previouscomplication[0];
             for (let j = 0; j < params.complication.length ; j++){
-                if(params.complication[j] in json_data){
+                if (params.complication[j] in json_data){
                     continue;
-                }else{
-                    json_data[params.complication[j]] = 0
+                } else {
+                    json_data[params.complication[j]] = 0;
                 }
             }
-
             ctx.previouscomplication[0] = json_data;
-
 
             const gen = ctx['Gender'];
             const age = ctx['Age'];
@@ -92,14 +87,12 @@ export const getRiskAssessmentFollowup = async (req) => {
 
                 ctx['previousscore'] = ctx['score'];
                 
-
                 let response = '';
-                if(Object.keys(ctx['previouscomplication'][0]).length > 1){
+                if (Object.keys(ctx['previouscomplication'][0]).length > 1){
  
-                    
-                    response = risk_level.toUpperCase() + " Risk!!! of developing complication if you get infected with COVID-19 with pre-medical conditions of "+ Object.keys(ctx['previouscomplication'][0]).toString() +
-                    '. Do you have other health complications?'
-                }else{                    
+                    response = risk_level.toUpperCase() + " Risk!!! of developing complication if you get infected with COVID-19 with pre-medical conditions of " + Object.keys(ctx['previouscomplication'][0]).toString() +
+                    '. Do you have other health complications?';
+                } else {
                     response = risk_level.toUpperCase() + " RISK!!! Of developing complication if you get infected with COVID-19 with pre-medical condition of " + int_name + ". Do you have other health complications?";
                 }
                 const data = {
@@ -129,6 +122,7 @@ export const getRiskAssessmentFollowup = async (req) => {
                     let first_val = new_arr[0];
                     first_val = "trigger_" + first_val;
                     const sc = ctx['score'];
+                    ctx.severity = '';
                     sc.push(parseInt(params[first_val]));
                     ctx['score'] = sc;
                     ctx['complication'] = new_arr;
@@ -140,10 +134,8 @@ export const getRiskAssessmentFollowup = async (req) => {
                         }
                     };
                     resolve(data);
-
                 }
             }
-
         }
         catch (error) {
             console.log(error.message, 500, "Covid Info Service Error!");
