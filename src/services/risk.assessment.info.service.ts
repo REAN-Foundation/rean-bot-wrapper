@@ -2,8 +2,8 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 import { container,  } from 'tsyringe';
 import { isEmpty } from 'lodash';
 export const getRiskAssessmentInfo = async (req) => {
-    const clientEnvironmentProviderService: ClientEnvironmentProviderService = 
-    container.resolve(ClientEnvironmentProviderService);
+    const clientEnvironmentProviderService: 
+    ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
     const baseURL = clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL");
     return new Promise(async (resolve, reject) => {
         try {
@@ -13,14 +13,13 @@ export const getRiskAssessmentInfo = async (req) => {
                 'low' : baseURL + '/uploads/L.png',
                 'high' : baseURL + '/uploads/H.png',
                 'moderate' : baseURL + '/uploads/M.png'
-            }
+            };
             if (req['body']['queryResult']['intent']['displayName'] !== "Risk.assessment.info-no") {
                 params = req.body.queryResult.parameters ? req.body.queryResult.parameters : {};
             } else {
-                params = req.body.queryResult.outputContexts[0].parameters ? 
-                req.body.queryResult.outputContexts[0].parameters : {};
+                params = req.body.queryResult.outputContexts[0].parameters ?
+                    req.body.queryResult.outputContexts[0].parameters : {};
             }
-            //PB code
             let response = '';
             const output = calculateRisk(params);
             if (req['body']['queryResult']['intent']['displayName'] !== "Risk.assessment.info-no") {
@@ -47,7 +46,7 @@ export const getRiskAssessmentInfo = async (req) => {
                         ]
                     };
                     resolve(data);
-                } else {                    
+                } else {
                     if (isEmpty(params.previouscomplication)){
                         var json_data = {};
                         json_data[params.complication[0]] = params.score;
@@ -186,10 +185,13 @@ function getEndofConvData(imagePath,response){
 function getFinalScore(params) {
     let finalScore = 0;
     let risk_level = '';
-    if (params.previousscore.length > 0) {                    
+    if (params.previousscore.length > 0) {
         for (let i = 0; i < params.previousscore.length; i++) {
-            if (!isNaN(params.previousscore[i]) && params.previousscore[i]) finalScore = 
-            finalScore + parseInt(params.previousscore[i]);
+            if (!isNaN(params.previousscore[i]) && params.previousscore[i]){
+                finalScore = finalScore + parseInt(params.previousscore[i]);
+            } else {
+                continue;
+            }
         }
     } else {
         finalScore = params.previousscore[0];
@@ -201,6 +203,6 @@ function getFinalScore(params) {
         risk_level = 'moderate';
     } else { risk_level = 'high'; }
 
-    const returnArray = { 'risk_level': risk_level, 'finalScore': finalScore};
+    const returnArray = { 'risk_level': risk_level, 'finalScore': finalScore };
     return returnArray;
 }
