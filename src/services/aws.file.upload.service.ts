@@ -1,6 +1,7 @@
 import AWS from 'aws-sdk';
 import fs from 'fs';
 import nodeHtmlToImage from 'node-html-to-image';
+
 // import { TempCredentials } from './get.temporary.aws.credentials';
 
 export class AwsS3manager{
@@ -12,16 +13,16 @@ export class AwsS3manager{
             const sts = new AWS.STS();
             const timestamp = (new Date()).getTime();
             const params = {
-                RoleArn : process.env.ROLE_ARN,
+                RoleArn  : process.env.ROLE_ARN,
                 RoleSessionName : `be-descriptibe-here-${timestamp}`
             };
             sts.assumeRole(params, (err, data) => {
                 if (err) reject(err);
                 else {
                     resolve({
-                        accessKeyId : data.Credentials.AccessKeyId,
+                        accessKeyId  : data.Credentials.AccessKeyId,
                         secretAccessKey : data.Credentials.SecretAccessKey,
-                        sessionToken : data.Credentials.SessionToken,
+                        sessionToken  : data.Credentials.SessionToken,
                     });
                 }
             });
@@ -31,6 +32,7 @@ export class AwsS3manager{
     async uploadFile (filePath) {
         const responseCredentials: any = await this.getCrossAccountCredentials();
         const BUCKET_NAME = process.env.BUCKET_NAME;
+
         // const BUCKET_NAME = "duploservices-dev-reanbot-documents-167414264568";
         
         console.log('FILE UPLOAD STARTING', BUCKET_NAME);
@@ -51,7 +53,6 @@ export class AwsS3manager{
                         'ContentType' : 'image/jpeg'
                     };
 
-                    console.log("params", params)
                     // eslint-disable-next-line max-len
                     const s3 = new AWS.S3(responseCredentials);
 
@@ -59,7 +60,6 @@ export class AwsS3manager{
                     s3.upload(params, function (err, data) {
                         if (err) {
                             reject(err);
-                            console.log("err", err)
                         }
                         console.log(`File uploaded successfully. ${data}`);
 
@@ -78,7 +78,7 @@ export class AwsS3manager{
             });
     
         });
-    };
+    }
 
     async createFileFromHTML (html) {
         const imageName = 'uploads/' + Date.now() + '.png';
@@ -106,8 +106,6 @@ export class AwsS3manager{
                     reject('');
                 });
         });
-    };
+    }
 
 }
-
-
