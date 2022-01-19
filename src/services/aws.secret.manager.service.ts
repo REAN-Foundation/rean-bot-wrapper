@@ -1,16 +1,20 @@
 import AWS from 'aws-sdk';
 
+// import { TempCredentials } from './get.temporary.aws.credentials';
+
 // Load the AWS SDK
 console.log("start---------");
 
 export class AwsSecretsManager {
+
+    // constructor(private tempCredentials?: TempCredentials){}
 
     async getCrossAccountCredentials() {
         return new Promise((resolve, reject) => {
             const sts = new AWS.STS();
             const timestamp = (new Date()).getTime();
             const params = {
-                RoleArn : process.env.RoleArn,
+                RoleArn : process.env.ROLE_ARN,
                 RoleSessionName : `be-descriptibe-here-${timestamp}`
             };
             sts.assumeRole(params, (err, data) => {
@@ -30,7 +34,7 @@ export class AwsSecretsManager {
 
         const responseCredentials: any = await this.getCrossAccountCredentials();
         const region = process.env.region;
-        const secretNameList = process.env.secretNameList.split(',');
+        const secretNameList = process.env.SECRET_NAME_LIST.split(',');
         const secretObjectList = [];
 
         // eslint-disable-next-line max-len

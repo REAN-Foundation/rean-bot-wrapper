@@ -1,6 +1,6 @@
 
 // import { DialogflowResponseService } from './dialogflow-response.service';
-import { uploadFile, createFileFromHTML } from './aws.file.upload.service';
+import { AwsS3manager } from './aws.file.upload.service';
 import { message, response } from '../refactor/interface/message.interface';
 import { autoInjectable, singleton, inject } from 'tsyringe';
 import  TelegramBot  from 'node-telegram-bot-api';
