@@ -33,7 +33,6 @@ export class AwsS3manager{
         const cloudFrontPath = process.env.CLOUD_FRONT_PATH;
         const cloudFrontPathSplit = cloudFrontPath.split("/");
 
-
         // const BUCKET_NAME = "duploservices-dev-reanbot-documents-167414264568";
         
         console.log('FILE UPLOAD STARTING', BUCKET_NAME);
