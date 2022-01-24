@@ -13,7 +13,8 @@ import { IndexCreation } from './models/elasticsearchmodel';
 import { platformServiceInterface } from "./refactor/interface/platform.interface";
 import { ClientEnvironmentProviderService } from "./services/set.client/client.environment.provider.service";
 import { AwsSecretsManager } from "./services/aws.secret.manager.service";
-import RateLimit from 'express-rate-limit';
+
+// import RateLimit from 'express-rate-limit';
 
 export default class Application {
 
@@ -98,10 +99,10 @@ export default class Application {
 
     }
 
-    private limiter = RateLimit({
-        windowMs : 1 * 60 * 1000, // 1 minute
-        max : 5
-    });
+    // private limiter = RateLimit({
+    //     windowMs : 1 * 60 * 1000, // 1 minute
+    //     max : 5
+    // });
 
     public start = async (): Promise<void> => {
         try {
@@ -143,7 +144,8 @@ export default class Application {
                 this._app.use(express.json());
                 this._app.use(helmet());
                 this._app.use(cors());
-                this._app.use(this.limiter);
+
+                // this._app.use(this.limiter);
 
                 const MAX_UPLOAD_FILE_SIZE = ConfigurationManager.MaxUploadFileSize();
 
