@@ -33,7 +33,6 @@ export class AwsS3manager{
         const cloudFrontPath = process.env.CLOUD_FRONT_PATH;
         const cloudFrontPathSplit = cloudFrontPath.split("/")
 
-
         // const BUCKET_NAME = "duploservices-dev-reanbot-documents-167414264568";
         
         console.log('FILE UPLOAD STARTING', BUCKET_NAME);
@@ -50,6 +49,7 @@ export class AwsS3manager{
                     const params = {
                         Bucket        : BUCKET_NAME,
                         Key           : cloudFrontPathSplit[3] + '/' + filename , // File name you want to save as in S3
+
                         Body          : fileContent,
                         'ContentType' : 'image/jpeg'
                     };
