@@ -6,23 +6,21 @@ import nodeHtmlToImage from 'node-html-to-image';
 
 export class AwsS3manager{
 
-    // constructor(private tempCredentials?: TempCredentials){}
-
     async getCrossAccountCredentials() {
         return new Promise((resolve, reject) => {
             const sts = new AWS.STS();
             const timestamp = (new Date()).getTime();
             const params = {
-                RoleArn  : process.env.ROLE_ARN,
+                RoleArn   : process.env.ROLE_ARN,
                 RoleSessionName : `be-descriptibe-here-${timestamp}`
             };
             sts.assumeRole(params, (err, data) => {
                 if (err) reject(err);
                 else {
                     resolve({
-                        accessKeyId  : data.Credentials.AccessKeyId,
+                        accessKeyId   : data.Credentials.AccessKeyId,
                         secretAccessKey : data.Credentials.SecretAccessKey,
-                        sessionToken  : data.Credentials.SessionToken,
+                        sessionToken   : data.Credentials.SessionToken,
                     });
                 }
             });
@@ -32,6 +30,8 @@ export class AwsS3manager{
     async uploadFile (filePath) {
         const responseCredentials: any = await this.getCrossAccountCredentials();
         const BUCKET_NAME = process.env.BUCKET_NAME;
+        const cloudFrontPath = process.env.CLOUD_FRONT_PATH;
+        const cloudFrontPathSplit = cloudFrontPath.split("/");
 
         // const BUCKET_NAME = "duploservices-dev-reanbot-documents-167414264568";
         
@@ -47,11 +47,13 @@ export class AwsS3manager{
     
                     // Setting up S3 upload parameters
                     const params = {
-                        Bucket        : BUCKET_NAME,
-                        Key           : 'dev/' + filename , // File name you want to save as in S3
+                        Bucket         : BUCKET_NAME,
+                        Key            : cloudFrontPathSplit[3] + '/' + filename , // File name you want to save as in S3
                         Body          : fileContent,
                         'ContentType' : 'image/jpeg'
                     };
+
+                    console.log("params");
 
                     // eslint-disable-next-line max-len
                     const s3 = new AWS.S3(responseCredentials);
