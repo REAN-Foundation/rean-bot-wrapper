@@ -1,12 +1,13 @@
-import { Logger } from '../../common/logger';
-import { getRequestOptions } from '../../utils/helper';
+import { getHeaders } from '../../services/biometrics/get.headers';
+import { GetPatientInfoService } from "../../services/support.app.service";
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 import { container,  } from 'tsyringe';
 import needle from "needle";
-// eslint-disable-next-line max-len
-const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
+
+const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
+const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
+    ClientEnvironmentProviderService);
 const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
-const reancare_api_key = clientEnvironmentProviderService.getClientEnvironmentVariable("ReancareApiKey");
 
 let remark = '';
 const getremark = function (BloodGlucose) {
@@ -25,110 +26,102 @@ const getremark = function (BloodGlucose) {
     return remark;
 };
 
-// eslint-disable-next-line max-len
-export const updateBloodGlucoseInfoService = async (patientUserId, accessToken, BloodGlucose,BloodGlucose_Unit, bloodGlucoseId) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            Logger.instance().log(`PUT BloodGlucoseInfo API`);
+export const updateBloodGlucoseInfoService = async (eventObj) => {
 
-            if (BloodGlucose) {
+    if (eventObj) {
+        var { patientUserId, accessToken, BloodGlucose_Unit, BloodGlucose } = await checkEntry(eventObj);
 
-                let options;
-                let unitmsg;
-                ({ options, unitmsg, BloodGlucose_Unit } = getUrl(BloodGlucose_Unit, accessToken));
-                const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/blood-glucose/${bloodGlucoseId}`;
+        const url = `${ReanBackendBaseUrl}clinical/biometrics/blood-glucose/search?patientUserId=${patientUserId}`;
+        
+        const options = getHeaders(accessToken);
+        const resp = await needle("get", url, options);
+        const bloodGlucoseId = resp.body.Data.BloodGlucoseRecords.Items[0].id;
 
-                const obj = {
-                    "patientUserId" : patientUserId,
-                    "BloodGlucose"  : BloodGlucose,
-                    "Unit"          : BloodGlucose_Unit
-                };
+        let unitmsg = null;
+        ({ unitmsg, BloodGlucose_Unit } = getUnit(BloodGlucose_Unit));
+        const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/blood-glucose/${bloodGlucoseId}`;
 
-                const response = await needle("put", apiUrl, obj, options);
+        const obj = {
+            "patientUserId" : patientUserId,
+            "BloodGlucose"  : BloodGlucose,
+            "Unit"          : BloodGlucose_Unit
+        };
 
-                console.log("response", response);
+        const response = await needle("put", apiUrl, obj, options);
 
-                if (response.statusCode !== 200) {
-                    reject("Failed to get response from API.");
-                    return;
-                }
-
-                remark = getremark(BloodGlucose);
-
-                const dffMessage = `${unitmsg}Your updated BloodGlucose ${response.body.Data.BloodGlucose.BloodGlucose} ${response.body.Data.BloodGlucose.Unit} is ${remark}`;
-
-                const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
-
-                resolve({ sendDff: true, message: data });
-
-            }
-            
+        if (response.statusCode !== 200) {
+            throw new Error("Failed to get response from API.");
         }
-        catch (error) {
-            Logger.instance().log_error(error.message, 500, "BloodGlucose Info Service Error!");
-            reject(error.message);
-        }
-    });
+        remark = getremark(BloodGlucose);
+
+        const dffMessage = `${unitmsg}Your updated BloodGlucose ${response.body.Data.BloodGlucose.BloodGlucose} ${response.body.Data.BloodGlucose.Unit} is ${remark}`;
+
+        const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
+
+        return response.message = data;
+    } else {
+        throw new Error(`500, BloodGlucoseUpdate Info Service Error!`);
+    }
 };
 
-export const createBloodGlucoseInfoService = async (patientUserId, accessToken, BloodGlucose,BloodGlucose_Unit) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            console.log("POST BloodGlucoseInfo API");
-            Logger.instance().log(`POST BloodGlucoseInfo API`);
+export const createBloodGlucoseInfoService = async (eventObj) => {
 
-            if (BloodGlucose) {
+    if (eventObj) {
+        var { patientUserId, accessToken, BloodGlucose_Unit, BloodGlucose } = await checkEntry(eventObj);
 
-                let options;
-                let unitmsg;
-                ({ options, unitmsg, BloodGlucose_Unit } = getUrl(BloodGlucose_Unit, accessToken));
-                const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/blood-glucose`;
+        let unitmsg = null;
+        ({ unitmsg, BloodGlucose_Unit } = getUnit(BloodGlucose_Unit));
+        const options = getHeaders(accessToken);
+        const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/blood-glucose`;
 
-                const obj = {
-                    "PatientUserId" : patientUserId,
-                    "BloodGlucose"  : BloodGlucose,
-                    "Unit"          : BloodGlucose_Unit,
-                    "RecordDate"    : Date()
-                };
+        const obj = {
+            "patientUserId" : patientUserId,
+            "BloodGlucose"  : BloodGlucose,
+            "Unit"          : BloodGlucose_Unit,
+            "RecordDate"    : Date()
+        };
 
-                console.log("the obj is", obj);
+        const response = await needle("post", apiUrl, obj, options);
 
-                const response = await needle("post", apiUrl, obj, options);
-
-                console.log("response", response);
-
-                if (response.statusCode !== 201) {
-                    reject("Failed to get response from API.");
-                    return;
-                }
-
-                remark = getremark(BloodGlucose);
-                
-                const dffMessage = `${unitmsg}Your newly added BloodGlucose ${response.body.Data.BloodGlucose.BloodGlucose} ${response.body.Data.BloodGlucose.Unit} is ${remark}`;
-
-                const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
-
-                resolve({ sendDff: true, message: data });
-
-            }
-            
+        if (response.statusCode !== 201) {
+            throw new Error("Failed to get response from API.");
         }
-        catch (error) {
-            Logger.instance().log_error(error.message, 500, "BloodGlucose Info Service Error!");
-            reject(error.message);
-        }
-    });
+        remark = getremark(BloodGlucose);
+
+        const dffMessage = `${unitmsg}Your newly added BloodGlucose ${response.body.Data.BloodGlucose.BloodGlucose} ${response.body.Data.BloodGlucose.Unit} is ${remark}`;
+
+        const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
+
+        return response.message = data;
+    } else {
+        throw new Error(`500, BloodGlucoseCreate Info Service Error!`);
+    }
 };
-function getUrl(BloodGlucose_Unit: any, accessToken: any) {
+
+function getUnit(BloodGlucose_Unit: any) {
     let unitmsg = '';
     if (BloodGlucose_Unit === '') {
         BloodGlucose_Unit = 'mg/dL';
         unitmsg = `BloodGlucose unit assumed to mg/dL. `;
 
     }
-    const options = getRequestOptions("rean_app");
-    options.headers["authorization"] = `Bearer ${accessToken}`;
-    options.headers["x-api-key"] = `${reancare_api_key}`;
-    return { options, unitmsg, BloodGlucose_Unit };
+    return { unitmsg, BloodGlucose_Unit };
+}
+
+async function checkEntry(eventObj: any) {
+    const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
+    const BloodGlucose = eventObj.body.queryResult.parameters.BloodGlucose_Amount;
+    const BloodGlucose_Unit = eventObj.body.queryResult.parameters.BloodGlucose_unit;
+
+    if (!phoneNumber && !BloodGlucose) {
+        throw new Error("Missing required parameter PhoneNumber and/or BloodGlucose");
+    }
+    let result = null;
+    result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
+
+    const patientUserId = result.message[0].UserId;
+
+    const accessToken = result.message[0].accessToken;
+    return { patientUserId, accessToken, BloodGlucose_Unit, BloodGlucose };
 }
 

@@ -10,13 +10,7 @@ import { RiskAssessmentListener } from './intentListeners/risk.assessment.listen
 import { getRiskAssessmentInfo } from './intentListeners/risk.assessment.info.listener';
 import { getRiskAssessmentFollowup } from './intentListeners/risk.assessment.followup.listener';
 import { getMedicationInfo } from './intentListeners/support.app.listener';
-import { createBloodGlucoseInfo, updateBloodGlucoseInfo } from './intentListeners/biometrics/blood.glucose.listener';
-import { createBloodPressureInfo, updateBloodPressureInfo } from './intentListeners/biometrics/blood.pressure.listener';
-import { createBodyHeightInfo, updateBodyHeightInfo } from './intentListeners/biometrics/body.height.listener';
-import { updateWeightInfo, createWeightInfo } from './intentListeners/biometrics/body.weight.listener';
-import { createBodyTemperatureInfo, updateBodyTemperatureInfo } from './intentListeners/biometrics/body.temperature.listener';
-import { createBloodOxygenSaturationInfo, updateBloodOxygenSaturationInfo } from './intentListeners/biometrics/blood.oxygen.saturation.listener';
-import { createPulseInfo, updatePulseInfo } from './intentListeners/biometrics/pulse.listener';
+import { AppSupportListener } from './intentListeners/app.support.listener';
 import { getGenericpedia, getGenericpediaChemist } from './intentListeners/genericpedia.listener';
 
 /*
@@ -56,20 +50,20 @@ export class IntentRegister {
         IntentEmitter.registerListener('genericpedia location', getGenericpediaChemist);
 
         IntentEmitter.registerListener('SupportApp.GetMedication', getMedicationInfo);
-        IntentEmitter.registerListener('BloodGlucose.update', updateBloodGlucoseInfo);
-        IntentEmitter.registerListener('BloodGlucose.Create', createBloodGlucoseInfo);
-        IntentEmitter.registerListener('BloodPressure.update', updateBloodPressureInfo);
-        IntentEmitter.registerListener('BloodPressure.Create', createBloodPressureInfo);
-        IntentEmitter.registerListener('BodyHeight.update', updateBodyHeightInfo);
-        IntentEmitter.registerListener('BodyHeight.Create', createBodyHeightInfo);
-        IntentEmitter.registerListener('Weight.update', updateWeightInfo);
-        IntentEmitter.registerListener('Weight.Create', createWeightInfo);
-        IntentEmitter.registerListener('BodyTemperature.update', updateBodyTemperatureInfo);
-        IntentEmitter.registerListener('BodyTemperature.Create', createBodyTemperatureInfo);
-        IntentEmitter.registerListener('BloodOxygenSaturation.update', updateBloodOxygenSaturationInfo);
-        IntentEmitter.registerListener('BloodOxygenSaturation.Create', createBloodOxygenSaturationInfo);
-        IntentEmitter.registerListener('Pulse.update', updatePulseInfo);
-        IntentEmitter.registerListener('Pulse.Create', createPulseInfo);
+        IntentEmitter.registerListener('BloodGlucose.update', AppSupportListener.handleIntent);
+        IntentEmitter.registerListener('BloodGlucose.Create', AppSupportListener.handleIntent);
+        IntentEmitter.registerListener('BloodPressure.update', AppSupportListener.handleIntent);
+        IntentEmitter.registerListener('BloodPressure.Create', AppSupportListener.handleIntent);
+        IntentEmitter.registerListener('BodyHeight.update', AppSupportListener.handleIntent);
+        IntentEmitter.registerListener('BodyHeight.Create', AppSupportListener.handleIntent);
+        IntentEmitter.registerListener('Weight.update', AppSupportListener.handleIntent);
+        IntentEmitter.registerListener('Weight.Create', AppSupportListener.handleIntent);
+        IntentEmitter.registerListener('BodyTemperature.update', AppSupportListener.handleIntent);
+        IntentEmitter.registerListener('BodyTemperature.Create', AppSupportListener.handleIntent);
+        IntentEmitter.registerListener('BloodOxygenSaturation.update', AppSupportListener.handleIntent);
+        IntentEmitter.registerListener('BloodOxygenSaturation.Create', AppSupportListener.handleIntent);
+        IntentEmitter.registerListener('Pulse.update', AppSupportListener.handleIntent);
+        IntentEmitter.registerListener('Pulse.Create', AppSupportListener.handleIntent);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
