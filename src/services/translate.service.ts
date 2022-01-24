@@ -6,16 +6,17 @@ let dialogflow_language = "en-US";
 
 export class translateService{
 
-    private translateProjectId = process.env.TRANSLATE_PROJECT_ID;
+    private GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+    
+    private obj = {
+        credentials: this.GCPCredentials,
+        projectId: this.GCPCredentials.project_id
+    };
+
 
     translateMessage = async (message) => {
-        const GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
-        const obj = {
-            credentials: GCPCredentials,
-            projectId: GCPCredentials.project_id
-        };
         console.log("entered the translateMessage of translateService JJJJJJJJJJJ", message);
-        const translate = new v2.Translate(obj);
+        const translate = new v2.Translate(this.obj);
         const [detections] = await translate.detect(message);
         const detectedLanguage = await Array.isArray(detections) ? detections : [detections];
         detected_language = detectedLanguage[0].language;
@@ -31,7 +32,7 @@ export class translateService{
     }
 
     processdialogflowmessage = async (message, detected_language) => {
-        const translate = new v2.Translate({ projectId: this.translateProjectId });
+        const translate = new v2.Translate(this.obj);
         console.log("entered the processdialogflowmessage of translateService JJJJJJJJJJJ");
         // eslint-disable-next-line init-declarations
         let translatedResponse;
