@@ -98,7 +98,7 @@ export default class Application {
 
     }
 
-    private limiter = new RateLimit({
+    private limiter = RateLimit({
         windowMs: 1*60*1000, // 1 minute
         max: 5
       });
