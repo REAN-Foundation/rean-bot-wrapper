@@ -30,7 +30,8 @@ export class AwsS3manager{
     async uploadFile (filePath) {
         const responseCredentials: any = await this.getCrossAccountCredentials();
         const BUCKET_NAME = process.env.BUCKET_NAME;
-        const environment = process.env.ENVIRONMENT
+        const cloudFrontPath = process.env.CLOUD_FRONT_PATH;
+        const cloudFrontPathSplit = cloudFrontPath.split("/")
 
         // const BUCKET_NAME = "duploservices-dev-reanbot-documents-167414264568";
         
@@ -47,7 +48,8 @@ export class AwsS3manager{
                     // Setting up S3 upload parameters
                     const params = {
                         Bucket        : BUCKET_NAME,
-                        Key           : environment.toLowerCase() + filename , // File name you want to save as in S3
+                        Key           : cloudFrontPathSplit[3] + '/' + filename , // File name you want to save as in S3
+
                         Body          : fileContent,
                         'ContentType' : 'image/jpeg'
                     };
