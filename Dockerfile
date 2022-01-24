@@ -15,6 +15,6 @@ RUN npm install -g typescript
 RUN npm install
 RUN npm run build
 RUN npm install sharp
-
+COPY src/libs/ /app/dist/src/libs/
 RUN chmod +x /app/entrypoint.sh
 ENTRYPOINT ["/bin/bash", "-c", "/app/entrypoint.sh"]
