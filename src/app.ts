@@ -99,9 +99,9 @@ export default class Application {
     }
 
     private limiter = RateLimit({
-        windowMs: 1*60*1000, // 1 minute
-        max: 5
-      });
+        windowMs : 1 * 60 * 1000, // 1 minute
+        max : 5
+    });
 
     public start = async (): Promise<void> => {
         try {
@@ -148,12 +148,12 @@ export default class Application {
                 const MAX_UPLOAD_FILE_SIZE = ConfigurationManager.MaxUploadFileSize();
 
                 this._app.use(fileUpload({
-                    limits : { fileSize: MAX_UPLOAD_FILE_SIZE },
+                    limits  : { fileSize: MAX_UPLOAD_FILE_SIZE },
                     preserveExtension : true,
-                    createParentPath : true,
-                    parseNested : true,
-                    useTempFiles : true,
-                    tempFileDir : '/tmp/uploads/'
+                    createParentPath  : true,
+                    parseNested  : true,
+                    useTempFiles  : true,
+                    tempFileDir  : '/tmp/uploads/'
                 }));
                 resolve(true);
             }
