@@ -37,7 +37,7 @@ export const updateBodyWeightInfoService = async (eventObj) => {
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
-        return response.message = data;
+        return { sendDff: true, message: data };
     } else {
         throw new Error(`500, BodyWeightUpdate Info Service Error!`);
     }
@@ -68,7 +68,7 @@ export const createBodyWeightInfoService = async (eventObj) => {
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
-        return response.message = data;
+        return { sendDff: true, message: data };
     } else {
         throw new Error(`500, BodyWeightCreate Info Service Error!`);
     }

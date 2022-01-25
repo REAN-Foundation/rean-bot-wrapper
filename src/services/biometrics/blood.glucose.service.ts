@@ -58,7 +58,7 @@ export const updateBloodGlucoseInfoService = async (eventObj) => {
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
-        return response.message = data;
+        return { sendDff: true, message: data };
     } else {
         throw new Error(`500, BloodGlucoseUpdate Info Service Error!`);
     }
@@ -92,7 +92,7 @@ export const createBloodGlucoseInfoService = async (eventObj) => {
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
-        return response.message = data;
+        return { sendDff: true, message: data };
     } else {
         throw new Error(`500, BloodGlucoseCreate Info Service Error!`);
     }

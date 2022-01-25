@@ -57,7 +57,7 @@ export const updateBloodPressureInfoService = async (eventObj) => {
         const dffMessage = `${unitmsg}Your updated BloodPressure Systolic: ${response.body.Data.BloodPressure.Systolic} Diastolic:${response.body.Data.BloodPressure.Diastolic} ${response.body.Data.BloodPressure.Unit} is ${remark}`;
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
-        return response.message = data;
+        return { sendDff: true, message: data };
     } else {
         throw new Error(`500, BloodGlucoseUpdate Info Service Error!`);
     }
@@ -92,7 +92,7 @@ export const createBloodPressureInfoService = async (eventObj) => {
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
-        return response.message = data;
+        return { sendDff: true, message: data };
     } else {
         throw new Error(`500, BloodGlucoseCreate Info Service Error!`);
     }

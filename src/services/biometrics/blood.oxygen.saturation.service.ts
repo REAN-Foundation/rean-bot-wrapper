@@ -55,7 +55,7 @@ export const updateBloodOxygenSaturationInfoService = async (eventObj) => {
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
-        return response.message = data;
+        return { sendDff: true, message: data };
     } else {
         throw new Error(`500, BloodOxygenSaturationUpdate Info Service Error!`);
     }
@@ -88,7 +88,7 @@ export const createBloodOxygenSaturationInfoService = async (eventObj) => {
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
-        return response.message = data;
+        return { sendDff: true, message: data };
     } else {
         throw new Error(`500, BloodOxygenSaturationCreate Info Service Error!`);
     }

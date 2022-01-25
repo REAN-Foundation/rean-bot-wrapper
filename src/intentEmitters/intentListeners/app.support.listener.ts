@@ -73,7 +73,7 @@ export class AppSupportListener {
             if (!response) {
                 throw new Error('Biometrics Info Listener Error!');
             }
-            return response;
+            return response.message;
         } catch (error) {
             throw new Error('Handle Intent Error!');
         }

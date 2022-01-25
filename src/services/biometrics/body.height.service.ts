@@ -37,7 +37,7 @@ export const updateBodyHeightInfoService = async (eventObj) => {
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
-        return response.message = data;
+        return { sendDff: true, message: data };
     } else {
         throw new Error(`500, BodyHeightUpdate Info Service Error!`);
     }
@@ -68,7 +68,7 @@ export const createBodyHeightInfoService = async (eventObj) => {
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
-        return response.message = data;
+        return { sendDff: true, message: data };
     } else {
         throw new Error(`500, BodyHeightCreate Info Service Error!`);
     }

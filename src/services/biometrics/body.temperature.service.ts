@@ -61,7 +61,7 @@ export const updateBodyTemperatureInfoService = async (eventObj) => {
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
-        return response.message = data;
+        return { sendDff: true, message: data };
     } else {
         throw new Error(`500, BodyTemperatureUpdate Info Service Error!`);
     }
@@ -95,7 +95,7 @@ export const createBodyTemperatureInfoService = async (eventObj) => {
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
-        return response.message = data;
+        return { sendDff: true, message: data };
     } else {
         throw new Error(`500, BodyTemperatureCreate Info Service Error!`);
     }
