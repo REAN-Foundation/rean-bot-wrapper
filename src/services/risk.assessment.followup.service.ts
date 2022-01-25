@@ -1,4 +1,3 @@
-
 export const getRiskAssessmentFollowup = async (req) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -6,10 +5,10 @@ export const getRiskAssessmentFollowup = async (req) => {
             const params = req.body.queryResult.parameters ? req.body.queryResult.parameters : '';
 
             const c = req.body.queryResult.outputContexts;
-            
+
             let ctx = c[0]['parameters'];
             for (let i = 0; i < c.length; i++) {
-                                
+
                 try {
                     if (c[i]['parameters']['complication'].length === 1) {
                         ctx = c[i]['parameters'];
@@ -21,7 +20,7 @@ export const getRiskAssessmentFollowup = async (req) => {
                 }
             }
             const int_name = req['body']['queryResult']['intent']['displayName'];
-            
+
             ctx.previouscomplication[0][int_name] = params.severity;
 
             var json_data = params.previouscomplication[0];
@@ -44,7 +43,7 @@ export const getRiskAssessmentFollowup = async (req) => {
                     new_arr.push(ctx['complication'][i]);
                 }
             }
-            
+
             if (new_arr.length === 0) {
                 const agenum = age['amount'];
                 let tot_score = 0;
@@ -86,10 +85,10 @@ export const getRiskAssessmentFollowup = async (req) => {
                 ctx['score'] = sc1;
 
                 ctx['previousscore'] = ctx['score'];
-                
+
                 let response = '';
                 if (Object.keys(ctx['previouscomplication'][0]).length > 1){
- 
+
                     response = risk_level.toUpperCase() + " Risk!!! of developing complication if you get infected with COVID-19 with pre-medical conditions of " + Object.keys(ctx['previouscomplication'][0]).toString() +
                     '. Do you have other health complications?';
                 } else {
@@ -117,7 +116,7 @@ export const getRiskAssessmentFollowup = async (req) => {
                 resolve(data);
 
             } else {
-                
+
                 if (new_arr.length > 0) {
                     let first_val = new_arr[0];
                     first_val = "trigger_" + first_val;

@@ -51,7 +51,7 @@ export default class Application {
 
         try {
             const secretObjectList = await this._awsSecretsManager.getSecrets();
-            
+
             for (const ele of secretObjectList) {
                 if (!ele.NAME) {
                     for (const k in ele) {
@@ -94,7 +94,7 @@ export default class Application {
                 telegram.setWebhook(clientName);
                 whatsapp.setWebhook(clientName);
             }
-            
+
         }
 
     }
