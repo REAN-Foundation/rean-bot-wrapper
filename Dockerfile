@@ -6,6 +6,10 @@ RUN apk add --no-cache \
 RUN apk add --update alpine-sdk
 RUN apk add chromium \
     harfbuzz
+
+RUN apk update
+RUN apk upgrade
+
 ADD . /app
 WORKDIR /app
 
