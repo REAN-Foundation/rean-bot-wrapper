@@ -14,6 +14,8 @@ import { platformServiceInterface } from "./refactor/interface/platform.interfac
 import { ClientEnvironmentProviderService } from "./services/set.client/client.environment.provider.service";
 import { AwsSecretsManager } from "./services/aws.secret.manager.service";
 
+// import RateLimit from 'express-rate-limit';
+
 export default class Application {
 
     public _app: express.Application = null;
@@ -97,6 +99,11 @@ export default class Application {
 
     }
 
+    // private limiter = RateLimit({
+    //     windowMs : 1 * 60 * 1000, // 1 minute
+    //     max : 5
+    // });
+
     public start = async (): Promise<void> => {
         try {
             await this.processClientEnvVariables();
@@ -138,15 +145,17 @@ export default class Application {
                 this._app.use(helmet());
                 this._app.use(cors());
 
+                // this._app.use(this.limiter);
+
                 const MAX_UPLOAD_FILE_SIZE = ConfigurationManager.MaxUploadFileSize();
 
                 this._app.use(fileUpload({
-                    limits : { fileSize: MAX_UPLOAD_FILE_SIZE },
+                    limits  : { fileSize: MAX_UPLOAD_FILE_SIZE },
                     preserveExtension : true,
-                    createParentPath : true,
-                    parseNested : true,
-                    useTempFiles : true,
-                    tempFileDir : '/tmp/uploads/'
+                    createParentPath  : true,
+                    parseNested  : true,
+                    useTempFiles  : true,
+                    tempFileDir  : '/tmp/uploads/'
                 }));
                 resolve(true);
             }
