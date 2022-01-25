@@ -27,15 +27,16 @@ const getremark = function (BloodOxygenSaturation) {
 export const updateBloodOxygenSaturationInfoService = async (eventObj) => {
 
     if (eventObj) {
-        var { patientUserId, accessToken, BloodOxygenSaturation_Unit, BloodOxygenSaturation } = await checkEntry(eventObj);
+        var { patientUserId, accessToken, BloodOxygenSaturation_Unit,
+            BloodOxygenSaturation } = await checkEntry(eventObj);
 
-        const url = `${ReanBackendBaseUrl}clinical/biometrics/blood-glucose/search?patientUserId=${patientUserId}`;
+        const url = `${ReanBackendBaseUrl}clinical/biometrics/blood-oxygen-saturations/search?patientUserId=${patientUserId}`;
         
         const options = getHeaders(accessToken);
         const resp = await needle("get", url, options);
-        const bloodOxygenSaturationId = resp.body.Data.BloodOxygenSaturation_UnitRecords.Items[0].id;
+        const bloodOxygenSaturationId = resp.body.Data.BloodOxygenSaturationRecords.Items[0].id;
         
-        const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/blood-oxygen-saturation/${bloodOxygenSaturationId}`;
+        const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/blood-oxygen-saturations/${bloodOxygenSaturationId}`;
 
         const obj = {
             "PatientUserId"         : patientUserId,
@@ -63,10 +64,11 @@ export const updateBloodOxygenSaturationInfoService = async (eventObj) => {
 export const createBloodOxygenSaturationInfoService = async (eventObj) => {
 
     if (eventObj) {
-        var { patientUserId, accessToken, BloodOxygenSaturation_Unit, BloodOxygenSaturation } = await checkEntry(eventObj);
+        var { patientUserId, accessToken, BloodOxygenSaturation_Unit,
+            BloodOxygenSaturation } = await checkEntry(eventObj);
         
         const options = getHeaders(accessToken);
-        const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/blood-oxygen-saturation`;
+        const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/blood-oxygen-saturations`;
 
         const obj = {
             "PatientUserId"         : patientUserId,
@@ -91,7 +93,6 @@ export const createBloodOxygenSaturationInfoService = async (eventObj) => {
         throw new Error(`500, BloodOxygenSaturationCreate Info Service Error!`);
     }
 };
-
 
 async function checkEntry(eventObj: any) {
     const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;

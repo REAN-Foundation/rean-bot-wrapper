@@ -5,7 +5,8 @@ import { container,  } from 'tsyringe';
 import needle from "needle";
 
 const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
-const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
+const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
+    ClientEnvironmentProviderService);
 const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
 
 let remark = '';
@@ -30,9 +31,9 @@ export const updateBloodPressureInfoService = async (eventObj) => {
     if (eventObj) {
         var { patientUserId, accessToken, Systolic, Diastolic, BloodPressure_Unit } = await checkEntry(eventObj);
 
-        const url = `${ReanBackendBaseUrl}clinical/biometrics/blood-pressure/search?patientUserId=${patientUserId}`;
+        const url = `${ReanBackendBaseUrl}clinical/biometrics/blood-pressures/search?patientUserId=${patientUserId}`;
         
-        let options = getHeaders(accessToken);
+        const options = getHeaders(accessToken);
         const resp = await needle("get", url, options);
         const bloodPressureId = resp.body.Data.BloodPressureRecords.Items[0].id;
 
@@ -48,7 +49,6 @@ export const updateBloodPressureInfoService = async (eventObj) => {
         };
         const response = await needle("put", apiUrl, obj, options);
 
-
         if (response.statusCode !== 200) {
             throw new Error("Failed to get response from API.");
         }
@@ -59,9 +59,9 @@ export const updateBloodPressureInfoService = async (eventObj) => {
 
         return response.message = data;
     } else {
-        throw new Error(`500, BloodGlucoseUpdate Info Service Error!`)
+        throw new Error(`500, BloodGlucoseUpdate Info Service Error!`);
     }
-}
+};
 
 export const createBloodPressureInfoService = async (eventObj) => {
 
@@ -70,16 +70,16 @@ export const createBloodPressureInfoService = async (eventObj) => {
 
         let unitmsg = null;
         ({ unitmsg, BloodPressure_Unit } = getUnit(BloodPressure_Unit));
-        let options = getHeaders(accessToken);
+        const options = getHeaders(accessToken);
         const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/blood-pressures`;
 
-                const obj = {
-                    "PatientUserId" : patientUserId,
-                    "Systolic"      : Systolic,
-                    "Diastolic"     : Diastolic,
-                    "Unit"          : BloodPressure_Unit,
-                    "RecordDate"    : Date()
-                };
+        const obj = {
+            "PatientUserId" : patientUserId,
+            "Systolic"      : Systolic,
+            "Diastolic"     : Diastolic,
+            "Unit"          : BloodPressure_Unit,
+            "RecordDate"    : Date()
+        };
 
         const response = await needle("post", apiUrl, obj, options);
 
@@ -94,9 +94,9 @@ export const createBloodPressureInfoService = async (eventObj) => {
 
         return response.message = data;
     } else {
-        throw new Error(`500, BloodGlucoseCreate Info Service Error!`)
+        throw new Error(`500, BloodGlucoseCreate Info Service Error!`);
     }
-}
+};
 
 function getUnit(BloodPressure_Unit: any) {
     let unitmsg = '';
@@ -117,7 +117,7 @@ async function checkEntry(eventObj: any) {
     if (!phoneNumber && !Systolic) {
         throw new Error("Missing required parameter PhoneNumber and/or Systolic");
     }
-    let result;
+    let result = null;
     result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
 
     const patientUserId = result.message[0].UserId;

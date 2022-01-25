@@ -7,8 +7,8 @@ const clientEnvironmentProviderService: ClientEnvironmentProviderService = conta
 const reancare_api_key = clientEnvironmentProviderService.getClientEnvironmentVariable("ReancareApiKey");
 
 export const getHeaders = (accessToken: any) => {
-    let options = getRequestOptions("rean_app");
+    const options = getRequestOptions("rean_app");
     options.headers["authorization"] = `Bearer ${accessToken}`;
     options.headers["x-api-key"] = `${reancare_api_key}`;
-    return {options};
-}
+    return options;
+};

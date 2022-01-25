@@ -3,7 +3,7 @@ import { createBloodPressureInfoService, updateBloodPressureInfoService } from "
 import { createBloodOxygenSaturationInfoService, updateBloodOxygenSaturationInfoService } from "../../services/biometrics/blood.oxygen.saturation.service";
 import { createBodyHeightInfoService, updateBodyHeightInfoService } from "../../services/biometrics/body.height.service";
 import { createBodyTemperatureInfoService, updateBodyTemperatureInfoService } from "../../services/biometrics/body.temperature.service";
-import { createWeightInfoService, updateWeightInfoService } from "../../services/biometrics/body.weight.service";
+import { createBodyWeightInfoService, updateBodyWeightInfoService } from "../../services/biometrics/body.weight.service";
 import { createPulseInfoService, updatePulseInfoService } from "../../services/biometrics/pulse.service";
 
 export class AppSupportListener {
@@ -45,11 +45,11 @@ export class AppSupportListener {
                 break;
             }
             case 'BodyWeight.update': {
-                response = await updateWeightInfoService(eventObj);
+                response = await updateBodyWeightInfoService(eventObj);
                 break;
             }
             case 'BodyWeight.Create': {
-                response = await createWeightInfoService(eventObj);
+                response = await createBodyWeightInfoService(eventObj);
                 break;
             }
             case 'BodyTemperature.update': {
@@ -71,7 +71,7 @@ export class AppSupportListener {
             
             }
             if (!response) {
-                throw new Error('BloodGlucoseUpdate Info Listener Error!');
+                throw new Error('Biometrics Info Listener Error!');
             }
             return response;
         } catch (error) {

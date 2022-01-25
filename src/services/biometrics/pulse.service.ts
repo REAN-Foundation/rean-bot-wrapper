@@ -1,12 +1,13 @@
-import { Logger } from '../../common/logger';
-import { getRequestOptions } from '../../utils/helper';
+import { getHeaders } from '../../services/biometrics/get.headers';
+import { GetPatientInfoService } from "../../services/support.app.service";
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 import { container,  } from 'tsyringe';
 import needle from "needle";
-// eslint-disable-next-line max-len
-const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
+
+const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
+const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
+    ClientEnvironmentProviderService);
 const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
-const reancare_api_key = clientEnvironmentProviderService.getClientEnvironmentVariable("ReancareApiKey");
 
 let remark = '';
 const getremark = function (Pulse) {
@@ -23,101 +24,92 @@ const getremark = function (Pulse) {
     return remark;
 };
 
-// eslint-disable-next-line max-len
-export const updatePulseInfoService = async (patientUserId, accessToken, Pulse, Pulse_Unit, pulseId) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            
-            Logger.instance().log(`PUT PulseInfo API`);
+export const updatePulseInfoService = async (eventObj) => {
 
-            if (Pulse) {
+    if (eventObj) {
+        var { patientUserId, accessToken, Pulse_Unit, Pulse } = await checkEntry(eventObj);
 
-                const options = getOptions(accessToken);
-                const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/Pulse/${pulseId}`;
+        const url = `${ReanBackendBaseUrl}clinical/biometrics/pulse/search?patientUserId=${patientUserId}`;
+        
+        const options = getHeaders(accessToken);
+        const resp = await needle("get", url, options);
+        const pulseId = resp.body.Data.PulseRecords.Items[0].id;
+        
+        const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/Pulse/${pulseId}`;
 
-                const obj = {
-                    "patientUserId" : patientUserId,
-                    "Pulse"         : Pulse,
-                    "Unit"          : Pulse_Unit
-                };
+        const obj = {
+            "patientUserId" : patientUserId,
+            "Pulse"         : Pulse,
+            "Unit"          : Pulse_Unit
+        };
 
-                console.log("the obj is", obj);
+        const response = await needle("put", apiUrl, obj, options);
 
-                const response = await needle("put", apiUrl, obj, options);
-
-                console.log("response", response);
-
-                if (response.statusCode !== 200) {
-                    reject("Failed to get update response from API.");
-                    return;
-                }
-
-                remark = getremark(Pulse);
-
-                const dffMessage = `Your updated Pulse ${response.body.Data.Pulse.Pulse} ${response.body.Data.Pulse.Unit} is ${remark}`;
-
-                const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
-
-                resolve({ sendDff: true, message: data });
-
-            }
-            
+        if (response.statusCode !== 200) {
+            throw new Error("Failed to get response from API.");
         }
-        catch (error) {
-            Logger.instance().log_error(error.message, 500, "Pulse Info Service Error!");
-            reject(error.message);
-        }
-    });
+        remark = getremark(Pulse);
+
+        const dffMessage = `Your updated Pulse ${response.body.Data.Pulse.Pulse} ${response.body.Data.Pulse.Unit} is ${remark}`;
+
+        const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
+
+        return response.message = data;
+    } else {
+        throw new Error(`500, PulseUpdate Info Service Error!`);
+    }
 };
 
-// eslint-disable-next-line max-len
-export const createPulseInfoService = async (patientUserId, accessToken, Pulse, Pulse_Unit) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            
-            Logger.instance().log(`POST PulseInfo API`);
+export const createPulseInfoService = async (eventObj) => {
 
-            if (Pulse) {
+    if (eventObj) {
+        var { patientUserId, accessToken, Pulse_Unit, Pulse } = await checkEntry(eventObj);
+        
+        const options = getHeaders(accessToken);
+        
+        const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/Pulse`;
 
-                const options = getOptions(accessToken);
-                const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/Pulse`;
+        const obj = {
+            "patientUserId" : patientUserId,
+            "Pulse"         : Pulse,
+            "Unit"          : Pulse_Unit,
+            "RecordDate"    : Date()
+        };
 
-                const obj = {
-                    "PatientUserId" : patientUserId,
-                    "Pulse"         : Pulse,
-                    "Unit"          : Pulse_Unit,
-                    "RecordDate"    : Date()
-                };
+        const response = await needle("post", apiUrl, obj, options);
 
-                const response = await needle("post", apiUrl, obj, options);
-
-                if (response.statusCode !== 201) {
-                    reject("Failed to get create response from API.");
-                    return;
-                }
-
-                remark = getremark(Pulse);
-
-                const dffMessage = `Your newly added Pulse ${response.body.Data.Pulse.Pulse} ${response.body.Data.Pulse.Unit} is ${remark}`;
-
-                const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
-
-                resolve({ sendDff: true, message: data });
-
-            }
-            
+        if (response.statusCode !== 201) {
+            throw new Error("Failed to get response from API.");
         }
-        catch (error) {
-            Logger.instance().log_error(error.message, 500, "Pulse Info Service Error!");
-            reject(error.message);
-        }
-    });
+        remark = getremark(Pulse);
+
+        const dffMessage = `Your newly added Pulse ${response.body.Data.Pulse.Pulse} ${response.body.Data.Pulse.Unit} is ${remark}`;
+
+        const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
+
+        return response.message = data;
+    } else {
+        throw new Error(`500, PulseCreate Info Service Error!`);
+    }
 };
 
-function getOptions(accessToken: any) {
-    const options = getRequestOptions("rean_app");
-    options.headers["authorization"] = `Bearer ${accessToken}`;
-    options.headers["x-api-key"] = `${reancare_api_key}`;
-    return options;
+async function checkEntry(eventObj: any) {
+    const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
+    const Pulse = eventObj.body.queryResult.parameters.Pulse;
+    let Pulse_Unit = eventObj.body.queryResult.parameters.Pulse_Unit;
+
+    if (Pulse_Unit === '') {
+        Pulse_Unit = 'bpm';
+    }
+
+    if (!phoneNumber && !Pulse) {
+        throw new Error("Missing required parameter PhoneNumber and/or Pulse");
+    }
+    let result = null;
+    result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
+
+    const patientUserId = result.message[0].UserId;
+
+    const accessToken = result.message[0].accessToken;
+    return { patientUserId, accessToken, Pulse_Unit, Pulse };
 }
-

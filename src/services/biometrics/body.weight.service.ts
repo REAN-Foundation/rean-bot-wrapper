@@ -1,101 +1,99 @@
-import { Logger } from '../../common/logger';
-import { getRequestOptions } from '../../utils/helper';
+import { getHeaders } from '../../services/biometrics/get.headers';
+import { GetPatientInfoService } from "../../services/support.app.service";
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 import { container,  } from 'tsyringe';
 import needle from "needle";
-// eslint-disable-next-line max-len
-const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
+
+const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
+const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
+    ClientEnvironmentProviderService);
 const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
-const reancare_api_key = clientEnvironmentProviderService.getClientEnvironmentVariable("ReancareApiKey");
 
-export const createWeightInfoService = async (patientUserId, accessToken, BodyWeight,BodyWeight_Unit) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            Logger.instance().log(`POST WeightInfo API`);
+export const updateBodyWeightInfoService = async (eventObj) => {
 
-            if (BodyWeight) {
+    if (eventObj) {
+        var { patientUserId, accessToken, BodyWeight_Unit, BodyWeight } = await checkEntry(eventObj);
+        
+        const url = `${ReanBackendBaseUrl}clinical/biometrics/body-weights/search?patientUserId=${patientUserId}`;
+        const options = getHeaders(accessToken);
+        const resp = await needle("get", url, options);
+        const bodyWeightId = resp.body.Data.BodyWeightRecords.Items[0].id;
 
-                const options = getOptions(accessToken);
-                const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/body-weights`;
+        const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/body-weights/${bodyWeightId}`;
 
-                const obj = {
-                    "PatientUserId" : patientUserId,
-                    "BodyWeight"    : BodyWeight,
-                    "Unit"          : BodyWeight_Unit,
-                    "RecordDate"    : Date()
-                };
+        const obj = {
+            "PatientUserId" : patientUserId,
+            "BodyWeight"    : BodyWeight,
+            "Unit"          : BodyWeight_Unit
+        };
 
-                console.log("the obj is", obj);
+        const response = await needle("put", apiUrl, obj, options);
 
-                const response = await needle("post", apiUrl, obj, options);
-
-                console.log("response", response);
-
-                if (response.statusCode !== 201) {
-                    reject("Failed to get create response from API.");
-                    return;
-                }
-
-                const dffMessage = `Your newly added BodyWeight is ${response.body.Data.BodyWeight.BodyWeight} ${response.body.Data.BodyWeight.Unit}.`;
-
-                const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
-
-                resolve({ sendDff: true, message: data });
-
-            }
-            
+        if (response.statusCode !== 200) {
+            throw new Error("Failed to get response from API.");
         }
-        catch (error) {
-            Logger.instance().log_error(error.message, 500, "Weight Info Service Error!");
-            reject(error.message);
-        }
-    });
+
+        const dffMessage = `Your updated BodyWeight is ${response.body.Data.BodyWeight.BodyWeight} ${response.body.Data.BodyWeight.Unit}.`;
+
+        const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
+
+        return response.message = data;
+    } else {
+        throw new Error(`500, BodyWeightUpdate Info Service Error!`);
+    }
 };
 
-export const updateWeightInfoService = async (patientUserId, accessToken, BodyWeight,BodyWeight_Unit, bodyWeightId) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            
-            Logger.instance().log(`PUT WeightInfo API`);
+export const createBodyWeightInfoService = async (eventObj) => {
 
-            if (BodyWeight) {
+    if (eventObj) {
+        var { patientUserId, accessToken, BodyWeight_Unit, BodyWeight } = await checkEntry(eventObj);
+        
+        const options = getHeaders(accessToken);
+        const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/body-weights`;
 
-                const options = getOptions(accessToken);
-                const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/body-weights/${bodyWeightId}`;
+        const obj = {
+            "PatientUserId" : patientUserId,
+            "BodyWeight"    : BodyWeight,
+            "Unit"          : BodyWeight_Unit,
+            "RecordDate"    : Date()
+        };
 
-                const obj = {
-                    "patientUserId" : patientUserId,
-                    "BodyWeight"    : BodyWeight,
-                    "Unit"          : BodyWeight_Unit
-                };
+        const response = await needle("post", apiUrl, obj, options);
 
-                const response = await needle("put", apiUrl, obj, options);
-
-                if (response.statusCode !== 200) {
-                    reject("Failed to get update response from API.");
-                    return;
-                }
-
-                const dffMessage = `Your updated BodyWeight is ${response.body.Data.BodyWeight.BodyWeight} ${response.body.Data.BodyWeight.Unit}.`;
-
-                const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
-
-                resolve({ sendDff: true, message: data });
-
-            }
-            
+        if (response.statusCode !== 201) {
+            throw new Error("Failed to get response from API.");
         }
-        catch (error) {
-            Logger.instance().log_error(error.message, 500, "Weight Info Service Error!");
-            reject(error.message);
-        }
-    });
+
+        const dffMessage = `Your newly added BodyWeight is ${response.body.Data.BodyWeight.BodyWeight} ${response.body.Data.BodyWeight.Unit}.`;
+
+        const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
+
+        return response.message = data;
+    } else {
+        throw new Error(`500, BodyWeightCreate Info Service Error!`);
+    }
 };
 
-function getOptions(accessToken: any) {
-    const options = getRequestOptions("rean_app");
-    options.headers["authorization"] = `Bearer ${accessToken}`;
-    options.headers["x-api-key"] = `${reancare_api_key}`;
-    return options;
+async function checkEntry(eventObj: any) {
+    const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
+    const BodyWeight = eventObj.body.queryResult.parameters.Weight_Amount;
+    let BodyWeight_Unit = eventObj.body.queryResult.parameters.Weight_unit;
+
+    const ten_digit = phoneNumber.substr(phoneNumber.length - 10);
+    const country_code = phoneNumber.split(ten_digit)[0];
+
+    if (BodyWeight_Unit === '') {
+        if (country_code === '+91') {
+            BodyWeight_Unit = 'Kg';
+        } else if (country_code === '1') {
+            BodyWeight_Unit = 'lb';
+        }
+    }
+    let result = null;
+    result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
+    const patientUserId = result.message[0].UserId;
+    const accessToken = result.message[0].accessToken;
+
+    return { patientUserId, accessToken, BodyWeight_Unit, BodyWeight };
 }
 
