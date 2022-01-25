@@ -3,7 +3,7 @@ import { Logger } from '../../common/logger';
 import { injectable } from 'tsyringe';
 import { ClientWebhookController } from '../controllers/client.webhook.controller';
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
-  
+
 @injectable()
 export class WhatsappWebhookRoutes{
 

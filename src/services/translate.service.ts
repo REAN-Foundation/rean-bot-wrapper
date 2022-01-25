@@ -7,7 +7,7 @@ let dialogflow_language = "en-US";
 export class translateService{
 
     private GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
-    
+
     private obj = {
         credentials: this.GCPCredentials,
         projectId: this.GCPCredentials.project_id

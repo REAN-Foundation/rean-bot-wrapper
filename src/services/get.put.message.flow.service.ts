@@ -57,7 +57,6 @@ export class MessageFlow{
         let message_to_platform = null;
         // eslint-disable-next-line max-len
         message_to_platform = await platformMessageService.SendMediaMessage(response_format.sessionId, response_format.messageBody,response_format.messageText);
-
         return message_to_platform;
     }
 

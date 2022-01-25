@@ -2,7 +2,7 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 import { container,  } from 'tsyringe';
 import { isEmpty } from 'lodash';
 export const getRiskAssessmentInfo = async (req) => {
-    const clientEnvironmentProviderService: 
+    const clientEnvironmentProviderService:
     ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
     const baseURL = clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL");
     return new Promise(async (resolve, reject) => {
@@ -156,7 +156,7 @@ function calculateRisk(params){
     const returnArray = { 'risk_level': risk_level, 'bmi': bmi, 'tot_score': tot_score };
 
     console.log("We are here in the function we pushed");
-    
+
     return returnArray;
 }
 
