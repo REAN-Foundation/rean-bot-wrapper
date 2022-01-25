@@ -1,5 +1,7 @@
 import { Logger } from '../../common/logger';
-import { getPatientsByPhoneNumberservice, getMedicationInfoservice } from "../../services/support.app.service";
+import { GetPatientInfoService } from "../../services/support.app.service";
+import { container } from 'tsyringe';
+const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
 
 export const getMedicationInfo = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
@@ -19,8 +21,8 @@ export const getMedicationInfo = async (intent, eventObj) => {
             // const patientNumber = eventObj.body.queryResult.parameters.PatientNumber ? eventObj.body.queryResult.parameters.PatientNumber : null;
             // eslint-disable-next-line init-declarations
             let result;
-            result = await getPatientsByPhoneNumberservice(phoneNumber);
-            
+            result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
+
             if (result.sendDff) {
                 resolve(result.message);
                 return;
@@ -32,7 +34,7 @@ export const getMedicationInfo = async (intent, eventObj) => {
 
             Logger.instance().log(`Fetching medication info for PatientUserId: ${patientUserId} & Access Token: ${accessToken}`);
 
-            result = await getMedicationInfoservice(patientUserId, accessToken);
+            result = await getPatientInfoService.getMedicationInfoservice(patientUserId, accessToken);
 
             console.log("Inside listener: ", result);
 

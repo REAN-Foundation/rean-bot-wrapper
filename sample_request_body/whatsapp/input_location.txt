@@ -1,0 +1,12 @@
+{
+  messages: [
+    {
+      from: '918********5',
+      id: 'ABEGkYFWeFvU2cIKz82E6e0G',
+      location: { latitude: 2x.xxxxxx2, longitude: 9x.xxxxxx1 },
+      timestamp: '1637836569',
+      type: 'location'
+    }
+  ],
+  contacts: [ { profile: { name: 'Jane' }, wa_id: '918********5' } ]
+}

@@ -3,9 +3,9 @@ import { getRequestOptions } from '../utils/helper';
 import { districtMapping } from '../utils/district.mapping';
 import needle from 'needle';
 import axios from 'axios';
-import dfff from 'dialogflow-fulfillment';
+import dfff from '../libs/dialogflow-fulfillment';
 import date from 'date-and-time';
-const GEO_API = process.env.GEO_API_KEY;
+
 const VaccinationServiceBaseUrl = 'https://cdn-api.co-vin.in/api/v2';
 
 // Get Covid Vaccination Slots by Pincode
@@ -93,6 +93,7 @@ export const getAppointments = async(req, res) => {
     }
 
     async function findNearestPin(lat, long) { //get pinCode from latitude and longitude
+        const GEO_API = process.env.GEO_API_KEY;
         try {
             let pin = undefined;
             const locationURL = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' + lat + ',' + long + '&key=' + GEO_API;
