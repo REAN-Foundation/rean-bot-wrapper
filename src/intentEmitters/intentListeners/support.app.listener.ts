@@ -22,7 +22,7 @@ export const getMedicationInfo = async (intent, eventObj) => {
             // eslint-disable-next-line init-declarations
             let result;
             result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
-            
+
             if (result.sendDff) {
                 resolve(result.message);
                 return;

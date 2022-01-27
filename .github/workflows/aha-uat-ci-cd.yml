@@ -5,15 +5,12 @@
 # file with configuration.  For more information, see:
 # https://github.com/actions/labeler
 
-name: UAT-CI-CD
+name: AHA-UAT-CI-CD
 
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push events but only for the develop branch
-  push:
-    branches:
-      - 'release/**'
-      - '!release/aha**'   # excludes aha release branches
+  workflow_dispatch:
 
 jobs:
   CodeScan-ESLint:
@@ -33,7 +30,7 @@ jobs:
           VALIDATE_TYPESCRIPT_ES: true
 
   Deploy-ECS:
-    environment: uat
+    environment: aha-uat
     runs-on: ubuntu-latest
 
     steps:
@@ -66,8 +63,8 @@ jobs:
         uses: docker/setup-buildx-action@v1
 
       - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        run: |
+          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
 
       - name: Cache Docker layers
         uses: actions/cache@v2
@@ -85,7 +82,7 @@ jobs:
           file: ./Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
-          tags: ${{ steps.login-ecr.outputs.registry }}/rean-bot-dev-uat:${{ steps.vars.outputs.branch }}_${{ steps.vars.outputs.sha_short }}
+          tags: public.ecr.aws/i9y2d4u3/rean-bot:${{ steps.vars.outputs.branch }}_${{ steps.vars.outputs.sha_short }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
@@ -103,7 +100,7 @@ jobs:
         with:
           task-definition: task-definition.json
           container-name: default
-          image: ${{ steps.login-ecr.outputs.registry }}/rean-bot-dev-uat:${{ steps.vars.outputs.branch }}_${{ steps.vars.outputs.sha_short }}
+          image: public.ecr.aws/i9y2d4u3/rean-bot:${{ steps.vars.outputs.branch }}_${{ steps.vars.outputs.sha_short }}
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
