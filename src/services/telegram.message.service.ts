@@ -84,7 +84,7 @@ export class TelegramMessageService implements platformServiceInterface{
         const intent = processedResponse.message_from_dialoglow.result && processedResponse.message_from_dialoglow.result.intent ? processedResponse.message_from_dialoglow.result.intent.displayName : '';
 
         if (processedResponse.message_from_dialoglow.image && processedResponse.message_from_dialoglow.image.url) {
-            reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: processedResponse.message_from_dialoglow.image , messageImageCaption: processedResponse.message_from_dialoglow.image.url, sessionId: telegram_id, messageText: null };
+            reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",raw_response_object: raw_response_object,intent: intent,messageBody: processedResponse.message_from_dialoglow.image.url, messageImageUrl: processedResponse.message_from_dialoglow.image.url , messageImageCaption: processedResponse.message_from_dialoglow.image, sessionId: telegram_id, messageText: processedResponse.processed_message[0] };
         }
         else if (processedResponse.processed_message.length > 1) {
 

@@ -20,6 +20,7 @@ export class translateService{
         const [detections] = await translate.detect(message);
         const detectedLanguage = await Array.isArray(detections) ? detections : [detections];
         detected_language = detectedLanguage[0].language;
+        detected_language = await this.checkLanguage(detected_language);
         if (detected_language !== 'en') {
             const target = 'en';
             const [translation] = await translate.translate(message, target);
@@ -59,6 +60,15 @@ export class translateService{
         } catch (e) {
             console.log("catch translate", e);
             return responseMessage;
+        }
+    }
+
+    checkLanguage = async (language:string) => {
+        if (language === "und"){
+            return language = "en";
+        }
+        else {
+            return language;
         }
     }
 
