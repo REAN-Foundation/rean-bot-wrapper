@@ -7,7 +7,6 @@ import needle from "needle";
 const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
 const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
     ClientEnvironmentProviderService);
-const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
 
 let remark = '';
 const getremark = function (BloodGlucose) {
@@ -30,9 +29,9 @@ export const updateBloodGlucoseInfoService = async (eventObj) => {
 
     if (eventObj) {
         var { patientUserId, accessToken, BloodGlucose_Unit, BloodGlucose } = await checkEntry(eventObj);
+        const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
 
         const url = `${ReanBackendBaseUrl}clinical/biometrics/blood-glucose/search?patientUserId=${patientUserId}`;
-        
         const options = getHeaders(accessToken);
         const resp = await needle("get", url, options);
         const bloodGlucoseId = resp.body.Data.BloodGlucoseRecords.Items[0].id;
@@ -42,7 +41,7 @@ export const updateBloodGlucoseInfoService = async (eventObj) => {
         const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/blood-glucose/${bloodGlucoseId}`;
 
         const obj = {
-            "patientUserId" : patientUserId,
+            "PatientUserId" : patientUserId,
             "BloodGlucose"  : BloodGlucose,
             "Unit"          : BloodGlucose_Unit
         };
@@ -72,10 +71,11 @@ export const createBloodGlucoseInfoService = async (eventObj) => {
         let unitmsg = null;
         ({ unitmsg, BloodGlucose_Unit } = getUnit(BloodGlucose_Unit));
         const options = getHeaders(accessToken);
+        const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
         const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/blood-glucose`;
 
         const obj = {
-            "patientUserId" : patientUserId,
+            "PatientUserId" : patientUserId,
             "BloodGlucose"  : BloodGlucose,
             "Unit"          : BloodGlucose_Unit,
             "RecordDate"    : Date()
@@ -124,4 +124,3 @@ async function checkEntry(eventObj: any) {
     const accessToken = result.message[0].accessToken;
     return { patientUserId, accessToken, BloodGlucose_Unit, BloodGlucose };
 }
-

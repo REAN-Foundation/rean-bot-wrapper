@@ -7,7 +7,6 @@ import needle from "needle";
 const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
 const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
     ClientEnvironmentProviderService);
-const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
 
 let remark = '';
 const getremark = function (Pulse) {
@@ -29,6 +28,7 @@ export const updatePulseInfoService = async (eventObj) => {
     if (eventObj) {
         var { patientUserId, accessToken, Pulse_Unit, Pulse } = await checkEntry(eventObj);
 
+        const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
         const url = `${ReanBackendBaseUrl}clinical/biometrics/pulse/search?patientUserId=${patientUserId}`;
         
         const options = getHeaders(accessToken);
@@ -38,7 +38,7 @@ export const updatePulseInfoService = async (eventObj) => {
         const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/Pulse/${pulseId}`;
 
         const obj = {
-            "patientUserId" : patientUserId,
+            "PatientUserId" : patientUserId,
             "Pulse"         : Pulse,
             "Unit"          : Pulse_Unit
         };
@@ -65,12 +65,12 @@ export const createPulseInfoService = async (eventObj) => {
     if (eventObj) {
         var { patientUserId, accessToken, Pulse_Unit, Pulse } = await checkEntry(eventObj);
         
+        const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
         const options = getHeaders(accessToken);
-        
         const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/Pulse`;
 
         const obj = {
-            "patientUserId" : patientUserId,
+            "PatientUserId" : patientUserId,
             "Pulse"         : Pulse,
             "Unit"          : Pulse_Unit,
             "RecordDate"    : Date()

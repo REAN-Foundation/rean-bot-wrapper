@@ -7,13 +7,13 @@ import needle from "needle";
 const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
 const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
     ClientEnvironmentProviderService);
-const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
 
 export const updateBodyWeightInfoService = async (eventObj) => {
 
     if (eventObj) {
         var { patientUserId, accessToken, BodyWeight_Unit, BodyWeight } = await checkEntry(eventObj);
         
+        const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
         const url = `${ReanBackendBaseUrl}clinical/biometrics/body-weights/search?patientUserId=${patientUserId}`;
         const options = getHeaders(accessToken);
         const resp = await needle("get", url, options);
@@ -48,6 +48,7 @@ export const createBodyWeightInfoService = async (eventObj) => {
     if (eventObj) {
         var { patientUserId, accessToken, BodyWeight_Unit, BodyWeight } = await checkEntry(eventObj);
         
+        const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
         const options = getHeaders(accessToken);
         const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/body-weights`;
 

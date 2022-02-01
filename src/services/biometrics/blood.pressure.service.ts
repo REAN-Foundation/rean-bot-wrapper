@@ -7,7 +7,6 @@ import needle from "needle";
 const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
 const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
     ClientEnvironmentProviderService);
-const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
 
 let remark = '';
 const getremark = function (Systolic,Diastolic) {
@@ -30,6 +29,7 @@ export const updateBloodPressureInfoService = async (eventObj) => {
 
     if (eventObj) {
         var { patientUserId, accessToken, Systolic, Diastolic, BloodPressure_Unit } = await checkEntry(eventObj);
+        const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
 
         const url = `${ReanBackendBaseUrl}clinical/biometrics/blood-pressures/search?patientUserId=${patientUserId}`;
         
@@ -70,6 +70,7 @@ export const createBloodPressureInfoService = async (eventObj) => {
 
         let unitmsg = null;
         ({ unitmsg, BloodPressure_Unit } = getUnit(BloodPressure_Unit));
+        const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
         const options = getHeaders(accessToken);
         const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/blood-pressures`;
 

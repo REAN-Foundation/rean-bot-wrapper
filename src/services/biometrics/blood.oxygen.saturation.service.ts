@@ -7,7 +7,6 @@ import needle from "needle";
 const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
 const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
     ClientEnvironmentProviderService);
-const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
 
 let remark = '';
 const getremark = function (BloodOxygenSaturation) {
@@ -30,6 +29,7 @@ export const updateBloodOxygenSaturationInfoService = async (eventObj) => {
         var { patientUserId, accessToken, BloodOxygenSaturation_Unit,
             BloodOxygenSaturation } = await checkEntry(eventObj);
 
+        const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
         const url = `${ReanBackendBaseUrl}clinical/biometrics/blood-oxygen-saturations/search?patientUserId=${patientUserId}`;
         
         const options = getHeaders(accessToken);
@@ -68,6 +68,7 @@ export const createBloodOxygenSaturationInfoService = async (eventObj) => {
             BloodOxygenSaturation } = await checkEntry(eventObj);
         
         const options = getHeaders(accessToken);
+        const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
         const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/blood-oxygen-saturations`;
 
         const obj = {
@@ -97,10 +98,13 @@ export const createBloodOxygenSaturationInfoService = async (eventObj) => {
 async function checkEntry(eventObj: any) {
     const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
     const BloodOxygenSaturation = eventObj.body.queryResult.parameters.BloodOxygenSaturation;
-    const BloodOxygenSaturation_Unit = eventObj.body.queryResult.parameters.Unit;
+    let BloodOxygenSaturation_Unit = eventObj.body.queryResult.parameters.Unit;
 
     if (!phoneNumber && !BloodOxygenSaturation) {
         throw new Error("Missing required parameter PhoneNumber and/or BloodOxygenSaturation");
+    }
+    if (BloodOxygenSaturation_Unit === '') {
+        BloodOxygenSaturation_Unit = '%';
     }
     let result = null;
     result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
