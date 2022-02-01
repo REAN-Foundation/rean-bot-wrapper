@@ -5,14 +5,22 @@ export const getRiskAssessmentInfo = async (req) => {
     const clientEnvironmentProviderService:
     ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
     const baseURL = clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL");
+    const env = clientEnvironmentProviderService.getClientEnvironmentVariable("ENVIRONMENT");
     return new Promise(async (resolve, reject) => {
         try {
             let params: any = {};
             var imagePath = '';
+            const img_url = 'https://d3uqieugp2i3ic.cloudfront.net/';
+            const img_env = {
+                'LOCAL' : 'dev',
+                'DEVELOPMENT' : 'dev',
+                'UAT' : 'uat',
+                'PROD' : 'prod'
+            };
             const image = {
-                'low' : baseURL + '/uploads/L.png',
-                'high' : baseURL + '/uploads/H.png',
-                'moderate' : baseURL + '/uploads/M.png'
+                'low' : img_url + img_env[env] + '/L.png',
+                'high' : img_url + img_env[env] + '/H.png',
+                'moderate' : img_url + img_env[env] + '/M.png'
             };
             if (req['body']['queryResult']['intent']['displayName'] !== "Risk.assessment.info-no") {
                 params = req.body.queryResult.parameters ? req.body.queryResult.parameters : {};
@@ -25,7 +33,7 @@ export const getRiskAssessmentInfo = async (req) => {
             if (req['body']['queryResult']['intent']['displayName'] !== "Risk.assessment.info-no") {
                 params.previousscore = params.score;
                 if (params.complication.length === 0) {
-                    response = output.risk_level.toUpperCase() + " RISK!!! Of developing complication if you get infected with COVID-19" +
+                    response = output.risk_level.toUpperCase() + " RISK!!! Of developing complication if you get infected with COVID-19, with a score of " + params.score +
                         " Do you have any health complications?";
                     const data = {
                         "fulfillmentMessages" : [
@@ -76,10 +84,10 @@ export const getRiskAssessmentInfo = async (req) => {
                                 const riskData = getFinalScore(params);
                                 output.risk_level = riskData.risk_level;
                                 const BMIValue = !isNaN(output.bmi) ? "- " + output.bmi : '';
-                                response = 'The medical conditions entered have already been considered for calculating your risk.' + output.risk_level.toUpperCase() + " RISK!!! Of developing complication if you get infected with COVID-19.\n\n" +
+                                response = 'The medical conditions entered have already been considered for calculating your risk.' + riskData.risk_level.toUpperCase() + " RISK!!! Of developing complication if you get infected with COVID-19.\n\n" +
                                     " Based on Age -" + params.Age.amount + ", Gender - " + genderText + ", BMI " + BMIValue + " and given complications Final risk score is " + riskData.finalScore + "  \n\n(Reference - https://www.reanfoundation.org/risk-assessment-tool/) \n\n" +
                                     " We can also  help you  with covid related questions, symptom assessment or vaccination availability.";
-                                imagePath = image[output.risk_level.toLocaleLowerCase()];
+                                imagePath = image[riskData.risk_level.toLocaleLowerCase()];
                                 const data = getEndofConvData(imagePath,response);
                                 resolve(data);
                             } else {
@@ -104,12 +112,14 @@ export const getRiskAssessmentInfo = async (req) => {
                 output.risk_level = '';
                 const riskData = getFinalScore(params);
                 const BMIValue = !isNaN(output.bmi) ? "- " + output.bmi : '';
-                response = output.risk_level.toUpperCase() + " RISK!!! Of developing complication if you get infected with COVID-19.\n\n" +
+                response = riskData.risk_level.toUpperCase() + " RISK!!! Of developing complication if you get infected with COVID-19.\n\n" +
                     " Based on Age -" + params.Age.amount + ", Gender - " + genderText + ", BMI " + BMIValue + " and given complications Final risk score is " + riskData.finalScore + "  \n\n(Reference - https://www.reanfoundation.org/risk-assessment-tool/) \n\n" +
                     " We can also  help you  with covid related questions, symptom assessment or vaccination availability.";
 
-                imagePath = image[output.risk_level.toLocaleLowerCase()];
+                imagePath = image[riskData.risk_level.toLocaleLowerCase()];
                 const data = getEndofConvData(imagePath,response);
+                console.log(data.fulfillmentMessages);
+                
                 resolve(data);
             }
         }

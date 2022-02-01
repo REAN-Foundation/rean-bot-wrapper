@@ -58,7 +58,6 @@ export class TelegramMessageService implements platformServiceInterface{
 
     getMessage = async (message) =>{
         console.log("enter the getMessage of telegram", message);
-
         if (message.text) {
             return await this.telegramMessageServiceFunctionalities.textMessageFormat(message);
         } else if (message.voice) {
@@ -82,14 +81,14 @@ export class TelegramMessageService implements platformServiceInterface{
         const chat_message_id = message.chat_message_id;
         const raw_response_object = processedResponse.message_from_dialoglow.result && processedResponse.message_from_dialoglow.result.fulfillmentMessages ? JSON.stringify(processedResponse.message_from_dialoglow.result.fulfillmentMessages) : '';
         const intent = processedResponse.message_from_dialoglow.result && processedResponse.message_from_dialoglow.result.intent ? processedResponse.message_from_dialoglow.result.intent.displayName : '';
-
         if (processedResponse.message_from_dialoglow.image && processedResponse.message_from_dialoglow.image.url) {
-            reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: processedResponse.message_from_dialoglow.image , messageImageCaption: processedResponse.message_from_dialoglow.image.url, sessionId: telegram_id, messageText: null };
+            reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",raw_response_object: raw_response_object,intent: intent,messageBody: processedResponse.message_from_dialoglow.image.url, messageImageUrl: processedResponse.message_from_dialoglow.image.url , messageImageCaption: processedResponse.message_from_dialoglow.image, sessionId: telegram_id, messageText: processedResponse.processed_message[0] };
+            console.log(reaponse_message);
         }
         else if (processedResponse.processed_message.length > 1) {
-
             if (processedResponse.message_from_dialoglow.parse_mode && processedResponse.message_from_dialoglow.parse_mode === 'HTML') {
-                const uploadImageName = await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
+                const uploadImageName = 
+                    await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
                 const vaacinationImageFile = await this.awsS3manager.uploadFile(uploadImageName);
                 if (vaacinationImageFile) {
                     reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",raw_response_object: raw_response_object,intent: intent,messageBody: String(vaacinationImageFile), messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[1] };
@@ -103,6 +102,7 @@ export class TelegramMessageService implements platformServiceInterface{
             reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "text",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[0] };
         }
         return reaponse_message;
+        
     }
 
     createFinalMessageFromHumanhandOver(requestBody) {
@@ -127,7 +127,6 @@ export class TelegramMessageService implements platformServiceInterface{
     SendMediaMessage = async (contact, imageLink = null, message) => {
         message = this.sanitizeMessage(message);
         return new Promise((resolve) => {
-
             if (imageLink === null){
                 this._telegram.sendMessage(contact, message, { parse_mode: 'HTML' }).then(function (data) {
                     resolve(data);
