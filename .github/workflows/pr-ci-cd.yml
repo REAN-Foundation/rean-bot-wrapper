@@ -30,7 +30,7 @@ jobs:
           VALIDATE_ALL_CODEBASE: false
           TYPESCRIPT_ES_CONFIG_FILE: .eslintrc.json
           VALIDATE_TYPESCRIPT_ES: true
-          DEFAULT_BRANCH: develop
+          DEFAULT_BRANCH: feature/update-node-alpine-version
 
   Build-Docker-Image:
     runs-on: ubuntu-latest
