@@ -32,8 +32,9 @@ export const updateBodyWeightInfoService = async (eventObj) => {
         if (response.statusCode !== 200) {
             throw new Error("Failed to get response from API.");
         }
+        const w = response.body.Data.BodyWeight.BodyWeight;
 
-        const dffMessage = `Your updated BodyWeight is ${response.body.Data.BodyWeight.BodyWeight} ${response.body.Data.BodyWeight.Unit}.`;
+        const dffMessage = `Your updated BodyWeight is ${w} ${response.body.Data.BodyWeight.Unit}.`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
@@ -64,8 +65,9 @@ export const createBodyWeightInfoService = async (eventObj) => {
         if (response.statusCode !== 201) {
             throw new Error("Failed to get response from API.");
         }
+        const w = response.body.Data.BodyWeight.BodyWeight;
 
-        const dffMessage = `Your newly added BodyWeight is ${response.body.Data.BodyWeight.BodyWeight} ${response.body.Data.BodyWeight.Unit}.`;
+        const dffMessage = `Your newly added BodyWeight is ${w} ${response.body.Data.BodyWeight.Unit}.`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 

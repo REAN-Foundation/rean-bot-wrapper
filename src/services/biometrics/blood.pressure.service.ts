@@ -52,9 +52,12 @@ export const updateBloodPressureInfoService = async (eventObj) => {
         if (response.statusCode !== 200) {
             throw new Error("Failed to get response from API.");
         }
+        const s = response.body.Data.BloodPressure.Systolic;
+        const d = response.body.Data.BloodPressure.Diastolic;
+        const u = response.body.Data.BloodPressure.Unit;
 
         remark = getremark(Systolic,Diastolic);
-        const dffMessage = `${unitmsg}Your updated BloodPressure Systolic: ${response.body.Data.BloodPressure.Systolic} Diastolic:${response.body.Data.BloodPressure.Diastolic} ${response.body.Data.BloodPressure.Unit} is ${remark}`;
+        const dffMessage = `${unitmsg}Your updated BloodPressure Systolic: ${s} Diastolic:${d} ${u} is ${remark}`;
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
         return { sendDff: true, message: data };
@@ -88,8 +91,11 @@ export const createBloodPressureInfoService = async (eventObj) => {
             throw new Error("Failed to get response from API.");
         }
         remark = getremark(Systolic,Diastolic);
+        const s = response.body.Data.BloodPressure.Systolic;
+        const d = response.body.Data.BloodPressure.Diastolic;
+        const u = response.body.Data.BloodPressure.Unit;
 
-        const dffMessage = `${unitmsg}Your newly added BloodPressure Systolic: ${response.body.Data.BloodPressure.Systolic} Diastolic:${response.body.Data.BloodPressure.Diastolic} ${response.body.Data.BloodPressure.Unit} is ${remark}`;
+        const dffMessage = `${unitmsg}Your newly added BloodPressure Systolic: ${s} Diastolic:${d} ${u} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 

@@ -1,9 +1,15 @@
-import { createBloodGlucoseInfoService, updateBloodGlucoseInfoService } from "../../services/biometrics/blood.glucose.service";
-import { createBloodPressureInfoService, updateBloodPressureInfoService } from "../../services/biometrics/blood.pressure.service";
-import { createBloodOxygenSaturationInfoService, updateBloodOxygenSaturationInfoService } from "../../services/biometrics/blood.oxygen.saturation.service";
-import { createBodyHeightInfoService, updateBodyHeightInfoService } from "../../services/biometrics/body.height.service";
-import { createBodyTemperatureInfoService, updateBodyTemperatureInfoService } from "../../services/biometrics/body.temperature.service";
-import { createBodyWeightInfoService, updateBodyWeightInfoService } from "../../services/biometrics/body.weight.service";
+import { createBloodGlucoseInfoService,
+    updateBloodGlucoseInfoService } from "../../services/biometrics/blood.glucose.service";
+import { createBloodPressureInfoService,
+    updateBloodPressureInfoService } from "../../services/biometrics/blood.pressure.service";
+import { createBloodOxygenSaturationInfoService,
+    updateBloodOxygenSaturationInfoService } from "../../services/biometrics/blood.oxygen.saturation.service";
+import { createBodyHeightInfoService,
+    updateBodyHeightInfoService } from "../../services/biometrics/body.height.service";
+import { createBodyTemperatureInfoService,
+    updateBodyTemperatureInfoService } from "../../services/biometrics/body.temperature.service";
+import { createBodyWeightInfoService,
+    updateBodyWeightInfoService } from "../../services/biometrics/body.weight.service";
 import { createPulseInfoService, updatePulseInfoService } from "../../services/biometrics/pulse.service";
 
 export class AppSupportListener {

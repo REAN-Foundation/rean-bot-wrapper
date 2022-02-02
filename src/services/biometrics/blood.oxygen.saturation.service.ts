@@ -50,8 +50,10 @@ export const updateBloodOxygenSaturationInfoService = async (eventObj) => {
             throw new Error("Failed to get response from API.");
         }
         remark = getremark(BloodOxygenSaturation);
+        const b = response.body.Data.BloodOxygenSaturation.BloodOxygenSaturation;
+        const u = response.body.Data.BloodOxygenSaturation.Unit;
 
-        const dffMessage = `Your updated BloodOxygenSaturation ${response.body.Data.BloodOxygenSaturation.BloodOxygenSaturation} ${response.body.Data.BloodOxygenSaturation.Unit} is ${remark}`;
+        const dffMessage = `Your updated BloodOxygenSaturation ${b} ${u} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
@@ -84,8 +86,10 @@ export const createBloodOxygenSaturationInfoService = async (eventObj) => {
             throw new Error("Failed to get response from API.");
         }
         remark = getremark(BloodOxygenSaturation);
+        const b = response.body.Data.BloodOxygenSaturation.BloodOxygenSaturation;
+        const u = response.body.Data.BloodOxygenSaturation.Unit;
 
-        const dffMessage = `Your newly added BloodOxygenSaturation ${response.body.Data.BloodOxygenSaturation.BloodOxygenSaturation} ${response.body.Data.BloodOxygenSaturation.Unit} is ${remark}`;
+        const dffMessage = `Your newly added BloodOxygenSaturation ${b} ${u} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 

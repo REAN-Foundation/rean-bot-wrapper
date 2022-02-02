@@ -49,8 +49,9 @@ export const updatePulseInfoService = async (eventObj) => {
             throw new Error("Failed to get response from API.");
         }
         remark = getremark(Pulse);
+        const p = response.body.Data.Pulse.Pulse;
 
-        const dffMessage = `Your updated Pulse ${response.body.Data.Pulse.Pulse} ${response.body.Data.Pulse.Unit} is ${remark}`;
+        const dffMessage = `Your updated Pulse ${p} ${response.body.Data.Pulse.Unit} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
@@ -82,8 +83,9 @@ export const createPulseInfoService = async (eventObj) => {
             throw new Error("Failed to get response from API.");
         }
         remark = getremark(Pulse);
+        const p = response.body.Data.Pulse.Pulse;
 
-        const dffMessage = `Your newly added Pulse ${response.body.Data.Pulse.Pulse} ${response.body.Data.Pulse.Unit} is ${remark}`;
+        const dffMessage = `Your newly added Pulse ${p} ${response.body.Data.Pulse.Unit} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 

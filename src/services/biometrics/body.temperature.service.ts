@@ -56,8 +56,10 @@ export const updateBodyTemperatureInfoService = async (eventObj) => {
             throw new Error("Failed to get response from API.");
         }
         remark = getremark(BodyTemperature_Unit,BodyTemperature);
+        const t = response.body.Data.BodyTemperature.BodyTemperature;
+        const u = response.body.Data.BodyTemperature.Unit;
 
-        const dffMessage = `${unitmsg}Your updated BodyTemperature ${response.body.Data.BodyTemperature.BodyTemperature} ${response.body.Data.BodyTemperature.Unit} is ${remark}`;
+        const dffMessage = `${unitmsg}Your updated BodyTemperature ${t} ${u} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
@@ -91,8 +93,10 @@ export const createBodyTemperatureInfoService = async (eventObj) => {
             throw new Error("Failed to get response from API.");
         }
         remark = getremark(BodyTemperature_Unit,BodyTemperature);
+        const t = response.body.Data.BodyTemperature.BodyTemperature;
+        const u = response.body.Data.BodyTemperature.Unit;
 
-        const dffMessage = `${unitmsg}Your newly added BodyTemperature ${response.body.Data.BodyTemperature.BodyTemperature} ${response.body.Data.BodyTemperature.Unit} is ${remark}`;
+        const dffMessage = `${unitmsg}Your newly added BodyTemperature ${t} ${u} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 

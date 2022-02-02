@@ -52,8 +52,9 @@ export const updateBloodGlucoseInfoService = async (eventObj) => {
             throw new Error("Failed to get response from API.");
         }
         remark = getremark(BloodGlucose);
+        const a = response.body.Data.BloodGlucose.BloodGlucose;
 
-        const dffMessage = `${unitmsg}Your updated BloodGlucose ${response.body.Data.BloodGlucose.BloodGlucose} ${response.body.Data.BloodGlucose.Unit} is ${remark}`;
+        const dffMessage = `${unitmsg}Your updated BloodGlucose ${a} ${response.body.Data.BloodGlucose.Unit} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
@@ -87,8 +88,9 @@ export const createBloodGlucoseInfoService = async (eventObj) => {
             throw new Error("Failed to get response from API.");
         }
         remark = getremark(BloodGlucose);
+        const a = response.body.Data.BloodGlucose.BloodGlucose;
 
-        const dffMessage = `${unitmsg}Your newly added BloodGlucose ${response.body.Data.BloodGlucose.BloodGlucose} ${response.body.Data.BloodGlucose.Unit} is ${remark}`;
+        const dffMessage = `${unitmsg}Your newly added BloodGlucose ${a} ${response.body.Data.BloodGlucose.Unit} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
