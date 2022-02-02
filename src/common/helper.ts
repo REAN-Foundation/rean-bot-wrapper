@@ -9,6 +9,8 @@ import express from 'express';
 
 export class Helper {
 
+    
+
     static getResourceOwner = (request: express.Request): string => {
         if (request.params.userId) {
             return request.params.userId;
