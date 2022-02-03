@@ -263,8 +263,8 @@ export class platformMessageService implements platformServiceInterface {
             }
             else if (processedResponse.processed_message.length > 1) {
                 if (processedResponse.message_from_dialoglow.parse_mode && processedResponse.message_from_dialoglow.parse_mode === 'HTML') {
-                    const uploadImageName = 
-                        await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
+                    // eslint-disable-next-line max-len
+                    const uploadImageName = await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
                     const vaacinationImageFile = await this.awsS3manager.uploadFile(uploadImageName);
                     if (vaacinationImageFile) {
                         reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: "image", raw_response_object: raw_response_object, intent: intent, messageBody: String(vaacinationImageFile), messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[1] };
