@@ -91,7 +91,7 @@ export class DialogflowResponseService {
             };
         }
 
-    }
+    };
 
 }
 

@@ -3,6 +3,7 @@ import http from  'https';
 import fs from 'fs';
 import { message } from '../refactor/interface/message.interface';
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
+
 // import { platformMessageService } from './whatsapp.message.service';
 import { Speechtotext } from './speech.to.text.service';
 import { autoInjectable } from "tsyringe";
@@ -77,7 +78,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
             });
             request.end();
         });
-    }
+    };
 
     inputMessageFormat (message){
         const response_message: message = {

@@ -134,7 +134,7 @@ export default class Application {
         catch (error) {
             Logger.instance().log('An error occurred while starting reancare-api service.' + error.message);
         }
-    }
+    };
 
     private setupMiddlewares = async (): Promise<boolean> => {
 
@@ -150,12 +150,12 @@ export default class Application {
                 const MAX_UPLOAD_FILE_SIZE = ConfigurationManager.MaxUploadFileSize();
 
                 this._app.use(fileUpload({
-                    limits  : { fileSize: MAX_UPLOAD_FILE_SIZE },
+                    limits : { fileSize: MAX_UPLOAD_FILE_SIZE },
                     preserveExtension : true,
-                    createParentPath  : true,
-                    parseNested  : true,
-                    useTempFiles  : true,
-                    tempFileDir  : '/tmp/uploads/'
+                    createParentPath : true,
+                    parseNested : true,
+                    useTempFiles : true,
+                    tempFileDir : '/tmp/uploads/'
                 }));
                 resolve(true);
             }
@@ -163,7 +163,7 @@ export default class Application {
                 reject(error);
             }
         });
-    }
+    };
 
     private listen = () => {
         return new Promise((resolve, reject) => {
@@ -181,6 +181,6 @@ export default class Application {
                 reject(error);
             }
         });
-    }
+    };
 
 }
