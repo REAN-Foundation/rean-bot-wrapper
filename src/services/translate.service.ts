@@ -3,16 +3,14 @@ import { v2 } from '@google-cloud/translate';
 let detected_language = 'en';
 let dialogflow_language = "en-US";
 
-
 export class translateService{
 
     private GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
 
     private obj = {
-        credentials: this.GCPCredentials,
-        projectId: this.GCPCredentials.project_id
+        credentials : this.GCPCredentials,
+        projectId : this.GCPCredentials.project_id
     };
-
 
     translateMessage = async (message) => {
         console.log("entered the translateMessage of translateService JJJJJJJJJJJ", message);
@@ -30,7 +28,7 @@ export class translateService{
         }
         console.log("exited the translate msg");
         return { message, detected_language };
-    }
+    };
 
     processdialogflowmessage = async (message, detected_language) => {
         const translate = new v2.Translate(this.obj);
@@ -44,7 +42,7 @@ export class translateService{
             translatedResponse = await this.translateResponse(translate, message, detected_language);
         }
         return translatedResponse;
-    }
+    };
 
     translateResponse = async (translate, responseMessage, detected_language) => {
         console.log("entered the translateResponse of translateService JJJJJJJJJJJ");
@@ -61,7 +59,7 @@ export class translateService{
             console.log("catch translate", e);
             return responseMessage;
         }
-    }
+    };
 
     checkLanguage = async (language:string) => {
         if (language === "und"){

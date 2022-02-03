@@ -1,8 +1,10 @@
 import http from 'https';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import fs from 'fs';
 import { AwsS3manager } from './aws.file.upload.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { autoInjectable, singleton, inject } from 'tsyringe';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { response, message } from '../refactor/interface/message.interface';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { MessageFlow } from './get.put.message.flow.service';
@@ -10,7 +12,6 @@ import { MessageFunctionalities } from './whatsapp.message.sevice.functionalitie
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-
 
 @autoInjectable()
 @singleton()
@@ -67,6 +68,7 @@ export class platformMessageService implements platformServiceInterface {
 
         return new Promise((resolve, reject) => {
             const webhookUrl = `${this.clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL")}/v1/${clientName}/whatsapp/${this.clientAuthenticator.urlToken}/receive`;
+
             // console.log("whatsapp url",webhookUrl)
             const postData = JSON.stringify({
                 'url'     : webhookUrl,
@@ -113,7 +115,7 @@ export class platformMessageService implements platformServiceInterface {
                 request.end();
             }
         });
-    }
+    };
 
     SendWhatsappMessageOldNumber = async (contact, message) => {
 
@@ -155,7 +157,7 @@ export class platformMessageService implements platformServiceInterface {
             request.write(postData);
             request.end();
         });
-    }
+    };
 
     sanitizeMessage = (message) => {
         if (message) {
@@ -172,7 +174,7 @@ export class platformMessageService implements platformServiceInterface {
         }
         console.log("msg  has been santised", message);
         return message;
-    }
+    };
 
     SendMediaMessage = async (contact, imageLink, message) => {
         return new Promise((resolve, reject) => {
@@ -227,7 +229,7 @@ export class platformMessageService implements platformServiceInterface {
             request.write(postData);
             request.end();
         });
-    }
+    };
 
     getMessage = async (msg) => {
         if (msg.messages[0].type === "text") {
@@ -243,7 +245,7 @@ export class platformMessageService implements platformServiceInterface {
         else {
             throw new Error("Message is neither text, voice nor location");
         }
-    }
+    };
 
     postResponse = async (message, processedResponse) => {
         // eslint-disable-next-line init-declarations
@@ -261,7 +263,8 @@ export class platformMessageService implements platformServiceInterface {
             }
             else if (processedResponse.processed_message.length > 1) {
                 if (processedResponse.message_from_dialoglow.parse_mode && processedResponse.message_from_dialoglow.parse_mode === 'HTML') {
-                    const uploadImageName = await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
+                    const uploadImageName = 
+                        await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
                     const vaacinationImageFile = await this.awsS3manager.uploadFile(uploadImageName);
                     if (vaacinationImageFile) {
                         reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: "image", raw_response_object: raw_response_object, intent: intent, messageBody: String(vaacinationImageFile), messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[1] };
@@ -278,7 +281,7 @@ export class platformMessageService implements platformServiceInterface {
         }
         console.log("postresponse format", reaponse_message);
         return reaponse_message;
-    }
+    };
 
     createFinalMessageFromHumanhandOver(requestBody) {
         const response_message: response = {

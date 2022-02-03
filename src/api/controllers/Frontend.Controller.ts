@@ -20,7 +20,7 @@ export class FrontendController {
             res.end();
         });
         
-    }
+    };
 
     getConversation = async (req,res) =>{
         const conversation = this._elasticsearchUtilities.
@@ -30,6 +30,6 @@ export class FrontendController {
             res.end();
         });
         
-    }
+    };
 
 }

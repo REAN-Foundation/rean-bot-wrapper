@@ -141,6 +141,6 @@ export class elasticsearchUtilities{
                 }
             );
         });
-    }
+    };
 
 }

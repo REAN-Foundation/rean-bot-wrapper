@@ -70,7 +70,7 @@ export class TelegramMessageService implements platformServiceInterface{
         } else {
             throw new Error('Message is neither text, voice nor location');
         }
-    }
+    };
 
     postResponse = async(message, processedResponse) => {
         console.log("enter the give response of tele");
@@ -89,8 +89,8 @@ export class TelegramMessageService implements platformServiceInterface{
         else if (processedResponse.processed_message.length > 1) {
 
             if (processedResponse.message_from_dialoglow.parse_mode && processedResponse.message_from_dialoglow.parse_mode === 'HTML') {
-                const uploadImageName = 
-                    await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
+                // eslint-disable-next-line max-len
+                const uploadImageName = await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
                 const vaacinationImageFile = await this.awsS3manager.uploadFile(uploadImageName);
                 if (vaacinationImageFile) {
                     reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",raw_response_object: raw_response_object,intent: intent,messageBody: String(vaacinationImageFile), messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[1] };
@@ -104,7 +104,7 @@ export class TelegramMessageService implements platformServiceInterface{
             reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "text",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[0] };
         }
         return reaponse_message;
-    }
+    };
 
     createFinalMessageFromHumanhandOver(requestBody) {
         const response_message: response = {
@@ -143,7 +143,7 @@ export class TelegramMessageService implements platformServiceInterface{
                     resolve(data);
                 });
         });
-    }
+    };
 
     sanitizeMessage(message) {
         if (message > 4096) {

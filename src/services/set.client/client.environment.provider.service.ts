@@ -30,6 +30,6 @@ export class ClientEnvironmentProviderService {
             this.setClientName(req.params.client);
         }
         next();
-    }
+    };
     
 }

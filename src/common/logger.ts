@@ -14,7 +14,7 @@ export class Logger {
         const temp_str = dateTime + '> ' + message;
         console.log(' ');
         console.log(temp_str);
-    }
+    };
 
     public error = (message: string, code: number, details: unknown): void => {
         const dateTime = new Date().toISOString();
@@ -26,7 +26,7 @@ export class Logger {
         const temp_str = dateTime + '> ' + JSON.stringify(err, null, '    ');
         console.log(' ');
         console.log(temp_str);
-    }
+    };
 
     public log_error = (message, code, details) => {
         const dateTime = new Date().toISOString();
@@ -39,7 +39,7 @@ export class Logger {
 
         msg = dateTime + '> ' + JSON.stringify(msg);
         console.log('[Error] ', msg);
-    }
+    };
 
     public log_info = (message, data = '') => {
         const dateTime = new Date().toISOString();
@@ -52,7 +52,7 @@ export class Logger {
         if (process.env.NODE_ENV === 'DEVELOPMENT') {
             console.log('[INFO] ', msg);
         }
-    }
+    };
 
     public log_warning = (message, data = '') => {
         const dateTime = new Date().toISOString();
@@ -65,6 +65,6 @@ export class Logger {
         if (process.env.NODE_ENV === 'DEVELOPMENT') {
             console.log('[WARNING] ', msg);
         }
-    }
+    };
 
 }

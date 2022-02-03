@@ -78,6 +78,6 @@ export class AppSupportListener {
             throw new Error('Handle Intent Error!');
         }
 
-    }
+    };
 
 }
