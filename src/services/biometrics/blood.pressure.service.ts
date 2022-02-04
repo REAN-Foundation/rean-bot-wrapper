@@ -7,7 +7,6 @@ import needle from "needle";
 const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
 const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
     ClientEnvironmentProviderService);
-const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
 
 let remark = '';
 const getremark = function (Systolic,Diastolic) {
@@ -30,6 +29,7 @@ export const updateBloodPressureInfoService = async (eventObj) => {
 
     if (eventObj) {
         var { patientUserId, accessToken, Systolic, Diastolic, BloodPressure_Unit } = await checkEntry(eventObj);
+        const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
 
         const url = `${ReanBackendBaseUrl}clinical/biometrics/blood-pressures/search?patientUserId=${patientUserId}`;
         
@@ -52,9 +52,12 @@ export const updateBloodPressureInfoService = async (eventObj) => {
         if (response.statusCode !== 200) {
             throw new Error("Failed to get response from API.");
         }
+        const s = response.body.Data.BloodPressure.Systolic;
+        const d = response.body.Data.BloodPressure.Diastolic;
+        const u = response.body.Data.BloodPressure.Unit;
 
         remark = getremark(Systolic,Diastolic);
-        const dffMessage = `${unitmsg}Your updated BloodPressure Systolic: ${response.body.Data.BloodPressure.Systolic} Diastolic:${response.body.Data.BloodPressure.Diastolic} ${response.body.Data.BloodPressure.Unit} is ${remark}`;
+        const dffMessage = `${unitmsg}Your updated BloodPressure Systolic: ${s} Diastolic:${d} ${u} is ${remark}`;
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
         return { sendDff: true, message: data };
@@ -70,6 +73,7 @@ export const createBloodPressureInfoService = async (eventObj) => {
 
         let unitmsg = null;
         ({ unitmsg, BloodPressure_Unit } = getUnit(BloodPressure_Unit));
+        const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
         const options = getHeaders(accessToken);
         const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/blood-pressures`;
 
@@ -87,8 +91,11 @@ export const createBloodPressureInfoService = async (eventObj) => {
             throw new Error("Failed to get response from API.");
         }
         remark = getremark(Systolic,Diastolic);
+        const s = response.body.Data.BloodPressure.Systolic;
+        const d = response.body.Data.BloodPressure.Diastolic;
+        const u = response.body.Data.BloodPressure.Unit;
 
-        const dffMessage = `${unitmsg}Your newly added BloodPressure Systolic: ${response.body.Data.BloodPressure.Systolic} Diastolic:${response.body.Data.BloodPressure.Diastolic} ${response.body.Data.BloodPressure.Unit} is ${remark}`;
+        const dffMessage = `${unitmsg}Your newly added BloodPressure Systolic: ${s} Diastolic:${d} ${u} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
