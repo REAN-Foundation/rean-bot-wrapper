@@ -91,6 +91,6 @@ export class AppSupportListener {
             throw new Error(`Handle biometrics intent ${error}`);
         }
 
-    }
+    };
 
 }
