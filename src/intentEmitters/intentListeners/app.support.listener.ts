@@ -1,9 +1,15 @@
-import { createBloodGlucoseInfoService, updateBloodGlucoseInfoService } from "../../services/biometrics/blood.glucose.service";
-import { createBloodPressureInfoService, updateBloodPressureInfoService } from "../../services/biometrics/blood.pressure.service";
-import { createBloodOxygenSaturationInfoService, updateBloodOxygenSaturationInfoService } from "../../services/biometrics/blood.oxygen.saturation.service";
-import { createBodyHeightInfoService, updateBodyHeightInfoService } from "../../services/biometrics/body.height.service";
-import { createBodyTemperatureInfoService, updateBodyTemperatureInfoService } from "../../services/biometrics/body.temperature.service";
-import { createBodyWeightInfoService, updateBodyWeightInfoService } from "../../services/biometrics/body.weight.service";
+import { createBloodGlucoseInfoService,
+    updateBloodGlucoseInfoService } from "../../services/biometrics/blood.glucose.service";
+import { createBloodPressureInfoService,
+    updateBloodPressureInfoService } from "../../services/biometrics/blood.pressure.service";
+import { createBloodOxygenSaturationInfoService,
+    updateBloodOxygenSaturationInfoService } from "../../services/biometrics/blood.oxygen.saturation.service";
+import { createBodyHeightInfoService,
+    updateBodyHeightInfoService } from "../../services/biometrics/body.height.service";
+import { createBodyTemperatureInfoService,
+    updateBodyTemperatureInfoService } from "../../services/biometrics/body.temperature.service";
+import { createBodyWeightInfoService,
+    updateBodyWeightInfoService } from "../../services/biometrics/body.weight.service";
 import { createPulseInfoService, updatePulseInfoService } from "../../services/biometrics/pulse.service";
 
 export class AppSupportListener {
@@ -16,6 +22,7 @@ export class AppSupportListener {
                 response = await updateBloodGlucoseInfoService(eventObj);
                 break;
             }
+            case 'BloodGlucose.AskCreate':
             case 'BloodGlucose.Create': {
                 response = await createBloodGlucoseInfoService(eventObj);
                 break;
@@ -24,6 +31,7 @@ export class AppSupportListener {
                 response = await updateBloodPressureInfoService(eventObj);
                 break;
             }
+            case 'BloodPressure.AskCreate':
             case 'BloodPressure.Create': {
                 response = await createBloodPressureInfoService(eventObj);
                 break;
@@ -32,6 +40,7 @@ export class AppSupportListener {
                 response = await updateBloodOxygenSaturationInfoService(eventObj);
                 break;
             }
+            case 'BloodOxygenSaturation.AskCreate':
             case 'BloodOxygenSaturation.Create': {
                 response = await createBloodOxygenSaturationInfoService(eventObj);
                 break;
@@ -40,15 +49,17 @@ export class AppSupportListener {
                 response = await updateBodyHeightInfoService(eventObj);
                 break;
             }
+            case 'BodyHeight.AskCreate':
             case 'BodyHeight.Create': {
                 response = await createBodyHeightInfoService(eventObj);
                 break;
             }
-            case 'BodyWeight.update': {
+            case 'Weight.update': {
                 response = await updateBodyWeightInfoService(eventObj);
                 break;
             }
-            case 'BodyWeight.Create': {
+            case 'Weight.AskCreate':
+            case 'Weight.Create': {
                 response = await createBodyWeightInfoService(eventObj);
                 break;
             }
@@ -56,6 +67,7 @@ export class AppSupportListener {
                 response = await updateBodyTemperatureInfoService(eventObj);
                 break;
             }
+            case 'BodyTemperature.AskCreate':
             case 'BodyTemperature.Create': {
                 response = await createBodyTemperatureInfoService(eventObj);
                 break;
@@ -64,6 +76,7 @@ export class AppSupportListener {
                 response = await updatePulseInfoService(eventObj);
                 break;
             }
+            case 'Pulse.AskCreate':
             case 'Pulse.Create': {
                 response = await createPulseInfoService(eventObj);
                 break;
@@ -75,7 +88,7 @@ export class AppSupportListener {
             }
             return response.message;
         } catch (error) {
-            throw new Error('Handle Intent Error!');
+            throw new Error(`Handle biometrics intent ${error}`);
         }
 
     };

@@ -7,7 +7,6 @@ import needle from "needle";
 const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
 const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
     ClientEnvironmentProviderService);
-const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
 
 let remark = '';
 const getremark = function (BodyTemperature_Unit,BodyTemperature) {
@@ -35,6 +34,7 @@ export const updateBodyTemperatureInfoService = async (eventObj) => {
     if (eventObj) {
         var { patientUserId, accessToken, BodyTemperature_Unit, BodyTemperature } = await checkEntry(eventObj);
 
+        const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
         const url = `${ReanBackendBaseUrl}clinical/biometrics/body-temperatures/search?patientUserId=${patientUserId}`;
         
         const options = getHeaders(accessToken);
@@ -56,8 +56,10 @@ export const updateBodyTemperatureInfoService = async (eventObj) => {
             throw new Error("Failed to get response from API.");
         }
         remark = getremark(BodyTemperature_Unit,BodyTemperature);
+        const t = response.body.Data.BodyTemperature.BodyTemperature;
+        const u = response.body.Data.BodyTemperature.Unit;
 
-        const dffMessage = `${unitmsg}Your updated BodyTemperature ${response.body.Data.BodyTemperature.BodyTemperature} ${response.body.Data.BodyTemperature.Unit} is ${remark}`;
+        const dffMessage = `${unitmsg}Your updated BodyTemperature ${t} ${u} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
@@ -74,6 +76,7 @@ export const createBodyTemperatureInfoService = async (eventObj) => {
         
         let unitmsg = null;
         ({ unitmsg, BodyTemperature_Unit } = getUnit(BodyTemperature_Unit,BodyTemperature));
+        const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
         const options = getHeaders(accessToken);
         const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/body-temperatures`;
 
@@ -90,8 +93,10 @@ export const createBodyTemperatureInfoService = async (eventObj) => {
             throw new Error("Failed to get response from API.");
         }
         remark = getremark(BodyTemperature_Unit,BodyTemperature);
+        const t = response.body.Data.BodyTemperature.BodyTemperature;
+        const u = response.body.Data.BodyTemperature.Unit;
 
-        const dffMessage = `${unitmsg}Your newly added BodyTemperature ${response.body.Data.BodyTemperature.BodyTemperature} ${response.body.Data.BodyTemperature.Unit} is ${remark}`;
+        const dffMessage = `${unitmsg}Your newly added BodyTemperature ${t} ${u} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 

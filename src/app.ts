@@ -150,12 +150,12 @@ export default class Application {
                 const MAX_UPLOAD_FILE_SIZE = ConfigurationManager.MaxUploadFileSize();
 
                 this._app.use(fileUpload({
-                    limits : { fileSize: MAX_UPLOAD_FILE_SIZE },
+                    limits            : { fileSize: MAX_UPLOAD_FILE_SIZE },
                     preserveExtension : true,
-                    createParentPath : true,
-                    parseNested : true,
-                    useTempFiles : true,
-                    tempFileDir : '/tmp/uploads/'
+                    createParentPath  : true,
+                    parseNested       : true,
+                    useTempFiles      : true,
+                    tempFileDir       : '/tmp/uploads/'
                 }));
                 resolve(true);
             }
