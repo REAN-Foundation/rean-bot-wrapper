@@ -7,7 +7,6 @@ import needle from "needle";
 const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
 const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
     ClientEnvironmentProviderService);
-const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
 
 let remark = '';
 const getremark = function (BloodOxygenSaturation) {
@@ -30,6 +29,7 @@ export const updateBloodOxygenSaturationInfoService = async (eventObj) => {
         var { patientUserId, accessToken, BloodOxygenSaturation_Unit,
             BloodOxygenSaturation } = await checkEntry(eventObj);
 
+        const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
         const url = `${ReanBackendBaseUrl}clinical/biometrics/blood-oxygen-saturations/search?patientUserId=${patientUserId}`;
         
         const options = getHeaders(accessToken);
@@ -50,8 +50,10 @@ export const updateBloodOxygenSaturationInfoService = async (eventObj) => {
             throw new Error("Failed to get response from API.");
         }
         remark = getremark(BloodOxygenSaturation);
+        const b = response.body.Data.BloodOxygenSaturation.BloodOxygenSaturation;
+        const u = response.body.Data.BloodOxygenSaturation.Unit;
 
-        const dffMessage = `Your updated BloodOxygenSaturation ${response.body.Data.BloodOxygenSaturation.BloodOxygenSaturation} ${response.body.Data.BloodOxygenSaturation.Unit} is ${remark}`;
+        const dffMessage = `Your updated BloodOxygenSaturation ${b} ${u} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
@@ -68,6 +70,7 @@ export const createBloodOxygenSaturationInfoService = async (eventObj) => {
             BloodOxygenSaturation } = await checkEntry(eventObj);
         
         const options = getHeaders(accessToken);
+        const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
         const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/blood-oxygen-saturations`;
 
         const obj = {
@@ -83,8 +86,10 @@ export const createBloodOxygenSaturationInfoService = async (eventObj) => {
             throw new Error("Failed to get response from API.");
         }
         remark = getremark(BloodOxygenSaturation);
+        const b = response.body.Data.BloodOxygenSaturation.BloodOxygenSaturation;
+        const u = response.body.Data.BloodOxygenSaturation.Unit;
 
-        const dffMessage = `Your newly added BloodOxygenSaturation ${response.body.Data.BloodOxygenSaturation.BloodOxygenSaturation} ${response.body.Data.BloodOxygenSaturation.Unit} is ${remark}`;
+        const dffMessage = `Your newly added BloodOxygenSaturation ${b} ${u} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
@@ -97,10 +102,13 @@ export const createBloodOxygenSaturationInfoService = async (eventObj) => {
 async function checkEntry(eventObj: any) {
     const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
     const BloodOxygenSaturation = eventObj.body.queryResult.parameters.BloodOxygenSaturation;
-    const BloodOxygenSaturation_Unit = eventObj.body.queryResult.parameters.Unit;
+    let BloodOxygenSaturation_Unit = eventObj.body.queryResult.parameters.Unit;
 
     if (!phoneNumber && !BloodOxygenSaturation) {
         throw new Error("Missing required parameter PhoneNumber and/or BloodOxygenSaturation");
+    }
+    if (BloodOxygenSaturation_Unit === '') {
+        BloodOxygenSaturation_Unit = '%';
     }
     let result = null;
     result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);

@@ -20,7 +20,7 @@ export class ResponseHandler {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const responseMessage = data && data[0]?.value ? data[0].value : obj;
         return response.status(code).send(responseMessage);
-    }
+    };
 
     sendSuccessResponseForApp = (response, code, message, data, log_data = false) => {
         const obj = {
@@ -32,7 +32,7 @@ export class ResponseHandler {
             this.logger.log_info(JSON.stringify(obj));
         }
         return response.status(code).send(obj);
-    }
+    };
 
     sendFailureResponse = (response, code, message, request = null, trace = null, details = null) => {
         const error = details ? details : message;
@@ -62,6 +62,6 @@ export class ResponseHandler {
 
         // console.log("the response of sendfailure", response.status(code).send(obj));
         return response.status(code).send(obj);
-    }
+    };
 
 }

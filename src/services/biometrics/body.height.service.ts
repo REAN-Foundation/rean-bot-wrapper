@@ -7,13 +7,13 @@ import needle from "needle";
 const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
 const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
     ClientEnvironmentProviderService);
-const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
 
 export const updateBodyHeightInfoService = async (eventObj) => {
 
     if (eventObj) {
         var { patientUserId, accessToken, BodyHeight_Unit, BodyHeight } = await checkEntry(eventObj);
         
+        const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
         const url = `${ReanBackendBaseUrl}clinical/biometrics/body-heights/search?patientUserId=${patientUserId}`;
         const options = getHeaders(accessToken);
         const resp = await needle("get", url, options);
@@ -32,8 +32,9 @@ export const updateBodyHeightInfoService = async (eventObj) => {
         if (response.statusCode !== 200) {
             throw new Error("Failed to get response from API.");
         }
+        const h = response.body.Data.BodyHeight.BodyHeight;
 
-        const dffMessage = `Your updated BodyHeight is ${response.body.Data.BodyHeight.BodyHeight} ${response.body.Data.BodyHeight.Unit}.`;
+        const dffMessage = `Your updated BodyHeight is ${h} ${response.body.Data.BodyHeight.Unit}.`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
@@ -48,6 +49,7 @@ export const createBodyHeightInfoService = async (eventObj) => {
     if (eventObj) {
         var { patientUserId, accessToken, BodyHeight_Unit, BodyHeight } = await checkEntry(eventObj);
 
+        const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
         const options = getHeaders(accessToken);
 
         const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/body-heights`;
@@ -63,8 +65,9 @@ export const createBodyHeightInfoService = async (eventObj) => {
         if (response.statusCode !== 201) {
             throw new Error("Failed to get response from API.");
         }
+        const h = response.body.Data.BodyHeight.BodyHeight;
 
-        const dffMessage = `Your newly added BodyHeight is ${response.body.Data.BodyHeight.BodyHeight} ${response.body.Data.BodyHeight.Unit}.`;
+        const dffMessage = `Your newly added BodyHeight is ${h} ${response.body.Data.BodyHeight.Unit}.`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 

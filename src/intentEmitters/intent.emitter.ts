@@ -3,7 +3,7 @@ import { Logger } from '../common/logger';
 export class IntentEmitter {
 
     // Static Map of Intent: Listeners
-    static _intentListenersMap = new Map()
+    static _intentListenersMap = new Map();
 
     // Register the Intent with a listener
     static registerListener(intent, listener) {
@@ -46,7 +46,7 @@ export class IntentEmitter {
                 reject('Error: IntentFulfillmentException!');
             }
         });
-    }
+    };
 
     // Get listeners already registered for given intent
     static getIntentListeners(intent) {
