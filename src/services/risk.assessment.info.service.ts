@@ -141,7 +141,6 @@ function calculateRisk(params){
     const age = params.Age;
     let weight = params.weight;
     let height = params.height;
-
     const agenum = age.amount;
     let tot_score = 0;
     if (agenum < 50) {

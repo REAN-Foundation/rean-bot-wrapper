@@ -10,6 +10,7 @@ export class Speechtotext {
             if (chatServiceName === 'telegram') {
                 http.get(fileUrl, (res) => {
 
+
                     //add time stamp - pending
                     const filename = path.basename(fileUrl);
 
@@ -18,6 +19,7 @@ export class Speechtotext {
                     const filePath = fs.createWriteStream(uploadpath);
                     res.pipe(filePath);
                     filePath.on('finish', () => {
+
                         filePath.close();
 
                         main(uploadpath).catch(console.error);
@@ -25,6 +27,7 @@ export class Speechtotext {
                     });
                 });
             } else if (chatServiceName === 'whatsapp') {
+
                 console.log("enter whatsapp");
                 main(fileUrl).catch(console.error);
             }
@@ -50,6 +53,7 @@ export class Speechtotext {
                     request = {
                         audio: audio,
                         config: config,
+
                     };
 
                     const [response] = await client.recognize(request);
