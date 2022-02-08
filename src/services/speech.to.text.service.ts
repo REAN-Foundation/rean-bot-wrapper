@@ -5,10 +5,11 @@ import fs from 'fs';
 
 export class Speechtotext {
 
-    SendSpeechRequest = async(fileUrl,chatServiceName) => {
+    SendSpeechRequest = async (fileUrl, chatServiceName) => {
         return new Promise((resolve, reject) => {
-            if (chatServiceName === 'telegram'){
-                http.get(fileUrl,(res) => {
+            if (chatServiceName === 'telegram') {
+                http.get(fileUrl, (res) => {
+
 
                     //add time stamp - pending
                     const filename = path.basename(fileUrl);
@@ -17,14 +18,16 @@ export class Speechtotext {
                     const uploadpath = `./audio/` + filename;
                     const filePath = fs.createWriteStream(uploadpath);
                     res.pipe(filePath);
-                    filePath.on('finish',() => {
+                    filePath.on('finish', () => {
+
                         filePath.close();
 
                         main(uploadpath).catch(console.error);
 
                     });
                 });
-            } else if (chatServiceName === 'whatsapp'){
+            } else if (chatServiceName === 'whatsapp') {
+
                 console.log("enter whatsapp");
                 main(fileUrl).catch(console.error);
             }
@@ -37,19 +40,20 @@ export class Speechtotext {
                     const audioBytes = file.toString('base64');
 
                     const audio = {
-                        content : audioBytes,
+                        content: audioBytes,
                     };
 
                     const config = {
-                        encoding                            : "OGG_OPUS",
-                        sampleRateHertz                     : 16000,
-                        languageCode                        : 'en-US',
-                        enableSeparateRecognitionPerChannel : true,
+                        encoding: "OGG_OPUS",
+                        sampleRateHertz: 16000,
+                        languageCode: 'en-US',
+                        enableSeparateRecognitionPerChannel: true,
                     };
                     let request = {};
                     request = {
-                        audio  : audio,
-                        config : config,
+                        audio: audio,
+                        config: config,
+
                     };
 
                     const [response] = await client.recognize(request);
