@@ -14,7 +14,7 @@ export class ChatBotController {
 
     ping = async (request, response) => {
         return this.responseHandler.sendSuccessResponse(response, 200, 'pong', { 'pong': true }, true);
-    }
+    };
 
     validateIntent = async (request, response) => {
         const intent = request.query.intent_name;
@@ -29,7 +29,7 @@ export class ChatBotController {
         };
 
         return this.responseHandler.sendSuccessResponse(response, 200, 'Intent Listeners Info', intent_listeners, true);
-    }
+    };
 
     // Intent Fulfillment API
     processIntent = async (request, response) => {
@@ -73,6 +73,7 @@ export class ChatBotController {
         IntentEmitter.emit('IntentFulfillment:Success', intent);
 
         return this.responseHandler.sendSuccessResponse(response, 200, 'Intent fulfilled successfully.', fulfillmentResponse);
-    }
+
+    };
 
 }

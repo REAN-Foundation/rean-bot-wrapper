@@ -20,7 +20,7 @@ export class Helper {
             request.params.doctorUserId;
         }
         return null;
-    }
+    };
 
     static dumpJson(obj, filename) {
         const txt = JSON.stringify(obj, null, '    ');
@@ -40,7 +40,7 @@ export class Helper {
 
         const obj = JSON.parse(rawdata);
         return obj;
-    }
+    };
 
     static executeCommand = (command: string): Promise<string> => {
         return new Promise(function (resolve, reject) {
@@ -350,7 +350,7 @@ export class Helper {
         let decrypted = decipher.update(encryptedText);
         decrypted = Buffer.concat([decrypted, decipher.final()]);
         return decrypted.toString();
-    }
+    };
 
     public static getPossiblePhoneNumbers = (phone) => {
 
@@ -387,6 +387,6 @@ export class Helper {
             possiblePhoneNumbers.push(phoneTemp);
         }
         return possiblePhoneNumbers;
-    }
+    };
 
 }
