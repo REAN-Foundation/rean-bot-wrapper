@@ -5,8 +5,6 @@ import { container,  } from 'tsyringe';
 import needle from "needle";
 
 const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
-const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
-    ClientEnvironmentProviderService);
 
 let remark = '';
 const getremark = function (BloodOxygenSaturation) {
@@ -26,6 +24,8 @@ const getremark = function (BloodOxygenSaturation) {
 export const updateBloodOxygenSaturationInfoService = async (eventObj) => {
 
     if (eventObj) {
+        const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
+            ClientEnvironmentProviderService);
         var { patientUserId, accessToken, BloodOxygenSaturation_Unit,
             BloodOxygenSaturation } = await checkEntry(eventObj);
 
@@ -66,6 +66,8 @@ export const updateBloodOxygenSaturationInfoService = async (eventObj) => {
 export const createBloodOxygenSaturationInfoService = async (eventObj) => {
 
     if (eventObj) {
+        const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
+            ClientEnvironmentProviderService);
         var { patientUserId, accessToken, BloodOxygenSaturation_Unit,
             BloodOxygenSaturation } = await checkEntry(eventObj);
         

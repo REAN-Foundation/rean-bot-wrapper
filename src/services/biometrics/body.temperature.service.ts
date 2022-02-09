@@ -5,8 +5,6 @@ import { container,  } from 'tsyringe';
 import needle from "needle";
 
 const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
-const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
-    ClientEnvironmentProviderService);
 
 let remark = '';
 const getremark = function (BodyTemperature_Unit,BodyTemperature) {
@@ -32,6 +30,8 @@ const getremark = function (BodyTemperature_Unit,BodyTemperature) {
 export const updateBodyTemperatureInfoService = async (eventObj) => {
 
     if (eventObj) {
+        const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
+            ClientEnvironmentProviderService);
         var { patientUserId, accessToken, BodyTemperature_Unit, BodyTemperature } = await checkEntry(eventObj);
 
         const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
@@ -72,6 +72,8 @@ export const updateBodyTemperatureInfoService = async (eventObj) => {
 export const createBodyTemperatureInfoService = async (eventObj) => {
 
     if (eventObj) {
+        const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
+            ClientEnvironmentProviderService);
         var { patientUserId, accessToken, BodyTemperature_Unit, BodyTemperature } = await checkEntry(eventObj);
         
         let unitmsg = null;
