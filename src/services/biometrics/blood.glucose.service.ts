@@ -5,8 +5,6 @@ import { container,  } from 'tsyringe';
 import needle from "needle";
 
 const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
-const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
-    ClientEnvironmentProviderService);
 
 let remark = '';
 const getremark = function (BloodGlucose) {
@@ -71,6 +69,8 @@ export const updateBloodGlucoseInfoService = async (eventObj) => {
 export const createBloodGlucoseInfoService = async (eventObj) => {
 
     if (eventObj) {
+        const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
+            ClientEnvironmentProviderService);
         var { patientUserId, accessToken, BloodGlucose_Unit, BloodGlucose } = await checkEntry(eventObj);
 
         let unitmsg = null;
