@@ -5,8 +5,6 @@ import { container,  } from 'tsyringe';
 import needle from "needle";
 
 const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
-const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
-    ClientEnvironmentProviderService);
 
 let remark = '';
 const getremark = function (BloodGlucose) {
@@ -28,6 +26,8 @@ const getremark = function (BloodGlucose) {
 export const updateBloodGlucoseInfoService = async (eventObj) => {
 
     if (eventObj) {
+        const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
+            ClientEnvironmentProviderService);
         var { patientUserId, accessToken, BloodGlucose_Unit, BloodGlucose } = await checkEntry(eventObj);
         const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
         const reancare_api_key = clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY");
@@ -69,6 +69,8 @@ export const updateBloodGlucoseInfoService = async (eventObj) => {
 export const createBloodGlucoseInfoService = async (eventObj) => {
 
     if (eventObj) {
+        const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
+            ClientEnvironmentProviderService);
         var { patientUserId, accessToken, BloodGlucose_Unit, BloodGlucose } = await checkEntry(eventObj);
 
         let unitmsg = null;
