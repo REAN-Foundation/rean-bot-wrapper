@@ -35,6 +35,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
     async voiceMessageFormat (msg) {
         const mediaUrl = await this.GetWhatsappMedia(msg.messages[0].voice.id);
         const ConvertedToText = await this.speechtotext.SendSpeechRequest(mediaUrl, "whatsapp");
+        
         if (ConvertedToText) {
             const returnMessage = this.inputMessageFormat(msg);
             returnMessage.messageBody = String(ConvertedToText);
@@ -42,7 +43,10 @@ export class MessageFunctionalities implements getMessageFunctionalities {
             return returnMessage;
         }
         else {
-            throw new Error("Unable to convert the audio file to text");
+            const returnMessage = this.inputMessageFormat(msg);
+            returnMessage.messageBody = " ";
+            returnMessage.type = 'text';
+            return returnMessage;
         }
     }
 

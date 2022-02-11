@@ -2,42 +2,67 @@ import http from 'https';
 import path from 'path';
 import speech from '@google-cloud/speech';
 import fs from 'fs';
+import { AwsS3manager } from './aws.file.upload.service';
+import { autoInjectable } from 'tsyringe';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 
+@autoInjectable()
 export class Speechtotext {
 
-    SendSpeechRequest = async (fileUrl, chatServiceName) => {
-        return new Promise((resolve, reject) => {
+    constructor(
+        private awss3manager?: AwsS3manager,
+        private clientEnvironmentProviderService?: ClientEnvironmentProviderService) { }
+
+    private GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+
+    private awsCred = this.awss3manager;
+
+    private env = this.clientEnvironmentProviderService.getClientEnvironmentVariable("ENVIRONMENT");
+
+    private obj_gcp = {
+        credentials : this.GCPCredentials,
+        projectId : this.GCPCredentials.project_id
+    };
+
+    async SendSpeechRequest(fileUrl, chatServiceName) {
+        return new Promise(async (resolve, reject) => {
+            const obj = this.obj_gcp;
             if (chatServiceName === 'telegram') {
-                http.get(fileUrl, (res) => {
-
-
+                http.get(fileUrl, async (res) => {
+                    
                     //add time stamp - pending
                     const filename = path.basename(fileUrl);
 
-                    // Image will be stored at this path
+                    // Audio file will be stored at this path
                     const uploadpath = `./audio/` + filename;
+
                     const filePath = fs.createWriteStream(uploadpath);
                     res.pipe(filePath);
-                    filePath.on('finish', () => {
 
-                        filePath.close();
-
-                        main(uploadpath).catch(console.error);
-
-                    });
+                    const awsFile = await this.awss3manager.uploadAudioFile(uploadpath);
+                    main(awsFile, obj,this.awsCred,this.env).catch(console.error);
                 });
             } else if (chatServiceName === 'whatsapp') {
-
-                console.log("enter whatsapp");
-                main(fileUrl).catch(console.error);
+                const awsFile = await this.awss3manager.uploadAudioFile(fileUrl);
+                main(awsFile, obj,this.awsCred,this.env).catch(console.error);
             }
 
-            async function main(uploadpath) {
+            async function main(uploadpath, obj, awscred,env) {
                 try {
-                    const client = new speech.SpeechClient();
-                    const file = fs.readFileSync(uploadpath);
+                    const environment = {
+                        'DEVELOPMENT' : 'dev',
+                        'UAT' : 'uat',
+                        'PROD' : 'prod'
+                    };
+
+                    const client = new speech.SpeechClient(obj);
+
+                    const key = environment[env] + '/' + uploadpath.split('/')[4];
+
+                    const awsGetFile = await awscred.getFile(key);
+                    const audioBytes = awsGetFile.Body.toString('base64');
+                    
                     console.log("upload Path,", uploadpath);
-                    const audioBytes = file.toString('base64');
 
                     const audio = {
                         content: audioBytes,
@@ -53,11 +78,11 @@ export class Speechtotext {
                     request = {
                         audio: audio,
                         config: config,
-
                     };
 
                     const [response] = await client.recognize(request);
-                    console.log("response %O", response);
+
+                    // console.log("response %O", response);
                     const transcription = response.results
                         .map(result => result.alternatives[0].transcript)
                         .join('\n');
@@ -67,6 +92,6 @@ export class Speechtotext {
                 }
             }
         });
-    };
+    }
 
 }

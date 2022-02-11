@@ -21,6 +21,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
     }
 
     async voiceMessageFormat(message) {
+        
         let response: any = {};
         response = await this.GetTelegramMedia(message.voice.file_id);
         console.log("response of telegram media is", response);
@@ -34,7 +35,10 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
                 returnMessage.type = 'voice';
                 return returnMessage;
             } else {
-                throw new Error("Unable to convert the audio file to text");
+                const returnMessage = this.inputMessageFormat(message);
+                returnMessage.messageBody = " ";
+                returnMessage.type = 'text';
+                return returnMessage;
             }
         } else {
             throw new Error("Unable to find the audio file path");

@@ -82,6 +82,57 @@ export class AwsS3manager{
         });
     }
 
+    async uploadAudioFile (filePath) {
+        const responseCredentials: any = await this.getCrossAccountCredentials();
+        const BUCKET_NAME = process.env.BUCKET_NAME;
+        const cloudFrontPath = process.env.CLOUD_FRONT_PATH;
+        const cloudFrontPathSplit = cloudFrontPath.split("/");
+
+        console.log('FILE UPLOAD STARTING', BUCKET_NAME);
+        return new Promise(async (resolve, reject) => {
+
+            // Read content from the file
+            fs.stat(filePath, function (err) {
+                if (err === null) {
+                    console.log('File exists');
+                    const fileContent = fs.createReadStream(filePath);
+                    var filename = filePath.replace(/^.*[\\/]/, '');
+
+                    // Setting up S3 upload parameters
+                    const params = {
+                        Bucket         : BUCKET_NAME,
+                        Key            : cloudFrontPathSplit[3] + '/' + filename , // File name you want to save as in S3
+                        Body          : fileContent,
+                        'ContentType' : 'audio/ogg'
+                    };
+
+                    // eslint-disable-next-line max-len
+                    const s3 = new AWS.S3(responseCredentials);
+
+                    // Uploading files to the bucket
+                    s3.upload(params, function (err, data) {
+                        if (err) {
+                            reject(err);
+                        }
+                        console.log(`File uploaded successfully. ${data}`);
+
+                        const location = process.env.CLOUD_FRONT_PATH + filename;
+
+                        resolve(location);
+                    });
+                } else if (err.code === 'ENOENT') {
+
+                    console.log('File not exists');
+                    reject('File not exists');
+                } else {
+                    console.log('Some other error: ', err.code);
+                    reject(err.code);
+                }
+            });
+
+        });
+    }
+
     async createFileFromHTML (html) {
         const imageName = 'uploads/' + Date.now() + '.png';
 
@@ -108,6 +159,28 @@ export class AwsS3manager{
                     reject('');
                 });
         });
+    }
+
+    async getFile (key) {
+        const responseCredentials: any = await this.getCrossAccountCredentials();
+        const BUCKET_NAME = process.env.BUCKET_NAME;
+        const s3 = new AWS.S3(responseCredentials);
+
+        const downloadParams = {
+            Key: key,
+            Bucket: BUCKET_NAME
+        };
+
+        const awsGetFile = await s3.getObject(downloadParams, function (error, data) {
+            if (error) {
+                console.error(error);
+            }
+            
+            return data;
+        }).promise();
+
+        return awsGetFile;
+
     }
 
 }
