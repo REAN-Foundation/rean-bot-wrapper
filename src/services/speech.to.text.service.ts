@@ -39,11 +39,11 @@ export class Speechtotext {
                     const filePath = fs.createWriteStream(uploadpath);
                     res.pipe(filePath);
 
-                    const awsFile = await this.awss3manager.uploadAudioFile(uploadpath);
+                    const awsFile = await this.awss3manager.uploadFile(uploadpath);
                     main(awsFile, obj,this.awsCred,this.env).catch(console.error);
                 });
             } else if (chatServiceName === 'whatsapp') {
-                const awsFile = await this.awss3manager.uploadAudioFile(fileUrl);
+                const awsFile = await this.awss3manager.uploadFile(fileUrl);
                 main(awsFile, obj,this.awsCred,this.env).catch(console.error);
             }
 
