@@ -2,7 +2,7 @@
 // import { DialogflowResponseService } from './dialogflow-response.service';
 import { AwsS3manager } from './aws.file.upload.service';
 import { response } from '../refactor/interface/message.interface';
-import { autoInjectable, singleton, inject } from 'tsyringe';
+import { autoInjectable, singleton, inject, delay } from 'tsyringe';
 import  TelegramBot  from 'node-telegram-bot-api';
 import { MessageFlow } from './get.put.message.flow.service';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
@@ -20,7 +20,7 @@ export class TelegramMessageService implements platformServiceInterface{
     public res;
 
     // public req;
-    constructor(private messageFlow?: MessageFlow,
+    constructor(@inject(delay(() => MessageFlow)) public messageFlow,
         private awsS3manager?: AwsS3manager,
         private telegramMessageServiceFunctionalities?: TelegramMessageServiceFunctionalities,
         private clientEnvironmentProviderService?: ClientEnvironmentProviderService,

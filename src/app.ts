@@ -13,6 +13,7 @@ import { IndexCreation } from './models/elasticsearchmodel';
 import { platformServiceInterface } from "./refactor/interface/platform.interface";
 import { ClientEnvironmentProviderService } from "./services/set.client/client.environment.provider.service";
 import { AwsSecretsManager } from "./services/aws.secret.manager.service";
+import mongoose from "mongoose";
 
 // import RateLimit from 'express-rate-limit';
 
@@ -81,6 +82,13 @@ export default class Application {
         console.log("verifying no-to-html version issue because of timing ot not");
     }
 
+    dbConnect(){
+        const dbURI = process.env.DB_URI;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        mongoose.connect(dbURI).then((result) => console.log("connected to db"))
+            .catch((err) => console.log(err));
+    }
+
     setWebhooksForClients() {
         // eslint-disable-next-line max-len
         const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
@@ -118,6 +126,9 @@ export default class Application {
 
             //Set-up middlewares
             await this.setupMiddlewares();
+
+            //connect db
+            this.dbConnect();
 
             //Set the routes
             await this._router.init();
