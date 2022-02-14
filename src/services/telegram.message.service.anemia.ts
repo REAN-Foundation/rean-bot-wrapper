@@ -69,7 +69,7 @@ export class TelegramAnemiaMessageService implements platformServiceInterface{
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars // eslint-disable-next-line max-len
-    SendMediaMessage(SmessagetoDialogflow_sessionId: string, response_format_messageBody: string, response_format_messageText: string) {
+    SendMediaMessage(sessionId: string, messageBody: string, messageText: string) {
         throw new Error('Method not implemented.');
     }
 

@@ -112,8 +112,8 @@ export class SlackMessageService implements platformServiceInterface {
         throw new Error('Method not implemented.');
     }
 
-    // eslint-disable-next-line max-len // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    SendMediaMessage(SmessagetoDialogflow_sessionId: string, response_format_messageBody: string, response_format_messageText: string) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    SendMediaMessage(sessionId: string, messageBody: string, messageText: string) {
         throw new Error('Method not implemented.');
     }
 

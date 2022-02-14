@@ -18,7 +18,7 @@ const blogSchema = new schema({
     ts : {
         type : String
     }
-},{ timestamps : true });
+},{ timestamps: true });
 
 export class DBMongoose{
 
