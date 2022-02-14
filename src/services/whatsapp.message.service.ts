@@ -3,7 +3,7 @@ import http from 'https';
 import fs from 'fs';
 import { AwsS3manager } from './aws.file.upload.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { autoInjectable, singleton, inject } from 'tsyringe';
+import { autoInjectable, singleton, inject, delay } from 'tsyringe';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { response, message } from '../refactor/interface/message.interface';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
@@ -19,7 +19,7 @@ export class platformMessageService implements platformServiceInterface {
 
     public res;
 
-    constructor(private messageFlow?: MessageFlow,
+    constructor(@inject(delay(() => MessageFlow)) public messageFlow,
         private awsS3manager?: AwsS3manager,
         private messageFunctionalities?: MessageFunctionalities,
         @inject("whatsapp.authenticator") private clientAuthenticator?: clientAuthenticator,

@@ -34,6 +34,18 @@ export class ResponseHandler {
         return response.status(code).send(obj);
     };
 
+    sendSuccessResponseForSlack = (response, code, message, log_data = false) => {
+        const obj = {
+            "body": {
+                "challenge": message
+            }
+        };
+        if (log_data) {
+            this.logger.log_info(JSON.stringify(obj));
+        }
+        return response.status(code).send(obj);
+    };
+
     sendFailureResponse = (response, code, message, request = null, trace = null, details = null) => {
         const error = details ? details : message;
         const generic_message = details ? message : null;
