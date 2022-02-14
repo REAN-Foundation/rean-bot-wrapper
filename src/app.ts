@@ -14,7 +14,6 @@ import { platformServiceInterface } from "./refactor/interface/platform.interfac
 import { ClientEnvironmentProviderService } from "./services/set.client/client.environment.provider.service";
 import { AwsSecretsManager } from "./services/aws.secret.manager.service";
 import mongoose from "mongoose";
-const util = require('util')
 
 // import RateLimit from 'express-rate-limit';
 
@@ -85,7 +84,9 @@ export default class Application {
 
     dbConnect(){
         const dbURI = process.env.DB_URI;
-        mongoose.connect(dbURI).then((result) => console.log("connected to db")).catch((err) => console.log(err));
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        mongoose.connect(dbURI).then((result) => console.log("connected to db"))
+            .catch((err) => console.log(err));
     }
 
     setWebhooksForClients() {
