@@ -5,12 +5,12 @@ import { container,  } from 'tsyringe';
 import needle from "needle";
 
 const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
-const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
-    ClientEnvironmentProviderService);
 
 export const updateBodyHeightInfoService = async (eventObj) => {
 
     if (eventObj) {
+        const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
+            ClientEnvironmentProviderService);
         var { patientUserId, accessToken, BodyHeight_Unit, BodyHeight } = await checkEntry(eventObj);
         
         const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
@@ -47,6 +47,8 @@ export const updateBodyHeightInfoService = async (eventObj) => {
 export const createBodyHeightInfoService = async (eventObj) => {
 
     if (eventObj) {
+        const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
+            ClientEnvironmentProviderService);
         var { patientUserId, accessToken, BodyHeight_Unit, BodyHeight } = await checkEntry(eventObj);
 
         const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");

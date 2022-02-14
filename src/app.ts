@@ -81,7 +81,6 @@ export default class Application {
             console.log(e);
         }
         console.log("verifying no-to-html version issue because of timing ot not");
-    }
 
     dbConnect(){
         const dbURI = process.env.DB_URI;
