@@ -8,6 +8,7 @@ import { clientAuthenticator } from '../../services/clientAuthenticator/client.a
 export class ClientWebhookController {
 
     private _platformMessageService?: platformServiceInterface;
+    
     private _clientAuthenticatorService?: clientAuthenticator;
 
     constructor(

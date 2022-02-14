@@ -36,8 +36,8 @@ export class ResponseHandler {
 
     sendSuccessResponseForSlack = (response, code, message, log_data = false) => {
         const obj = {
-            "body": {
-                "challenge": message
+            "body" : {
+                "challenge" : message
             }
         };
         if (log_data) {

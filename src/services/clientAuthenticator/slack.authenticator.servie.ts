@@ -16,6 +16,7 @@ export class SlackAuthenticator implements clientAuthenticator{
         throw new Error('Method not implemented.');
     }
     
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     authenticate(req: any, res: any) {
         if (this.urlToken === req.params.unique_token){
             return;
