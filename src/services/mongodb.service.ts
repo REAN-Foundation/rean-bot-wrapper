@@ -10,13 +10,13 @@ export class MongoDBService{
     async mongooseSaveData(userID, message, channel){
 
         const blog = new this.dbMongoose.Blog({
-            userID : userID,
+            userID  : userID,
             message : message,
             channel : channel,
-            ts : "null"
+            ts      : "null"
         });
         blog.save().then((result) => console.log("result",result))
-        .catch((err) => console.log(err));
+            .catch((err) => console.log(err));
 
     }
 

@@ -58,20 +58,23 @@ export class TelegramAnemiaMessageService implements platformServiceInterface{
         console.log("Telegram webhook for anemia set," );
     }
 
-    getMessage(_msg: any) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    getMessage(msg: any) {
         throw new Error('Method not implemented.');
     }
 
-    postResponse(_messagetoDialogflow: message, _process_raw_dialogflow: any) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    postResponse(messagetoDialogflow: message, process_raw_dialogflow: any) {
         throw new Error('Method not implemented.');
     }
 
     // eslint-disable-next-line max-len
-    SendMediaMessage(_SmessagetoDialogflow_sessionId: string, _response_format_messageBody: string, _response_format_messageText: string) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    SendMediaMessage(SmessagetoDialogflow_sessionId: string, response_format_messageBody: string, response_format_messageText: string) {
         throw new Error('Method not implemented.');
     }
 
-    createFinalMessageFromHumanhandOver(_requestBody: any) {
+    createFinalMessageFromHumanhandOver(requestBody: any) {
         throw new Error('Method not implemented.');
     }
 

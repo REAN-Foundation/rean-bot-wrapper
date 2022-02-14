@@ -27,7 +27,7 @@ export class FeedbackService implements feedbackInterface {
             return this.triggerFeedbackIntent(message, channel, platformMessageService);
         }
         if (intent === "Feedback - Negative"){
-            const response = await this.mongoDBService.mongooseGetData({ "userID" : message.sessionId });
+            const response = await this.mongoDBService.mongooseGetData({ "userID": message.sessionId });
             await this.slackMessageService.postMessage(response);
         }
     }

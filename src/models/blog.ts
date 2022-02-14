@@ -4,21 +4,21 @@ const schema = mongoose.Schema;
 
 const blogSchema = new schema({
     userID : {
-        type : Number,
+        type  : Number,
         required : true
     },
-    message :{
-        type : String,
+    message : {
+        type  : String,
         required : true
     },
-    channel :{
-        type : String,
+    channel : {
+        type  : String,
         required : true
     },
-    ts :{
+    ts : {
         type : String
     }
-},{ timestamps : true });
+},{ timestamps  : true });
 
 export class DBMongoose{
 
