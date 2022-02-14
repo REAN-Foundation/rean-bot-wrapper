@@ -10,17 +10,18 @@ export const getRiskAssessmentInfo = async (req) => {
         try {
             let params: any = {};
             var imagePath = '';
-            const img_url = 'https://d3uqieugp2i3ic.cloudfront.net/';
-            const img_env = {
-                'LOCAL' : 'dev',
-                'DEVELOPMENT' : 'dev',
-                'UAT' : 'uat',
-                'PROD' : 'prod'
-            };
+            const img_url = 'https://d3uqieugp2i3ic.cloudfront.net/dev';
+
+            // const img_env = {
+            //     'LOCAL' : 'dev',
+            //     'DEVELOPMENT' : 'dev',
+            //     'UAT' : 'uat',
+            //     'PROD' : 'prod'
+            // };
             const image = {
-                'low' : img_url + img_env[env] + '/L.png',
-                'high' : img_url + img_env[env] + '/H.png',
-                'moderate' : img_url + img_env[env] + '/M.png'
+                'low' : img_url + '/L.png',
+                'high' : img_url + '/H.png',
+                'moderate' : img_url + '/M.png'
             };
             if (req['body']['queryResult']['intent']['displayName'] !== "Risk.assessment.info-no") {
                 params = req.body.queryResult.parameters ? req.body.queryResult.parameters : {};
@@ -89,6 +90,8 @@ export const getRiskAssessmentInfo = async (req) => {
                                     " We can also  help you  with covid related questions, symptom assessment or vaccination availability.";
                                 imagePath = image[riskData.risk_level.toLocaleLowerCase()];
                                 const data = getEndofConvData(imagePath,response);
+                                console.log(imagePath);
+                                
                                 resolve(data);
                             } else {
                                 json_data[params.complication[i]] = 0;
@@ -118,6 +121,8 @@ export const getRiskAssessmentInfo = async (req) => {
 
                 imagePath = image[riskData.risk_level.toLocaleLowerCase()];
                 const data = getEndofConvData(imagePath,response);
+                console.log(imagePath);
+                
                 resolve(data);
             }
         }
