@@ -8,6 +8,8 @@ import { platformMessageService as rean_SUPPORT_Platformservice } from '../servi
 import { TelegramAuthenticator } from '../services/clientAuthenticator/telegram.authenticator';
 import { WhatsappAuthenticator } from '../services/clientAuthenticator/whatsapp.authenticator';
 import { ReanAppAuthenticator } from '../services/clientAuthenticator/reanapp.authenticator';
+import { SlackAuthenticator } from '../services/clientAuthenticator/slack.authenticator.servie';
+import { SlackMessageService } from '../services/slack.message.service';
 
 export class Injector {
 
@@ -21,10 +23,12 @@ export class Injector {
         container.register('telegram', telegramPlatformservice);
         container.register('anemiaTelegram', telegramAnemiaPlatformservice);
         container.register('REAN_SUPPORT', rean_SUPPORT_Platformservice);
+        container.register('slack', SlackMessageService);
         container.register('telegram.authenticator', TelegramAuthenticator);
         container.register('anemiaTelegram.authenticator', TelegramAuthenticator);
         container.register('whatsapp.authenticator', WhatsappAuthenticator);
         container.register('REAN_SUPPORT.authenticator', ReanAppAuthenticator);
+        container.register('slack.authenticator', SlackAuthenticator);
 
     }
 
