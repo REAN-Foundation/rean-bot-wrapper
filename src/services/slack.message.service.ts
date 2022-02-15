@@ -8,20 +8,24 @@ import { MongoDBService } from './mongodb.service';
 import { TelegramMessageService } from './telegram.message.service';
 import { platformMessageService } from './whatsapp.message.service';
 
-const client = new WebClient(process.env.SLACK_TOKEN_FEEDBACK);
-const channelID = process.env.SLACK_FEEDBACK_CHANNEL_ID;
-const slackSecret = process.env.SLACK_SECRET_FEEDBACK;
-const slackEvent = createEventAdapter(slackSecret);
-
 @autoInjectable()
 export class SlackMessageService implements platformServiceInterface {
+
+    public res;
+
+    private slackEvent;
+
+    private client;
+
+    private channelID;
 
     constructor(@inject(delay(() => platformMessageService)) public whatsappMessageService,
         private responseHandler?: ResponseHandler,
         private telegramMessageservice?: TelegramMessageService,
-        private mongoDBService?: MongoDBService) { }
-
-    public res;
+        private mongoDBService?: MongoDBService) { this.client = new WebClient(process.env.SLACK_TOKEN_FEEDBACK);
+        this.channelID = process.env.SLACK_FEEDBACK_CHANNEL_ID;
+        const slackSecret = process.env.SLACK_SECRET_FEEDBACK;
+        this.slackEvent = createEventAdapter(slackSecret); }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async handleMessage(message, client) {
@@ -60,7 +64,7 @@ export class SlackMessageService implements platformServiceInterface {
             console.log("testing endpoint");
         }
 
-        slackEvent.on("message", (event) => {
+        this.slackEvent.on("message", (event) => {
             console.log(`Received a message event123: user ${event.user} in channel ${event.channel} says ${event.text}`);
             (async () => {
                 try {
@@ -83,7 +87,7 @@ export class SlackMessageService implements platformServiceInterface {
         let objID = response[response.length - 1]._id;
         objID = objID.toString();
         const topic = response[response.length - 1].message;
-        const message = await client.chat.postMessage({ channel: channelID, text: topic });
+        const message = await this.client.chat.postMessage({ channel: this.channelID, text: topic });
         const updatedObject = { $set: { "ts": message.ts } };
         this.mongoDBService.mongooseUpdateDocument(objID, updatedObject);
     }
