@@ -8,9 +8,9 @@ import { MongoDBService } from './mongodb.service';
 import { TelegramMessageService } from './telegram.message.service';
 import { platformMessageService } from './whatsapp.message.service';
 
-const client = new WebClient(process.env.SlackToken);
-const channelID = process.env.channelID;
-const slackSecret = process.env.slackSecret;
+const client = new WebClient(process.env.SLACK_TOKEN_FEEDBACK);
+const channelID = process.env.SLACK_FEEDBACK_CHANNEL_ID;
+const slackSecret = process.env.SLACK_SECRET_FEEDBACK;
 const slackEvent = createEventAdapter(slackSecret);
 
 @autoInjectable()
