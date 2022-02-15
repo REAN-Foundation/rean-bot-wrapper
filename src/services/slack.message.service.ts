@@ -22,10 +22,10 @@ export class SlackMessageService implements platformServiceInterface {
     constructor(@inject(delay(() => platformMessageService)) public whatsappMessageService,
         private responseHandler?: ResponseHandler,
         private telegramMessageservice?: TelegramMessageService,
-        private mongoDBService?: MongoDBService) {this.client = new WebClient(process.env.SLACK_TOKEN_FEEDBACK);
-            this.channelID = process.env.SLACK_FEEDBACK_CHANNEL_ID;
-            const slackSecret = process.env.SLACK_SECRET_FEEDBACK;
-            this.slackEvent = createEventAdapter(slackSecret); }
+        private mongoDBService?: MongoDBService) { this.client = new WebClient(process.env.SLACK_TOKEN_FEEDBACK);
+        this.channelID = process.env.SLACK_FEEDBACK_CHANNEL_ID;
+        const slackSecret = process.env.SLACK_SECRET_FEEDBACK;
+        this.slackEvent = createEventAdapter(slackSecret); }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async handleMessage(message, client) {
