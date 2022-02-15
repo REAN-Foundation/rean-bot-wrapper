@@ -17,7 +17,7 @@ export class SlackMessageService implements platformServiceInterface {
 
     private client;
 
-    private channelID
+    private channelID;
 
     constructor(@inject(delay(() => platformMessageService)) public whatsappMessageService,
         private responseHandler?: ResponseHandler,
