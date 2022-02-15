@@ -9,7 +9,5 @@ export const getHeaders = (accessToken: any) => {
     const options = getRequestOptions("rean_app");
     options.headers["authorization"] = `Bearer ${accessToken}`;
     options.headers["x-api-key"] = reancare_api_key;
-    console.log('reancareAPIkEY for dev services', reancare_api_key);
-    console.log('headers in the options', options);
     return options;
 };

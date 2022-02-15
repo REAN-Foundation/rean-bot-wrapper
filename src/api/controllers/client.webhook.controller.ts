@@ -8,6 +8,7 @@ import { clientAuthenticator } from '../../services/clientAuthenticator/client.a
 export class ClientWebhookController {
 
     private _platformMessageService?: platformServiceInterface;
+    
     private _clientAuthenticatorService?: clientAuthenticator;
 
     constructor(
@@ -41,7 +42,7 @@ export class ClientWebhookController {
                 // status = sent, received & read
             }
             else {
-                if (req.params.channel !== "REAN_SUPPORT"){
+                if (req.params.channel !== "REAN_SUPPORT" && req.params.channel !== "slack"){
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
                 }
                 this._platformMessageService = container.resolve(req.params.channel);
