@@ -24,6 +24,10 @@ export class MessageFlow{
     }
 
     async processMessage(messagetoDialogflow, channel ,platformMessageService: platformServiceInterface) {
+        if (messagetoDialogflow.messageBody === ' '){
+            const message_to_platform = await platformMessageService.SendMediaMessage(messagetoDialogflow.sessionId,null,"Sorry, I did not get that. Can you say it again?");
+            return message_to_platform;
+        }
         const processedResponse = await this.handleRequestservice.handleUserRequest(messagetoDialogflow, channel);
         // eslint-disable-next-line max-len
         const response_format: response = await platformMessageService.postResponse(messagetoDialogflow, processedResponse);
