@@ -128,7 +128,7 @@ export default class Application {
             await this.setupMiddlewares();
 
             //connect db
-            this.dbConnect();
+            // this.dbConnect();
 
             //Set the routes
             await this._router.init();
