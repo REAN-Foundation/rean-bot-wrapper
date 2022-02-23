@@ -2,81 +2,81 @@ import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from 'seque
 import { response } from '../refactor/interface/message.interface';
 
 @Table({
-    timestamps: true,
-    modelName: 'UserResponse',
-    tableName: 'user_response'
+    timestamps : true,
+    modelName  : 'UserResponse',
+    tableName  : 'user_response'
 })
 export class UserResponse extends Model implements response {
 
     @AutoIncrement
     @PrimaryKey
     @Column({
-        type: DataType.INTEGER
+        type : DataType.INTEGER
     })
-    id?: number;
+        id?: number;
 
     @Column({
-        type: DataType.STRING(256)
+        type : DataType.STRING(256)
     })
-    direction: string;
+        direction: string;
 
     @Column({
-        type: DataType.STRING(256)
+        type : DataType.STRING(256)
     })
-    sessionId: string;
+        sessionId: string;
 
     @Column({
-        type: DataType.STRING(256)
+        type : DataType.STRING(256)
     })
-    name: string;
+        name: string;
 
     @Column({
-        type: DataType.STRING(256)
+        type : DataType.STRING(256)
     })
-    chat_message_id: string;
+        chat_message_id: string;
 
     @Column({
-        type: DataType.STRING(256)
+        type : DataType.STRING(256)
     })
-    platform: string;
+        platform: string;
 
     @Column({
-        type: DataType.STRING(256)
+        type : DataType.STRING(256)
     })
-    input_message: any;
+        input_message: any;
 
     @Column({
-        type: DataType.STRING(256)
+        type : DataType.STRING(256)
     })
-    message_type: string;
+        message_type: string;
 
     @Column({
-        type: DataType.STRING(256)
+        type : DataType.STRING(256)
     })
-    messageBody: string;
+        messageBody: string;
 
     @Column({
-        type: DataType.TEXT
+        type : DataType.TEXT
     })
-    messageText: string;
+        messageText: string;
 
     @Column({
-        type: DataType.TEXT
+        type : DataType.TEXT
     })
-    raw_response_object: string;
+        raw_response_object: string;
 
     @Column({
-        type: DataType.STRING(256)
+        type : DataType.STRING(256)
     })
-    intent: string;
+        intent: string;
 
     @Column({
-        type: DataType.STRING(256)
+        type : DataType.STRING(256)
     })
-    messageImageUrl: string;
+        messageImageUrl: string;
 
     @Column({
-        type: DataType.TEXT
+        type : DataType.TEXT
     })
-    messageImageCaption: string;
+        messageImageCaption: string;
 }

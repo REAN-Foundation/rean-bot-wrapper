@@ -2,61 +2,61 @@ import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from 'seque
 import { message } from '../refactor/interface/message.interface';
 
 @Table({
-    timestamps: true,
-    modelName: 'UserRequest',
-    tableName: 'user_request'
+    timestamps : true,
+    modelName  : 'UserRequest',
+    tableName  : 'user_request'
 })
 export class UserRequest extends Model implements message {
 
     @AutoIncrement
     @PrimaryKey
     @Column({
-        type: DataType.INTEGER
+        type : DataType.INTEGER
     })
-    id?: number;
+        id?: number;
 
     @Column({
-        type: DataType.STRING(256)
+        type : DataType.STRING(256)
     })
-    name: string;
+        name: string;
 
     @Column({
-        type: DataType.STRING(256)
+        type : DataType.STRING(256)
     })
-    platform: string;
+        platform: string;
 
     @Column({
-        type: DataType.STRING(256)
+        type : DataType.STRING(256)
     })
-    sessionId: string;
+        sessionId: string;
 
     @Column({
-        type: DataType.STRING(256)
+        type : DataType.STRING(256)
     })
-    chat_message_id: string;
+        chat_message_id: string;
 
     @Column({
-        type: DataType.STRING(256)
+        type : DataType.STRING(256)
     })
-    direction: string;
+        direction: string;
 
     @Column({
-        type: DataType.STRING(256)
+        type : DataType.STRING(256)
     })
-    type: string;
+        type: string;
 
     @Column({
-        type: DataType.STRING(256)
+        type : DataType.STRING(256)
     })
-    messageBody: string;
+        messageBody: string;
 
     @Column({
-        type: DataType.STRING(256)
+        type : DataType.STRING(256)
     })
-    latlong: string;
+        latlong: string;
 
     @Column({
-        type: DataType.STRING(256)
+        type : DataType.STRING(256)
     })
-    replyPath: string;
+        replyPath: string;
 }
