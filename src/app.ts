@@ -90,7 +90,8 @@ export default class Application {
         // eslint-disable-next-line max-len
         const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
         const telegram: platformServiceInterface = container.resolve('telegram');
-        const anemiaTelegram: platformServiceInterface = container.resolve('anemiaTelegram');
+        
+        // const anemiaTelegram: platformServiceInterface = container.resolve('anemiaTelegram');
         const whatsapp: platformServiceInterface = container.resolve('whatsapp');
         for (const clientName of this.clientsList) {
             clientEnvironmentProviderService.setClientName(clientName);

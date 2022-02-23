@@ -32,8 +32,8 @@ export interface handlerequest{
 }
 
 export interface feedbackmessage{
-    userId : String;
-    message : String;
-    channel : String;
-    ts : String;
+    userId : string;
+    message : string;
+    channel : string;
+    ts : string;
 }

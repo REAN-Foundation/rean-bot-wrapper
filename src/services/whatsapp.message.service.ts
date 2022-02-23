@@ -279,7 +279,6 @@ export class platformMessageService implements platformServiceInterface {
                 reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: "text", raw_response_object: raw_response_object, intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[0] };
             }
         }
-        // console.log("postresponse format", reaponse_message);
         return reaponse_message;
     };
 

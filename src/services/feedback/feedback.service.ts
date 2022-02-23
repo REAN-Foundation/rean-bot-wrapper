@@ -22,7 +22,7 @@ export class FeedbackService implements feedbackInterface {
 
             const saveMessage = message.messageBody;
             const sessionId = message.sessionId;
-            const feedBackInfo = new UserFeedback({userId: sessionId, message: saveMessage, channel: channel});
+            const feedBackInfo = new UserFeedback({ userId: sessionId, message: saveMessage, channel: channel });
             await feedBackInfo.save();
             return this.triggerFeedbackIntent(message, channel, platformMessageService);
         }

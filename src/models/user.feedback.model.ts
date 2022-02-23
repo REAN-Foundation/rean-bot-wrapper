@@ -1,38 +1,38 @@
-import { Table, Column, Model, DataType, HasMany, IsNull, PrimaryKey, AutoIncrement } from 'sequelize-typescript';
-import { feedbackmessage } from '../refactor/interface/message.interface'; 
+import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from 'sequelize-typescript';
+import { feedbackmessage } from '../refactor/interface/message.interface';
 
 @Table({
-    timestamps      : true,
-    modelName       : 'UserFeedback',
-    tableName       : 'user_feedback'
+    timestamps: true,
+    modelName: 'UserFeedback',
+    tableName: 'user_feedback'
 })
-export class UserFeedback extends Model implements feedbackmessage{
+export class UserFeedback extends Model implements feedbackmessage {
 
     @AutoIncrement
     @PrimaryKey
     @Column({
-        type         : DataType.INTEGER
+        type: DataType.INTEGER
     })
-    id?: number
+    id?: number;
 
     @Column({
-        type         : DataType.STRING
+        type: DataType.STRING
     })
-    userId: String;
+    userId: string;
 
     @Column({
-        type         : DataType.STRING
+        type: DataType.STRING
     })
-    message: String;
+    message: string;
 
     @Column({
-        type         : DataType.STRING
+        type: DataType.STRING
     })
-    channel: String;
+    channel: string;
 
     @Column({
-        type         : DataType.STRING
+        type: DataType.STRING
     })
-    ts: String;
+    ts: string;
 
 }

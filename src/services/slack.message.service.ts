@@ -20,7 +20,7 @@ export class SlackMessageService implements platformServiceInterface {
 
     private channelID;
 
-    private isInitialised: boolean = false;
+    private isInitialised = false;
 
     constructor(@inject(delay(() => platformMessageService)) public whatsappMessageService,
         private responseHandler?: ResponseHandler,
@@ -37,7 +37,7 @@ export class SlackMessageService implements platformServiceInterface {
 
     async getMessage(message) {
 
-        this.delayedInitialisation()
+        this.delayedInitialisation();
         if (!message.challenge) {
 
             // check if message on slack is parent
@@ -85,13 +85,12 @@ export class SlackMessageService implements platformServiceInterface {
     }
 
     async postMessage(response) {
-        let objID = response[response.length - 1].dataValues.id;
-        console.log("The obj Id", objID);
+        const objID = response[response.length - 1].dataValues.id;
         const topic = response[response.length - 1].dataValues.message;
-        this.delayedInitialisation()
+        this.delayedInitialisation();
         const message = await this.client.chat.postMessage({ channel: this.channelID, text: topic });
-        await UserFeedback.update({ ts: message.ts }, { where: { id : objID } })
-            .then(() => {console.log("updated")})
+        await UserFeedback.update({ ts: message.ts }, { where: { id: objID } })
+            .then(() => { console.log("updated"); })
             .catch(error => console.log("error on update", error));
     }
 
@@ -106,6 +105,7 @@ export class SlackMessageService implements platformServiceInterface {
         }
         
     }
+    
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     sendManualMesage(msg: any) {
         throw new Error('Method not implemented.');

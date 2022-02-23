@@ -18,8 +18,8 @@ export class SequelizeClient {
         const dbPassword = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DB_PASSWORD");
         const dbUser = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DB_USER_NAME");
         const sequelizeClient = new Sequelize(dbName, dbUser, dbPassword, {
-            host: 'localhost',
-            dialect: 'mysql'
+            host : 'localhost',
+            dialect : 'mysql'
         });
         sequelizeClient.addModels([UserRequest, UserResponse, UserFeedback]);
         this._sequelize = sequelizeClient;
@@ -35,6 +35,6 @@ export class SequelizeClient {
             })
             .catch(error => console.log("DB connection failed", error));
         await this._sequelize.sync({ alter: true });
-    }
+    };
     
 }

@@ -2,7 +2,7 @@ import { message } from '../refactor/interface/message.interface';
 import { autoInjectable, singleton } from 'tsyringe';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { MessageFlow } from './get.put.message.flow.service';
-import { ResponseHandler } from '../utils/response.handler'; 
+import { ResponseHandler } from '../utils/response.handler';
 
 @autoInjectable()
 @singleton()
@@ -16,6 +16,8 @@ export class platformMessageService implements platformServiceInterface{
     ) {
 
     }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     setWebhook(client: any) {
         throw new Error('Method not implemented.');
     }
@@ -33,7 +35,6 @@ export class platformMessageService implements platformServiceInterface{
     }
 
     handleMessage(msg, client) {
-        // console.log("the msg sent ", msg);
         return this.messageFlow.get_put_msg_Dialogflow(msg, client, this);
     }
 
