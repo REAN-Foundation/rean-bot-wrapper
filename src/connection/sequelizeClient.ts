@@ -18,7 +18,7 @@ export class SequelizeClient {
         const dbPassword = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DB_PASSWORD");
         const dbUser = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DB_USER_NAME");
         const sequelizeClient = new Sequelize(dbName, dbUser, dbPassword, {
-            host : 'localhost',
+            host    : 'localhost',
             dialect : 'mysql'
         });
         sequelizeClient.addModels([UserRequest, UserResponse, UserFeedback]);

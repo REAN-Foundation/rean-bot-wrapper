@@ -2,37 +2,37 @@ import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from 'seque
 import { feedbackmessage } from '../refactor/interface/message.interface';
 
 @Table({
-    timestamps: true,
-    modelName: 'UserFeedback',
-    tableName: 'user_feedback'
+    timestamps : true,
+    modelName : 'UserFeedback',
+    tableName : 'user_feedback'
 })
 export class UserFeedback extends Model implements feedbackmessage {
 
     @AutoIncrement
     @PrimaryKey
     @Column({
-        type: DataType.INTEGER
+        type : DataType.INTEGER
     })
-    id?: number;
+        id?: number;
 
     @Column({
-        type: DataType.STRING
+        type : DataType.STRING
     })
-    userId: string;
+        userId: string;
 
     @Column({
-        type: DataType.STRING
+        type : DataType.STRING
     })
-    message: string;
+        message: string;
 
     @Column({
-        type: DataType.STRING
+        type : DataType.STRING
     })
-    channel: string;
+        channel: string;
 
     @Column({
-        type: DataType.STRING
+        type : DataType.STRING
     })
-    ts: string;
+        ts: string;
 
 }
