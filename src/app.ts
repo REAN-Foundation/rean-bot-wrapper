@@ -15,8 +15,6 @@ import { ClientEnvironmentProviderService } from "./services/set.client/client.e
 import { AwsSecretsManager } from "./services/aws.secret.manager.service";
 import mongoose from "mongoose";
 
-// import RateLimit from 'express-rate-limit';
-
 export default class Application {
 
     public _app: express.Application = null;
@@ -47,39 +45,76 @@ export default class Application {
     public app(): express.Application {
         return this._app;
     }
-
+    
     async processClientEnvVariables() {
-
-        try {
-            const secretObjectList = await this._awsSecretsManager.getSecrets();
-
-            for (const ele of secretObjectList) {
-                if (!ele.NAME) {
-                    for (const k in ele) {
-                        if (typeof ele[k] === "object"){
-                            process.env[k.toUpperCase()] = JSON.stringify(ele[k]);
+        console.log("We are in the " + process.env.ENVIRONMENT);
+        if  (process.env.ENVIRONMENT === 'LOCAL'){
+            try {
+                const secretNameList = process.env.secretNameList.split(',');
+                const secretObjectList = [];
+                for (const element of secretNameList) {
+                    // eslint-disable-next-line @typescript-eslint/no-var-requires
+                    const responseSecretValue = require(`../${element}.json`);
+                    const secretStringToObj = responseSecretValue;
+                    secretObjectList.push(secretStringToObj);
+                }
+                for (const ele of secretObjectList) {
+                    if (!ele.NAME) {
+                        for (const k in ele) {
+                            if (typeof ele[k] === "object"){
+                                process.env[k.toUpperCase()] = JSON.stringify(ele[k]);
+                            }
+                            else {
+                                process.env[k.toUpperCase()] = ele[k];
+                            }
                         }
-                        else {
-                            process.env[k.toUpperCase()] = ele[k];
+                    }
+                    else {
+                        this.clientsList.push(ele.NAME);
+                        for (const k in ele) {
+                            if (typeof ele[k] === "object"){
+                                process.env[ele.NAME + "_" + k.toUpperCase()] = JSON.stringify(ele[k]);
+                            }
+                            else {
+                                process.env[ele.NAME + "_" + k.toUpperCase()] = ele[k];
+                            }
+                            console.log(`${[ele.NAME + "_" + k.toUpperCase()]} = ${ele[k]}`)
                         }
                     }
                 }
-                else {
-                    this.clientsList.push(ele.NAME);
-                    for (const k in ele) {
-                        if (typeof ele[k] === "object"){
-                            process.env[ele.NAME + "_" + k.toUpperCase()] = JSON.stringify(ele[k]);
-                        }
-                        else {
-                            process.env[ele.NAME + "_" + k.toUpperCase()] = ele[k];
-                        }
-                    }
-                }
+            } catch (e) {
+                console.log(e);
             }
-        } catch (e) {
-            console.log(e);
+        } else {
+            try {
+                const secretObjectList = await this._awsSecretsManager.getSecrets();
+                for (const ele of secretObjectList) {
+                    if (!ele.NAME) {
+                        for (const k in ele) {
+                            if (typeof ele[k] === "object"){
+                                process.env[k.toUpperCase()] = JSON.stringify(ele[k]);
+                            }
+                            else {
+                                process.env[k.toUpperCase()] = ele[k];
+                            }
+                        }
+                    }
+                    else {
+                        this.clientsList.push(ele.NAME);
+                        for (const k in ele) {
+                            if (typeof ele[k] === "object"){
+                                process.env[ele.NAME + "_" + k.toUpperCase()] = JSON.stringify(ele[k]);
+                            }
+                            else {
+                                process.env[ele.NAME + "_" + k.toUpperCase()] = ele[k];
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.log(e);
+            }
         }
-        console.log("verifying no-to-html version issue because of timing ot not");
     }
 
     dbConnect(){
@@ -97,8 +132,8 @@ export default class Application {
         const whatsapp: platformServiceInterface = container.resolve('whatsapp');
         for (const clientName of this.clientsList) {
             clientEnvironmentProviderService.setClientName(clientName);
-            if (clientName === "ANEMIA"){
-                anemiaTelegram.setWebhook(clientName);
+            if (clientName === "NSMI"){
+                telegram.setWebhook(clientName);
             } else {
                 telegram.setWebhook(clientName);
                 whatsapp.setWebhook(clientName);
@@ -107,11 +142,6 @@ export default class Application {
         }
 
     }
-
-    // private limiter = RateLimit({
-    //     windowMs : 1 * 60 * 1000, // 1 minute
-    //     max : 5
-    // });
 
     public start = async (): Promise<void> => {
         try {
@@ -126,9 +156,6 @@ export default class Application {
 
             //Set-up middlewares
             await this.setupMiddlewares();
-
-            //connect db
-            this.dbConnect();
 
             //Set the routes
             await this._router.init();

@@ -259,7 +259,7 @@ export class platformMessageService implements platformServiceInterface {
 
         if (processedResponse) {
             if (processedResponse.message_from_dialoglow.image && processedResponse.message_from_dialoglow.image.url) {
-                reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: "image", raw_response_object: raw_response_object, intent: intent, messageBody: processedResponse.message_from_dialoglow.image.url, messageImageUrl: processedResponse.message_from_dialoglow.image, messageImageCaption: processedResponse.message_from_dialoglow.image.url, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.message_from_dialoglow.image.caption };
+                reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: "image", raw_response_object: raw_response_object, intent: intent, messageBody: processedResponse.message_from_dialoglow.image.url, messageImageUrl: processedResponse.message_from_dialoglow.image.url, messageImageCaption: processedResponse.message_from_dialoglow.image.caption, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.message_from_dialoglow.image.caption };
             }
             else if (processedResponse.processed_message.length > 1) {
                 if (processedResponse.message_from_dialoglow.parse_mode && processedResponse.message_from_dialoglow.parse_mode === 'HTML') {
@@ -279,7 +279,7 @@ export class platformMessageService implements platformServiceInterface {
                 reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: "text", raw_response_object: raw_response_object, intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[0] };
             }
         }
-        console.log("postresponse format", reaponse_message);
+        // console.log("postresponse format", reaponse_message);
         return reaponse_message;
     };
 

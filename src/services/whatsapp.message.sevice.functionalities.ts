@@ -91,7 +91,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
             direction       : "In",
             messageBody     : null,
             sessionId       : message.contacts[0].wa_id,
-            replayPath      : null,
+            replyPath      : null,
             latlong         : null,
             type            : "text"
         };

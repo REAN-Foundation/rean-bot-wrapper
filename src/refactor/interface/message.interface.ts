@@ -7,7 +7,7 @@ export interface message{
     type : string;
     messageBody : string;
     latlong : string;
-    replayPath : string;
+    replyPath : string;
 }
 
 export interface response{
@@ -29,4 +29,11 @@ export interface response{
 export interface handlerequest{
     botObject: any;
     message: message;
+}
+
+export interface feedbackmessage{
+    userId : String;
+    message : String;
+    channel : String;
+    ts : String;
 }

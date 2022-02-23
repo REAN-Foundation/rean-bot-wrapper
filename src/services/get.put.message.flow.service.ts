@@ -3,23 +3,27 @@ import { message } from '../refactor/interface/message.interface';
 import { handleRequestservice } from './handle.request.service';
 import { autoInjectable } from 'tsyringe';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
-import { elasticsearchUserstat } from './statistics/user.stat.service';
 import { response } from '../refactor/interface/message.interface';
 import { FeedbackService } from '../services/feedback/feedback.service';
+import { UserRequest } from '../models/user.request.model';
+import { UserResponse } from '../models/user.response.model';
+import { SequelizeClient } from '../connection/sequelizeClient';
 
 @autoInjectable()
 export class MessageFlow{
 
     constructor(
         private handleRequestservice?: handleRequestservice,
-        private _elasticsearchUserstat?: elasticsearchUserstat,
+        private sequelizeClient?: SequelizeClient,
         private _feedbackService?:FeedbackService) {
     }
 
     async get_put_msg_Dialogflow (msg, channel ,platformMessageService: platformServiceInterface) {
         console.log("entered the get_put_msg_Dialogflow,,,,,,,,,,,,,,,,,,,,,,,,,");
         const messagetoDialogflow: message = await platformMessageService.getMessage(msg);
-        this._elasticsearchUserstat.createUserStat(messagetoDialogflow);
+        await this.sequelizeClient.connect();
+        const personrequest = new UserRequest(messagetoDialogflow);
+        await personrequest.save();
         return this.processMessage(messagetoDialogflow, channel ,platformMessageService);
     }
 
@@ -31,7 +35,9 @@ export class MessageFlow{
         const processedResponse = await this.handleRequestservice.handleUserRequest(messagetoDialogflow, channel);
         // eslint-disable-next-line max-len
         const response_format: response = await platformMessageService.postResponse(messagetoDialogflow, processedResponse);
-        this._elasticsearchUserstat.createUserStat(response_format);
+
+        const personresponse = new UserResponse(response_format);
+        await personresponse.save();
 
         if (processedResponse.message_from_dialoglow.text) {
             let message_to_platform = null;
@@ -56,7 +62,8 @@ export class MessageFlow{
 
     async send_manual_msg (msg,platformMessageService: platformServiceInterface) {
         const response_format = await platformMessageService.createFinalMessageFromHumanhandOver(msg);
-        this._elasticsearchUserstat.createUserStat(response_format);
+        const person = new UserRequest(response_format);
+        await person.save();
 
         let message_to_platform = null;
         // eslint-disable-next-line max-len

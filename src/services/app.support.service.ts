@@ -44,7 +44,7 @@ export class platformMessageService implements platformServiceInterface{
 
         if (msg.type === "text") {
             const message = msg.message + ` PhoneNumber is ${phoneNumber}`;
-            returnMessage = { name: null,platform: "Rean_Support",chat_message_id: null, direction: "In",messageBody: message,sessionId: phoneNumber,replayPath: phoneNumber,latlong: null,type: 'text' };
+            returnMessage = { name: null,platform: "Rean_Support",chat_message_id: null, direction: "In",messageBody: message,sessionId: phoneNumber,replyPath: phoneNumber,latlong: null,type: 'text' };
             return returnMessage;
         }
     }
