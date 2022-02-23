@@ -47,73 +47,35 @@ export default class Application {
     }
     
     async processClientEnvVariables() {
-        console.log("We are in the " + process.env.ENVIRONMENT);
-        if  (process.env.ENVIRONMENT === 'LOCAL'){
-            try {
-                const secretNameList = process.env.secretNameList.split(',');
-                const secretObjectList = [];
-                for (const element of secretNameList) {
-                    // eslint-disable-next-line @typescript-eslint/no-var-requires
-                    const responseSecretValue = require(`../${element}.json`);
-                    const secretStringToObj = responseSecretValue;
-                    secretObjectList.push(secretStringToObj);
-                }
-                for (const ele of secretObjectList) {
-                    if (!ele.NAME) {
-                        for (const k in ele) {
-                            if (typeof ele[k] === "object"){
-                                process.env[k.toUpperCase()] = JSON.stringify(ele[k]);
-                            }
-                            else {
-                                process.env[k.toUpperCase()] = ele[k];
-                            }
+
+        try {
+            const secretObjectList = await this._awsSecretsManager.getSecrets();
+
+            for (const ele of secretObjectList) {
+                if (!ele.NAME) {
+                    for (const k in ele) {
+                        if (typeof ele[k] === "object"){
+                            process.env[k.toUpperCase()] = JSON.stringify(ele[k]);
                         }
-                    }
-                    else {
-                        this.clientsList.push(ele.NAME);
-                        for (const k in ele) {
-                            if (typeof ele[k] === "object"){
-                                process.env[ele.NAME + "_" + k.toUpperCase()] = JSON.stringify(ele[k]);
-                            }
-                            else {
-                                process.env[ele.NAME + "_" + k.toUpperCase()] = ele[k];
-                            }
-                            console.log(`${[ele.NAME + "_" + k.toUpperCase()]} = ${ele[k]}`)
+                        else {
+                            process.env[k.toUpperCase()] = ele[k];
                         }
                     }
                 }
-            } catch (e) {
-                console.log(e);
+                else {
+                    this.clientsList.push(ele.NAME);
+                    for (const k in ele) {
+                        if (typeof ele[k] === "object"){
+                            process.env[ele.NAME + "_" + k.toUpperCase()] = JSON.stringify(ele[k]);
+                        }
+                        else {
+                            process.env[ele.NAME + "_" + k.toUpperCase()] = ele[k];
+                        }
+                    }
+                }
             }
-        } else {
-            try {
-                const secretObjectList = await this._awsSecretsManager.getSecrets();
-                for (const ele of secretObjectList) {
-                    if (!ele.NAME) {
-                        for (const k in ele) {
-                            if (typeof ele[k] === "object"){
-                                process.env[k.toUpperCase()] = JSON.stringify(ele[k]);
-                            }
-                            else {
-                                process.env[k.toUpperCase()] = ele[k];
-                            }
-                        }
-                    }
-                    else {
-                        this.clientsList.push(ele.NAME);
-                        for (const k in ele) {
-                            if (typeof ele[k] === "object"){
-                                process.env[ele.NAME + "_" + k.toUpperCase()] = JSON.stringify(ele[k]);
-                            }
-                            else {
-                                process.env[ele.NAME + "_" + k.toUpperCase()] = ele[k];
-                            }
-                        }
-                    }
-                }
-            } catch (e) {
-                console.log(e);
-            }
+        } catch (e) {
+            console.log(e);
         }
     }
 
