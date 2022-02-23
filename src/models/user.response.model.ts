@@ -1,12 +1,12 @@
 import { Table, Column, Model, DataType, HasMany, IsNull, PrimaryKey, AutoIncrement } from 'sequelize-typescript';
-import { response } from '../refactor/interface/message.interface'; 
+// import { response } from '../refactor/interface/message.interface'; 
 
 @Table({
     timestamps      : true,
     modelName       : 'UserResponse',
     tableName       : 'user_response'
 })
-export class UserResponse extends Model implements response{
+export class UserResponse extends Model {
 
     @AutoIncrement
     @PrimaryKey
@@ -18,27 +18,27 @@ export class UserResponse extends Model implements response{
     @Column({
         type         : DataType.STRING(256)
     })
-    name: string;
+    resname: string;
 
     @Column({
         type         : DataType.STRING(256)
     })
-    platform: string;
+    resplatform: string;
 
     @Column({
         type         : DataType.STRING(256)
     })
-    sessionId: string;
+    ressessionId: string;
 
     @Column({
         type         : DataType.STRING(256)
     })
-    chat_message_id: string;
+    reschat_message_id: string;
 
     @Column({
         type         : DataType.STRING(256)
     })
-    direction: string;
+    resdirection: string;
 
     @Column({
         type         : DataType.STRING(256)
