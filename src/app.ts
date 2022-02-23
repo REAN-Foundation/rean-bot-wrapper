@@ -15,8 +15,6 @@ import { ClientEnvironmentProviderService } from "./services/set.client/client.e
 import { AwsSecretsManager } from "./services/aws.secret.manager.service";
 import mongoose from "mongoose";
 
-// import RateLimit from 'express-rate-limit';
-
 export default class Application {
 
     public _app: express.Application = null;
@@ -47,7 +45,7 @@ export default class Application {
     public app(): express.Application {
         return this._app;
     }
-
+    
     async processClientEnvVariables() {
 
         try {
@@ -79,7 +77,6 @@ export default class Application {
         } catch (e) {
             console.log(e);
         }
-        console.log("verifying no-to-html version issue because of timing ot not");
     }
 
     dbConnect(){
@@ -93,12 +90,13 @@ export default class Application {
         // eslint-disable-next-line max-len
         const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
         const telegram: platformServiceInterface = container.resolve('telegram');
-        const anemiaTelegram: platformServiceInterface = container.resolve('anemiaTelegram');
+        
+        // const anemiaTelegram: platformServiceInterface = container.resolve('anemiaTelegram');
         const whatsapp: platformServiceInterface = container.resolve('whatsapp');
         for (const clientName of this.clientsList) {
             clientEnvironmentProviderService.setClientName(clientName);
-            if (clientName === "ANEMIA"){
-                anemiaTelegram.setWebhook(clientName);
+            if (clientName === "NSMI"){
+                telegram.setWebhook(clientName);
             } else {
                 telegram.setWebhook(clientName);
                 whatsapp.setWebhook(clientName);
@@ -107,11 +105,6 @@ export default class Application {
         }
 
     }
-
-    // private limiter = RateLimit({
-    //     windowMs : 1 * 60 * 1000, // 1 minute
-    //     max : 5
-    // });
 
     public start = async (): Promise<void> => {
         try {
@@ -126,9 +119,6 @@ export default class Application {
 
             //Set-up middlewares
             await this.setupMiddlewares();
-
-            //connect db
-            this.dbConnect();
 
             //Set the routes
             await this._router.init();

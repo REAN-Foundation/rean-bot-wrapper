@@ -4,9 +4,10 @@ import { platformServiceInterface } from '../refactor/interface/platform.interfa
 import { message } from '../refactor/interface/message.interface';
 import { autoInjectable, delay, inject } from 'tsyringe';
 import { ResponseHandler } from '../utils/response.handler';
-import { MongoDBService } from './mongodb.service';
 import { TelegramMessageService } from './telegram.message.service';
 import { platformMessageService } from './whatsapp.message.service';
+import { UserFeedback } from '../models/user.feedback.model';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 
 @autoInjectable()
 export class SlackMessageService implements platformServiceInterface {
@@ -19,13 +20,12 @@ export class SlackMessageService implements platformServiceInterface {
 
     private channelID;
 
+    private isInitialised = false;
+
     constructor(@inject(delay(() => platformMessageService)) public whatsappMessageService,
         private responseHandler?: ResponseHandler,
-        private telegramMessageservice?: TelegramMessageService,
-        private mongoDBService?: MongoDBService) { this.client = new WebClient(process.env.SLACK_TOKEN_FEEDBACK);
-        this.channelID = process.env.SLACK_FEEDBACK_CHANNEL_ID;
-        const slackSecret = process.env.SLACK_SECRET_FEEDBACK;
-        this.slackEvent = createEventAdapter(slackSecret); }
+        private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        private telegramMessageservice?: TelegramMessageService) {}
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async handleMessage(message, client) {
@@ -37,6 +37,7 @@ export class SlackMessageService implements platformServiceInterface {
 
     async getMessage(message) {
 
+        this.delayedInitialisation();
         if (!message.challenge) {
 
             // check if message on slack is parent
@@ -47,10 +48,10 @@ export class SlackMessageService implements platformServiceInterface {
             // find the parent message(user) and inform the user about reply
             else {
                 console.log("child message");
-                const data = await this.mongoDBService.mongooseGetData({ "ts": message.event.thread_ts });
-                const contact = data[0].userID;
-                const textToUser = `Our Experts have reponded to your querry. \nYour Query: ${data[0].message} \nExpert: ${message.event.text}`;
-                const channel = data[0].channel;
+                const data = await UserFeedback.findOne({ where: { ts: message.event.thread_ts } });
+                const contact = data.userId;
+                const textToUser = `Our Experts have reponded to your querry. \nYour Query: ${data.message} \nExpert: ${message.event.text}`;
+                const channel = data.channel;
                 if (channel === "telegram"){
                     await this.telegramMessageservice.SendMediaMessage(contact, null, textToUser);
                 }
@@ -84,14 +85,27 @@ export class SlackMessageService implements platformServiceInterface {
     }
 
     async postMessage(response) {
-        let objID = response[response.length - 1]._id;
-        objID = objID.toString();
-        const topic = response[response.length - 1].message;
+        const objID = response[response.length - 1].dataValues.id;
+        const topic = response[response.length - 1].dataValues.message;
+        this.delayedInitialisation();
         const message = await this.client.chat.postMessage({ channel: this.channelID, text: topic });
-        const updatedObject = { $set: { "ts": message.ts } };
-        this.mongoDBService.mongooseUpdateDocument(objID, updatedObject);
+        await UserFeedback.update({ ts: message.ts }, { where: { id: objID } })
+            .then(() => { console.log("updated"); })
+            .catch(error => console.log("error on update", error));
     }
 
+    delayedInitialisation(){
+        if (!this.isInitialised){
+            this.client = new WebClient(this.clientEnvironmentProviderService.getClientEnvironmentVariable("SLACK_TOKEN_FEEDBACK"));
+            this.channelID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("SLACK_FEEDBACK_CHANNEL_ID");
+            const slackSecret = this.clientEnvironmentProviderService.getClientEnvironmentVariable("SLACK_SECRET_FEEDBACK");
+            this.slackEvent = createEventAdapter(slackSecret);
+            this.isInitialised = true;
+
+        }
+        
+    }
+    
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     sendManualMesage(msg: any) {
         throw new Error('Method not implemented.');

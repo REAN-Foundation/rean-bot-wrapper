@@ -77,7 +77,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
             direction       : "In",
             messageBody     : null,
             sessionId       : message.chat.id.toString(),
-            replayPath      : null,
+            replyPath       : null,
             latlong         : null,
             type            : "text"
         };
