@@ -18,27 +18,27 @@ export class UserResponse extends Model {
     @Column({
         type         : DataType.STRING(256)
     })
-    resname: string;
+    direction: string;
 
     @Column({
         type         : DataType.STRING(256)
     })
-    resplatform: string;
+    sessionId: string;
 
     @Column({
         type         : DataType.STRING(256)
     })
-    ressessionId: string;
+    name: string;
 
     @Column({
         type         : DataType.STRING(256)
     })
-    reschat_message_id: string;
+    chat_message_id: string;
 
     @Column({
         type         : DataType.STRING(256)
     })
-    resdirection: string;
+    platform: string;
 
     @Column({
         type         : DataType.STRING(256)
