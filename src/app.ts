@@ -79,7 +79,7 @@ export default class Application {
         } catch (e) {
             console.log(e);
         }
-        console.log("verifying no-to-html version issue because of timing ot not");
+        
     }
 
     dbConnect(){
