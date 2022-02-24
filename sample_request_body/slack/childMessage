@@ -1,0 +1,33 @@
+{
+  token: 'S**********************T',
+  team_id: 'T*********R',
+  api_app_id: 'A*********V',
+  event: {
+    client_msg_id: 'b************1',
+    type: 'message',
+    text: 'testing reply',
+    user: 'U*********R',
+    ts: '1644413824.391979',
+    team: 'T*********R',
+    blocks: [ [Object] ],
+    thread_ts: '1644413105.383489',
+    parent_user_id: 'U*********F',
+    channel: 'C*********K',
+    event_ts: '1644413824.391979',
+    channel_type: 'channel'
+  },
+  type: 'event_callback',
+  event_id: 'E**********U',
+  event_time: 1644413824,
+  authorizations: [
+    {
+      enterprise_id: null,
+      team_id: 'T*********R',
+      user_id: 'U*********F',
+      is_bot: true,
+      is_enterprise_install: false
+    }
+  ],
+  is_ext_shared_channel: false,
+  event_context: ''
+}

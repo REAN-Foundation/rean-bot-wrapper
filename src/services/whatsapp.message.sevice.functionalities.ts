@@ -42,7 +42,10 @@ export class MessageFunctionalities implements getMessageFunctionalities {
             return returnMessage;
         }
         else {
-            throw new Error("Unable to convert the audio file to text");
+            const returnMessage = this.inputMessageFormat(msg);
+            returnMessage.messageBody = " ";
+            returnMessage.type = 'text';
+            return returnMessage;
         }
     }
 

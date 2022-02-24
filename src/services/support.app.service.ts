@@ -24,10 +24,10 @@ export class GetPatientInfoService{
                 if (phoneNumber.length > 10 && phoneNumber.indexOf('-') === -1) {
                     phoneNumber = `${country_code}-${ten_digit}`;
                 }
-
                 const options = getRequestOptions();
+                options.headers["x-api-key"] = clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY");
                 const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
-                const apiUrl = `${ReanBackendBaseUrl}patients/internal/search?phone=${encodeURIComponent(phoneNumber)}`;
+                const apiUrl = `${ReanBackendBaseUrl}patients/search?phone=${encodeURIComponent(phoneNumber)}`;
                 console.log("apiUrl", apiUrl);
                 const response = await needle("get", apiUrl, options);
                 Logger.instance().log(`Response: ${apiUrl}`);
@@ -83,9 +83,10 @@ export class GetPatientInfoService{
             try {
                 Logger.instance().log(`Get MedicationInfo API`);
                 const options = getRequestOptions("rean_app");
+                options.headers["x-api-key"] = clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY");
                 options.headers["authorization"] = `Bearer ${accessToken}`;
                 const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
-                const apiUrl = `${ReanBackendBaseUrl}clinical/medications/current/intetnal/${patientUserId}`;
+                const apiUrl = `${ReanBackendBaseUrl}clinical/medications/current/${patientUserId}`;
 
                 const response = await needle("get", apiUrl, options);
 

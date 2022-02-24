@@ -44,6 +44,7 @@ export class AwsS3manager{
                     console.log('File exists');
                     const fileContent = fs.readFileSync(filePath);
                     var filename = filePath.replace(/^.*[\\/]/, '');
+                    var split_fs = filePath.split('/')[1];
 
                     // Setting up S3 upload parameters
                     const params = {
@@ -52,6 +53,11 @@ export class AwsS3manager{
                         Body          : fileContent,
                         'ContentType' : 'image/jpeg'
                     };
+
+                    if (split_fs === 'audio'){
+                        console.log("Detected as an Audio file");
+                        params.ContentType = 'audio/ogg';
+                    }
 
                     console.log("params");
 
@@ -108,6 +114,28 @@ export class AwsS3manager{
                     reject('');
                 });
         });
+    }
+
+    async getFile (key) {
+        const responseCredentials: any = await this.getCrossAccountCredentials();
+        const BUCKET_NAME = process.env.BUCKET_NAME;
+        const s3 = new AWS.S3(responseCredentials);
+
+        const downloadParams = {
+            Key : key,
+            Bucket : BUCKET_NAME
+        };
+
+        const awsGetFile = await s3.getObject(downloadParams, function (error, data) {
+            if (error) {
+                console.error(error);
+            }
+            
+            return data;
+        }).promise();
+
+        return awsGetFile;
+
     }
 
 }

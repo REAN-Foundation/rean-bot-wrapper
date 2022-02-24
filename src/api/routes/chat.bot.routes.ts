@@ -9,7 +9,7 @@ export class ChatBotRoutes {
 
     register (app: express.Application): void {
 
-        const router = express.Router();
+        const router = express.Router();     
 
         const authenticator = Loader.authenticator;
         const controller = new ChatBotController();
@@ -19,6 +19,7 @@ export class ChatBotRoutes {
         router.post('/intent/fulfill', authenticator.authenticateUser, controller.processIntent);
 
         app.use('/v1/chat-bot', router);
+        
     }
 
 }
