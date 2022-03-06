@@ -11,6 +11,7 @@ import { getRiskAssessmentInfo } from './intentListeners/risk.assessment.info.li
 import { getRiskAssessmentFollowup } from './intentListeners/risk.assessment.followup.listener';
 import { getMedicationInfo } from './intentListeners/support.app.listener';
 import { AppSupportListener } from './intentListeners/app.support.listener';
+import { AppSymptomListener } from './intentListeners/app.symptom.listener';
 import { getGenericpedia, getGenericpediaChemist } from './intentListeners/genericpedia.listener';
 
 /*
@@ -51,27 +52,24 @@ export class IntentRegister {
 
         IntentEmitter.registerListener('SupportApp.GetMedication', getMedicationInfo);
         IntentEmitter.registerListener('BloodGlucose.update', AppSupportListener.handleIntent);
-        IntentEmitter.registerListener('BloodGlucose.AskCreate', AppSupportListener.handleIntent);
         IntentEmitter.registerListener('BloodGlucose.Create', AppSupportListener.handleIntent);
         IntentEmitter.registerListener('BloodPressure.update', AppSupportListener.handleIntent);
         IntentEmitter.registerListener('BloodPressure.Create', AppSupportListener.handleIntent);
-        IntentEmitter.registerListener('BloodPressure.AskCreate', AppSupportListener.handleIntent);
         IntentEmitter.registerListener('BodyHeight.update', AppSupportListener.handleIntent);
         IntentEmitter.registerListener('BodyHeight.Create', AppSupportListener.handleIntent);
-        IntentEmitter.registerListener('BodyHeight.AskCreate', AppSupportListener.handleIntent);
         IntentEmitter.registerListener('Weight.update', AppSupportListener.handleIntent);
         IntentEmitter.registerListener('Weight.Create', AppSupportListener.handleIntent);
-        IntentEmitter.registerListener('Weight.AskCreate', AppSupportListener.handleIntent);
         IntentEmitter.registerListener('BodyTemperature.update', AppSupportListener.handleIntent);
         IntentEmitter.registerListener('BodyTemperature.Create', AppSupportListener.handleIntent);
-        IntentEmitter.registerListener('BodyTemperature.AskCreate', AppSupportListener.handleIntent);
         IntentEmitter.registerListener('BloodOxygenSaturation.update', AppSupportListener.handleIntent);
         IntentEmitter.registerListener('BloodOxygenSaturation.Create', AppSupportListener.handleIntent);
-        IntentEmitter.registerListener('BloodOxygenSaturation.AskCreate', AppSupportListener.handleIntent);
         IntentEmitter.registerListener('Pulse.update', AppSupportListener.handleIntent);
         IntentEmitter.registerListener('Pulse.Create', AppSupportListener.handleIntent);
-        IntentEmitter.registerListener('Pulse.AskCreate', AppSupportListener.handleIntent);
-
+        IntentEmitter.registerListener('HowYouFeel - Better', AppSymptomListener.handleIntent);
+        IntentEmitter.registerListener('HowYouFeel - same', AppSymptomListener.handleIntent);
+        IntentEmitter.registerListener('HowYouFeel - worse', AppSymptomListener.handleIntent);
+        IntentEmitter.registerListener('HowYouFeel - worse - custom', AppSymptomListener.handleIntent);
+    
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
 
