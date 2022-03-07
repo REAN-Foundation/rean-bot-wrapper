@@ -13,7 +13,7 @@ export const howDoFeelWorse2InfoService = async (eventObj) => {
         );
         const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
         const array = eventObj.body.queryResult.parameters.array;
-        console.log('the array given by user///', array)
+        console.log('the array given by user///', array);
 
         if (!phoneNumber) {
             throw new Error('Missing required parameter PhoneNumber ');
@@ -41,14 +41,14 @@ export const howDoFeelWorse2InfoService = async (eventObj) => {
         const resp1 = await needle('post', url, obj, options);
         const assessmentId = resp1.body.Data.SymptomAssessment.id;
 
-        for (let c of array) {
+        for (const c of array) {
             const symptomTypeId = resp.body.Data.SymptomAssessmentTemplate.TemplateSymptomTypes[c - 1].SymptomTypeId;
             const symptom = resp.body.Data.SymptomAssessmentTemplate.TemplateSymptomTypes[c - 1].Symptom;
             console.log(`symptom selected by user ${symptom}`);
             
             //create symptom
-            const url = `${ReanBackendBaseUrl}clinical/symptoms`;
-            const obj = {
+            const url2 = `${ReanBackendBaseUrl}clinical/symptoms`;
+            const obj2 = {
                 PatientUserId  : patientUserId,
                 AssessmentId   : assessmentId,
                 SymptomTypeId  : symptomTypeId,
@@ -58,7 +58,7 @@ export const howDoFeelWorse2InfoService = async (eventObj) => {
                 Interpretation : 1,
             };
             
-            const resp2 = await needle('post', url, obj, options);
+            const resp2 = await needle('post', url2, obj2, options);
             
             if (resp2.statusCode !== 201) {
                 throw new Error('Failed to get response from API.');

@@ -85,8 +85,7 @@ async function postData(apiUrl: string, obj: {
         throw new Error("Failed to get response from API.");
     }
 
-    const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
-    return data;
+    return { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 }
 
 async function getData(eventObj: any) {
