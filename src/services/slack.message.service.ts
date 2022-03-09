@@ -50,13 +50,13 @@ export class SlackMessageService implements platformServiceInterface {
                 console.log("child message");
                 const data = await UserFeedback.findOne({ where: { ts: message.event.thread_ts } });
                 const contact = data.userId;
-                const textToUser = `Our Experts have reponded to your querry. \nYour Query: ${data.message} \nExpert: ${message.event.text}`;
+                const textToUser = `Our Experts have responded to your query. \nYour Query: ${data.message} \nExpert: ${message.event.text}`;
                 const channel = data.channel;
                 if (channel === "telegram"){
-                    await this.telegramMessageservice.SendMediaMessage(contact, null, textToUser);
+                    await this.telegramMessageservice.SendMediaMessage(contact, null, textToUser, "text");
                 }
                 else if (channel === "whatsapp"){
-                    await this.whatsappMessageService.SendMediaMessage(contact.toString(), null, textToUser);
+                    await this.whatsappMessageService.SendMediaMessage(contact.toString(), null, textToUser, "text");
                 }
                 
             }

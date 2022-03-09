@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import AWS from 'aws-sdk';
 
 // import { TempCredentials } from './get.temporary.aws.credentials';
@@ -14,16 +15,16 @@ export class AwsSecretsManager {
             const sts = new AWS.STS();
             const timestamp = (new Date()).getTime();
             const params = {
-                RoleArn : process.env.ROLE_ARN,
+                RoleArn         : process.env.ROLE_ARN,
                 RoleSessionName : `be-descriptibe-here-${timestamp}`
             };
             sts.assumeRole(params, (err, data) => {
                 if (err) reject(err);
                 else {
                     resolve({
-                        accessKeyId : data.Credentials.AccessKeyId,
+                        accessKeyId     : data.Credentials.AccessKeyId,
                         secretAccessKey : data.Credentials.SecretAccessKey,
-                        sessionToken : data.Credentials.SessionToken,
+                        sessionToken    : data.Credentials.SessionToken,
                     });
                 }
             });
@@ -56,6 +57,7 @@ export class AwsSecretsManager {
         //         }
         //     ]
         // };
+        // eslint-disable-next-line init-declarations
         let error: any;
 
         // eslint-disable-next-line max-len
@@ -70,12 +72,14 @@ export class AwsSecretsManager {
 
         // For the list of secrets, get the respective values and store as list of objects
         for (const ele of secretNameList) {
-            // console.log("secretName", ele);
-            const responseSecretValue = await client.getSecretValue({ SecretId: ele }).promise().catch(err => (error = err));
+            // eslint-disable-next-line max-len
+            const responseSecretValue = await client.getSecretValue({ SecretId: ele }).promise()
+                .catch(err => (error = err));
             const secretStringToObj = JSON.parse(responseSecretValue.SecretString);
             secretObjectList.push(secretStringToObj);
         }
 
         return secretObjectList;
     }
+    
 }
