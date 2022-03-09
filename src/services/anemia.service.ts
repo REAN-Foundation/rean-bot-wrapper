@@ -44,9 +44,9 @@ export class AnemiaModel{
         let anemiaResult: string;
         if (messagetoAnemiaModel.type !== "image"){
             // eslint-disable-next-line max-len
-            this.telegramMessageService.SendMediaMessage(messagetoAnemiaModel.sessionId, null, "Hey, I'm  REAN Anemia Detection Bot. Please share an image of your eye conjunctiva similar to the one shown below");
+            this.telegramMessageService.SendMediaMessage(messagetoAnemiaModel.sessionId, null, "Hey, I'm  REAN Anemia Detection Bot. Please share an image of your eye conjunctiva similar to the one shown below",messagetoAnemiaModel.type);
             // eslint-disable-next-line max-len
-            this.telegramMessageService.SendMediaMessage(messagetoAnemiaModel.sessionId, "https://t4.ftcdn.net/jpg/02/52/68/73/240_F_252687355_x6qCu70kdEjb1RRygVreCZXslqq7EDi1.jpg","Instructions: \n 1. Gently pull your lower eyelid  with your index finger. \n 2. Try focusing the camera on the conjunctiva region and take a picture under good lighting.");
+            this.telegramMessageService.SendMediaMessage(messagetoAnemiaModel.sessionId, "https://t4.ftcdn.net/jpg/02/52/68/73/240_F_252687355_x6qCu70kdEjb1RRygVreCZXslqq7EDi1.jpg","Instructions: \n 1. Gently pull your lower eyelid  with your index finger. \n 2. Try focusing the camera on the conjunctiva region and take a picture under good lighting.", messagetoAnemiaModel.type);
             return;
         }
         else {
@@ -60,7 +60,8 @@ export class AnemiaModel{
                 anemiaResult = "Result not found";
             }
         }
-        return this.telegramMessageService.SendMediaMessage(messagetoAnemiaModel.sessionId, null, anemiaResult);
+        // eslint-disable-next-line max-len
+        return this.telegramMessageService.SendMediaMessage(messagetoAnemiaModel.sessionId, null, anemiaResult, messagetoAnemiaModel.type);
 
     }
 

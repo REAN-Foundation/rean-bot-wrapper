@@ -10,6 +10,7 @@ import { TelegramMessageServiceFunctionalities } from '../services/telegram.mess
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import needle from 'needle';
 
 @autoInjectable()
 @singleton()
@@ -125,13 +126,26 @@ export class TelegramMessageService implements platformServiceInterface{
         return response_message;
     }
 
-    SendMediaMessage = async (contact, imageLink = null, message) => {
+    SendMediaMessage = async (contact, imageLink = null, message, messageType) => {
         message = this.sanitizeMessage(message);
         return new Promise((resolve) => {
 
             if (imageLink === null){
                 this._telegram.sendMessage(contact, message, { parse_mode: 'HTML' }).then(function (data) {
                     resolve(data);
+                });
+            }
+            else if (messageType === "voice") {
+                var data = {
+                    chat_id : contact,
+                    voice   : imageLink
+                };
+                const botToken = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN");
+                const channelUrl = `https://api.telegram.org/bot${botToken}/sendVoice`;
+                needle.post(channelUrl, data, function(err, resp, body) {
+                    if (err) {
+                        console.log("error", err);
+                    }
                 });
             }
             else this._telegram.sendPhoto(
