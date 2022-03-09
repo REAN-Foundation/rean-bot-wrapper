@@ -186,7 +186,7 @@ export class platformMessageService implements platformServiceInterface {
             'type'           : null
         };
         return postData;
-    }
+    };
 
     async postRequestMessages(postdata) {
         return new Promise(async(resolve,reject) =>{
@@ -196,7 +196,7 @@ export class platformMessageService implements platformServiceInterface {
                 options.headers['D360-Api-Key'] = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY");
                 const hostname = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST");
                 const path = '/v1/messages';
-                const apiUrl = "https://"+ hostname + path;
+                const apiUrl = "https://" + hostname + path;
                 console.log("apiuri",apiUrl);
                 await needle.post(apiUrl, postdata, options, function(err, resp) {
                     if (err) {

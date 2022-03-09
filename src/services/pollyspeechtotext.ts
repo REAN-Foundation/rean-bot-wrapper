@@ -11,7 +11,7 @@ export class AWSPolly {
     constructor(private awsS3manager?: AwsS3manager) {}
 
     async texttoSpeech(text) {
-        return new Promise<string>(async (resolve, reject) => {
+        return new Promise<string>(async (resolve) => {
             const responseCredentials: any = await this.awsS3manager.getCrossAccountCredentials();
             const credObj = {
                 region          : process.env.region,
@@ -34,7 +34,7 @@ export class AWSPolly {
     }
 
     async callPolly(credObj, input) {
-        return new Promise<any>(async (resolve, reject) => {
+        return new Promise<any>(async (resolve) => {
             try {
                 const randomString = crypto.randomBytes(16).toString('hex');
                 console.log(randomString);
@@ -102,5 +102,5 @@ export class AWSPolly {
             }
         });
     }
+    
 }
-

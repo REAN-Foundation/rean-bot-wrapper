@@ -1,7 +1,7 @@
+/* eslint-disable init-declarations */
 import { message } from '../refactor/interface/message.interface';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { autoInjectable } from 'tsyringe';
-import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { TelegramMessageService } from './telegram.message.service';
 import needle from "needle";
@@ -18,6 +18,7 @@ export class AnemiaModel{
         private telegramMessageService?: TelegramMessageService) {
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async get_put_AnemiaResult (msg, channel) {
         console.log("entered the get_put_AnemiaResult");
         const messagetoAnemiaModel: message = await this.telegramMessageService.getMessage(msg);

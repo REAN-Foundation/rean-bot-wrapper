@@ -142,6 +142,7 @@ export class TelegramMessageService implements platformServiceInterface{
                 };
                 const botToken = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN");
                 const channelUrl = `https://api.telegram.org/bot${botToken}/sendVoice`;
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 needle.post(channelUrl, data, function(err, resp, body) {
                     if (err) {
                         console.log("error", err);

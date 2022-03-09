@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import AWS from 'aws-sdk';
 
 // import { TempCredentials } from './get.temporary.aws.credentials';
@@ -56,6 +57,7 @@ export class AwsSecretsManager {
         //         }
         //     ]
         // };
+        // eslint-disable-next-line init-declarations
         let error: any;
 
         // eslint-disable-next-line max-len
@@ -70,12 +72,14 @@ export class AwsSecretsManager {
 
         // For the list of secrets, get the respective values and store as list of objects
         for (const ele of secretNameList) {
-            // console.log("secretName", ele);
-            const responseSecretValue = await client.getSecretValue({ SecretId: ele }).promise().catch(err => (error = err));
+            // eslint-disable-next-line max-len
+            const responseSecretValue = await client.getSecretValue({ SecretId: ele }).promise()
+                .catch(err => (error = err));
             const secretStringToObj = JSON.parse(responseSecretValue.SecretString);
             secretObjectList.push(secretStringToObj);
         }
 
         return secretObjectList;
     }
+    
 }
