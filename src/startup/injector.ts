@@ -3,7 +3,7 @@ import { DependencyContainer } from 'tsyringe';
 import { AuthInjector } from '../auth/auth.injector';
 import { platformMessageService } from '../services/whatsapp.message.service';
 import { TelegramMessageService as telegramPlatformservice } from '../services/telegram.message.service';
-import { TelegramAnemiaMessageService as telegramAnemiaPlatformservice } from '../services/telegram.message.service.anemia';
+// import { TelegramAnemiaMessageService as telegramAnemiaPlatformservice } from '../services/telegram.message.service.anemia';
 import { platformMessageService as rean_SUPPORT_Platformservice } from '../services/app.support.service';
 import { TelegramAuthenticator } from '../services/clientAuthenticator/telegram.authenticator';
 import { WhatsappAuthenticator } from '../services/clientAuthenticator/whatsapp.authenticator';
@@ -21,7 +21,7 @@ export class Injector {
         //client injector
         container.register('whatsapp', platformMessageService);
         container.register('telegram', telegramPlatformservice);
-        container.register('anemiaTelegram', telegramAnemiaPlatformservice);
+        // container.register('anemiaTelegram', telegramAnemiaPlatformservice);
         container.register('REAN_SUPPORT', rean_SUPPORT_Platformservice);
         container.register('slack', SlackMessageService);
         container.register('telegram.authenticator', TelegramAuthenticator);
