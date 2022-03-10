@@ -21,7 +21,7 @@ export class Speechtotext {
 
     private obj_gcp = {
         credentials : this.GCPCredentials,
-        projectId : this.GCPCredentials.project_id
+        projectId   : this.GCPCredentials.project_id
     };
 
     async SendSpeechRequest(fileUrl, chatServiceName) {
@@ -51,8 +51,8 @@ export class Speechtotext {
                 try {
                     const environment = {
                         'DEVELOPMENT' : 'dev',
-                        'UAT' : 'uat',
-                        'PROD' : 'prod'
+                        'UAT'         : 'uat',
+                        'PROD'        : 'prod'
                     };
 
                     const client = new speech.SpeechClient(obj);
@@ -69,14 +69,14 @@ export class Speechtotext {
                     };
 
                     const config = {
-                        encoding : "OGG_OPUS",
-                        sampleRateHertz : 16000,
-                        languageCode : 'en-US',
+                        encoding                            : "OGG_OPUS",
+                        sampleRateHertz                     : 16000,
+                        languageCode                        : 'en-US',
                         enableSeparateRecognitionPerChannel : true,
                     };
                     let request = {};
                     request = {
-                        audio : audio,
+                        audio  : audio,
                         config : config,
                     };
 
