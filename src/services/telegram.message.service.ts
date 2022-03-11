@@ -58,7 +58,7 @@ export class TelegramMessageService implements platformServiceInterface{
     }
 
     getMessage = async (message) =>{
-        console.log("enter the getMessage of telegram", message);
+        console.log("enter the getMessage of telegram");
 
         if (message.text) {
             return await this.telegramMessageServiceFunctionalities.textMessageFormat(message);

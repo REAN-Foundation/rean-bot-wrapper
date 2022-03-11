@@ -261,6 +261,9 @@ export class platformMessageService implements platformServiceInterface {
         else if (msg.messages[0].type === "voice") {
             return await this.messageFunctionalities.voiceMessageFormat(msg);
         }
+        else if (msg.messages[0].type === "image") {
+            return await this.messageFunctionalities.imageMessaegFormat(msg);
+        }
         else {
             throw new Error("Message is neither text, voice nor location");
         }

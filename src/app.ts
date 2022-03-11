@@ -90,15 +90,18 @@ export default class Application {
         // eslint-disable-next-line max-len
         const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
         const telegram: platformServiceInterface = container.resolve('telegram');
-        const anemiaTelegram: platformServiceInterface = container.resolve('anemiaTelegram');
         const whatsapp: platformServiceInterface = container.resolve('whatsapp');
         for (const clientName of this.clientsList) {
             clientEnvironmentProviderService.setClientName(clientName);
             if (clientName === "NSMI"){
                 telegram.setWebhook(clientName);
+            } else if (clientName === "UNION"){
+                telegram.setWebhook(clientName);
             }
+            
+            // this condition will be removed after container task definition is updated
             else if (clientName === "ANEMIA"){
-                anemiaTelegram.setWebhook(clientName);
+                console.log("Anemia is not a separate client anymore");
             }
             else {
                 telegram.setWebhook(clientName);
