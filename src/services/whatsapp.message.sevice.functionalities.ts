@@ -3,8 +3,6 @@ import http from  'https';
 import fs from 'fs';
 import { message } from '../refactor/interface/message.interface';
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
-
-// import { platformMessageService } from './whatsapp.message.service';
 import { Speechtotext } from './speech.to.text.service';
 import { autoInjectable } from "tsyringe";
 import { EmojiFilter } from './filter.message.for.emoji.service';
@@ -54,6 +52,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
     async imageMessaegFormat(msg) {
         let response: any = {};
         response = await this.GetWhatsappMedia('photo', msg.messages[0].image.id, '.jpg');
+        console.log("response from GetWhatsappMedia", response);
         const location = await this.awsS3manager.uploadFile(response);
         console.log("response image whatsapp", response);
         if (response){

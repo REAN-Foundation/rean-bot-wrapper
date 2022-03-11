@@ -8,7 +8,6 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 import { AwsS3manager } from "./aws.file.upload.service";
 import path, { resolve } from 'path';
 import fs from 'fs';
-import needle from 'needle';
 
 @autoInjectable()
 export class TelegramMessageServiceFunctionalities implements getMessageFunctionalities{
