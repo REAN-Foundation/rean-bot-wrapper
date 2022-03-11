@@ -98,6 +98,11 @@ export default class Application {
             } else if (clientName === "UNION"){
                 telegram.setWebhook(clientName);
             }
+            
+            // this condition will be removed after container task definition is updated
+            else if (clientName === "ANEMIA"){
+                console.log("Anemia is not a separate client anymore");
+            }
             else {
                 telegram.setWebhook(clientName);
                 whatsapp.setWebhook(clientName);
