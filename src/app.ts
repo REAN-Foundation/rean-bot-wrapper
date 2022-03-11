@@ -95,6 +95,8 @@ export default class Application {
             clientEnvironmentProviderService.setClientName(clientName);
             if (clientName === "NSMI"){
                 telegram.setWebhook(clientName);
+            } else if (clientName === "UNION"){
+                telegram.setWebhook(clientName);
             }
             else {
                 telegram.setWebhook(clientName);
