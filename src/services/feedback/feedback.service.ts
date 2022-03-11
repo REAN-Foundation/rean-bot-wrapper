@@ -18,7 +18,7 @@ export class FeedbackService implements feedbackInterface {
         for (let i = 0; i < 3; i++) {
             initialThreeLettersOfIntent += intent.charAt(i);
         }
-        if (initialThreeLettersOfIntent === "QID" || initialThreeLettersOfIntent === "nsm" || initialThreeLettersOfIntent === "Kno") {
+        if (initialThreeLettersOfIntent === "QID" || initialThreeLettersOfIntent === "nsm" || initialThreeLettersOfIntent === "FAQ") {
 
             const saveMessage = message.messageBody;
             const sessionId = message.sessionId;

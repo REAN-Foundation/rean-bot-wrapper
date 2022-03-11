@@ -99,6 +99,8 @@ export default class Application {
             }
             else if (clientName === "ANEMIA"){
                 anemiaTelegram.setWebhook(clientName);
+            } else if (clientName === "UNION"){
+                telegram.setWebhook(clientName);
             }
             else {
                 telegram.setWebhook(clientName);
