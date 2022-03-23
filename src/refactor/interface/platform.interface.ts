@@ -8,9 +8,8 @@ export interface platformServiceInterface{
     setWebhook(client);
     postResponse(messagetoDialogflow: message, process_raw_dialogflow:any);
     // eslint-disable-next-line max-len
-    SendMediaMessage(SmessagetoDialogflow_sessionId: string, response_format_messageBody: string,response_format_messageText:string );
+    SendMediaMessage(messagetoDialogflow_sessionId: string, response_format_messageBody: string,response_format_messageText:string, messageType: string );
     set res(res);
     createFinalMessageFromHumanhandOver(requestBody:any);
-    // emojiUnicode (emoji);
 
 }

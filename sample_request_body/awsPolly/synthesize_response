@@ -1,0 +1,16 @@
+SynthesisTask: {
+    Engine: 'standard',
+    TaskId: 'd4***********d',
+    TaskStatus: 'scheduled',
+    TaskStatusReason: null,
+    OutputUri: 'https: //s3.****.amazonaws.com/***.ogg',
+    CreationTime: 2022-03-04T05: 16: 41.007Z,
+    RequestCharacters: 71,
+    SnsTopicArn: null,
+    OutputFormat: 'ogg_vorbis',
+    SampleRate: null,
+    TextType: 'text',
+    VoiceId: 'Joanna',
+    LanguageCode: null
+}
+}

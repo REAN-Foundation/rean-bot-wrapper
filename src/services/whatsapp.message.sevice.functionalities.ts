@@ -3,17 +3,17 @@ import http from  'https';
 import fs from 'fs';
 import { message } from '../refactor/interface/message.interface';
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
-
-// import { platformMessageService } from './whatsapp.message.service';
 import { Speechtotext } from './speech.to.text.service';
 import { autoInjectable } from "tsyringe";
 import { EmojiFilter } from './filter.message.for.emoji.service';
+import { AwsS3manager } from "./aws.file.upload.service";
 
 @autoInjectable()
 export class MessageFunctionalities implements getMessageFunctionalities {
 
     constructor(private emojiFilter?: EmojiFilter,
         private speechtotext?: Speechtotext,
+        private awsS3manager?: AwsS3manager,
         private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     async textMessageFormat (msg) {
@@ -33,7 +33,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
     }
 
     async voiceMessageFormat (msg) {
-        const mediaUrl = await this.GetWhatsappMedia(msg.messages[0].voice.id);
+        const mediaUrl = await this.GetWhatsappMedia('audio', msg.messages[0].voice.id, '_voice.ogg');
         const ConvertedToText = await this.speechtotext.SendSpeechRequest(mediaUrl, "whatsapp");
         if (ConvertedToText) {
             const returnMessage = this.inputMessageFormat(msg);
@@ -49,8 +49,25 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         }
     }
 
+    async imageMessaegFormat(msg) {
+        let response: any = {};
+        response = await this.GetWhatsappMedia('photo', msg.messages[0].image.id, '.jpg');
+        console.log("response from GetWhatsappMedia", response);
+        const location = await this.awsS3manager.uploadFile(response);
+        console.log("response image whatsapp", response);
+        if (response){
+            const returnMessage = this.inputMessageFormat(msg);
+            returnMessage.type = 'image';
+            returnMessage.messageBody = location;
+            return returnMessage;
+        } else {
+            throw new Error("Unable to find the image file path");
+        }
+        
+    }
+
     /*retrive whatsapp media */
-    GetWhatsappMedia = async (mediaId) => {
+    GetWhatsappMedia = async (type, mediaId, extension) => {
         return new Promise((resolve, reject) => {
             const options = {
                 hostname : this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST"),
@@ -64,7 +81,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
 
             const request = http.request(options, (response) => {
                 response.on('data', (chunk) => {
-                    const file_name = 'audio/' + Date.now() + '_voice.ogg';
+                    const file_name = `${type}/` + Date.now() + `${extension}`;
                     fs.writeFile('./' + file_name, chunk, err => {
                         if (err) {
                             reject(err);
@@ -91,7 +108,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
             direction       : "In",
             messageBody     : null,
             sessionId       : message.contacts[0].wa_id,
-            replayPath      : null,
+            replyPath       : null,
             latlong         : null,
             type            : "text"
         };
@@ -99,5 +116,3 @@ export class MessageFunctionalities implements getMessageFunctionalities {
     }
 
 }
-
-// @inject(delay(() => platformMessageService) ) public platformMessageService,

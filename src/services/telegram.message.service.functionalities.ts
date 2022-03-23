@@ -5,12 +5,16 @@ import { EmojiFilter } from './filter.message.for.emoji.service';
 import { Speechtotext } from './speech.to.text.service';
 import { autoInjectable } from "tsyringe";
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { AwsS3manager } from "./aws.file.upload.service";
+import path, { resolve } from 'path';
+import fs from 'fs';
 
 @autoInjectable()
 export class TelegramMessageServiceFunctionalities implements getMessageFunctionalities{
 
     constructor(private emojiFilter?: EmojiFilter,
         private speechtotext?: Speechtotext,
+        private awsS3manager?: AwsS3manager,
         private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     async textMessageFormat(message) {
@@ -58,9 +62,13 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         response = await this.GetTelegramMedia(message.photo[3].file_id);
         console.log("response image get telegram", response);
         if (response.result.file_path){
+            const filePath = await this.downloadTelegramMedia('https://api.telegram.org/file/bot' + this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN") + '/' + response.result.file_path, "photo");
+            const location = await this.awsS3manager.uploadFile(filePath);
             const returnMessage = this.inputMessageFormat(message);
+            console.log("location image in S3", location);
             returnMessage.type = 'image';
-            returnMessage.messageBody = response.result.file_path;
+            returnMessage.messageBody = location;
+            console.log("return message", returnMessage);
             return returnMessage;
         } else {
             throw new Error("Unable to find the image file path");
@@ -77,7 +85,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
             direction       : "In",
             messageBody     : null,
             sessionId       : message.chat.id.toString(),
-            replayPath      : null,
+            replyPath       : null,
             latlong         : null,
             type            : "text"
         };
@@ -106,5 +114,26 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
             req.end();
         });
     };
+
+    async downloadTelegramMedia(fileUrl, media) {
+        return new Promise<string>((resolve) => {
+            http.get(fileUrl, async(res) => {
+                    
+                //add time stamp - pending
+                const filename = path.basename(fileUrl);
+                console.log("filename", filename);
+    
+                // Audio file will be stored at this path
+                const uploadpath = `./${media}/` + filename;
+                console.log("uploadpath", uploadpath);
+    
+                const filePath = fs.createWriteStream(uploadpath);
+                res.pipe(filePath);
+    
+                // const awsFile = await this.awss3manager.uploadFile(uploadpath);
+                resolve(uploadpath);
+            });
+        });  
+    }
 
 }

@@ -4,6 +4,7 @@ import { autoInjectable, delay, inject } from 'tsyringe';
 import { MessageFlow } from '../get.put.message.flow.service';
 import { MongoDBService } from '../mongodb.service';
 import { SlackMessageService } from '../slack.message.service';
+import { UserFeedback } from '../../models/user.feedback.model';
 
 @autoInjectable()
 export class FeedbackService implements feedbackInterface {
@@ -17,17 +18,16 @@ export class FeedbackService implements feedbackInterface {
         for (let i = 0; i < 3; i++) {
             initialThreeLettersOfIntent += intent.charAt(i);
         }
-        if (initialThreeLettersOfIntent === "QID") {
+        if (initialThreeLettersOfIntent === "QID" || initialThreeLettersOfIntent === "nsm" || initialThreeLettersOfIntent === "FAQ") {
 
             const saveMessage = message.messageBody;
             const sessionId = message.sessionId;
-            this.mongoDBService.mongooseSaveData(sessionId, saveMessage, channel);
-
-            // let message_to_platform = this.sendFeedback(intent,sessionId, platformMessageService);
+            const feedBackInfo = new UserFeedback({ userId: sessionId, message: saveMessage, channel: channel });
+            await feedBackInfo.save();
             return this.triggerFeedbackIntent(message, channel, platformMessageService);
         }
         if (intent === "Feedback - Negative"){
-            const response = await this.mongoDBService.mongooseGetData({ "userID": message.sessionId });
+            const response = await UserFeedback.findAll({ where: { userId: message.sessionId } });
             await this.slackMessageService.postMessage(response);
         }
     }

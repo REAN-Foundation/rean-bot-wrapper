@@ -11,16 +11,16 @@ export class AwsS3manager{
             const sts = new AWS.STS();
             const timestamp = (new Date()).getTime();
             const params = {
-                RoleArn   : process.env.ROLE_ARN,
+                RoleArn         : process.env.ROLE_ARN,
                 RoleSessionName : `be-descriptibe-here-${timestamp}`
             };
             sts.assumeRole(params, (err, data) => {
                 if (err) reject(err);
                 else {
                     resolve({
-                        accessKeyId   : data.Credentials.AccessKeyId,
+                        accessKeyId     : data.Credentials.AccessKeyId,
                         secretAccessKey : data.Credentials.SecretAccessKey,
-                        sessionToken   : data.Credentials.SessionToken,
+                        sessionToken    : data.Credentials.SessionToken,
                     });
                 }
             });
@@ -33,10 +33,8 @@ export class AwsS3manager{
         const cloudFrontPath = process.env.CLOUD_FRONT_PATH;
         const cloudFrontPathSplit = cloudFrontPath.split("/");
 
-        // const BUCKET_NAME = "duploservices-dev-reanbot-documents-167414264568";
-
         console.log('FILE UPLOAD STARTING', BUCKET_NAME);
-        return new Promise(async (resolve, reject) => {
+        return new Promise<string>(async (resolve, reject) => {
 
             // Read content from the file
             fs.stat(filePath, function (err) {
@@ -45,11 +43,12 @@ export class AwsS3manager{
                     const fileContent = fs.readFileSync(filePath);
                     var filename = filePath.replace(/^.*[\\/]/, '');
                     var split_fs = filePath.split('/')[1];
+                    console.log("filename", filename + split_fs);
 
                     // Setting up S3 upload parameters
                     const params = {
-                        Bucket         : BUCKET_NAME,
-                        Key            : cloudFrontPathSplit[3] + '/' + filename , // File name you want to save as in S3
+                        Bucket        : BUCKET_NAME,
+                        Key           : cloudFrontPathSplit[3] + '/' + filename , // File name you want to save as in S3
                         Body          : fileContent,
                         'ContentType' : 'image/jpeg'
                     };
@@ -122,7 +121,7 @@ export class AwsS3manager{
         const s3 = new AWS.S3(responseCredentials);
 
         const downloadParams = {
-            Key : key,
+            Key    : key,
             Bucket : BUCKET_NAME
         };
 

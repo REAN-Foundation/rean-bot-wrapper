@@ -10,6 +10,7 @@ import { TelegramMessageServiceFunctionalities } from '../services/telegram.mess
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import needle from 'needle';
 
 @autoInjectable()
 @singleton()
@@ -53,11 +54,11 @@ export class TelegramMessageService implements platformServiceInterface{
         this._telegram.setWebHook(webhookUrl);
 
         // console.log("url tele",webhookUrl)
-        console.log("Telegram webhook set," );
+        console.log("Telegram webhook set");
     }
 
     getMessage = async (message) =>{
-        console.log("enter the getMessage of telegram", message);
+        console.log("enter the getMessage of telegram");
 
         if (message.text) {
             return await this.telegramMessageServiceFunctionalities.textMessageFormat(message);
@@ -84,7 +85,7 @@ export class TelegramMessageService implements platformServiceInterface{
         const intent = processedResponse.message_from_dialoglow.result && processedResponse.message_from_dialoglow.result.intent ? processedResponse.message_from_dialoglow.result.intent.displayName : '';
 
         if (processedResponse.message_from_dialoglow.image && processedResponse.message_from_dialoglow.image.url) {
-            reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",raw_response_object: raw_response_object,intent: intent,messageBody: processedResponse.message_from_dialoglow.image.url, messageImageUrl: processedResponse.message_from_dialoglow.image.url , messageImageCaption: processedResponse.message_from_dialoglow.image, sessionId: telegram_id, messageText: processedResponse.processed_message[0] };
+            reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",raw_response_object: raw_response_object,intent: intent,messageBody: processedResponse.message_from_dialoglow.image.url, messageImageUrl: processedResponse.message_from_dialoglow.image.url , messageImageCaption: processedResponse.message_from_dialoglow.image.caption, sessionId: telegram_id, messageText: processedResponse.processed_message[0] };
         }
         else if (processedResponse.processed_message.length > 1) {
 
@@ -125,13 +126,27 @@ export class TelegramMessageService implements platformServiceInterface{
         return response_message;
     }
 
-    SendMediaMessage = async (contact, imageLink = null, message) => {
+    SendMediaMessage = async (contact, imageLink = null, message, messageType) => {
         message = this.sanitizeMessage(message);
         return new Promise((resolve) => {
 
             if (imageLink === null){
                 this._telegram.sendMessage(contact, message, { parse_mode: 'HTML' }).then(function (data) {
                     resolve(data);
+                });
+            }
+            else if (messageType === "voice") {
+                var data = {
+                    chat_id : contact,
+                    voice   : imageLink
+                };
+                const botToken = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN");
+                const channelUrl = `https://api.telegram.org/bot${botToken}/sendVoice`;
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                needle.post(channelUrl, data, function(err, resp, body) {
+                    if (err) {
+                        console.log("error", err);
+                    }
                 });
             }
             else this._telegram.sendPhoto(

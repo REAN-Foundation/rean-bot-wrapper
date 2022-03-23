@@ -73,7 +73,7 @@ export class ChatBotController {
         IntentEmitter.emit('IntentFulfillment:Success', intent);
 
         return this.responseHandler.sendSuccessResponse(response, 200, 'Intent fulfilled successfully.', fulfillmentResponse);
-        
+
     };
 
 }
