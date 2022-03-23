@@ -1,7 +1,9 @@
-import dialogflow from '@google-cloud/dialogflow';
+/* eslint-disable @typescript-eslint/no-var-requires */
 import { v4 } from 'uuid';
 import { injectable } from 'tsyringe';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+let dialogflow = require('@google-cloud/dialogflow');
+const dialogflowv2 = require('@google-cloud/dialogflow').v2beta1;
 
 @injectable()
 export class DialogflowResponseService {
@@ -10,6 +12,11 @@ export class DialogflowResponseService {
 
     getDialogflowMessage = async (message, userSessionId = null, platform = null) => {
         try {
+
+            const env_name = this.clientEnvironment.getClientEnvironmentVariable("NAME");
+            if (env_name === "UNION"){
+                dialogflow = dialogflowv2;
+            }
 
             // set default values
             let responseMessage = { text: [], parse_mode: false, image: { url: '', caption: '' } };

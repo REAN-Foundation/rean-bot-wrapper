@@ -40,7 +40,7 @@ export const howDoFeelWorse2InfoService = async (eventObj) => {
         };
         const resp1 = await needle('post', url, obj, options);
         const assessmentId = resp1.body.Data.SymptomAssessment.id;
-
+      
         const dict = new Map<string, number>();
         const array = ['tingling','weight gain','swelling','frequent urination','extreme thirst',
         'nausea','extreme fatigue','pain','cough','shortness of breath','dizziness','trouble sleeping'];
@@ -76,7 +76,7 @@ export const howDoFeelWorse2InfoService = async (eventObj) => {
                 throw new Error('Failed to get response from API.');
             }
         }
-
+      
         const dffMessage = `Your symptoms recorded successfully, Do you have any other complications?`;
 
         return { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } };
