@@ -72,7 +72,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('HowYouFeel - same', AppSymptomListener.handleIntent);
         IntentEmitter.registerListener('HowYouFeel - worse', AppSymptomListener.handleIntent);
         IntentEmitter.registerListener('HowYouFeel - worse - custom', AppSymptomListener.handleIntent);
-    
+      
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
 

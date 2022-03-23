@@ -38,6 +38,7 @@ export class SlackMessageService implements platformServiceInterface {
     async getMessage(message) {
 
         this.delayedInitialisation();
+
         if (!message.challenge) {
 
             // check if message on slack is parent
