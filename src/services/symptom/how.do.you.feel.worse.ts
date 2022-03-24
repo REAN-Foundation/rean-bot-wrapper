@@ -26,34 +26,35 @@ export const howDoFeelWorse2InfoService = async (eventObj) => {
         const options = getHeaders(accessToken);
         const ReanBackendBaseUrl =
             clientEnvironmentProviderService.getClientEnvironmentVariable('REAN_APP_BACKEND_BASE_URL');
-        let url = `${ReanBackendBaseUrl}clinical/symptom-assessment-templates/7cc55f8a-3b68-407f-a660-b3dbffd11875`;
+        let url = `${ReanBackendBaseUrl}clinical/symptom-assessment-templates/search?title=heart`;
 
         const resp = await needle('get', url, options);
-        
+        const assessmentTemplateId = resp.body.Data.SymptomAssessmentTemplates.Items[0].id;
+
         //create symptom assessment for patient
         url = `${ReanBackendBaseUrl}clinical/symptom-assessments`;
         const obj = {
             PatientUserId        : patientUserId,
-            AssessmentTemplateId : '7cc55f8a-3b68-407f-a660-b3dbffd11875',
+            AssessmentTemplateId : assessmentTemplateId,
             AssessmentDate       : Date(),
-            Title                : '7cc55f8a-3b68-407f-a660-b3dbffd11875',
+            Title                : assessmentTemplateId,
         };
         const resp1 = await needle('post', url, obj, options);
         const assessmentId = resp1.body.Data.SymptomAssessment.id;
       
         const dict = new Map<string, number>();
         const array = ['tingling','weight gain','swelling','frequent urination','extreme thirst',
-        'nausea','extreme fatigue','pain','cough','shortness of breath','dizziness','trouble sleeping'];
+            'nausea','extreme fatigue','pain','cough','shortness of breath','dizziness','trouble sleeping'];
         let i = 1;
-        for (let c of array) {
-            dict.set(c, i)
-            i= i+1;
+        for (const word of array) {
+            dict.set(word, i);
+            i = i + 1;
         }
 
-        for (let c of symptomList) {
-            const a = dict.get(c);
-            const symptomTypeId = resp.body.Data.SymptomAssessmentTemplate.TemplateSymptomTypes[a - 1].SymptomTypeId;
-            console.log(`symptom selected by user ${c}`);
+        for (const symptom of symptomList) {
+            const a = dict.get(symptom);
+            const symptomTypeId = resp.body.Data.SymptomAssessmentTemplates.
+                Items[0].TemplateSymptomTypes[a-1].SymptomTypeId;
             
             //create symptom
             const url = `${ReanBackendBaseUrl}clinical/symptoms`;
@@ -66,9 +67,9 @@ export const howDoFeelWorse2InfoService = async (eventObj) => {
                 Status         : -1,
                 Interpretation : 1,
             };
-            if (state == 'better') {
-                obj.Severity = 1,
-                obj.Status = 1
+            if (state === 'better') {
+                obj.Severity = 1;
+                obj.Status = 1;
             }
             const resp2 = await needle('post', url, obj, options);
             
@@ -76,8 +77,8 @@ export const howDoFeelWorse2InfoService = async (eventObj) => {
                 throw new Error('Failed to get response from API.');
             }
         }
-      
-        const dffMessage = `Your symptoms recorded successfully, Do you have any other complications?`;
+
+        const dffMessage = `Your symptoms recorded successfully, Do you have other symptoms?`;
 
         return { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } };
     } else {
