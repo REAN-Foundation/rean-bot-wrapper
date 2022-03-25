@@ -54,11 +54,11 @@ export const howDoFeelWorse2InfoService = async (eventObj) => {
         for (const symptom of symptomList) {
             const a = dict.get(symptom);
             const symptomTypeId = resp.body.Data.SymptomAssessmentTemplates.
-                Items[0].TemplateSymptomTypes[a-1].SymptomTypeId;
+                Items[0].TemplateSymptomTypes[a - 1].SymptomTypeId;
             
             //create symptom
-            const url = `${ReanBackendBaseUrl}clinical/symptoms`;
-            const obj = {
+            url = `${ReanBackendBaseUrl}clinical/symptoms`;
+            const obj1 = {
                 PatientUserId  : patientUserId,
                 AssessmentId   : assessmentId,
                 SymptomTypeId  : symptomTypeId,
@@ -68,10 +68,10 @@ export const howDoFeelWorse2InfoService = async (eventObj) => {
                 Interpretation : 1,
             };
             if (state === 'better') {
-                obj.Severity = 1;
-                obj.Status = 1;
+                obj1.Severity = 1;
+                obj1.Status = 1;
             }
-            const resp2 = await needle('post', url, obj, options);
+            const resp2 = await needle('post', url, obj1, options);
             
             if (resp2.statusCode !== 201) {
                 throw new Error('Failed to get response from API.');
