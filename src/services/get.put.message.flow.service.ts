@@ -57,8 +57,6 @@ export class MessageFlow{
                 platformMessageService.SendMediaMessage(messagetoDialogflow.sessionId,null,messageToPlatform,response_format.message_type);
             }
             else {
-                message_to_platform = this._feedbackService.checkIntentAndSendFeedback(intent,messagetoDialogflow,channel, platformMessageService);
-
                 message_to_platform = await platformMessageService.SendMediaMessage(messagetoDialogflow.sessionId, response_format.messageBody,response_format.messageText, response_format.message_type);
 
                 // console.log("the message to platform is", message_to_platform);
