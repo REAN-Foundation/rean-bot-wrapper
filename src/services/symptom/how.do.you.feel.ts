@@ -55,20 +55,9 @@ export const howDoFeelWorseInfoService = async (eventObj) => {
             "Feeling"       : -1,
             "RecordDate"    : Date()
         };
-        const dffMessage = `Type the options which you were facing, example- 3,4,8.
-        1. Tingling or Numbness in feet.
-        2. Sudden weight gain in last 24 hours
-        3. Increased swelling of legs, feet or ankles
-        4. Frequent urination
-        5. Extreme thirst
-        6. Discomfort in abdomen or nausea
-        7. Extreme fatigue
-        8. Chest pain or pain in jaw, shoulder or arm
-        9. Dry or frequent hacking cough
-        10. Shortness of breath
-        11. Dizziness or loss of consciousness
-        12. Trouble Sleeping.`;
-
+      
+        const dffMessage = `Please tell me about your symptoms.`;
+        
         const data = await postData(apiUrl, obj, options, dffMessage);
 
         return { sendDff: true, message: data };

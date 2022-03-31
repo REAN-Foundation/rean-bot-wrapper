@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { getMessageFunctionalities } from "../refactor/interface/message.service.functionalities.interface";
 import http from  'https';
 import fs from 'fs';
@@ -54,7 +55,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         response = await this.GetWhatsappMedia('photo', msg.messages[0].image.id, '.jpg');
         console.log("response from GetWhatsappMedia", response);
         const location = await this.awsS3manager.uploadFile(response);
-        console.log("response image whatsapp", response);
+        console.log("response image whatsapp", location);
         if (response){
             const returnMessage = this.inputMessageFormat(msg);
             returnMessage.type = 'image';
@@ -79,24 +80,39 @@ export class MessageFunctionalities implements getMessageFunctionalities {
                 }
             };
 
-            const request = http.request(options, (response) => {
-                response.on('data', (chunk) => {
-                    const file_name = `${type}/` + Date.now() + `${extension}`;
-                    fs.writeFile('./' + file_name, chunk, err => {
-                        if (err) {
-                            reject(err);
-                            return;
-                        } else {
-                            resolve(file_name);
-                        }
+            if (type === 'photo'){
+                const fileUrl = 'https://' + options.hostname + options.path;
+                console.log("fileurl", fileUrl);
+                http.get(fileUrl, options, async(res) => {
+                    const uploadpath = `${type}/` + Date.now() + `${extension}`;
+                    console.log("uploadpath", uploadpath);
+                    const filePath = fs.createWriteStream(uploadpath);
+                    res.pipe(filePath);
+                    resolve(uploadpath);
+                });
+                
+            }
+
+            else {
+                const request = http.request(options, (response) => {
+                    response.on('data', (chunk) => {
+                        const file_name = `${type}/` + Date.now() + `${extension}`;
+                        fs.writeFile('./' + file_name, chunk, err => {
+                            if (err) {
+                                reject(err);
+                                return;
+                            } else {
+                                resolve(file_name);
+                            }
+                        });
                     });
                 });
-            });
-
-            request.on('error', (e) => {
-                reject(e);
-            });
-            request.end();
+    
+                request.on('error', (e) => {
+                    reject(e);
+                });
+                request.end();
+            }
         });
     };
 
