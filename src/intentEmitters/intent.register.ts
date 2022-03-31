@@ -14,6 +14,7 @@ import { AppSupportListener } from './intentListeners/app.support.listener';
 import { AppSymptomListener } from './intentListeners/app.symptom.listener';
 import { getGenericpedia, getGenericpediaChemist } from './intentListeners/genericpedia.listener';
 import { AnemiaBotListener } from './intentListeners/anemia.bot.listener';
+import { NegativeFeedbackListener } from './intentListeners/negative.feedabck.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -38,6 +39,8 @@ export class IntentRegister {
         IntentEmitter.registerListener('Risk.Assessment', RiskAssessmentListener);
         
         IntentEmitter.registerListener('anemiaInitialisation-followup', AnemiaBotListener);
+
+        IntentEmitter.registerListener('NegativeFeedback', NegativeFeedbackListener);
 
         IntentEmitter.registerListener('Risk.assessment.info', getRiskAssessmentInfo);
         IntentEmitter.registerListener('risk.assessment.info-no', getRiskAssessmentInfo);
