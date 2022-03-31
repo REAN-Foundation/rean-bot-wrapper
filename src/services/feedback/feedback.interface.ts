@@ -1,3 +1,4 @@
 export interface feedbackInterface{
-    checkIntentAndSendFeedback (channel, sessionId)
+    NegativeFeedback (channel, sessionId)
+    PositiveFeedback (channel, sessionId)
 }

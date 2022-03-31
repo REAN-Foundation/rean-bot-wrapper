@@ -34,5 +34,10 @@ export class UserFeedback extends Model implements feedbackmessage {
         type : DataType.STRING
     })
         ts: string;
+    
+    @Column({
+        type : DataType.STRING
+    })
+        feedbackType: string;
 
 }
