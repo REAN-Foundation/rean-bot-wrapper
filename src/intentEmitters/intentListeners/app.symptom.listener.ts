@@ -20,6 +20,7 @@ export class AppSymptomListener {
                 response = await howDoFeelWorseInfoService(eventObj);
                 break;
             }
+
             case 'HowYouFeel - worse - custom - worse': {
 
                 response = await howDoFeelWorse2InfoService(eventObj);
