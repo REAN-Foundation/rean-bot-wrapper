@@ -4,6 +4,7 @@ import { injectable } from 'tsyringe';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 let dialogflow = require('@google-cloud/dialogflow');
 const dialogflowv2 = require('@google-cloud/dialogflow').v2beta1;
+const {struct} = require('pb-util');
 
 @injectable()
 export class DialogflowResponseService {
@@ -33,7 +34,7 @@ export class DialogflowResponseService {
                 options = {
                     credentials : {
                         client_email : ReanAppGcpCredentials.client_email,
-                        private_key : ReanAppGcpCredentials.private_key
+                        private_key  : ReanAppGcpCredentials.private_key
                     },
                     projectId : ReanAppGcpCredentials.private_key
                 };
@@ -47,7 +48,7 @@ export class DialogflowResponseService {
                 options = {
                     credentials : {
                         client_email : dialogflowApplicationCredentialsobj.client_email,
-                        private_key : dialogflowApplicationCredentialsobj.private_key
+                        private_key  : dialogflowApplicationCredentialsobj.private_key
                     },
                     projectId : dialogflowApplicationCredentialsobj.private_key
                 };
@@ -58,12 +59,15 @@ export class DialogflowResponseService {
             sessionPath = sessionClient.projectAgentSessionPath(projectIdFinal, sessionId);
             console.log("Message to be sent to DF: ", message);
             const request = {
-                session : sessionPath,
+                session    : sessionPath,
                 queryInput : {
                     text : {
-                        text : message,
+                        text         : message,
                         languageCode : dialogflow_language,
                     },
+                },
+                queryParams : {
+                    payload : struct.encode({source: platform, sessionId: sessionId })
                 },
             };
             console.log("B$session CLient detects intent");
@@ -82,19 +86,19 @@ export class DialogflowResponseService {
                 responseMessage.text[0] = result.fulfillmentText;
             }
             return {
-                text : responseMessage,
-                image : responseMessage.image ? responseMessage.image : false,
+                text       : responseMessage,
+                image      : responseMessage.image ? responseMessage.image : false,
                 parse_mode : responseMessage.parse_mode ? responseMessage.parse_mode : false,
-                result : result,
+                result     : result,
             };
         }
         catch (e) {
             console.log(e);
             return {
-                text : ["Sorry, something went wrong. Let me consult an expert and get back to you!"],
-                image : { url: '', caption: '' },
+                text       : ["Sorry, something went wrong. Let me consult an expert and get back to you!"],
+                image      : { url: '', caption: '' },
                 parse_mode : false,
-                result : false
+                result     : false
             };
         }
 

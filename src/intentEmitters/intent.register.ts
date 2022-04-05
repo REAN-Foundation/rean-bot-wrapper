@@ -14,6 +14,8 @@ import { AppSupportListener } from './intentListeners/app.support.listener';
 import { AppSymptomListener } from './intentListeners/app.symptom.listener';
 import { getGenericpedia, getGenericpediaChemist } from './intentListeners/genericpedia.listener';
 import { AnemiaBotListener } from './intentListeners/anemia.bot.listener';
+import { NegativeFeedbackListener } from './intentListeners/negative.feedabck.listener';
+import { PositiveFeedbackListener } from './intentListeners/positive.feedback.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -38,6 +40,10 @@ export class IntentRegister {
         IntentEmitter.registerListener('Risk.Assessment', RiskAssessmentListener);
         
         IntentEmitter.registerListener('anemiaInitialisation-followup', AnemiaBotListener);
+
+        IntentEmitter.registerListener('NegativeFeedback', NegativeFeedbackListener);
+
+        IntentEmitter.registerListener('PositiveFeedback', PositiveFeedbackListener);
 
         IntentEmitter.registerListener('Risk.assessment.info', getRiskAssessmentInfo);
         IntentEmitter.registerListener('risk.assessment.info-no', getRiskAssessmentInfo);
@@ -71,7 +77,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('HowYouFeel - Better', AppSymptomListener.handleIntent);
         IntentEmitter.registerListener('HowYouFeel - same', AppSymptomListener.handleIntent);
         IntentEmitter.registerListener('HowYouFeel - worse', AppSymptomListener.handleIntent);
-        IntentEmitter.registerListener('HowYouFeel - worse - custom', AppSymptomListener.handleIntent);
+        IntentEmitter.registerListener('HowYouFeel - worse - custom - worse', AppSymptomListener.handleIntent);
       
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
