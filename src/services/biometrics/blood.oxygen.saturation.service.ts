@@ -102,18 +102,17 @@ export const createBloodOxygenSaturationInfoService = async (eventObj) => {
 };
 
 async function checkEntry(eventObj: any) {
-    const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
     const BloodOxygenSaturation = eventObj.body.queryResult.parameters.BloodOxygenSaturation;
     let BloodOxygenSaturation_Unit = eventObj.body.queryResult.parameters.Unit;
 
-    if (!phoneNumber && !BloodOxygenSaturation) {
-        throw new Error("Missing required parameter PhoneNumber and/or BloodOxygenSaturation");
+    if (!BloodOxygenSaturation) {
+        throw new Error("Missing required parameter BloodOxygenSaturation");
     }
     if (BloodOxygenSaturation_Unit === '') {
         BloodOxygenSaturation_Unit = '%';
     }
     let result = null;
-    result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
+    result = await getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
 
     const patientUserId = result.message[0].UserId;
 

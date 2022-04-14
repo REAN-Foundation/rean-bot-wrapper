@@ -125,15 +125,14 @@ function getUnit(BodyTemperature_Unit: any, BodyTemperature: any) {
 }
 
 async function checkEntry(eventObj: any) {
-    const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
     const BodyTemperature = eventObj.body.queryResult.parameters.BodyTemperature;
     const BodyTemperature_Unit = eventObj.body.queryResult.parameters.Unit;
 
-    if (!phoneNumber && !BodyTemperature) {
-        throw new Error("Missing required parameter PhoneNumber and/or BodyTemperature");
+    if (!BodyTemperature) {
+        throw new Error("Missing required parameter BodyTemperature");
     }
     let result = null;
-    result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
+    result = await getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
 
     const patientUserId = result.message[0].UserId;
 

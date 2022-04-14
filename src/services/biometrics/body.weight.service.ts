@@ -80,22 +80,24 @@ export const createBodyWeightInfoService = async (eventObj) => {
 };
 
 async function checkEntry(eventObj: any) {
-    const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
     const BodyWeight = eventObj.body.queryResult.parameters.Weight_Amount;
     let BodyWeight_Unit = eventObj.body.queryResult.parameters.Weight_unit;
+
+    const b = eventObj.body.session;
+    const phoneNumber = b.split("/", 5)[4];
 
     const ten_digit = phoneNumber.substr(phoneNumber.length - 10);
     const country_code = phoneNumber.split(ten_digit)[0];
 
     if (BodyWeight_Unit === '') {
-        if (country_code === '+91') {
+        if (country_code === '+91-') {
             BodyWeight_Unit = 'Kg';
-        } else if (country_code === '1') {
+        } else if (country_code === '+1-') {
             BodyWeight_Unit = 'lb';
         }
     }
     let result = null;
-    result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
+    result = await getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
     const patientUserId = result.message[0].UserId;
     const accessToken = result.message[0].accessToken;
 

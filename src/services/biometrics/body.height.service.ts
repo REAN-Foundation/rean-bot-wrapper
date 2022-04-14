@@ -80,26 +80,30 @@ export const createBodyHeightInfoService = async (eventObj) => {
 };
 
 async function checkEntry(eventObj: any) {
-    const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
     let BodyHeight = eventObj.body.queryResult.parameters.BodyHeight;
     let BodyHeight_Unit = eventObj.body.queryResult.parameters.BodyHeight_Unit;
     const Inch = eventObj.body.queryResult.parameters.Inch;
+
+    const b = eventObj.body.session;
+    const phoneNumber = b.split("/", 5)[4];
 
     const ten_digit = phoneNumber.substr(phoneNumber.length - 10);
     const country_code = phoneNumber.split(ten_digit)[0];
 
     if (BodyHeight_Unit === '') {
-        if (country_code === '+91') {
+        if (country_code === '+91-') {
             BodyHeight_Unit = 'cm';
-        } else if (country_code === '1') {
+        } else if (country_code === '+1-') {
             BodyHeight_Unit = 'ft';
         }
     }
     if (Inch !== '') {
         BodyHeight = BodyHeight + (Inch / 12);
     }
+    BodyHeight = Math.round(BodyHeight * 100) / 100;
+    
     let result = null;
-    result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
+    result = await getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
 
     const patientUserId = result.message[0].UserId;
     const accessToken = result.message[0].accessToken;

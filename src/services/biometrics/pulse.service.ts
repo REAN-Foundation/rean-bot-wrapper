@@ -98,7 +98,6 @@ export const createPulseInfoService = async (eventObj) => {
 };
 
 async function checkEntry(eventObj: any) {
-    const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
     const Pulse = eventObj.body.queryResult.parameters.Pulse;
     let Pulse_Unit = eventObj.body.queryResult.parameters.Pulse_Unit;
 
@@ -106,11 +105,11 @@ async function checkEntry(eventObj: any) {
         Pulse_Unit = 'bpm';
     }
 
-    if (!phoneNumber && !Pulse) {
-        throw new Error("Missing required parameter PhoneNumber and/or Pulse");
+    if (!Pulse) {
+        throw new Error("Missing required parameter pulse");
     }
     let result = null;
-    result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
+    result = await getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
 
     const patientUserId = result.message[0].UserId;
 
