@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import http from  'https';
 import { getMessageFunctionalities } from "../refactor/interface/message.service.functionalities.interface";
 import { message } from '../refactor/interface/message.interface';
@@ -12,8 +13,10 @@ import fs from 'fs';
 @autoInjectable()
 export class TelegramMessageServiceFunctionalities implements getMessageFunctionalities{
 
+    public speechtotext = new Speechtotext();
+
     constructor(private emojiFilter?: EmojiFilter,
-        private speechtotext?: Speechtotext,
+        // private speechtotext?: Speechtotext,
         private awsS3manager?: AwsS3manager,
         private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
@@ -97,7 +100,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         return new Promise((resolve, reject) => {
             const telgramMediaPath = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_MEDIA_PATH_URL");
             
-            // console.log("afgshhhhhhhhhhhhh", (telgramMediaPath + '?file_id=' + fileid));
+            console.log("afgshhhhhhhhhhhhh", (telgramMediaPath + '?file_id=' + fileid));
             const req = http.request(telgramMediaPath + '?file_id=' + fileid, res => {
                 let data = " ";
                 res.on('data', d => {

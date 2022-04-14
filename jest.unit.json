@@ -1,0 +1,9 @@
+{
+    "preset": "ts-jest",
+    "coverageDirectory": "./coverage",
+    "testMatch": [
+        "**/test/telegram.message.service.spec.ts"
+    ],
+    "resetMocks": true,
+    "clearMocks": true
+}

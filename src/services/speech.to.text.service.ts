@@ -12,21 +12,30 @@ export class Speechtotext {
     constructor(
         private awss3manager?: AwsS3manager,
         private clientEnvironmentProviderService?: ClientEnvironmentProviderService) { }
-
-    private GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+    
+    // private GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
 
     private awsCred = this.awss3manager;
 
     private env = this.clientEnvironmentProviderService.getClientEnvironmentVariable("ENVIRONMENT");
 
-    private obj_gcp = {
-        credentials : this.GCPCredentials,
-        projectId   : this.GCPCredentials.project_id
-    };
+    // private obj_gcp = {
+    //     credentials : this.GCPCredentials,
+    //     projectId   : this.GCPCredentials.project_id
+    // };
 
     async SendSpeechRequest(fileUrl, chatServiceName) {
         return new Promise(async (resolve, reject) => {
-            const obj = this.obj_gcp;
+            const GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+            // const GCPCredentials = {project_id: "test"};
+            console.log("GCPCredentials",GCPCredentials);
+
+            const obj_gcp = {
+                credentials : GCPCredentials,
+                projectId   : GCPCredentials.project_id
+            };
+            console.log("obj_gcp",obj_gcp);
+            const obj = obj_gcp;
             if (chatServiceName === 'telegram') {
                 http.get(fileUrl, async (res) => {
                     
