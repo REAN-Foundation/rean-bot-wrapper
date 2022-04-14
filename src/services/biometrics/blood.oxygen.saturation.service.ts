@@ -53,7 +53,7 @@ export const updateBloodOxygenSaturationInfoService = async (eventObj) => {
         const b = response.body.Data.BloodOxygenSaturation.BloodOxygenSaturation;
         const u = response.body.Data.BloodOxygenSaturation.Unit;
 
-        const dffMessage = `Your updated BloodOxygenSaturation ${b} ${u} is ${remark}`;
+        const dffMessage = `Your updated blood oxygen saturation ${b} ${u} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
@@ -91,7 +91,7 @@ export const createBloodOxygenSaturationInfoService = async (eventObj) => {
         const b = response.body.Data.BloodOxygenSaturation.BloodOxygenSaturation;
         const u = response.body.Data.BloodOxygenSaturation.Unit;
 
-        const dffMessage = `Your newly added BloodOxygenSaturation ${b} ${u} is ${remark}`;
+        const dffMessage = `Your newly added blood oxygen saturation ${b} ${u} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 

@@ -59,7 +59,7 @@ export const updateBodyTemperatureInfoService = async (eventObj) => {
         const t = response.body.Data.BodyTemperature.BodyTemperature;
         const u = response.body.Data.BodyTemperature.Unit;
 
-        const dffMessage = `${unitmsg}Your updated BodyTemperature ${t} ${u} is ${remark}`;
+        const dffMessage = `${unitmsg}Your updated body temperature ${t} ${u} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
@@ -98,7 +98,7 @@ export const createBodyTemperatureInfoService = async (eventObj) => {
         const t = response.body.Data.BodyTemperature.BodyTemperature;
         const u = response.body.Data.BodyTemperature.Unit;
 
-        const dffMessage = `${unitmsg}Your newly added BodyTemperature ${t} ${u} is ${remark}`;
+        const dffMessage = `${unitmsg}Your newly added body temperature ${t} ${u} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 

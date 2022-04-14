@@ -34,7 +34,7 @@ export const updateBodyWeightInfoService = async (eventObj) => {
         }
         const w = response.body.Data.BodyWeight.BodyWeight;
 
-        const dffMessage = `Your updated BodyWeight is ${w} ${response.body.Data.BodyWeight.Unit}.`;
+        const dffMessage = `Your updated body weight is ${w} ${response.body.Data.BodyWeight.Unit}.`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
@@ -69,7 +69,7 @@ export const createBodyWeightInfoService = async (eventObj) => {
         }
         const w = response.body.Data.BodyWeight.BodyWeight;
 
-        const dffMessage = `Your newly added BodyWeight is ${w} ${response.body.Data.BodyWeight.Unit}.`;
+        const dffMessage = `Your newly added body weight is ${w} ${response.body.Data.BodyWeight.Unit}.`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 

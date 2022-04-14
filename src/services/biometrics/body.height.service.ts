@@ -34,7 +34,7 @@ export const updateBodyHeightInfoService = async (eventObj) => {
         }
         const h = response.body.Data.BodyHeight.BodyHeight;
 
-        const dffMessage = `Your updated BodyHeight is ${h} ${response.body.Data.BodyHeight.Unit}.`;
+        const dffMessage = `Your updated body height is ${h} ${response.body.Data.BodyHeight.Unit}.`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
@@ -69,7 +69,7 @@ export const createBodyHeightInfoService = async (eventObj) => {
         }
         const h = response.body.Data.BodyHeight.BodyHeight;
 
-        const dffMessage = `Your newly added BodyHeight is ${h} ${response.body.Data.BodyHeight.Unit}.`;
+        const dffMessage = `Your newly added body height is ${h} ${response.body.Data.BodyHeight.Unit}.`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 

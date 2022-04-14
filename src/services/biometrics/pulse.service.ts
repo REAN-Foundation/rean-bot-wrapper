@@ -51,7 +51,7 @@ export const updatePulseInfoService = async (eventObj) => {
         remark = getremark(Pulse);
         const p = response.body.Data.Pulse.Pulse;
 
-        const dffMessage = `Your updated Pulse ${p} ${response.body.Data.Pulse.Unit} is ${remark}`;
+        const dffMessage = `Your updated pulse rate ${p} ${response.body.Data.Pulse.Unit} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
@@ -87,7 +87,7 @@ export const createPulseInfoService = async (eventObj) => {
         remark = getremark(Pulse);
         const p = response.body.Data.Pulse.Pulse;
 
-        const dffMessage = `Your newly added Pulse ${p} ${response.body.Data.Pulse.Unit} is ${remark}`;
+        const dffMessage = `Your newly added pulse rate ${p} ${response.body.Data.Pulse.Unit} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 

@@ -57,7 +57,7 @@ export const updateBloodPressureInfoService = async (eventObj) => {
         const u = response.body.Data.BloodPressure.Unit;
 
         remark = getremark(Systolic,Diastolic);
-        const dffMessage = `${unitmsg}Your updated BloodPressure Systolic: ${s} Diastolic:${d} ${u} is ${remark}`;
+        const dffMessage = `${unitmsg}Your updated blood pressure Systolic: ${s} Diastolic:${d} ${u} is ${remark}`;
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
         return { sendDff: true, message: data };
@@ -97,7 +97,7 @@ export const createBloodPressureInfoService = async (eventObj) => {
         const d = response.body.Data.BloodPressure.Diastolic;
         const u = response.body.Data.BloodPressure.Unit;
 
-        const dffMessage = `${unitmsg}Your newly added BloodPressure Systolic: ${s} Diastolic:${d} ${u} is ${remark}`;
+        const dffMessage = `${unitmsg}Your newly added blood pressure Systolic: ${s} Diastolic:${d} ${u} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
