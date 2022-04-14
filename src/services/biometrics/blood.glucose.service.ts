@@ -113,15 +113,14 @@ function getUnit(BloodGlucose_Unit: any) {
 }
 
 async function checkEntry(eventObj: any) {
-    const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
     const BloodGlucose = eventObj.body.queryResult.parameters.BloodGlucose_Amount;
     const BloodGlucose_Unit = eventObj.body.queryResult.parameters.BloodGlucose_unit;
 
-    if (!phoneNumber && !BloodGlucose) {
-        throw new Error("Missing required parameter PhoneNumber and/or BloodGlucose");
+    if (!BloodGlucose) {
+        throw new Error("Missing required parameter BloodGlucose");
     }
     let result = null;
-    result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
+    result = await getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
 
     const patientUserId = result.message[0].UserId;
 
