@@ -81,11 +81,6 @@ async function getData(eventObj: any) {
     const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
         ClientEnvironmentProviderService);
 
-    // const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
-
-    // if (!phoneNumber) {
-    //     throw new Error("Missing required parameter PhoneNumber ");
-    // }
     let result = null;
     result = await getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
 
@@ -98,4 +93,3 @@ async function getData(eventObj: any) {
     const apiUrl = `${ReanBackendBaseUrl}clinical/symptoms/how-do-you-feel`;
     return { patientUserId, apiUrl, options };
 }
-

@@ -17,7 +17,7 @@ export const howDoFeelWorse2InfoService = async (eventObj) => {
         if ((symptomList.length - state.length) > 0) {
             const diff = (symptomList.length - state.length);
         
-            for (var j = 0; j < diff ; j++){
+            for (var i = 0; i < diff ; i++){
                 state.push(state[0]);
             }
         }
