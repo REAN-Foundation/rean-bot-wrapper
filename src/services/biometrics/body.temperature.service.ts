@@ -59,7 +59,7 @@ export const updateBodyTemperatureInfoService = async (eventObj) => {
         const t = response.body.Data.BodyTemperature.BodyTemperature;
         const u = response.body.Data.BodyTemperature.Unit;
 
-        const dffMessage = `${unitmsg}Your updated BodyTemperature ${t} ${u} is ${remark}`;
+        const dffMessage = `${unitmsg}Your updated body temperature ${t} ${u} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
@@ -98,7 +98,7 @@ export const createBodyTemperatureInfoService = async (eventObj) => {
         const t = response.body.Data.BodyTemperature.BodyTemperature;
         const u = response.body.Data.BodyTemperature.Unit;
 
-        const dffMessage = `${unitmsg}Your newly added BodyTemperature ${t} ${u} is ${remark}`;
+        const dffMessage = `${unitmsg}Your newly added body temperature ${t} ${u} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
@@ -125,15 +125,14 @@ function getUnit(BodyTemperature_Unit: any, BodyTemperature: any) {
 }
 
 async function checkEntry(eventObj: any) {
-    const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
     const BodyTemperature = eventObj.body.queryResult.parameters.BodyTemperature;
     const BodyTemperature_Unit = eventObj.body.queryResult.parameters.Unit;
 
-    if (!phoneNumber && !BodyTemperature) {
-        throw new Error("Missing required parameter PhoneNumber and/or BodyTemperature");
+    if (!BodyTemperature) {
+        throw new Error("Missing required parameter BodyTemperature");
     }
     let result = null;
-    result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
+    result = await getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
 
     const patientUserId = result.message[0].UserId;
 

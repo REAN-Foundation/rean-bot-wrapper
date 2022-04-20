@@ -9,10 +9,17 @@ const clientEnvironmentProviderService: ClientEnvironmentProviderService = conta
 
 export class GetPatientInfoService{
 
-    async getPatientsByPhoneNumberservice (phoneNumber) {
+    async getPatientsByPhoneNumberservice (eventObj) {
         return new Promise(async (resolve, reject) => {
             try {
                 Logger.instance().log(`Get Patient Info API ${clientEnvironmentProviderService.getClientName()}`);
+
+                const b = eventObj.body.session;
+                let phoneNumber = b.split("/", 5)[4];
+                if (!phoneNumber) {
+                    reject("Missing required parameter PhoneNumber");
+                    return;
+                }
 
                 if (phoneNumber.length > 10 && phoneNumber.indexOf('+') === -1) {
                     phoneNumber = '+' + phoneNumber;
