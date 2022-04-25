@@ -16,6 +16,7 @@ import { getGenericpedia, getGenericpediaChemist } from './intentListeners/gener
 import { AnemiaBotListener } from './intentListeners/anemia.bot.listener';
 import { NegativeFeedbackListener } from './intentListeners/negative.feedabck.listener';
 import { PositiveFeedbackListener } from './intentListeners/positive.feedback.listener';
+import { ExampleAnemiaImageListener } from './intentListeners/example.anemia.image.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -32,6 +33,8 @@ export class IntentRegister {
         IntentEmitter.registerListener('vaccination:appointments', secondListener);
 
         IntentEmitter.registerListener('covid-info', getCovidInfo1s);
+
+        IntentEmitter.registerListener('anemiaStart', ExampleAnemiaImageListener);
 
         IntentEmitter.registerListener('covid-resources', getCovidResources1s);
 
