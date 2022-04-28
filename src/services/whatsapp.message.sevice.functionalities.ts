@@ -8,6 +8,7 @@ import { Speechtotext } from './speech.to.text.service';
 import { autoInjectable } from "tsyringe";
 import { EmojiFilter } from './filter.message.for.emoji.service';
 import { AwsS3manager } from "./aws.file.upload.service";
+import { UserLanguage } from "./set.language";
 
 @autoInjectable()
 export class MessageFunctionalities implements getMessageFunctionalities {
@@ -35,16 +36,25 @@ export class MessageFunctionalities implements getMessageFunctionalities {
 
     async voiceMessageFormat (msg) {
         const mediaUrl = await this.GetWhatsappMedia('audio', msg.messages[0].voice.id, '_voice.ogg');
-        const ConvertedToText = await this.speechtotext.SendSpeechRequest(mediaUrl, "whatsapp");
-        if (ConvertedToText) {
-            const returnMessage = this.inputMessageFormat(msg);
-            returnMessage.messageBody = String(ConvertedToText);
-            returnMessage.type = 'voice';
-            return returnMessage;
+        const preferredLanguage = await new UserLanguage().getPreferredLanguageofSession(msg.messages[0].from);
+        const ConvertedToText = await this.speechtotext.SendSpeechRequest(mediaUrl, "whatsapp", preferredLanguage);
+        if (preferredLanguage !== "null"){
+            if (ConvertedToText) {
+                const returnMessage = this.inputMessageFormat(msg);
+                returnMessage.messageBody = String(ConvertedToText);
+                returnMessage.type = 'voice';
+                return returnMessage;
+            }
+            else {
+                const returnMessage = this.inputMessageFormat(msg);
+                returnMessage.messageBody = " ";
+                returnMessage.type = 'text';
+                return returnMessage;
+            }
         }
         else {
             const returnMessage = this.inputMessageFormat(msg);
-            returnMessage.messageBody = " ";
+            returnMessage.messageBody = "Need to set language";
             returnMessage.type = 'text';
             return returnMessage;
         }
