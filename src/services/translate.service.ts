@@ -1,4 +1,7 @@
+/* eslint-disable lines-around-comment */
+/* eslint-disable max-len */
 import { v2 } from '@google-cloud/translate';
+import { UserLanguage } from './set.language';
 
 let detected_language = 'en';
 let dialogflow_language = "en-US";
@@ -9,25 +12,41 @@ export class translateService{
 
     private obj = {
         credentials : this.GCPCredentials,
-        projectId : this.GCPCredentials.project_id
+        projectId   : this.GCPCredentials.project_id
     };
 
-    translateMessage = async (message) => {
-        console.log("entered the translateMessage of translateService JJJJJJJJJJJ", message);
+    detectLanguage = async (message:string) => {
+        console.log("detect the language of: ", message);
         const translate = new v2.Translate(this.obj);
         const [detections] = await translate.detect(message);
         const detectedLanguage = await Array.isArray(detections) ? detections : [detections];
         detected_language = detectedLanguage[0].language;
+        console.log("The detected language is!!!!!!!!!!!!!", detected_language);
         detected_language = await this.checkLanguage(detected_language);
-        if (detected_language !== 'en') {
+        return detected_language;
+    }
+
+    translateMessage = async (message:string, sessionId) => {
+        console.log("entered the translateMessage of translateService JJJJJJJJJJJ", message);
+        const translate = new v2.Translate(this.obj);
+        const languageForSession = await new UserLanguage().setLanguageForSession(sessionId, message);
+        console.log("languageForSession", languageForSession);
+        // if (languageForSession === "change language") {
+        //     const message = "change language";
+        //     console.log({ message, detected_language });
+        //     return { message, detected_language };
+        // }
+        if (languageForSession !== 'en') {
             const target = 'en';
             const [translation] = await translate.translate(message, target);
             message = translation;
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             dialogflow_language = "en-US";
         }
+
         console.log("exited the translate msg");
-        return { message, detected_language };
+        console.log({ message, languageForSession });
+        return { message, languageForSession };
     };
 
     processdialogflowmessage = async (message, detected_language) => {
@@ -45,7 +64,7 @@ export class translateService{
     };
 
     translateResponse = async (translate, responseMessage, detected_language) => {
-        console.log("entered the translateResponse of translateService JJJJJJJJJJJ");
+        console.log(`entered the translateResponse of translateService JJJJJJJJJJJ ${responseMessage} to language ${detected_language}`);
         try {
             if (detected_language !== 'en') {
                 const [translation] = await translate.translate(responseMessage.text[0], { to: detected_language, format: "text" });
