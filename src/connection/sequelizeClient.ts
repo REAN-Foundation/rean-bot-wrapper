@@ -1,8 +1,9 @@
 import { Sequelize } from 'sequelize-typescript';
 import { UserFeedback } from '../models/user.feedback.model';
 import { autoInjectable } from 'tsyringe';
-import { UserRequest } from '../models/user.request.model';
-import { UserResponse } from '../models/user.response.model';
+import { ChatMessage } from '../models/chat.message.model';
+import { ChatSession } from '../models/chat.session';
+import { ContactList } from '../models/contact.list';
 import { ClientEnvironmentProviderService } from '../services/set.client/client.environment.provider.service';
 
 @autoInjectable()
@@ -23,7 +24,10 @@ export class SequelizeClient {
             dialect : 'mysql',
             port    : 3306,
         });
-        sequelizeClient.addModels([UserRequest, UserResponse, UserFeedback]);
+        
+        sequelizeClient.addModels([ChatMessage, UserFeedback, ChatSession, ContactList]);
+        // ChatSession.hasMany(ChatMessage);
+        // ChatMessage.belongsTo(ChatSession);
         this._sequelize = sequelizeClient;
 
         await this._sequelize.authenticate()
