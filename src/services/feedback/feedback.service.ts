@@ -13,7 +13,7 @@ export class FeedbackService implements feedbackInterface {
     async NegativeFeedback(channel, sessionId) {
         return new Promise(async(resolve, reject) =>{
             try {
-                const listOfUserRequestdata = await ChatMessage.findAll({ where: { sessionId: sessionId } });
+                const listOfUserRequestdata = await ChatMessage.findAll({ where: { userPlatformID: sessionId } });
                 const message = listOfUserRequestdata[listOfUserRequestdata.length - 2].messageContent;
                 const feedBackInfo = new UserFeedback({ userId: sessionId, message: message, channel: channel, feedbackType: "Negative Feedback" });
                 await feedBackInfo.save();
@@ -44,7 +44,7 @@ export class FeedbackService implements feedbackInterface {
     async PositiveFeedback(channel, sessionId) {
         return new Promise(async(resolve, reject) =>{
             try {
-                const listOfUserRequestdata = await ChatMessage.findAll({ where: { sessionId: sessionId } });
+                const listOfUserRequestdata = await ChatMessage.findAll({ where: { userPlatformID: sessionId } });
                 const message = listOfUserRequestdata[listOfUserRequestdata.length - 2].messageContent;
                 const feedBackInfo = new UserFeedback({ userId: sessionId, message: message, channel: channel, feedbackType: "Positive Feedback" });
                 await feedBackInfo.save();
