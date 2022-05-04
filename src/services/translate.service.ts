@@ -17,13 +17,19 @@ export class translateService{
 
     detectLanguage = async (message:string) => {
         console.log("detect the language of: ", message);
-        const translate = new v2.Translate(this.obj);
-        const [detections] = await translate.detect(message);
-        const detectedLanguage = await Array.isArray(detections) ? detections : [detections];
-        detected_language = detectedLanguage[0].language;
-        console.log("The detected language is!!!!!!!!!!!!!", detected_language);
-        detected_language = await this.checkLanguage(detected_language);
-        return detected_language;
+        //this is a temp solution for detecting the "hindi" and "Hindi" as english as Google translate detects it as Filipino
+        if (message === "Hindi" || message === "hindi" ) {
+            return detected_language = "en";
+        }
+        else {
+            const translate = new v2.Translate(this.obj);
+            const [detections] = await translate.detect(message);
+            const detectedLanguage = await Array.isArray(detections) ? detections : [detections];
+            detected_language = detectedLanguage[0].language;
+            console.log("The detected language is!!!!!!!!!!!!!", detected_language);
+            detected_language = await this.checkLanguage(detected_language);
+            return detected_language;
+        }
     }
 
     translateMessage = async (message:string, sessionId) => {
