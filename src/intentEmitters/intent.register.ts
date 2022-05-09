@@ -16,6 +16,7 @@ import { getGenericpedia, getGenericpediaChemist } from './intentListeners/gener
 import { AnemiaBotListener } from './intentListeners/anemia.bot.listener';
 import { NegativeFeedbackListener } from './intentListeners/negative.feedabck.listener';
 import { PositiveFeedbackListener } from './intentListeners/positive.feedback.listener';
+import { AppMedicationListener } from './intentListeners/app.medication.listener';
 import { ExampleAnemiaImageListener } from './intentListeners/example.anemia.image.listener';
 import { LanguageChangeListener } from './intentListeners/language.change.listener';
 
@@ -84,6 +85,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('HowYouFeel - same', AppSymptomListener.handleIntent);
         IntentEmitter.registerListener('HowYouFeel - worse', AppSymptomListener.handleIntent);
         IntentEmitter.registerListener('HowYouFeel - worse - custom - worse', AppSymptomListener.handleIntent);
+        IntentEmitter.registerListener('Medication.Add.InApp', AppMedicationListener.handleIntent);
       
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
