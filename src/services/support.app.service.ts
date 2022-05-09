@@ -204,33 +204,33 @@ export class GetPatientInfoService{
 
             switch (frequency) {
             case "Morning, Afternoon, Evening and Night": {
-                obj1.TimeSchedules = ["Morning","Afternoon","Evening", "Night"],
+                obj1.TimeSchedules = ["Morning","Afternoon","Evening", "Night"];
                 obj1.Frequency = 4;
                 break;
             }
             case "Morning, Afternoon and Evening": {
-                obj1.TimeSchedules = ["Morning","Afternoon","Night"],
+                obj1.TimeSchedules = ["Morning","Afternoon","Night"];
                 obj1.Frequency = 3;
                 break;
             }
             case "Morning and Evening": {
-                obj1.TimeSchedules = ["Morning","Evening"],
+                obj1.TimeSchedules = ["Morning","Evening"];
                 obj1.Frequency = 2;
                 break;
             }
             case "Morning": {
-                obj1.TimeSchedules = ["Morning"],
+                obj1.TimeSchedules = ["Morning"];
                 obj1.Frequency = 1;
                 break;
             }
             case "Night":{
                     
-                obj1.TimeSchedules = ["Night"],
+                obj1.TimeSchedules = ["Night"];
                 obj1.Frequency = 1;
                 break;
             }
             case "Evening": {
-                obj1.TimeSchedules = ["Evening"],
+                obj1.TimeSchedules = ["Evening"];
                 obj1.Frequency = 1;
                 break;
                     
@@ -238,7 +238,7 @@ export class GetPatientInfoService{
             case "Empty Stomach":
             case "Once": {
 
-                obj1.TimeSchedules = ["Custom"],
+                obj1.TimeSchedules = ["Custom"];
                 obj1.Frequency = 1;
                 break;
             }

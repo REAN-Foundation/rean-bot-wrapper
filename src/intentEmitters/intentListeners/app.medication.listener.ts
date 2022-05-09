@@ -4,7 +4,7 @@ const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatien
 
 export class AppMedicationListener {
 
-    public static handleIntent = async (intent, eventObj) => {
+    public static handleIntent = async (_intent, eventObj) => {
         try {
 
             const response = await getPatientInfoService.addMedicationInfoservice(eventObj);
