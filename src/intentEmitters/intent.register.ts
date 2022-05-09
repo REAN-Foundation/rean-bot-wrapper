@@ -17,6 +17,8 @@ import { AnemiaBotListener } from './intentListeners/anemia.bot.listener';
 import { NegativeFeedbackListener } from './intentListeners/negative.feedabck.listener';
 import { PositiveFeedbackListener } from './intentListeners/positive.feedback.listener';
 import { AppMedicationListener } from './intentListeners/app.medication.listener';
+import { ExampleAnemiaImageListener } from './intentListeners/example.anemia.image.listener';
+import { LanguageChangeListener } from './intentListeners/language.change.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -34,7 +36,11 @@ export class IntentRegister {
 
         IntentEmitter.registerListener('covid-info', getCovidInfo1s);
 
+        IntentEmitter.registerListener('anemiaStart', ExampleAnemiaImageListener);
+
         IntentEmitter.registerListener('covid-resources', getCovidResources1s);
+
+        IntentEmitter.registerListener('Change Language - custom', LanguageChangeListener);
 
         IntentEmitter.registerListener('life - no', getSymptomAssessment);
 

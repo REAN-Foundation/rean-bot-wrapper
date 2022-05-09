@@ -21,6 +21,7 @@
     "@aws-sdk/client-comprehendmedical": "^3.13.0",
     "@google-cloud/dialogflow": "^4.4.0",
     "@google-cloud/speech": "^4.9.0",
+    "@google-cloud/text-to-speech": "^3.4.0",
     "@google-cloud/translate": "^6.3.0",
     "@slack/events-api": "^3.0.1",
     "@slack/web-api": "^6.4.0",

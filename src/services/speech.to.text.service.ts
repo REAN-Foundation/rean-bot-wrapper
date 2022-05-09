@@ -24,7 +24,7 @@ export class Speechtotext {
         projectId   : this.GCPCredentials.project_id
     };
 
-    async SendSpeechRequest(fileUrl, chatServiceName) {
+    async SendSpeechRequest(fileUrl, chatServiceName, preferredLanguage) {
         return new Promise(async (resolve, reject) => {
             const obj = this.obj_gcp;
             if (chatServiceName === 'telegram') {
@@ -40,14 +40,14 @@ export class Speechtotext {
                     res.pipe(filePath);
 
                     const awsFile = await this.awss3manager.uploadFile(uploadpath);
-                    main(awsFile, obj,this.awsCred,this.env).catch(console.error);
+                    main(awsFile, obj,this.awsCred,this.env, preferredLanguage).catch(console.error);
                 });
             } else if (chatServiceName === 'whatsapp') {
                 const awsFile = await this.awss3manager.uploadFile(fileUrl);
-                main(awsFile, obj,this.awsCred,this.env).catch(console.error);
+                main(awsFile, obj,this.awsCred,this.env, preferredLanguage).catch(console.error);
             }
 
-            async function main(uploadpath, obj, awscred,env) {
+            async function main(uploadpath, obj, awscred,env, preferredLanguage) {
                 try {
                     const environment = {
                         'DEVELOPMENT' : 'dev',
@@ -71,7 +71,7 @@ export class Speechtotext {
                     const config = {
                         encoding                            : "OGG_OPUS",
                         sampleRateHertz                     : 16000,
-                        languageCode                        : 'en-US',
+                        languageCode                        : preferredLanguage,
                         enableSeparateRecognitionPerChannel : true,
                     };
                     let request = {};
