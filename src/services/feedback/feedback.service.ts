@@ -2,7 +2,7 @@ import { feedbackInterface } from './feedback.interface';
 import { autoInjectable } from 'tsyringe';
 import { SlackMessageService } from '../slack.message.service';
 import { UserFeedback } from '../../models/user.feedback.model';
-import { UserRequest } from '../../models/user.request.model';
+import { ChatMessage } from '../../models/chat.message.model';
 
 @autoInjectable()
 export class FeedbackService implements feedbackInterface {
@@ -13,8 +13,8 @@ export class FeedbackService implements feedbackInterface {
     async NegativeFeedback(channel, sessionId) {
         return new Promise(async(resolve, reject) =>{
             try {
-                const listOfUserRequestdata = await UserRequest.findAll({ where: { sessionId: sessionId } });
-                const message = listOfUserRequestdata[listOfUserRequestdata.length - 2].messageBody;
+                const listOfUserRequestdata = await ChatMessage.findAll({ where: { userPlatformID: sessionId } });
+                const message = listOfUserRequestdata[listOfUserRequestdata.length - 2].messageContent;
                 const feedBackInfo = new UserFeedback({ userId: sessionId, message: message, channel: channel, feedbackType: "Negative Feedback" });
                 await feedBackInfo.save();
                 const response = await UserFeedback.findAll({ where: { userId: sessionId } });
@@ -44,8 +44,8 @@ export class FeedbackService implements feedbackInterface {
     async PositiveFeedback(channel, sessionId) {
         return new Promise(async(resolve, reject) =>{
             try {
-                const listOfUserRequestdata = await UserRequest.findAll({ where: { sessionId: sessionId } });
-                const message = listOfUserRequestdata[listOfUserRequestdata.length - 2].messageBody;
+                const listOfUserRequestdata = await ChatMessage.findAll({ where: { userPlatformID: sessionId } });
+                const message = listOfUserRequestdata[listOfUserRequestdata.length - 2].messageContent;
                 const feedBackInfo = new UserFeedback({ userId: sessionId, message: message, channel: channel, feedbackType: "Positive Feedback" });
                 await feedBackInfo.save();
                 const reply = "We are glad that you like it. Thank you for your valuable feedback";

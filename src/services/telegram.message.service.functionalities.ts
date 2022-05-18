@@ -6,6 +6,8 @@ import { Speechtotext } from './speech.to.text.service';
 import { autoInjectable } from "tsyringe";
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { AwsS3manager } from "./aws.file.upload.service";
+import { UserLanguage } from './set.language';
+import { SequelizeClient } from '../connection/sequelizeClient';
 import path, { resolve } from 'path';
 import fs from 'fs';
 
@@ -29,22 +31,32 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         response = await this.GetTelegramMedia(message.voice.file_id);
         console.log("response of telegram media is", response);
         const file_path = response.result.file_path;
-        if (file_path) {
-            const ConvertedToText = await this.speechtotext.SendSpeechRequest('https://api.telegram.org/file/bot' + this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN") + '/' + response.result.file_path, "telegram");
-            console.log("Converted to text",ConvertedToText);
-            if (ConvertedToText) {
-                const returnMessage = this.inputMessageFormat(message);
-                returnMessage.messageBody = String(ConvertedToText);
-                returnMessage.type = 'voice';
-                return returnMessage;
+        await new SequelizeClient().connect();
+        const preferredLanguage = await new UserLanguage().getPreferredLanguageofSession(message.from.id);
+        if (preferredLanguage !== "null"){
+            if (file_path) {
+                const ConvertedToText = await this.speechtotext.SendSpeechRequest('https://api.telegram.org/file/bot' + this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN") + '/' + response.result.file_path, "telegram", preferredLanguage);
+                console.log("Converted to text!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",ConvertedToText);
+                if (ConvertedToText) {
+                    const returnMessage = this.inputMessageFormat(message);
+                    returnMessage.messageBody = String(ConvertedToText);
+                    returnMessage.type = 'voice';
+                    return returnMessage;
+                } else {
+                    const returnMessage = this.inputMessageFormat(message);
+                    returnMessage.messageBody = " ";
+                    returnMessage.type = 'text';
+                    return returnMessage;
+                }
             } else {
-                const returnMessage = this.inputMessageFormat(message);
-                returnMessage.messageBody = " ";
-                returnMessage.type = 'text';
-                return returnMessage;
+                throw new Error("Unable to find the audio file path");
             }
-        } else {
-            throw new Error("Unable to find the audio file path");
+        }
+        else {
+            const returnMessage = this.inputMessageFormat(message);
+            returnMessage.messageBody = "Need to set language";
+            returnMessage.type = 'text';
+            return returnMessage;
         }
     }
 

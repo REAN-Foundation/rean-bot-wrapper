@@ -16,6 +16,9 @@ import { getGenericpedia, getGenericpediaChemist } from './intentListeners/gener
 import { AnemiaBotListener } from './intentListeners/anemia.bot.listener';
 import { NegativeFeedbackListener } from './intentListeners/negative.feedabck.listener';
 import { PositiveFeedbackListener } from './intentListeners/positive.feedback.listener';
+import { AppMedicationListener } from './intentListeners/app.medication.listener';
+import { ExampleAnemiaImageListener } from './intentListeners/example.anemia.image.listener';
+import { LanguageChangeListener } from './intentListeners/language.change.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -33,7 +36,11 @@ export class IntentRegister {
 
         IntentEmitter.registerListener('covid-info', getCovidInfo1s);
 
+        IntentEmitter.registerListener('anemiaStart', ExampleAnemiaImageListener);
+
         IntentEmitter.registerListener('covid-resources', getCovidResources1s);
+
+        IntentEmitter.registerListener('Change Language - custom', LanguageChangeListener);
 
         IntentEmitter.registerListener('life - no', getSymptomAssessment);
 
@@ -78,6 +85,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('HowYouFeel - same', AppSymptomListener.handleIntent);
         IntentEmitter.registerListener('HowYouFeel - worse', AppSymptomListener.handleIntent);
         IntentEmitter.registerListener('HowYouFeel - worse - custom - worse', AppSymptomListener.handleIntent);
+        IntentEmitter.registerListener('Medication.Add.InApp', AppMedicationListener.handleIntent);
       
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);

@@ -8,7 +8,7 @@ export class ErrorHandler{
     }
 
     handle_controller_error = (error, res, req) => {
-        
+
         var message = '';
         var error_code = 500;
         var request = req;

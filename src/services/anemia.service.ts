@@ -33,7 +33,6 @@ export class AnemiaModel{
                 reject(error.message);
             }
         });
-
     }
 
 }
