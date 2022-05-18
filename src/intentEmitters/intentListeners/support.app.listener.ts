@@ -10,18 +10,13 @@ export const getMedicationInfo = async (intent, eventObj) => {
 
             // Service Call
             console.log("Request parameter", eventObj.body.queryResult.parameters);
-            if (!eventObj.body.queryResult.parameters.PhoneNumber) {
-                reject("Missing required parameter PhoneNumber");
-                return;
-            }
-            const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
             // eslint-disable-next-line max-len
 
             // eslint-disable-next-line max-len
             // const patientNumber = eventObj.body.queryResult.parameters.PatientNumber ? eventObj.body.queryResult.parameters.PatientNumber : null;
             // eslint-disable-next-line init-declarations
             let result;
-            result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
+            result = await getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
 
             if (result.sendDff) {
                 resolve(result.message);

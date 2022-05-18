@@ -57,7 +57,7 @@ export const updateBloodPressureInfoService = async (eventObj) => {
         const u = response.body.Data.BloodPressure.Unit;
 
         remark = getremark(Systolic,Diastolic);
-        const dffMessage = `${unitmsg}Your updated BloodPressure Systolic: ${s} Diastolic:${d} ${u} is ${remark}`;
+        const dffMessage = `${unitmsg}Your updated blood pressure Systolic: ${s} Diastolic:${d} ${u} is ${remark}`;
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
         return { sendDff: true, message: data };
@@ -97,7 +97,7 @@ export const createBloodPressureInfoService = async (eventObj) => {
         const d = response.body.Data.BloodPressure.Diastolic;
         const u = response.body.Data.BloodPressure.Unit;
 
-        const dffMessage = `${unitmsg}Your newly added BloodPressure Systolic: ${s} Diastolic:${d} ${u} is ${remark}`;
+        const dffMessage = `${unitmsg}Your newly added blood pressure Systolic: ${s} Diastolic:${d} ${u} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
@@ -118,16 +118,15 @@ function getUnit(BloodPressure_Unit: any) {
 }
 
 async function checkEntry(eventObj: any) {
-    const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
     const Systolic = eventObj.body.queryResult.parameters.Systolic;
     const Diastolic = eventObj.body.queryResult.parameters.Diastolic;
     const BloodPressure_Unit = eventObj.body.queryResult.parameters.Unit;
 
-    if (!phoneNumber && !Systolic) {
-        throw new Error("Missing required parameter PhoneNumber and/or Systolic");
+    if (!Diastolic && !Systolic) {
+        throw new Error("Missing required parameter Diastolic and/or Systolic");
     }
     let result = null;
-    result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
+    result = await getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
 
     const patientUserId = result.message[0].UserId;
     const accessToken = result.message[0].accessToken;

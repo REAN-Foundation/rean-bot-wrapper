@@ -81,5 +81,5 @@ export class AwsSecretsManager {
 
         return secretObjectList;
     }
-
+    
 }

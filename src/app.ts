@@ -45,7 +45,7 @@ export default class Application {
     public app(): express.Application {
         return this._app;
     }
-
+    
     async processClientEnvVariables() {
 
         try {
@@ -77,7 +77,6 @@ export default class Application {
         } catch (e) {
             console.log(e);
         }
-
     }
 
     dbConnect(){
