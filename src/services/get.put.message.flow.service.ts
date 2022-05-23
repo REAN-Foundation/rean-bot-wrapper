@@ -6,24 +6,24 @@ import { handleRequestservice } from './handle.request.service';
 import { autoInjectable } from 'tsyringe';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { response } from '../refactor/interface/message.interface';
-import { FeedbackService } from '../services/feedback/feedback.service';
 import { ChatMessage } from '../models/chat.message.model';
 import { SequelizeClient } from '../connection/sequelizeClient';
 import { CallAnemiaModel } from './call.anemia.model';
 import { GoogleTextToSpeech } from './text.to.speech';
+import { UserFeedback } from '../models/user.feedback.model';
+import { SlackMessageService } from "./slack.message.service";
 
 @autoInjectable()
 export class MessageFlow{
 
     constructor(
+        private slackMessageService?: SlackMessageService,
         private handleRequestservice?: handleRequestservice,
         private sequelizeClient?: SequelizeClient,
-        private _feedbackService?:FeedbackService,
         private callAnemiaModel?: CallAnemiaModel) {
     }
 
-    async get_put_msg_Dialogflow (msg, channel ,platformMessageService: platformServiceInterface) {
-        console.log("entered the get_put_msg_Dialogflow,,,,,,,,,,,,,,,,,,,,,,,,,");
+    async checkTheFlow(msg, channel, platformMessageService: platformServiceInterface){
         const messagetoDialogflow: message = await platformMessageService.getMessage(msg);
         console.log("message to DF", messagetoDialogflow);
         const chatMessageObj = {
@@ -39,6 +39,32 @@ export class MessageFlow{
         await this.sequelizeClient.connect();
         const personrequest = new ChatMessage(chatMessageObj);
         await personrequest.save();
+        const userId = chatMessageObj.userPlatformID;
+        const resp = await UserFeedback.findAll({where: { userId: userId } });
+        if (resp.length === 0) {
+            this.get_put_msg_Dialogflow(messagetoDialogflow, channel, platformMessageService);
+        }
+        else {
+            const humanHandoff = resp[resp.length - 1].humanHandoff;
+            const ts = resp[resp.length - 1].ts;
+            if (humanHandoff === "true" ){
+                // this.delayedInitialisation();
+                this.slackMessageService.delayedInitialisation();
+                const client = this.slackMessageService.client;
+                const channelID = this.slackMessageService.channelID;
+                await client.chat.postMessage({ channel: channelID, text: chatMessageObj.messageContent, thread_ts: ts});
+                
+            }
+            else {
+                this.get_put_msg_Dialogflow(messagetoDialogflow, channel, platformMessageService);
+            }
+        }
+        
+    }
+
+    async get_put_msg_Dialogflow (messagetoDialogflow, channel ,platformMessageService) {
+        console.log("entered the get_put_msg_Dialogflow,,,,,,,,,,,,,,,,,,,,,,,,,");
+        
         return this.processMessage(messagetoDialogflow, channel ,platformMessageService);
     }
 

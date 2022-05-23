@@ -28,7 +28,7 @@ export class platformMessageService implements platformServiceInterface {
         private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     handleMessage(msg: any, channel: string) {
-        return this.messageFlow.get_put_msg_Dialogflow(msg, channel, this);
+        return this.messageFlow.checkTheFlow(msg, channel, this);
     }
 
     sendManualMesage(msg) {
