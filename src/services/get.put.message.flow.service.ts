@@ -27,6 +27,7 @@ export class MessageFlow{
         const messagetoDialogflow: message = await platformMessageService.getMessage(msg);
         console.log("message to DF", messagetoDialogflow);
         const chatMessageObj = {
+            name           : messagetoDialogflow.name,
             platform       : messagetoDialogflow.platform,
             direction      : messagetoDialogflow.direction,
             messageType    : messagetoDialogflow.type,

@@ -18,7 +18,7 @@ export class HumanHandoff {
         console.log("minutesutc", minutesUtc);
         // const secondsUtc = time_obj.getUTCSeconds();
 
-        if (hourUtc === 5 && ( minutesUtc > 0 || minutesUtc < 59)){
+        if (hourUtc === 6 && ( minutesUtc > 0 || minutesUtc < 59)){
             console.log("returned true");
             return "true";
         }
@@ -30,7 +30,7 @@ export class HumanHandoff {
 
     async humanHandover(eventObj){
         return new Promise(async(resolve) =>{
-            const userId = eventObj.body.originalDetectIntentRequest.payload.sessionId;
+            const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
             const resp = await UserFeedback.findAll({where:{userId: userId}});
             console.log("resp human handover find one", resp);
             const objID = resp[resp.length - 1].id;
@@ -61,6 +61,4 @@ export class HumanHandoff {
     }
 
 }
-
-// new HumanHandoff().checkTime();
 

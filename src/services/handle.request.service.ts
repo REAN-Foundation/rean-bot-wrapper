@@ -3,7 +3,6 @@ import { DialogflowResponseService } from './dialogflow.response.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { translateService } from './translate.service';
 import { autoInjectable } from 'tsyringe';
-import { Console } from 'console';
 
 @autoInjectable()
 export class handleRequestservice{
@@ -14,12 +13,13 @@ export class handleRequestservice{
 
     async handleUserRequest (message, channel) {
         const platform_id = message.sessionId;
+        const userName = message.name;
 
         //get the translated message
         const translate_message = await this.translateService.translateMessage(message.messageBody, platform_id);
 
         // eslint-disable-next-line max-len
-        const message_from_dialoglow = await this.DialogflowResponseService.getDialogflowMessage(translate_message.message, platform_id, channel);
+        const message_from_dialoglow = await this.DialogflowResponseService.getDialogflowMessage(translate_message.message, platform_id, channel, userName);
         const text_part_from_DF = message_from_dialoglow.text;
 
         // process the message from dialogflow before sending it to whatsapp

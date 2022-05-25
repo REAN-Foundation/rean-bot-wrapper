@@ -13,14 +13,14 @@ export class FeedbackService implements feedbackInterface {
     constructor(
         private slackMessageService?: SlackMessageService){}
 
-    async NegativeFeedback(channel, sessionId) {
+    async NegativeFeedback(channel, userId) {
         return new Promise(async(resolve, reject) =>{
             try {
-                const listOfUserRequestdata = await ChatMessage.findAll({ where: { userPlatformID: sessionId } });
+                const listOfUserRequestdata = await ChatMessage.findAll({ where: { userPlatformID: userId } });
                 const message = listOfUserRequestdata[listOfUserRequestdata.length - 3].messageContent;
-                const feedBackInfo = new UserFeedback({ userId: sessionId, message: message, channel: channel,humanHandoff: "false", feedbackType: "Negative Feedback"});
+                const feedBackInfo = new UserFeedback({ userId: userId, message: message, channel: channel,humanHandoff: "false", feedbackType: "Negative Feedback"});
                 await feedBackInfo.save();
-                const response = await UserFeedback.findAll({ where: { userId: sessionId } });
+                const response = await UserFeedback.findAll({ where: { userId: userId } });
                 await this.slackMessageService.postMessage(response);
                 if (await humanHandoff.checkTime() === "false"){
                     const reply = "We have recorded your feedback. Our experts will get back to you on this issue";

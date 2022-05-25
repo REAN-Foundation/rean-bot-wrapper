@@ -39,6 +39,7 @@ export interface feedbackmessage{
 }
 
 export interface chatMessage {
+    name: string,
     direction: string;
     messageType: string;
     messageContent: string;

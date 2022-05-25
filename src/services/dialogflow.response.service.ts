@@ -11,7 +11,7 @@ export class DialogflowResponseService {
 
     constructor(private clientEnvironment?: ClientEnvironmentProviderService) { }
 
-    getDialogflowMessage = async (message, userSessionId = null, platform = null) => {
+    getDialogflowMessage = async (message, userSessionId = null, platform = null, userName) => {
         try {
 
             const env_name = this.clientEnvironment.getClientEnvironmentVariable("NAME");
@@ -67,7 +67,7 @@ export class DialogflowResponseService {
                     },
                 },
                 queryParams : {
-                    payload : struct.encode({source: platform, sessionId: sessionId })
+                    payload : struct.encode({source: platform, userId: sessionId, userName: userName })
                 },
             };
             console.log("B$session CLient detects intent");
