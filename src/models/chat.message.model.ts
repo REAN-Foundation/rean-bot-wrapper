@@ -31,6 +31,12 @@ export class ChatMessage extends Model implements chatMessage {
     @Column({
         type : DataType.STRING(256)
     })
+        name: string;
+
+
+    @Column({
+        type : DataType.STRING(256)
+    })
         platform: string;
 
     @Column({

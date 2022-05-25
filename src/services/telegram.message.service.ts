@@ -44,7 +44,7 @@ export class TelegramMessageService implements platformServiceInterface{
 
     init(){
         this._telegram.on('message', msg => {
-            this.messageFlow.get_put_msg_Dialogflow(msg, "telegram", this);
+            this.messageFlow.checkTheFlow(msg, "telegram", this);
         });
     }
 

@@ -35,7 +35,7 @@ export class platformMessageService implements platformServiceInterface{
     }
 
     handleMessage(msg, client) {
-        return this.messageFlow.get_put_msg_Dialogflow(msg, client, this);
+        return this.messageFlow.checkTheFlow(msg, client, this);
     }
 
     getMessage(msg) {
