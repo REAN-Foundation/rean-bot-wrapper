@@ -15,9 +15,9 @@ export const PositiveFeedbackListener = async (intent, eventObj) => {
             // res = 5;
             console.log("eventobj", eventObj.body.originalDetectIntentRequest.payload.source);
             const channel = eventObj.body.originalDetectIntentRequest.payload.source;
-            const sessionId = eventObj.body.originalDetectIntentRequest.payload.sessionId;
+            const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
             const feedbackService = new FeedbackService();
-            response = await feedbackService.PositiveFeedback(channel, sessionId);
+            response = await feedbackService.PositiveFeedback(channel, userId);
 
             console.log('Inside listener: ', response);
 
