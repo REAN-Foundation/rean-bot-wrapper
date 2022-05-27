@@ -1,6 +1,6 @@
 import http from  'https';
 import { getMessageFunctionalities } from "../refactor/interface/message.service.functionalities.interface";
-import { message } from '../refactor/interface/message.interface';
+import { Imessage } from '../refactor/interface/message.interface';
 import { EmojiFilter } from './filter.message.for.emoji.service';
 import { Speechtotext } from './speech.to.text.service';
 import { autoInjectable } from "tsyringe";
@@ -90,7 +90,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
 
     inputMessageFormat (message){
         console.log("the message", message);
-        const response_message: message = {
+        const response_message: Imessage = {
             name            : message.from.first_name,
             platform        : "Telegram",
             chat_message_id : message.message_id,

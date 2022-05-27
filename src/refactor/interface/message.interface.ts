@@ -1,4 +1,4 @@
-export interface message{
+export interface Imessage{
     name : string;
     platform : string;
     sessionId : string;
@@ -10,7 +10,7 @@ export interface message{
     replyPath : string;
 }
 
-export interface response{
+export interface Iresponse{
     name : string;
     platform : string;
     sessionId: string;
@@ -28,7 +28,7 @@ export interface response{
 
 export interface handlerequest{
     botObject: any;
-    message: message;
+    message: Imessage;
 }
 
 export interface feedbackmessage{
@@ -38,7 +38,7 @@ export interface feedbackmessage{
     ts : string;
 }
 
-export interface chatMessage {
+export interface IchatMessage {
     name: string,
     direction: string;
     messageType: string;
@@ -66,4 +66,24 @@ export interface contactList {
     username: string;
     platform: string;
     emailID: string;
+}
+
+export interface IdialogflowResponseFormat {
+        text       :any[],
+        image      :Record<string, unknown>,
+        parse_mode :any,
+        result     :any
+}
+
+export interface IprocessedDialogflowResponseFormat{
+    processed_message: any;
+    message_from_dialoglow: {
+        text: any[];
+        image: {
+            url: string;
+            caption: string;
+        };
+        parse_mode: any;
+        result: any;
+    };
 }

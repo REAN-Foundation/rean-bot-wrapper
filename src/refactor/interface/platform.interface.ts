@@ -1,4 +1,4 @@
-import { message } from "./message.interface";
+import { Imessage } from "./message.interface";
 
 export interface platformServiceInterface{
     getMessage (msg: any);
@@ -6,7 +6,7 @@ export interface platformServiceInterface{
     sendManualMesage(msg);
     init ();
     setWebhook(client);
-    postResponse(messagetoDialogflow: message, process_raw_dialogflow:any);
+    postResponse(messagetoDialogflow: Imessage, process_raw_dialogflow:any);
     // eslint-disable-next-line max-len
     SendMediaMessage(messagetoDialogflow_sessionId: string, response_format_messageBody: string,response_format_messageText:string, messageType: string );
     set res(res);

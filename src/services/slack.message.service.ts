@@ -1,7 +1,7 @@
 import { WebClient } from '@slack/web-api';
 import { createEventAdapter } from '@slack/events-api';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
-import { message } from '../refactor/interface/message.interface';
+import { Imessage } from '../refactor/interface/message.interface';
 import { autoInjectable, delay, inject } from 'tsyringe';
 import { ResponseHandler } from '../utils/response.handler';
 import { TelegramMessageService } from './telegram.message.service';
@@ -18,7 +18,7 @@ export class SlackMessageService implements platformServiceInterface {
 
     public client;
 
-    public channelID;
+    public channelID: string;
 
     private isInitialised = false;
 
@@ -155,7 +155,7 @@ export class SlackMessageService implements platformServiceInterface {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    postResponse(messagetoDialogflow: message, process_raw_dialogflow: any) {
+    postResponse(messagetoDialogflow: Imessage, process_raw_dialogflow: any) {
         throw new Error('Method not implemented.');
     }
 

@@ -5,7 +5,7 @@ import { AwsS3manager } from './aws.file.upload.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { autoInjectable, singleton, inject, delay } from 'tsyringe';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { response, message } from '../refactor/interface/message.interface';
+import { Iresponse, Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { MessageFlow } from './get.put.message.flow.service';
 import { MessageFunctionalities } from './whatsapp.message.sevice.functionalities';
@@ -31,7 +31,7 @@ export class platformMessageService implements platformServiceInterface {
         return this.messageFlow.checkTheFlow(msg, channel, this);
     }
 
-    sendManualMesage(msg) {
+    sendManualMesage(msg: any) {
         return this.messageFlow.send_manual_msg(msg, this);
     }
 
@@ -66,7 +66,7 @@ export class platformMessageService implements platformServiceInterface {
         return request;
     }
 
-    setWebhook(clientName){
+    setWebhook(clientName: string){
 
         return new Promise((resolve, reject) => {
             const webhookUrl = `${this.clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL")}/v1/${clientName}/whatsapp/${this.clientAuthenticator.urlToken}/receive`;
@@ -93,7 +93,7 @@ export class platformMessageService implements platformServiceInterface {
         });
     }
 
-    SetWebHookOldNumber = async (clientName) => {
+    SetWebHookOldNumber = async (clientName: string) => {
 
         return new Promise((resolve, reject) => {
             const webhookUrl = `${this.clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL")}/v1/${clientName}/whatsapp/${this.clientAuthenticator.urlToken}/receive`;
@@ -213,7 +213,7 @@ export class platformMessageService implements platformServiceInterface {
         });
     }
 
-    SendMediaMessage = async (contact, imageLink, message, messageType) => {
+    SendMediaMessage = async (contact: number | string, imageLink: string, message: string, messageType: string) => {
         return new Promise(async() => {
             console.log("message type",messageType + imageLink);
             message = this.sanitizeMessage(message);
@@ -250,7 +250,7 @@ export class platformMessageService implements platformServiceInterface {
         });
     };
 
-    getMessage = async (msg) => {
+    getMessage = async (msg: any) => {
         if (msg.messages[0].type === "text") {
             // eslint-disable-next-line max-len
             return await this.messageFunctionalities.textMessageFormat(msg);
@@ -269,9 +269,9 @@ export class platformMessageService implements platformServiceInterface {
         }
     };
 
-    postResponse = async (message, processedResponse) => {
+    postResponse = async (message: Imessage , processedResponse: IprocessedDialogflowResponseFormat) => {
         // eslint-disable-next-line init-declarations
-        let reaponse_message: response;
+        let reaponse_message: Iresponse;
         const whatsapp_id = message.sessionId;
         const input_message = message.messageBody;
         const name = message.name;
@@ -305,7 +305,7 @@ export class platformMessageService implements platformServiceInterface {
     };
 
     createFinalMessageFromHumanhandOver(requestBody) {
-        const response_message: response = {
+        const response_message: Iresponse = {
             name                : requestBody.agentName,
             platform            : "whatsapp",
             chat_message_id     : null,

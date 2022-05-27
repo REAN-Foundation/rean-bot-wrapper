@@ -97,7 +97,7 @@ export class AwsS3manager{
         const base64COWINLogo = new (Buffer as any).from(COWINLogo).toString('base64');
         const dataURIREAN = 'data:image/jpeg;base64,' + base64REANLogo;
         const dataURICOWIN = 'data:image/jpeg;base64,' + base64COWINLogo;
-        return new Promise(async (resolve, reject) => {
+        return new Promise<string>(async (resolve, reject) => {
             nodeHtmlToImage({
                 output        : imageName,
                 html          : html,
