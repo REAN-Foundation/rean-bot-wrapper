@@ -1,4 +1,4 @@
-import { message } from '../refactor/interface/message.interface';
+import { Imessage } from '../refactor/interface/message.interface';
 import { autoInjectable, singleton } from 'tsyringe';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { MessageFlow } from './get.put.message.flow.service';
@@ -40,7 +40,7 @@ export class platformMessageService implements platformServiceInterface{
 
     getMessage(msg) {
         // eslint-disable-next-line init-declarations
-        let returnMessage: message;
+        let returnMessage: Imessage;
         const phoneNumber = msg.phoneNumber.toString();
 
         if (msg.type === "text") {

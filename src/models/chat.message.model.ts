@@ -1,5 +1,5 @@
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, ForeignKey, BelongsTo } from 'sequelize-typescript';
-import { chatMessage } from '../refactor/interface/message.interface';
+import { IchatMessage } from '../refactor/interface/message.interface';
 import { ChatSession } from './chat.session';
 
 @Table({
@@ -7,7 +7,7 @@ import { ChatSession } from './chat.session';
     modelName  : 'ChatMessage',
     tableName  : 'chat_message'
 })
-export class ChatMessage extends Model implements chatMessage {
+export class ChatMessage extends Model implements IchatMessage {
 
     @AutoIncrement
     @PrimaryKey

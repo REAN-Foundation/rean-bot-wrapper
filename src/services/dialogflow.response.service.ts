@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { v4 } from 'uuid';
 import { injectable } from 'tsyringe';
@@ -11,7 +12,7 @@ export class DialogflowResponseService {
 
     constructor(private clientEnvironment?: ClientEnvironmentProviderService) { }
 
-    getDialogflowMessage = async (message, userSessionId = null, platform = null, userName) => {
+    getDialogflowMessage = async (message: string, userPlatformId: string = null, platform: string = null, userName: string) => {
         try {
 
             const env_name = this.clientEnvironment.getClientEnvironmentVariable("NAME");
@@ -22,7 +23,7 @@ export class DialogflowResponseService {
             // set default values
             let responseMessage = { text: [], parse_mode: false, image: { url: '', caption: '' } };
             const dialogflow_language = "en-US";
-            const sessionId = userSessionId === null ? v4() : userSessionId;
+            const userId: string = userPlatformId === null ? v4() : userPlatformId;
 
             let sessionClient = null;
             let sessionPath = null;
@@ -56,7 +57,7 @@ export class DialogflowResponseService {
 
             }
             sessionClient = new dialogflow.SessionsClient(options);
-            sessionPath = sessionClient.projectAgentSessionPath(projectIdFinal, sessionId);
+            sessionPath = sessionClient.projectAgentSessionPath(projectIdFinal, userId);
             console.log("Message to be sent to DF: ", message);
             const request = {
                 session    : sessionPath,
@@ -67,7 +68,7 @@ export class DialogflowResponseService {
                     },
                 },
                 queryParams : {
-                    payload : struct.encode({source: platform, userId: sessionId, userName: userName })
+                    payload : struct.encode({source: platform, userId: userId, userName: userName })
                 },
             };
             console.log("B$session CLient detects intent");
@@ -85,12 +86,16 @@ export class DialogflowResponseService {
             if (responseMessage.text.length === 0) {
                 responseMessage.text[0] = result.fulfillmentText;
             }
-            return {
-                text       : responseMessage,
-                image      : responseMessage.image ? responseMessage.image : false,
+            const dfResponseObj = {
+                text  : responseMessage.text,
+                image : responseMessage.image ? responseMessage.image : {
+                    url     : "",
+                    caption : ""
+                },
                 parse_mode : responseMessage.parse_mode ? responseMessage.parse_mode : false,
                 result     : result,
             };
+            return dfResponseObj;
         }
         catch (e) {
             console.log(e);
