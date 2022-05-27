@@ -2,7 +2,7 @@
 import { getMessageFunctionalities } from "../refactor/interface/message.service.functionalities.interface";
 import http from  'https';
 import fs from 'fs';
-import { message } from '../refactor/interface/message.interface';
+import { Imessage } from '../refactor/interface/message.interface';
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 import { Speechtotext } from './speech.to.text.service';
 import { autoInjectable } from "tsyringe";
@@ -127,7 +127,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
     };
 
     inputMessageFormat (message){
-        const response_message: message = {
+        const response_message: Imessage = {
             name            : message.contacts[0].profile.name,
             platform        : "Whatsapp",
             chat_message_id : message.messages[0].id,
