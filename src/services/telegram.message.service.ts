@@ -68,6 +68,8 @@ export class TelegramMessageService implements platformServiceInterface{
             return await this.telegramMessageServiceFunctionalities.locationMessageFormat(message);
         } else if (message.photo){
             return await this.telegramMessageServiceFunctionalities.imageMessaegFormat(message);
+        } else if (message.document){
+            return await this.telegramMessageServiceFunctionalities.documentMessageFormat(message);
         } else {
             throw new Error('Message is neither text, voice nor location');
         }
