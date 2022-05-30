@@ -1,4 +1,5 @@
 import http from  'https';
+import http_tp from 'http';
 import { getMessageFunctionalities } from "../refactor/interface/message.service.functionalities.interface";
 import { Imessage } from '../refactor/interface/message.interface';
 import { EmojiFilter } from './filter.message.for.emoji.service';
@@ -104,6 +105,21 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         return response_message;
     }
 
+    async documentMessageFormat(message) {
+        let response: any = {};
+        response = await this.GetTelegramMedia(message.document.file_id);
+        console.log("response document get telegram", response);
+        if (response.result.file_path){
+            console.log("We are fetching the excel file here");
+            const filePath = await this.downloadTelegramDocument('https://api.telegram.org/file/bot' + this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN") + '/' + response.result.file_path, "document");
+            const location = filePath;
+            const returnMessage = this.inputMessageFormat(message);
+            returnMessage.type = 'document';
+            returnMessage.messageBody = location.toString();
+            return returnMessage;
+        }
+    }
+
     GetTelegramMedia = async (fileid) => {
 
         return new Promise((resolve, reject) => {
@@ -146,6 +162,45 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
                 resolve(uploadpath);
             });
         });  
+    }
+
+    async downloadTelegramDocument(url,media) {
+        console.log(media);
+        console.log("this is the media");
+        const proto = !url.charAt(4).localeCompare('s') ? http : http_tp;
+        const filename = path.basename(url);
+        const filePath = `./${media}/` + filename;
+
+        if (!fs.existsSync(`./${media}`)) {
+            fs.mkdirSync(`./${media}`);
+        }
+
+        return new Promise((resolve,reject) => {
+            const file = fs.createWriteStream(filePath);
+
+            const request = proto.get(url, response => {
+                if (response.statusCode !== 200) {
+                    fs.unlink(filePath, () => {
+                        reject(new Error(`Failed to get '${url}' (${response.statusCode})`));
+                    });
+                    return;
+                }
+
+                response.pipe(file);
+            });
+
+            file.on('finish', () => resolve(filePath));
+
+            request.on('error', err => {
+                fs.unlink(filePath, () => reject(err));
+            });
+
+            request.on('error', err => {
+                fs.unlink(filePath, () => reject(err));
+            });
+
+            request.end();
+        });
     }
 
 }

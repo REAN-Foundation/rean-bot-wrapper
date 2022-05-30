@@ -36,7 +36,6 @@ export class UserLanguage {
     async getPreferredLanguageofSession(sessionId){
         return new Promise<string>(async(resolve) => {
             const userLanguageTableResponse = await ChatSession.findAll({ where: { userPlatformID: sessionId } });
-            console.log("userLanguageTableResponse",userLanguageTableResponse);
             try {
                 if (userLanguageTableResponse.length > 0 && userLanguageTableResponse[userLanguageTableResponse.length - 1].preferredLanguage !== null) {
                     if (userLanguageTableResponse[userLanguageTableResponse.length - 1].sessionOpen === "true") {
