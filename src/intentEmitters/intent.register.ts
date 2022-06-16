@@ -19,6 +19,9 @@ import { PositiveFeedbackListener } from './intentListeners/positive.feedback.li
 import { AppMedicationListener } from './intentListeners/app.medication.listener';
 import { ExampleAnemiaImageListener } from './intentListeners/example.anemia.image.listener';
 import { LanguageChangeListener } from './intentListeners/language.change.listener';
+import { HumanHandoverListener } from './intentListeners/human.handover.listener';
+import { RequestLiveAgent } from './intentListeners/request.live.agent.listener';
+import { createDemoBot } from './intentListeners/create.demo.bot.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -52,8 +55,14 @@ export class IntentRegister {
 
         IntentEmitter.registerListener('PositiveFeedback', PositiveFeedbackListener);
 
+        IntentEmitter.registerListener('NegativeFeedback-HumanHandOff-Yes', HumanHandoverListener);
+
+        IntentEmitter.registerListener("RequestLiveAgent", RequestLiveAgent);
+
         IntentEmitter.registerListener('Risk.assessment.info', getRiskAssessmentInfo);
         IntentEmitter.registerListener('risk.assessment.info-no', getRiskAssessmentInfo);
+
+        IntentEmitter.registerListener('create.demo.excel',createDemoBot);
 
         IntentEmitter.registerListener('diabetes', getRiskAssessmentFollowup);
         IntentEmitter.registerListener('cancer', getRiskAssessmentFollowup);

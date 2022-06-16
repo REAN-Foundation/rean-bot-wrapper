@@ -2,6 +2,7 @@
 /* eslint-disable max-len */
 import { v2 } from '@google-cloud/translate';
 import { UserLanguage } from './set.language';
+import { IdialogflowResponseFormat } from '../refactor/interface/message.interface';
 
 let detected_language = 'en';
 let dialogflow_language = "en-US";
@@ -55,29 +56,30 @@ export class translateService{
         return { message, languageForSession };
     };
 
-    processdialogflowmessage = async (message, detected_language) => {
+    processdialogflowmessage = async (message: IdialogflowResponseFormat, detected_language: string) => {
         const translate = new v2.Translate(this.obj);
-        console.log("entered the processdialogflowmessage of translateService JJJJJJJJJJJ");
+        console.log("entered the processdialogflowmessage of translateService JJJJJJJJJJJ", message);
         // eslint-disable-next-line init-declarations
         let translatedResponse;
         if (message.parse_mode) {
             translatedResponse = message.text;
         }
         else {
-            translatedResponse = await this.translateResponse(translate, message, detected_language);
+            translatedResponse = await this.translateResponse(translate, message.text, detected_language);
         }
+        console.log("translatedResponse",translatedResponse);
         return translatedResponse;
     };
 
-    translateResponse = async (translate, responseMessage, detected_language) => {
+    translateResponse = async (translate, responseMessage: string[], detected_language: string) => {
         console.log(`entered the translateResponse of translateService JJJJJJJJJJJ ${responseMessage} to language ${detected_language}`);
         try {
             if (detected_language !== 'en') {
-                const [translation] = await translate.translate(responseMessage.text[0], { to: detected_language, format: "text" });
+                const [translation] = await translate.translate(responseMessage[0], { to: detected_language, format: "text" });
                 responseMessage = [translation];
             }
             else {
-                responseMessage = [responseMessage.text[0]];
+                responseMessage = [responseMessage[0]];
             }
             return responseMessage;
         } catch (e) {

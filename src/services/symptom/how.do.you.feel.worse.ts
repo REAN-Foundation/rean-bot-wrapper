@@ -34,6 +34,7 @@ export const howDoFeelWorse2InfoService = async (eventObj) => {
 
         const resp = await needle('get', url, options);
         const assessmentTemplateId = resp.body.Data.SymptomAssessmentTemplates.Items[0].id;
+
         //create symptom assessment for patient
         url = `${ReanBackendBaseUrl}clinical/symptom-assessments`;
         const obj = {

@@ -1,4 +1,4 @@
-import { message } from '../refactor/interface/message.interface';
+import { Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface';
 import { autoInjectable, singleton } from 'tsyringe';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { MessageFlow } from './get.put.message.flow.service';
@@ -35,12 +35,12 @@ export class platformMessageService implements platformServiceInterface{
     }
 
     handleMessage(msg, client) {
-        return this.messageFlow.get_put_msg_Dialogflow(msg, client, this);
+        return this.messageFlow.checkTheFlow(msg, client, this);
     }
 
     getMessage(msg) {
         // eslint-disable-next-line init-declarations
-        let returnMessage: message;
+        let returnMessage: Imessage;
         const phoneNumber = msg.phoneNumber.toString();
 
         if (msg.type === "text") {
@@ -50,9 +50,9 @@ export class platformMessageService implements platformServiceInterface{
         }
     }
 
-    postResponse (message, response ){
+    postResponse (message, response: IprocessedDialogflowResponseFormat ){
         const reansupport_Id = message.Id;
-        const message_type = response.message_from_dialoglow.text.image.url ? "image" : "text";
+        const message_type = response.message_from_dialoglow.image.url ? "image" : "text";
         const raw_response_object = response.message_from_dialoglow.result && response.message_from_dialoglow.result.fulfillmentMessages ? JSON.stringify(response.message_from_dialoglow.result.fulfillmentMessages) : '';
         const intent = response.message_from_dialoglow.result && response.message_from_dialoglow.result.intent ? response.message_from_dialoglow.result.intent.displayName : '';
 

@@ -21,7 +21,7 @@ export class UserFeedback extends Model implements feedbackmessage {
         userId: string;
 
     @Column({
-        type : DataType.STRING
+        type : DataType.TEXT
     })
         message: string;
 
@@ -29,6 +29,11 @@ export class UserFeedback extends Model implements feedbackmessage {
         type : DataType.STRING
     })
         channel: string;
+
+    @Column({
+        type : DataType.STRING
+    })
+        humanHandoff: string;
 
     @Column({
         type : DataType.STRING

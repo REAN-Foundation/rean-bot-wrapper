@@ -1,7 +1,7 @@
 import { WebClient } from '@slack/web-api';
 import { createEventAdapter } from '@slack/events-api';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
-import { message } from '../refactor/interface/message.interface';
+import { Imessage } from '../refactor/interface/message.interface';
 import { autoInjectable, delay, inject } from 'tsyringe';
 import { ResponseHandler } from '../utils/response.handler';
 import { TelegramMessageService } from './telegram.message.service';
@@ -16,9 +16,9 @@ export class SlackMessageService implements platformServiceInterface {
 
     private slackEvent;
 
-    private client;
+    public client;
 
-    private channelID;
+    public channelID: string;
 
     private isInitialised = false;
 
@@ -49,14 +49,38 @@ export class SlackMessageService implements platformServiceInterface {
             else {
                 console.log("child message");
                 const data = await UserFeedback.findOne({ where: { ts: message.event.thread_ts } });
+                console.log("data", data);
                 const contact = data.userId;
-                const textToUser = `Our Experts have responded to your query. \nYour Query: ${data.message} \nExpert: ${message.event.text}`;
+                const humanHandoff = data.humanHandoff;
                 const channel = data.channel;
-                if (channel === "telegram"){
-                    await this.telegramMessageservice.SendMediaMessage(contact, null, textToUser, "text");
+                if (humanHandoff === "true"){
+                    console.log("child message HH On");
+                    
+                    //if message.event.bot_id then we don't want to trigger a slack event
+                    if (message.event.client_msg_id){
+
+                        //This text from support will update the humanHandOff attribute to false at the end of the chat
+                        if (message.event.text === "Exit" || message.event.text === "exit"){
+                            await UserFeedback.update({ humanHandoff: "false" }, { where: { id: data.id } } )
+                                .then(() => { console.log("updated"); })
+                                .catch(error => console.log("error on update", error));
+
+                            const message = "Thank you for connecting.";
+                            await this.sendCustomMessage(channel, contact, message);
+                        }
+                        else {
+                            await this.sendCustomMessage(channel, contact, message.event.text);
+                        }
+                        
+                    }
+                    else {
+                        console.log("User posted message: ", message.event.text);
+                    }
                 }
-                else if (channel === "whatsapp"){
-                    await this.whatsappMessageService.SendMediaMessage(contact.toString(), null, textToUser, "text");
+                else {
+                    console.log("child message HH off");
+                    const textToUser = `Our Experts have responded to your query. \nYour Query: ${data.message} \nExpert: ${message.event.text}`;
+                    await this.sendCustomMessage(channel, contact, textToUser);
                 }
                 
             }
@@ -96,6 +120,7 @@ export class SlackMessageService implements platformServiceInterface {
 
     delayedInitialisation(){
         if (!this.isInitialised){
+            console.log("SMS delayedInitialisation");
             this.client = new WebClient(this.clientEnvironmentProviderService.getClientEnvironmentVariable("SLACK_TOKEN_FEEDBACK"));
             this.channelID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("SLACK_FEEDBACK_CHANNEL_ID");
             const slackSecret = this.clientEnvironmentProviderService.getClientEnvironmentVariable("SLACK_SECRET_FEEDBACK");
@@ -111,6 +136,15 @@ export class SlackMessageService implements platformServiceInterface {
         throw new Error('Method not implemented.');
     }
 
+    async sendCustomMessage(channel, contact, message) {
+        if (channel === "telegram"){
+            await this.telegramMessageservice.SendMediaMessage(contact, null, message, "text");
+        }
+        else if (channel === "whatsapp"){
+            await this.whatsappMessageService.SendMediaMessage(contact.toString(), null, message, "text");
+        }
+    }
+
     init() {
         throw new Error('Method not implemented.');
     }
@@ -121,7 +155,7 @@ export class SlackMessageService implements platformServiceInterface {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    postResponse(messagetoDialogflow: message, process_raw_dialogflow: any) {
+    postResponse(messagetoDialogflow: Imessage, process_raw_dialogflow: any) {
         throw new Error('Method not implemented.');
     }
 
