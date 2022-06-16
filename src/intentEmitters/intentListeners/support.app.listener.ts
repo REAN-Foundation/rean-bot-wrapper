@@ -10,6 +10,7 @@ export const getMedicationInfo = async (intent, eventObj) => {
 
             // Service Call
             console.log("Request parameter", eventObj.body.queryResult.parameters);
+
             // eslint-disable-next-line max-len
 
             // eslint-disable-next-line max-len

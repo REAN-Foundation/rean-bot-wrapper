@@ -26,6 +26,8 @@ export class SequelizeClient {
         });
         
         sequelizeClient.addModels([ChatMessage, UserFeedback, ChatSession, ContactList]);
+        // ChatSession.hasMany(ChatMessage);
+        // ChatMessage.belongsTo(ChatSession);
         this._sequelize = sequelizeClient;
 
         await this._sequelize.authenticate()
