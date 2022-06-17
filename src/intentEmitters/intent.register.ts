@@ -69,7 +69,6 @@ export class IntentRegister {
         //Intents for calorie information
         IntentEmitter.registerListener('foodItemsDetails', calorieDetection);
         IntentEmitter.registerListener('calorie.report.creation', calorieReport);
-
         IntentEmitter.registerListener('diabetes', getRiskAssessmentFollowup);
         IntentEmitter.registerListener('cancer', getRiskAssessmentFollowup);
         IntentEmitter.registerListener('heart', getRiskAssessmentFollowup);
