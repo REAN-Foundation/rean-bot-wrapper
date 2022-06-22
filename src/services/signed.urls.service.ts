@@ -10,7 +10,7 @@ export class SignedUrls{
 
     constructor(private clientEnvironmentProviderservice?: ClientEnvironmentProviderService){}
 
-    async getSignedUrl(){
+    async getSignedUrl(url){
 
         const millisecond = parseFloat(this.clientEnvironmentProviderservice.getClientEnvironmentVariable("EXPIRE_LINK_TIME"));
         var signingParams = {
@@ -24,7 +24,7 @@ export class SignedUrls{
         
         // Generating a signed URL
         var signedUrl = cfsign.getSignedUrl(
-            'https://d3uqieugp2i3ic.cloudfront.net/dev/1642511978193.png', 
+            url, 
             signingParams
         );
         
