@@ -80,10 +80,10 @@ export default class Application {
     }
 
     dbConnect(){
-        const dbURI = process.env.DB_URI;
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        mongoose.connect(dbURI).then((result) => console.log("connected to db"))
-            .catch((err) => console.log(err));
+        // const dbURI = process.env.DB_URI;
+        // // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // mongoose.connect(dbURI).then((result) => console.log("connected to db"))
+        //     .catch((err) => console.log(err));
     }
 
     setWebhooksForClients() {
