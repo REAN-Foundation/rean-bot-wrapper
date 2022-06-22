@@ -1,3 +1,4 @@
+/* eslint-disable lines-around-comment */
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 const cfsign = require('aws-cloudfront-sign');
@@ -29,4 +30,6 @@ export class SignedUrls{
         
         console.log("signedUrl", signedUrl);
     }
+    
 }
+
