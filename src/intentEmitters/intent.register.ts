@@ -22,6 +22,8 @@ import { LanguageChangeListener } from './intentListeners/language.change.listen
 import { HumanHandoverListener } from './intentListeners/human.handover.listener';
 import { RequestLiveAgent } from './intentListeners/request.live.agent.listener';
 import { createDemoBot } from './intentListeners/create.demo.bot.listener';
+import { calorieDetection } from './intentListeners/calorie.detection.listener';
+import { calorieReport } from './intentListeners/calorie.report.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -63,6 +65,10 @@ export class IntentRegister {
         IntentEmitter.registerListener('risk.assessment.info-no', getRiskAssessmentInfo);
 
         IntentEmitter.registerListener('create.demo.excel',createDemoBot);
+
+        //Intents for calorie information
+        IntentEmitter.registerListener('foodItemsDetails', calorieDetection);
+        IntentEmitter.registerListener('calorie.report.creation', calorieReport);
 
         IntentEmitter.registerListener('diabetes', getRiskAssessmentFollowup);
         IntentEmitter.registerListener('cancer', getRiskAssessmentFollowup);

@@ -87,3 +87,13 @@ export interface IprocessedDialogflowResponseFormat{
         result: any;
     };
 }
+
+export interface calorieInfo {
+    autoIncrementalID: number;
+    user_food_name: string;
+    fs_food_name: string;
+    units: string;
+    calories: number;
+    negative_feedback: number;
+    meta_data: string;
+}
