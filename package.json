@@ -30,6 +30,7 @@
     "actions-on-google": "^2.5",
     "approx-string-match": "^1.1.0",
     "async-request": "^1.0.0",
+    "aws-cloudfront-sign": "^2.2.0",
     "aws-sdk": "^2.997.0",
     "axios": "^0.21.4",
     "bcryptjs": "^2.4.3",
