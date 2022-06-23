@@ -3,11 +3,13 @@ import { UserFeedback } from "../models/user.feedback.model";
 import { delay, inject } from "tsyringe";
 import { autoInjectable } from 'tsyringe';
 import { SlackMessageService } from "./slack.message.service";
+import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 
 @autoInjectable()
 export class HumanHandoff {
 
-    constructor(@inject(delay(() => SlackMessageService)) public slackMessageService){}
+    constructor(@inject(delay(() => SlackMessageService)) public slackMessageService,
+        private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     async checkTime(){
         const time_obj = new Date();
@@ -17,8 +19,10 @@ export class HumanHandoff {
         console.log("hourUtc", hourUtc);
         console.log("minutesutc", minutesUtc);
         // const secondsUtc = time_obj.getUTCSeconds();
+        const startHHhour = parseFloat(this.clientEnvironmentProviderService.getClientEnvironmentVariable("HH_START_HOUR"));
+        const endHHhour = parseFloat(this.clientEnvironmentProviderService.getClientEnvironmentVariable("HH_END_HOUR"));
 
-        if (hourUtc === 6 && ( minutesUtc > 0 || minutesUtc < 59)){
+        if ((hourUtc >= startHHhour) && ( hourUtc <= endHHhour)){
             console.log("returned true");
             return "true";
         }
