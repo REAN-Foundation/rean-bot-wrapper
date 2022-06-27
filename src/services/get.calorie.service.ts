@@ -22,6 +22,15 @@ export class GetCalories {
             var serving_data = {};
             console.log("We are here in the get Calorie data of the things");
 
+            // eslint-disable-next-line init-declarations
+            let meal_type:string;
+
+            if (req.meal_type){
+                meal_type = req.meal_type;
+            } else {
+                meal_type = "NA";
+            }
+
             // eslint-disable-next-line @typescript-eslint/no-var-requires
             const access_data = await main();
             const access_token2 = JSON.stringify(access_data);
@@ -164,6 +173,7 @@ export class GetCalories {
                 fs_food_name   : text,
                 units          : null,
                 calories       : parseInt(total_calories),
+                meal_type      : meal_type,
                 meta_data      : JSON.stringify(meta_data)
             };
             const calorieInfo = new CalorieInfo(calorieObj);
