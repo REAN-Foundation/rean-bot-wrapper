@@ -46,6 +46,12 @@ export class CalorieInfo extends Model implements calorieInfo {
         calories: number;
 
     @Column({
+        type      : DataType.STRING,
+        allowNull : true,
+    })
+        meal_type: string;
+
+    @Column({
         type         : DataType.INTEGER,
         defaultValue : 0
     })

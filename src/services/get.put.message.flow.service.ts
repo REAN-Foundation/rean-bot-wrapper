@@ -89,8 +89,6 @@ export class MessageFlow{
         const personresponse = new ChatMessage(dfResponseObj);
         await personresponse.save();
 
-        console.log(processedResponse.message_from_dialoglow.text);
-
         if (processedResponse.message_from_dialoglow.text) {
             let message_to_platform = null;
 
