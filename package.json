@@ -62,7 +62,7 @@
     "needle": "^2.9.1",
     "node-cron": "^2.0.3",
     "node-html-to-image": "3.2.0",
-    "node-telegram-bot-api": "^0.54.0",
+    "node-telegram-bot-api": "^0.57.0",
     "pb-util": "^1.0.3",
     "pg": "^8.6.0",
     "pg-hstore": "^2.3.3",
