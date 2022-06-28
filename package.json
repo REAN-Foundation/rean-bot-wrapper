@@ -61,7 +61,7 @@
     "mysql2": "^2.2.5",
     "needle": "^2.9.1",
     "node-cron": "^2.0.3",
-    "node-html-to-image": "3.2.0",
+    "node-html-to-image": "3.2.4",
     "node-telegram-bot-api": "^0.54.0",
     "pb-util": "^1.0.3",
     "pg": "^8.6.0",
