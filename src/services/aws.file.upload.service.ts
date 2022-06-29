@@ -1,6 +1,7 @@
 import AWS from 'aws-sdk';
 import fs from 'fs';
 import nodeHtmlToImage from 'node-html-to-image';
+import { SignedUrls } from './signed.urls.service';
 
 // import { TempCredentials } from './get.temporary.aws.credentials';
 
@@ -64,15 +65,15 @@ export class AwsS3manager{
                     const s3 = new AWS.S3(responseCredentials);
 
                     // Uploading files to the bucket
-                    s3.upload(params, function (err, data) {
+                    s3.upload(params, async function (err, data) {
                         if (err) {
                             reject(err);
                         }
                         console.log(`File uploaded successfully. ${data}`);
 
                         const location = process.env.CLOUD_FRONT_PATH + filename;
-
-                        resolve(location);
+                        
+                        resolve(await new SignedUrls().getSignedUrl(location));
                     });
                 } else if (err.code === 'ENOENT') {
 

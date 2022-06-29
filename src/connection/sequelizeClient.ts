@@ -24,6 +24,7 @@ export class SequelizeClient {
             host    : dbHost,
             dialect : 'mysql',
             port    : 3306,
+            logging : false
         });
         
         sequelizeClient.addModels([ChatMessage, UserFeedback, ChatSession, ContactList, CalorieInfo]);

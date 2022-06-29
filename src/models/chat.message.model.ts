@@ -60,17 +60,17 @@ export class ChatMessage extends Model implements IchatMessage {
         messageType: string;
 
     @Column({
-        type : DataType.TEXT
+        type : DataType.TEXT()
     })
         messageContent: string;
     
     @Column({
-        type : DataType.STRING(256)
+        type : DataType.STRING(1024)
     })
         imageContent: string;
 
     @Column({
-        type : DataType.STRING(256)
+        type : DataType.STRING(1024)
     })
         imageUrl: string;
 
