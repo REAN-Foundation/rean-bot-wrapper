@@ -5,6 +5,7 @@ import { ChatMessage } from '../models/chat.message.model';
 import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
 import { ClientEnvironmentProviderService } from '../services/set.client/client.environment.provider.service';
+import { CalorieInfo } from '../models/calorie.info.model';
 
 @autoInjectable()
 export class SequelizeClient {
@@ -23,9 +24,10 @@ export class SequelizeClient {
             host    : dbHost,
             dialect : 'mysql',
             port    : 3306,
+            logging : false
         });
         
-        sequelizeClient.addModels([ChatMessage, UserFeedback, ChatSession, ContactList]);
+        sequelizeClient.addModels([ChatMessage, UserFeedback, ChatSession, ContactList, CalorieInfo]);
         // ChatSession.hasMany(ChatMessage);
         // ChatMessage.belongsTo(ChatSession);
         this._sequelize = sequelizeClient;

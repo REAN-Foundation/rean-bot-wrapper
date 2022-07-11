@@ -2,13 +2,16 @@ import { UserFeedback } from "../models/user.feedback.model";
 import { autoInjectable, container, delay, inject } from "tsyringe";
 import { HumanHandoff } from "./human.handoff.service";
 import { SlackMessageService } from "./slack.message.service";
+import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
+
 
 const humanHandoff: HumanHandoff = container.resolve(HumanHandoff);
 
 @autoInjectable()
 export class LiveAgent{
 
-    constructor(@inject(delay(() => SlackMessageService)) public slackMessageService){}
+    constructor(@inject(delay(() => SlackMessageService)) public slackMessageService,
+    private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     async requestLiveAgent(body) {
         console.log("eventobj for live agent",body);
@@ -18,7 +21,9 @@ export class LiveAgent{
         console.log("message", message);
         return new Promise(async(resolve) =>{
             if (await humanHandoff.checkTime() === "false") {
-                const reply = "Our experts will be available during *****";
+                const startHHhour = parseFloat(this.clientEnvironmentProviderService.getClientEnvironmentVariable("HH_START_HOUR_LOCAL"));
+                const endHHhour = parseFloat(this.clientEnvironmentProviderService.getClientEnvironmentVariable("HH_END_HOUR_LOCAL"));
+                const reply = `Our experts will be available between ${startHHhour} and ${endHHhour}`;
                 const data = {
                     "fulfillmentMessages" : [
                         {
@@ -59,4 +64,8 @@ export class LiveAgent{
         });
 
     }
+
+    // async localTime(){
+        
+    // }
 }
