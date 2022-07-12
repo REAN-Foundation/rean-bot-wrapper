@@ -21,7 +21,7 @@ export class GetCalories {
         try {
             const request = req;
             var serving_data = {};
-            var value = 1;
+            let value = 1;
             console.log("We are here in the get Calorie data of the things");
 
             // eslint-disable-next-line init-declarations
@@ -99,16 +99,17 @@ export class GetCalories {
                         'calories'  : parseInt(calories),
                         'data'      : serving_data,
                     };
-                    const calorieDB = {
-                        message_id : table_id,
-                        food_name  : search_term.name,
-                        fs_db_name : food.food.food_name,
-                        calories   : parseInt(calories),
-                        value      : value,
-                        meta_data  : JSON.stringify(serving_data)
-                    };
-                    const calorie_database = new CalorieDatabase(calorieDB);
-                    await calorie_database.save();
+                    await saveToDB(table_id,search_term.name,food.food.food_name,calories,value,serving_data);
+                    // const calorieDB = {
+                    //     message_id : table_id,
+                    //     food_name  : search_term.name,
+                    //     fs_db_name : food.food.food_name,
+                    //     calories   : parseInt(calories),
+                    //     value      : value,
+                    //     meta_data  : JSON.stringify(serving_data)
+                    // };
+                    // const calorie_database = new CalorieDatabase(calorieDB);
+                    // await calorie_database.save();
                     meta_data.push(temp);
                     const reply = `${search_term.name.toLowerCase()} ${food_description.toLowerCase()} is ${parseInt(calories)} calories`; 
                     reply_text.push(reply);
@@ -134,16 +135,18 @@ export class GetCalories {
                         'calories'  : parseInt(calories),
                         'data'      : serving_data,
                     };
-                    const calorieDB = {
-                        message_id : table_id,
-                        food_name  : search_term.name,
-                        fs_db_name : food.food.food_name,
-                        calories   : parseInt(calories),
-                        value      : value,
-                        meta_data  : JSON.stringify(serving_data)
-                    };
-                    const calorie_database = new CalorieDatabase(calorieDB);
-                    await calorie_database.save();
+                    await saveToDB(table_id,search_term.name,food.food.food_name,calories,value,serving_data);
+
+                    // const calorieDB = {
+                    //     message_id : table_id,
+                    //     food_name  : search_term.name,
+                    //     fs_db_name : food.food.food_name,
+                    //     calories   : parseInt(calories),
+                    //     value      : value,
+                    //     meta_data  : JSON.stringify(serving_data)
+                    // };
+                    // const calorie_database = new CalorieDatabase(calorieDB);
+                    // await calorie_database.save();
                     meta_data.push(temp);
                     const reply = `${search_term.name.toLowerCase()} ${food_description.toLowerCase()} is ${parseInt(calories)} calories`; 
                     reply_text.push(reply);
@@ -189,16 +192,18 @@ export class GetCalories {
                         'calories'  : temp_cal,
                         'data'      : serving_data
                     };
-                    const calorieDB = {
-                        message_id : table_id,
-                        food_name  : search_term.name,
-                        fs_db_name : food.food.food_name,
-                        value      : value,
-                        calories   : parseInt(calories),
-                        meta_data  : JSON.stringify(serving_data)
-                    };
-                    const calorie_database = new CalorieDatabase(calorieDB);
-                    await calorie_database.save();
+                    await saveToDB(table_id,search_term.name,food.food.food_name,calories,value,serving_data);
+
+                    // const calorieDB = {
+                    //     message_id : table_id,
+                    //     food_name  : search_term.name,
+                    //     fs_db_name : food.food.food_name,
+                    //     value      : value,
+                    //     calories   : parseInt(calories),
+                    //     meta_data  : JSON.stringify(serving_data)
+                    // };
+                    // const calorie_database = new CalorieDatabase(calorieDB);
+                    // await calorie_database.save();
                     meta_data.push(temp);
                     const reply = `${search_term.name.toLowerCase()} ${match.serving_description} is ${calories} calories`;
                     reply_text.push(reply);
@@ -344,6 +349,19 @@ export class GetCalories {
             } else {
                 return unit_found;
             }
+        }
+
+        async function saveToDB(table_id,name,food_name,calories,value,serving_data) {
+            const calorieDB = {
+                message_id : table_id,
+                food_name  : name,
+                fs_db_name : food_name,
+                calories   : parseInt(calories),
+                value      : value,
+                meta_data  : JSON.stringify(serving_data)
+            };
+            const calorie_database = new CalorieDatabase(calorieDB);
+            await calorie_database.save();
         }
     } 
 }
