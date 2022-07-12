@@ -1,5 +1,6 @@
-import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, AllowNull, Index } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, AllowNull, Index, HasMany } from 'sequelize-typescript';
 import { calorieInfo } from '../refactor/interface/message.interface';
+import { CalorieDatabase } from './calorie.db.model';
 
 @Table({
     timestamps : true,
@@ -24,14 +25,14 @@ export class CalorieInfo extends Model implements calorieInfo {
 
     @Index
     @Column({
-        type : DataType.STRING
+        type : DataType.STRING(256)
     })
-        user_food_name: string;
+        user_message: string;
     
     @Column({
-        type : DataType.STRING
+        type : DataType.STRING(512)
     })
-        fs_food_name: string;
+        fs_message: string;
 
     @Column({
         type      : DataType.STRING,
@@ -46,6 +47,12 @@ export class CalorieInfo extends Model implements calorieInfo {
         calories: number;
 
     @Column({
+        type      : DataType.INTEGER,
+        allowNull : true,
+    })
+        user_calories: number;
+
+    @Column({
         type      : DataType.STRING,
         allowNull : true,
     })
@@ -58,8 +65,17 @@ export class CalorieInfo extends Model implements calorieInfo {
         negative_feedback: number;
 
     @Column({
+        type         : DataType.INTEGER,
+        defaultValue : 0
+    })
+        calories_updated: number;
+
+    @Column({
         type      : DataType.STRING(2048),
         allowNull : true
     })
         meta_data: string;
+
+    @HasMany(() => CalorieDatabase)
+    CalorieDatabase: CalorieDatabase[];
 }

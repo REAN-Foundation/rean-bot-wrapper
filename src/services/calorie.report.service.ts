@@ -67,19 +67,16 @@ export const getCalorieReport = async (req,res) => {
                 var total = 0;
                 if (daily.meal_type === meal_type[i - 1]) {
                     table[daily.daynumber][i] = parseInt(daily.total_calories);
-                    total += parseInt(daily.total_calories);
-                } else {
-                    total += parseInt(daily.total_calories);
                 }
                 let temp = 0;
                 for (let j = 1; j < DATELENGTH + 1; j++){
                     temp++;
+                    if (daily.meal_type === "NA" && daily.daynumber === i) {
+                        table[daily.daynumber][DATELENGTH] = parseInt(daily.total_calories);
+                    }
                     if (!table[i][j]) {
                         table[i][j] = 0;
                     }
-                }
-                if (i === DATELENGTH) {
-                    table[daily.daynumber][i] = total;
                 }
             }
         }
@@ -167,7 +164,7 @@ export const getCalorieReport = async (req,res) => {
         const t_date = to_date.getFullYear() + '-' + (to_date.getMonth() + 1) + '-' + to_date.getDate();
         const data = await CalorieInfo.findAll({
             attributes : [
-                [sequelize.fn('SUM', sequelize.col('calories')), 'total_calories']
+                [sequelize.fn('SUM', sequelize.col('user_calories')), 'total_calories']
             ],
             where : sequelize.literal(`user_id = ${sessionId} AND createdAt >= '${f_date} 00:00:00' AND createdAt < '${t_date} 00:00:00'`)
         });
@@ -180,7 +177,7 @@ export const getCalorieReport = async (req,res) => {
     async function getDailyDataForReport(sessionId){
         const data = await CalorieInfo.findAll({
             attributes :[
-                [sequelize.fn('SUM', sequelize.col('calories')), 'total_calories'],
+                [sequelize.fn('SUM', sequelize.col('user_calories')), 'total_calories'],
                 [sequelize.fn('DAYOFWEEK',sequelize.col('createdAt')),'daynumber'],
                 [sequelize.fn('WEEKOFYEAR',sequelize.col('createdAt')),'weeknumber'],
                 'meal_type',

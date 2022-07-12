@@ -1,6 +1,7 @@
 import { autoInjectable,container } from "tsyringe";
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { CalorieInfo } from "../models/calorie.info.model";
+import { CalorieDatabase } from "../models/calorie.db.model";
 import { SequelizeClient } from '../connection/sequelizeClient';
 import requestCalorie = require('request');
 import filesystem = require('fs');
@@ -20,6 +21,7 @@ export class GetCalories {
         try {
             const request = req;
             var serving_data = {};
+            let value = 1;
             console.log("We are here in the get Calorie data of the things");
 
             // eslint-disable-next-line init-declarations
@@ -44,6 +46,16 @@ export class GetCalories {
             const food_names = [];
             const calories_array = [];
             const reply_text = [];
+
+            const calorieUser = {
+                user_id      : payload.userId,
+                user_message : queryText,
+            };
+
+            const calorie_user = new CalorieInfo(calorieUser);
+            const calorie_user_saved = await calorie_user.save();
+            const table_id = calorie_user_saved.autoIncrementalID;
+
             for (const foodName of query_result.food){
                 const search_term = {
                     'name' : foodName.food_name.name,
@@ -87,11 +99,22 @@ export class GetCalories {
                         'calories'  : parseInt(calories),
                         'data'      : serving_data,
                     };
+                    await saveToDB(table_id,search_term.name,food.food.food_name,calories,value,serving_data);
+                    // const calorieDB = {
+                    //     message_id : table_id,
+                    //     food_name  : search_term.name,
+                    //     fs_db_name : food.food.food_name,
+                    //     calories   : parseInt(calories),
+                    //     value      : value,
+                    //     meta_data  : JSON.stringify(serving_data)
+                    // };
+                    // const calorie_database = new CalorieDatabase(calorieDB);
+                    // await calorie_database.save();
                     meta_data.push(temp);
                     const reply = `${search_term.name.toLowerCase()} ${food_description.toLowerCase()} is ${parseInt(calories)} calories`; 
                     reply_text.push(reply);
                 } else if (!foodName.unit && foodName.value){
-
+                    value = parseInt(foodName.value);
                     console.log("Quantity has been defined");
                     let calories = '0';
                     let food_description = '';
@@ -112,6 +135,18 @@ export class GetCalories {
                         'calories'  : parseInt(calories),
                         'data'      : serving_data,
                     };
+                    await saveToDB(table_id,search_term.name,food.food.food_name,calories,value,serving_data);
+
+                    // const calorieDB = {
+                    //     message_id : table_id,
+                    //     food_name  : search_term.name,
+                    //     fs_db_name : food.food.food_name,
+                    //     calories   : parseInt(calories),
+                    //     value      : value,
+                    //     meta_data  : JSON.stringify(serving_data)
+                    // };
+                    // const calorie_database = new CalorieDatabase(calorieDB);
+                    // await calorie_database.save();
                     meta_data.push(temp);
                     const reply = `${search_term.name.toLowerCase()} ${food_description.toLowerCase()} is ${parseInt(calories)} calories`; 
                     reply_text.push(reply);
@@ -141,6 +176,7 @@ export class GetCalories {
                         calories_array.push(parseInt(calories));
                         temp_cal = parseInt(calories);
                     } else {
+                        value = parseInt(foodName.value);
                         if (volumes.includes(foodName.unit)) {
                             const unit_volume = parseInt(calories)/parseInt(match.number_of_units);
                             const per_volume_cal = (unit_volume * foodName.value).toFixed(1);
@@ -156,6 +192,18 @@ export class GetCalories {
                         'calories'  : temp_cal,
                         'data'      : serving_data
                     };
+                    await saveToDB(table_id,search_term.name,food.food.food_name,calories,value,serving_data);
+
+                    // const calorieDB = {
+                    //     message_id : table_id,
+                    //     food_name  : search_term.name,
+                    //     fs_db_name : food.food.food_name,
+                    //     value      : value,
+                    //     calories   : parseInt(calories),
+                    //     meta_data  : JSON.stringify(serving_data)
+                    // };
+                    // const calorie_database = new CalorieDatabase(calorieDB);
+                    // await calorie_database.save();
                     meta_data.push(temp);
                     const reply = `${search_term.name.toLowerCase()} ${match.serving_description} is ${calories} calories`;
                     reply_text.push(reply);
@@ -167,17 +215,22 @@ export class GetCalories {
             const total_calories = calories_array.reduce((a,b) => a + b);
             
             const text = 'The calorie content for ' +  reply_text.join(',') + '. Your total calorie intake based on the provided food items  and quantity is ' + total_calories + ' kcal (estimated).';
-            const calorieObj = {
-                user_id        : payload.userId,
-                user_food_name : queryText,
-                fs_food_name   : text,
-                units          : null,
-                calories       : parseInt(total_calories),
-                meal_type      : meal_type,
-                meta_data      : JSON.stringify(meta_data)
-            };
-            const calorieInfo = new CalorieInfo(calorieObj);
-            await calorieInfo.save();
+
+            const findit = await CalorieInfo.findOne(
+                {
+                    where : {
+                        autoIncrementalID : table_id
+                    },
+                }).then(function (record) {
+                return record.update({
+                    fs_message    : text,
+                    units         : null,
+                    calories      : parseInt(total_calories),
+                    user_calories : parseInt(total_calories),
+                    meal_type     : meal_type,
+                    meta_data     : JSON.stringify(meta_data)
+                });
+            });
             const data = {
                 "text"      : text,
                 "meta_data" : JSON.parse(JSON.stringify(meta_data)),
@@ -296,6 +349,19 @@ export class GetCalories {
             } else {
                 return unit_found;
             }
+        }
+
+        async function saveToDB(table_id,name,food_name,calories,value,serving_data) {
+            const calorieDB = {
+                message_id : table_id,
+                food_name  : name,
+                fs_db_name : food_name,
+                calories   : parseInt(calories),
+                value      : value,
+                meta_data  : JSON.stringify(serving_data)
+            };
+            const calorie_database = new CalorieDatabase(calorieDB);
+            await calorie_database.save();
         }
     } 
 }
