@@ -90,10 +90,22 @@ export interface IprocessedDialogflowResponseFormat{
 
 export interface calorieInfo {
     autoIncrementalID: number;
-    user_food_name: string;
-    fs_food_name: string;
+    user_message: string;
+    fs_message: string;
     units: string;
     calories: number;
+    user_calories:number;
     negative_feedback: number;
+    meta_data: string;
+    calories_updated: number;
+}
+
+export interface calorieDatabase {
+    autoIncrementalID: number;
+    food_name: string;
+    message_id: number;
+    fs_db_name: string;
+    calories: number;
+    value: number;
     meta_data: string;
 }
