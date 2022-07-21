@@ -32,7 +32,7 @@ export class FeedbackService implements feedbackInterface {
                     const negativeResponse = response[response.length-1].messageContent;
                     const findit = await CalorieInfo.findOne(
                         {
-                            where : {user_food_name: { [Op.like]: `${negativeResponse}`}},
+                            where : {user_message: { [Op.like]: `${negativeResponse}`}},
                             order : [['updatedAt', 'DESC']],
                             limit : 1,
                         }).then(function (record) {
@@ -43,7 +43,7 @@ export class FeedbackService implements feedbackInterface {
                             {
                                 "text" : {
                                     "text" : [
-                                        "Thank you for your feedback. We are working towards providing a better experience."
+                                        "Thank you for your feedback. Would you like to update the calorie value for the above food item?"
                                     ]
                                 }
                             }

@@ -24,6 +24,7 @@ import { RequestLiveAgent } from './intentListeners/request.live.agent.listener'
 import { createDemoBot } from './intentListeners/create.demo.bot.listener';
 import { calorieDetection } from './intentListeners/calorie.detection.listener';
 import { calorieReport } from './intentListeners/calorie.report.listener';
+import { CalorieUpdate } from './intentListeners/calorie.update.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -69,6 +70,7 @@ export class IntentRegister {
         //Intents for calorie information
         IntentEmitter.registerListener('foodItemsDetails', calorieDetection);
         IntentEmitter.registerListener('calorie.report.creation', calorieReport);
+        IntentEmitter.registerListener('CalorieNegativeFeedback - yes', CalorieUpdate);
 
         IntentEmitter.registerListener('diabetes', getRiskAssessmentFollowup);
         IntentEmitter.registerListener('cancer', getRiskAssessmentFollowup);
