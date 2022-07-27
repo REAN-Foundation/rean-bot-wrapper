@@ -22,6 +22,7 @@ export class GetCalories {
             const request = req;
             var serving_data = {};
             let value = 1;
+            var date_update = new Date().toISOString().slice(0, 19).replace('T', ' ');
             console.log("We are here in the get Calorie data of the things");
 
             // eslint-disable-next-line init-declarations
@@ -31,6 +32,9 @@ export class GetCalories {
                 meal_type = req.meal_type;
             } else {
                 meal_type = "NA";
+            }
+            if (req.date){
+                date_update = new Date(req.date).toISOString().slice(0,19).replace('T',' ');
             }
 
             // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -99,17 +103,8 @@ export class GetCalories {
                         'calories'  : parseInt(calories),
                         'data'      : serving_data,
                     };
+                    // eslint-disable-next-line max-len
                     await saveToDB(table_id,search_term.name,food.food.food_name,calories,value,serving_data);
-                    // const calorieDB = {
-                    //     message_id : table_id,
-                    //     food_name  : search_term.name,
-                    //     fs_db_name : food.food.food_name,
-                    //     calories   : parseInt(calories),
-                    //     value      : value,
-                    //     meta_data  : JSON.stringify(serving_data)
-                    // };
-                    // const calorie_database = new CalorieDatabase(calorieDB);
-                    // await calorie_database.save();
                     meta_data.push(temp);
                     const reply = `${search_term.name.toLowerCase()} ${food_description.toLowerCase()} is ${parseInt(calories)} calories`; 
                     reply_text.push(reply);
@@ -135,18 +130,8 @@ export class GetCalories {
                         'calories'  : parseInt(calories),
                         'data'      : serving_data,
                     };
+                    // eslint-disable-next-line max-len
                     await saveToDB(table_id,search_term.name,food.food.food_name,calories,value,serving_data);
-
-                    // const calorieDB = {
-                    //     message_id : table_id,
-                    //     food_name  : search_term.name,
-                    //     fs_db_name : food.food.food_name,
-                    //     calories   : parseInt(calories),
-                    //     value      : value,
-                    //     meta_data  : JSON.stringify(serving_data)
-                    // };
-                    // const calorie_database = new CalorieDatabase(calorieDB);
-                    // await calorie_database.save();
                     meta_data.push(temp);
                     const reply = `${search_term.name.toLowerCase()} ${food_description.toLowerCase()} is ${parseInt(calories)} calories`; 
                     reply_text.push(reply);
@@ -192,18 +177,8 @@ export class GetCalories {
                         'calories'  : temp_cal,
                         'data'      : serving_data
                     };
+                    // eslint-disable-next-line max-len
                     await saveToDB(table_id,search_term.name,food.food.food_name,calories,value,serving_data);
-
-                    // const calorieDB = {
-                    //     message_id : table_id,
-                    //     food_name  : search_term.name,
-                    //     fs_db_name : food.food.food_name,
-                    //     value      : value,
-                    //     calories   : parseInt(calories),
-                    //     meta_data  : JSON.stringify(serving_data)
-                    // };
-                    // const calorie_database = new CalorieDatabase(calorieDB);
-                    // await calorie_database.save();
                     meta_data.push(temp);
                     const reply = `${search_term.name.toLowerCase()} ${match.serving_description} is ${calories} calories`;
                     reply_text.push(reply);
@@ -215,7 +190,6 @@ export class GetCalories {
             const total_calories = calories_array.reduce((a,b) => a + b);
             
             const text = 'The calorie content for ' +  reply_text.join(',') + '. Your total calorie intake based on the provided food items  and quantity is ' + total_calories + ' kcal (estimated).';
-
             const findit = await CalorieInfo.findOne(
                 {
                     where : {
@@ -228,7 +202,8 @@ export class GetCalories {
                     calories      : parseInt(total_calories),
                     user_calories : parseInt(total_calories),
                     meal_type     : meal_type,
-                    meta_data     : JSON.stringify(meta_data)
+                    meta_data     : JSON.stringify(meta_data),
+                    record_date   : date_update
                 });
             });
             const data = {
@@ -358,7 +333,7 @@ export class GetCalories {
                 fs_db_name : food_name,
                 calories   : parseInt(calories),
                 value      : value,
-                meta_data  : JSON.stringify(serving_data)
+                meta_data  : JSON.stringify(serving_data),
             };
             const calorie_database = new CalorieDatabase(calorieDB);
             await calorie_database.save();

@@ -166,7 +166,7 @@ export const getCalorieReport = async (req,res) => {
             attributes : [
                 [sequelize.fn('SUM', sequelize.col('user_calories')), 'total_calories']
             ],
-            where : sequelize.literal(`user_id = ${sessionId} AND createdAt >= '${f_date} 00:00:00' AND createdAt < '${t_date} 00:00:00'`)
+            where : sequelize.literal(`user_id = ${sessionId} AND record_date >= '${f_date} 00:00:00' AND record_date < '${t_date} 00:00:00'`)
         });
         if (!data[0].get().total_calories) {
             data[0].get().total_calories = "N/A";
@@ -178,11 +178,11 @@ export const getCalorieReport = async (req,res) => {
         const data = await CalorieInfo.findAll({
             attributes :[
                 [sequelize.fn('SUM', sequelize.col('user_calories')), 'total_calories'],
-                [sequelize.fn('DAYOFWEEK',sequelize.col('createdAt')),'daynumber'],
-                [sequelize.fn('WEEKOFYEAR',sequelize.col('createdAt')),'weeknumber'],
+                [sequelize.fn('DAYOFWEEK',sequelize.col('record_date')),'daynumber'],
+                [sequelize.fn('WEEKOFYEAR',sequelize.col('record_date')),'weeknumber'],
                 'meal_type',
             ],
-            where : sequelize.literal(`user_id = ${sessionId} AND WEEKOFYEAR(createdAt) = WEEKOFYEAR(NOW())`),
+            where : sequelize.literal(`user_id = ${sessionId} AND WEEKOFYEAR(record_date) = WEEKOFYEAR(NOW())`),
             group : ['daynumber','meal_type']
         }).then(data => {
             return JSON.parse(JSON.stringify(data));
