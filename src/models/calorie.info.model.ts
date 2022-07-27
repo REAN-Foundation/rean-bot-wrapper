@@ -75,6 +75,11 @@ export class CalorieInfo extends Model implements calorieInfo {
         allowNull : true
     })
         meta_data: string;
+    
+    @Column({
+        type : DataType.DATE,
+    })
+        record_date: Date;
 
     @HasMany(() => CalorieDatabase)
     CalorieDatabase: CalorieDatabase[];
