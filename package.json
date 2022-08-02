@@ -31,7 +31,7 @@
     "approx-string-match": "^1.1.0",
     "async-request": "^1.0.0",
     "aws-cloudfront-sign": "^2.2.0",
-    "aws-sdk": "^2.997.0",
+    "aws-sdk": "^2.1184.0",
     "axios": "^0.21.4",
     "bcryptjs": "^2.4.3",
     "bluebird": "^3.7.2",

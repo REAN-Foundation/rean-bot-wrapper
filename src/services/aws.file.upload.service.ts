@@ -44,7 +44,7 @@ export class AwsS3manager{
                     const fileContent = fs.readFileSync(filePath);
                     var filename = filePath.replace(/^.*[\\/]/, '');
                     var split_fs = filePath.split('/')[1];
-                    console.log("filename", filename + split_fs);
+                    // console.log("filename", filename + split_fs);
 
                     // Setting up S3 upload parameters
                     const params = {
@@ -59,8 +59,6 @@ export class AwsS3manager{
                         params.ContentType = 'audio/ogg';
                     }
 
-                    console.log("params");
-
                     // eslint-disable-next-line max-len
                     const s3 = new AWS.S3(responseCredentials);
 
@@ -69,14 +67,11 @@ export class AwsS3manager{
                         if (err) {
                             reject(err);
                         }
-                        console.log(`File uploaded successfully. ${data}`);
-
+                        // console.log(`File uploaded successfully. ${data}`);
                         const location = process.env.CLOUD_FRONT_PATH + filename;
-                        
                         resolve(await new SignedUrls().getSignedUrl(location));
                     });
                 } else if (err.code === 'ENOENT') {
-
                     console.log('File not exists');
                     reject('File not exists');
                 } else {
@@ -117,24 +112,23 @@ export class AwsS3manager{
     }
 
     async getFile (key) {
-        const responseCredentials: any = await this.getCrossAccountCredentials();
-        const BUCKET_NAME = process.env.BUCKET_NAME;
-        const s3 = new AWS.S3(responseCredentials);
+        return new Promise<any>(async(resolve,reject) => {
+            const responseCredentials: any = await this.getCrossAccountCredentials();
+            const BUCKET_NAME = process.env.BUCKET_NAME;
+            const s3 = new AWS.S3(responseCredentials);
 
-        const downloadParams = {
-            Key    : key,
-            Bucket : BUCKET_NAME
-        };
+            const downloadParams = {
+                Key    : key,
+                Bucket : BUCKET_NAME
+            };
 
-        const awsGetFile = await s3.getObject(downloadParams, function (error, data) {
-            if (error) {
-                console.error(error);
-            }
-            
-            return data;
-        }).promise();
-
-        return awsGetFile;
+            s3.getObject(downloadParams, function (error, data) {
+                if (error) {
+                    console.error(error);
+                }
+                resolve(data);
+            });
+        });
 
     }
 
