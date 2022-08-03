@@ -21,7 +21,7 @@ export class AnemiaModel{
                         }
                     ]
                 };
-                console.log("sending image url", util.inspect(data, {showHidden: false, depth: null, colors: true}));
+                console.log("sending image url", util.inspect(data, { showHidden: false, depth: null, colors: true }));
                 resolve(data);
             }
             catch (error) {

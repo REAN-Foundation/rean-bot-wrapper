@@ -66,6 +66,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         console.log("response from GetWhatsappMedia", response);
         const location = await this.awsS3manager.uploadFile(response);
         console.log("response image whatsapp", location);
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
         const url = require('url');
         const urlParse = url.parse(location);
         const imageUrl = (urlParse.protocol + urlParse.hostname + urlParse.pathname);

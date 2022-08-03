@@ -40,7 +40,7 @@ export class MessageFlow{
         const personrequest = new ChatMessage(chatMessageObj);
         await personrequest.save();
         const userId = chatMessageObj.userPlatformID;
-        const resp = await UserFeedback.findAll({where: { userId: userId } });
+        const resp = await UserFeedback.findAll({ where: { userId: userId } });
         if (resp.length === 0) {
             this.get_put_msg_Dialogflow(messagetoDialogflow, channel, platformMessageService);
         }
@@ -51,7 +51,7 @@ export class MessageFlow{
                 this.slackMessageService.delayedInitialisation();
                 const client = this.slackMessageService.client;
                 const channelID = this.slackMessageService.channelID;
-                await client.chat.postMessage({ channel: channelID, text: chatMessageObj.messageContent, thread_ts: ts});
+                await client.chat.postMessage({ channel: channelID, text: chatMessageObj.messageContent, thread_ts: ts });
                 
             }
             else {

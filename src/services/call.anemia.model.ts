@@ -3,7 +3,6 @@ import { getRequestOptions } from '../utils/helper';
 import needle from "needle";
 import { autoInjectable } from 'tsyringe';
 import { ChatMessage } from '../models/chat.message.model';
-import sequelize = require("sequelize");
 
 @autoInjectable()
 export class CallAnemiaModel {
@@ -12,7 +11,7 @@ export class CallAnemiaModel {
 
     async callAnemiaModel(imagePathFromDF) {
 
-        const respChatMessage = await ChatMessage.findAll({ where: {"messageContent": imagePathFromDF, "direction": "In" }});
+        const respChatMessage = await ChatMessage.findAll({ where: { "messageContent": imagePathFromDF, "direction": "In" } });
         const anemiaModelUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("ANEMIA_MODEL_URL");
         const REQUEST_AUTHENTICATION = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REQUEST_AUTHENTICATION");
         const options = getRequestOptions();
@@ -25,7 +24,6 @@ export class CallAnemiaModel {
         const response = await needle("post", anemiaModelUrl, obj, options);
 
         console.log("response from anemia model", response.body);
-
 
         if (response.statusCode !== 200) {
             console.log("Failed to get response from API.", response.statusCode);
@@ -43,4 +41,5 @@ export class CallAnemiaModel {
         return anemiaResult;
 
     }
+
 }

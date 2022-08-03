@@ -9,7 +9,7 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 import { AwsS3manager } from "./aws.file.upload.service";
 import { UserLanguage } from './set.language';
 import { SequelizeClient } from '../connection/sequelizeClient';
-import path, { resolve } from 'path';
+import path from 'path';
 import fs from 'fs';
 
 @autoInjectable()
@@ -82,6 +82,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
             const urlParse = url.parse(location);
             const imageUrl = (urlParse.protocol + urlParse.hostname + urlParse.pathname);
             const returnMessage = this.inputMessageFormat(message);
+
             // console.log("location image in S3", imageUrl);
             returnMessage.type = 'image';
             returnMessage.messageBody = imageUrl;
@@ -167,7 +168,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
                 // const awsFile = await this.awss3manager.uploadFile(uploadpath);
                 resolve(uploadpath);
             });
-        });  
+        });
     }
 
     async downloadTelegramDocument(url,media) {
