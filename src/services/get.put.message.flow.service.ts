@@ -32,7 +32,7 @@ export class MessageFlow{
             messageType    : messagetoDialogflow.type,
             messageContent : messagetoDialogflow.messageBody,
             imageContent   : null,
-            imageUrl       : null,
+            imageUrl       : messagetoDialogflow.imageUrl,
             userPlatformID : messagetoDialogflow.sessionId,
             intent         : null
         };
