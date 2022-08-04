@@ -39,14 +39,19 @@ export class ChatSession extends Model implements chatSession {
         platform: string;
     
     @Column({
-        type : DataType.STRING
+        type : DataType.DATE
     })
-        lastMessageDate: string;
+        lastMessageDate: any;
 
     @Column({
         type : DataType.STRING,
     })
         sessionOpen: string;
+
+    @Column({
+        type : DataType.STRING,
+    })
+        askForFeedback: string;
 
     @HasMany(() => ChatMessage)
     ChatMessage: ChatMessage[];
