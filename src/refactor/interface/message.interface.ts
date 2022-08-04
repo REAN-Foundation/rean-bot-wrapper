@@ -6,6 +6,7 @@ export interface Imessage{
     direction: string;
     type : string;
     messageBody : string;
+    imageUrl : string;
     latlong : string;
     replyPath : string;
 }

@@ -9,7 +9,7 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 import { AwsS3manager } from "./aws.file.upload.service";
 import { UserLanguage } from './set.language';
 import { SequelizeClient } from '../connection/sequelizeClient';
-import path, { resolve } from 'path';
+import path from 'path';
 import fs from 'fs';
 
 @autoInjectable()
@@ -77,10 +77,16 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         if (response.result.file_path){
             const filePath = await this.downloadTelegramMedia('https://api.telegram.org/file/bot' + this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN") + '/' + response.result.file_path, "photo");
             const location = await this.awsS3manager.uploadFile(filePath);
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
+            const url = require('url');
+            const urlParse = url.parse(location);
+            const imageUrl = (urlParse.protocol + urlParse.hostname + urlParse.pathname);
             const returnMessage = this.inputMessageFormat(message);
-            console.log("location image in S3", location);
+
+            // console.log("location image in S3", imageUrl);
             returnMessage.type = 'image';
-            returnMessage.messageBody = location;
+            returnMessage.messageBody = imageUrl;
+            returnMessage.imageUrl = location;
             console.log("return message", returnMessage);
             return returnMessage;
         } else {
@@ -97,6 +103,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
             chat_message_id : message.message_id,
             direction       : "In",
             messageBody     : null,
+            imageUrl        : null,
             sessionId       : message.chat.id.toString(),
             replyPath       : null,
             latlong         : null,
@@ -161,7 +168,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
                 // const awsFile = await this.awss3manager.uploadFile(uploadpath);
                 resolve(uploadpath);
             });
-        });  
+        });
     }
 
     async downloadTelegramDocument(url,media) {

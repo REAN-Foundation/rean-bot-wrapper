@@ -66,10 +66,15 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         console.log("response from GetWhatsappMedia", response);
         const location = await this.awsS3manager.uploadFile(response);
         console.log("response image whatsapp", location);
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const url = require('url');
+        const urlParse = url.parse(location);
+        const imageUrl = (urlParse.protocol + urlParse.hostname + urlParse.pathname);
         if (response){
             const returnMessage = this.inputMessageFormat(msg);
             returnMessage.type = 'image';
-            returnMessage.messageBody = location;
+            returnMessage.messageBody = imageUrl;
+            returnMessage.imageUrl = location;
             return returnMessage;
         } else {
             throw new Error("Unable to find the image file path");
@@ -133,6 +138,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
             chat_message_id : message.messages[0].id,
             direction       : "In",
             messageBody     : null,
+            imageUrl        : null,
             sessionId       : message.contacts[0].wa_id,
             replyPath       : null,
             latlong         : null,
