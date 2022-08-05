@@ -74,8 +74,7 @@ export class ClientWebhookController {
     authenticateMetaWhatsappWebhook = async (req, res) => {
         console.log("meta whatsapp webhook verification");
         try {
-            const challange = req.query["hub.challenge"];
-            this.responseHandler.sendSuccessResponseForWhatsappAPI(res,200,challange);
+            this.responseHandler.sendSuccessResponseForWhatsappAPI(res,200,req);
         }
         catch (error) {
             console.log("in error", error);
