@@ -34,12 +34,10 @@ export class ResponseHandler {
         return response.status(code).send(obj);
     };
 
-    // sendSuccessResponseForWhatsappAPI = (response, code, message, log_data = false) => {
-    //     if (log_data) {
-    //         this.logger.log_info(JSON.stringify(message));
-    //     }
-    //     return response.status(code).send(message);
-    // };
+    sendSuccessResponseForWhatsappAPI = (response, code, message, log_data = false) => {
+        this.logger.log_info(JSON.stringify(message));
+        return response.status(code).send(message);
+    };
 
     sendSuccessResponseForSlack = (response, code, message, log_data = false) => {
         const obj = {
