@@ -13,6 +13,7 @@ import { GoogleTextToSpeech } from './text.to.speech';
 import { UserFeedback } from '../models/user.feedback.model';
 import { SlackMessageService } from "./slack.message.service";
 import { ChatSession } from '../models/chat.session';
+import { ContactList } from '../models/contact.list';
 
 @autoInjectable()
 export class MessageFlow{
@@ -80,6 +81,7 @@ export class MessageFlow{
         const personresponse = new ChatMessage(dfResponseObj);
         await personresponse.save();
 
+        // console.log(processedResponse.message_from_dialoglow.text);
         if (processedResponse.message_from_dialoglow.text) {
             let message_to_platform = null;
 
@@ -145,7 +147,8 @@ export class MessageFlow{
                 userPlatformID : messagetoDialogflow.sessionId,
                 intent         : null
             };
-            await this.sequelizeClient.connect();
+
+            // await this.sequelizeClient.connect();
             const personrequest = new ChatMessage(chatMessageObj);
             await personrequest.save();
             const userId = chatMessageObj.userPlatformID;
@@ -155,6 +158,22 @@ export class MessageFlow{
 
             // console.log("lastMessageDate",lastMessageDate);
             // console.log("respChatSession!!!", respChatSession);
+
+            //check if user is new, if new then make a new entry in table contact list
+            const respContactList = await ContactList.findAll({ where: { mobileNumber: userId } });
+
+            // console.log("respContactList!!!", respContactList);
+            if (respContactList.length === 0) {
+                const newContactlistEntry = new ContactList({
+                    mobileNumber : messagetoDialogflow.sessionId,
+                    username     : messagetoDialogflow.name,
+                    platform     : messagetoDialogflow.platform,
+                    optOut       : "false" });
+                console.log("newContactlistEntry", newContactlistEntry);
+                await newContactlistEntry.save();
+            }
+
+            //start or continue a session
             if (respChatSession.length === 0 || respChatSession[respChatSession.length - 1].sessionOpen === "false") {
 
                 // console.log("starting a new session");

@@ -5,7 +5,8 @@ import { Imessage } from '../refactor/interface/message.interface';
 import { autoInjectable, delay, inject } from 'tsyringe';
 import { ResponseHandler } from '../utils/response.handler';
 import { TelegramMessageService } from './telegram.message.service';
-import { platformMessageService } from './whatsapp.message.service';
+import { WhatsappMessageService } from './whatsapp.message.service';
+import { WhatsappMetaMessageService } from './whatsapp.meta.message.service';
 import { UserFeedback } from '../models/user.feedback.model';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 
@@ -22,7 +23,8 @@ export class SlackMessageService implements platformServiceInterface {
 
     private isInitialised = false;
 
-    constructor(@inject(delay(() => platformMessageService)) public whatsappMessageService,
+    constructor(@inject(delay(() => WhatsappMessageService)) public whatsappMessageService,
+        @inject(delay(() => WhatsappMetaMessageService)) public whatsappNewMessageService,
         private responseHandler?: ResponseHandler,
         private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         private telegramMessageservice?: TelegramMessageService) {}
@@ -142,6 +144,9 @@ export class SlackMessageService implements platformServiceInterface {
         }
         else if (channel === "whatsapp"){
             await this.whatsappMessageService.SendMediaMessage(contact.toString(), null, message, "text");
+        }
+        else if (channel === "whatsappNew"){
+            await this.whatsappNewMessageService.SendMediaMessage(contact.toString(), null, message, "text");
         }
     }
 

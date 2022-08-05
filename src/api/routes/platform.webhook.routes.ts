@@ -5,7 +5,7 @@ import { ClientWebhookController } from '../controllers/client.webhook.controlle
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
 
 @injectable()
-export class WhatsappWebhookRoutes{
+export class PlatformWebhookRoutes{
 
     constructor(private logger?: Logger,
         private _clientWebhookController?: ClientWebhookController,
@@ -15,9 +15,10 @@ export class WhatsappWebhookRoutes{
 
     register (app: express.Application) {
         const router = express.Router();
-
         router.post(`/:client/:channel/:unique_token/send`, this.clientEnvironmentProviderService.clientNameMiddleware, this._clientWebhookController.sendMessage);
         router.post(`/:client/:channel/:unique_token/receive`, this.clientEnvironmentProviderService.clientNameMiddleware, this._clientWebhookController.receiveMessage);
+        router.get(`/:client/:channel/:unique_token/webhook`, this.clientEnvironmentProviderService.clientNameMiddleware, this._clientWebhookController.authenticateMetaWhatsappWebhook);
+        router.post(`/:client/:channel/:unique_token/webhook`, this.clientEnvironmentProviderService.clientNameMiddleware, this._clientWebhookController.receiveMessageMetaWhatsapp);
         app.use('/v1/', router);
     }
 

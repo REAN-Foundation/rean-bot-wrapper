@@ -1,8 +1,10 @@
+/* eslint-disable max-len */
 import { ResponseHandler } from '../../utils/response.handler';
 import { ErrorHandler } from '../../utils/error.handler';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { autoInjectable, container } from 'tsyringe';
 import { clientAuthenticator } from '../../services/clientAuthenticator/client.authenticator.interface';
+import util from 'util';
 
 @autoInjectable()
 export class ClientWebhookController {
@@ -49,6 +51,61 @@ export class ClientWebhookController {
                 this._platformMessageService.res = res;
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const response = this._platformMessageService.handleMessage(req.body, req.params.channel);
+            }
+        }
+        catch (error) {
+            console.log("in error", error);
+            this.errorHandler.handle_controller_error(error, res, req);
+        }
+    };
+
+    authenticateMetaWhatsappWebhook = async (req, res) => {
+        console.log("receiveMessage webhook");
+        try {
+            this.responseHandler.sendSuccessResponseForWhatsappAPI(res,200,req.query["hub.challenge"]);
+        }
+        catch (error) {
+            console.log("in error", error);
+            this.errorHandler.handle_controller_error(error, res, req);
+        }
+
+    }
+
+    receiveMessageMetaWhatsapp = async (req, res) => {
+        // console.log("receiveMessage webhook receiveMessageWhatsappNew");
+        try {
+            this._clientAuthenticatorService = container.resolve(req.params.channel + '.authenticator');
+            this._clientAuthenticatorService.authenticate(req,res);
+            const statuses = req.body.entry[0].changes[0].value.statuses;
+            if (statuses) {
+                if (statuses[0].status === "sent") {
+                    console.log("sent", statuses);
+                    this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', "");
+                }
+                else if (statuses[0].status === "delivered") {
+                    console.log("delivered", statuses);
+                    this.responseHandler.sendSuccessResponse(res, 200, 'Message delivered successfully!', "");
+                }
+                else if (statuses[0].status === "read") {
+                    console.log("read", statuses);
+                    this.responseHandler.sendSuccessResponse(res, 200, 'Message read successfully!', "");
+                }
+                else {
+                    //deal accordingly
+                    // console.log("Check status", statuses[0].status);
+                }
+            }
+            else {
+                console.log("receiveMessage webhook receiveMessageWhatsappNew");
+                if (req.params.channel !== "REAN_SUPPORT" && req.params.channel !== "slack"){
+                    this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
+                }
+                this._platformMessageService = container.resolve(req.params.channel);
+                this._platformMessageService.res = res;
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                // console.log("reqbody content", util.inspect(req.body));
+                // console.log("changes content", util.inspect(req.body.entry[0].changes[0]));
+                const response = this._platformMessageService.handleMessage(req.body.entry[0].changes[0].value, req.params.channel);
             }
         }
         catch (error) {
