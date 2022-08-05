@@ -39,9 +39,21 @@ export class ClientWebhookController {
         try {
             this._clientAuthenticatorService = container.resolve(req.params.channel + '.authenticator');
             this._clientAuthenticatorService.authenticate(req,res);
-            if (req.body.statuses) {
+            const status = req.body.statuses;
+            if (status) {
+                if (status[0].status === "sent") {
+                    this.responseHandler.sendSuccessResponse(res, 200, 'Message is sent successfully!', "");
+                }
+                else if (status[0].status === "delivered") {
+                    this.responseHandler.sendSuccessResponse(res, 200, 'Message is delivered successfully!', "");
+                }
+                else if (status[0].status === "read") {
+                    this.responseHandler.sendSuccessResponse(res, 200, 'Message is read successfully!', "");
+                }
+                else {
 
-                // status = sent, received & read
+                    //deal accordingly
+                }
             }
             else {
                 if (req.params.channel !== "REAN_SUPPORT" && req.params.channel !== "slack"){
@@ -79,15 +91,18 @@ export class ClientWebhookController {
             const statuses = req.body.entry[0].changes[0].value.statuses;
             if (statuses) {
                 if (statuses[0].status === "sent") {
-                    console.log("sent", statuses);
+
+                    // console.log("sent", statuses);
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', "");
                 }
                 else if (statuses[0].status === "delivered") {
-                    console.log("delivered", statuses);
+
+                    // console.log("delivered", statuses);
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message delivered successfully!', "");
                 }
                 else if (statuses[0].status === "read") {
-                    console.log("read", statuses);
+
+                    // console.log("read", statuses);
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message read successfully!', "");
                 }
                 else {

@@ -8,7 +8,7 @@ import { autoInjectable, singleton, inject, delay } from 'tsyringe';
 import { Iresponse, Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { MessageFlow } from './get.put.message.flow.service';
-import { MessageFunctionalities } from './whatsapp.message.sevice.functionalities';
+import { MessageFunctionalities } from './whatsapp.meta.functionalities';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
@@ -160,24 +160,6 @@ export class WhatsappMessageService implements platformServiceInterface {
         });
     };
 
-    sanitizeMessage = (message) => {
-        if (message) {
-            message = message.replace(/<b> /g, "*").replace(/<b>/g, "*")
-                .replace(/ <\/b>/g, "* ")
-                .replace(/ <\/ b>/g, "* ")
-                .replace(/<\/b>/g, "* ");
-            if (message.length > 4096) {
-
-                var strshortened = message.slice(0, 3800);
-                strshortened = strshortened.substring(0, strshortened.lastIndexOf("\n\n") + 1);
-                message = strshortened + '\n\n Too many appointments to display here, please visit the CoWin website - https://www.cowin.gov.in/home -  to view more appointments. \n or \n Enter additional details to filter the results.';
-            }
-        }
-
-        // console.log("msg  has been santised", message);
-        return message;
-    };
-
     postDataFormatWhatsapp = (contact) => {
         const postData = {
             'recipient_type' : 'individual',
@@ -215,7 +197,7 @@ export class WhatsappMessageService implements platformServiceInterface {
     SendMediaMessage = async (contact: number | string, imageLink: string, message: string, messageType: string) => {
         return new Promise(async() => {
             console.log("message type",messageType + imageLink);
-            message = this.sanitizeMessage(message);
+            message = this.messageFunctionalities.sanitizeMessage(message);
             const postData = this.postDataFormatWhatsapp(contact);
             if (messageType === "image") {
                 postData["image"] = {

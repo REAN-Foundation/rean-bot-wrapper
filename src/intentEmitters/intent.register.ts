@@ -25,8 +25,7 @@ import { createDemoBot } from './intentListeners/create.demo.bot.listener';
 import { calorieDetection } from './intentListeners/calorie.detection.listener';
 import { calorieReport } from './intentListeners/calorie.report.listener';
 import { CalorieUpdate } from './intentListeners/calorie.update.listener';
-import { WhatsAppOptOut } from './intentListeners/whatsapp.optout.listener';
-import { WhatsAppOptIn } from './intentListeners/whatsapp.optin.listener';
+import { WhatsAppTemplateOpting } from './intentListeners/whatsapp.tempalte.opting.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -64,9 +63,9 @@ export class IntentRegister {
 
         IntentEmitter.registerListener("RequestLiveAgent", RequestLiveAgent);
 
-        IntentEmitter.registerListener("OptOut", WhatsAppOptOut);
+        IntentEmitter.registerListener("OptOut", WhatsAppTemplateOpting);
 
-        IntentEmitter.registerListener("OptIn", WhatsAppOptIn);
+        IntentEmitter.registerListener("OptIn", WhatsAppTemplateOpting);
         
         IntentEmitter.registerListener('Risk.assessment.info', getRiskAssessmentInfo);
         IntentEmitter.registerListener('risk.assessment.info-no', getRiskAssessmentInfo);

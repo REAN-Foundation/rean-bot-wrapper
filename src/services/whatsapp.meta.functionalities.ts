@@ -145,13 +145,31 @@ export class MessageFunctionalities implements getMessageFunctionalities {
             chat_message_id : message.messages[0].id,
             direction       : "In",
             messageBody     : null,
+            imageUrl        : null,
             sessionId       : message.contacts[0].wa_id,
             replyPath       : null,
             latlong         : null,
-            type            : "text",
-            imageUrl        : ""
+            type            : "text"
         };
         return response_message;
     }
+
+    sanitizeMessage = (message) => {
+        if (message) {
+            message = message.replace(/<b> /g, "*").replace(/<b>/g, "*")
+                .replace(/ <\/b>/g, "* ")
+                .replace(/ <\/ b>/g, "* ")
+                .replace(/<\/b>/g, "* ");
+            if (message.length > 4096) {
+
+                var strshortened = message.slice(0, 3800);
+                strshortened = strshortened.substring(0, strshortened.lastIndexOf("\n\n") + 1);
+                message = strshortened + '\n\n Too many appointments to display here, please visit the CoWin website - https://www.cowin.gov.in/home -  to view more appointments. \n or \n Enter additional details to filter the results.';
+            }
+        }
+
+        // console.log("msg  has been santised", message);
+        return message;
+    };
 
 }
