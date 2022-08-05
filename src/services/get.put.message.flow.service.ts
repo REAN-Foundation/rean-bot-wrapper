@@ -27,7 +27,8 @@ export class MessageFlow{
 
     async checkTheFlow(msg: any, channel: string, platformMessageService: platformServiceInterface){
         const messagetoDialogflow: Imessage = await platformMessageService.getMessage(msg);
-        console.log("message to DF", messagetoDialogflow);
+
+        // console.log("message to DF", messagetoDialogflow);
 
         //initialising MySQL DB tables
         const chatMessageObj = await this.engageMySQL(messagetoDialogflow);
@@ -54,7 +55,6 @@ export class MessageFlow{
     }
 
     async get_put_msg_Dialogflow (messagetoDialogflow: Imessage, channel: string ,platformMessageService: platformServiceInterface) {
-        console.log("entered the get_put_msg_Dialogflow,,,,,,,,,,,,,,,,,,,,,,,,,");
         
         return this.processMessage(messagetoDialogflow, channel ,platformMessageService);
     }
@@ -114,7 +114,8 @@ export class MessageFlow{
             const id = message.sessionId;
             const obj = new GoogleTextToSpeech();
             const audioURL = await obj.texttoSpeech(response_format.messageText, id);
-            console.log("audioURL", audioURL);
+
+            // console.log("audioURL", audioURL);
             response_format.message_type = "voice";
             response_format.messageBody = audioURL;
         }
@@ -169,7 +170,8 @@ export class MessageFlow{
                     username     : messagetoDialogflow.name,
                     platform     : messagetoDialogflow.platform,
                     optOut       : "false" });
-                console.log("newContactlistEntry", newContactlistEntry);
+                    
+                // console.log("newContactlistEntry", newContactlistEntry);
                 await newContactlistEntry.save();
             }
 
