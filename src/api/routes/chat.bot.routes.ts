@@ -13,7 +13,7 @@ export class ChatBotRoutes {
 
     register (app: express.Application): void {
 
-        const router = express.Router();     
+        const router = express.Router();
 
         const authenticator = Loader.authenticator;
         const controller = new ChatBotController();

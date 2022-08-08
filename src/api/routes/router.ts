@@ -2,7 +2,7 @@ import express from "express";
 import { Logger } from "../../common/logger";
 import { ChatBotRoutes } from './chat.bot.routes';
 import { autoInjectable } from 'tsyringe';
-import { WhatsappWebhookRoutes } from './whatsapp.webhook.routes';
+import { PlatformWebhookRoutes } from './platform.webhook.routes';
 import { FrontendRoutes } from "./Frontend.routes";
 import { ClientEnvironmentProviderService } from "../../services/set.client/client.environment.provider.service";
 
@@ -13,7 +13,7 @@ export class Router {
 
     constructor(app: express.Application,
                 private chatBotRoutes?: ChatBotRoutes,
-                private whatsappWebhookRoutes?: WhatsappWebhookRoutes,
+                private whatsappWebhookRoutes?: PlatformWebhookRoutes,
                 private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
                 private frontendRoutes?: FrontendRoutes,){
         this._app = app;

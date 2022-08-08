@@ -13,6 +13,7 @@ import { GoogleTextToSpeech } from './text.to.speech';
 import { UserFeedback } from '../models/user.feedback.model';
 import { SlackMessageService } from "./slack.message.service";
 import { ChatSession } from '../models/chat.session';
+import { ContactList } from '../models/contact.list';
 
 @autoInjectable()
 export class MessageFlow{
@@ -26,7 +27,8 @@ export class MessageFlow{
 
     async checkTheFlow(msg: any, channel: string, platformMessageService: platformServiceInterface){
         const messagetoDialogflow: Imessage = await platformMessageService.getMessage(msg);
-        console.log("message to DF", messagetoDialogflow);
+
+        // console.log("message to DF", messagetoDialogflow);
 
         //initialising MySQL DB tables
         const chatMessageObj = await this.engageMySQL(messagetoDialogflow);
@@ -53,7 +55,6 @@ export class MessageFlow{
     }
 
     async get_put_msg_Dialogflow (messagetoDialogflow: Imessage, channel: string ,platformMessageService: platformServiceInterface) {
-        console.log("entered the get_put_msg_Dialogflow,,,,,,,,,,,,,,,,,,,,,,,,,");
         
         return this.processMessage(messagetoDialogflow, channel ,platformMessageService);
     }
@@ -80,6 +81,7 @@ export class MessageFlow{
         const personresponse = new ChatMessage(dfResponseObj);
         await personresponse.save();
 
+        // console.log(processedResponse.message_from_dialoglow.text);
         if (processedResponse.message_from_dialoglow.text) {
             let message_to_platform = null;
 
@@ -112,7 +114,8 @@ export class MessageFlow{
             const id = message.sessionId;
             const obj = new GoogleTextToSpeech();
             const audioURL = await obj.texttoSpeech(response_format.messageText, id);
-            console.log("audioURL", audioURL);
+
+            // console.log("audioURL", audioURL);
             response_format.message_type = "voice";
             response_format.messageBody = audioURL;
         }
@@ -145,7 +148,8 @@ export class MessageFlow{
                 userPlatformID : messagetoDialogflow.sessionId,
                 intent         : null
             };
-            await this.sequelizeClient.connect();
+
+            // await this.sequelizeClient.connect();
             const personrequest = new ChatMessage(chatMessageObj);
             await personrequest.save();
             const userId = chatMessageObj.userPlatformID;
@@ -155,6 +159,23 @@ export class MessageFlow{
 
             // console.log("lastMessageDate",lastMessageDate);
             // console.log("respChatSession!!!", respChatSession);
+
+            //check if user is new, if new then make a new entry in table contact list
+            const respContactList = await ContactList.findAll({ where: { mobileNumber: userId } });
+
+            // console.log("respContactList!!!", respContactList);
+            if (respContactList.length === 0) {
+                const newContactlistEntry = new ContactList({
+                    mobileNumber : messagetoDialogflow.sessionId,
+                    username     : messagetoDialogflow.name,
+                    platform     : messagetoDialogflow.platform,
+                    optOut       : "false" });
+                    
+                // console.log("newContactlistEntry", newContactlistEntry);
+                await newContactlistEntry.save();
+            }
+
+            //start or continue a session
             if (respChatSession.length === 0 || respChatSession[respChatSession.length - 1].sessionOpen === "false") {
 
                 // console.log("starting a new session");
