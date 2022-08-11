@@ -82,6 +82,13 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         
     }
 
+    async interactiveMessaegFormat(msg) {
+        const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(msg.messages[0].interactive.button_reply.title);
+        const returnMessage = this.inputMessageFormat(msg);
+        returnMessage.messageBody = emojiFilteredMessage;
+        return returnMessage;
+    }
+
     /*retrive whatsapp media */
     GetWhatsappMedia = async (type, mediaId, extension) => {
         return new Promise((resolve, reject) => {
@@ -146,5 +153,23 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         };
         return response_message;
     }
+
+    sanitizeMessage = (message) => {
+        if (message) {
+            message = message.replace(/<b> /g, "*").replace(/<b>/g, "*")
+                .replace(/ <\/b>/g, "* ")
+                .replace(/ <\/ b>/g, "* ")
+                .replace(/<\/b>/g, "* ");
+            if (message.length > 4096) {
+
+                var strshortened = message.slice(0, 3800);
+                strshortened = strshortened.substring(0, strshortened.lastIndexOf("\n\n") + 1);
+                message = strshortened + '\n\n Too many appointments to display here, please visit the CoWin website - https://www.cowin.gov.in/home -  to view more appointments. \n or \n Enter additional details to filter the results.';
+            }
+        }
+
+        // console.log("msg  has been santised", message);
+        return message;
+    };
 
 }
