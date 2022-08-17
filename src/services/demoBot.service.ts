@@ -76,11 +76,13 @@ export class demoBotService {
             if (filter_intent.displayName.match(/FAQ.*/) ) {
                 const intentPath = intentsClient.projectAgentIntentPath(projectIdFinal,filter_intent.name.split('/').pop());
                 const delete_request = {name: intentPath};
-                const delete_result = await intentsClient.deleteIntent(delete_request);
+                intents.push(delete_request);
 
             }
         }
         
+        const delete_request = await intentsClient.batchDeleteIntents({parent: projectAgentPath, intents: intents});
+
         var count = 0;
 
         // Create the intents in the dialogflow
@@ -123,7 +125,7 @@ export class demoBotService {
             const [response] = await intentsClient.createIntent(createIntentRequest);
             console.log(`Intent ${response.name} created`);
         }
-
+        
         return true;
 
     }

@@ -26,6 +26,7 @@ import { calorieDetection } from './intentListeners/calorie.detection.listener';
 import { calorieReport } from './intentListeners/calorie.report.listener';
 import { CalorieUpdate } from './intentListeners/calorie.update.listener';
 import { WhatsAppTemplateOpting } from './intentListeners/whatsapp.tempalte.opting.listener';
+import { eyeSymptomAssessment } from './intentListeners/eye.symptom.assesment.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -76,6 +77,14 @@ export class IntentRegister {
         IntentEmitter.registerListener('foodItemsDetails', calorieDetection);
         IntentEmitter.registerListener('calorie.report.creation', calorieReport);
         IntentEmitter.registerListener('CalorieNegativeFeedback - yes', CalorieUpdate);
+
+        //Intents for Post Operative Eye Care Symptom tracking
+        IntentEmitter.registerListener('userDetails', eyeSymptomAssessment);
+        IntentEmitter.registerListener('DifficultLookingatLight',eyeSymptomAssessment);
+        IntentEmitter.registerListener('DropInVision',eyeSymptomAssessment);
+        IntentEmitter.registerListener('IncreasedRedness',eyeSymptomAssessment);
+        IntentEmitter.registerListener('WateringFromOperatedEye',eyeSymptomAssessment);
+        IntentEmitter.registerListener('whiteSpot',eyeSymptomAssessment);
 
         IntentEmitter.registerListener('diabetes', getRiskAssessmentFollowup);
         IntentEmitter.registerListener('cancer', getRiskAssessmentFollowup);
