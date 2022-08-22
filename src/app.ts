@@ -14,8 +14,6 @@ import { IndexCreation } from './models/elasticsearchmodel';
 import { platformServiceInterface } from "./refactor/interface/platform.interface";
 import { ClientEnvironmentProviderService } from "./services/set.client/client.environment.provider.service";
 import { AwsSecretsManager } from "./services/aws.secret.manager.service";
-import { SequelizeClient } from "./connection/sequelizeClient";
-import mongoose from "mongoose";
 
 export default class Application {
 
@@ -31,8 +29,6 @@ export default class Application {
 
     private _awsSecretsManager: AwsSecretsManager = null;
 
-    private _sequelizeClient: SequelizeClient = null;
-
     private clientsList = [];
 
     private constructor() {
@@ -40,7 +36,6 @@ export default class Application {
         this._intentRegister = new IntentRegister();
         this._IndexCreation = new IndexCreation();
         this._awsSecretsManager = new AwsSecretsManager();
-        this._sequelizeClient = new SequelizeClient();
     }
 
     public static instance(): Application {
@@ -82,18 +77,6 @@ export default class Application {
         } catch (e) {
             console.log(e);
         }
-    }
-
-    async dbConnect(){
-        const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
-        for (const clientName of this.clientsList) {
-            clientEnvironmentProviderService.setClientName(clientName);
-            await this._sequelizeClient.connect();
-        }
-        // const dbURI = process.env.DB_URI;
-        // // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        // mongoose.connect(dbURI).then((result) => console.log("connected to db"))
-        //     .catch((err) => console.log(err));
     }
 
     setWebhooksForClients() {
@@ -152,9 +135,6 @@ export default class Application {
             //Start listening
             await this.listen();
 
-            //set up the DB connection
-            await this.dbConnect();
-
         }
         catch (error) {
             Logger.instance().log('An error occurred while starting reancare-api service.' + error.message);
@@ -171,7 +151,7 @@ export default class Application {
                 this._app.use(cors());
 
                 // this._app.use(this.limiter);
-
+                
                 const MAX_UPLOAD_FILE_SIZE = ConfigurationManager.MaxUploadFileSize();
 
                 this._app.use(fileUpload({
