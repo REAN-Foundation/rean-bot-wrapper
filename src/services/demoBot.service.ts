@@ -133,6 +133,6 @@ export class demoBotService {
     async postResponseDemo(sessionId: any, client: any, data:any) {
         console.log("Sending demo bot success message");
         this._platformMessageService = container.resolve(client);
-        await this._platformMessageService.SendMediaMessage(sessionId,null,data,'text');
+        await this._platformMessageService.SendMediaMessage(sessionId,null,data,'text',null);
     }
 }
