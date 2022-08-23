@@ -26,7 +26,7 @@ export class CalorieService {
     async postResponseCalorie(userId: any, client: any, data: any) {
         console.log("Sending calorie data to client");
         this._platformMessageService = container.resolve(client);
-        await this._platformMessageService.SendMediaMessage(userId,null,data,'text');
+        await this._platformMessageService.SendMediaMessage(userId,null,data,'text',null);
     }
 
     async sendCalorieToDF(req){

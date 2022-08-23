@@ -20,7 +20,7 @@ export class handleRequestservice{
         const translate_message = await this.translateService.translateMessage(message.messageBody, platform_id);
 
         // eslint-disable-next-line max-len
-        const message_from_dialoglow = await this.DialogflowResponseService.getDialogflowMessage(translate_message.message, platform_id, channel, userName);
+        const message_from_dialoglow = await this.DialogflowResponseService.getDialogflowMessage(translate_message.message, platform_id, channel, userName, message.intent);
 
         // process the message from dialogflow before sending it to whatsapp
         // eslint-disable-next-line max-len

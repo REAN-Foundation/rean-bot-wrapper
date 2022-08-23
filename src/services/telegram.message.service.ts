@@ -128,7 +128,7 @@ export class TelegramMessageService implements platformServiceInterface{
         return response_message;
     }
 
-    SendMediaMessage = async (contact, imageLink = null, message, messageType) => {
+    SendMediaMessage = async (contact, imageLink = null, message, messageType, payload = null) => {
         message = this.sanitizeMessage(message);
         return new Promise((resolve) => {
 

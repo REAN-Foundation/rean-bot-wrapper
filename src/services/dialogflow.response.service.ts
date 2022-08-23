@@ -12,7 +12,7 @@ export class DialogflowResponseService {
 
     constructor(private clientEnvironment?: ClientEnvironmentProviderService) { }
 
-    getDialogflowMessage = async (message: string, userPlatformId: string = null, platform: string = null, userName: string) => {
+    getDialogflowMessage = async (message: string, userPlatformId: string = null, platform: string = null, userName: string, intent: string = null) => {
         try {
 
             const env_name = this.clientEnvironment.getClientEnvironmentVariable("NAME");
@@ -71,8 +71,28 @@ export class DialogflowResponseService {
                     payload : struct.encode({source: platform, userId: userId, userName: userName })
                 },
             };
+            let request_intent = null;
+            if (intent !== null){
+                request_intent = {
+                    session    : sessionPath,
+                    queryInput : {
+                        event : {
+                            name         : intent,
+                            languageCode : dialogflow_language,
+                        },
+                    },
+                    queryParams : {
+                        payload : struct.encode({source: platform, userId: userId, userName: userName })
+                    },
+                };
+            }
             console.log("B$session CLient detects intent");
-            const responses = await sessionClient.detectIntent(request);
+            let responses = null;
+            if (request_intent !== null){
+                responses = await sessionClient.detectIntent(request_intent);
+            } else {
+                responses = await sessionClient.detectIntent(request);
+            }
             const result = responses[0].queryResult;
             if (result.intent) {
                 console.log(`  Intent: ${result.intent.displayName}`);

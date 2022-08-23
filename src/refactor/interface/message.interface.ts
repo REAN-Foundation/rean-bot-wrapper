@@ -9,6 +9,7 @@ export interface Imessage{
     imageUrl : string;
     latlong : string;
     replyPath : string;
+    intent  : string;
 }
 
 export interface Iresponse{
