@@ -65,8 +65,8 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
                 const hostname = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
                 const whatsappPhoneNumberID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_PHONE_NUMBER_ID");
                 const path = `/v13.0/${whatsappPhoneNumberID}/messages`;
-                const apiUrl = hostname + path;
-                await needle.post(apiUrl, postdata, options, function(err, resp) {
+                const apiUrl_meta = hostname + path;
+                await needle.post(apiUrl_meta, postdata, options, function(err, resp) {
                     if (err) {
                         console.log("err", err);
                         reject(err);
@@ -161,25 +161,25 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
                 console.log("this is the postDataString", postDataString);
                 await this.postRequestMessages(postDataString);
             } else if (messageType === "interactive-list") {
-                const rows = [];
-                const list_items = payload.fields.buttons.listValue.values;
-                let count = 0;
-                for (const lit of list_items){
-                    let id = count;
-                    let description = "";
+                const rows_meta = [];
+                const list_meta = payload.fields.buttons.listValue.values;
+                let count_meta = 0;
+                for (const lit of list_meta){
+                    let id_meta = count_meta;
+                    let description_meta = "";
                     if (lit.structValue.fields.description){
-                        description = lit.structValue.fields.description.stringValue;
+                        description_meta = lit.structValue.fields.description.stringValue;
                     }
                     if (lit.structValue.fields.id){
-                        id = lit.structValue.fields.id.stringValue;
+                        id_meta = lit.structValue.fields.id.stringValue;
                     }
-                    const temp = {
-                        "id"          : id,
+                    const temp_meta = {
+                        "id"          : id_meta,
                         "title"       : lit.structValue.fields.title.stringValue,
-                        "description" : description
+                        "description" : description_meta
                     };
-                    rows.push(temp);
-                    count++;
+                    rows_meta.push(temp_meta);
+                    count_meta++;
                 }
                 postDataMeta["interactive"] = {
                     "type"   : "list",
@@ -194,7 +194,7 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
                         "button": "Select From Here",
                         "sections": [
                             {
-                                "rows": rows
+                                "rows": rows_meta
                             }
                         ]
                     }
