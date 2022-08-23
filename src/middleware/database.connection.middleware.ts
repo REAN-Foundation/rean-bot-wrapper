@@ -7,7 +7,11 @@ export class DatabaseConnection{
     constructor(private sequelizeClient?: SequelizeClient){}
 
     myLogger = async (req, res, next) => {
-        await this.sequelizeClient.connect();
+        if (req.body.statuses){
+            console.log("DO NOTHING");
+        } else {
+            await this.sequelizeClient.connect();
+        }
         next();
     }
 }
