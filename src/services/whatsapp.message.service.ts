@@ -194,7 +194,8 @@ export class WhatsappMessageService implements platformServiceInterface {
         });
     }
 
-    SendMediaMessage = async (contact: number | string, imageLink: string, message: string, messageType: string) => {
+    // eslint-disable-next-line max-len
+    SendMediaMessage = async (contact: number | string, imageLink: string, message: string, messageType: string, payload: any) => {
         return new Promise(async() => {
             console.log("message type",messageType + imageLink);
             message = this.messageFunctionalities.sanitizeMessage(message);
@@ -217,6 +218,50 @@ export class WhatsappMessageService implements platformServiceInterface {
                 postData.type = "audio";
                 const postDataString = JSON.stringify(postData);
                 console.log("this is the postDataString", postDataString);
+                await this.postRequestMessages(postDataString);
+            } else if (messageType === "interactive-list"){
+                const rows = [];
+                const list_items = payload.fields.buttons.listValue.values;
+                let count = 0;
+                for (const lit of list_items){
+                    let id = count;
+                    let description = "";
+                    if (lit.structValue.fields.description){
+                        description = lit.structValue.fields.description.stringValue;
+                    }
+                    if (lit.structValue.fields.id){
+                        id = lit.structValue.fields.id.stringValue;
+                    }
+                    const temp = {
+                        "id"          : id,
+                        "title"       : lit.structValue.fields.title.stringValue,
+                        "description" : description
+                    };
+                    rows.push(temp);
+                    count++;
+                }
+                postData["interactive"] = {
+                    "type"   : "list",
+                    "header" : {
+                        "type" : "text",
+                        "text" : "LIST"
+                    },
+                    "body" : {
+                        "text" : message
+                    },
+                    "action" : {
+                        "button"   : "Select From Here",
+                        "sections" : [
+                            {
+                                "title" : "Menu",
+                                "rows"  : rows
+                            }
+                        ]
+                    }
+                };
+                postData.type = "interactive";
+                const postDataString = JSON.stringify(postData);
+                console.log("this is the postData", postDataString);
                 await this.postRequestMessages(postDataString);
             }
             else {
@@ -244,6 +289,13 @@ export class WhatsappMessageService implements platformServiceInterface {
         }
         else if (msg.messages[0].type === "image") {
             return await this.messageFunctionalities.imageMessaegFormat(msg);
+        }
+        else if (msg.messages[0].type === "interactive") {
+            if (msg.messages[0].interactive.type === "list_reply"){
+                return await this.messageFunctionalities.interactiveListMessaegFormat(msg);
+            } else {
+                return await this.messageFunctionalities.interactiveMessaegFormat(msg);
+            }
         }
         else {
             throw new Error("Message is neither text, voice nor location");
@@ -279,7 +331,13 @@ export class WhatsappMessageService implements platformServiceInterface {
                 }
             }
             else {
-                reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: "text", raw_response_object: raw_response_object, intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[0] };
+                let message_type = "text";
+                if ((processedResponse.message_from_dialoglow.result.fulfillmentMessages).length > 1){
+                    if (processedResponse.message_from_dialoglow.result.fulfillmentMessages[1].payload !== undefined){
+                        message_type = processedResponse.message_from_dialoglow.result.fulfillmentMessages[1].payload.fields.messagetype.stringValue;
+                    }
+                }
+                reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: message_type, raw_response_object: raw_response_object, intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[0] };
             }
         }
         return reaponse_message;

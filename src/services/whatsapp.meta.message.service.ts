@@ -81,10 +81,11 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
         });
     }
 
-    SendMediaMessage = async (contact: number | string, imageLink: string, message: string, messageType: string) => {
+    SendMediaMessage = async (contact: number | string, imageLink: string, message: string, messageType: string, payload: any) => {
         return new Promise(async() => {
 
             // console.log("message type",messageType + imageLink);
+            console.log("This is the payload", payload);
             const messageBody = this.messageFunctionalitiesmeta.sanitizeMessage(message);
             const postDataMeta = this.postDataFormatWhatsapp(contact);
             if (messageType === "image") {
@@ -130,7 +131,7 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
                 console.log("this is the postDataString", postDataString);
                 await this.postRequestMessages(postDataString);
             }
-            else if (messageType === "interactive"){
+            else if (messageType === "interactive-buttons"){
                 postDataMeta["interactive"] = {
                     "type" : "button",
                     "body" : {
@@ -153,6 +154,49 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
                                 }
                             }
                         ] 
+                    }
+                };
+                postDataMeta.type = "interactive";
+                const postDataString = JSON.stringify(postDataMeta);
+                console.log("this is the postDataString", postDataString);
+                await this.postRequestMessages(postDataString);
+            } else if (messageType === "interactive-list") {
+                const rows = [];
+                const list_items = payload.fields.buttons.listValue.values;
+                let count = 0;
+                for (const lit of list_items){
+                    let id = count;
+                    let description = "";
+                    if (lit.structValue.fields.description){
+                        description = lit.structValue.fields.description.stringValue;
+                    }
+                    if (lit.structValue.fields.id){
+                        id = lit.structValue.fields.id.stringValue;
+                    }
+                    const temp = {
+                        "id"          : id,
+                        "title"       : lit.structValue.fields.title.stringValue,
+                        "description" : description
+                    };
+                    rows.push(temp);
+                    count++;
+                }
+                postDataMeta["interactive"] = {
+                    "type"   : "list",
+                    "header" : {
+                        "type" : "text",
+                        "text" : "LIST"
+                    },
+                    "body" : {
+                        "text" : message
+                    },
+                    "action" : {
+                        "button": "Select From Here",
+                        "sections": [
+                            {
+                                "rows": rows
+                            }
+                        ]
                     }
                 };
                 postDataMeta.type = "interactive";
@@ -188,7 +232,11 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
             return await this.messageFunctionalitiesmeta.imageMessaegFormat(message);
         }
         else if (message.messages[0].type === "interactive") {
-            return await this.messageFunctionalitiesmeta.interactiveMessaegFormat(message);
+            if (message.messages[0].interactive.type === "list_reply"){
+                return await this.messageFunctionalitiesmeta.interactiveListMessaegFormat(message);
+            } else {
+                return await this.messageFunctionalitiesmeta.interactiveMessaegFormat(message);
+            }
         }
         else if (message.messages[0].type === "button") {
             console.log("msg.messages[0].interactive",util.inspect(message.messages[0].button));

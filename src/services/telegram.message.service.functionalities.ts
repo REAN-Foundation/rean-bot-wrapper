@@ -107,7 +107,8 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
             sessionId       : message.chat.id.toString(),
             replyPath       : null,
             latlong         : null,
-            type            : "text"
+            type            : "text",
+            intent          : null
         };
         return response_message;
     }

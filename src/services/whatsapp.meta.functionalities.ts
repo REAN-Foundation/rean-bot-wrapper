@@ -89,6 +89,14 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         return returnMessage;
     }
 
+    async interactiveListMessaegFormat(msg){
+        const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(msg.messages[0].interactive.list_reply.title);
+        const returnMessage = this.inputMessageFormat(msg);
+        returnMessage.messageBody = emojiFilteredMessage;
+        returnMessage.intent = msg.messages[0].interactive.list_reply.id;
+        return returnMessage;
+    }
+
     /*retrive whatsapp media */
     GetWhatsappMedia = async (type, mediaId, extension) => {
         return new Promise((resolve, reject) => {
@@ -149,7 +157,8 @@ export class MessageFunctionalities implements getMessageFunctionalities {
             sessionId       : message.contacts[0].wa_id,
             replyPath       : null,
             latlong         : null,
-            type            : "text"
+            type            : "text",
+            intent          : null,
         };
         return response_message;
     }

@@ -61,12 +61,13 @@ export class MessageFlow{
 
     async processMessage(messagetoDialogflow: Imessage, channel: string ,platformMessageService: platformServiceInterface) {
         if (messagetoDialogflow.messageBody === ' '){
-            const message_to_platform = await platformMessageService.SendMediaMessage(messagetoDialogflow.sessionId,null,"Sorry, I did not get that. Can you say it again?",messagetoDialogflow.type);
+            const message_to_platform = await platformMessageService.SendMediaMessage(messagetoDialogflow.sessionId,null,"Sorry, I did not get that. Can you say it again?",messagetoDialogflow.type,null);
             return message_to_platform;
         }
         const processedResponse = await this.handleRequestservice.handleUserRequest(messagetoDialogflow, channel);
         const intent = processedResponse.message_from_dialoglow.result && processedResponse.message_from_dialoglow.result.intent ? processedResponse.message_from_dialoglow.result.intent.displayName : '';
         const response_format: Iresponse = await platformMessageService.postResponse(messagetoDialogflow, processedResponse);
+        const payload = await this.getPayload(processedResponse);
         const dfResponseObj = {
             platform       : response_format.platform,
             direction      : response_format.direction,
@@ -88,10 +89,10 @@ export class MessageFlow{
             await this.replyInAudio(messagetoDialogflow, response_format);
             if (intent === "anemiaInitialisation-followup") {
                 const messageToPlatform = await this.callAnemiaModel.callAnemiaModel(processedResponse.processed_message[0]);
-                platformMessageService.SendMediaMessage(messagetoDialogflow.sessionId,null,messageToPlatform,response_format.message_type);
+                platformMessageService.SendMediaMessage(messagetoDialogflow.sessionId,null,messageToPlatform,response_format.message_type,null);
             }
             else {
-                message_to_platform = await platformMessageService.SendMediaMessage(messagetoDialogflow.sessionId, response_format.messageBody,response_format.messageText, response_format.message_type);
+                message_to_platform = await platformMessageService.SendMediaMessage(messagetoDialogflow.sessionId, response_format.messageBody,response_format.messageText, response_format.message_type,payload);
 
                 // console.log("the message to platform is", message_to_platform);
 
@@ -104,6 +105,16 @@ export class MessageFlow{
         else {
             console.log('An error occurred while processing messages!');
         }
+    }
+
+    async getPayload(processedResponse){
+        let payload = null;
+        if (processedResponse.message_from_dialoglow.result.fulfillmentMessages.length > 1) {
+            if (processedResponse.message_from_dialoglow.result.fulfillmentMessages[1].payload !== undefined) {
+                payload = processedResponse.message_from_dialoglow.result.fulfillmentMessages[1].payload;
+            }
+        }
+        return payload;
     }
 
     async replyInAudio(message: Imessage, response_format: Iresponse) {
@@ -131,7 +142,7 @@ export class MessageFlow{
 
         let message_to_platform = null;
         // eslint-disable-next-line max-len
-        message_to_platform = await platformMessageService.SendMediaMessage(response_format.sessionId, response_format.messageBody,response_format.messageText, response_format.message_type);
+        message_to_platform = await platformMessageService.SendMediaMessage(response_format.sessionId, response_format.messageBody,response_format.messageText, response_format.message_type,null);
         return message_to_platform;
     }
 
