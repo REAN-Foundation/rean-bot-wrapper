@@ -185,6 +185,7 @@ export class WhatsappMessageService implements platformServiceInterface {
                         reject(err);
                     }
                     console.log("resp", resp.body);
+                    resolve(resp.body);
                 });
             }
             catch (error) {
@@ -196,7 +197,7 @@ export class WhatsappMessageService implements platformServiceInterface {
 
     // eslint-disable-next-line max-len
     SendMediaMessage = async (contact: number | string, imageLink: string, message: string, messageType: string, payload: any) => {
-        return new Promise(async() => {
+        return new Promise(async(resolve) => {
             console.log("message type",messageType + imageLink);
             message = this.messageFunctionalities.sanitizeMessage(message);
             const postData = this.postDataFormatWhatsapp(contact);
@@ -208,7 +209,7 @@ export class WhatsappMessageService implements platformServiceInterface {
                 postData.type = "image";
                 const postDataString = JSON.stringify(postData);
                 console.log("this is the postData", postDataString);
-                await this.postRequestMessages(postDataString);
+                resolve(await this.postRequestMessages(postDataString));
 
             }
             else if (messageType === "voice"){
@@ -218,7 +219,7 @@ export class WhatsappMessageService implements platformServiceInterface {
                 postData.type = "audio";
                 const postDataString = JSON.stringify(postData);
                 console.log("this is the postDataString", postDataString);
-                await this.postRequestMessages(postDataString);
+                resolve(await this.postRequestMessages(postDataString));
             } else if (messageType === "interactive-list"){
                 const rows = [];
                 const list_items = payload.fields.buttons.listValue.values;
@@ -262,7 +263,7 @@ export class WhatsappMessageService implements platformServiceInterface {
                 postData.type = "interactive";
                 const postDataString = JSON.stringify(postData);
                 console.log("this is the postData", postDataString);
-                await this.postRequestMessages(postDataString);
+                resolve(await this.postRequestMessages(postDataString));
             }
             else {
                 postData["text"] = {
@@ -271,7 +272,7 @@ export class WhatsappMessageService implements platformServiceInterface {
                 postData.type = "text";
                 const postDataString = JSON.stringify(postData);
                 console.log("this is the postData", postDataString);
-                await this.postRequestMessages(postDataString);
+                resolve(await this.postRequestMessages(postDataString));
             }
         });
     };
