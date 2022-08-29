@@ -218,6 +218,7 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
 
     getMessage = async (message: any) => {
         // console.log("request from whatsapp format", msg);
+        console.log("messages meta", message);
         if (message.messages[0].type === "text") {
             // eslint-disable-next-line max-len
             return await this.messageFunctionalitiesmeta.textMessageFormat(message);
@@ -225,7 +226,7 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
         else if (message.messages[0].type === "location") {
             return await this.messageFunctionalitiesmeta.locationMessageFormat(message);
         }
-        else if (message.messages[0].type === "voice") {
+        else if (message.messages[0].type === "audio") {
             return await this.messageFunctionalitiesmeta.voiceMessageFormat(message);
         }
         else if (message.messages[0].type === "image") {
