@@ -27,6 +27,7 @@ import { calorieReport } from './intentListeners/calorie.report.listener';
 import { CalorieUpdate } from './intentListeners/calorie.update.listener';
 import { WhatsAppTemplateOpting } from './intentListeners/whatsapp.tempalte.opting.listener';
 import { eyeSymptomAssessment } from './intentListeners/eye.symptom.assesment.listener';
+import { MaternityCareplanListener } from './intentListeners/maternity.careplan.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -117,6 +118,8 @@ export class IntentRegister {
         IntentEmitter.registerListener('HowYouFeel - worse', AppSymptomListener.handleIntent);
         IntentEmitter.registerListener('HowYouFeel - worse - custom - worse', AppSymptomListener.handleIntent);
         IntentEmitter.registerListener('Medication.Add.InApp', AppMedicationListener.handleIntent);
+        IntentEmitter.registerListener('Registration', MaternityCareplanListener.handleIntent );
+        IntentEmitter.registerListener('RegistrationAgree', MaternityCareplanListener.handleEnrollIntent );
       
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
