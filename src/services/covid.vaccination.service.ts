@@ -673,7 +673,7 @@ export const getAppointments = async(req, res) => {
                     agent.add("Would you like to search with additional details?");
                 }
 
-                //agent.context.set('VaccinationAppointmentAvailability-followup', 0, {loc: {'District': 'Hyderabad'}});
+                agent.context.set('VaccinationAppointmentAvailability-followup', 0, {});
 
                 //console.log(actual_ret);
             }

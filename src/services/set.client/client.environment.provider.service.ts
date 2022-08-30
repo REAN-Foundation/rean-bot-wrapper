@@ -19,7 +19,7 @@ export class ClientEnvironmentProviderService {
 
     getClientEnvironmentVariable(variablename){
 
-        // console.log("getClientEnvironmentVariable",[this.clientName + "_" + variablename])
+        // console.log("getClientEnvironmentVariable",[this.clientName + "_" + variablename]);
         return process.env[this.clientName + "_" + variablename];
     }
 

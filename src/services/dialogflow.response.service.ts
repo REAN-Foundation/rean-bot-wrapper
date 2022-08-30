@@ -1,20 +1,29 @@
-import dialogflow from '@google-cloud/dialogflow';
+/* eslint-disable max-len */
+/* eslint-disable @typescript-eslint/no-var-requires */
 import { v4 } from 'uuid';
 import { injectable } from 'tsyringe';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+let dialogflow = require('@google-cloud/dialogflow');
+const dialogflowv2 = require('@google-cloud/dialogflow').v2beta1;
+const {struct} = require('pb-util');
 
 @injectable()
 export class DialogflowResponseService {
 
     constructor(private clientEnvironment?: ClientEnvironmentProviderService) { }
 
-    getDialogflowMessage = async (message, userSessionId = null, platform = null) => {
+    getDialogflowMessage = async (message: string, userPlatformId: string = null, platform: string = null, userName: string) => {
         try {
+
+            const env_name = this.clientEnvironment.getClientEnvironmentVariable("NAME");
+            if (env_name === "UNION"){
+                dialogflow = dialogflowv2;
+            }
 
             // set default values
             let responseMessage = { text: [], parse_mode: false, image: { url: '', caption: '' } };
             const dialogflow_language = "en-US";
-            const sessionId = userSessionId === null ? v4() : userSessionId;
+            const userId: string = userPlatformId === null ? v4() : userPlatformId;
 
             let sessionClient = null;
             let sessionPath = null;
@@ -26,7 +35,7 @@ export class DialogflowResponseService {
                 options = {
                     credentials : {
                         client_email : ReanAppGcpCredentials.client_email,
-                        private_key : ReanAppGcpCredentials.private_key
+                        private_key  : ReanAppGcpCredentials.private_key
                     },
                     projectId : ReanAppGcpCredentials.private_key
                 };
@@ -40,7 +49,7 @@ export class DialogflowResponseService {
                 options = {
                     credentials : {
                         client_email : dialogflowApplicationCredentialsobj.client_email,
-                        private_key : dialogflowApplicationCredentialsobj.private_key
+                        private_key  : dialogflowApplicationCredentialsobj.private_key
                     },
                     projectId : dialogflowApplicationCredentialsobj.private_key
                 };
@@ -48,15 +57,18 @@ export class DialogflowResponseService {
 
             }
             sessionClient = new dialogflow.SessionsClient(options);
-            sessionPath = sessionClient.projectAgentSessionPath(projectIdFinal, sessionId);
+            sessionPath = sessionClient.projectAgentSessionPath(projectIdFinal, userId);
             console.log("Message to be sent to DF: ", message);
             const request = {
-                session : sessionPath,
+                session    : sessionPath,
                 queryInput : {
                     text : {
-                        text : message,
+                        text         : message,
                         languageCode : dialogflow_language,
                     },
+                },
+                queryParams : {
+                    payload : struct.encode({source: platform, userId: userId, userName: userName })
                 },
             };
             console.log("B$session CLient detects intent");
@@ -74,20 +86,24 @@ export class DialogflowResponseService {
             if (responseMessage.text.length === 0) {
                 responseMessage.text[0] = result.fulfillmentText;
             }
-            return {
-                text : responseMessage,
-                image : responseMessage.image ? responseMessage.image : false,
+            const dfResponseObj = {
+                text  : responseMessage.text,
+                image : responseMessage.image ? responseMessage.image : {
+                    url     : "",
+                    caption : ""
+                },
                 parse_mode : responseMessage.parse_mode ? responseMessage.parse_mode : false,
-                result : result,
+                result     : result,
             };
+            return dfResponseObj;
         }
         catch (e) {
             console.log(e);
             return {
-                text : ["Sorry, something went wrong. Let me consult an expert and get back to you!"],
-                image : { url: '', caption: '' },
+                text       : ["Sorry, something went wrong. Let me consult an expert and get back to you!"],
+                image      : { url: '', caption: '' },
                 parse_mode : false,
-                result : false
+                result     : false
             };
         }
 

@@ -21,6 +21,7 @@
     "@aws-sdk/client-comprehendmedical": "^3.13.0",
     "@google-cloud/dialogflow": "^4.4.0",
     "@google-cloud/speech": "^4.9.0",
+    "@google-cloud/text-to-speech": "^3.4.0",
     "@google-cloud/translate": "^6.3.0",
     "@slack/events-api": "^3.0.1",
     "@slack/web-api": "^6.4.0",
@@ -61,6 +62,7 @@
     "node-cron": "^2.0.3",
     "node-html-to-image": "3.2.0",
     "node-telegram-bot-api": "^0.54.0",
+    "pb-util": "^1.0.3",
     "pg": "^8.6.0",
     "pg-hstore": "^2.3.3",
     "reflect-metadata": "^0.1.13",
@@ -72,7 +74,8 @@
     "tsyringe": "^4.5.0",
     "twilio": "^3.67.2",
     "uuid": "^8.3.2",
-    "uuid-apikey": "^1.5.3"
+    "uuid-apikey": "^1.5.3",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@jest/types": "^27.0.6",

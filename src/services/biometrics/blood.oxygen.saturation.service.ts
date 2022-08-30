@@ -53,7 +53,7 @@ export const updateBloodOxygenSaturationInfoService = async (eventObj) => {
         const b = response.body.Data.BloodOxygenSaturation.BloodOxygenSaturation;
         const u = response.body.Data.BloodOxygenSaturation.Unit;
 
-        const dffMessage = `Your updated BloodOxygenSaturation ${b} ${u} is ${remark}`;
+        const dffMessage = `Your updated blood oxygen saturation ${b} ${u} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
@@ -91,7 +91,7 @@ export const createBloodOxygenSaturationInfoService = async (eventObj) => {
         const b = response.body.Data.BloodOxygenSaturation.BloodOxygenSaturation;
         const u = response.body.Data.BloodOxygenSaturation.Unit;
 
-        const dffMessage = `Your newly added BloodOxygenSaturation ${b} ${u} is ${remark}`;
+        const dffMessage = `Your newly added blood oxygen saturation ${b} ${u} is ${remark}`;
 
         const data = { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }] };
 
@@ -102,18 +102,17 @@ export const createBloodOxygenSaturationInfoService = async (eventObj) => {
 };
 
 async function checkEntry(eventObj: any) {
-    const phoneNumber = eventObj.body.queryResult.parameters.PhoneNumber;
     const BloodOxygenSaturation = eventObj.body.queryResult.parameters.BloodOxygenSaturation;
     let BloodOxygenSaturation_Unit = eventObj.body.queryResult.parameters.Unit;
 
-    if (!phoneNumber && !BloodOxygenSaturation) {
-        throw new Error("Missing required parameter PhoneNumber and/or BloodOxygenSaturation");
+    if (!BloodOxygenSaturation) {
+        throw new Error("Missing required parameter BloodOxygenSaturation");
     }
     if (BloodOxygenSaturation_Unit === '') {
         BloodOxygenSaturation_Unit = '%';
     }
     let result = null;
-    result = await getPatientInfoService.getPatientsByPhoneNumberservice(phoneNumber);
+    result = await getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
 
     const patientUserId = result.message[0].UserId;
 

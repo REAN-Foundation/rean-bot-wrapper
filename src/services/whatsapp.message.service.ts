@@ -5,13 +5,15 @@ import { AwsS3manager } from './aws.file.upload.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { autoInjectable, singleton, inject, delay } from 'tsyringe';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { response, message } from '../refactor/interface/message.interface';
+import { Iresponse, Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { MessageFlow } from './get.put.message.flow.service';
 import { MessageFunctionalities } from './whatsapp.message.sevice.functionalities';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import needle from 'needle';
+import { getRequestOptions } from '../utils/helper';
 
 @autoInjectable()
 @singleton()
@@ -26,10 +28,10 @@ export class platformMessageService implements platformServiceInterface {
         private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     handleMessage(msg: any, channel: string) {
-        return this.messageFlow.get_put_msg_Dialogflow(msg, channel, this);
+        return this.messageFlow.checkTheFlow(msg, channel, this);
     }
 
-    sendManualMesage(msg) {
+    sendManualMesage(msg: any) {
         return this.messageFlow.send_manual_msg(msg, this);
     }
 
@@ -64,7 +66,7 @@ export class platformMessageService implements platformServiceInterface {
         return request;
     }
 
-    setWebhook(clientName){
+    setWebhook(clientName: string){
 
         return new Promise((resolve, reject) => {
             const webhookUrl = `${this.clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL")}/v1/${clientName}/whatsapp/${this.clientAuthenticator.urlToken}/receive`;
@@ -91,7 +93,7 @@ export class platformMessageService implements platformServiceInterface {
         });
     }
 
-    SetWebHookOldNumber = async (clientName) => {
+    SetWebHookOldNumber = async (clientName: string) => {
 
         return new Promise((resolve, reject) => {
             const webhookUrl = `${this.clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL")}/v1/${clientName}/whatsapp/${this.clientAuthenticator.urlToken}/receive`;
@@ -172,66 +174,83 @@ export class platformMessageService implements platformServiceInterface {
                 message = strshortened + '\n\n Too many appointments to display here, please visit the CoWin website - https://www.cowin.gov.in/home -  to view more appointments. \n or \n Enter additional details to filter the results.';
             }
         }
-        console.log("msg  has been santised", message);
+
+        // console.log("msg  has been santised", message);
         return message;
     };
 
-    SendMediaMessage = async (contact, imageLink, message) => {
-        return new Promise((resolve, reject) => {
+    postDataFormatWhatsapp = (contact) => {
+        const postData = {
+            'recipient_type' : 'individual',
+            'to'             : contact,
+            'type'           : null
+        };
+        return postData;
+    };
+
+    async postRequestMessages(postdata) {
+        return new Promise(async(resolve,reject) =>{
+            try {
+                const options = getRequestOptions();
+                options.headers['Content-Type'] = 'application/json';
+                options.headers['D360-Api-Key'] = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY");
+                const hostname = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST");
+                const path = '/v1/messages';
+                const apiUrl = "https://" + hostname + path;
+                console.log("apiuri",apiUrl);
+                await needle.post(apiUrl, postdata, options, function(err, resp) {
+                    if (err) {
+                        console.log("err", err);
+                        reject(err);
+                    }
+                    console.log("resp", resp.body);
+                });
+            }
+            catch (error) {
+                console.log("error", error);
+                reject(error.message);
+            }
+        });
+    }
+
+    SendMediaMessage = async (contact: number | string, imageLink: string, message: string, messageType: string) => {
+        return new Promise(async() => {
+            console.log("message type",messageType + imageLink);
             message = this.sanitizeMessage(message);
-            const postData = imageLink ? JSON.stringify({
-                'recipient_type' : 'individual',
-                'to'             : contact,
-                'type'           : 'image',
-                "image"          : {
+            const postData = this.postDataFormatWhatsapp(contact);
+            if (messageType === "image") {
+                postData["image"] = {
                     "link"    : imageLink,
                     "caption" : message
-                }
-            }) : JSON.stringify({
-                'recipient_type' : 'individual',
-                'to'             : contact,
-                'type'           : 'text',
-                'text'           : {
-                    'body' : message
-                }
-            });
-            console.log("this is the postData", postData);
-            const options = {
-                hostname : this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST"),
-                path     : '/v1/messages',
-                method   : 'POST',
-                headers  : {
-                    'Content-Type' : 'application/json',
-                    'D360-Api-Key' : this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY")
-                }
-            };
-            const request = http.request(options, (response) => {
-                response.setEncoding('utf8');
-                response.on('data', (chunk) => {
-                    chunk = JSON.parse(chunk);
-                    // eslint-disable-next-line init-declarations
-                    let responseStatus: any;
-                    console.log("chunk", chunk);
-                    if (chunk.meta.success === undefined) {
-                        responseStatus = chunk;
-                    }
-                    console.log("exiting!!!!!!!!!!!!");
-                    resolve(responseStatus);
-                });
-                response.on('end', () => {
-                    resolve(true);
-                });
-            });
-            request.on('error', (e) => {
-                console.error(`problem with request: ${e.message}`);
-                reject();
-            });
-            request.write(postData);
-            request.end();
+                };
+                postData.type = "image";
+                const postDataString = JSON.stringify(postData);
+                console.log("this is the postData", postDataString);
+                await this.postRequestMessages(postDataString);
+
+            }
+            else if (messageType === "voice"){
+                postData["audio"] = {
+                    "link" : imageLink
+                };
+                postData.type = "audio";
+                const postDataString = JSON.stringify(postData);
+                console.log("this is the postDataString", postDataString);
+                await this.postRequestMessages(postDataString);
+            }
+            else {
+                postData["text"] = {
+                    "body" : message
+                };
+                postData.type = "text";
+                const postDataString = JSON.stringify(postData);
+                console.log("this is the postData", postDataString);
+                await this.postRequestMessages(postDataString);
+            }
         });
     };
 
-    getMessage = async (msg) => {
+    getMessage = async (msg: any) => {
         if (msg.messages[0].type === "text") {
             // eslint-disable-next-line max-len
             return await this.messageFunctionalities.textMessageFormat(msg);
@@ -242,14 +261,17 @@ export class platformMessageService implements platformServiceInterface {
         else if (msg.messages[0].type === "voice") {
             return await this.messageFunctionalities.voiceMessageFormat(msg);
         }
+        else if (msg.messages[0].type === "image") {
+            return await this.messageFunctionalities.imageMessaegFormat(msg);
+        }
         else {
             throw new Error("Message is neither text, voice nor location");
         }
     };
 
-    postResponse = async (message, processedResponse) => {
+    postResponse = async (message: Imessage , processedResponse: IprocessedDialogflowResponseFormat) => {
         // eslint-disable-next-line init-declarations
-        let reaponse_message: response;
+        let reaponse_message: Iresponse;
         const whatsapp_id = message.sessionId;
         const input_message = message.messageBody;
         const name = message.name;
@@ -259,7 +281,7 @@ export class platformMessageService implements platformServiceInterface {
 
         if (processedResponse) {
             if (processedResponse.message_from_dialoglow.image && processedResponse.message_from_dialoglow.image.url) {
-                reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: "image", raw_response_object: raw_response_object, intent: intent, messageBody: processedResponse.message_from_dialoglow.image.url, messageImageUrl: processedResponse.message_from_dialoglow.image, messageImageCaption: processedResponse.message_from_dialoglow.image.url, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.message_from_dialoglow.image.caption };
+                reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: "image", raw_response_object: raw_response_object, intent: intent, messageBody: processedResponse.message_from_dialoglow.image.url, messageImageUrl: processedResponse.message_from_dialoglow.image.url, messageImageCaption: processedResponse.message_from_dialoglow.image.caption, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.message_from_dialoglow.image.caption };
             }
             else if (processedResponse.processed_message.length > 1) {
                 if (processedResponse.message_from_dialoglow.parse_mode && processedResponse.message_from_dialoglow.parse_mode === 'HTML') {
@@ -279,12 +301,11 @@ export class platformMessageService implements platformServiceInterface {
                 reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: "text", raw_response_object: raw_response_object, intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[0] };
             }
         }
-        console.log("postresponse format", reaponse_message);
         return reaponse_message;
     };
 
     createFinalMessageFromHumanhandOver(requestBody) {
-        const response_message: response = {
+        const response_message: Iresponse = {
             name                : requestBody.agentName,
             platform            : "whatsapp",
             chat_message_id     : null,

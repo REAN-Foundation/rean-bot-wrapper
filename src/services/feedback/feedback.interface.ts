@@ -1,4 +1,6 @@
 export interface feedbackInterface{
-    checkIntentAndSendFeedback (intent,message,channel,platformMessageService)
-    triggerFeedbackIntent(intent,message,channel,platformMessageService)
+  
+    NegativeFeedback (channel, sessionId)
+    PositiveFeedback (channel, sessionId)
+  
 }
