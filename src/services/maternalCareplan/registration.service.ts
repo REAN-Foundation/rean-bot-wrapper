@@ -13,20 +13,6 @@ export const registrationService = async (eventObj) => {
         const name : string = eventObj.body.queryResult.parameters.Name.name;
         const lmp : string = eventObj.body.queryResult.parameters.LMP;
 
-        const date_1 = new Date(lmp.split("T")[0]);
-        const date_2 = new Date();
-
-        const days = (date_1: Date, date_2: Date) =>{
-            const difference = date_2.getTime() - date_1.getTime();
-            const TotalDays = Math.ceil(difference / (1000 * 3600 * 24));
-            return TotalDays;
-        };
-        if (days(date_1, date_2) < 28) {
-            const dffMessage = `Hello ${name}, Please try to register again after the 4th week of your pregnancy.`;
-            Logger.instance().log(`Patient not elligible to take maternity careplan.`);
-            return { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } };
-        }
-
         const b = eventObj.body.session;
         let phoneNumber = b.split("/", 5)[4];
         if (!phoneNumber) {
@@ -59,9 +45,8 @@ export const registrationService = async (eventObj) => {
         } else {
             throw new Error('Error in patient registration with rean care service.');
         }
-        const date = new Date(lmp.split("T")[0]).toDateString();
         
-        const dffMessage = `Hi ${name}, Your last mensuration period date is ${date}. Do you agree on this information?`;
+        const dffMessage = `Hi ${name}, Your last mensuration period date is ${lmp.split("T")[0]}. Do you agree on this information?`;
         return { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } };
 
     } else {
