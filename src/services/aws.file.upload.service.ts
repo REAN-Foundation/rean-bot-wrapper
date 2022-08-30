@@ -1,6 +1,7 @@
 import AWS from 'aws-sdk';
 import fs from 'fs';
 import nodeHtmlToImage from 'node-html-to-image';
+import path from 'path';
 import { SignedUrls } from './signed.urls.service';
 
 // import { TempCredentials } from './get.temporary.aws.credentials';
@@ -43,8 +44,7 @@ export class AwsS3manager{
                     console.log('File exists');
                     const fileContent = fs.readFileSync(filePath);
                     var filename = filePath.replace(/^.*[\\/]/, '');
-                    var split_fs = filePath.split('/')[1];
-                    // console.log("filename", filename + split_fs);
+                    const extension = path.parse(filename).ext;
 
                     // Setting up S3 upload parameters
                     const params = {
@@ -54,7 +54,7 @@ export class AwsS3manager{
                         'ContentType' : 'image/jpeg'
                     };
 
-                    if (split_fs === 'audio'){
+                    if (extension === '.ogg' || extension === '.mp3' || extension === '.oga'){
                         console.log("Detected as an Audio file");
                         params.ContentType = 'audio/ogg';
                     }

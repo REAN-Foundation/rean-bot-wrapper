@@ -58,7 +58,8 @@ export class Speechtotext {
                 const client = new speech.SpeechClient(gcpCred);
                 const url = require('url');
                 const key = ((url.parse(uploadpath)).pathname).substring(1);
-
+                const extension = path.parse(key).ext;
+                const sampleRate = this.sampleRate(extension);
                 const awsGetFile = await this.awss3manager.getFile(key);
 
                 const audioBytes = awsGetFile.Body.toString('base64');
@@ -69,7 +70,7 @@ export class Speechtotext {
 
                 const config = {
                     encoding                            : "OGG_OPUS",
-                    sampleRateHertz                     : 48000,
+                    sampleRateHertz                     : sampleRate,
                     languageCode                        : preferredLanguage,
                     enableSeparateRecognitionPerChannel : true,
                 };
@@ -91,6 +92,15 @@ export class Speechtotext {
                 reject(error);
             }
         });
+    }
+
+    private sampleRate = (extension:string) => {
+        if (extension === ".oga"){
+            return 48000;
+        }
+        else {
+            return 16000;
+        }
     }
 
 }
