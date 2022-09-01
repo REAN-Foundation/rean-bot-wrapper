@@ -52,6 +52,9 @@ export class ClientWebhookController {
                 }
                 else {
 
+                    console.log(util.inspect(status[0].status));
+                    this.responseHandler.sendSuccessResponse(res, 200, 'Notification received',"");
+                    
                     //deal accordingly
                 }
             }
