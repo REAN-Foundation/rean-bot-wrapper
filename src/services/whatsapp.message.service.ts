@@ -272,7 +272,7 @@ export class WhatsappMessageService implements platformServiceInterface {
                 postData["text"] = {
                     "body" : message
                 };
-                if (new RegExp("(https://)?").test(message)) {
+                if (new RegExp("([a-zA-Z0-9]://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?(/.*)?").test(message)) {
                     console.log("We have a url inside");
                     postData["preview_url"] = true;
                 } else {
