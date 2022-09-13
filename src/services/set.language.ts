@@ -30,7 +30,7 @@ export class UserLanguage {
             // if (detected_language !== preferredLanguage){
             //     return "change language";
             // }
-            if (message.length < 5) {
+            if (message.length < 80) {
                 console.log('when preffered Language is not null');
                 console.log('666', preferredLanguage);
                 return preferredLanguage;
