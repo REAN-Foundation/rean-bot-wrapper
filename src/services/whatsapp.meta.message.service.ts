@@ -64,7 +64,7 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
                 options.headers['Authorization'] = `Bearer ${token}`;
                 const hostname = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
                 const whatsappPhoneNumberID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_PHONE_NUMBER_ID");
-                const path = `/v13.0/${whatsappPhoneNumberID}/messages`;
+                const path = `/v14.0/${whatsappPhoneNumberID}/messages`;
                 const apiUrl_meta = hostname + path;
                 await needle.post(apiUrl_meta, postdata, options, function(err, resp) {
                     if (err) {

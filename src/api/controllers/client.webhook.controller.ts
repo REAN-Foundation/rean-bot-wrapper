@@ -109,6 +109,8 @@ export class ClientWebhookController {
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message read successfully!', "");
                 }
                 else {
+                    this.responseHandler.sendSuccessResponse(res, 200, 'Notification received successfully!', "");
+
                     //deal accordingly
                     // console.log("Check status", statuses[0].status);
                 }
