@@ -202,6 +202,9 @@ export class WhatsappMessageService implements platformServiceInterface {
             message = this.messageFunctionalities.sanitizeMessage(message);
             const postData = this.postDataFormatWhatsapp(contact);
             if (messageType === "image") {
+                if (!imageLink) {
+                    imageLink = payload.fields.url.stringValue;
+                }
                 postData["image"] = {
                     "link"    : imageLink,
                     "caption" : message
@@ -269,6 +272,12 @@ export class WhatsappMessageService implements platformServiceInterface {
                 postData["text"] = {
                     "body" : message
                 };
+                if (new RegExp("(https?://[^s]+)/g").test(message)) {
+                    console.log("We have a url inside");
+                    postData["preview_url"] = true;
+                } else {
+                    postData["preview_url"] = false;
+                }
                 postData.type = "text";
                 const postDataString = JSON.stringify(postData);
                 console.log("this is the postData", postDataString);

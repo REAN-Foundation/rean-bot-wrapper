@@ -72,7 +72,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
 
     async imageMessaegFormat(message) {
         let response: any = {};
-        response = await this.GetTelegramMedia(message.photo[3].file_id);
+        response = await this.GetTelegramMedia(message.photo[(message.photo).length - 1].file_id);
         console.log("response image get telegram", response);
         if (response.result.file_path){
             const filePath = await this.downloadTelegramMedia('https://api.telegram.org/file/bot' + this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN") + '/' + response.result.file_path, "photo");
