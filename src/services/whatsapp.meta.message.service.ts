@@ -132,28 +132,27 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
                 await this.postRequestMessages(postDataString);
             }
             else if (messageType === "interactive-buttons"){
+                const buttons = [];
+                const numberOfButtons = (payload.fields.buttons.listValue.values).length;
+                for (let i = 0; i < numberOfButtons; i++){
+                    const id = payload.fields.buttons.listValue.values[i].structValue.fields.reply.structValue.fields.id.stringValue;
+                    const title = payload.fields.buttons.listValue.values[i].structValue.fields.reply.structValue.fields.title.stringValue;
+                    const tempObject = {
+                        "type"  : "reply",
+                        "reply" : {
+                            "id"    : id,
+                            "title" : title
+                        }
+                    };
+                    buttons.push(tempObject);
+                }
                 postDataMeta["interactive"] = {
                     "type" : "button",
                     "body" : {
                         "text" : message
                     },
                     "action" : {
-                        "buttons" : [
-                            {
-                                "type"  : "reply",
-                                "reply" : {
-                                    "id"    : "unique-postback-id11111",
-                                    "title" : "Yes" 
-                                }
-                            },
-                            {
-                                "type"  : "reply",
-                                "reply" : {
-                                    "id"    : "unique-postback-id222222222",
-                                    "title" : "No" 
-                                }
-                            }
-                        ] 
+                        "buttons" : buttons
                     }
                 };
                 postDataMeta.type = "interactive";
