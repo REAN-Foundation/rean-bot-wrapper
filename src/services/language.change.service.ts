@@ -12,7 +12,8 @@ export class ChangeLanguage{
                     "Hindi"   : "hi",
                     "English" : "en",
                     "Tamil"   : "ta",
-                    "Telugu"  : "te"
+                    "Telugu"  : "te",
+                    "Punjabi" : "pa"
                 };
                 const newLanguageCode = await this.languageCode(newLanguage,listOfLanguages);
                 //stop the old session
