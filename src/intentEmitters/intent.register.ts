@@ -28,6 +28,7 @@ import { CalorieUpdate } from './intentListeners/calorie.update.listener';
 import { WhatsAppTemplateOpting } from './intentListeners/whatsapp.tempalte.opting.listener';
 import { eyeSymptomAssessment } from './intentListeners/eye.symptom.assesment.listener';
 import { MaternityCareplanListener } from './intentListeners/maternity.careplan.listener';
+import { kerotoplastyListener } from './intentListeners/kerotoplasty.bot.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -120,6 +121,9 @@ export class IntentRegister {
         IntentEmitter.registerListener('Medication.Add.InApp', AppMedicationListener.handleIntent);
         IntentEmitter.registerListener('Registration', MaternityCareplanListener.handleIntent );
         IntentEmitter.registerListener('RegistrationAgree', MaternityCareplanListener.handleEnrollIntent );
+
+        IntentEmitter.registerListener('conditionIdentification', kerotoplastyListener.handleIntent);
+
       
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);

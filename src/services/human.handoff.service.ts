@@ -18,6 +18,7 @@ export class HumanHandoff {
         const minutesUtc = time_obj.getUTCMinutes();
         console.log("hourUtc", hourUtc);
         console.log("minutesutc", minutesUtc);
+
         // const secondsUtc = time_obj.getUTCSeconds();
         const startHHhour = parseFloat(this.clientEnvironmentProviderService.getClientEnvironmentVariable("HH_START_HOUR"));
         const endHHhour = parseFloat(this.clientEnvironmentProviderService.getClientEnvironmentVariable("HH_END_HOUR"));
@@ -55,6 +56,7 @@ export class HumanHandoff {
             };
             resolve(data);
             const ts = resp[resp.length - 1].ts;
+            
             // console.log("ts", ts);
             await this.slackMessageService.delayedInitialisation();
             const client = this.slackMessageService.client;
