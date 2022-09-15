@@ -6,7 +6,7 @@ import { translateService } from './translate.service';
 export class UserLanguage {
 
     async setLanguageForSession(messageType, sessionId, message) {
-        const respChatSession = await ChatSession.findAll({where: { userPlatformID: sessionId } });
+        const respChatSession = await ChatSession.findAll({ where: { userPlatformID: sessionId } });
         const autoIncrementalID = respChatSession[respChatSession.length - 1].autoIncrementalID;
         const preferredLanguage = await this.getPreferredLanguageofSession(sessionId);
         console.log("preferredLanguage",preferredLanguage);
@@ -39,7 +39,7 @@ export class UserLanguage {
             else {
                 // const detected_language = await new translateService().detectLanguage(message);
                 const detected_language = await this.toDetectLangugaeOrNot(messageType, message);
-                await ChatSession.update({preferredLanguage: detected_language, sessionOpen: "true" }, {where: {autoIncrementalID: autoIncrementalID}});
+                await ChatSession.update({ preferredLanguage: detected_language, sessionOpen: "true" }, { where: { autoIncrementalID: autoIncrementalID } });
                 return detected_language;
             }
         }
@@ -76,7 +76,8 @@ export class UserLanguage {
     }
 
     async toDetectLangugaeOrNot(messageType, message) {
-        let detected_language:string
+        // eslint-disable-next-line init-declarations
+        let detected_language:string;
         if (messageType !== "location"){
             detected_language = await new translateService().detectLanguage(message);
         }
