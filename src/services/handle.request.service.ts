@@ -19,7 +19,7 @@ export class handleRequestservice{
         const userName = message.name;
 
         //get the translated message
-        const translate_message = await this.translateService.translateMessage(message.messageBody, platform_id);
+        const translate_message = await this.translateService.translateMessage(message.type, message.messageBody, platform_id);
 
         // eslint-disable-next-line max-len
         const message_from_dialoglow = await this.DialogflowResponseService.getDialogflowMessage(translate_message.message, platform_id, channel, userName, message.intent);
