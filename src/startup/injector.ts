@@ -11,6 +11,8 @@ import { ReanAppAuthenticator } from '../services/clientAuthenticator/reanapp.au
 import { SlackAuthenticator } from '../services/clientAuthenticator/slack.authenticator.servie';
 import { SlackMessageService } from '../services/slack.message.service';
 import { WhatsappMetaAuthenticator } from '../services/clientAuthenticator/whatsapp.meta.authenticator';
+import { MockMessageService } from '../services/mock.channel';
+import { MockChannelAuthenticator } from '../services/clientAuthenticator/mockChannel.authenticator';
 
 export class Injector {
 
@@ -31,6 +33,8 @@ export class Injector {
         container.register('REAN_SUPPORT.authenticator', ReanAppAuthenticator);
         container.register('slack.authenticator', SlackAuthenticator);
         container.register('whatsappMeta.authenticator', WhatsappMetaAuthenticator);
+        container.register('mockChannel', MockMessageService);
+        container.register('mockChannel.authenticator', MockChannelAuthenticator);
 
     }
 
