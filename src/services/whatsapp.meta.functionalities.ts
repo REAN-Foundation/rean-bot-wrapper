@@ -34,8 +34,8 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         return returnMessage;
     }
 
-    async voiceMessageFormat (msg) {
-        const mediaUrl = await this.GetWhatsappMedia('audio', msg.messages[0].voice.id, '_voice.ogg');
+    async voiceMessageFormat (msg, type) {
+        const mediaUrl = await this.GetWhatsappMedia('audio', msg.messages[0][type].id, '_voice.ogg');
         const preferredLanguage = await new UserLanguage().getPreferredLanguageofSession(msg.messages[0].from);
         const ConvertedToText = await this.speechtotext.SendSpeechRequest(mediaUrl, "whatsapp", preferredLanguage);
         if (preferredLanguage !== "null"){
@@ -80,6 +80,87 @@ export class MessageFunctionalities implements getMessageFunctionalities {
             throw new Error("Unable to find the image file path");
         }
         
+    }
+
+    async createImageMessage(message: string, postData: any, imageLink: string, payload: any) {
+        if (!imageLink) {
+            imageLink = payload.fields.url.stringValue;
+        }
+        postData["image"] = {
+            "link"    : imageLink,
+            "caption" : message
+        };
+        postData.type = "image";
+        const postDataString = JSON.stringify(postData);
+        return postDataString;
+    }
+
+    async createTextMessage(message: string, postData: any){
+        postData["text"] = {
+            "body" : message
+        };
+        if (new RegExp("(https?:+)").test(message)) {
+            postData["preview_url"] = true;
+        } else {
+            postData["preview_url"] = false;
+        }
+        postData.type = "text";
+        const postDataString = JSON.stringify(postData);
+        return postDataString;
+    }
+
+    async createVoiceMessage(message: string, postData: any, imageLink: string) { 
+        postData["audio"] = {
+            "link" : imageLink
+        };
+        postData.type = "audio";
+        const postDataString = JSON.stringify(postData);
+        console.log("this is the postDataString", postDataString);
+        return postDataString;
+    }
+
+    async createInteractiveList(message: string, postData: any, payload: any) {
+        const rows_meta = [];
+        const list_meta = payload.fields.buttons.listValue.values;
+        let count_meta = 0;
+        for (const lit of list_meta){
+            let id_meta = count_meta;
+            let description_meta = "";
+            if (lit.structValue.fields.description){
+                description_meta = lit.structValue.fields.description.stringValue;
+            }
+            if (lit.structValue.fields.id){
+                id_meta = lit.structValue.fields.id.stringValue;
+            }
+            const temp_meta = {
+                "id"          : id_meta,
+                "title"       : lit.structValue.fields.title.stringValue,
+                "description" : description_meta
+            };
+            rows_meta.push(temp_meta);
+            count_meta++;
+        }
+        postData["interactive"] = {
+            "type"   : "list",
+            "header" : {
+                "type" : "text",
+                "text" : "LIST"
+            },
+            "body" : {
+                "text" : message
+            },
+            "action" : {
+                "button"   : "Select From Here",
+                "sections" : [
+                    {
+                        "rows" : rows_meta
+                    }
+                ]
+            }
+        };
+        postData.type = "interactive";
+        const postDataString = JSON.stringify(postData);
+        return postDataString;
     }
 
     async interactiveMessaegFormat(msg) {

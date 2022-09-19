@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import http from 'https';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import fs from 'fs';
@@ -202,16 +203,8 @@ export class WhatsappMessageService implements platformServiceInterface {
             message = this.messageFunctionalities.sanitizeMessage(message);
             const postData = this.postDataFormatWhatsapp(contact);
             if (messageType === "image") {
-                if (!imageLink) {
-                    imageLink = payload.fields.url.stringValue;
-                }
-                postData["image"] = {
-                    "link"    : imageLink,
-                    "caption" : message
-                };
-                postData.type = "image";
-                const postDataString = JSON.stringify(postData);
-                console.log("this is the postData", postDataString);
+                // eslint-disable-next-line max-len
+                const postDataString = await this.messageFunctionalities.createImageMessage(message, postData, imageLink, payload);
                 resolve(await this.postRequestMessages(postDataString));
 
             }
@@ -224,63 +217,11 @@ export class WhatsappMessageService implements platformServiceInterface {
                 console.log("this is the postDataString", postDataString);
                 resolve(await this.postRequestMessages(postDataString));
             } else if (messageType === "interactive-list"){
-                const rows = [];
-                const list_items = payload.fields.buttons.listValue.values;
-                let count = 0;
-                for (const lit of list_items){
-                    let id = count;
-                    let description = "";
-                    if (lit.structValue.fields.description){
-                        description = lit.structValue.fields.description.stringValue;
-                    }
-                    if (lit.structValue.fields.id){
-                        id = lit.structValue.fields.id.stringValue;
-                    }
-                    const temp = {
-                        "id"          : id,
-                        "title"       : lit.structValue.fields.title.stringValue,
-                        "description" : description
-                    };
-                    rows.push(temp);
-                    count++;
-                }
-                postData["interactive"] = {
-                    "type"   : "list",
-                    "header" : {
-                        "type" : "text",
-                        "text" : "LIST"
-                    },
-                    "body" : {
-                        "text" : message
-                    },
-                    "action" : {
-                        "button"   : "Select From Here",
-                        "sections" : [
-                            {
-                                "title" : "Menu",
-                                "rows"  : rows
-                            }
-                        ]
-                    }
-                };
-                postData.type = "interactive";
-                const postDataString = JSON.stringify(postData);
-                console.log("this is the postData", postDataString);
+                const postDataString = await this.messageFunctionalities.createInteractiveList(message, postData, payload);
                 resolve(await this.postRequestMessages(postDataString));
             }
             else {
-                postData["text"] = {
-                    "body" : message
-                };
-                if (new RegExp("(https?://[^s]+)/g").test(message)) {
-                    console.log("We have a url inside");
-                    postData["preview_url"] = true;
-                } else {
-                    postData["preview_url"] = false;
-                }
-                postData.type = "text";
-                const postDataString = JSON.stringify(postData);
-                console.log("this is the postData", postDataString);
+                const postDataString = await this.messageFunctionalities.createTextMessage(message, postData);
                 resolve(await this.postRequestMessages(postDataString));
             }
         });
@@ -295,7 +236,7 @@ export class WhatsappMessageService implements platformServiceInterface {
             return await this.messageFunctionalities.locationMessageFormat(msg);
         }
         else if (msg.messages[0].type === "voice") {
-            return await this.messageFunctionalities.voiceMessageFormat(msg);
+            return await this.messageFunctionalities.voiceMessageFormat(msg, msg.messages[0].type);
         }
         else if (msg.messages[0].type === "image") {
             return await this.messageFunctionalities.imageMessaegFormat(msg);
