@@ -33,9 +33,9 @@ export class translateService{
         }
     }
 
-    translateMessage = async (message:string, sessionId) => {
+    translateMessage = async (messageType, message:string, sessionId) => {
         const translate = new v2.Translate(this.obj);
-        const languageForSession = await new UserLanguage().setLanguageForSession(sessionId, message);
+        const languageForSession = await new UserLanguage().setLanguageForSession(messageType, sessionId, message);
         console.log("languageForSession", languageForSession);
         // if (languageForSession === "change language") {
         //     const message = "change language";

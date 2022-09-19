@@ -32,6 +32,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         response = await this.GetTelegramMedia(message.voice.file_id);
         console.log("response of telegram media is", response);
         const file_path = response.result.file_path;
+
         // await new SequelizeClient().connect();
         const preferredLanguage = await new UserLanguage().getPreferredLanguageofSession(message.from.id);
         if (preferredLanguage !== "null"){
