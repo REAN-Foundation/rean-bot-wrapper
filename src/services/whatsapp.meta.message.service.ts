@@ -89,13 +89,7 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
             const messageBody = this.messageFunctionalitiesmeta.sanitizeMessage(message);
             const postDataMeta = this.postDataFormatWhatsapp(contact);
             if (messageType === "image") {
-                postDataMeta["image"] = {
-                    "link"    : imageLink,
-                    "caption" : messageBody
-                };
-                postDataMeta.type = "image";
-                const postDataString = JSON.stringify(postDataMeta);
-                console.log("this is the postData", postDataString);
+                const postDataString = await this.messageFunctionalitiesmeta.createImageMessage(message, postDataMeta, imageLink, payload);
                 await this.postRequestMessages(postDataString);
 
             }
@@ -160,56 +154,11 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
                 console.log("this is the postDataString", postDataString);
                 await this.postRequestMessages(postDataString);
             } else if (messageType === "interactive-list") {
-                const rows_meta = [];
-                const list_meta = payload.fields.buttons.listValue.values;
-                let count_meta = 0;
-                for (const lit of list_meta){
-                    let id_meta = count_meta;
-                    let description_meta = "";
-                    if (lit.structValue.fields.description){
-                        description_meta = lit.structValue.fields.description.stringValue;
-                    }
-                    if (lit.structValue.fields.id){
-                        id_meta = lit.structValue.fields.id.stringValue;
-                    }
-                    const temp_meta = {
-                        "id"          : id_meta,
-                        "title"       : lit.structValue.fields.title.stringValue,
-                        "description" : description_meta
-                    };
-                    rows_meta.push(temp_meta);
-                    count_meta++;
-                }
-                postDataMeta["interactive"] = {
-                    "type"   : "list",
-                    "header" : {
-                        "type" : "text",
-                        "text" : "LIST"
-                    },
-                    "body" : {
-                        "text" : message
-                    },
-                    "action" : {
-                        "button": "Select From Here",
-                        "sections": [
-                            {
-                                "rows": rows_meta
-                            }
-                        ]
-                    }
-                };
-                postDataMeta.type = "interactive";
-                const postDataString = JSON.stringify(postDataMeta);
-                console.log("this is the postDataString", postDataString);
+                const postDataString = await this.messageFunctionalitiesmeta.createInteractiveList(message, postDataMeta, payload);
                 await this.postRequestMessages(postDataString);
             }
             else {
-                postDataMeta["text"] = {
-                    "body" : message
-                };
-                postDataMeta.type = "text";
-                const postDataString = JSON.stringify(postDataMeta);
-                console.log("this is the postData", postDataString);
+                const postDataString = await this.messageFunctionalitiesmeta.createTextMessage(message, postDataMeta);
                 await this.postRequestMessages(postDataString);
             }
         });
@@ -226,7 +175,7 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
             return await this.messageFunctionalitiesmeta.locationMessageFormat(message);
         }
         else if (message.messages[0].type === "audio") {
-            return await this.messageFunctionalitiesmeta.voiceMessageFormat(message);
+            return await this.messageFunctionalitiesmeta.voiceMessageFormat(message, message.messages[0].type);
         }
         else if (message.messages[0].type === "image") {
             return await this.messageFunctionalitiesmeta.imageMessaegFormat(message);
