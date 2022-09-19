@@ -60,29 +60,8 @@ export class MockMessageService implements platformServiceInterface {
     };
 
     async postRequestMessages(postdata) {
-        return new Promise(async(resolve,reject) =>{
-            try {
-                const options = getRequestOptions();
-                const token = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
-                options.headers['Content-Type'] = 'application/json';
-                options.headers['Authorization'] = `Bearer ${token}`;
-                const hostname = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
-                const whatsappPhoneNumberID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_PHONE_NUMBER_ID");
-                const path = `/v14.0/${whatsappPhoneNumberID}/messages`;
-                const apiUrl_meta = hostname + path;
-                await needle.post(apiUrl_meta, postdata, options, function(err, resp) {
-                    if (err) {
-                        console.log("err", err);
-                        reject(err);
-                    }
-                    console.log("resp", resp.body);
-                });
-            }
-            catch (error) {
-                console.log("error", error);
-                reject(error.message);
-            }
-        });
+        
+        //Not required
     }
 
     SendMediaMessage = async (contact: number | string, imageLink: string, message: string, messageType: string, payload: any) => {
