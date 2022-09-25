@@ -68,6 +68,21 @@ export class translateService{
         return translatedResponse;
     };
 
+    translatePushNotifications = async ( message: string, phoneNumber: string) => {
+        console.log(`entered the translation of push notification JJJJJJJJJJJ`);
+        try {
+            const translate = new v2.Translate(this.obj);
+            const languageForSession = await new UserLanguage().getPreferredLanguageofSession(phoneNumber);
+            console.log("languageForSession", languageForSession);
+            const responseMessage = this.translateResponse(translate, [message], languageForSession);
+            return responseMessage;
+
+        } catch (e) {
+            console.log("catch translate", e);
+            return "en";
+        }
+    };
+
     translateResponse = async (translate, responseMessage: string[], detected_language: string) => {
         console.log(`entered the translateResponse of translateService JJJJJJJJJJJ`);
         try {
