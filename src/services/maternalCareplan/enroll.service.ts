@@ -63,7 +63,7 @@ export const enrollService = async (eventObj) => {
         const enrollmentId = resp.body.Data.Enrollment.EnrollmentId;
         Logger.instance().log(`Enrollment id of user is: ${enrollmentId}`);
 
-        const dffMessage = `Welcome! ${name} have successfully subscribed to the REAN Maternal care plan. You will start getting regular notifications.`;
+        const dffMessage = `Welcome! ${name}, you have successfully subscribed to the REAN Maternal care plan.`;
 
         return { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } };
     } else {
