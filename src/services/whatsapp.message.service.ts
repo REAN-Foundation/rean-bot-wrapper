@@ -203,8 +203,15 @@ export class WhatsappMessageService implements platformServiceInterface {
             message = this.messageFunctionalities.sanitizeMessage(message);
             const postData = this.postDataFormatWhatsapp(contact);
             if (messageType === "image") {
-                // eslint-disable-next-line max-len
-                const postDataString = await this.messageFunctionalities.createImageMessage(message, postData, imageLink, payload);
+                if (!imageLink) {
+                    imageLink = payload.fields.url.stringValue;
+                }
+                postData["image"] = {
+                    "link"    : imageLink,
+                    "caption" : message
+                };
+                postData.type = "image";
+                const postDataString = JSON.stringify(postData);
                 resolve(await this.postRequestMessages(postDataString));
 
             }
@@ -217,11 +224,61 @@ export class WhatsappMessageService implements platformServiceInterface {
                 console.log("this is the postDataString", postDataString);
                 resolve(await this.postRequestMessages(postDataString));
             } else if (messageType === "interactive-list"){
-                const postDataString = await this.messageFunctionalities.createInteractiveList(message, postData, payload);
+                const rows_meta = [];
+                var header = "";
+                const list_meta = payload.fields.buttons.listValue.values;
+                if (payload.fields.header){
+                    header = payload.fields.header.stringValue;
+                } else {
+                    header = "LIST";
+                } 
+                let count_meta = 0;
+                for (const lit of list_meta){
+                    let id_meta = count_meta;
+                    let description_meta = "";
+                    if (lit.structValue.fields.description){
+                        description_meta = lit.structValue.fields.description.stringValue;
+                    }
+                    if (lit.structValue.fields.id){
+                        id_meta = lit.structValue.fields.id.stringValue;
+                    }
+                    const temp_meta = {
+                        "id"          : id_meta,
+                        "title"       : lit.structValue.fields.title.stringValue,
+                        "description" : description_meta
+                    };
+                    rows_meta.push(temp_meta);
+                    count_meta++;
+                }
+                postData["interactive"] = {
+                    "type" : "list",
+                    "body" : {
+                        "text" : message
+                    },
+                    "action" : {
+                        "button"   : "Select From Here",
+                        "sections" : [
+                            {
+                                "rows" : rows_meta
+                            }
+                        ]
+                    }
+                };
+                postData.type = "interactive";
+                const postDataString = JSON.stringify(postData);
                 resolve(await this.postRequestMessages(postDataString));
             }
             else {
-                const postDataString = await this.messageFunctionalities.createTextMessage(message, postData);
+                postData["text"] = {
+                    "body" : message
+                };
+                if (new RegExp("(https?:+)").test(message)) {
+                    postData["preview_url"] = true;
+                } else {
+                    postData["preview_url"] = false;
+                }
+                postData.type = "text";
+                const postDataString = JSON.stringify(postData);
                 resolve(await this.postRequestMessages(postDataString));
             }
         });
@@ -236,7 +293,7 @@ export class WhatsappMessageService implements platformServiceInterface {
             return await this.messageFunctionalities.locationMessageFormat(msg);
         }
         else if (msg.messages[0].type === "voice") {
-            return await this.messageFunctionalities.voiceMessageFormat(msg, msg.messages[0].type);
+            return await this.messageFunctionalities.voiceMessageFormat(msg, msg.messages[0].type, 'whatsapp');
         }
         else if (msg.messages[0].type === "image") {
             return await this.messageFunctionalities.imageMessaegFormat(msg);

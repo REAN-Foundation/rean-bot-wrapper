@@ -9,6 +9,7 @@ import { autoInjectable } from "tsyringe";
 import { EmojiFilter } from './filter.message.for.emoji.service';
 import { AwsS3manager } from "./aws.file.upload.service";
 import { UserLanguage } from "./set.language";
+import needle from 'needle';
 
 @autoInjectable()
 export class MessageFunctionalities implements getMessageFunctionalities {
@@ -34,9 +35,19 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         return returnMessage;
     }
 
-    async voiceMessageFormat (msg, type) {
-        const mediaUrl = await this.GetWhatsappMedia('audio', msg.messages[0][type].id, '_voice.ogg');
-        const preferredLanguage = await new UserLanguage().getPreferredLanguageofSession(msg.messages[0].from);
+    async voiceMessageFormat (msg, type, chanel) {
+        let mediaUrl;
+        let preferredLanguageRequest;
+        if (chanel === "whatsappMeta") {
+            mediaUrl = await this.GetWhatsappMetaMedia('audio', msg.messages[0].url, '_voice.ogg');
+            // mediaUrl = msg.messages[0].url;
+            preferredLanguageRequest = msg.messages[0].from;
+        } else {
+            mediaUrl = await this.GetWhatsappMedia('audio', msg.messages[0][type].id, '_voice.ogg');
+            preferredLanguageRequest = msg.messages[0].from;
+        }
+
+        const preferredLanguage = await new UserLanguage().getPreferredLanguageofSession(preferredLanguageRequest);
         const ConvertedToText = await this.speechtotext.SendSpeechRequest(mediaUrl, "whatsapp", preferredLanguage);
         if (preferredLanguage !== "null"){
             if (ConvertedToText) {
@@ -80,87 +91,6 @@ export class MessageFunctionalities implements getMessageFunctionalities {
             throw new Error("Unable to find the image file path");
         }
         
-    }
-
-    async createImageMessage(message: string, postData: any, imageLink: string, payload: any) {
-        if (!imageLink) {
-            imageLink = payload.fields.url.stringValue;
-        }
-        postData["image"] = {
-            "link"    : imageLink,
-            "caption" : message
-        };
-        postData.type = "image";
-        const postDataString = JSON.stringify(postData);
-        return postDataString;
-    }
-
-    async createTextMessage(message: string, postData: any){
-        postData["text"] = {
-            "body" : message
-        };
-        if (new RegExp("(https?:+)").test(message)) {
-            postData["preview_url"] = true;
-        } else {
-            postData["preview_url"] = false;
-        }
-        postData.type = "text";
-        const postDataString = JSON.stringify(postData);
-        return postDataString;
-    }
-
-    async createVoiceMessage(message: string, postData: any, imageLink: string) { 
-        postData["audio"] = {
-            "link" : imageLink
-        };
-        postData.type = "audio";
-        const postDataString = JSON.stringify(postData);
-        console.log("this is the postDataString", postDataString);
-        return postDataString;
-    }
-
-    async createInteractiveList(message: string, postData: any, payload: any) {
-        const rows_meta = [];
-        const list_meta = payload.fields.buttons.listValue.values;
-        let count_meta = 0;
-        for (const lit of list_meta){
-            let id_meta = count_meta;
-            let description_meta = "";
-            if (lit.structValue.fields.description){
-                description_meta = lit.structValue.fields.description.stringValue;
-            }
-            if (lit.structValue.fields.id){
-                id_meta = lit.structValue.fields.id.stringValue;
-            }
-            const temp_meta = {
-                "id"          : id_meta,
-                "title"       : lit.structValue.fields.title.stringValue,
-                "description" : description_meta
-            };
-            rows_meta.push(temp_meta);
-            count_meta++;
-        }
-        postData["interactive"] = {
-            "type"   : "list",
-            "header" : {
-                "type" : "text",
-                "text" : "LIST"
-            },
-            "body" : {
-                "text" : message
-            },
-            "action" : {
-                "button"   : "Select From Here",
-                "sections" : [
-                    {
-                        "rows" : rows_meta
-                    }
-                ]
-            }
-        };
-        postData.type = "interactive";
-        const postDataString = JSON.stringify(postData);
-        return postDataString;
     }
 
     async interactiveMessaegFormat(msg) {
@@ -223,6 +153,36 @@ export class MessageFunctionalities implements getMessageFunctionalities {
                     reject(e);
                 });
                 request.end();
+            }
+        });
+    };
+
+    GetWhatsappMetaMedia = async (type, mediaUrl, extension) => {
+        return new Promise((resolve, reject) => {
+            const token = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
+            const headers = {
+                headers : {
+                    'Authorization' : `Bearer ${token}`,
+                }
+            };
+
+            try { 
+                const request = needle.get(mediaUrl, headers, function(err, resp, body) { 
+                    if (err){
+                        console.log('FAiled to REad File');
+                    }
+                    const file_name = `${type}/` + Date.now() + `${extension}`;
+                    fs.writeFile('./' + file_name,body, err => { 
+                        if (err) {
+                            console.log(err);
+                            reject(err);
+                        } else {
+                            resolve(file_name);
+                        }
+                    } );
+                });
+            } catch (err) { 
+                console.log(err);
             }
         });
     };
