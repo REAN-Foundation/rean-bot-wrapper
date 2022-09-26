@@ -57,6 +57,9 @@ export class AwsS3manager{
                     if (extension === '.ogg' || extension === '.mp3' || extension === '.oga'){
                         console.log("Detected as an Audio file");
                         params.ContentType = 'audio/ogg';
+                        if (extension === ".mp3" ){
+                            params.ContentType = 'audio/mpeg';
+                        }
                     }
 
                     // eslint-disable-next-line max-len
