@@ -224,31 +224,31 @@ export class WhatsappMessageService implements platformServiceInterface {
                 console.log("this is the postDataString", postDataString);
                 resolve(await this.postRequestMessages(postDataString));
             } else if (messageType === "interactive-list"){
-                const rows_meta = [];
+                const rows = [];
                 var header = "";
-                const list_meta = payload.fields.buttons.listValue.values;
+                const list = payload.fields.buttons.listValue.values;
                 if (payload.fields.header){
                     header = payload.fields.header.stringValue;
                 } else {
                     header = "LIST";
                 } 
-                let count_meta = 0;
-                for (const lit of list_meta){
-                    let id_meta = count_meta;
+                let count = 0;
+                for (const lit of list){
+                    let id = count;
                     let description_meta = "";
                     if (lit.structValue.fields.description){
                         description_meta = lit.structValue.fields.description.stringValue;
                     }
                     if (lit.structValue.fields.id){
-                        id_meta = lit.structValue.fields.id.stringValue;
+                        id = lit.structValue.fields.id.stringValue;
                     }
-                    const temp_meta = {
-                        "id"          : id_meta,
+                    const temp = {
+                        "id"          : id,
                         "title"       : lit.structValue.fields.title.stringValue,
                         "description" : description_meta
                     };
-                    rows_meta.push(temp_meta);
-                    count_meta++;
+                    rows.push(temp);
+                    count++;
                 }
                 postData["interactive"] = {
                     "type" : "list",
@@ -259,7 +259,7 @@ export class WhatsappMessageService implements platformServiceInterface {
                         "button"   : "Select From Here",
                         "sections" : [
                             {
-                                "rows" : rows_meta
+                                "rows" : rows
                             }
                         ]
                     }
