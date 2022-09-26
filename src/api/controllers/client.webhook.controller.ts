@@ -25,9 +25,12 @@ export class ClientWebhookController {
             // eslint-disable-next-line max-len
             this._platformMessageService = container.resolve(req.params.channel);
             const responce = await this._platformMessageService.sendManualMesage(req.body);
-            if (responce) this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', responce);
-            else
-                this.responseHandler.sendFailureResponse(res, 200, 'An error occurred while sending messages!', req);
+            if (responce) {
+                this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', responce);
+            }
+            else {
+                this.responseHandler.sendFailureResponse(res, 500, 'An error occurred while sending messages!', req);
+            }
         }
         catch (error) {
             this.errorHandler.handle_controller_error(error, res, req);
