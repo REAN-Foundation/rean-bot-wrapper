@@ -14,6 +14,8 @@ import { UserFeedback } from '../models/user.feedback.model';
 import { SlackMessageService } from "./slack.message.service";
 import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
+import { translateService } from './translate.service';
+import { v2 } from '@google-cloud/translate';
 
 @autoInjectable()
 export class MessageFlow{
@@ -22,7 +24,8 @@ export class MessageFlow{
         private slackMessageService?: SlackMessageService,
         private handleRequestservice?: handleRequestservice,
         private sequelizeClient?: SequelizeClient,
-        private callAnemiaModel?: CallAnemiaModel) {
+        private callAnemiaModel?: CallAnemiaModel,
+        private translate?: translateService) {
     }
 
     async checkTheFlow(msg: any, channel: string, platformMessageService: platformServiceInterface){
@@ -136,13 +139,15 @@ export class MessageFlow{
     }
 
     async send_manual_msg (msg,platformMessageService: platformServiceInterface) {
+        const translatedMessage = await this.translate.translatePushNotifications( msg.message, msg.userId);
+        msg.message = translatedMessage;
         const response_format = await platformMessageService.createFinalMessageFromHumanhandOver(msg);
         const person = new ChatMessage(response_format);
         await person.save();
 
         let message_to_platform = null;
         // eslint-disable-next-line max-len
-        message_to_platform = await platformMessageService.SendMediaMessage(response_format.sessionId, response_format.messageBody,response_format.messageText, response_format.message_type,null);
+        message_to_platform = await platformMessageService.SendMediaMessage(response_format.sessionId, response_format.messageBody,response_format.messageText[0], response_format.message_type,null);
         return message_to_platform;
     }
 

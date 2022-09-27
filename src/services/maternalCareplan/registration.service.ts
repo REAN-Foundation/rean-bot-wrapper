@@ -46,7 +46,7 @@ export const registrationService = async (eventObj) => {
             throw new Error('Error in patient registration with rean care service.');
         }
         
-        const dffMessage = `Hi ${name}, Your last mensuration period date is ${lmp.split("T")[0]}. Do you agree on this information?`;
+        const dffMessage = `Hi ${name}, Your Last Mensuration Period(LMP) date is ${new Date(lmp.split("T")[0]).toDateString()}.\nYou will get periodic notifications based on your LMP. Do you agree with this information?`;
         return { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } };
 
     } else {
