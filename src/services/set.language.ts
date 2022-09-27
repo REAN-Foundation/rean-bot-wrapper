@@ -2,8 +2,15 @@
 /* eslint-disable max-len */
 import { ChatSession } from '../models/chat.session';
 import { translateService } from './translate.service';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { autoInjectable } from 'tsyringe';
 
+@autoInjectable()
 export class UserLanguage {
+
+    private translateSetting;
+
+    constructor(private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     async setLanguageForSession(messageType, sessionId, message) {
         const respChatSession = await ChatSession.findAll({ where: { userPlatformID: sessionId } });
@@ -31,7 +38,13 @@ export class UserLanguage {
             // if (detected_language !== preferredLanguage){
             //     return "change language";
             // }
-            if (message.length < 80) {
+            if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("TRANSLATE_SETTING")) {
+                this.translateSetting = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TRANSLATE_SETTING");
+            } else {
+                this.translateSetting = 10;
+            }
+
+            if (message.length < this.translateSetting) {
                 console.log('when preffered Language is not null');
                 console.log('666', preferredLanguage);
                 return preferredLanguage;
