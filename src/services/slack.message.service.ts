@@ -145,7 +145,7 @@ export class SlackMessageService implements platformServiceInterface {
         else if (channel === "whatsapp"){
             await this.whatsappMessageService.SendMediaMessage(contact.toString(), null, message, "text");
         }
-        else if (channel === "whatsappNew"){
+        else if (channel === "whatsappMeta"){
             await this.whatsappNewMessageService.SendMediaMessage(contact.toString(), null, message, "text");
         }
     }

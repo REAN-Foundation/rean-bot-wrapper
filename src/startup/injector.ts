@@ -12,7 +12,10 @@ import { SlackAuthenticator } from '../services/clientAuthenticator/slack.authen
 import { SlackMessageService } from '../services/slack.message.service';
 import { WhatsappMetaAuthenticator } from '../services/clientAuthenticator/whatsapp.meta.authenticator';
 import { MockMessageService } from '../services/mock.channel';
+import { ClickUpMessageService } from '../services/clickup.message.service';
 import { MockChannelAuthenticator } from '../services/clientAuthenticator/mockChannel.authenticator';
+import { ClickUpAuthenticator } from '../services/clientAuthenticator/clickup.authenticator';
+
 
 export class Injector {
 
@@ -23,6 +26,7 @@ export class Injector {
 
         //client injector
         container.register('whatsapp', WhatsappMessageService);
+        container.register('clickup', ClickUpMessageService);
         container.register('whatsappMeta', WhatsappMetaMessageService);
         container.register('telegram', telegramPlatformservice);
         container.register('REAN_SUPPORT', rean_SUPPORT_Platformservice);
@@ -34,6 +38,7 @@ export class Injector {
         container.register('slack.authenticator', SlackAuthenticator);
         container.register('whatsappMeta.authenticator', WhatsappMetaAuthenticator);
         container.register('mockChannel', MockMessageService);
+        container.register('clickup.authenticator', ClickUpAuthenticator);
         container.register('mockChannel.authenticator', MockChannelAuthenticator);
 
     }

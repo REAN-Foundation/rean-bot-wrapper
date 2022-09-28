@@ -45,4 +45,9 @@ export class UserFeedback extends Model implements feedbackmessage {
     })
         feedbackType: string;
 
+    @Column({
+        type : DataType.STRING
+    })
+        taskID: string;
+
 }

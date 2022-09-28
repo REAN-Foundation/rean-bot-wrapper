@@ -60,6 +60,11 @@ export class ChatMessage extends Model implements IchatMessage {
         messageType: string;
 
     @Column({
+        type : DataType.STRING(256)
+    })
+    messageId: string;
+
+    @Column({
         type : DataType.TEXT()
     })
         messageContent: string;
