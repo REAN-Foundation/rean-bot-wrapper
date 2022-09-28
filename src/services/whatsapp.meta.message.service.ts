@@ -32,8 +32,8 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
         return this.messageFlow.checkTheFlow(requestBody, channel, this);
     }
 
-    sendManualMesage(msg: any) {
-        return this.messageFlow.send_manual_msg(msg, this);
+    async sendManualMesage(msg: any) {
+        return await this.messageFlow.send_manual_msg(msg, this);
     }
 
     init() {
@@ -66,13 +66,8 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
                 const whatsappPhoneNumberID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_PHONE_NUMBER_ID");
                 const path = `/v14.0/${whatsappPhoneNumberID}/messages`;
                 const apiUrl_meta = hostname + path;
-                await needle.post(apiUrl_meta, postdata, options, function(err, resp) {
-                    if (err) {
-                        console.log("err", err);
-                        reject(err);
-                    }
-                    console.log("resp", resp.body);
-                });
+                const response = await needle("post", apiUrl_meta, postdata, options);
+                resolve(response);
             }
             catch (error) {
                 console.log("error", error);
@@ -81,142 +76,169 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
         });
     }
 
+    async getMetaMediaUrl(mediaId){
+        try {
+            const options = getRequestOptions();
+            const token = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
+            options.headers['Content-Type'] = 'application/json';
+            options.headers['Authorization'] = `Bearer ${token}`;
+            const hostname = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
+            const path = `/v14.0/${mediaId}`;
+            const apiUrl_meta = hostname + path;
+            const response = await needle("get",apiUrl_meta, options);
+            return response.body.url;
+        }
+        catch (error) {
+            console.log("error", error);
+        }
+    }
+
     SendMediaMessage = async (contact: number | string, imageLink: string, message: string, messageType: string, payload: any) => {
-        return new Promise(async() => {
 
-            // console.log("message type",messageType + imageLink);
-            console.log("This is the payload", payload);
-            const messageBody = this.messageFunctionalitiesmeta.sanitizeMessage(message);
-            const postDataMeta = this.postDataFormatWhatsapp(contact);
-            if (messageType === "image") {
-                postDataMeta["image"] = {
-                    "link"    : imageLink,
-                    "caption" : messageBody
-                };
-                postDataMeta.type = "image";
-                const postDataString = JSON.stringify(postDataMeta);
-                console.log("this is the postData", postDataString);
-                await this.postRequestMessages(postDataString);
+        // console.log("message type",messageType + imageLink);
+        console.log("This is the payload", payload);
+        const messageBody = this.messageFunctionalitiesmeta.sanitizeMessage(message);
+        const postDataMeta = this.postDataFormatWhatsapp(contact);
+        if (messageType === "image") {
+            if (!imageLink) {
+                imageLink = payload.fields.url.stringValue;
+            }
+            postDataMeta["image"] = {
+                "link"    : imageLink,
+                "caption" : message
+            };
+            postDataMeta.type = "image";
+            const postDataString = JSON.stringify(postDataMeta);
+            return await this.postRequestMessages(postDataString);
 
-            }
-            else if (messageType === "voice"){
-                postDataMeta["audio"] = {
-                    "link" : imageLink
-                };
-                postDataMeta.type = "audio";
-                const postDataString = JSON.stringify(postDataMeta);
-                console.log("this is the postDataString", postDataString);
-                await this.postRequestMessages(postDataString);
-            }
-            else if (messageType === "template"){
-                postDataMeta["template"] = {
-                    "name"     : "transactional_test",
-                    "language" : {
-                        "code" : "en"
-                    },
-                    "components" : [{
-                        "type"       : "body",
-                        "parameters" : [{
-                            "type" : "text",
-                            "text" : "twelve"
-                        },
-                        {
-                            "type" : "text",
-                            "text" : "Vitamins"
-                        }]
-                    }] 
-                };
-                postDataMeta.type = "template";
-                const postDataString = JSON.stringify(postDataMeta);
-                console.log("this is the postDataString", postDataString);
-                await this.postRequestMessages(postDataString);
-            }
-            else if (messageType === "interactive-buttons"){
-                const buttons = [];
-                const numberOfButtons = (payload.fields.buttons.listValue.values).length;
-                for (let i = 0; i < numberOfButtons; i++){
-                    const id = payload.fields.buttons.listValue.values[i].structValue.fields.reply.structValue.fields.id.stringValue;
-                    const title = payload.fields.buttons.listValue.values[i].structValue.fields.reply.structValue.fields.title.stringValue;
-                    const tempObject = {
-                        "type"  : "reply",
-                        "reply" : {
-                            "id"    : id,
-                            "title" : title
-                        }
-                    };
-                    buttons.push(tempObject);
-                }
-                postDataMeta["interactive"] = {
-                    "type" : "button",
-                    "body" : {
-                        "text" : message
-                    },
-                    "action" : {
-                        "buttons" : buttons
-                    }
-                };
-                postDataMeta.type = "interactive";
-                const postDataString = JSON.stringify(postDataMeta);
-                console.log("this is the postDataString", postDataString);
-                await this.postRequestMessages(postDataString);
-            } else if (messageType === "interactive-list") {
-                const rows_meta = [];
-                const list_meta = payload.fields.buttons.listValue.values;
-                let count_meta = 0;
-                for (const lit of list_meta){
-                    let id_meta = count_meta;
-                    let description_meta = "";
-                    if (lit.structValue.fields.description){
-                        description_meta = lit.structValue.fields.description.stringValue;
-                    }
-                    if (lit.structValue.fields.id){
-                        id_meta = lit.structValue.fields.id.stringValue;
-                    }
-                    const temp_meta = {
-                        "id"          : id_meta,
-                        "title"       : lit.structValue.fields.title.stringValue,
-                        "description" : description_meta
-                    };
-                    rows_meta.push(temp_meta);
-                    count_meta++;
-                }
-                postDataMeta["interactive"] = {
-                    "type"   : "list",
-                    "header" : {
+        }
+        else if (messageType === "voice"){
+            postDataMeta["audio"] = {
+                "link" : imageLink
+            };
+            postDataMeta.type = "audio";
+            const postDataString = JSON.stringify(postDataMeta);
+            console.log("this is the postDataString", postDataString);
+            return await this.postRequestMessages(postDataString);
+        }
+        else if (messageType === "template"){
+            postDataMeta["template"] = {
+                "name"     : "transactional_test",
+                "language" : {
+                    "code" : "en"
+                },
+                "components" : [{
+                    "type"       : "body",
+                    "parameters" : [{
                         "type" : "text",
-                        "text" : "LIST"
+                        "text" : "twelve"
                     },
-                    "body" : {
-                        "text" : message
-                    },
-                    "action" : {
-                        "button": "Select From Here",
-                        "sections": [
-                            {
-                                "rows": rows_meta
-                            }
-                        ]
+                    {
+                        "type" : "text",
+                        "text" : "Vitamins"
+                    }]
+                }]
+            };
+            postDataMeta.type = "template";
+            const postDataString = JSON.stringify(postDataMeta);
+            console.log("this is the postDataString", postDataString);
+            return await this.postRequestMessages(postDataString);
+        }
+        else if (messageType === "interactive-buttons"){
+            const buttons = [];
+            const numberOfButtons = (payload.fields.buttons.listValue.values).length;
+            for (let i = 0; i < numberOfButtons; i++){
+                const id = payload.fields.buttons.listValue.values[i].structValue.fields.reply.structValue.fields.id.stringValue;
+                const title = payload.fields.buttons.listValue.values[i].structValue.fields.reply.structValue.fields.title.stringValue;
+                const tempObject = {
+                    "type"  : "reply",
+                    "reply" : {
+                        "id"    : id,
+                        "title" : title
                     }
                 };
-                postDataMeta.type = "interactive";
-                const postDataString = JSON.stringify(postDataMeta);
-                console.log("this is the postDataString", postDataString);
-                await this.postRequestMessages(postDataString);
+                buttons.push(tempObject);
             }
-            else {
-                postDataMeta["text"] = {
-                    "body" : message
-                };
-                postDataMeta.type = "text";
-                const postDataString = JSON.stringify(postDataMeta);
-                console.log("this is the postData", postDataString);
-                await this.postRequestMessages(postDataString);
+            postDataMeta["interactive"] = {
+                "type" : "button",
+                "body" : {
+                    "text" : message
+                },
+                "action" : {
+                    "buttons" : buttons
+                }
+            };
+            postDataMeta.type = "interactive";
+            const postDataString = JSON.stringify(postDataMeta);
+            console.log("this is the postDataString", postDataString);
+            return await this.postRequestMessages(postDataString);
+        } else if (messageType === "interactive-list") {
+            const rows_meta = [];
+            var header = "";
+            const list_meta = payload.fields.buttons.listValue.values;
+            if (payload.fields.header){
+                header = payload.fields.header.stringValue;
+            } else {
+                header = "LIST";
             }
-        });
-    };
 
+            let count_meta = 0;
+            for (const lit of list_meta){
+                let id_meta = count_meta;
+                let description_meta = "";
+                if (lit.structValue.fields.description){
+                    description_meta = lit.structValue.fields.description.stringValue;
+                }
+                if (lit.structValue.fields.id){
+                    id_meta = lit.structValue.fields.id.stringValue;
+                }
+                const temp_meta = {
+                    "id"          : id_meta,
+                    "title"       : lit.structValue.fields.title.stringValue,
+                    "description" : description_meta
+                };
+                rows_meta.push(temp_meta);
+                count_meta++;
+            }
+            postDataMeta["interactive"] = {
+                "type"   : "list",
+                "header" : {
+                    "type" : "text",
+                    "text" : header
+                },
+                "body" : {
+                    "text" : message
+                },
+                "action" : {
+                    "button"   : "Select From Here",
+                    "sections" : [
+                        {
+                            "rows" : rows_meta
+                        }
+                    ]
+                }
+            };
+            postDataMeta.type = "interactive";
+            const postDataString = JSON.stringify(postDataMeta);
+            return await this.postRequestMessages(postDataString);
+        }
+        else {
+            postDataMeta["text"] = {
+                "body" : message
+            };
+            if (new RegExp("(https?:+)").test(message)) {
+                postDataMeta["text"]["preview_url"] = true;
+            } else {
+                postDataMeta["text"]["preview_url"] = false;
+            }
+            postDataMeta.type = "text";
+            const postDataString = JSON.stringify(postDataMeta);
+            console.log(postDataString);
+            return await this.postRequestMessages(postDataString);
+        }
+    };
+    
     getMessage = async (message: any) => {
-        // console.log("request from whatsapp format", msg);
         console.log("messages meta", message);
         if (message.messages[0].type === "text") {
             // eslint-disable-next-line max-len
@@ -226,7 +248,9 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
             return await this.messageFunctionalitiesmeta.locationMessageFormat(message);
         }
         else if (message.messages[0].type === "audio") {
-            return await this.messageFunctionalitiesmeta.voiceMessageFormat(message);
+            const mediaUrl = await this.getMetaMediaUrl(message.messages[0].audio.id);
+            message.messages[0]['url'] = mediaUrl;
+            return await this.messageFunctionalitiesmeta.voiceMessageFormat(message, message.messages[0].type, 'whatsappMeta');
         }
         else if (message.messages[0].type === "image") {
             return await this.messageFunctionalitiesmeta.imageMessaegFormat(message);
@@ -240,6 +264,7 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
         }
         else if (message.messages[0].type === "button") {
             console.log("msg.messages[0].interactive",util.inspect(message.messages[0].button));
+
             // return await this.messageFunctionalitiesmeta.interactiveMessaegFormat(msg);
         }
         else {
