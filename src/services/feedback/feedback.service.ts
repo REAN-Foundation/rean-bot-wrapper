@@ -7,6 +7,7 @@ import { HumanHandoff } from '../../services/human.handoff.service';
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
 import { CalorieInfo } from '../../models/calorie.info.model';
 import { Op } from 'sequelize';
+import { ClickUpTask } from '../clickup/clickup.task';
 
 const humanHandoff: HumanHandoff = container.resolve(HumanHandoff);
 // eslint-disable-next-line max-len
@@ -16,7 +17,9 @@ const clientEnvironmentProviderService: ClientEnvironmentProviderService = conta
 export class FeedbackService implements feedbackInterface {
 
     constructor(
-        private slackMessageService?: SlackMessageService){}
+        private slackMessageService?: SlackMessageService,
+        private clickuptask?: ClickUpTask,
+        private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     async NegativeFeedback(channel, userId) {
         return new Promise(async(resolve, reject) =>{
@@ -52,7 +55,13 @@ export class FeedbackService implements feedbackInterface {
                     resolve(data);
                 } else {
                     const response = await UserFeedback.findAll({ where: { userId: userId } });
-                    await this.slackMessageService.postMessage(response);
+                    const preferredSupportChannel = this.clientEnvironmentProviderService.getClientEnvironmentVariable("SUPPORT_CHANNEL");
+                    if (preferredSupportChannel === "ClickUp"){
+                        await this.clickuptask.createTask(response);
+                    }
+                    else {
+                        await this.slackMessageService.postMessage(response);
+                    }
                     if (await humanHandoff.checkTime() === "false"){
                         const reply = "We have recorded your feedback. Our experts will get back to you on this issue";
                         const data = {
