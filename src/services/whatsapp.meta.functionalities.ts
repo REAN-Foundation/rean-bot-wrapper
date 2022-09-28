@@ -9,6 +9,7 @@ import { autoInjectable } from "tsyringe";
 import { EmojiFilter } from './filter.message.for.emoji.service';
 import { AwsS3manager } from "./aws.file.upload.service";
 import { UserLanguage } from "./set.language";
+import needle from 'needle';
 
 @autoInjectable()
 export class MessageFunctionalities implements getMessageFunctionalities {
@@ -34,9 +35,19 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         return returnMessage;
     }
 
-    async voiceMessageFormat (msg) {
-        const mediaUrl = await this.GetWhatsappMedia('audio', msg.messages[0].voice.id, '_voice.ogg');
-        const preferredLanguage = await new UserLanguage().getPreferredLanguageofSession(msg.messages[0].from);
+    async voiceMessageFormat (msg, type, chanel) {
+        let mediaUrl;
+        let preferredLanguageRequest;
+        if (chanel === "whatsappMeta") {
+            mediaUrl = await this.GetWhatsappMetaMedia('audio', msg.messages[0].url, '_voice.ogg');
+            // mediaUrl = msg.messages[0].url;
+            preferredLanguageRequest = msg.messages[0].from;
+        } else {
+            mediaUrl = await this.GetWhatsappMedia('audio', msg.messages[0][type].id, '_voice.ogg');
+            preferredLanguageRequest = msg.messages[0].from;
+        }
+
+        const preferredLanguage = await new UserLanguage().getPreferredLanguageofSession(preferredLanguageRequest);
         const ConvertedToText = await this.speechtotext.SendSpeechRequest(mediaUrl, "whatsapp", preferredLanguage);
         if (preferredLanguage !== "null"){
             if (ConvertedToText) {
@@ -142,6 +153,36 @@ export class MessageFunctionalities implements getMessageFunctionalities {
                     reject(e);
                 });
                 request.end();
+            }
+        });
+    };
+
+    GetWhatsappMetaMedia = async (type, mediaUrl, extension) => {
+        return new Promise((resolve, reject) => {
+            const token = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
+            const headers = {
+                headers : {
+                    'Authorization' : `Bearer ${token}`,
+                }
+            };
+
+            try { 
+                const request = needle.get(mediaUrl, headers, function(err, resp, body) { 
+                    if (err){
+                        console.log('FAiled to REad File');
+                    }
+                    const file_name = `${type}/` + Date.now() + `${extension}`;
+                    fs.writeFile('./' + file_name,body, err => { 
+                        if (err) {
+                            console.log(err);
+                            reject(err);
+                        } else {
+                            resolve(file_name);
+                        }
+                    } );
+                });
+            } catch (err) { 
+                console.log(err);
             }
         });
     };
