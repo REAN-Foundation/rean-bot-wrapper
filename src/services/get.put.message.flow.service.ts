@@ -154,6 +154,7 @@ export class MessageFlow{
                 direction      : messagetoDialogflow.direction,
                 messageType    : messagetoDialogflow.type,
                 messageContent : messagetoDialogflow.messageBody,
+                messageId      : messagetoDialogflow.chat_message_id,
                 imageContent   : null,
                 imageUrl       : messagetoDialogflow.imageUrl,
                 userPlatformID : messagetoDialogflow.sessionId,

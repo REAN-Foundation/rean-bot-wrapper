@@ -50,6 +50,7 @@ export interface IchatMessage {
     intent: string;
     imageContent: string;
     imageUrl: string;
+    messageId: string;
 }
 
 export interface chatSession {
