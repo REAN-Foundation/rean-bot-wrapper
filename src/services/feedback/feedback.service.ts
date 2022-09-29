@@ -31,7 +31,7 @@ export class FeedbackService implements feedbackInterface {
                 await feedBackInfo.save();
                 if (client_name === "CALORIE_BOT") {
                     console.log("Calorie negative feedback received.");
-                    const response = await ChatMessage.findAll({limit :2, where : {userPlatformId: userId, direction: "In"}, raw: true, order: [['createdAt', 'DESC']]});
+                    const response = await ChatMessage.findAll({limit: 2, where: {userPlatformId: userId, direction: "In"}, raw: true, order: [['createdAt', 'DESC']]});
                     const negativeResponse = response[response.length-1].messageContent;
                     const findit = await CalorieInfo.findOne(
                         {
@@ -39,7 +39,7 @@ export class FeedbackService implements feedbackInterface {
                             order : [['updatedAt', 'DESC']],
                             limit : 1,
                         }).then(function (record) {
-                        return record.update({negative_feedback:1});
+                        return record.update({negative_feedback: 1});
                     });
                     const data = {
                         "fulfillmentMessages" : [
@@ -82,9 +82,26 @@ export class FeedbackService implements feedbackInterface {
                         const data = {
                             "fulfillmentMessages" : [
                                 {
-                                    "text" : {
-                                        "text" : [
-                                            reply
+                                    "text" : { "text": [reply] }
+                                },
+                                {
+                                    "payload" : {
+                                        "messagetype" : "interactive-buttons",
+                                        "buttons"     : [
+                                            {
+                                                "reply" : {
+                                                    "title" : "Yes",
+                                                    "id"    : "001"
+                                                },
+                                                "type" : "reply"
+                                            },
+                                            {
+                                                "type"  : "reply",
+                                                "reply" : {
+                                                    "title" : "No",
+                                                    "id"    : "002"
+                                                }
+                                            }
                                         ]
                                     }
                                 }
