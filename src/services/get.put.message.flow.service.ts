@@ -142,7 +142,18 @@ export class MessageFlow{
         const translatedMessage = await this.translate.translatePushNotifications( msg.message, msg.userId);
         msg.message = translatedMessage;
         const response_format = await platformMessageService.createFinalMessageFromHumanhandOver(msg);
-        const person = new ChatMessage(response_format);
+        const chatMessageObj = {
+            platform       : response_format.platform,
+            direction      : response_format.direction,
+            messageType    : response_format.message_type,
+            messageContent : response_format.messageText[0],
+            imageContent   : response_format.messageBody,
+            imageUrl       : response_format.messageImageUrl,
+            userPlatformID : response_format.sessionId,
+            intent         : response_format.intent
+        };
+
+        const person = new ChatMessage(chatMessageObj);
         await person.save();
 
         let message_to_platform = null;

@@ -1,4 +1,4 @@
-import emojiRegex = require('emoji-regex');
+import emojiRegex from 'emoji-regex';
 
 export class EmojiFilter{
 
