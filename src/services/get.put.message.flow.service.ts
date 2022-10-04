@@ -71,7 +71,9 @@ export class MessageFlow{
         const intent = processedResponse.message_from_dialoglow.result && processedResponse.message_from_dialoglow.result.intent ? processedResponse.message_from_dialoglow.result.intent.displayName : '';
         const response_format: Iresponse = await platformMessageService.postResponse(messagetoDialogflow, processedResponse);
         const payload = await this.getPayload(processedResponse);
+        const ChatSessionId = await ChatSession.findOne({ where: { userPlatformID: response_format.sessionId } });
         const dfResponseObj = {
+            chatSessionID  : ChatSessionId.autoIncrementalID ?? null,
             platform       : response_format.platform,
             direction      : response_format.direction,
             messageType    : response_format.message_type,
@@ -142,7 +144,9 @@ export class MessageFlow{
         const translatedMessage = await this.translate.translatePushNotifications( msg.message, msg.userId);
         msg.message = translatedMessage;
         const response_format = await platformMessageService.createFinalMessageFromHumanhandOver(msg);
+        const ChatSessionId = await ChatSession.findOne({ where: { userPlatformID: response_format.sessionId } });
         const chatMessageObj = {
+            chatSessionID  : ChatSessionId.autoIncrementalID ?? null,
             platform       : response_format.platform,
             direction      : response_format.direction,
             messageType    : response_format.message_type,
@@ -164,7 +168,9 @@ export class MessageFlow{
 
     async engageMySQL(messagetoDialogflow) {
         return new Promise<IchatMessage>(async(resolve) =>{
+            const ChatSessionId = await ChatSession.findOne({ where: { userPlatformID: messagetoDialogflow.sessionId } });
             const chatMessageObj: IchatMessage = {
+                chatSessionID  : ChatSessionId.autoIncrementalID ?? null,
                 name           : messagetoDialogflow.name,
                 platform       : messagetoDialogflow.platform,
                 direction      : messagetoDialogflow.direction,
