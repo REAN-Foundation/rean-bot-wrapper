@@ -72,7 +72,8 @@ export class translateService{
         console.log(`entered the translation of push notification JJJJJJJJJJJ`);
         try {
             const translate = new v2.Translate(this.obj);
-            const languageForSession = await new UserLanguage().getPreferredLanguageofSession(phoneNumber);
+            let languageForSession = await new UserLanguage().getPreferredLanguageofSession(phoneNumber);
+            languageForSession = languageForSession !== 'null' ? languageForSession : 'en';
             console.log("languageForSession", languageForSession);
             const responseMessage = this.translateResponse(translate, [message], languageForSession);
             return responseMessage;
