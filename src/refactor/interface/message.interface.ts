@@ -41,6 +41,7 @@ export interface feedbackmessage{
 }
 
 export interface IchatMessage {
+    chatSessionID?: number,
     name: string,
     direction: string;
     messageType: string;

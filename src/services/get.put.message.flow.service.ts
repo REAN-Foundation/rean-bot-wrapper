@@ -142,8 +142,22 @@ export class MessageFlow{
         const translatedMessage = await this.translate.translatePushNotifications( msg.message, msg.userId);
         msg.message = translatedMessage;
         const response_format = await platformMessageService.createFinalMessageFromHumanhandOver(msg);
-        const person = new ChatMessage(response_format);
-        await person.save();
+        const ChatSessionId = await ChatSession.findOne({ where: { userPlatformID: response_format.sessionId } });
+        const chatMessageObj = {
+            chatSessionID  : ChatSessionId.autoIncrementalID ?? null,
+            platform       : response_format.platform,
+            direction      : response_format.direction,
+            messageType    : response_format.message_type,
+            messageContent : response_format.messageText[0],
+            imageContent   : response_format.messageBody,
+            imageUrl       : response_format.messageImageUrl,
+            userPlatformID : response_format.sessionId,
+            intent         : response_format.intent
+        };
+
+        const person = new ChatMessage(chatMessageObj);
+        const db_response = await person.save();
+        console.log(`DB response ${db_response}`);
 
         let message_to_platform = null;
         // eslint-disable-next-line max-len
@@ -153,7 +167,9 @@ export class MessageFlow{
 
     async engageMySQL(messagetoDialogflow) {
         return new Promise<IchatMessage>(async(resolve) =>{
+            const ChatSessionId = await ChatSession.findOne({ where: { userPlatformID: messagetoDialogflow.sessionId } });
             const chatMessageObj: IchatMessage = {
+                chatSessionID  : ChatSessionId.autoIncrementalID ?? null,
                 name           : messagetoDialogflow.name,
                 platform       : messagetoDialogflow.platform,
                 direction      : messagetoDialogflow.direction,

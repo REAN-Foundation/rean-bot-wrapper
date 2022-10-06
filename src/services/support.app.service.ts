@@ -3,6 +3,7 @@ import { getRequestOptions } from '../utils/helper';
 import needle from "needle";
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { container,  } from 'tsyringe';
+import { getHeaders } from '../services/biometrics/get.headers';
 import { Dose,Duration,MedicationAdministrationRoutes,MedicationDomainModel,MedicineName } from '../refactor/interface/medication.interface';
 
 // eslint-disable-next-line max-len
@@ -32,8 +33,7 @@ export class GetPatientInfoService{
                 if (phoneNumber.length > 10 && phoneNumber.indexOf('-') === -1) {
                     phoneNumber = `${country_code}-${ten_digit}`;
                 }
-                const options = getRequestOptions();
-                options.headers["x-api-key"] = clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY");
+                const options = getHeaders();
                 const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
                 const apiUrl = `${ReanBackendBaseUrl}patients/search?phone=${encodeURIComponent(phoneNumber)}`;
                 console.log("apiUrl", apiUrl);
