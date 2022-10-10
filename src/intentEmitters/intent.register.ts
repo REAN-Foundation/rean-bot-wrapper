@@ -28,7 +28,8 @@ import { CalorieUpdate } from './intentListeners/calorie.update.listener';
 import { WhatsAppTemplateOpting } from './intentListeners/whatsapp.tempalte.opting.listener';
 import { eyeSymptomAssessment } from './intentListeners/eye.symptom.assesment.listener';
 import { MaternityCareplanListener } from './intentListeners/maternity.careplan.listener';
-import { kerotoplastyListener } from './intentListeners/kerotoplasty.bot.listener';
+import { kerotoplastyConditionIdentificationListener} from './intentListeners/kerotoplasty.bot.condition.Identification.listener';
+import { kerotoplastyLocationListener } from './intentListeners/kerotoplasty.find.nearest.location.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -122,7 +123,10 @@ export class IntentRegister {
         IntentEmitter.registerListener('Registration', MaternityCareplanListener.handleIntent );
         IntentEmitter.registerListener('RegistrationAgree', MaternityCareplanListener.handleEnrollIntent );
 
-        IntentEmitter.registerListener('conditionIdentification', kerotoplastyListener.handleIntent);
+        IntentEmitter.registerListener('conditionIdentification', kerotoplastyConditionIdentificationListener);
+        IntentEmitter.registerListener('criticalCondition', kerotoplastyLocationListener);
+        IntentEmitter.registerListener('hyperCriticalCondition', kerotoplastyLocationListener);
+        IntentEmitter.registerListener('normalCondition', kerotoplastyLocationListener);
 
       
         // Intent Failure/fallback listener
