@@ -3,6 +3,7 @@
 import { v4 } from 'uuid';
 import { injectable } from 'tsyringe';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { Imessage } from '../refactor/interface/message.interface';
 let dialogflow = require('@google-cloud/dialogflow');
 const dialogflowv2 = require('@google-cloud/dialogflow').v2beta1;
 const {struct} = require('pb-util');
@@ -12,7 +13,7 @@ export class DialogflowResponseService {
 
     constructor(private clientEnvironment?: ClientEnvironmentProviderService) { }
 
-    getDialogflowMessage = async (message: string, userPlatformId: string = null, platform: string = null, userName: string, intent: string = null) => {
+    getDialogflowMessage = async (message: string, userPlatformId: string = null, platform: string = null, userName: string, intent: string = null, completeMessage:Imessage =null ) => {
         try {
 
             const env_name = this.clientEnvironment.getClientEnvironmentVariable("NAME");
@@ -24,6 +25,7 @@ export class DialogflowResponseService {
             let responseMessage = { text: [], parse_mode: false, image: { url: '', caption: '' } };
             const dialogflow_language = "en-US";
             const userId: string = userPlatformId === null ? v4() : userPlatformId;
+            const location = completeMessage.latlong === null ? v4() : completeMessage.latlong;
 
             let sessionClient = null;
             let sessionPath = null;
@@ -68,7 +70,7 @@ export class DialogflowResponseService {
                     },
                 },
                 queryParams : {
-                    payload : struct.encode({source: platform, userId: userId, userName: userName })
+                    payload : struct.encode({source: platform, userId: userId, userName: userName,location: location})
                 },
             };
             let request_intent = null;
@@ -82,7 +84,7 @@ export class DialogflowResponseService {
                         },
                     },
                     queryParams : {
-                        payload : struct.encode({source: platform, userId: userId, userName: userName })
+                        payload : struct.encode({source: platform, userId: userId, userName: userName,location: location })
                     },
                 };
             }
@@ -101,7 +103,6 @@ export class DialogflowResponseService {
                 // console.log(`  No intent matched.`);
             }
 
-            console.log("B$getFulfillmentResponse gets response");
             responseMessage = getFulfillmentResponse(result);
             if (responseMessage.text.length === 0) {
                 responseMessage.text[0] = result.fulfillmentText;

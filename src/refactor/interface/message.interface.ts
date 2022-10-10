@@ -7,9 +7,10 @@ export interface Imessage{
     type : string;
     messageBody : string;
     imageUrl : string;
-    latlong : string;
+    latlong : any;
     replyPath : string;
     intent  : string;
+
 }
 
 export interface Iresponse{

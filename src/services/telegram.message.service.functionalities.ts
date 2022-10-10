@@ -66,7 +66,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         const location_message = `latlong:${message.location.latitude}-${message.location.longitude}`;
         const returnMessage = this.inputMessageFormat(message);
         returnMessage.type = 'location';
-        returnMessage.latlong = location_message;
+        returnMessage.latlong = message.location;
         returnMessage.messageBody = location_message;
         return returnMessage;
     }
@@ -109,7 +109,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
             replyPath       : null,
             latlong         : null,
             type            : "text",
-            intent          : null
+            intent          : null,
         };
         return response_message;
     }

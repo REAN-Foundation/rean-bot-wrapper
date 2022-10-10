@@ -30,7 +30,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         const loc = `latlong:${msg.messages[0].location.latitude}-${msg.messages[0].location.longitude}`;
         const returnMessage = this.inputMessageFormat(msg);
         returnMessage.type = 'location';
-        returnMessage.latlong = loc;
+        returnMessage.latlong = msg.messages[0].location;
         returnMessage.messageBody = loc;
         return returnMessage;
     }
