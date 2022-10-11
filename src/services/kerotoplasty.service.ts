@@ -1,16 +1,14 @@
-export class kerotoplasty_service {
+import { GetLocation } from "./find.nearest.location.service";
+import { dialoflowMessageFormatting } from "./Dialogflow.service";
+import { autoInjectable } from "tsyringe";
 
-    trigger_intent(triggering_event:string, eventObj){
-        return { 
-            "followupEventInput" : {
-                "name"         : triggering_event,
-                "languageCode" : "en-US",
-                "parameters"   : eventObj.body.queryResult.parameters
-            }
-        };
-    }
+@autoInjectable()
+export class kerotoplastyService {
 
-    kerotoplasty_response_service = async (eventObj) => {
+    constructor(
+        private DialogflowServices?: dialoflowMessageFormatting){}
+
+    identifyCondition = async (eventObj) => {
         if (eventObj) {
             const dropInVision = eventObj.body.queryResult.parameters.complexDropInVision.name;
             const complexSeverePain = eventObj.body.queryResult.parameters.complexSeverePain.name;
@@ -18,16 +16,44 @@ export class kerotoplasty_service {
             //const params = eventObj.body.queryResult.parameters;
             if (dropInVision === 'Yes' && complexSeverePain === 'Yes')
             {
-                return this.trigger_intent('triggerHyperCritical',eventObj);
-            } 
+                return await this.DialogflowServices.triggerIntent('triggerHyperCritical',eventObj);
+            }
             else if (dropInVision === 'Yes' || complexSeverePain === 'Yes') {
-                return this.trigger_intent('triggerCritical',eventObj);
+                return await this.DialogflowServices.triggerIntent('triggerCritical',eventObj);
             }
             else {
-                return this.trigger_intent('triggerNormal',eventObj);
+                return await this.DialogflowServices.triggerIntent('triggerNormal',eventObj);
             }
         } else {
             throw new Error(`500, kerotoplasy response Service Error!`);
         }
     };
+
+    async conditionSpecificResponse(intent,eventObj){
+        const getLocationService = new GetLocation();
+        const locationData = await getLocationService.getLoctionData(eventObj);
+        let message = null;
+        console.log("our location data is ",locationData);
+        const postalAddress= locationData["Postal Addres"];
+        const keys = Object.keys(locationData["Postal Addres"]);
+        switch (intent) {
+        case 'hyperCriticalCondition': {
+            message = `Your situation seems Hyper-Critical, Please Visit the nearest care center as soon as possible.\n your nearest centers are: \n 1. ${postalAddress[keys[0]]}  \n 2. ${postalAddress[keys[1]]} `;
+            break;
+        }
+        case 'criticalCondition':
+        {
+            message = `Your situation seems critical, Please visit us on the next appointment you can get.\n your nearest centers are: \n 1. ${postalAddress[keys[0]]}  \n 2. ${postalAddress[keys[1]]} `;
+            break;
+        }
+        case 'normalCondition': {
+            message = `Your situation seems Normal. Please visit us in our nearest center If their is Drop in vision or severe pain in your operated eye.\n your nearest centers are: \n 1. ${postalAddress[keys[0]]} \n 2. ${postalAddress[keys[1]]} `;
+            break;
+        }
+        }
+        const responseToSend = this.DialogflowServices.making_response(message);
+        return responseToSend;
+
+    }
+
 }

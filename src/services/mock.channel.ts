@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
-import http from 'https';
+// import http from 'https';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import fs from 'fs';
+// import fs from 'fs';
 import { AwsS3manager } from './aws.file.upload.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { autoInjectable, singleton, inject, delay } from 'tsyringe';
@@ -13,8 +13,7 @@ import { MessageFlow } from './get.put.message.flow.service';
 import { MockCHannelMessageFunctionalities } from './mock.channel.message.funtionalities';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import needle from 'needle';
-import { getRequestOptions } from '../utils/helper';
+// import { getRequestOptions } from '../utils/helper';
 import { ChatMessage } from '../models/chat.message.model';
 
 @autoInjectable()
