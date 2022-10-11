@@ -1,6 +1,7 @@
 export  class dialoflowMessageFormatting {
+
     async triggerIntent(triggering_event:string, eventObj){
-        return { 
+        return {
             "followupEventInput" : {
                 "name"         : triggering_event,
                 "languageCode" : "en-US",
@@ -11,8 +12,9 @@ export  class dialoflowMessageFormatting {
 
     async making_response(response:string){
         const data = {
-            "fulfillmentMessages" : [{"text" : {"text" : [response]}}],
+            "fulfillmentMessages" : [{ "text": { "text": [response] } }],
         };
         return data;
     }
+
 }

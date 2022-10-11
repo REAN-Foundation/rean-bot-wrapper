@@ -108,6 +108,14 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         return returnMessage;
     }
 
+    async interactiveButtonMessaegFormat(msg){
+        const message = msg.messages[0].interactive.button_reply.title;
+        const returnMessage = this.inputMessageFormat(msg);
+        returnMessage.messageBody = message;
+        returnMessage.intent = msg.messages[0].interactive.button_reply.id;
+        return returnMessage;
+    }
+
     /*retrive whatsapp media */
     GetWhatsappMedia = async (type, mediaId, extension) => {
         return new Promise((resolve, reject) => {

@@ -3,6 +3,7 @@ import { ClientEnvironmentProviderService } from '../set.client/client.environme
 import { container } from 'tsyringe';
 import needle from 'needle';
 import { Logger } from '../../common/logger';
+import { getPhoneNumber } from '../needle.service';
 
 export const registrationService = async (eventObj) => {
 
@@ -13,21 +14,7 @@ export const registrationService = async (eventObj) => {
         const name : string = eventObj.body.queryResult.parameters.Name.name;
         const lmp : string = eventObj.body.queryResult.parameters.LMP;
 
-        const b = eventObj.body.session;
-        let phoneNumber = b.split("/", 5)[4];
-        if (!phoneNumber) {
-            throw new Error('Missing required parameter PhoneNumber!');
-        }
-        if (phoneNumber.length > 10 && phoneNumber.indexOf('+') === -1) {
-            phoneNumber = '+' + phoneNumber;
-        }
-
-        // adding "-" if phone number does not contain one.
-        const ten_digit = phoneNumber.substr(phoneNumber.length - 10);
-        const country_code = phoneNumber.split(ten_digit)[0];
-        if (phoneNumber.length > 10 && phoneNumber.indexOf('-') === -1) {
-            phoneNumber = `${country_code}-${ten_digit}`;
-        }
+        const phoneNumber = await getPhoneNumber(eventObj);
         
         const options = getHeaders();
         const ReanBackendBaseUrl =

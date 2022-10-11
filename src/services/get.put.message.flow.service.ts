@@ -166,7 +166,8 @@ export class MessageFlow{
         };
 
         const person = new ChatMessage(chatMessageObj);
-        await person.save();
+        const db_response = await person.save();
+        console.log(`DB response ${db_response}`);
 
         let message_to_platform = null;
         // eslint-disable-next-line max-len

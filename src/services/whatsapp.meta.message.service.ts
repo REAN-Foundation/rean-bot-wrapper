@@ -258,6 +258,8 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
         else if (message.messages[0].type === "interactive") {
             if (message.messages[0].interactive.type === "list_reply"){
                 return await this.messageFunctionalitiesmeta.interactiveListMessaegFormat(message);
+            } else if (message.messages[0].interactive.type === "button_reply"){
+                return await this.messageFunctionalitiesmeta.interactiveButtonMessaegFormat(message);
             } else {
                 return await this.messageFunctionalitiesmeta.interactiveMessaegFormat(message);
             }
