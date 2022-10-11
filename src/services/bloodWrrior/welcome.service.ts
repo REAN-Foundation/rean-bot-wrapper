@@ -1,7 +1,6 @@
 import { GetPatientInfoService } from '../support.app.service';
-import { container } from 'tsyringe';
+import { container, autoInjectable } from 'tsyringe';
 import { Logger } from '../../common/logger';
-import { autoInjectable } from 'tsyringe';
 import { getPhoneNumber, needleRequestForREAN } from '../needle.service';
 import { whatsappMetaButtonService } from '../whatsappmeta.button.service';
 import { dialoflowMessageFormatting } from '../Dialogflow.service';
