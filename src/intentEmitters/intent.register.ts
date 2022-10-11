@@ -28,7 +28,6 @@ import { CalorieUpdate } from './intentListeners/calorie.update.listener';
 import { WhatsAppTemplateOpting } from './intentListeners/whatsapp.tempalte.opting.listener';
 import { eyeSymptomAssessment } from './intentListeners/eye.symptom.assesment.listener';
 import { MaternityCareplanListener } from './intentListeners/maternity.careplan.listener';
-import { kerotoplastyListener } from './intentListeners/kerotoplasty.bot.listener';
 import { BloodWarriorWelcome } from './intentListeners/bloodWarrior/welcome.listener';
 import { BloodWarriorPatient } from './intentListeners/bloodWarrior/patient.listener';
 import { BloodWarriorDonor } from './intentListeners/bloodWarrior/donor.listener';

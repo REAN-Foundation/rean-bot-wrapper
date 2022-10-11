@@ -3,14 +3,15 @@ import { container } from 'tsyringe';
 import { Logger } from '../../common/logger';
 import { autoInjectable } from 'tsyringe';
 import { getPhoneNumber, needleRequestForREAN } from '../needle.service';
-import { kerotoplasty_service } from '../kerotoplasty.service';
+import { whatsappMetaButtonService } from '../whatsappmeta.button.service';
+import { dialoflowMessageFormatting } from '../Dialogflow.service';
 
 @autoInjectable()
 export class BloodWarriorWelcomeService {
 
     getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
 
-    ketoplastyService: kerotoplasty_service = container.resolve(kerotoplasty_service);
+    dialoflowMessageFormattingService: dialoflowMessageFormatting = container.resolve(dialoflowMessageFormatting);
     
     async registrationService (eventObj) {
         try {
@@ -22,7 +23,7 @@ export class BloodWarriorWelcomeService {
                 roleId = requestBody.Data.Persons.Roles[0].RoleId;
             }
             const triggering_event = await this.getEvent(roleId);
-            return await this.ketoplastyService.trigger_intent(triggering_event,eventObj);
+            return await this.dialoflowMessageFormattingService.triggerIntent(triggering_event,eventObj);
 
         } catch (error) {
             Logger.instance()
@@ -58,33 +59,14 @@ export class BloodWarriorWelcomeService {
             Blood Group: ${bloodGroup},
             Expected next Blood Transfusion Date: ${stringDate}\nIf the details are correct, please click proceed or if you can register as a new patient.`;
             console.log(dffMessage);
-
+            
+            const payloadButtons = await whatsappMetaButtonService("Proceed","Patient_Confirm","Change TF Date","Change_TF_Date");
             const data = {
                 "fulfillmentMessages" : [
                     {
                         "text" : { "text": [dffMessage] }
                     },
-                    {
-                        "payload" : {
-                            "messagetype" : "interactive-buttons",
-                            "buttons"     : [
-                                {
-                                    "reply" : {
-                                        "title" : "Proceed",
-                                        "id"    : "Patient_Confirm"
-                                    },
-                                    "type" : "reply"
-                                },
-                                {
-                                    "type"  : "reply",
-                                    "reply" : {
-                                        "title" : "Change TF Date",
-                                        "id"    : "Change_TF_Date"
-                                    }
-                                }
-                            ]
-                        }
-                    }
+                    payloadButtons
                 ]
             };
             return await { sendDff: true, message: data };

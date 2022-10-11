@@ -3,7 +3,7 @@ import { container } from 'tsyringe';
 import { Logger } from '../../common/logger';
 import { autoInjectable } from 'tsyringe';
 import { getPhoneNumber, needleRequestForREAN } from '../needle.service';
-import { kerotoplasty_service } from '../kerotoplasty.service';
+import { whatsappMetaButtonService } from '../whatsappmeta.button.service';
 
 @autoInjectable()
 export class DonorService {
@@ -26,32 +26,13 @@ export class DonorService {
             Last Donation Date: ${lastDonationDate}\nIf the details are correct, please click proceed or if you can register as a new donor.`;
             console.log(dffMessage);
 
+            const payloadButtons = await whatsappMetaButtonService("Proceed","Donor_Confirm","Register as Donor","Register_Donor");
             const data = {
                 "fulfillmentMessages" : [
                     {
                         "text" : { "text": [dffMessage] }
                     },
-                    {
-                        "payload" : {
-                            "messagetype" : "interactive-buttons",
-                            "buttons"     : [
-                                {
-                                    "reply" : {
-                                        "title" : "Proceed",
-                                        "id"    : "Donor_Confirm"
-                                    },
-                                    "type" : "reply"
-                                },
-                                {
-                                    "type"  : "reply",
-                                    "reply" : {
-                                        "title" : "Register as Donor",
-                                        "id"    : "Register_Donor"
-                                    }
-                                }
-                            ]
-                        }
-                    }
+                    payloadButtons
                 ]
             };
             return await { sendDff: true, message: data };
