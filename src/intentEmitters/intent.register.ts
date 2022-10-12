@@ -36,6 +36,7 @@ import { BloodWarriorPatientEnroll } from './intentListeners/bloodWarrior/patien
 import { ChangeTransfusionDate } from './intentListeners/bloodWarrior/change.tf.date.listener';
 import { kerotoplastyConditionIdentificationListener} from './intentListeners/kerotoplasty.bot.condition.Identification.listener';
 import { kerotoplastyLocationListener } from './intentListeners/kerotoplasty.find.nearest.location.listener';
+import { BloodWarriorMenu } from './intentListeners/bloodWarrior/menu.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -139,6 +140,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('criticalCondition', kerotoplastyLocationListener);
         IntentEmitter.registerListener('hyperCriticalCondition', kerotoplastyLocationListener);
         IntentEmitter.registerListener('normalCondition', kerotoplastyLocationListener);
+        IntentEmitter.registerListener('Menu', BloodWarriorMenu);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
