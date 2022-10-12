@@ -14,13 +14,7 @@ export class BloodWarriorWelcomeService {
     
     async registrationService (eventObj) {
         try {
-            const phoneNumber = await getPhoneNumber(eventObj);
-            const apiURL = `persons/phone/${phoneNumber}`;
-            const requestBody = await needleRequestForREAN("get", apiURL);
-            let roleId = 0;
-            if (requestBody.Data.Persons !== null) {
-                roleId = requestBody.Data.Persons.Roles[0].RoleId;
-            }
+            const roleId = await this.getRoleId(eventObj);
             const triggering_event = await this.getEvent(roleId);
             return await this.dialoflowMessageFormattingService.triggerIntent(triggering_event,eventObj);
 
@@ -37,6 +31,17 @@ export class BloodWarriorWelcomeService {
             1  : "BloodWarrior_Admin"
         };
         return message[roleId] ?? "New_User";
+    }
+
+    public async getRoleId(eventObj) {
+        const phoneNumber = await getPhoneNumber(eventObj);
+        const apiURL = `persons/phone/${phoneNumber}`;
+        const requestBody = await needleRequestForREAN("get", apiURL);
+        let roleId = 0;
+        if (requestBody.Data.Persons !== null) {
+            roleId = requestBody.Data.Persons.Roles[0].RoleId;
+        }
+        return roleId;
     }
 
     async patientService (eventObj) {
