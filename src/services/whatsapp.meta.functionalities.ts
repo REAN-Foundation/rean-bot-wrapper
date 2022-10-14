@@ -30,7 +30,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         const loc = `latlong:${msg.messages[0].location.latitude}-${msg.messages[0].location.longitude}`;
         const returnMessage = this.inputMessageFormat(msg);
         returnMessage.type = 'location';
-        returnMessage.latlong = loc;
+        returnMessage.latlong = msg.messages[0].location;
         returnMessage.messageBody = loc;
         return returnMessage;
     }
@@ -105,6 +105,14 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         const returnMessage = this.inputMessageFormat(msg);
         returnMessage.messageBody = emojiFilteredMessage;
         returnMessage.intent = msg.messages[0].interactive.list_reply.id;
+        return returnMessage;
+    }
+
+    async interactiveButtonMessaegFormat(msg){
+        const message = msg.messages[0].interactive.button_reply.title;
+        const returnMessage = this.inputMessageFormat(msg);
+        returnMessage.messageBody = message;
+        returnMessage.intent = msg.messages[0].interactive.button_reply.id;
         return returnMessage;
     }
 

@@ -28,7 +28,15 @@ import { CalorieUpdate } from './intentListeners/calorie.update.listener';
 import { WhatsAppTemplateOpting } from './intentListeners/whatsapp.tempalte.opting.listener';
 import { eyeSymptomAssessment } from './intentListeners/eye.symptom.assesment.listener';
 import { MaternityCareplanListener } from './intentListeners/maternity.careplan.listener';
-import { kerotoplastyListener } from './intentListeners/kerotoplasty.bot.listener';
+import { BloodWarriorWelcome } from './intentListeners/bloodWarrior/welcome.listener';
+import { BloodWarriorPatient } from './intentListeners/bloodWarrior/patient.listener';
+import { BloodWarriorDonor } from './intentListeners/bloodWarrior/donor.listener';
+import { BloodWarriorNewUser } from './intentListeners/bloodWarrior/new.userlistener';
+import { BloodWarriorPatientEnroll } from './intentListeners/bloodWarrior/patient.enroll.listener';
+import { ChangeTransfusionDate } from './intentListeners/bloodWarrior/change.tf.date.listener';
+import { kerotoplastyConditionIdentificationListener} from './intentListeners/kerotoplasty.bot.condition.Identification.listener';
+import { kerotoplastyLocationListener } from './intentListeners/kerotoplasty.find.nearest.location.listener';
+import { BloodWarriorMenu } from './intentListeners/bloodWarrior/menu.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -121,10 +129,19 @@ export class IntentRegister {
         IntentEmitter.registerListener('Medication.Add.InApp', AppMedicationListener.handleIntent);
         IntentEmitter.registerListener('Registration', MaternityCareplanListener.handleIntent );
         IntentEmitter.registerListener('RegistrationAgree', MaternityCareplanListener.handleEnrollIntent );
+        IntentEmitter.registerListener('Welcome.BloodWarrior', BloodWarriorWelcome);
+        IntentEmitter.registerListener('BloodWarrior_Patient', BloodWarriorPatient);
+        IntentEmitter.registerListener('BloodWarrior_Donor', BloodWarriorDonor);
+        IntentEmitter.registerListener('New_User', BloodWarriorNewUser);
+        IntentEmitter.registerListener('Patient_Confirm', BloodWarriorPatientEnroll);
+        IntentEmitter.registerListener('Change_TF_Date_Input', ChangeTransfusionDate);
 
-        IntentEmitter.registerListener('conditionIdentification', kerotoplastyListener.handleIntent);
+        IntentEmitter.registerListener('conditionIdentification', kerotoplastyConditionIdentificationListener);
+        IntentEmitter.registerListener('criticalCondition', kerotoplastyLocationListener);
+        IntentEmitter.registerListener('hyperCriticalCondition', kerotoplastyLocationListener);
+        IntentEmitter.registerListener('normalCondition', kerotoplastyLocationListener);
+        IntentEmitter.registerListener('Menu', BloodWarriorMenu);
 
-      
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
 

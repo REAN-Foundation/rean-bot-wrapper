@@ -4,6 +4,7 @@ import { ErrorHandler } from '../../utils/error.handler';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { autoInjectable, container } from 'tsyringe';
 import { clientAuthenticator } from '../../services/clientAuthenticator/client.authenticator.interface';
+import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
 import util from 'util';
 
 @autoInjectable()
@@ -15,7 +16,8 @@ export class ClientWebhookController {
 
     constructor(
         private responseHandler?: ResponseHandler,
-        private errorHandler?: ErrorHandler) {
+        private errorHandler?: ErrorHandler,
+        private clientEnvironment?: ClientEnvironmentProviderService) {
 
     }
 
@@ -25,7 +27,7 @@ export class ClientWebhookController {
             // eslint-disable-next-line max-len
             this._platformMessageService = container.resolve(req.params.channel);
             const response = await this._platformMessageService.sendManualMesage(req.body);
-            if (response.statusCode === 200) {
+            if (response.statusCode === 200 || response.message_id !== undefined) {
                 this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', response.body);
             }
             else {
@@ -119,16 +121,22 @@ export class ClientWebhookController {
                 }
             }
             else {
-                console.log("receiveMessage webhook receiveMessageWhatsappNew");
-                if (req.params.channel !== "REAN_SUPPORT" && req.params.channel !== "slack"){
-                    this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
+                const phone_number_id = this.clientEnvironment.getClientEnvironmentVariable('WHATSAPP_PHONE_NUMBER_ID');
+                if (req.body.entry[0].changes[0].value.metadata.phone_number_id == phone_number_id) {
+                    console.log("receiveMessage webhook receiveMessageWhatsappNew");
+                    if (req.params.channel !== "REAN_SUPPORT" && req.params.channel !== "slack"){
+                        this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
+                    }
+                    this._platformMessageService = container.resolve(req.params.channel);
+                    this._platformMessageService.res = res;
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    // console.log("reqbody content", util.inspect(req.body));
+                    // console.log("changes content", util.inspect(req.body.entry[0].changes[0]));
+                    const response = this._platformMessageService.handleMessage(req.body.entry[0].changes[0].value, req.params.channel);
+                } else {
+                    this.responseHandler.sendSuccessResponse(res, 200, 'Message Processed', "");
+                    console.log("Process exited");
                 }
-                this._platformMessageService = container.resolve(req.params.channel);
-                this._platformMessageService.res = res;
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                // console.log("reqbody content", util.inspect(req.body));
-                // console.log("changes content", util.inspect(req.body.entry[0].changes[0]));
-                const response = this._platformMessageService.handleMessage(req.body.entry[0].changes[0].value, req.params.channel);
             }
         }
         catch (error) {
