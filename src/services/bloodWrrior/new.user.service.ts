@@ -1,11 +1,8 @@
-import { GetPatientInfoService } from '../support.app.service';
-import { container, autoInjectable } from 'tsyringe';
+import { autoInjectable } from 'tsyringe';
 import { Logger } from '../../common/logger';
 
 @autoInjectable()
 export class NewUserService {
-
-    getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
 
     async newUserService (eventObj) {
         try {

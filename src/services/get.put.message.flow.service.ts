@@ -16,6 +16,7 @@ import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
 import { translateService } from './translate.service';
 import { v2 } from '@google-cloud/translate';
+import { sendApiButtonService } from './whatsappmeta.button.service';
 
 @autoInjectable()
 export class MessageFlow{
@@ -147,6 +148,11 @@ export class MessageFlow{
     async send_manual_msg (msg,platformMessageService: platformServiceInterface) {
         const translatedMessage = await this.translate.translatePushNotifications( msg.message, msg.userId);
         msg.message = translatedMessage;
+
+        let payload = null;
+        if (msg.payload !== null) {
+            payload = await sendApiButtonService(msg.payload);
+        }
         const response_format = await platformMessageService.createFinalMessageFromHumanhandOver(msg);
         const chatSessionModel = await ChatSession.findOne({ where: { userPlatformID: response_format.sessionId } });
         let chatSessionId = null;
@@ -171,7 +177,7 @@ export class MessageFlow{
 
         let message_to_platform = null;
         // eslint-disable-next-line max-len
-        message_to_platform = await platformMessageService.SendMediaMessage(response_format.sessionId, response_format.messageBody,response_format.messageText[0], response_format.message_type,null);
+        message_to_platform = await platformMessageService.SendMediaMessage(response_format.sessionId, response_format.messageBody,response_format.messageText[0], response_format.message_type,payload);
         return message_to_platform;
     }
 
