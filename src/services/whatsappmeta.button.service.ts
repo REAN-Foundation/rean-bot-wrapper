@@ -23,3 +23,75 @@ export const whatsappMetaButtonService = async (button_1, buttonId_1, button_2, 
 
     return payloadButtons;
 };
+
+export const sendApiButtonService = async (buttons) => {
+    const payload = {
+        "fields" : {
+            "buttons" : {
+                "listValue" : {
+                    "values" : [
+                        {
+                            "structValue" : {
+                                "fields" : {
+                                    "type" : {
+                                        "stringValue" : "reply",
+                                        "kind"        : "stringValue"
+                                    },
+                                    "reply" : {
+                                        "structValue" : {
+                                            "fields" : {
+                                                "id" : {
+                                                    "stringValue" : buttons[1],
+                                                    "kind"        : "stringValue"
+                                                },
+                                                "title" : {
+                                                    "stringValue" : buttons[0],
+                                                    "kind"        : "stringValue"
+                                                }
+                                            }
+                                        },
+                                        "kind" : "structValue"
+                                    }
+                                }
+                            },
+                            "kind" : "structValue"
+                        },
+                        {
+                            "structValue" : {
+                                "fields" : {
+                                    "reply" : {
+                                        "structValue" : {
+                                            "fields" : {
+                                                "title" : {
+                                                    "stringValue" : buttons[2],
+                                                    "kind"        : "stringValue"
+                                                },
+                                                "id" : {
+                                                    "stringValue" : buttons[3],
+                                                    "kind"        : "stringValue"
+                                                }
+                                            }
+                                        },
+                                        "kind" : "structValue"
+                                    },
+                                    "type" : {
+                                        "stringValue" : "reply",
+                                        "kind"        : "stringValue"
+                                    }
+                                }
+                            },
+                            "kind" : "structValue"
+                        }
+                    ]
+                },
+                "kind" : "listValue"
+            },
+            "messagetype" : {
+                "stringValue" : "interactive-buttons",
+                "kind"        : "stringValue"
+            }
+        }
+    };
+
+    return payload;
+};

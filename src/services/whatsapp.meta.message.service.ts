@@ -67,6 +67,7 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
                 const path = `/v14.0/${whatsappPhoneNumberID}/messages`;
                 const apiUrl_meta = hostname + path;
                 const response = await needle("post", apiUrl_meta, postdata, options);
+                console.log(response.body);
                 resolve(response);
             }
             catch (error) {
@@ -323,7 +324,7 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
             chat_message_id     : null,
             direction           : "Out",
             input_message       : null,
-            message_type        : "text",
+            message_type        : requestBody.type,
             raw_response_object : null,
             intent              : null,
             messageBody         : null,
