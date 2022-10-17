@@ -6,14 +6,14 @@ export class ChangeLanguage{
         return new Promise(async(resolve, reject) =>{
             try {
                 console.log("eventobj.body", eventObj.body);
-                const newLanguage = eventObj.body.queryResult.queryText;
+                const newLanguage = eventObj.body.queryResult.queryText.toLowerCase();
                 const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
                 const listOfLanguages = {
-                    "Hindi"   : "hi",
-                    "English" : "en",
-                    "Tamil"   : "ta",
-                    "Telugu"  : "te",
-                    "Punjabi" : "pa"
+                    "hindi"   : "hi",
+                    "english" : "en",
+                    "tamil"   : "ta",
+                    "telugu"  : "te",
+                    "punjabi" : "pa"
                 };
                 const newLanguageCode = await this.languageCode(newLanguage,listOfLanguages);
                 //stop the old session
@@ -26,7 +26,7 @@ export class ChangeLanguage{
                 //create a new session
                 const newSession = new ChatSession({ userPlatformID: userId, preferredLanguage: newLanguageCode, sessionOpen: "true" });
                 await newSession.save();
-                const reply = `Language changed to: ${newLanguageCode}`;
+                const reply = `Language changed to: ${newLanguage}`;
                 const data = {
                     "fulfillmentMessages" : [
                         {
