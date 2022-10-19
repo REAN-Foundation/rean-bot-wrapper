@@ -74,7 +74,6 @@ export class BloodWarriorWelcomeService {
                 ]
             };
             return await { sendDff: true, message: data };
-
         } catch (error) {
             Logger.instance()
                 .log_error(error.message,500,'Register patient with blood warrior messaging service error');
