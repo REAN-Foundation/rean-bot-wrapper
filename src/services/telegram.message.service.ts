@@ -134,6 +134,7 @@ export class TelegramMessageService implements platformServiceInterface{
 
             if (imageLink === null){
                 this._telegram.sendMessage(contact, message, { parse_mode: 'HTML' }).then(function (data) {
+                    console.log("Telegram send body is", data);
                     resolve(data);
                 });
             }
