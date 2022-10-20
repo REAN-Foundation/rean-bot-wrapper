@@ -9,11 +9,20 @@ export class ChangeLanguage{
                 const newLanguage = eventObj.body.queryResult.queryText.toLowerCase();
                 const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
                 const listOfLanguages = {
-                    "hindi"   : "hi",
-                    "english" : "en",
-                    "tamil"   : "ta",
-                    "telugu"  : "te",
-                    "punjabi" : "pa"
+                    "hindi"     : "hi",
+                    "english"   : "en",
+                    "tamil"     : "ta",
+                    "telugu"    : "te",
+                    "punjabi"   : "pa",
+                    "marathi"   : "mr",
+                    "malayalam" : "ml",
+                    "kannada"   : "kn",
+                    "gujarati"  : "gu",
+                    "bengali"   : "bn",
+                    "assamese"  : "as",
+                    "odia"      : "or",
+                    "french"    : "fr",
+                    "spanish"   : "es"
                 };
                 const newLanguageCode = await this.languageCode(newLanguage,listOfLanguages);
                 //stop the old session
@@ -51,7 +60,6 @@ export class ChangeLanguage{
     async languageCode(newLanguage, listOfLanguages) {
         return new Promise<string>(async(resolve) => {
             for (const property in listOfLanguages){
-                console.log("property", property);
                 if (property === newLanguage){
                     const newLanguage = listOfLanguages[property];
                     console.log("newlanguage", newLanguage);
