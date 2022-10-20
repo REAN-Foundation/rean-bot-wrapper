@@ -38,6 +38,8 @@ import { kerotoplastyConditionIdentificationListener} from './intentListeners/ke
 import { kerotoplastyLocationListener } from './intentListeners/kerotoplasty.find.nearest.location.listener';
 import { BloodWarriorMenu } from './intentListeners/bloodWarrior/menu.listener';
 import { RaiseBloodDonationRequest } from './intentListeners/bloodWarrior/raise.request.listener';
+import { CustomWelcomeIntent } from './intentListeners/custom.welcome.listener';
+import { CustomLanguageListener } from './intentListeners/custom.language.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -59,6 +61,8 @@ export class IntentRegister {
 
         IntentEmitter.registerListener('covid-resources', getCovidResources1s);
 
+        IntentEmitter.registerListener('Custom Welcome Intent', CustomWelcomeIntent);
+        IntentEmitter.registerListener('Custom Language - custom', CustomLanguageListener);
         IntentEmitter.registerListener('Change Language - custom', LanguageChangeListener);
 
         IntentEmitter.registerListener('life - no', getSymptomAssessment);
