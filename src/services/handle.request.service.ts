@@ -6,6 +6,7 @@ import { translateService } from './translate.service';
 import { autoInjectable } from 'tsyringe';
 import { Imessage } from '../refactor/interface/message.interface';
 import util from 'util';
+import { ChatSession } from '../models/chat.session';
 
 @autoInjectable()
 export class handleRequestservice{
@@ -28,7 +29,7 @@ export class handleRequestservice{
         // this.getTranslatedResponse(message_from_dialoglow, translate_message.languageForSession);
         // process the message from dialogflow before sending it to whatsapp
         // eslint-disable-next-line max-len
-        const processed_message = await this.processMessage(message_from_dialoglow, translate_message.languageForSession);
+        const processed_message = await this.processMessage(message_from_dialoglow, platform_id);
         // const processed_message = await this.translateService.processdialogflowmessage(message_from_dialoglow, translate_message.languageForSession);
 
         return { processed_message, message_from_dialoglow };
@@ -52,7 +53,14 @@ export class handleRequestservice{
         return customTranslations;
     }
 
-    async processMessage(message_from_dialoglow, languageForSession){
+    async processMessage(message_from_dialoglow, platformId){
+        const languagefromdb = await ChatSession.findAll({
+            where : {
+                userPlatformID : platformId,
+                sessionOpen    : 'true'
+            }
+        });
+        const languageForSession = languagefromdb[languagefromdb.length - 1].preferredLanguage;
         const customTranslations = [this.getTranslatedResponse(message_from_dialoglow, languageForSession)];
         if (customTranslations[0] === null){
             const googleTranslate = await this.translateService.processdialogflowmessage(message_from_dialoglow, languageForSession);
