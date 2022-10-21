@@ -23,9 +23,7 @@ export const CustomWelcomeIntent = async (intent, eventObj) => {
                         "languageCode" : "en-US"
                     }
                 };
-                if (imageUrl) {
-                    await WelcomeService.postResponseCustom(payload.userId,payload.source,imageUrl);
-                }
+                await WelcomeService.postResponseCustom(payload.userId,payload.source,imageUrl);
             } else {
                 response = {
                     "followupEventInput" : {
