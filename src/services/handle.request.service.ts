@@ -3,7 +3,7 @@
 import { DialogflowResponseService } from './dialogflow.response.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { translateService } from './translate.service';
-import { autoInjectable } from 'tsyringe';
+import { autoInjectable, container, inject } from 'tsyringe';
 import { Imessage } from '../refactor/interface/message.interface';
 import util from 'util';
 import { ChatSession } from '../models/chat.session';
@@ -11,8 +11,10 @@ import { ChatSession } from '../models/chat.session';
 @autoInjectable()
 export class handleRequestservice{
 
-    constructor(private DialogflowResponseService?: DialogflowResponseService,
-                private translateService?: translateService ) {
+    // constructor(
+    constructor(
+        private DialogflowResponseService?: DialogflowResponseService,
+        private translateService?: translateService) {
     }
 
     async handleUserRequest (message: Imessage, channel: string) {
@@ -28,27 +30,16 @@ export class handleRequestservice{
 
         // this.getTranslatedResponse(message_from_dialoglow, translate_message.languageForSession);
         // process the message from dialogflow before sending it to whatsapp
-        // eslint-disable-next-line max-len
         const processed_message = await this.processMessage(message_from_dialoglow, platform_id);
-        // const processed_message = await this.translateService.processdialogflowmessage(message_from_dialoglow, translate_message.languageForSession);
 
         return { processed_message, message_from_dialoglow };
     }
 
     getTranslatedResponse(message_from_dialoglow, languageForSession){
-        let payload = null;
         let customTranslations = null;
-        if (message_from_dialoglow.result.fulfillmentMessages.length > 1) {
-            if (message_from_dialoglow.result.fulfillmentMessages[1].payload !== undefined) {
-                payload = message_from_dialoglow.result.fulfillmentMessages[1].payload;
-                console.log("payload", util.inspect(payload.fields.translations));
-                if (payload.fields.translations){
-                    customTranslations = payload.fields.translations.structValue.fields[languageForSession].stringValue;
-                    console.log("customTranslations", customTranslations);
-
-                }
-
-            }
+        const payload = message_from_dialoglow.getPayload();
+        if (payload){
+            customTranslations = payload.fields.translations.structValue.fields[languageForSession].stringValue;
         }
         return customTranslations;
     }

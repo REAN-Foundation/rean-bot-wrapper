@@ -2,7 +2,7 @@
 /* eslint-disable max-len */
 import { v2 } from '@google-cloud/translate';
 import { UserLanguage } from './set.language';
-import { IdialogflowResponseFormat } from '../refactor/interface/message.interface';
+import { DialogflowResponseFormat } from './response.format/dialogflow.response.format';
 
 let detected_language = 'en';
 let dialogflow_language = "en-US";
@@ -54,16 +54,18 @@ export class translateService{
         return { message, languageForSession };
     };
 
-    processdialogflowmessage = async (message: IdialogflowResponseFormat, detected_language: string) => {
+    processdialogflowmessage = async (messageFromDialogflow: DialogflowResponseFormat, detected_language: string) => {
         const translate = new v2.Translate(this.obj);
         console.log("entered the processdialogflowmessage of translateService JJJJJJJJJJJ");
         // eslint-disable-next-line init-declarations
         let translatedResponse;
-        if (message.parse_mode) {
-            translatedResponse = message.text;
+        const parse_mode = messageFromDialogflow.getParseMode();
+        const text = messageFromDialogflow.getText();
+        if (parse_mode) {
+            translatedResponse = text;
         }
         else {
-            translatedResponse = await this.translateResponse(translate, message.text, detected_language);
+            translatedResponse = await this.translateResponse(translate, text, detected_language);
         }
         return translatedResponse;
     };

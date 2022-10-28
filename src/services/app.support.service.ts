@@ -52,11 +52,12 @@ export class platformMessageService implements platformServiceInterface{
 
     postResponse (message, response: IprocessedDialogflowResponseFormat ){
         const reansupport_Id = message.Id;
-        const message_type = response.message_from_dialoglow.image.url ? "image" : "text";
-        const raw_response_object = response.message_from_dialoglow.result && response.message_from_dialoglow.result.fulfillmentMessages ? JSON.stringify(response.message_from_dialoglow.result.fulfillmentMessages) : '';
-        const intent = response.message_from_dialoglow.result && response.message_from_dialoglow.result.intent ? response.message_from_dialoglow.result.intent.displayName : '';
+        const image = response.message_from_dialoglow.getImageObject();
+        const message_type = image.url ? "image" : "text";
+        // const raw_response_object = response.message_from_dialoglow.result && response.message_from_dialoglow.result.fulfillmentMessages ? JSON.stringify(response.message_from_dialoglow.result.fulfillmentMessages) : '';
+        const intent = response.message_from_dialoglow.getIntent();
 
-        const reaponse_message = { name: null,platform: "Rean_Support",chat_message_id: null,direction: "Out",message_type: message_type,raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: reansupport_Id, messageText: response.processed_message[0] };
+        const reaponse_message = { name: null,platform: "Rean_Support",chat_message_id: null,direction: "Out",message_type: message_type,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: reansupport_Id, messageText: response.processed_message[0] };
         return reaponse_message;
 
     }
