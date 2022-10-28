@@ -17,6 +17,8 @@ import { ContactList } from '../models/contact.list';
 import { translateService } from './translate.service';
 import { v2 } from '@google-cloud/translate';
 import { sendApiButtonService } from './whatsappmeta.button.service';
+import { DialogflowResponseFormat } from './response.format/dialogflow.response.format';
+// import { IplatformResponseFunctionalities } from './response.format/response.interface';
 
 @autoInjectable()
 export class MessageFlow{
@@ -31,8 +33,6 @@ export class MessageFlow{
 
     async checkTheFlow(msg: any, channel: string, platformMessageService: platformServiceInterface){
         const messagetoDialogflow: Imessage = await platformMessageService.getMessage(msg);
-
-        // console.log("message to DF", messagetoDialogflow);
 
         //initialising MySQL DB tables
         const chatMessageObj = await this.engageMySQL(messagetoDialogflow);
@@ -69,9 +69,9 @@ export class MessageFlow{
             return message_to_platform;
         }
         const processedResponse = await this.handleRequestservice.handleUserRequest(messagetoDialogflow, channel);
-        const intent = processedResponse.message_from_dialoglow.result && processedResponse.message_from_dialoglow.result.intent ? processedResponse.message_from_dialoglow.result.intent.displayName : '';
         const response_format: Iresponse = await platformMessageService.postResponse(messagetoDialogflow, processedResponse);
-        const payload = await this.getPayload(processedResponse);
+        const intent = processedResponse.message_from_dialoglow.getIntent();
+        const payload = processedResponse.message_from_dialoglow.getPayload();
         const chatSessionModel = await ChatSession.findOne({ where: { userPlatformID: response_format.sessionId } });
         let chatSessionId = null;
         if (chatSessionModel) {
@@ -93,7 +93,7 @@ export class MessageFlow{
         await personresponse.save();
 
         // console.log(processedResponse.message_from_dialoglow.text);
-        if (processedResponse.message_from_dialoglow.text) {
+        if (processedResponse.message_from_dialoglow.getText()) {
             let message_to_platform = null;
 
             await this.replyInAudio(messagetoDialogflow, response_format);
@@ -106,7 +106,7 @@ export class MessageFlow{
 
                 // console.log("the message to platform is", message_to_platform);
 
-                if (!processedResponse.message_from_dialoglow.text) {
+                if (!processedResponse.message_from_dialoglow.getText()) {
                     console.log('An error occurred while sending messages!');
                 }
                 return message_to_platform;
@@ -117,15 +117,15 @@ export class MessageFlow{
         }
     }
 
-    async getPayload(processedResponse){
-        let payload = null;
-        if (processedResponse.message_from_dialoglow.result.fulfillmentMessages.length > 1) {
-            if (processedResponse.message_from_dialoglow.result.fulfillmentMessages[1].payload !== undefined) {
-                payload = processedResponse.message_from_dialoglow.result.fulfillmentMessages[1].payload;
-            }
-        }
-        return payload;
-    }
+    // async getPayload(processedResponse){
+    //     let payload = null;
+    //     if (processedResponse.message_from_dialoglow.result.fulfillmentMessages.length > 1) {
+    //         if (processedResponse.message_from_dialoglow.result.fulfillmentMessages[1].payload !== undefined) {
+    //             payload = processedResponse.message_from_dialoglow.result.fulfillmentMessages[1].payload;
+    //         }
+    //     }
+    //     return payload;
+    // }
 
     async replyInAudio(message: Imessage, response_format: Iresponse) {
         if (message.type === "voice") {

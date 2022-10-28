@@ -223,7 +223,37 @@ export class WhatsappMessageService implements platformServiceInterface {
                 const postDataString = JSON.stringify(postData);
                 console.log("this is the postDataString", postDataString);
                 resolve(await this.postRequestMessages(postDataString));
-            } else if (messageType === "interactive-list"){
+            }
+            else if (messageType === "interactive-buttons"){
+                const buttons1 = [];
+                const numberOfButtons1 = (payload.fields.buttons.listValue.values).length;
+                for (let i = 0; i < numberOfButtons1; i++){
+                    const id1 = payload.fields.buttons.listValue.values[i].structValue.fields.reply.structValue.fields.id.stringValue;
+                    const title1 = payload.fields.buttons.listValue.values[i].structValue.fields.reply.structValue.fields.title.stringValue;
+                    const tempObject1 = {
+                        "type"  : "reply",
+                        "reply" : {
+                            "id"    : id1,
+                            "title" : title1
+                        }
+                    };
+                    buttons1.push(tempObject1);
+                }
+                postData["interactive"] = {
+                    "type" : "button",
+                    "body" : {
+                        "text" : message
+                    },
+                    "action" : {
+                        "buttons" : buttons1
+                    }
+                };
+                postData.type = "interactive";
+                const postDataString = JSON.stringify(postData);
+                console.log("this is the postDataString", postDataString);
+                return await this.postRequestMessages(postDataString);
+            }
+            else if (messageType === "interactive-list"){
                 const rows = [];
                 var header = "";
                 const list = payload.fields.buttons.listValue.values;
@@ -317,35 +347,35 @@ export class WhatsappMessageService implements platformServiceInterface {
         const input_message = message.messageBody;
         const name = message.name;
         const chat_message_id = message.chat_message_id;
-        const raw_response_object = processedResponse.message_from_dialoglow.result && processedResponse.message_from_dialoglow.result.fulfillmentMessages ? JSON.stringify(processedResponse.message_from_dialoglow.result.fulfillmentMessages) : '';
-        const intent = processedResponse.message_from_dialoglow.result && processedResponse.message_from_dialoglow.result.intent ? processedResponse.message_from_dialoglow.result.intent.displayName : '';
+        const image = processedResponse.message_from_dialoglow.getImageObject();
+        const pasrseMode = processedResponse.message_from_dialoglow.getParseMode();
+        const payload = processedResponse.message_from_dialoglow.getPayload();
+        const intent = processedResponse.message_from_dialoglow.getIntent();
 
         if (processedResponse) {
-            if (processedResponse.message_from_dialoglow.image && processedResponse.message_from_dialoglow.image.url) {
-                reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: "image", raw_response_object: raw_response_object, intent: intent, messageBody: processedResponse.message_from_dialoglow.image.url, messageImageUrl: processedResponse.message_from_dialoglow.image.url, messageImageCaption: processedResponse.message_from_dialoglow.image.caption, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.message_from_dialoglow.image.caption };
+            if (image && image.url) {
+                reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: "image", intent: intent, messageBody: image.url, messageImageUrl: image.url, messageImageCaption: image.caption, sessionId: whatsapp_id, input_message: input_message, messageText: image.caption };
             }
             else if (processedResponse.processed_message.length > 1) {
-                if (processedResponse.message_from_dialoglow.parse_mode && processedResponse.message_from_dialoglow.parse_mode === 'HTML') {
+                if (pasrseMode && pasrseMode === 'HTML') {
                     // eslint-disable-next-line max-len
                     const uploadImageName = await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
                     const vaacinationImageFile = await this.awsS3manager.uploadFile(uploadImageName);
                     if (vaacinationImageFile) {
-                        reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: "image", raw_response_object: raw_response_object, intent: intent, messageBody: String(vaacinationImageFile), messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[1] };
+                        reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: "image", intent: intent, messageBody: String(vaacinationImageFile), messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[1] };
                     }
                 }
                 else {
-                    reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: "text", raw_response_object: raw_response_object, intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[0] };
-                    reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: "text", raw_response_object: raw_response_object, intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[1] };
+                    reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[0] };
+                    reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[1] };
                 }
             }
             else {
                 let message_type = "text";
-                if ((processedResponse.message_from_dialoglow.result.fulfillmentMessages).length > 1){
-                    if (processedResponse.message_from_dialoglow.result.fulfillmentMessages[1].payload !== undefined){
-                        message_type = processedResponse.message_from_dialoglow.result.fulfillmentMessages[1].payload.fields.messagetype.stringValue;
-                    }
+                if (payload.fields.messagetype){
+                    message_type = payload.fields.messagetype.stringValue;
                 }
-                reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: message_type, raw_response_object: raw_response_object, intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[0] };
+                reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: message_type, intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[0] };
             }
         }
         return reaponse_message;
@@ -359,7 +389,6 @@ export class WhatsappMessageService implements platformServiceInterface {
             direction           : "Out",
             input_message       : null,
             message_type        : "text",
-            raw_response_object : null,
             intent              : null,
             messageBody         : null,
             messageImageUrl     : null,

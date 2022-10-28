@@ -1,3 +1,5 @@
+import { DialogflowResponseFormat } from "../../services/response.format/dialogflow.response.format";
+
 export interface Imessage{
     name : string;
     platform : string;
@@ -23,7 +25,7 @@ export interface Iresponse{
     message_type: string;
     messageBody: string;
     messageText: string;
-    raw_response_object: string;
+    // raw_response_object: string;
     intent: string;
     messageImageUrl: string;
     messageImageCaption: string;
@@ -73,24 +75,9 @@ export interface contactList {
     emailID: string;
 }
 
-export interface IdialogflowResponseFormat {
-        text       :any[],
-        image      :Record<string, unknown>,
-        parse_mode :any,
-        result     :any
-}
-
 export interface IprocessedDialogflowResponseFormat{
     processed_message: any;
-    message_from_dialoglow: {
-        text: any[];
-        image: {
-            url: string;
-            caption: string;
-        };
-        parse_mode: any;
-        result: any;
-    };
+    message_from_dialoglow: DialogflowResponseFormat;
 }
 
 export interface calorieInfo {
