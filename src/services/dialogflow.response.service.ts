@@ -7,6 +7,7 @@ import { Imessage } from '../refactor/interface/message.interface';
 let dialogflow = require('@google-cloud/dialogflow');
 const dialogflowv2 = require('@google-cloud/dialogflow').v2beta1;
 const {struct} = require('pb-util');
+import { DialogflowResponseFormat } from './response.format/dialogflow.response.format';
 
 @injectable()
 export class DialogflowResponseService {
@@ -20,9 +21,6 @@ export class DialogflowResponseService {
             if (env_name === "UNION"){
                 dialogflow = dialogflowv2;
             }
-
-            // set default values
-            let responseMessage = { text: [], parse_mode: false, image: { url: '', caption: '' } };
             const dialogflow_language = "en-US";
             const userId: string = userPlatformId === null ? v4() : userPlatformId;
             const location = completeMessage.latlong === null ? v4() : completeMessage.latlong;
@@ -95,71 +93,21 @@ export class DialogflowResponseService {
             } else {
                 responses = await sessionClient.detectIntent(request);
             }
-            const result = responses[0].queryResult;
-            if (result.intent) {
-                console.log(`  Intent: ${result.intent.displayName}`);
+            const dialogflowResponseFormatObj = new DialogflowResponseFormat(responses);
+            const intentfromDF = dialogflowResponseFormatObj.getIntent();
+            if (intent) {
+                console.log(`  Intent: ${intentfromDF}`);
             } else {
 
                 // console.log(`  No intent matched.`);
             }
-
-            responseMessage = getFulfillmentResponse(result);
-            if (responseMessage.text.length === 0) {
-                responseMessage.text[0] = result.fulfillmentText;
-            }
-            const dfResponseObj = {
-                text  : responseMessage.text,
-                image : responseMessage.image ? responseMessage.image : {
-                    url     : "",
-                    caption : ""
-                },
-                parse_mode : responseMessage.parse_mode ? responseMessage.parse_mode : false,
-                result     : result,
-            };
-            return dfResponseObj;
+            return dialogflowResponseFormatObj;
         }
         catch (e) {
             console.log(e);
-            return {
-                text       : ["Sorry, something went wrong. Let me consult an expert and get back to you!"],
-                image      : { url: '', caption: '' },
-                parse_mode : false,
-                result     : false
-            };
         }
 
     };
 
 }
 
-function getFulfillmentResponse(result) {
-    const responseMessage = { text: [], parse_mode: false, image: { url: '', caption: '' } };
-
-    if (result.fulfillmentMessages) {
-        if (result.fulfillmentMessages[0].platform && result.fulfillmentMessages[0].platform === "TELEGRAM" && result.fulfillmentMessages[0].payload) {
-            // eslint-disable-next-line max-len
-            responseMessage.text[0] = result.fulfillmentMessages[0].payload.fields.telegram.structValue.fields.text.stringValue;
-            if (result.fulfillmentMessages[1]) {
-                if (result.fulfillmentMessages[0].payload.fields.telegram.structValue.fields.parse_mode.stringValue && result.fulfillmentMessages[0].payload.fields.telegram.structValue.fields.parse_mode.stringValue === 'HTML') {
-                    // eslint-disable-next-line max-len
-                    responseMessage.parse_mode = result.fulfillmentMessages[0].payload.fields.telegram.structValue.fields.parse_mode.stringValue;
-                }
-                // eslint-disable-next-line max-len
-                if (result.fulfillmentMessages[1].text) responseMessage.text[1] = result.fulfillmentMessages[1].text.text[0];
-                // eslint-disable-next-line max-len
-                if (result.fulfillmentMessages[1].image) responseMessage.image = result.fulfillmentMessages[1].image.imageUri;
-            }
-
-        } else if (result.fulfillmentMessages[0] && result.fulfillmentMessages[0].text) {
-            responseMessage.text[0] = result.fulfillmentMessages[0].text.text[0];
-            if (result.fulfillmentMessages[1] && result.fulfillmentMessages[1].image) {
-                // eslint-disable-next-line max-len
-                responseMessage.image = { url: result.fulfillmentMessages[1].image.imageUri, caption: result.fulfillmentMessages[1].image.accessibilityText };
-            }
-        }
-        else {
-            responseMessage.text[0] = "Sorry, something went wrong. Let me consult an expert and get back to you.";
-        }
-    }
-    return responseMessage;
-}
