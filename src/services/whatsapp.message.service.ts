@@ -225,19 +225,19 @@ export class WhatsappMessageService implements platformServiceInterface {
                 resolve(await this.postRequestMessages(postDataString));
             }
             else if (messageType === "interactive-buttons"){
-                const buttons = [];
-                const numberOfButtons = (payload.fields.buttons.listValue.values).length;
-                for (let i = 0; i < numberOfButtons; i++){
-                    const id = payload.fields.buttons.listValue.values[i].structValue.fields.reply.structValue.fields.id.stringValue;
-                    const title = payload.fields.buttons.listValue.values[i].structValue.fields.reply.structValue.fields.title.stringValue;
-                    const tempObject = {
+                const buttons1 = [];
+                const numberOfButtons1 = (payload.fields.buttons.listValue.values).length;
+                for (let i = 0; i < numberOfButtons1; i++){
+                    const id1 = payload.fields.buttons.listValue.values[i].structValue.fields.reply.structValue.fields.id.stringValue;
+                    const title1 = payload.fields.buttons.listValue.values[i].structValue.fields.reply.structValue.fields.title.stringValue;
+                    const tempObject1 = {
                         "type"  : "reply",
                         "reply" : {
-                            "id"    : id,
-                            "title" : title
+                            "id"    : id1,
+                            "title" : title1
                         }
                     };
-                    buttons.push(tempObject);
+                    buttons1.push(tempObject1);
                 }
                 postData["interactive"] = {
                     "type" : "button",
@@ -245,7 +245,7 @@ export class WhatsappMessageService implements platformServiceInterface {
                         "text" : message
                     },
                     "action" : {
-                        "buttons" : buttons
+                        "buttons" : buttons1
                     }
                 };
                 postData.type = "interactive";
