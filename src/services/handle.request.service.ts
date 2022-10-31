@@ -38,8 +38,10 @@ export class handleRequestservice{
     getTranslatedResponse(message_from_dialoglow, languageForSession){
         let customTranslations = null;
         const payload = message_from_dialoglow.getPayload();
-        if (payload){
-            customTranslations = payload.fields.translations.structValue.fields[languageForSession].stringValue;
+        if (payload) {
+            if (payload.fields.customTranslations){
+                customTranslations = payload.fields.translations.structValue.fields[languageForSession].stringValue;
+            }
         }
         return customTranslations;
     }
