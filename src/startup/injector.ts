@@ -5,7 +5,7 @@ import { WhatsappMetaMessageService } from '../services/whatsapp.meta.message.se
 import { WhatsappMessageService } from '../services/whatsapp.message.service';
 import { TelegramMessageService as telegramPlatformservice } from '../services/telegram.message.service';
 import { platformMessageService as rean_SUPPORT_Platformservice } from '../services/app.support.service';
-import { platformMessageService as sneha_SUPPORT_Platformservice } from '../services/sneha.support.service';
+import { snehaMessagePlatformService as sneha_SUPPORT_Platformservice } from '../services/sneha.support.service';
 import { TelegramAuthenticator } from '../services/clientAuthenticator/telegram.authenticator';
 import { WhatsappAuthenticator } from '../services/clientAuthenticator/whatsapp.authenticator';
 import { ReanAppAuthenticator } from '../services/clientAuthenticator/reanapp.authenticator';

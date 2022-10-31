@@ -6,7 +6,7 @@ import { ResponseHandler } from '../utils/response.handler';
 
 @autoInjectable()
 @singleton()
-export class platformMessageService implements platformServiceInterface{
+export class snehaMessagePlatformService implements platformServiceInterface{
 
     public translate = false;
 
