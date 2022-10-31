@@ -66,8 +66,7 @@ export class ClientWebhookController {
             else {
                 if (req.params.channel !== "REAN_SUPPORT" &&
                     req.params.channel !== "slack" &&
-                    req.params.channel !== "SNEHA_SUPPORT"
-                    ){
+                    req.params.channel !== "SNEHA_SUPPORT") {
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
                 }
                 this._platformMessageService = container.resolve(req.params.channel);
@@ -129,8 +128,7 @@ export class ClientWebhookController {
                     console.log("receiveMessage webhook receiveMessageWhatsappNew");
                     if (req.params.channel !== "REAN_SUPPORT" &&
                         req.params.channel !== "slack" &&
-                        req.params.channel !== "SNEHA_SUPPORT"
-                        ){
+                        req.params.channel !== "SNEHA_SUPPORT") {
                         this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
                     }
                     this._platformMessageService = container.resolve(req.params.channel);
