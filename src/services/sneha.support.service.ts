@@ -8,22 +8,28 @@ import { ResponseHandler } from '../utils/response.handler';
 @singleton()
 export class snehaMessagePlatformService implements platformServiceInterface{
 
-    public response;
+    public res;
 
     constructor(private messageFlow?: MessageFlow,private responseHandler?: ResponseHandler,
     ) {
 
     }
-    sendManualMesage(msg: any) {
-        console.log("Method not implemented");
+
+    setWebhook(client: any) {
+        console.log("Method not implemented.");
     }
 
     init() {
-        console.log("Method not implemented");   
+        console.log("Method not implemented.");
     }
 
-    setWebhook(client: any) {
-        console.log("Method not implemented");    }
+    sendManualMesage() {
+        console.log("Method not implemented.");
+    }
+
+    createFinalMessageFromHumanhandOver() {
+        console.log("Method not implemented.");
+    }
 
     handleMessage(msg, client) {
         return this.messageFlow.checkTheFlow(msg, client, this);
@@ -54,7 +60,7 @@ export class snehaMessagePlatformService implements platformServiceInterface{
     }
 
     SendMediaMessage(contact,imageLink, message){
-        this.responseHandler.sendSuccessResponseForApp(this.response, 201, "Message processed successfully.", { response_message: message });
+        this.responseHandler.sendSuccessResponseForApp(this.res, 201, "Message processed successfully.", { response_message: message });
         return message;
     }
 
