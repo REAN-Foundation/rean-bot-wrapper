@@ -84,7 +84,15 @@ export class ClickUpMessageService implements platformServiceInterface {
                 console.log("Not comment, hanlde later");
             }
             else {
-                this.eventComment(requestBody);
+                console.log("requestbody of comment", requestBody.history_items[0].comment);
+                const commentObj = requestBody.history_items[0].comment.comment;
+                for (let i = 0; i < commentObj.length; i++){
+                    if (commentObj[i].type){
+                        const tag = commentObj[i].text;
+                        this.eventComment(requestBody,tag);
+                    }
+                }
+                // console.log("requestbody of comment attributes", requestBody.history_items[0].comment.comment[1].attributes);
             }
         }
         else if (requestBody.event === "taskStatusUpdated") {
@@ -100,10 +108,11 @@ export class ClickUpMessageService implements platformServiceInterface {
 
     }
 
-    async eventComment(requestBody) {
+    async eventComment(requestBody,tag) {
         const data = await UserFeedback.findOne({ where: { taskID: requestBody.task_id } });
         console.log("data", data);
-        const textToUser = `Our Experts have responded to your query. \nYour Query: ${data.message} \nExpert: ${requestBody.history_items[0].comment.text_content}`;
+        const filterText = (requestBody.history_items[0].comment.text_content).replace(tag, '');
+        const textToUser = `Our Experts have responded to your query. \nYour Query: ${data.message} \nExpert: ${filterText}`;
         console.log("textToUser", textToUser);
         await this.sendCustomMessage(data.channel, data.userId, textToUser);
     }
