@@ -372,8 +372,10 @@ export class WhatsappMessageService implements platformServiceInterface {
             }
             else {
                 let message_type = "text";
-                if (payload.fields.messagetype){
-                    message_type = payload.fields.messagetype.stringValue;
+                if (payload){
+                    if (payload.fields.messagetype){
+                        message_type = payload.fields.messagetype.stringValue;
+                    }
                 }
                 reaponse_message = { name: name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: message_type, intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[0] };
             }
