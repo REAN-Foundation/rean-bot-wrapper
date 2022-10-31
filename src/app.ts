@@ -98,6 +98,8 @@ export default class Application {
             // this condition will be removed after container task definition is updated
             else if (clientName === "ANEMIA"){
                 console.log("Anemia is not a separate client anymore");
+            } else if (clientName === "SNEHA") {
+                console.log("Does not require setting up webhook");
             }
             else {
                 telegram.setWebhook(clientName);
