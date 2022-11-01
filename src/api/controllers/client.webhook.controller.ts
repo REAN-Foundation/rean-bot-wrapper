@@ -64,7 +64,9 @@ export class ClientWebhookController {
                 }
             }
             else {
-                if (req.params.channel !== "REAN_SUPPORT" && req.params.channel !== "slack"){
+                if (req.params.channel !== "REAN_SUPPORT" &&
+                    req.params.channel !== "slack" &&
+                    req.params.channel !== "SNEHA_SUPPORT") {
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
                 }
                 this._platformMessageService = container.resolve(req.params.channel);
@@ -124,7 +126,9 @@ export class ClientWebhookController {
                 const phone_number_id = this.clientEnvironment.getClientEnvironmentVariable('WHATSAPP_PHONE_NUMBER_ID');
                 if (req.body.entry[0].changes[0].value.metadata.phone_number_id == phone_number_id) {
                     console.log("receiveMessage webhook receiveMessageWhatsappNew");
-                    if (req.params.channel !== "REAN_SUPPORT" && req.params.channel !== "slack"){
+                    if (req.params.channel !== "REAN_SUPPORT" &&
+                        req.params.channel !== "slack" &&
+                        req.params.channel !== "SNEHA_SUPPORT") {
                         this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
                     }
                     this._platformMessageService = container.resolve(req.params.channel);
