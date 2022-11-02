@@ -28,7 +28,8 @@ export class BloodWarriorWelcomeService {
         const message = {
             2  : "BloodWarrior_Patient",
             11 : "BloodWarrior_Donor",
-            1  : "BloodWarrior_Admin"
+            1  : "BloodWarrior_Admin",
+            12 : "BloodWarrior_Volunteer"
         };
         return message[roleId] ?? "New_User";
     }
@@ -55,13 +56,14 @@ export class BloodWarriorWelcomeService {
             const apiURL = `patient-health-profiles/${patientUserId}`;
             result = await needleRequestForREAN("get", apiURL);
             const bloodGroup = result.Data.HealthProfile.BloodGroup;
-            const transfusionDate = result.Data.HealthProfile.BloodTransfusionDate;
-            const stringDate = new Date(transfusionDate.split("T")[0]).toDateString();
-            
+            let transfusionDate = result.Data.HealthProfile.BloodTransfusionDate ?? null;
+            if (transfusionDate) {
+                transfusionDate = new Date(transfusionDate.split("T")[0]).toDateString();
+            }
             const dffMessage = `Welcome to Blood Warriors ${name},\nHere are the details we have found:
             Patient Name: ${name},
             Blood Group: ${bloodGroup},
-            Expected next Blood Transfusion Date: ${stringDate}\nIf the details are correct, please click proceed or if you can register as a new patient.`;
+            Expected next Blood Transfusion Date: ${transfusionDate}\nIf the details are correct, please click proceed or if you can register as a new patient.`;
             console.log(dffMessage);
             
             const payloadButtons = await whatsappMetaButtonService("Proceed","Patient_Confirm","Change TF Date","Change_TF_Date");

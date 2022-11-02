@@ -28,7 +28,7 @@ export const enrollPatientService = async (eventObj) => {
             const obj1 = {
                 Provider  : "REAN_BW",
                 PlanName  : "Patient messages",
-                PlanCode  : 4,
+                PlanCode  : "Patient-Reminders",
                 StartDate : new Date().toISOString().split('T')[0]
             };
     
