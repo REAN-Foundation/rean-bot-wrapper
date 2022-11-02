@@ -51,7 +51,7 @@ export const enrollService = async (eventObj) => {
         const obj1 = {
             Provider  : "REAN",
             PlanName  : "Maternity Careplan",
-            PlanCode  : 1,
+            PlanCode  : "DMC-Maternity",
             StartDate : new Date().toISOString().split('T')[0],
             DayOffset : (days(date_1, date_2) - 28)
         };

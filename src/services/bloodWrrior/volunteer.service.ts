@@ -5,29 +5,29 @@ import { getPhoneNumber, needleRequestForREAN } from '../needle.service';
 import { whatsappMetaButtonService } from '../whatsappmeta.button.service';
 
 @autoInjectable()
-export class DonorService {
+export class VolunteerService {
 
     getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
 
-    async donorService (eventObj) {
+    async volunteerService (eventObj) {
         try {
             const phoneNumber = await getPhoneNumber(eventObj);
-            const apiURL = `donors/search?phone=${phoneNumber}`;
+            const apiURL = `volunteers/search?phone=${phoneNumber}`;
             const requestBody = await needleRequestForREAN("get", apiURL);
 
-            const bloodGroup = requestBody.Data.Donors.Items[0].BloodGroup;
-            const name = requestBody.Data.Donors.Items[0].DisplayName;
-            let lastDonationDate = requestBody.Data.Donors.Items[0].LastDonationDate ?? null;
+            const bloodGroup = requestBody.Data.Volunteers.Items[0].BloodGroup;
+            const name = requestBody.Data.Volunteers.Items[0].DisplayName;
+            let lastDonationDate = requestBody.Data.Volunteers.Items[0].LastDonationDate ?? null;
             if (lastDonationDate) {
                 lastDonationDate = new Date(lastDonationDate.split("T")[0]).toDateString();
             }
-            const dffMessage = `Welcome to Blood Warriors ${name},\nThank you for your continuous support as a emergency donor:
-            Donor Name: ${name},
+            const dffMessage = `Welcome to Blood Warriors ${name},\nThank you for your continuous support as a volunteer:
+            Volunteer Name: ${name},
             Blood Group: ${bloodGroup},
-            Last Donation Date: ${lastDonationDate}\nIf the details are correct, please click proceed or if you can register as a new donor.`;
+            Last Donation Date: ${lastDonationDate}\nIf the details are correct, please click proceed or if you can register as a new volunteer.`;
             console.log(dffMessage);
 
-            const payloadButtons = await whatsappMetaButtonService("Proceed","Donor_Confirm","Register as Donor","Register_Donor");
+            const payloadButtons = await whatsappMetaButtonService("Proceed","Volunteer_Confirm","Register Volunteer","Register_Volunteer");
             const data = {
                 "fulfillmentMessages" : [
                     {
@@ -40,7 +40,7 @@ export class DonorService {
 
         } catch (error) {
             Logger.instance()
-                .log_error(error.message,500,'Register donor with blood warrior service error');
+                .log_error(error.message,500,'Register volunteer with blood warrior service error');
         }
     }
 
