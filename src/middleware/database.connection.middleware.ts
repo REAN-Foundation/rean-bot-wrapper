@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { autoInjectable } from 'tsyringe';
 import { SequelizeClient } from '../connection/sequelizeClient';
 

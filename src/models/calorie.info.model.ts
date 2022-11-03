@@ -2,11 +2,13 @@ import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, Index, HasMa
 import { calorieInfo } from '../refactor/interface/message.interface';
 import { CalorieDatabase } from './calorie.db.model';
 
-@Table({
-    timestamps : true,
-    modelName  : 'CalorieInfo',
-    tableName  : 'calorie_info'
-})
+@Table(
+    {
+        timestamps : true,
+        modelName  : 'CalorieInfo',
+        tableName  : 'calorie_info'
+    }
+)
 
 export class CalorieInfo extends Model implements calorieInfo {
 
