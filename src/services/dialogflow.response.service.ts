@@ -6,7 +6,7 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 import { Imessage } from '../refactor/interface/message.interface';
 let dialogflow = require('@google-cloud/dialogflow');
 const dialogflowv2 = require('@google-cloud/dialogflow').v2beta1;
-const {struct} = require('pb-util');
+const { struct } = require('pb-util');
 import { DialogflowResponseFormat } from './response.format/dialogflow.response.format';
 
 @injectable()
@@ -14,7 +14,7 @@ export class DialogflowResponseService {
 
     constructor(private clientEnvironment?: ClientEnvironmentProviderService) { }
 
-    getDialogflowMessage = async (message: string, userPlatformId: string = null, platform: string = null, userName: string, intent: string = null, completeMessage:Imessage =null ) => {
+    getDialogflowMessage = async (message: string, userPlatformId: string = null, platform: string = null, userName: string, intent: string = null, completeMessage:Imessage = null ) => {
         try {
 
             const env_name = this.clientEnvironment.getClientEnvironmentVariable("NAME");
@@ -68,7 +68,7 @@ export class DialogflowResponseService {
                     },
                 },
                 queryParams : {
-                    payload : struct.encode({source: platform, userId: userId, userName: userName,location: location})
+                    payload : struct.encode({ source: platform, userId: userId, userName: userName,location: location })
                 },
             };
             let request_intent = null;
@@ -82,7 +82,7 @@ export class DialogflowResponseService {
                         },
                     },
                     queryParams : {
-                        payload : struct.encode({source: platform, userId: userId, userName: userName,location: location })
+                        payload : struct.encode({ source: platform, userId: userId, userName: userName,location: location })
                     },
                 };
             }

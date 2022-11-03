@@ -45,7 +45,7 @@ export class platformMessageService implements platformServiceInterface{
 
         if (msg.type === "text") {
             const message = msg.message; //+ ` PhoneNumber is ${phoneNumber}`;
-            returnMessage = { name: null,platform: "Rean_Support",chat_message_id: null, direction: "In",messageBody: message,imageUrl: null, sessionId: phoneNumber,replyPath: phoneNumber,latlong: null,type: 'text' , intent: null};
+            returnMessage = { name: null,platform: "Rean_Support",chat_message_id: null, direction: "In",messageBody: message,imageUrl: null, sessionId: phoneNumber,replyPath: phoneNumber,latlong: null,type: 'text' , intent: null };
             return returnMessage;
         }
     }
@@ -54,7 +54,6 @@ export class platformMessageService implements platformServiceInterface{
         const reansupport_Id = message.sessionId;
         const image = response.message_from_dialoglow.getImageObject();
         const message_type = image.url ? "image" : "text";
-        // const raw_response_object = response.message_from_dialoglow.result && response.message_from_dialoglow.result.fulfillmentMessages ? JSON.stringify(response.message_from_dialoglow.result.fulfillmentMessages) : '';
         const intent = response.message_from_dialoglow.getIntent();
 
         const reaponse_message = { name: null,platform: "Rean_Support",chat_message_id: null,direction: "Out",message_type: message_type,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: reansupport_Id, messageText: response.processed_message[0] };

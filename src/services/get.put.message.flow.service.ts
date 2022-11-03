@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 /* eslint-disable linebreak-style */
 import { Imessage, Iresponse, IchatMessage } from '../refactor/interface/message.interface';
@@ -17,7 +18,6 @@ import { translateService } from './translate.service';
 import { v2 } from '@google-cloud/translate';
 import { sendApiButtonService } from './whatsappmeta.button.service';
 import { DialogflowResponseFormat } from './response.format/dialogflow.response.format';
-// import { IplatformResponseFunctionalities } from './response.format/response.interface';
 
 @autoInjectable()
 export class MessageFlow{

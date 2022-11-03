@@ -8,7 +8,7 @@ import { Logger } from '../../common/logger';
 const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
 
 export const enrollPatientService = async (eventObj) => {
-    return new Promise(async (resolve,reject) => {
+    return new Promise(async (resolve) => {
         try {
             const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
                 ClientEnvironmentProviderService
@@ -29,7 +29,8 @@ export const enrollPatientService = async (eventObj) => {
                 Provider  : "REAN_BW",
                 PlanName  : "Patient messages",
                 PlanCode  : 4,
-                StartDate : new Date().toISOString().split('T')[0]
+                StartDate : new Date().toISOString()
+                    .split('T')[0]
             };
     
             const resp = await needle('post', url, obj1, options);

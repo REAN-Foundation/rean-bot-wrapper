@@ -1,4 +1,4 @@
-import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, AllowNull, Index, HasMany } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, Index, HasMany } from 'sequelize-typescript';
 import { calorieInfo } from '../refactor/interface/message.interface';
 import { CalorieDatabase } from './calorie.db.model';
 
@@ -83,4 +83,5 @@ export class CalorieInfo extends Model implements calorieInfo {
 
     @HasMany(() => CalorieDatabase)
     CalorieDatabase: CalorieDatabase[];
+
 }

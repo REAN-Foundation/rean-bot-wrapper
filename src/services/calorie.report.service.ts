@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import dfff from '../libs/dialogflow-fulfillment';
 import { CalorieInfo } from "../models/calorie.info.model";
 import { SequelizeClient } from '../connection/sequelizeClient';
@@ -16,10 +17,10 @@ export const getCalorieReport = async (req,res) => {
     async function createTable(agent) {
 
         var today = new Date();
-        var yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate()-1);
-        var last_week = new Date(today.getFullYear(), today.getMonth(), today.getDate()-7);
-        var last_month = new Date(today.getFullYear(), today.getMonth()-1 , today.getDate());
-        var three_month = new Date(today.getFullYear(), today.getMonth()-3, today.getDate());
+        var yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
+        var last_week = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7);
+        var last_month = new Date(today.getFullYear(), today.getMonth() - 1 , today.getDate());
+        var three_month = new Date(today.getFullYear(), today.getMonth() - 3, today.getDate());
     
         const yesterday_data = await getDataForReport(yesterday,today,userId);
         const week_data = await getDataForReport(last_week,today,userId);
@@ -109,10 +110,10 @@ export const getCalorieReport = async (req,res) => {
 
         string += '<table style="width:100%; border:1px solid; padding-bottom:10px;">';
         
-        for ( let i=0; i < table.length; i++){
+        for ( let i = 0; i < table.length; i++){
             string += '<tr>';
             for (let j = 0; j < table[0].length; j++){
-                if (i===0 || j === 0){
+                if (i === 0 || j === 0){
                     string += '<td style="background-color:#cbc3e3; padding-left:2px;">';
                     string += '<span style="font-size: 20px;">';
                     if (!table[i][j]){
@@ -176,7 +177,7 @@ export const getCalorieReport = async (req,res) => {
 
     async function getDailyDataForReport(sessionId){
         const data = await CalorieInfo.findAll({
-            attributes :[
+            attributes : [
                 [sequelize.fn('SUM', sequelize.col('user_calories')), 'total_calories'],
                 [sequelize.fn('DAYOFWEEK',sequelize.col('record_date')),'daynumber'],
                 [sequelize.fn('WEEKOFYEAR',sequelize.col('record_date')),'weeknumber'],

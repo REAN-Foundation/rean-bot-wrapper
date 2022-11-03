@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface';
 import { autoInjectable, singleton } from 'tsyringe';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
@@ -42,7 +43,7 @@ export class snehaMessagePlatformService implements platformServiceInterface{
 
         if (msg.type === "text") {
             const message = msg.message; //+ ` PhoneNumber is ${phoneNumber}`;
-            returnMsg = { name: null,platform: "Sneha_Support",chat_message_id: null, direction: "In",messageBody: message,imageUrl: null, sessionId: phone,replyPath: phone,latlong: null,type: 'text' , intent: null};
+            returnMsg = { name: null,platform: "Sneha_Support",chat_message_id: null, direction: "In",messageBody: message,imageUrl: null, sessionId: phone,replyPath: phone,latlong: null,type: 'text' , intent: null };
             return returnMsg;
         }
     }
@@ -51,7 +52,6 @@ export class snehaMessagePlatformService implements platformServiceInterface{
         const snehaSupport_Id = message.sessionId;
         const image = response.message_from_dialoglow.getImageObject();
         const messageType = image.url ? "image" : "text";
-        // const raw_response_object = response.message_from_dialoglow.result && response.message_from_dialoglow.result.fulfillmentMessages ? JSON.stringify(response.message_from_dialoglow.result.fulfillmentMessages) : '';
         const intent = response.message_from_dialoglow.getIntent();
 
         const responseMessage = { name: null,platform: "Sneha_Support",chat_message_id: null,direction: "Out",message_type: messageType,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: snehaSupport_Id, messageText: response.processed_message[0] };

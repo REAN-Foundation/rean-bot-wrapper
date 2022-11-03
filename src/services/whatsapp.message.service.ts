@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 import http from 'https';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -71,7 +72,6 @@ export class WhatsappMessageService implements platformServiceInterface {
 
         return new Promise((resolve, reject) => {
             const webhookUrl = `${this.clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL")}/v1/${clientName}/whatsapp/${this.clientAuthenticator.urlToken}/receive`;
-            // console.log("whatsapp url",webhookUrl);
             const postData = JSON.stringify({
                 'url'     : webhookUrl,
                 "headers" : {
@@ -261,7 +261,7 @@ export class WhatsappMessageService implements platformServiceInterface {
                     header = payload.fields.header.stringValue;
                 } else {
                     header = "LIST";
-                } 
+                }
                 let count = 0;
                 for (const lit of list){
                     let id = count;

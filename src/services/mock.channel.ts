@@ -13,7 +13,6 @@ import { MessageFlow } from './get.put.message.flow.service';
 import { MockCHannelMessageFunctionalities } from './mock.channel.message.funtionalities';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-// import { getRequestOptions } from '../utils/helper';
 import { ChatMessage } from '../models/chat.message.model';
 
 @autoInjectable()
@@ -68,7 +67,7 @@ export class MockMessageService implements platformServiceInterface {
         //call a function that creates csv
         const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: contact } });
         const lastMessageDate = respChatMessage[respChatMessage.length - 1].createdAt;
-        const obj = {timeStamp: lastMessageDate, message: message};
+        const obj = { timeStamp: lastMessageDate, message: message };
         console.log("obj", obj);
     };
 

@@ -39,6 +39,7 @@ export class ClickUpMessageService implements platformServiceInterface {
 
     async handleMessage(requestBody: any) {
         console.log("request", requestBody);
+
         // console.log("user", util.inspect(requestBody.history_items[0].user));
         // console.log("comment", util.inspect(requestBody.history_items[0].comment));
         this.clickupEventHandler(requestBody);
@@ -62,10 +63,11 @@ export class ClickUpMessageService implements platformServiceInterface {
     }
 
     SendMediaMessage = async (contact: number | string, imageLink: string, message: string, messageType: string, payload: any) => {
+        
         //call a function that creates csv
         const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: contact } });
         const lastMessageDate = respChatMessage[respChatMessage.length - 1].createdAt;
-        const obj = {timeStamp: lastMessageDate, message: message};
+        const obj = { timeStamp: lastMessageDate, message: message };
         console.log("obj", obj);
     };
 
@@ -92,6 +94,7 @@ export class ClickUpMessageService implements platformServiceInterface {
                         this.eventComment(requestBody,tag);
                     }
                 }
+
                 // console.log("requestbody of comment attributes", requestBody.history_items[0].comment.comment[1].attributes);
             }
         }
@@ -137,4 +140,5 @@ export class ClickUpMessageService implements platformServiceInterface {
             await this.whatsappNewMessageService.SendMediaMessage(contact.toString(), null, message, "text");
         }
     }
+
 }

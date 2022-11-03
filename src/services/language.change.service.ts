@@ -25,13 +25,14 @@ export class ChangeLanguage{
                     "spanish"   : "es"
                 };
                 const newLanguageCode = await this.languageCode(newLanguage,listOfLanguages);
+
                 //stop the old session
                 await ChatSession.update({ sessionOpen: "false" }, {
                     where : {
                         userPlatformID : userId
                     }
                 });
-                // const chatsessionUpdateObj = await ChatSession.update({ sessionOpen: "false" }, { where: { userPlatformID: sessionId } });
+
                 //create a new session
                 const newSession = new ChatSession({ userPlatformID: userId, preferredLanguage: newLanguageCode, sessionOpen: "true" });
                 await newSession.save();

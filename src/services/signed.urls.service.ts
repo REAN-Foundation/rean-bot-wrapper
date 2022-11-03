@@ -11,7 +11,7 @@ export class SignedUrls{
     constructor(private clientEnvironmentProviderservice?: ClientEnvironmentProviderService){}
 
     async getSignedUrl(url){
-        return new Promise<string> ((resolve,reject) => {
+        return new Promise<string>((resolve) => {
             const millisecond = parseFloat(this.clientEnvironmentProviderservice.getClientEnvironmentVariable("EXPIRE_LINK_TIME"));
             var signingParams = {
                 keypairId        : process.env.CF_KEY_PAIR_ID,
@@ -22,7 +22,7 @@ export class SignedUrls{
 
             // Generating a signed URL
             var signedUrl = cfsign.getSignedUrl(
-                url, 
+                url,
                 signingParams
             );
             

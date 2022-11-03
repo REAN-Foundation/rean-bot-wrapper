@@ -10,7 +10,7 @@ export class GetLocation{
     async getLoctionData(eventObj){
         let  userLocation = null;
         if (eventObj.body.queryResult.parameters.Location.latlong){
-            userLocation = eventObj.body.queryResult.parameters.Location.latlong; 
+            userLocation = eventObj.body.queryResult.parameters.Location.latlong;
         }
         else if (eventObj.body.queryResult.parameters.Location.zipcode){
             userLocation = eventObj.body.queryResult.parameters.Location.zipcode;
@@ -34,11 +34,10 @@ export class GetLocation{
             };
             const response = await needle("post",url, obj,options);
             return response.body;
-        } 
+        }
         catch (error) {
             console.log('LVPEI Institute location Listener Error!');
         }
     }
-
 
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import http from  'https';
 import http_tp from 'http';
 import { getMessageFunctionalities } from "../refactor/interface/message.service.functionalities.interface";

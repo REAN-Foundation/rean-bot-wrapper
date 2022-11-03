@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { container } from 'tsyringe';
 import { Logger } from '../../common/logger';
 import { GetPatientInfoService } from '../support.app.service';
@@ -6,7 +7,7 @@ import { needleRequestForREAN } from '../needle.service';
 const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
 
 export const changeTransfusionDateService = async (eventObj) => {
-    return new Promise(async (resolve,reject) => {
+    return new Promise(async (resolve) => {
         try {
             const transfusionDate = eventObj.body.queryResult.parameters.Transfusion_Date;
             let result = null;

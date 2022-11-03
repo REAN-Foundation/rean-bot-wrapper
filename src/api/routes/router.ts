@@ -23,6 +23,7 @@ export class Router {
         return new Promise((resolve, reject) => {
             try {
                 console.log("Inside router.ts");
+                
                 //Handling the base route
                 this._app.get('/v1/', (req, res) => {
                     res.send({

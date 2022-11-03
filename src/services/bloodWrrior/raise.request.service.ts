@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { GetPatientInfoService } from '../support.app.service';
 import { container, autoInjectable } from 'tsyringe';
 import { Logger } from '../../common/logger';

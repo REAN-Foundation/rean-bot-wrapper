@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { feedbackInterface } from './feedback.interface';
 import { autoInjectable, container } from 'tsyringe';
 import { SlackMessageService } from '../slack.message.service';
@@ -27,19 +28,19 @@ export class FeedbackService implements feedbackInterface {
                 const client_name = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
                 const listOfUserRequestdata = await ChatMessage.findAll({ where: { userPlatformID: userId } });
                 const message = listOfUserRequestdata[listOfUserRequestdata.length - 3].messageContent;
-                const feedBackInfo = new UserFeedback({ userId: userId, message: message, channel: channel,humanHandoff: "false", feedbackType: "Negative Feedback"});
+                const feedBackInfo = new UserFeedback({ userId: userId, message: message, channel: channel,humanHandoff: "false", feedbackType: "Negative Feedback" });
                 await feedBackInfo.save();
                 if (client_name === "CALORIE_BOT") {
                     console.log("Calorie negative feedback received.");
-                    const response = await ChatMessage.findAll({limit: 2, where: {userPlatformId: userId, direction: "In"}, raw: true, order: [['createdAt', 'DESC']]});
-                    const negativeResponse = response[response.length-1].messageContent;
+                    const response = await ChatMessage.findAll({ limit: 2, where: { userPlatformId: userId, direction: "In" }, raw: true, order: [['createdAt', 'DESC']] });
+                    const negativeResponse = response[response.length - 1].messageContent;
                     const findit = await CalorieInfo.findOne(
                         {
-                            where : {user_message: { [Op.like]: `${negativeResponse}`}},
+                            where : { user_message: { [Op.like]: `${negativeResponse}` } },
                             order : [['updatedAt', 'DESC']],
                             limit : 1,
                         }).then(function (record) {
-                        return record.update({negative_feedback: 1});
+                        return record.update({ negative_feedback: 1 });
                     });
                     const data = {
                         "fulfillmentMessages" : [
