@@ -110,7 +110,6 @@ export class GetCalories {
                     reply_text.push(reply);
                 } else if (!foodName.unit && foodName.value){
                     value = parseInt(foodName.value);
-                    console.log("Quantity has been defined");
                     let calories = '0';
                     let food_description = '';
                     if (servings.serving.serving_description){
@@ -134,8 +133,6 @@ export class GetCalories {
                     await saveToDB(table_id,search_term.name,food.food.food_name,calories,value,serving_data);
                     meta_data.push(temp);
                     const reply = `${search_term.name.toLowerCase()} ${food_description.toLowerCase()} is ${parseInt(calories)} calories`; 
-                    reply_text.push(reply);
-
                 } else {
                     console.log("Here in else of unit");
                     

@@ -21,7 +21,6 @@ export class handleRequestservice{
         const platform_id = message.sessionId;
         const userName = message.name;
 
-
         //get the translated message
         const translate_message = await this.translateService.translateMessage(message.type, message.messageBody, platform_id);
 
