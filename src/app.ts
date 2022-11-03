@@ -97,6 +97,10 @@ export default class Application {
                 telegram.setWebhook(clientName);
             } else if (clientName === "UNION"){
                 telegram.setWebhook(clientName);
+            } else if (clientName === "DEMO_BOT"){
+                telegram.setWebhook(clientName);
+            } else if (clientName === "CALORIE_BOT"){
+                telegram.setWebhook(clientName);
             }
             
             // this condition will be removed after container task definition is updated

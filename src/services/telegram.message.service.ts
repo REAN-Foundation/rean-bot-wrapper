@@ -1,7 +1,7 @@
 
 // import { DialogflowResponseService } from './dialogflow-response.service';
 import { AwsS3manager } from './aws.file.upload.service';
-import { response } from '../refactor/interface/message.interface';
+import { Imessage, IprocessedDialogflowResponseFormat, Iresponse } from '../refactor/interface/message.interface';
 import { autoInjectable, singleton, inject, delay } from 'tsyringe';
 import  TelegramBot  from 'node-telegram-bot-api';
 import { MessageFlow } from './get.put.message.flow.service';
@@ -44,7 +44,7 @@ export class TelegramMessageService implements platformServiceInterface{
 
     init(){
         this._telegram.on('message', msg => {
-            this.messageFlow.get_put_msg_Dialogflow(msg, "telegram", this);
+            this.messageFlow.checkTheFlow(msg, "telegram", this);
         });
     }
 
@@ -57,7 +57,7 @@ export class TelegramMessageService implements platformServiceInterface{
         console.log("Telegram webhook set");
     }
 
-    getMessage = async (message) =>{
+    getMessage = async (message: any) =>{
         console.log("enter the getMessage of telegram");
 
         if (message.text) {
@@ -68,15 +68,17 @@ export class TelegramMessageService implements platformServiceInterface{
             return await this.telegramMessageServiceFunctionalities.locationMessageFormat(message);
         } else if (message.photo){
             return await this.telegramMessageServiceFunctionalities.imageMessaegFormat(message);
+        } else if (message.document){
+            return await this.telegramMessageServiceFunctionalities.documentMessageFormat(message);
         } else {
             throw new Error('Message is neither text, voice nor location');
         }
     };
 
-    postResponse = async(message, processedResponse) => {
+    postResponse = async(message: Imessage, processedResponse: IprocessedDialogflowResponseFormat) => {
         console.log("enter the give response of tele");
         // eslint-disable-next-line init-declarations
-        let reaponse_message: response;
+        let reaponse_message: Iresponse;
         const telegram_id = message.sessionId;
         const input_message = message.messageBody;
         const name = message.name;
@@ -108,7 +110,7 @@ export class TelegramMessageService implements platformServiceInterface{
     };
 
     createFinalMessageFromHumanhandOver(requestBody) {
-        const response_message: response = {
+        const response_message: Iresponse = {
             name                : requestBody.agentName,
             platform            : "Telegram",
             chat_message_id     : null,
