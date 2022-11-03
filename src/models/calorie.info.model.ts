@@ -4,9 +4,9 @@ import { CalorieDatabase } from './calorie.db.model';
 
 @Table(
     {
-        timestamps : true,
-        modelName  : 'CalorieInfo',
-        tableName  : 'calorie_info'
+    timestamps : true,
+    modelName  : 'CalorieInfo',
+    tableName  : 'calorie_info'
     }
 )
 

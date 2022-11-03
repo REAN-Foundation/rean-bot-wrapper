@@ -4,9 +4,9 @@ import { ChatMessage } from './chat.message.model';
 
 @Table(
     {
-        timestamps : true,
-        modelName  : 'ChatSession',
-        tableName  : 'chat_session'
+    timestamps : true,
+    modelName  : 'ChatSession',
+    tableName  : 'chat_session'
     }
 )
 export class ChatSession extends Model implements chatSession {
