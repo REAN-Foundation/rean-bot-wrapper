@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { feedbackInterface } from './feedback.interface';
 import { autoInjectable, container } from 'tsyringe';
 import { SlackMessageService } from '../slack.message.service';
@@ -7,6 +8,7 @@ import { HumanHandoff } from '../../services/human.handoff.service';
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
 import { CalorieInfo } from '../../models/calorie.info.model';
 import { Op } from 'sequelize';
+import { ClickUpTask } from '../clickup/clickup.task';
 
 const humanHandoff: HumanHandoff = container.resolve(HumanHandoff);
 // eslint-disable-next-line max-len
@@ -16,7 +18,9 @@ const clientEnvironmentProviderService: ClientEnvironmentProviderService = conta
 export class FeedbackService implements feedbackInterface {
 
     constructor(
-        private slackMessageService?: SlackMessageService){}
+        private slackMessageService?: SlackMessageService,
+        private clickuptask?: ClickUpTask,
+        private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     async NegativeFeedback(channel, userId) {
         return new Promise(async(resolve, reject) =>{
@@ -24,26 +28,26 @@ export class FeedbackService implements feedbackInterface {
                 const client_name = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
                 const listOfUserRequestdata = await ChatMessage.findAll({ where: { userPlatformID: userId } });
                 const message = listOfUserRequestdata[listOfUserRequestdata.length - 3].messageContent;
-                const feedBackInfo = new UserFeedback({ userId: userId, message: message, channel: channel,humanHandoff: "false", feedbackType: "Negative Feedback"});
+                const feedBackInfo = new UserFeedback({ userId: userId, message: message, channel: channel,humanHandoff: "false", feedbackType: "Negative Feedback" });
                 await feedBackInfo.save();
                 if (client_name === "CALORIE_BOT") {
                     console.log("Calorie negative feedback received.");
-                    const response = await ChatMessage.findAll({limit :2, where : {userPlatformId: userId, direction: "In"}, raw: true, order: [['createdAt', 'DESC']]});
-                    const negativeResponse = response[response.length-1].messageContent;
+                    const response = await ChatMessage.findAll({ limit: 2, where: { userPlatformId: userId, direction: "In" }, raw: true, order: [['createdAt', 'DESC']] });
+                    const negativeResponse = response[response.length - 1].messageContent;
                     const findit = await CalorieInfo.findOne(
                         {
-                            where : {user_food_name: { [Op.like]: `${negativeResponse}`}},
+                            where : { user_message: { [Op.like]: `${negativeResponse}` } },
                             order : [['updatedAt', 'DESC']],
                             limit : 1,
                         }).then(function (record) {
-                        return record.update({negative_feedback:1});
+                        return record.update({ negative_feedback: 1 });
                     });
                     const data = {
                         "fulfillmentMessages" : [
                             {
                                 "text" : {
                                     "text" : [
-                                        "Thank you for your feedback. We are working towards providing a better experience."
+                                        "Thank you for your feedback. Would you like to update the calorie value for the above food item?"
                                     ]
                                 }
                             }
@@ -52,7 +56,13 @@ export class FeedbackService implements feedbackInterface {
                     resolve(data);
                 } else {
                     const response = await UserFeedback.findAll({ where: { userId: userId } });
-                    await this.slackMessageService.postMessage(response);
+                    const preferredSupportChannel = this.clientEnvironmentProviderService.getClientEnvironmentVariable("SUPPORT_CHANNEL");
+                    if (preferredSupportChannel === "ClickUp"){
+                        await this.clickuptask.createTask(response);
+                    }
+                    else {
+                        await this.slackMessageService.postMessage(response);
+                    }
                     if (await humanHandoff.checkTime() === "false"){
                         const reply = "We have recorded your feedback. Our experts will get back to you on this issue";
                         const data = {
@@ -73,9 +83,26 @@ export class FeedbackService implements feedbackInterface {
                         const data = {
                             "fulfillmentMessages" : [
                                 {
-                                    "text" : {
-                                        "text" : [
-                                            reply
+                                    "text" : { "text": [reply] }
+                                },
+                                {
+                                    "payload" : {
+                                        "messagetype" : "interactive-buttons",
+                                        "buttons"     : [
+                                            {
+                                                "reply" : {
+                                                    "title" : "Yes",
+                                                    "id"    : "001"
+                                                },
+                                                "type" : "reply"
+                                            },
+                                            {
+                                                "type"  : "reply",
+                                                "reply" : {
+                                                    "title" : "No",
+                                                    "id"    : "002"
+                                                }
+                                            }
                                         ]
                                     }
                                 }

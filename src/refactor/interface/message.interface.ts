@@ -1,3 +1,5 @@
+import { DialogflowResponseFormat } from "../../services/response.format/dialogflow.response.format";
+
 export interface Imessage{
     name : string;
     platform : string;
@@ -6,8 +8,11 @@ export interface Imessage{
     direction: string;
     type : string;
     messageBody : string;
-    latlong : string;
+    imageUrl : string;
+    latlong : any;
     replyPath : string;
+    intent  : string;
+
 }
 
 export interface Iresponse{
@@ -20,7 +25,6 @@ export interface Iresponse{
     message_type: string;
     messageBody: string;
     messageText: string;
-    raw_response_object: string;
     intent: string;
     messageImageUrl: string;
     messageImageCaption: string;
@@ -39,6 +43,7 @@ export interface feedbackmessage{
 }
 
 export interface IchatMessage {
+    chatSessionID?: number,
     name: string,
     direction: string;
     messageType: string;
@@ -48,6 +53,7 @@ export interface IchatMessage {
     intent: string;
     imageContent: string;
     imageUrl: string;
+    messageId: string;
 }
 
 export interface chatSession {
@@ -68,32 +74,29 @@ export interface contactList {
     emailID: string;
 }
 
-export interface IdialogflowResponseFormat {
-        text       :any[],
-        image      :Record<string, unknown>,
-        parse_mode :any,
-        result     :any
-}
-
 export interface IprocessedDialogflowResponseFormat{
     processed_message: any;
-    message_from_dialoglow: {
-        text: any[];
-        image: {
-            url: string;
-            caption: string;
-        };
-        parse_mode: any;
-        result: any;
-    };
+    message_from_dialoglow: DialogflowResponseFormat;
 }
 
 export interface calorieInfo {
     autoIncrementalID: number;
-    user_food_name: string;
-    fs_food_name: string;
+    user_message: string;
+    fs_message: string;
     units: string;
     calories: number;
+    user_calories:number;
     negative_feedback: number;
+    meta_data: string;
+    calories_updated: number;
+}
+
+export interface calorieDatabase {
+    autoIncrementalID: number;
+    food_name: string;
+    message_id: number;
+    fs_db_name: string;
+    calories: number;
+    value: number;
     meta_data: string;
 }

@@ -1,11 +1,14 @@
-import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, AllowNull, Index } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, Index, HasMany } from 'sequelize-typescript';
 import { calorieInfo } from '../refactor/interface/message.interface';
+import { CalorieDatabase } from './calorie.db.model';
 
-@Table({
+@Table(
+    {
     timestamps : true,
     modelName  : 'CalorieInfo',
     tableName  : 'calorie_info'
-})
+    }
+)
 
 export class CalorieInfo extends Model implements calorieInfo {
 
@@ -24,14 +27,14 @@ export class CalorieInfo extends Model implements calorieInfo {
 
     @Index
     @Column({
-        type : DataType.STRING
+        type : DataType.STRING(256)
     })
-        user_food_name: string;
+        user_message: string;
     
     @Column({
-        type : DataType.STRING
+        type : DataType.STRING(512)
     })
-        fs_food_name: string;
+        fs_message: string;
 
     @Column({
         type      : DataType.STRING,
@@ -46,14 +49,41 @@ export class CalorieInfo extends Model implements calorieInfo {
         calories: number;
 
     @Column({
+        type      : DataType.INTEGER,
+        allowNull : true,
+    })
+        user_calories: number;
+
+    @Column({
+        type      : DataType.STRING,
+        allowNull : true,
+    })
+        meal_type: string;
+
+    @Column({
         type         : DataType.INTEGER,
         defaultValue : 0
     })
         negative_feedback: number;
 
     @Column({
+        type         : DataType.INTEGER,
+        defaultValue : 0
+    })
+        calories_updated: number;
+
+    @Column({
         type      : DataType.STRING(2048),
         allowNull : true
     })
         meta_data: string;
+    
+    @Column({
+        type : DataType.DATE,
+    })
+        record_date: Date;
+
+    @HasMany(() => CalorieDatabase)
+    CalorieDatabase: CalorieDatabase[];
+
 }

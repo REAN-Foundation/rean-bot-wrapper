@@ -2,11 +2,13 @@ import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, ForeignKey, 
 import { IchatMessage } from '../refactor/interface/message.interface';
 import { ChatSession } from './chat.session';
 
-@Table({
+@Table(
+    {
     timestamps : true,
     modelName  : 'ChatMessage',
     tableName  : 'chat_message'
-})
+    }
+)
 export class ChatMessage extends Model implements IchatMessage {
 
     @AutoIncrement
@@ -32,7 +34,6 @@ export class ChatMessage extends Model implements IchatMessage {
         type : DataType.STRING(256)
     })
         name: string;
-
 
     @Column({
         type : DataType.STRING(256)
@@ -60,17 +61,22 @@ export class ChatMessage extends Model implements IchatMessage {
         messageType: string;
 
     @Column({
-        type : DataType.TEXT
+        type : DataType.STRING(256)
+    })
+    messageId: string;
+
+    @Column({
+        type : DataType.TEXT()
     })
         messageContent: string;
     
     @Column({
-        type : DataType.STRING(256)
+        type : DataType.STRING(1024)
     })
         imageContent: string;
 
     @Column({
-        type : DataType.STRING(256)
+        type : DataType.STRING(1024)
     })
         imageUrl: string;
 

@@ -1,15 +1,21 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable max-len */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { DialogflowResponseService } from './dialogflow.response.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { translateService } from './translate.service';
-import { autoInjectable } from 'tsyringe';
+import { autoInjectable, container, inject } from 'tsyringe';
 import { Imessage } from '../refactor/interface/message.interface';
+import util from 'util';
+import { ChatSession } from '../models/chat.session';
 
 @autoInjectable()
 export class handleRequestservice{
 
-    constructor(private DialogflowResponseService?: DialogflowResponseService,
-                private translateService?: translateService ) {
+    // constructor(
+    constructor(
+        private DialogflowResponseService?: DialogflowResponseService,
+        private translateService?: translateService) {
     }
 
     async handleUserRequest (message: Imessage, channel: string) {
@@ -17,16 +23,47 @@ export class handleRequestservice{
         const userName = message.name;
 
         //get the translated message
-        const translate_message = await this.translateService.translateMessage(message.messageBody, platform_id);
+        const translate_message = await this.translateService.translateMessage(message.type, message.messageBody, platform_id);
 
         // eslint-disable-next-line max-len
-        const message_from_dialoglow = await this.DialogflowResponseService.getDialogflowMessage(translate_message.message, platform_id, channel, userName);
+        const message_from_dialoglow = await this.DialogflowResponseService.getDialogflowMessage(translate_message.message, platform_id, channel, userName, message.intent,message);
 
+        // this.getTranslatedResponse(message_from_dialoglow, translate_message.languageForSession);
         // process the message from dialogflow before sending it to whatsapp
-        // eslint-disable-next-line max-len
-        const processed_message = await this.translateService.processdialogflowmessage(message_from_dialoglow, translate_message.languageForSession);
+        const processed_message = await this.processMessage(message_from_dialoglow, platform_id);
 
         return { processed_message, message_from_dialoglow };
+    }
+
+    getTranslatedResponse(message_from_dialoglow, languageForSession){
+        let customTranslations = null;
+        const payload = message_from_dialoglow.getPayload();
+        if (payload) {
+            if (payload.fields.customTranslations){
+                customTranslations = payload.fields.translations.structValue.fields[languageForSession].stringValue;
+            }
+        }
+        return customTranslations;
+    }
+
+    async processMessage(message_from_dialoglow, platformId){
+        const languagefromdb = await ChatSession.findAll({
+            where : {
+                userPlatformID : platformId,
+                sessionOpen    : 'true'
+            }
+        });
+        const languageForSession = languagefromdb[languagefromdb.length - 1].preferredLanguage;
+        const customTranslations = [this.getTranslatedResponse(message_from_dialoglow, languageForSession)];
+        if (customTranslations[0] === null){
+            const googleTranslate = await this.translateService.processdialogflowmessage(message_from_dialoglow, languageForSession);
+            console.log("googleTranslate", googleTranslate);
+            return googleTranslate;
+        }
+        else {
+            console.log("customTranslations", customTranslations);
+            return customTranslations;
+        }
     }
 
 }

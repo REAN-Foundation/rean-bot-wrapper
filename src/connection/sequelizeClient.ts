@@ -6,6 +6,7 @@ import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
 import { ClientEnvironmentProviderService } from '../services/set.client/client.environment.provider.service';
 import { CalorieInfo } from '../models/calorie.info.model';
+import { CalorieDatabase } from '../models/calorie.db.model';
 
 @autoInjectable()
 export class SequelizeClient {
@@ -24,9 +25,16 @@ export class SequelizeClient {
             host    : dbHost,
             dialect : 'mysql',
             port    : 3306,
+            logging : false
         });
         
-        sequelizeClient.addModels([ChatMessage, UserFeedback, ChatSession, ContactList, CalorieInfo]);
+        if (this.clientEnvironmentProviderService.getClientEnvironmentVariable('NAME') === "CALORIE_BOT") {
+            // eslint-disable-next-line max-len
+            sequelizeClient.addModels([ChatMessage, UserFeedback, ChatSession, ContactList, CalorieInfo, CalorieDatabase]);
+        } else {
+            sequelizeClient.addModels([ChatMessage, UserFeedback, ChatSession, ContactList]);
+        }
+
         // ChatSession.hasMany(ChatMessage);
         // ChatMessage.belongsTo(ChatSession);
         this._sequelize = sequelizeClient;
