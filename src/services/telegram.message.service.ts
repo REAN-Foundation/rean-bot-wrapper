@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable max-len */
 
 // import { DialogflowResponseService } from './dialogflow-response.service';
 import { AwsS3manager } from './aws.file.upload.service';
@@ -83,28 +85,29 @@ export class TelegramMessageService implements platformServiceInterface{
         const input_message = message.messageBody;
         const name = message.name;
         const chat_message_id = message.chat_message_id;
-        const raw_response_object = processedResponse.message_from_dialoglow.result && processedResponse.message_from_dialoglow.result.fulfillmentMessages ? JSON.stringify(processedResponse.message_from_dialoglow.result.fulfillmentMessages) : '';
-        const intent = processedResponse.message_from_dialoglow.result && processedResponse.message_from_dialoglow.result.intent ? processedResponse.message_from_dialoglow.result.intent.displayName : '';
+        const image = processedResponse.message_from_dialoglow.getImageObject();
+        const pasrseMode = processedResponse.message_from_dialoglow.getParseMode();
+        const intent = processedResponse.message_from_dialoglow.getIntent();
 
-        if (processedResponse.message_from_dialoglow.image && processedResponse.message_from_dialoglow.image.url) {
-            reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",raw_response_object: raw_response_object,intent: intent,messageBody: processedResponse.message_from_dialoglow.image.url, messageImageUrl: processedResponse.message_from_dialoglow.image.url , messageImageCaption: processedResponse.message_from_dialoglow.image.caption, sessionId: telegram_id, messageText: processedResponse.processed_message[0] };
+        if (image && image.url) {
+            reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",intent: intent,messageBody: image.url, messageImageUrl: image.url , messageImageCaption: image.caption, sessionId: telegram_id, messageText: processedResponse.processed_message[0] };
         }
         else if (processedResponse.processed_message.length > 1) {
 
-            if (processedResponse.message_from_dialoglow.parse_mode && processedResponse.message_from_dialoglow.parse_mode === 'HTML') {
+            if (pasrseMode && pasrseMode === 'HTML') {
                 // eslint-disable-next-line max-len
                 const uploadImageName = await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
                 const vaacinationImageFile = await this.awsS3manager.uploadFile(uploadImageName);
                 if (vaacinationImageFile) {
-                    reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",raw_response_object: raw_response_object,intent: intent,messageBody: String(vaacinationImageFile), messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[1] };
+                    reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",intent: intent,messageBody: String(vaacinationImageFile), messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[1] };
                 }
             }
             else {
-                reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "text",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[0] };
-                reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "text",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[1] };
+                reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "text",intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[0] };
+                reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "text",intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[1] };
             }
         } else {
-            reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "text",raw_response_object: raw_response_object,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[0] };
+            reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "text",intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[0] };
         }
         return reaponse_message;
     };
@@ -117,7 +120,6 @@ export class TelegramMessageService implements platformServiceInterface{
             direction           : "Out",
             input_message       : null,
             message_type        : "text",
-            raw_response_object : null,
             intent              : null,
             messageBody         : null,
             messageImageUrl     : null,
@@ -128,12 +130,13 @@ export class TelegramMessageService implements platformServiceInterface{
         return response_message;
     }
 
-    SendMediaMessage = async (contact, imageLink = null, message, messageType) => {
+    SendMediaMessage = async (contact, imageLink = null, message, messageType, payload = null) => {
         message = this.sanitizeMessage(message);
         return new Promise((resolve) => {
 
             if (imageLink === null){
                 this._telegram.sendMessage(contact, message, { parse_mode: 'HTML' }).then(function (data) {
+                    console.log("Telegram send body is", data);
                     resolve(data);
                 });
             }

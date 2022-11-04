@@ -24,6 +24,22 @@ import { RequestLiveAgent } from './intentListeners/request.live.agent.listener'
 import { createDemoBot } from './intentListeners/create.demo.bot.listener';
 import { calorieDetection } from './intentListeners/calorie.detection.listener';
 import { calorieReport } from './intentListeners/calorie.report.listener';
+import { CalorieUpdate } from './intentListeners/calorie.update.listener';
+import { WhatsAppTemplateOpting } from './intentListeners/whatsapp.tempalte.opting.listener';
+import { eyeSymptomAssessment } from './intentListeners/eye.symptom.assesment.listener';
+import { MaternityCareplanListener } from './intentListeners/maternity.careplan.listener';
+import { BloodWarriorWelcome } from './intentListeners/bloodWarrior/welcome.listener';
+import { BloodWarriorPatient } from './intentListeners/bloodWarrior/patient.listener';
+import { BloodWarriorDonor } from './intentListeners/bloodWarrior/donor.listener';
+import { BloodWarriorNewUser } from './intentListeners/bloodWarrior/new.userlistener';
+import { BloodWarriorPatientEnroll } from './intentListeners/bloodWarrior/patient.enroll.listener';
+import { ChangeTransfusionDate } from './intentListeners/bloodWarrior/change.tf.date.listener';
+import { kerotoplastyConditionIdentificationListener } from './intentListeners/kerotoplasty.bot.condition.Identification.listener';
+import { kerotoplastyLocationListener } from './intentListeners/kerotoplasty.find.nearest.location.listener';
+import { BloodWarriorMenu } from './intentListeners/bloodWarrior/menu.listener';
+import { RaiseBloodDonationRequest } from './intentListeners/bloodWarrior/raise.request.listener';
+import { CustomWelcomeIntent } from './intentListeners/custom.welcome.listener';
+import { CustomLanguageListener } from './intentListeners/custom.language.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -45,6 +61,8 @@ export class IntentRegister {
 
         IntentEmitter.registerListener('covid-resources', getCovidResources1s);
 
+        IntentEmitter.registerListener('Custom Welcome Intent', CustomWelcomeIntent);
+        IntentEmitter.registerListener('Custom Language - custom', CustomLanguageListener);
         IntentEmitter.registerListener('Change Language - custom', LanguageChangeListener);
 
         IntentEmitter.registerListener('life - no', getSymptomAssessment);
@@ -61,6 +79,10 @@ export class IntentRegister {
 
         IntentEmitter.registerListener("RequestLiveAgent", RequestLiveAgent);
 
+        IntentEmitter.registerListener("OptOut", WhatsAppTemplateOpting);
+
+        IntentEmitter.registerListener("OptIn", WhatsAppTemplateOpting);
+        
         IntentEmitter.registerListener('Risk.assessment.info', getRiskAssessmentInfo);
         IntentEmitter.registerListener('risk.assessment.info-no', getRiskAssessmentInfo);
 
@@ -69,6 +91,16 @@ export class IntentRegister {
         //Intents for calorie information
         IntentEmitter.registerListener('foodItemsDetails', calorieDetection);
         IntentEmitter.registerListener('calorie.report.creation', calorieReport);
+        IntentEmitter.registerListener('CalorieNegativeFeedback - yes', CalorieUpdate);
+
+        //Intents for Post Operative Eye Care Symptom tracking
+        IntentEmitter.registerListener('userDetails', eyeSymptomAssessment);
+        IntentEmitter.registerListener('DifficultLookingatLight',eyeSymptomAssessment);
+        IntentEmitter.registerListener('DropInVision',eyeSymptomAssessment);
+        IntentEmitter.registerListener('IncreasedRedness',eyeSymptomAssessment);
+        IntentEmitter.registerListener('WateringFromOperatedEye',eyeSymptomAssessment);
+        IntentEmitter.registerListener('whiteSpot',eyeSymptomAssessment);
+
         IntentEmitter.registerListener('diabetes', getRiskAssessmentFollowup);
         IntentEmitter.registerListener('cancer', getRiskAssessmentFollowup);
         IntentEmitter.registerListener('heart', getRiskAssessmentFollowup);
@@ -100,7 +132,22 @@ export class IntentRegister {
         IntentEmitter.registerListener('HowYouFeel - worse', AppSymptomListener.handleIntent);
         IntentEmitter.registerListener('HowYouFeel - worse - custom - worse', AppSymptomListener.handleIntent);
         IntentEmitter.registerListener('Medication.Add.InApp', AppMedicationListener.handleIntent);
-      
+        IntentEmitter.registerListener('Registration', MaternityCareplanListener.handleIntent );
+        IntentEmitter.registerListener('RegistrationAgree', MaternityCareplanListener.handleEnrollIntent );
+        IntentEmitter.registerListener('Welcome.BloodWarrior', BloodWarriorWelcome);
+        IntentEmitter.registerListener('BloodWarrior_Patient', BloodWarriorPatient);
+        IntentEmitter.registerListener('BloodWarrior_Donor', BloodWarriorDonor);
+        IntentEmitter.registerListener('New_User', BloodWarriorNewUser);
+        IntentEmitter.registerListener('Patient_Confirm', BloodWarriorPatientEnroll);
+        IntentEmitter.registerListener('Change_TF_Date_Input', ChangeTransfusionDate);
+
+        IntentEmitter.registerListener('conditionIdentification', kerotoplastyConditionIdentificationListener);
+        IntentEmitter.registerListener('criticalCondition', kerotoplastyLocationListener);
+        IntentEmitter.registerListener('hyperCriticalCondition', kerotoplastyLocationListener);
+        IntentEmitter.registerListener('normalCondition', kerotoplastyLocationListener);
+        IntentEmitter.registerListener('Menu', BloodWarriorMenu);
+        IntentEmitter.registerListener('Raise_Request_Yes', RaiseBloodDonationRequest);
+
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
 

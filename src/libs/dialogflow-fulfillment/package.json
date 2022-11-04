@@ -39,7 +39,7 @@
   ],
   "dependencies": {
     "debug": "^3.1.0",
-    "lodash": "^4.17.11"
+    "lodash": "^4.17.12"
   },
   "peerDependencies": {
     "actions-on-google": "^2.5.0"

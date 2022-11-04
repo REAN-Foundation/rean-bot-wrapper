@@ -3,7 +3,9 @@ import { getRequestOptions } from '../utils/helper';
 import needle from "needle";
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { container,  } from 'tsyringe';
+import { getHeaders } from '../services/biometrics/get.headers';
 import { Dose,Duration,MedicationAdministrationRoutes,MedicationDomainModel,MedicineName } from '../refactor/interface/medication.interface';
+import { getPhoneNumber } from './needle.service';
 
 // eslint-disable-next-line max-len
 const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
@@ -15,25 +17,8 @@ export class GetPatientInfoService{
             try {
                 Logger.instance().log(`Get Patient Info API ${clientEnvironmentProviderService.getClientName()}`);
 
-                const b = eventObj.body.session;
-                let phoneNumber = b.split("/", 5)[4];
-                if (!phoneNumber) {
-                    reject("Missing required parameter PhoneNumber");
-                    return;
-                }
-
-                if (phoneNumber.length > 10 && phoneNumber.indexOf('+') === -1) {
-                    phoneNumber = '+' + phoneNumber;
-                }
-
-                // adding "-" if phone number does not contain one.
-                const ten_digit = phoneNumber.substr(phoneNumber.length - 10);
-                const country_code = phoneNumber.split(ten_digit)[0];
-                if (phoneNumber.length > 10 && phoneNumber.indexOf('-') === -1) {
-                    phoneNumber = `${country_code}-${ten_digit}`;
-                }
-                const options = getRequestOptions();
-                options.headers["x-api-key"] = clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY");
+                const phoneNumber = await getPhoneNumber(eventObj);
+                const options = getHeaders();
                 const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
                 const apiUrl = `${ReanBackendBaseUrl}patients/search?phone=${encodeURIComponent(phoneNumber)}`;
                 console.log("apiUrl", apiUrl);

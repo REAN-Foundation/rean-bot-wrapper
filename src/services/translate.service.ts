@@ -2,7 +2,7 @@
 /* eslint-disable max-len */
 import { v2 } from '@google-cloud/translate';
 import { UserLanguage } from './set.language';
-import { IdialogflowResponseFormat } from '../refactor/interface/message.interface';
+import { DialogflowResponseFormat } from './response.format/dialogflow.response.format';
 
 let detected_language = 'en';
 let dialogflow_language = "en-US";
@@ -17,7 +17,7 @@ export class translateService{
     };
 
     detectLanguage = async (message:string) => {
-        console.log("detect the language of: ", message);
+
         //this is a temp solution for detecting the "hindi" and "Hindi" as english as Google translate detects it as Filipino
         if (message === "Hindi" || message === "hindi" ) {
             return detected_language = "en";
@@ -33,10 +33,9 @@ export class translateService{
         }
     }
 
-    translateMessage = async (message:string, sessionId) => {
-        console.log("entered the translateMessage of translateService JJJJJJJJJJJ", message);
+    translateMessage = async (messageType, message:string, sessionId) => {
         const translate = new v2.Translate(this.obj);
-        const languageForSession = await new UserLanguage().setLanguageForSession(sessionId, message);
+        const languageForSession = await new UserLanguage().setLanguageForSession(messageType, sessionId, message);
         console.log("languageForSession", languageForSession);
         // if (languageForSession === "change language") {
         //     const message = "change language";
@@ -52,27 +51,44 @@ export class translateService{
         }
 
         console.log("exited the translate msg");
-        console.log({ message, languageForSession });
         return { message, languageForSession };
     };
 
-    processdialogflowmessage = async (message: IdialogflowResponseFormat, detected_language: string) => {
+    processdialogflowmessage = async (messageFromDialogflow: DialogflowResponseFormat, detected_language: string) => {
         const translate = new v2.Translate(this.obj);
-        console.log("entered the processdialogflowmessage of translateService JJJJJJJJJJJ", message);
+        // console.log("entered the processdialogflowmessage of translateService JJJJJJJJJJJ", message);
         // eslint-disable-next-line init-declarations
         let translatedResponse;
-        if (message.parse_mode) {
-            translatedResponse = message.text;
+        const parse_mode = messageFromDialogflow.getParseMode();
+        const text = messageFromDialogflow.getText();
+        if (parse_mode) {
+            translatedResponse = text;
         }
         else {
-            translatedResponse = await this.translateResponse(translate, message.text, detected_language);
+            translatedResponse = await this.translateResponse(translate, text, detected_language);
         }
         console.log("translatedResponse",translatedResponse);
         return translatedResponse;
     };
 
+    translatePushNotifications = async ( message: string, phoneNumber: string) => {
+        console.log(`entered the translation of push notification JJJJJJJJJJJ`);
+        try {
+            const translate = new v2.Translate(this.obj);
+            let languageForSession = await new UserLanguage().getPreferredLanguageofSession(phoneNumber);
+            languageForSession = languageForSession !== 'null' ? languageForSession : 'en';
+            console.log("languageForSession", languageForSession);
+            const responseMessage = this.translateResponse(translate, [message], languageForSession);
+            return responseMessage;
+
+        } catch (e) {
+            console.log("catch translate", e);
+            return "en";
+        }
+    };
+
     translateResponse = async (translate, responseMessage: string[], detected_language: string) => {
-        console.log(`entered the translateResponse of translateService JJJJJJJJJJJ ${responseMessage} to language ${detected_language}`);
+        console.log(`entered the translateResponse of translateService JJJJJJJJJJJ`);
         try {
             if (detected_language !== 'en') {
                 const [translation] = await translate.translate(responseMessage[0], { to: detected_language, format: "text" });
