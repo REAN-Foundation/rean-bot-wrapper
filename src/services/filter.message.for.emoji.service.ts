@@ -10,9 +10,13 @@ export class EmojiFilter{
     async checkForEmoji(message: string) {
         console.log("inside checkForEmoji",message);
         const regex = emojiRegex();
-        const emojiObj = JSON.parse(this.clientEnvironmentProviderService.getClientEnvironmentVariable("EMOJI"));
-        console.log("emojiObj", emojiObj);
-
+        let emojiObj;
+        if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("EMOJI")){
+            emojiObj = JSON.parse(this.clientEnvironmentProviderService.getClientEnvironmentVariable("EMOJI"));
+        }
+        else {
+            emojiObj = JSON.parse(process.env.EMOJI);
+        }
         const emojiObjKeys = Object.keys(emojiObj);
         console.log("emojiKeys", emojiObjKeys);
         let filteredMessage: string = message;
