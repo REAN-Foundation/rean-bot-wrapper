@@ -78,5 +78,15 @@ export class ChatMessage extends Model implements IchatMessage {
         type : DataType.STRING(1024)
     })
         imageUrl: string;
+    
+    @Column({
+        type : DataType.STRING(1024)
+    })
+        whatsappResponseMessageId: string;
+        
+    @Column({
+        type : DataType.STRING(1024)
+    })
+        telegramResponseMessageId : string
 
 }

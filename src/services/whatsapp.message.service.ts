@@ -15,6 +15,7 @@ import { clientAuthenticator } from './clientAuthenticator/client.authenticator.
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import needle from 'needle';
 import { getRequestOptions } from '../utils/helper';
+import { ChatMessage } from '../models/chat.message.model';
 
 @autoInjectable()
 @singleton()
@@ -171,7 +172,7 @@ export class WhatsappMessageService implements platformServiceInterface {
     };
 
     async postRequestMessages(postdata) {
-        return new Promise(async(resolve,reject) =>{
+        return new Promise<any>(async(resolve,reject) =>{
             try {
                 const options = getRequestOptions();
                 options.headers['Content-Type'] = 'application/json';
@@ -180,6 +181,7 @@ export class WhatsappMessageService implements platformServiceInterface {
                 const path = '/v1/messages';
                 const apiUrl = "https://" + hostname + path;
                 console.log("apiuri",apiUrl);
+                // eslint-disable-next-line init-declarations
                 await needle.post(apiUrl, postdata, options, function(err, resp) {
                     if (err) {
                         console.log("err", err);
@@ -188,6 +190,7 @@ export class WhatsappMessageService implements platformServiceInterface {
                     console.log("resp", resp.body);
                     resolve(resp.body);
                 });
+                
             }
             catch (error) {
                 console.log("error", error);
@@ -309,7 +312,13 @@ export class WhatsappMessageService implements platformServiceInterface {
                 }
                 postData.type = "text";
                 const postDataString = JSON.stringify(postData);
-                resolve(await this.postRequestMessages(postDataString));
+                const needleResp = await this.postRequestMessages(postDataString);
+                const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: postData.to } });
+                const id = respChatMessage[respChatMessage.length - 1].id;
+                await ChatMessage.update({ whatsappResponseMessageId: needleResp.messages[0].id }, { where: { id: id } } )
+                    .then(() => { console.log("updated"); })
+                    .catch(error => console.log("error on update", error));
+                resolve(needleResp);
             }
         });
     };

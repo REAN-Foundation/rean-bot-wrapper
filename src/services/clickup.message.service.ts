@@ -112,7 +112,7 @@ export class ClickUpMessageService implements platformServiceInterface {
         const data = await UserFeedback.findOne({ where: { taskID: requestBody.task_id } });
         console.log("data", data);
         const filterText = (requestBody.history_items[0].comment.text_content).replace(tag, '');
-        const textToUser = `Our Experts have responded to your query. \nYour Query: ${data.message} \nExpert: ${filterText}`;
+        const textToUser = `Our Experts have responded to your query. \nYour Query: ${data.messageContent} \nExpert: ${filterText}`;
         console.log("textToUser", textToUser);
         await this.sendCustomMessage(data.channel, data.userId, textToUser);
     }

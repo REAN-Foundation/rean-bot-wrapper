@@ -23,7 +23,7 @@ export class UserFeedback extends Model implements feedbackmessage {
     @Column({
         type : DataType.TEXT
     })
-        message: string;
+        messageContent: string;
 
     @Column({
         type : DataType.STRING

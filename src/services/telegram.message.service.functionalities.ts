@@ -99,17 +99,20 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
     inputMessageFormat (message){
         console.log("the message", message);
         const response_message: Imessage = {
-            name            : message.from.first_name,
-            platform        : "Telegram",
-            chat_message_id : message.message_id,
-            direction       : "In",
-            messageBody     : null,
-            imageUrl        : null,
-            sessionId       : message.chat.id.toString(),
-            replyPath       : null,
-            latlong         : null,
-            type            : "text",
-            intent          : null,
+            name                      : message.from.first_name,
+            platform                  : "Telegram",
+            chat_message_id           : message.message_id,
+            direction                 : "In",
+            messageBody               : null,
+            imageUrl                  : null,
+            sessionId                 : message.chat.id.toString(),
+            replyPath                 : null,
+            latlong                   : null,
+            type                      : "text",
+            intent                    : null,
+            whatsappResponseMessageId : null,
+            contextId                 : message.reply_to_message ? message.reply_to_message.message_id : null,
+            telegramResponseMessageId : null
         };
         return response_message;
     }
