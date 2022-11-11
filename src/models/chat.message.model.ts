@@ -2,11 +2,13 @@ import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, ForeignKey, 
 import { IchatMessage } from '../refactor/interface/message.interface';
 import { ChatSession } from './chat.session';
 
-@Table({
+@Table(
+    {
     timestamps : true,
     modelName  : 'ChatMessage',
     tableName  : 'chat_message'
-})
+    }
+)
 export class ChatMessage extends Model implements IchatMessage {
 
     @AutoIncrement

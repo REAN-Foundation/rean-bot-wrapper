@@ -1,11 +1,13 @@
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from 'sequelize-typescript';
 import { feedbackmessage } from '../refactor/interface/message.interface';
 
-@Table({
+@Table(
+    {
     timestamps : true,
     modelName  : 'UserFeedback',
     tableName  : 'user_feedback'
-})
+    }
+)
 export class UserFeedback extends Model implements feedbackmessage {
 
     @AutoIncrement
