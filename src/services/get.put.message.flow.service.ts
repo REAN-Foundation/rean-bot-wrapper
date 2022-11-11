@@ -117,16 +117,6 @@ export class MessageFlow{
         }
     }
 
-    // async getPayload(processedResponse){
-    //     let payload = null;
-    //     if (processedResponse.message_from_dialoglow.result.fulfillmentMessages.length > 1) {
-    //         if (processedResponse.message_from_dialoglow.result.fulfillmentMessages[1].payload !== undefined) {
-    //             payload = processedResponse.message_from_dialoglow.result.fulfillmentMessages[1].payload;
-    //         }
-    //     }
-    //     return payload;
-    // }
-
     async replyInAudio(message: Imessage, response_format: Iresponse) {
         if (message.type === "voice") {
 
@@ -189,17 +179,20 @@ export class MessageFlow{
                 chatSessionId = chatSessionModel.autoIncrementalID;
             }
             const chatMessageObj = {
-                chatSessionID  : chatSessionId,
-                name           : messagetoDialogflow.name,
-                platform       : messagetoDialogflow.platform,
-                direction      : messagetoDialogflow.direction,
-                messageType    : messagetoDialogflow.type,
-                messageContent : messagetoDialogflow.messageBody,
-                messageId      : messagetoDialogflow.chat_message_id,
-                imageContent   : null,
-                imageUrl       : messagetoDialogflow.imageUrl,
-                userPlatformID : messagetoDialogflow.sessionId,
-                intent         : null
+                chatSessionID             : chatSessionId,
+                name                      : messagetoDialogflow.name,
+                platform                  : messagetoDialogflow.platform,
+                direction                 : messagetoDialogflow.direction,
+                messageType               : messagetoDialogflow.type,
+                messageContent            : messagetoDialogflow.messageBody,
+                messageId                 : messagetoDialogflow.chat_message_id,
+                imageContent              : null,
+                imageUrl                  : messagetoDialogflow.imageUrl,
+                userPlatformID            : messagetoDialogflow.sessionId,
+                intent                    : null,
+                whatsappResponseMessageId : null,
+                contextId                 : messagetoDialogflow.contextId,
+                telegramResponseMessageId : null
             };
 
             // await this.sequelizeClient.connect();

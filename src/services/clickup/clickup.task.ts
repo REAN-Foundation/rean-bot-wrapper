@@ -21,7 +21,7 @@ export class ClickUpTask{
         const CLICKUP_AUTHENTICATION = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
         options.headers["Authorization"] =  CLICKUP_AUTHENTICATION;
         options.headers["Content-Type"] = `application/json`;
-        const topic = rdsData[rdsData.length - 1].dataValues.message;
+        const topic = rdsData[rdsData.length - 1].dataValues.messageContent;
         const obj = {
             "name"            : topic,
             "status"          : "TO DO",
