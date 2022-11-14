@@ -81,7 +81,7 @@ export class SlackMessageService implements platformServiceInterface {
                 }
                 else {
                     console.log("child message HH off");
-                    const textToUser = `Our Experts have responded to your query. \nYour Query: ${data.message} \nExpert: ${message.event.text}`;
+                    const textToUser = `Our Experts have responded to your query. \nYour Query: ${data.messageContent} \nExpert: ${message.event.text}`;
                     await this.sendCustomMessage(channel, contact, textToUser);
                 }
                 

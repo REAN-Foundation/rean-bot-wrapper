@@ -42,7 +42,7 @@ export class snehaMessagePlatformService implements platformServiceInterface{
 
         if (msg.type === "text") {
             const message = msg.message; //+ ` PhoneNumber is ${phoneNumber}`;
-            returnMsg = { name: null,platform: "Sneha_Support",chat_message_id: null, direction: "In",messageBody: message,imageUrl: null, sessionId: phone,replyPath: phone,latlong: null,type: 'text' , intent: null};
+            returnMsg = { name: null,platform: "Sneha_Support",chat_message_id: null, direction: "In",messageBody: message,imageUrl: null, sessionId: phone,replyPath: phone,latlong: null,type: 'text' , intent: null, whatsappResponseMessageId: null, contextId: null, telegramResponseMessageId : null};
             return returnMsg;
         }
     }
