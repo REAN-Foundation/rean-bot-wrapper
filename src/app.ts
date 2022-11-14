@@ -60,6 +60,7 @@ export default class Application {
                         else {
                             process.env[k.toUpperCase()] = ele[k];
                         }
+                        console.log("loading this key", k.toUpperCase());
                     }
                 }
                 else {
