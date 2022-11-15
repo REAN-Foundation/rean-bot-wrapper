@@ -41,6 +41,7 @@ import { RaiseBloodDonationRequest } from './intentListeners/bloodWarrior/raise.
 import { CustomWelcomeIntent } from './intentListeners/custom.welcome.listener';
 import { CustomLanguageListener } from './intentListeners/custom.language.listener';
 import { BloodWarriorVolunteer } from './intentListeners/bloodWarrior/volunteer.listener';
+import { BloodBridgeStatusListener } from './intentListeners/bloodWarrior/blood.bridge.status.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -149,6 +150,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('Menu', BloodWarriorMenu);
         IntentEmitter.registerListener('Raise_Request_Yes', RaiseBloodDonationRequest);
         IntentEmitter.registerListener('BloodWarrior_Volunteer', BloodWarriorVolunteer);
+        IntentEmitter.registerListener('BloodBridgeStatus', BloodBridgeStatusListener);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);

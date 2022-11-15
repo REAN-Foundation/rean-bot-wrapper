@@ -63,6 +63,7 @@ export class UserLanguage {
             const userLanguageTableResponse = await ChatSession.findAll({ where: { userPlatformID: sessionId } });
             console.log("userLanguageTableResponse",userLanguageTableResponse);
             try {
+                console.log(`Push notification language table response length ${userLanguageTableResponse.length}`);
                 if (userLanguageTableResponse.length > 0 && userLanguageTableResponse[userLanguageTableResponse.length - 1].preferredLanguage !== null) {
                     if (userLanguageTableResponse[userLanguageTableResponse.length - 1].sessionOpen === "true") {
                         resolve(userLanguageTableResponse[userLanguageTableResponse.length - 1].preferredLanguage);
