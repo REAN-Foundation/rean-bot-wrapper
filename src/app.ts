@@ -138,6 +138,16 @@ export default class Application {
             //Start listening
             await this.listen();
 
+            //time of restart
+            const date_ob = new Date();
+            const date = ("0" + date_ob.getDate()).slice(-2);
+            const month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
+            const year = date_ob.getFullYear();
+            const hours = date_ob.getHours();
+            const minutes = date_ob.getMinutes();
+            const seconds = date_ob.getSeconds();
+            console.log("time of restart", year + "-" + month + "-" + date + " " + hours + ":" + minutes + ":" + seconds);
+
         }
         catch (error) {
             Logger.instance().log('An error occurred while starting reancare-api service.' + error.message);
