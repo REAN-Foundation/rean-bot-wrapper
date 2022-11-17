@@ -69,7 +69,7 @@ export class FeedbackService implements feedbackInterface {
                     
                     const preferredSupportChannel = this.clientEnvironmentProviderService.getClientEnvironmentVariable("SUPPORT_CHANNEL");
                     if (preferredSupportChannel === "ClickUp"){
-                        await this.clickuptask.createTask(response);
+                        await this.clickuptask.createTask(response, responseUserFeedback);
                     }
                     else {
                         await this.slackMessageService.postMessage(response);
