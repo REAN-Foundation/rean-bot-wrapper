@@ -13,7 +13,7 @@ export class ClickUpTask{
 
     constructor(private clientEnvironmentProviderService?: ClientEnvironmentProviderService) { }
 
-    async createTask(rdsData,imageLink:string = null){
+    async createTask(rdsData,responseUserFeedback,imageLink:string = null){
         const listID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_LIST_ID");
         const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
         const createTaskUrl = `https://api.clickup.com/api/v2/list/${listID}/task`;
@@ -42,10 +42,10 @@ export class ClickUpTask{
         const response = await needle("post", createTaskUrl, obj, options);
 
         // console.log("response status", response.statusCode);
-        // console.log("body", response.body);
-        const objID = rdsData[rdsData.length - 1].dataValues.id;
+        console.log("body", response.body.id);
+        const objID = responseUserFeedback[responseUserFeedback.length - 1].dataValues.id;
 
-        // console.log("objId", objID);
+        console.log("objId", objID);
         await UserFeedback.update({ taskID: response.body.id }, { where: { id: objID } })
             .then(() => { console.log("updated"); })
             .catch(error => console.log("error on update", error));
