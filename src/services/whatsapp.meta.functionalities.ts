@@ -97,6 +97,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(msg.messages[0].interactive.button_reply.title);
         const returnMessage = this.inputMessageFormat(msg);
         returnMessage.messageBody = emojiFilteredMessage;
+        returnMessage.intent = msg.messages[0].interactive.button_reply.id;
         return returnMessage;
     }
 
