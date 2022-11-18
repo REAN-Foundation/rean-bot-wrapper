@@ -76,6 +76,7 @@ export class translateService{
             const translate = new v2.Translate(this.obj);
             let languageForSession = await new UserLanguage().getPreferredLanguageofSession(phoneNumber);
             console.log("languageForSession before", languageForSession);
+
             languageForSession = languageForSession !== 'null' ? languageForSession : 'en';
             console.log("languageForSession after", languageForSession);
             const responseMessage = this.translateResponse(translate, [message], languageForSession);
