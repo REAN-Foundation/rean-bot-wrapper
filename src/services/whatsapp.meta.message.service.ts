@@ -345,12 +345,12 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
 
     SendPayloadMessageMeta = async (contact: number | string, imageLink: string, payloadContent: any) => {
         return new Promise(async(resolve) => {
-            const listOfPostData = [];
+            const listOfPostDataMeta = [];
             for (let i = 0; i < payloadContent.length; i++){
                 const postDataMeta = this.postDataFormatWhatsapp(contact);
-                const payloadContentMessageType = payloadContent[i].fields.messagetype.stringValue;
-                if ( payloadContentMessageType === "interactive-buttons"){
-                    const buttons = [];
+                const payloadContentMessageTypeMeta = payloadContent[i].fields.messagetype.stringValue;
+                if ( payloadContentMessageTypeMeta === "interactive-buttons"){
+                    const buttonsMeta = [];
                     const numberOfButtons = (payloadContent[i].fields.buttons.listValue.values).length;
                     for (let j = 0; j < numberOfButtons; j++){
                         const id = payloadContent[i].fields.buttons.listValue.values[j].structValue.fields.reply.structValue.fields.id.stringValue;
@@ -362,7 +362,7 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
                                 "title" : title
                             }
                         };
-                        buttons.push(tempObject);
+                        buttonsMeta.push(tempObject);
                     }
                     postDataMeta["interactive"] = {
                         "type" : "button",
@@ -370,11 +370,11 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
                             "text" : payloadContent[i].fields.message.stringValue
                         },
                         "action" : {
-                            "buttons" : buttons
+                            "buttons" : buttonsMeta
                         }
                     };
                     postDataMeta.type = "interactive";
-                    listOfPostData.push(postDataMeta);
+                    listOfPostDataMeta.push(postDataMeta);
                 }
                 else {
                     console.log("here in text",i);
@@ -384,14 +384,12 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
                         "body" : payloadMessageMeta
                     };
                     postDatatemp.type = "text";
-                    listOfPostData.push(postDatatemp);
+                    listOfPostDataMeta.push(postDatatemp);
                 }
             }
-
-            for (let i = 0; i < listOfPostData.length; i++){
-                await this.postRequestMessages(listOfPostData[i]);
+            for (let i = 0; i < listOfPostDataMeta.length; i++){
+                await this.postRequestMessages(listOfPostDataMeta[i]);
             }
-
         });
     };
 }
