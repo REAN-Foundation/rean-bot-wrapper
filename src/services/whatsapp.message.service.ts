@@ -302,10 +302,11 @@ export class WhatsappMessageService implements platformServiceInterface {
                 postData.type = "interactive";
                 const postDataString = JSON.stringify(postData);
                 resolve(await this.postRequestMessages(postDataString));
-            }
-            else if (messageType === "custom_payload") {
-                const payloadContent = this.handleMessagetypePayload.getPayloadContent(payload);
-                this.SendPayloadMessage(contact, imageLink, payloadContent);
+                
+            // }
+            // else if (messageType === "custom_payload") {
+            //     const payloadContent = this.handleMessagetypePayload.getPayloadContent(payload);
+            //     this.SendPayloadMessage(contact, imageLink, payloadContent);
             }
             else {
                 postData["text"] = {
@@ -414,91 +415,6 @@ export class WhatsappMessageService implements platformServiceInterface {
             messageText         : requestBody.message
         };
         return response_message;
-
-        // return response_message;
-    }
-
-    SendPayloadMessage = async (contact: number | string, imageLink: string, payloadContent: any) => {
-        return new Promise(async(resolve) => {
-            const listOfPostData = [];
-            for (let i = 0; i < payloadContent.length; i++){
-                const postData = this.postDataFormatWhatsapp(contact);
-                const payloadContentMessageType = payloadContent[i].fields.messagetype.stringValue;
-                if ( payloadContentMessageType === "interactive-buttons"){
-                    const buttons = [];
-                    const numberOfButtons = (payloadContent[i].fields.buttons.listValue.values).length;
-                    for (let j = 0; j < numberOfButtons; j++){
-                        const id = payloadContent[i].fields.buttons.listValue.values[j].structValue.fields.reply.structValue.fields.id.stringValue;
-                        const title = payloadContent[i].fields.buttons.listValue.values[j].structValue.fields.reply.structValue.fields.title.stringValue;
-                        const tempObject = {
-                            "type"  : "reply",
-                            "reply" : {
-                                "id"    : id,
-                                "title" : title
-                            }
-                        };
-                        buttons.push(tempObject);
-                    }
-                    postData["interactive"] = {
-                        "type" : "button",
-                        "body" : {
-                            "text" : payloadContent[i].fields.message.stringValue
-                        },
-                        "action" : {
-                            "buttons" : buttons
-                        }
-                    };
-                    postData.type = "interactive";
-                    listOfPostData.push(postData);
-                }
-                else {
-                    console.log("here in text",i);
-                    const payloadMessage = payloadContent[i].fields.content;
-                    // for (let i = 0; i<payloadMessage.length; i++){
-                    const postDatatemp = this.postDataFormatWhatsapp(contact);
-                    postDatatemp["text"] = {
-                        "body" : payloadMessage
-                    };
-                    postDatatemp.type = "text";
-                    listOfPostData.push(postDatatemp);
-                    // }
-                    // console.log("listOfPostData text", listOfPostData);
-                }
-            }
-
-            for (let i = 0; i < listOfPostData.length; i++){
-                // console.log("list", listOfPostData[i]);
-                // await this.postRequestMessages(listOfPostData[i], true);
-                await this.needlePost(listOfPostData[i]);
-            }
-
-        });
-    };
-
-    async needlePost(postData) {
-        return new Promise(async(resolve,reject) =>{
-            try {
-                const options = getRequestOptions();
-                options.headers['Content-Type'] = 'application/json';
-                options.headers['D360-Api-Key'] = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY");
-                const hostname = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST");
-                const path = '/v1/messages';
-                const apiUrl = "https://" + hostname + path;
-                console.log("apiuri",apiUrl);
-                await needle.post(apiUrl, postData, options, function(err, resp) {
-                    if (err) {
-                        console.log("err", err);
-                        reject(err);
-                    }
-                    // console.log("resp", resp.body);
-                    resolve(resp.body);
-                });
-            }
-            catch (error) {
-                console.log("error", error);
-                reject(error.message);
-            }
-        });
     }
 
 }
