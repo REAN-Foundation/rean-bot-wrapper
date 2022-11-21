@@ -227,7 +227,7 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
         }
         else if (messageType === "custom_payload") {
             const payloadContent = this.handleMessagetypePayload.getPayloadContent(payload);
-            this.SendPayloadMessage(contact, imageLink, payloadContent);
+            this.SendPayloadMessageMeta(contact, imageLink, payloadContent);
         }
         else {
             postDataMeta["text"] = {
@@ -343,11 +343,11 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
         // return response_message;
     }
 
-    SendPayloadMessage = async (contact: number | string, imageLink: string, payloadContent: any) => {
+    SendPayloadMessageMeta = async (contact: number | string, imageLink: string, payloadContent: any) => {
         return new Promise(async(resolve) => {
             const listOfPostData = [];
             for (let i = 0; i < payloadContent.length; i++){
-                const postData = this.postDataFormatWhatsapp(contact);
+                const postDataMeta = this.postDataFormatWhatsapp(contact);
                 const payloadContentMessageType = payloadContent[i].fields.messagetype.stringValue;
                 if ( payloadContentMessageType === "interactive-buttons"){
                     const buttons = [];
@@ -364,7 +364,7 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
                         };
                         buttons.push(tempObject);
                     }
-                    postData["interactive"] = {
+                    postDataMeta["interactive"] = {
                         "type" : "button",
                         "body" : {
                             "text" : payloadContent[i].fields.message.stringValue
@@ -373,8 +373,8 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
                             "buttons" : buttons
                         }
                     };
-                    postData.type = "interactive";
-                    listOfPostData.push(postData);
+                    postDataMeta.type = "interactive";
+                    listOfPostData.push(postDataMeta);
                 }
                 else {
                     console.log("here in text",i);
@@ -387,7 +387,7 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
                     };
                     postDatatemp.type = "text";
                     listOfPostData.push(postDatatemp);
-                    
+
                     // }
                     // console.log("listOfPostData text", listOfPostData);
                 }
@@ -402,21 +402,20 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
         });
     };
 
-    async needlePost(postData) {
+    async needlePost(postDataMeta) {
         return new Promise(async(resolve,reject) =>{
             try {
                 const options = getRequestOptions();
-                const token = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
+                const tokenMeta = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
                 options.headers['Content-Type'] = 'application/json';
-                options.headers['Authorization'] = `Bearer ${token}`;
-                const hostname = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
-                const phone_number_id = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_PHONE_NUMBER_ID");
-                const path = `/v15.0/${phone_number_id}/messages`;
-                const apiUrl = hostname + path;
-                console.log("apiuri",apiUrl);
-                const response = await needle("post", apiUrl, postData, options);
-                console.log(response.body);
-                resolve(response);
+                options.headers['Authorization'] = `Bearer ${tokenMeta}`;
+                const hostnameMeta = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
+                const phone_number_id_meta = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_PHONE_NUMBER_ID");
+                const path = `/v15.0/${phone_number_id_meta}/messages`;
+                const apiUrl_Meta = hostnameMeta + path;
+                const responseMeta = await needle("post", apiUrl_Meta, postDataMeta, options);
+                console.log(responseMeta.body);
+                resolve(responseMeta);
             }
             catch (error) {
                 console.log("error", error);
