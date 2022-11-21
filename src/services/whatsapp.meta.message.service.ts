@@ -378,50 +378,20 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
                 }
                 else {
                     console.log("here in text",i);
-                    const payloadMessage = payloadContent[i].fields.content;
-
-                    // for (let i = 0; i<payloadMessage.length; i++){
+                    const payloadMessageMeta = payloadContent[i].fields.content;
                     const postDatatemp = this.postDataFormatWhatsapp(contact);
                     postDatatemp["text"] = {
-                        "body" : payloadMessage
+                        "body" : payloadMessageMeta
                     };
                     postDatatemp.type = "text";
                     listOfPostData.push(postDatatemp);
-
-                    // }
-                    // console.log("listOfPostData text", listOfPostData);
                 }
             }
 
             for (let i = 0; i < listOfPostData.length; i++){
-                // console.log("list", listOfPostData[i]);
-                // await this.postRequestMessages(listOfPostData[i], true);
-                await this.needlePost(listOfPostData[i]);
+                await this.postRequestMessages(listOfPostData[i]);
             }
 
         });
     };
-
-    async needlePost(postDataMeta) {
-        return new Promise(async(resolve,reject) =>{
-            try {
-                const options = getRequestOptions();
-                const tokenMeta = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
-                options.headers['Content-Type'] = 'application/json';
-                options.headers['Authorization'] = `Bearer ${tokenMeta}`;
-                const hostnameMeta = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
-                const phone_number_id_meta = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_PHONE_NUMBER_ID");
-                const path = `/v15.0/${phone_number_id_meta}/messages`;
-                const apiUrl_Meta = hostnameMeta + path;
-                const responseMeta = await needle("post", apiUrl_Meta, postDataMeta, options);
-                console.log(responseMeta.body);
-                resolve(responseMeta);
-            }
-            catch (error) {
-                console.log("error", error);
-                reject(error.message);
-            }
-        });
-    }
-
 }
