@@ -379,6 +379,7 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
                 else {
                     console.log("here in text",i);
                     const payloadMessage = payloadContent[i].fields.content;
+
                     // for (let i = 0; i<payloadMessage.length; i++){
                     const postDatatemp = this.postDataFormatWhatsapp(contact);
                     postDatatemp["text"] = {
@@ -386,6 +387,7 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
                     };
                     postDatatemp.type = "text";
                     listOfPostData.push(postDatatemp);
+                    
                     // }
                     // console.log("listOfPostData text", listOfPostData);
                 }
@@ -404,20 +406,17 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
         return new Promise(async(resolve,reject) =>{
             try {
                 const options = getRequestOptions();
+                const token = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
                 options.headers['Content-Type'] = 'application/json';
-                options.headers['D360-Api-Key'] = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY");
-                const hostname = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST");
-                const path = '/v1/messages';
-                const apiUrl = "https://" + hostname + path;
+                options.headers['Authorization'] = `Bearer ${token}`;
+                const hostname = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
+                const phone_number_id = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_PHONE_NUMBER_ID");
+                const path = `/v15.0/${phone_number_id}/messages`;
+                const apiUrl = hostname + path;
                 console.log("apiuri",apiUrl);
-                await needle.post(apiUrl, postData, options, function(err, resp) {
-                    if (err) {
-                        console.log("err", err);
-                        reject(err);
-                    }
-                    // console.log("resp", resp.body);
-                    resolve(resp.body);
-                });
+                const response = await needle("post", apiUrl, postData, options);
+                console.log(response.body);
+                resolve(response);
             }
             catch (error) {
                 console.log("error", error);
