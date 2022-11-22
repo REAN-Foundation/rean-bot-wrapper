@@ -16,6 +16,7 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 import needle from 'needle';
 import { getRequestOptions } from '../utils/helper';
 import { ChatMessage } from '../models/chat.message.model';
+import { HandleMessagetypePayload } from './handle.messagetype.payload';
 
 @autoInjectable()
 @singleton()
@@ -27,7 +28,8 @@ export class WhatsappMessageService implements platformServiceInterface {
         private awsS3manager?: AwsS3manager,
         private messageFunctionalities?: MessageFunctionalities,
         @inject("whatsapp.authenticator") private clientAuthenticator?: clientAuthenticator,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+        private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        private handleMessagetypePayload?: HandleMessagetypePayload){}
 
     handleMessage(msg: any, channel: string) {
         return this.messageFlow.checkTheFlow(msg, channel, this);
@@ -300,6 +302,11 @@ export class WhatsappMessageService implements platformServiceInterface {
                 postData.type = "interactive";
                 const postDataString = JSON.stringify(postData);
                 resolve(await this.postRequestMessages(postDataString));
+                
+            // }
+            // else if (messageType === "custom_payload") {
+            //     const payloadContent = this.handleMessagetypePayload.getPayloadContent(payload);
+            //     this.SendPayloadMessage(contact, imageLink, payloadContent);
             }
             else {
                 postData["text"] = {
@@ -408,8 +415,6 @@ export class WhatsappMessageService implements platformServiceInterface {
             messageText         : requestBody.message
         };
         return response_message;
-
-        // return response_message;
     }
 
 }
