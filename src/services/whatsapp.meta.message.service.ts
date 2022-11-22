@@ -16,6 +16,7 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 import needle from 'needle';
 import { getRequestOptions } from '../utils/helper';
 import util from "util";
+import { HandleMessagetypePayload } from './handle.messagetype.payload';
 
 @autoInjectable()
 @singleton()
@@ -26,7 +27,8 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
     constructor(@inject(delay(() => MessageFlow)) public messageFlow,
         private awsS3manager?: AwsS3manager,
         private messageFunctionalitiesmeta?: MessageFunctionalities,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+        private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        private handleMessagetypePayload?: HandleMessagetypePayload){}
 
     handleMessage(requestBody: any, channel: string) {
         return this.messageFlow.checkTheFlow(requestBody, channel, this);
@@ -223,6 +225,10 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
             const postDataString = JSON.stringify(postDataMeta);
             return await this.postRequestMessages(postDataString);
         }
+        else if (messageType === "custom_payload") {
+            const payloadContent = this.handleMessagetypePayload.getPayloadContent(payload);
+            this.SendPayloadMessageMeta(contact, imageLink, payloadContent);
+        }
         else {
             postDataMeta["text"] = {
                 "body" : message
@@ -337,4 +343,53 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
         // return response_message;
     }
 
+    SendPayloadMessageMeta = async (contact: number | string, imageLink: string, payloadContent: any) => {
+        return new Promise(async(resolve) => {
+            const listOfPostDataMeta = [];
+            for (let i = 0; i < payloadContent.length; i++){
+                const postDataMeta = this.postDataFormatWhatsapp(contact);
+                const payloadContentMessageTypeMeta = payloadContent[i].fields.messagetype.stringValue;
+                if ( payloadContentMessageTypeMeta === "interactive-buttons"){
+                    const buttonsMeta = [];
+                    const numberOfButtons = (payloadContent[i].fields.buttons.listValue.values).length;
+                    for (let j = 0; j < numberOfButtons; j++){
+                        const id = payloadContent[i].fields.buttons.listValue.values[j].structValue.fields.reply.structValue.fields.id.stringValue;
+                        const title = payloadContent[i].fields.buttons.listValue.values[j].structValue.fields.reply.structValue.fields.title.stringValue;
+                        const tempObject = {
+                            "type"  : "reply",
+                            "reply" : {
+                                "id"    : id,
+                                "title" : title
+                            }
+                        };
+                        buttonsMeta.push(tempObject);
+                    }
+                    postDataMeta["interactive"] = {
+                        "type" : "button",
+                        "body" : {
+                            "text" : payloadContent[i].fields.message.stringValue
+                        },
+                        "action" : {
+                            "buttons" : buttonsMeta
+                        }
+                    };
+                    postDataMeta.type = "interactive";
+                    listOfPostDataMeta.push(postDataMeta);
+                }
+                else {
+                    console.log("here in text",i);
+                    const payloadMessageMeta = payloadContent[i].fields.content;
+                    const postDatatemp = this.postDataFormatWhatsapp(contact);
+                    postDatatemp["text"] = {
+                        "body" : payloadMessageMeta
+                    };
+                    postDatatemp.type = "text";
+                    listOfPostDataMeta.push(postDatatemp);
+                }
+            }
+            for (let i = 0; i < listOfPostDataMeta.length; i++){
+                await this.postRequestMessages(listOfPostDataMeta[i]);
+            }
+        });
+    };
 }

@@ -12,8 +12,6 @@ import { CalorieDatabase } from '../models/calorie.db.model';
 @singleton()
 export class SequelizeClient {
 
-    private databaseConnectionPool = {}
-
     constructor(private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     public _sequelize: Sequelize = null;
@@ -21,9 +19,6 @@ export class SequelizeClient {
     public connect = async() => {
 
         const client = this.clientEnvironmentProviderService.getClientName();
-        if (this.databaseConnectionPool[client] != null) {
-            return;
-        }
         const dbName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DATA_BASE_NAME");
         const dbPassword = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DB_PASSWORD");
         const dbUser = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DB_USER_NAME");
@@ -57,7 +52,6 @@ export class SequelizeClient {
             })
             .catch(error => console.log("DB connection failed", error));
         await this._sequelize.sync({ alter: true });
-        this.databaseConnectionPool[client] = true;
     };
     
 }
