@@ -42,6 +42,8 @@ import { CustomWelcomeIntent } from './intentListeners/custom.welcome.listener';
 import { CustomLanguageListener } from './intentListeners/custom.language.listener';
 import { BloodWarriorVolunteer } from './intentListeners/bloodWarrior/volunteer.listener';
 import { BloodBridgeStatusListener } from './intentListeners/bloodWarrior/blood.bridge.status.listener';
+import { ChecklistDateValidation } from './intentListeners/bloodWarrior/checklist.date.validation.listener';
+import { RejectDonorRequest } from './intentListeners/bloodWarrior/reject.donor.request.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -151,6 +153,9 @@ export class IntentRegister {
         IntentEmitter.registerListener('Raise_Request_Yes', RaiseBloodDonationRequest);
         IntentEmitter.registerListener('BloodWarrior_Volunteer', BloodWarriorVolunteer);
         IntentEmitter.registerListener('BloodBridgeStatus', BloodBridgeStatusListener);
+        IntentEmitter.registerListener('Checklist_Yes_Date', ChecklistDateValidation);
+        IntentEmitter.registerListener('Reject_Donation_Request', RejectDonorRequest);
+        IntentEmitter.registerListener('Checklist_No', RejectDonorRequest);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
