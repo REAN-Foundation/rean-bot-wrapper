@@ -112,7 +112,7 @@ export class SlackMessageService implements platformServiceInterface {
 
     async postMessage(response) {
         const objID = response[response.length - 1].dataValues.id;
-        const topic = response[response.length - 1].dataValues.message;
+        const topic = response[response.length - 1].dataValues.messageContent;
         this.delayedInitialisation();
         const message = await this.client.chat.postMessage({ channel: this.channelID, text: topic });
         await UserFeedback.update({ ts: message.ts }, { where: { id: objID } })
