@@ -66,10 +66,11 @@ export class AwsS3manager{
                     const s3 = new AWS.S3(responseCredentials);
 
                     // Uploading files to the bucket
-                    s3.upload(params, async function (err, data) {
+                    s3.upload(params, async function (err) {
                         if (err) {
                             reject(err);
                         }
+
                         // console.log(`File uploaded successfully. ${data}`);
                         const location = process.env.CLOUD_FRONT_PATH + filename;
                         resolve(await new SignedUrls().getSignedUrl(location));
@@ -115,7 +116,7 @@ export class AwsS3manager{
     }
 
     async getFile (key) {
-        return new Promise<any>(async(resolve,reject) => {
+        return new Promise<any>(async(resolve) => {
             const responseCredentials: any = await this.getCrossAccountCredentials();
             const BUCKET_NAME = process.env.BUCKET_NAME;
             const s3 = new AWS.S3(responseCredentials);

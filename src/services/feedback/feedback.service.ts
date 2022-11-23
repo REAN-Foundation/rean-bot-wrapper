@@ -1,4 +1,5 @@
 /* eslint-disable max-len */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { feedbackInterface } from './feedback.interface';
 import { autoInjectable, container } from 'tsyringe';
 import { SlackMessageService } from '../slack.message.service';
@@ -27,6 +28,7 @@ export class FeedbackService implements feedbackInterface {
             try {
                 const channel = payload.source;
                 const userId = payload.userId;
+                
                 // const contextId = payload.contextId;
                 const client_name = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
                 const listOfUserRequestdata = await ChatMessage.findAll({ where: { userPlatformID: userId } });

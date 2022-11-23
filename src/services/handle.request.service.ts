@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { DialogflowResponseService } from './dialogflow.response.service';
@@ -19,6 +20,7 @@ export class handleRequestservice{
 
     async handleUserRequest (message: Imessage, channel: string) {
         const platform_id = message.sessionId;
+        const userName = message.name;
 
         //get the translated message
         const translate_message = await this.translateService.translateMessage(message.type, message.messageBody, platform_id);

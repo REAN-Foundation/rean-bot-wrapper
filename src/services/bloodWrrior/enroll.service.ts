@@ -8,7 +8,7 @@ import { Logger } from '../../common/logger';
 const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
 
 export const enrollPatientService = async (eventObj) => {
-    return new Promise(async (resolve,reject) => {
+    return new Promise(async (resolve) => {
         try {
             const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
                 ClientEnvironmentProviderService

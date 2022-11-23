@@ -1,12 +1,14 @@
-import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, AllowNull, Index, ForeignKey, BelongsTo } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, Index, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { calorieDatabase } from '../refactor/interface/message.interface';
 import { CalorieInfo } from './calorie.info.model';
 
-@Table({
+@Table(
+    {
     timestamps : true,
     modelName  : 'CalorieDB',
     tableName  : 'calorie_database'
-})
+    }
+)
 
 export class CalorieDatabase extends Model implements calorieDatabase {
 
@@ -54,4 +56,5 @@ export class CalorieDatabase extends Model implements calorieDatabase {
         allowNull : true
     })
         meta_data: string;
+
 }

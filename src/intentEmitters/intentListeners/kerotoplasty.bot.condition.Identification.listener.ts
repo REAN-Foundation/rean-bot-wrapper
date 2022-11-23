@@ -5,7 +5,7 @@ import { kerotoplastyService } from "../../services/kerotoplasty.service";
 
 const kerotoplastyServiceObj: kerotoplastyService = container.resolve(kerotoplastyService);
 
-export const kerotoplastyConditionIdentificationListener= async (intent, eventObj) => {
+export const kerotoplastyConditionIdentificationListener = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
 
         // let res;

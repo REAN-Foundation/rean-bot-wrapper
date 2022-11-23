@@ -34,7 +34,7 @@ export class kerotoplastyService {
         const locationData = await getLocationService.getLoctionData(eventObj);
         let message = null;
         console.log("our location data is ",locationData);
-        const postalAddress= locationData["Postal Addres"];
+        const postalAddress = locationData["Postal Addres"];
         const keys = Object.keys(locationData["Postal Addres"]);
         switch (intent) {
         case 'hyperCriticalCondition': {

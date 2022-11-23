@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import express from 'express';
 import { Logger } from '../../common/logger';
 import { injectable } from 'tsyringe';
@@ -21,6 +22,7 @@ export class PlatformWebhookRoutes{
         router.post(`/:client/:channel/:unique_token/receive`, this.clientEnvironmentProviderService.clientNameMiddleware, this.dbconnectioMiddleware.myLogger, this._clientWebhookController.receiveMessage);
         router.get(`/:client/:channel/:unique_token/webhook`, this.clientEnvironmentProviderService.clientNameMiddleware, this._clientWebhookController.authenticateMetaWhatsappWebhook);
         router.post(`/:client/:channel/:unique_token/webhook`, this.clientEnvironmentProviderService.clientNameMiddleware, this.dbconnectioMiddleware.metaDBConnection, this._clientWebhookController.receiveMessageMetaWhatsapp);
+        
         // router.use();
         app.use('/v1/', router);
     }

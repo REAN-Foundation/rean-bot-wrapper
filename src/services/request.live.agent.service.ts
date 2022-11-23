@@ -4,7 +4,6 @@ import { HumanHandoff } from "./human.handoff.service";
 import { SlackMessageService } from "./slack.message.service";
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 
-
 const humanHandoff: HumanHandoff = container.resolve(HumanHandoff);
 
 @autoInjectable()
@@ -56,7 +55,7 @@ export class LiveAgent{
                 await this.slackMessageService.delayedInitialisation();
                 const client = this.slackMessageService.client;
                 const slackchannelID = this.slackMessageService.channelID;
-                const response = await client.chat.postMessage({ channel: slackchannelID, text: `${payload.userName} wants to connect with an expert`,});
+                const response = await client.chat.postMessage({ channel: slackchannelID, text: `${payload.userName} wants to connect with an expert` });
                 await UserFeedback.update({ ts: response.ts }, { where: { id: feedBackInfo.id } })
                     .then(() => { console.log("updated"); })
                     .catch(error => console.log("error on update", error));
@@ -68,4 +67,5 @@ export class LiveAgent{
     // async localTime(){
         
     // }
+    
 }

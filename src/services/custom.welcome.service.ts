@@ -1,4 +1,5 @@
-import { autoInjectable,container} from "tsyringe";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { autoInjectable,container } from "tsyringe";
 import { platformServiceInterface } from "../refactor/interface/platform.interface";
 import { ChatMessage } from '../models/chat.message.model';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
@@ -39,4 +40,5 @@ export class CustomWelcomeService {
         this._platformMessageService = container.resolve(client);
         await this._platformMessageService.SendMediaMessage(userId,data,null,'image',null);
     }
+
 }

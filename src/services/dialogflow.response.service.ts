@@ -6,7 +6,7 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 import { Imessage } from '../refactor/interface/message.interface';
 let dialogflow = require('@google-cloud/dialogflow');
 const dialogflowv2 = require('@google-cloud/dialogflow').v2beta1;
-const {struct} = require('pb-util');
+const { struct } = require('pb-util');
 import { DialogflowResponseFormat } from './response.format/dialogflow.response.format';
 
 @injectable()
@@ -68,7 +68,7 @@ export class DialogflowResponseService {
                     },
                 },
                 queryParams : {
-                    payload : struct.encode({source: platform, userId: userId, userName: completeMessage.name,location: location, contextId: completeMessage.contextId})
+                    payload : struct.encode({ source: platform, userId: userId, userName: completeMessage.name,location: location, contextId: completeMessage.contextId })
                 },
             };
             let request_intent = null;
@@ -82,7 +82,7 @@ export class DialogflowResponseService {
                         },
                     },
                     queryParams : {
-                        payload : struct.encode({source: platform, userId: userId, userName: completeMessage.name,location: location })
+                        payload : struct.encode({ source: platform, userId: userId, userName: completeMessage.name,location: location })
                     },
                 };
             }

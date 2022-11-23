@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import { autoInjectable, singleton } from "tsyringe";
-import {IserviceResponseFunctionalities } from "./response.interface";
+import { IserviceResponseFunctionalities } from "./response.interface";
 
 @autoInjectable()
 @singleton()
@@ -32,7 +32,7 @@ export class DialogflowResponseFormat implements IserviceResponseFunctionalities
     }
 
     getImageObject() {
-        let image = {url: "",caption: ""};
+        let image = { url: "",caption: "" };
         if (this.response[0].queryResult.fulfillmentMessages[0].platform && this.response[0].queryResult.fulfillmentMessages[0].platform === "TELEGRAM" && this.response[0].queryResult.fulfillmentMessages[0].payload){
             if (this.response[0].queryResult.fulfillmentMessages[1]){
                 if (this.response[0].queryResult.fulfillmentMessages[1].image){
@@ -41,7 +41,7 @@ export class DialogflowResponseFormat implements IserviceResponseFunctionalities
             }
         }
         else if (this.response[0].queryResult.fulfillmentMessages[1] && this.response[0].queryResult.fulfillmentMessages[1].image){
-            image = {url: this.response[0].queryResult.fulfillmentMessages[1].image.imageUri, caption: this.response[0].queryResult.fulfillmentMessages[1].image.accessibilityText};
+            image = { url: this.response[0].queryResult.fulfillmentMessages[1].image.imageUri, caption: this.response[0].queryResult.fulfillmentMessages[1].image.accessibilityText };
         }
         else {
             console.log("no image");

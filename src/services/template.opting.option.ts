@@ -6,8 +6,8 @@ export class WhatsAppOptingOption{
         const payload = body.originalDetectIntentRequest.payload;
         return new Promise(async(resolve) =>{
             if (intent === "OptOut"){
-                await ContactList.update({ optOut: "true" }, { where:{ mobileNumber: payload.userId } })
-                    .then(() => {console.log("updated");})
+                await ContactList.update({ optOut: "true" }, { where: { mobileNumber: payload.userId } })
+                    .then(() => { console.log("updated"); })
                     .catch(error =>console.log("error on update", error));
                 const data = {
                     "fulfillmentMessages" : [
@@ -23,8 +23,8 @@ export class WhatsAppOptingOption{
                 resolve(data);
             }
             else if (intent === "OptIn"){
-                await ContactList.update({ optOut: "false" }, { where:{ mobileNumber: payload.userId } })
-                    .then(() => {console.log("updated");})
+                await ContactList.update({ optOut: "false" }, { where: { mobileNumber: payload.userId } })
+                    .then(() => { console.log("updated"); })
                     .catch(error =>console.log("error on update", error));
         
                 const data = {

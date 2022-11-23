@@ -56,7 +56,7 @@ export class translateService{
 
     processdialogflowmessage = async (messageFromDialogflow: DialogflowResponseFormat, detected_language: string) => {
         const translate = new v2.Translate(this.obj);
-        console.log("entered the processdialogflowmessage of translateService JJJJJJJJJJJ");
+        // console.log("entered the processdialogflowmessage of translateService JJJJJJJJJJJ", message);
         // eslint-disable-next-line init-declarations
         let translatedResponse;
         const parse_mode = messageFromDialogflow.getParseMode();
@@ -67,6 +67,7 @@ export class translateService{
         else {
             translatedResponse = await this.translateResponse(translate, text, detected_language);
         }
+        console.log("translatedResponse",translatedResponse);
         return translatedResponse;
     };
 

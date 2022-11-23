@@ -3,7 +3,7 @@ import { container } from "tsyringe";
 const welcomeService: BloodWarriorWelcomeService = container.resolve(BloodWarriorWelcomeService);
 
 export const BloodWarriorPatient = async (intent, eventObj) => {
-    return new Promise(async (resolve,reject) => {
+    return new Promise(async (resolve) => {
         try {
             let result = null;
             result = await welcomeService.patientService(eventObj);

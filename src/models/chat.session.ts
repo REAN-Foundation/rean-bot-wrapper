@@ -1,13 +1,14 @@
-import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, HasMany, IsUUID, AllowNull } from 'sequelize-typescript';
-import { v4 } from 'uuid';
+import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, HasMany } from 'sequelize-typescript';
 import { chatSession } from '../refactor/interface/message.interface';
 import { ChatMessage } from './chat.message.model';
 
-@Table({
+@Table(
+    {
     timestamps : true,
     modelName  : 'ChatSession',
     tableName  : 'chat_session'
-})
+    }
+)
 export class ChatSession extends Model implements chatSession {
     
     @AutoIncrement

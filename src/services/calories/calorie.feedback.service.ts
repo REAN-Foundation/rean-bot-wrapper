@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { exit } from 'process';
 import { CalorieDatabase } from '../../models/calorie.db.model';
 import { CalorieInfo } from '../../models/calorie.info.model';
@@ -113,7 +114,7 @@ export class CalorieFeedback {
                 } else {
                     const updated_item = await CalorieDatabase.findOne({
                         where : {
-                            food_name  : { [Op.like]: `${update_info.food.name}`},
+                            food_name  : { [Op.like]: `${update_info.food.name}` },
                             message_id : message_id.autoIncrementalID
                         },
                         limit : 1
@@ -133,7 +134,7 @@ export class CalorieFeedback {
                     }).then( function (record) {
                         return record.update({
                             user_calories    : new_calorie_value,
-                            calories_updated :1
+                            calories_updated : 1
                         });
                     });
                 }
@@ -170,4 +171,5 @@ export class CalorieFeedback {
             }
         });
     }
+
 }

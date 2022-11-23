@@ -1,3 +1,5 @@
+/* eslint-disable newline-per-chained-call */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { autoInjectable,container } from "tsyringe";
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { CalorieInfo } from "../models/calorie.info.model";
@@ -110,7 +112,6 @@ export class GetCalories {
                     reply_text.push(reply);
                 } else if (!foodName.unit && foodName.value){
                     value = parseInt(foodName.value);
-                    console.log("Quantity has been defined");
                     let calories = '0';
                     let food_description = '';
                     if (servings.serving.serving_description){
@@ -163,7 +164,7 @@ export class GetCalories {
                     } else {
                         value = parseInt(foodName.value);
                         if (volumes.includes(foodName.unit)) {
-                            const unit_volume = parseInt(calories)/parseInt(match.number_of_units);
+                            const unit_volume = parseInt(calories) / parseInt(match.number_of_units);
                             const per_volume_cal = (unit_volume * foodName.value).toFixed(1);
                             calories_array.push(parseInt(per_volume_cal));
                             temp_cal = parseInt(per_volume_cal);
@@ -216,13 +217,12 @@ export class GetCalories {
             console.log('Food Info info Listener Error!');
         }
 
-
         async function doRequest(url) {
             return new Promise(function (resolve, reject) {
                 requestCalorie(url, function (error, res, body) {
-                    if (!error && res.statusCode == 200) {
+                    if (!error && res.statusCode === 200) {
                         const data = {
-                            'body' : body 
+                            'body' : body
                         };
                         resolve(data);
                     } else {
@@ -244,7 +244,7 @@ export class GetCalories {
                     user     : clientID,
                     password : clientSecret
                 },
-                headers : { 'content-type': 'application/json'},
+                headers : { 'content-type': 'application/json' },
                 form    : {
                     'grant_type' : 'client_credentials',
                     'scope'      : 'basic'
@@ -266,7 +266,7 @@ export class GetCalories {
             var options = {
                 method  : 'POST',
                 url     : url,
-                headers : { 
+                headers : {
                     'content-type'  : 'application/json',
                     'Authorization' : `Bearer ${access_token}`
                 }
@@ -284,7 +284,7 @@ export class GetCalories {
             var options = {
                 method  : 'POST',
                 url     : url,
-                headers : { 
+                headers : {
                     'content-type'  : 'application/json',
                     'Authorization' : `Bearer ${access_token}`
                 }
@@ -338,5 +338,6 @@ export class GetCalories {
             const calorie_database = new CalorieDatabase(calorieDB);
             await calorie_database.save();
         }
-    } 
+    }
+
 }
