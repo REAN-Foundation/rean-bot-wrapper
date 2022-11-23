@@ -17,7 +17,6 @@ export class translateService{
     };
 
     detectLanguage = async (message:string) => {
-
         //this is a temp solution for detecting the "hindi" and "Hindi" as english as Google translate detects it as Filipino
         if (message === "Hindi" || message === "hindi" ) {
             return detected_language = "en";
