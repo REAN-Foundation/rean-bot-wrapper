@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import "reflect-metadata";
 import express from 'express';
 import fileUpload from 'express-fileupload';
@@ -13,7 +14,6 @@ import { IndexCreation } from './models/elasticsearchmodel';
 import { platformServiceInterface } from "./refactor/interface/platform.interface";
 import { ClientEnvironmentProviderService } from "./services/set.client/client.environment.provider.service";
 import { AwsSecretsManager } from "./services/aws.secret.manager.service";
-import mongoose from "mongoose";
 
 export default class Application {
 
@@ -60,6 +60,7 @@ export default class Application {
                         else {
                             process.env[k.toUpperCase()] = ele[k];
                         }
+                        console.log("loading this key", k.toUpperCase());
                     }
                 }
                 else {
@@ -79,15 +80,7 @@ export default class Application {
         }
     }
 
-    dbConnect(){
-        const dbURI = process.env.DB_URI;
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        mongoose.connect(dbURI).then((result) => console.log("connected to db"))
-            .catch((err) => console.log(err));
-    }
-
     setWebhooksForClients() {
-        // eslint-disable-next-line max-len
         const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
         const telegram: platformServiceInterface = container.resolve('telegram');
         const whatsapp: platformServiceInterface = container.resolve('whatsapp');
@@ -106,6 +99,8 @@ export default class Application {
             // this condition will be removed after container task definition is updated
             else if (clientName === "ANEMIA"){
                 console.log("Anemia is not a separate client anymore");
+            } else if (clientName === "SNEHA") {
+                console.log("Does not require setting up webhook");
             }
             else {
                 telegram.setWebhook(clientName);
@@ -136,11 +131,22 @@ export default class Application {
             this._intentRegister.register();
 
             this._IndexCreation.createIndexes();
+
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             this.setWebhooksForClients();
 
             //Start listening
             await this.listen();
+
+            //time of restart
+            const date_ob = new Date();
+            const date = ("0" + date_ob.getDate()).slice(-2);
+            const month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
+            const year = date_ob.getFullYear();
+            const hours = date_ob.getHours();
+            const minutes = date_ob.getMinutes();
+            const seconds = date_ob.getSeconds();
+            console.log("time of restart", year + "-" + month + "-" + date + " " + hours + ":" + minutes + ":" + seconds);
 
         }
         catch (error) {
@@ -158,7 +164,7 @@ export default class Application {
                 this._app.use(cors());
 
                 // this._app.use(this.limiter);
-
+                
                 const MAX_UPLOAD_FILE_SIZE = ConfigurationManager.MaxUploadFileSize();
 
                 this._app.use(fileUpload({

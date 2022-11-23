@@ -1,6 +1,8 @@
 import AWS from 'aws-sdk';
 import fs from 'fs';
 import nodeHtmlToImage from 'node-html-to-image';
+import path from 'path';
+import { SignedUrls } from './signed.urls.service';
 
 // import { TempCredentials } from './get.temporary.aws.credentials';
 
@@ -42,8 +44,7 @@ export class AwsS3manager{
                     console.log('File exists');
                     const fileContent = fs.readFileSync(filePath);
                     var filename = filePath.replace(/^.*[\\/]/, '');
-                    var split_fs = filePath.split('/')[1];
-                    console.log("filename", filename + split_fs);
+                    const extension = path.parse(filename).ext;
 
                     // Setting up S3 upload parameters
                     const params = {
@@ -53,29 +54,28 @@ export class AwsS3manager{
                         'ContentType' : 'image/jpeg'
                     };
 
-                    if (split_fs === 'audio'){
+                    if (extension === '.ogg' || extension === '.mp3' || extension === '.oga'){
                         console.log("Detected as an Audio file");
                         params.ContentType = 'audio/ogg';
+                        if (extension === ".mp3" ){
+                            params.ContentType = 'audio/mpeg';
+                        }
                     }
-
-                    console.log("params");
 
                     // eslint-disable-next-line max-len
                     const s3 = new AWS.S3(responseCredentials);
 
                     // Uploading files to the bucket
-                    s3.upload(params, function (err, data) {
+                    s3.upload(params, async function (err) {
                         if (err) {
                             reject(err);
                         }
-                        console.log(`File uploaded successfully. ${data}`);
 
+                        // console.log(`File uploaded successfully. ${data}`);
                         const location = process.env.CLOUD_FRONT_PATH + filename;
-
-                        resolve(location);
+                        resolve(await new SignedUrls().getSignedUrl(location));
                     });
                 } else if (err.code === 'ENOENT') {
-
                     console.log('File not exists');
                     reject('File not exists');
                 } else {
@@ -116,24 +116,23 @@ export class AwsS3manager{
     }
 
     async getFile (key) {
-        const responseCredentials: any = await this.getCrossAccountCredentials();
-        const BUCKET_NAME = process.env.BUCKET_NAME;
-        const s3 = new AWS.S3(responseCredentials);
+        return new Promise<any>(async(resolve) => {
+            const responseCredentials: any = await this.getCrossAccountCredentials();
+            const BUCKET_NAME = process.env.BUCKET_NAME;
+            const s3 = new AWS.S3(responseCredentials);
 
-        const downloadParams = {
-            Key    : key,
-            Bucket : BUCKET_NAME
-        };
+            const downloadParams = {
+                Key    : key,
+                Bucket : BUCKET_NAME
+            };
 
-        const awsGetFile = await s3.getObject(downloadParams, function (error, data) {
-            if (error) {
-                console.error(error);
-            }
-            
-            return data;
-        }).promise();
-
-        return awsGetFile;
+            s3.getObject(downloadParams, function (error, data) {
+                if (error) {
+                    console.error(error);
+                }
+                resolve(data);
+            });
+        });
 
     }
 

@@ -14,10 +14,9 @@ export const NegativeFeedbackListener = async (intent, eventObj) => {
 
             // res = 5;
             console.log("eventobj", eventObj.body.originalDetectIntentRequest.payload.source);
-            const channel = eventObj.body.originalDetectIntentRequest.payload.source;
-            const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
+            const payload = eventObj.body.originalDetectIntentRequest.payload;
             const feedbackService = new FeedbackService();
-            response = await feedbackService.NegativeFeedback(channel, userId);
+            response = await feedbackService.NegativeFeedback(payload);
 
             console.log('Inside listener: ', response);
 

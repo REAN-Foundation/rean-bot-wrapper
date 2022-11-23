@@ -1,4 +1,4 @@
-import { autoInjectable,container} from "tsyringe";
+import { autoInjectable,container } from "tsyringe";
 import { platformServiceInterface } from "../refactor/interface/platform.interface";
 import { MessageFlow } from "./get.put.message.flow.service";
 import { GetCalories } from "./get.calorie.service";
@@ -26,11 +26,11 @@ export class CalorieService {
     async postResponseCalorie(userId: any, client: any, data: any) {
         console.log("Sending calorie data to client");
         this._platformMessageService = container.resolve(client);
-        await this._platformMessageService.SendMediaMessage(userId,null,data,'text');
+        await this._platformMessageService.SendMediaMessage(userId,null,data,'text',null);
     }
 
     async sendCalorieToDF(req){
-        return new Promise(async (resolve,reject)=> {
+        return new Promise(async (resolve)=> {
             console.log("Start food calorie service...");
             const params = req.body.queryResult.parameters;
             console.log(params);
@@ -50,4 +50,5 @@ export class CalorieService {
             resolve(data);
         });
     }
+
 }

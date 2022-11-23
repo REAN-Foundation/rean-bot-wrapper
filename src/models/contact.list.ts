@@ -40,4 +40,9 @@ export class ContactList extends Model implements contactList {
     })
         platform: string;
 
+    @Column({
+        type : DataType.STRING
+    })
+        optOut: string;
+
 }

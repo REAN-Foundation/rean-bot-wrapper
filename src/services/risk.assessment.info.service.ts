@@ -1,11 +1,7 @@
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { container,  } from 'tsyringe';
 import { isEmpty } from 'lodash';
+import { SignedUrls } from './signed.urls.service';
 export const getRiskAssessmentInfo = async (req) => {
-    const clientEnvironmentProviderService:
-    ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
-    const baseURL = clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL");
-    const env = clientEnvironmentProviderService.getClientEnvironmentVariable("ENVIRONMENT");
+
     return new Promise(async (resolve, reject) => {
         try {
             let params: any = {};
@@ -13,14 +9,14 @@ export const getRiskAssessmentInfo = async (req) => {
             const img_url = 'https://d3uqieugp2i3ic.cloudfront.net/dev';
 
             // const img_env = {
-            //     'LOCAL' : 'dev',
+            //     'LOCAL'       : 'dev',
             //     'DEVELOPMENT' : 'dev',
-            //     'UAT' : 'uat',
-            //     'PROD' : 'prod'
+            //     'UAT'         : 'uat',
+            //     'PROD'        : 'prod'
             // };
             const image = {
-                'low' : img_url + '/L.png',
-                'high' : img_url + '/H.png',
+                'low'      : img_url + '/L.png',
+                'high'     : img_url + '/H.png',
                 'moderate' : img_url + '/M.png'
             };
             if (req['body']['queryResult']['intent']['displayName'] !== "Risk.assessment.info-no") {
@@ -167,7 +163,8 @@ function calculateRisk(params){
     return returnArray;
 }
 
-function getEndofConvData(imagePath,response){
+async function getEndofConvData(imagePath,response){
+    const signedUrl = await new SignedUrls().getSignedUrl(imagePath);
     const data = {
         "fulfillmentMessages" : [
             {
@@ -179,7 +176,7 @@ function getEndofConvData(imagePath,response){
             },
             {
                 "image" : {
-                    "imageUri"          : imagePath,
+                    "imageUri"          : signedUrl,
                     "accessibilityText" : response
                 },
             },

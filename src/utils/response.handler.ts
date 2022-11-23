@@ -34,6 +34,18 @@ export class ResponseHandler {
         return response.status(code).send(obj);
     };
 
+    sendSuccessResponseForWhatsappAPI = (response, code, req) => {
+        var keys = Object.keys( req.query );
+        let challenge = "";
+        for (let i = 0 ; i < keys.length ; i++){
+            if (keys[i] === "hub.challenge"){
+                challenge = req.query[keys[i]];
+            }
+        }
+        this.logger.log_info(JSON.stringify(challenge));
+        return response.status(code).send(challenge);
+    };
+
     sendSuccessResponseForSlack = (response, code, message, log_data = false) => {
         const obj = {
             "body" : {
