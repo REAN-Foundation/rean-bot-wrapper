@@ -42,6 +42,8 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         let preferredLanguageRequest;
         if (chanel === "whatsappMeta") {
             mediaUrl = await this.GetWhatsappMetaMedia('audio', msg.messages[0].url, '_voice.ogg');
+            
+            // mediaUrl = msg.messages[0].url;
             preferredLanguageRequest = msg.messages[0].from;
         } else {
             mediaUrl = await this.GetWhatsappMedia('audio', msg.messages[0][type].id, '_voice.ogg');
@@ -98,6 +100,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(msg.messages[0].interactive.button_reply.title);
         const returnMessage = this.inputMessageFormat(msg);
         returnMessage.messageBody = emojiFilteredMessage;
+        returnMessage.intent = msg.messages[0].interactive.button_reply.id;
         return returnMessage;
     }
 
@@ -198,17 +201,20 @@ export class MessageFunctionalities implements getMessageFunctionalities {
 
     inputMessageFormat (message){
         const response_message: Imessage = {
-            name            : message.contacts[0].profile.name,
-            platform        : "Whatsapp",
-            chat_message_id : message.messages[0].id,
-            direction       : "In",
-            messageBody     : null,
-            imageUrl        : null,
-            sessionId       : message.contacts[0].wa_id,
-            replyPath       : null,
-            latlong         : null,
-            type            : "text",
-            intent          : null,
+            name                      : message.contacts[0].profile.name,
+            platform                  : "Whatsapp",
+            chat_message_id           : message.messages[0].id,
+            direction                 : "In",
+            messageBody               : null,
+            imageUrl                  : null,
+            sessionId                 : message.contacts[0].wa_id,
+            replyPath                 : null,
+            latlong                   : null,
+            type                      : "text",
+            intent                    : null,
+            whatsappResponseMessageId : null,
+            contextId                 : message.messages[0].context ? message.messages[0].context.id : null,
+            telegramResponseMessageId : null
         };
         return response_message;
     }

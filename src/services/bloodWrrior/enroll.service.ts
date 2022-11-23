@@ -28,9 +28,8 @@ export const enrollPatientService = async (eventObj) => {
             const obj1 = {
                 Provider  : "REAN_BW",
                 PlanName  : "Patient messages",
-                PlanCode  : 4,
-                StartDate : new Date().toISOString()
-                    .split('T')[0]
+                PlanCode  : "Patient-Reminders",
+                StartDate : new Date().toISOString().split('T')[0]
             };
     
             const resp = await needle('post', url, obj1, options);

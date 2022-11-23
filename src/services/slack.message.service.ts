@@ -81,7 +81,7 @@ export class SlackMessageService implements platformServiceInterface {
                 }
                 else {
                     console.log("child message HH off");
-                    const textToUser = `Our Experts have responded to your query. \nYour Query: ${data.message} \nExpert: ${message.event.text}`;
+                    const textToUser = `Our Experts have responded to your query. \nYour Query: ${data.messageContent} \nExpert: ${message.event.text}`;
                     await this.sendCustomMessage(channel, contact, textToUser);
                 }
                 
@@ -112,7 +112,7 @@ export class SlackMessageService implements platformServiceInterface {
 
     async postMessage(response) {
         const objID = response[response.length - 1].dataValues.id;
-        const topic = response[response.length - 1].dataValues.message;
+        const topic = response[response.length - 1].dataValues.messageContent;
         this.delayedInitialisation();
         const message = await this.client.chat.postMessage({ channel: this.channelID, text: topic });
         await UserFeedback.update({ ts: message.ts }, { where: { id: objID } })

@@ -13,6 +13,7 @@ import { TelegramMessageServiceFunctionalities } from '../services/telegram.mess
 import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import needle from 'needle';
+import { ChatMessage } from '../models/chat.message.model';
 
 @autoInjectable()
 @singleton()
@@ -135,8 +136,13 @@ export class TelegramMessageService implements platformServiceInterface{
         return new Promise((resolve) => {
 
             if (imageLink === null){
-                this._telegram.sendMessage(contact, message, { parse_mode: 'HTML' }).then(function (data) {
+                this._telegram.sendMessage(contact, message, { parse_mode: 'HTML' }).then(async function (data) {
                     console.log("Telegram send body is", data);
+                    const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: contact } });
+                    const id = respChatMessage[respChatMessage.length - 1].id;
+                    ChatMessage.update({ telegramResponseMessageId: data.message_id }, { where: { id: id } } )
+                        .then(() => { console.log("updated telegram respomse id"); })
+                        .catch(error => console.log("error on update", error));
                     resolve(data);
                 });
             }

@@ -27,17 +27,20 @@ export class MockCHannelMessageFunctionalities implements getMessageFunctionalit
 
     inputMessageFormat (message){
         const response_message: Imessage = {
-            name            : message.contacts[0].profile.name,
-            platform        : "MockChannel",
-            chat_message_id : message.messages[0].id,
-            direction       : "In",
-            messageBody     : null,
-            imageUrl        : null,
-            sessionId       : message.contacts[0].wa_id,
-            replyPath       : null,
-            latlong         : null,
-            type            : "text",
-            intent          : null,
+            name                      : message.contacts[0].profile.name,
+            platform                  : "MockChannel",
+            chat_message_id           : message.messages[0].id,
+            direction                 : "In",
+            messageBody               : null,
+            imageUrl                  : null,
+            sessionId                 : message.contacts[0].wa_id,
+            replyPath                 : null,
+            latlong                   : null,
+            type                      : "text",
+            intent                    : null,
+            whatsappResponseMessageId : null,
+            contextId                 : null,
+            telegramResponseMessageId : null
         };
         return response_message;
     }

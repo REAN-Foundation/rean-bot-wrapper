@@ -20,7 +20,7 @@ export class GetPatientInfoService{
                 const phoneNumber = await getPhoneNumber(eventObj);
                 const options = getHeaders();
                 const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
-                const apiUrl = `${ReanBackendBaseUrl}patients/search?phone=${encodeURIComponent(phoneNumber)}`;
+                const apiUrl = `${ReanBackendBaseUrl}patients/byPhone?phone=${encodeURIComponent(phoneNumber)}`;
                 console.log("apiUrl", apiUrl);
                 const response = await needle("get", apiUrl, options);
                 Logger.instance().log(`Response: ${apiUrl}`);

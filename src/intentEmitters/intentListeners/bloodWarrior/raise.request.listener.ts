@@ -7,17 +7,14 @@ export const RaiseBloodDonationRequest = async (intent, eventObj) => {
         try {
             let response = null;
             response = await raiseDonationRequestService.sendUserMessage(eventObj);
+            const patientUserId = response.patientUserId;
+            const patientName = response.name;
             resolve(response.message);
 
-            response = await raiseDonationRequestService.raiseBloodDonation(eventObj,
-                response.patientUserId,response.name);
-            if (response.result.statusCode === 200 ) {
-                console.log(`Succesfully donation request send to donor. DonorName : ${response.name}.`);
-            }
-            else {
-                console.log(`Cannot send donation request to donor`);
-            }
-
+            await raiseDonationRequestService.raiseBloodDonation(eventObj,
+                patientUserId, patientName)
+                .then((result) => { raiseDonationRequestService.notifyVolunteer(
+                    eventObj, patientUserId, patientName, result.stringTFDate, result.donorNames); });
         } catch (error) {
             console.log(error);
         }

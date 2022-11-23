@@ -12,6 +12,9 @@ export interface Imessage{
     latlong : any;
     replyPath : string;
     intent  : string;
+    whatsappResponseMessageId : string;
+    contextId : string;
+    telegramResponseMessageId : string
 
 }
 
@@ -25,6 +28,7 @@ export interface Iresponse{
     message_type: string;
     messageBody: string;
     messageText: string;
+    // raw_response_object: string;
     intent: string;
     messageImageUrl: string;
     messageImageCaption: string;
@@ -37,7 +41,7 @@ export interface handlerequest{
 
 export interface feedbackmessage{
     userId : string;
-    message : string;
+    messageContent : string;
     channel : string;
     ts : string;
 }
@@ -54,6 +58,8 @@ export interface IchatMessage {
     imageContent: string;
     imageUrl: string;
     messageId: string;
+    whatsappResponseMessageId : string;
+    telegramResponseMessageId : string
 }
 
 export interface chatSession {

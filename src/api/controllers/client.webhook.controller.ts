@@ -95,7 +95,7 @@ export class ClientWebhookController {
     }
 
     receiveMessageMetaWhatsapp = async (req, res) => {
-
+        
         // console.log("receiveMessage webhook receiveMessageWhatsappNew");
         try {
             this._clientAuthenticatorService = container.resolve(req.params.channel + '.authenticator');
