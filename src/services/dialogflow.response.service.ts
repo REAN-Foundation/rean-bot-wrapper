@@ -14,7 +14,7 @@ export class DialogflowResponseService {
 
     constructor(private clientEnvironment?: ClientEnvironmentProviderService) { }
 
-    getDialogflowMessage = async (message: string, userPlatformId: string = null, platform: string = null, userName: string, intent: string = null, completeMessage:Imessage = null ) => {
+    getDialogflowMessage = async (message: string, platform: string = null, intent: string = null, completeMessage:Imessage = null ) => {
         try {
 
             const env_name = this.clientEnvironment.getClientEnvironmentVariable("NAME");
@@ -22,7 +22,7 @@ export class DialogflowResponseService {
                 dialogflow = dialogflowv2;
             }
             const dialogflow_language = "en-US";
-            const userId: string = userPlatformId === null ? v4() : userPlatformId;
+            const userId: string = completeMessage.sessionId === null ? v4() : completeMessage.sessionId;
             const location = completeMessage.latlong === null ? v4() : completeMessage.latlong;
 
             let sessionClient = null;
@@ -68,7 +68,7 @@ export class DialogflowResponseService {
                     },
                 },
                 queryParams : {
-                    payload : struct.encode({ source: platform, userId: userId, userName: userName,location: location })
+                    payload : struct.encode({ source: platform, userId: userId, userName: completeMessage.name,location: location, contextId: completeMessage.contextId })
                 },
             };
             let request_intent = null;
@@ -82,7 +82,7 @@ export class DialogflowResponseService {
                         },
                     },
                     queryParams : {
-                        payload : struct.encode({ source: platform, userId: userId, userName: userName,location: location })
+                        payload : struct.encode({ source: platform, userId: userId, userName: completeMessage.name,location: location })
                     },
                 };
             }
@@ -110,4 +110,3 @@ export class DialogflowResponseService {
     };
 
 }
-

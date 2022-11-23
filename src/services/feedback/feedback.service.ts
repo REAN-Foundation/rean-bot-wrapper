@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { feedbackInterface } from './feedback.interface';
 import { autoInjectable, container } from 'tsyringe';
@@ -22,25 +23,29 @@ export class FeedbackService implements feedbackInterface {
         private clickuptask?: ClickUpTask,
         private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
-    async NegativeFeedback(channel, userId) {
+    async NegativeFeedback(payload) {
         return new Promise(async(resolve, reject) =>{
             try {
+                const channel = payload.source;
+                const userId = payload.userId;
+                
+                // const contextId = payload.contextId;
                 const client_name = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
                 const listOfUserRequestdata = await ChatMessage.findAll({ where: { userPlatformID: userId } });
                 const message = listOfUserRequestdata[listOfUserRequestdata.length - 3].messageContent;
-                const feedBackInfo = new UserFeedback({ userId: userId, message: message, channel: channel,humanHandoff: "false", feedbackType: "Negative Feedback" });
+                const feedBackInfo = new UserFeedback({ userId: userId, messageContent: message, channel: channel,humanHandoff: "false", feedbackType: "Negative Feedback"});
                 await feedBackInfo.save();
                 if (client_name === "CALORIE_BOT") {
                     console.log("Calorie negative feedback received.");
-                    const response = await ChatMessage.findAll({ limit: 2, where: { userPlatformId: userId, direction: "In" }, raw: true, order: [['createdAt', 'DESC']] });
-                    const negativeResponse = response[response.length - 1].messageContent;
+                    const response = await ChatMessage.findAll({limit: 2, where: {userPlatformId: userId, direction: "In"}, raw: true, order: [['createdAt', 'DESC']]});
+                    const negativeResponse = response[response.length-1].messageContent;
                     const findit = await CalorieInfo.findOne(
                         {
-                            where : { user_message: { [Op.like]: `${negativeResponse}` } },
+                            where : {user_message: { [Op.like]: `${negativeResponse}`}},
                             order : [['updatedAt', 'DESC']],
                             limit : 1,
                         }).then(function (record) {
-                        return record.update({ negative_feedback: 1 });
+                        return record.update({negative_feedback: 1});
                     });
                     const data = {
                         "fulfillmentMessages" : [
@@ -55,10 +60,18 @@ export class FeedbackService implements feedbackInterface {
                     };
                     resolve(data);
                 } else {
-                    const response = await UserFeedback.findAll({ where: { userId: userId } });
+                    let response;
+                    const responseUserFeedback = await UserFeedback.findAll({ where: { userId: userId } });
+                    if (payload.source === "whatsapp"){
+                        response = payload.contextId ? await ChatMessage.findAll({ where: { whatsappResponseMessageId: payload.contextId } }) : responseUserFeedback;
+                    }
+                    else {
+                        response = payload.contextId ? await ChatMessage.findAll({ where: { telegramResponseMessageId: payload.contextId } }) : responseUserFeedback;
+                    }
+                    
                     const preferredSupportChannel = this.clientEnvironmentProviderService.getClientEnvironmentVariable("SUPPORT_CHANNEL");
                     if (preferredSupportChannel === "ClickUp"){
-                        await this.clickuptask.createTask(response);
+                        await this.clickuptask.createTask(response, responseUserFeedback);
                     }
                     else {
                         await this.slackMessageService.postMessage(response);
@@ -126,7 +139,7 @@ export class FeedbackService implements feedbackInterface {
             try {
                 const listOfUserRequestdata = await ChatMessage.findAll({ where: { userPlatformID: sessionId } });
                 const message = listOfUserRequestdata[listOfUserRequestdata.length - 2].messageContent;
-                const feedBackInfo = new UserFeedback({ userId: sessionId, message: message, channel: channel, feedbackType: "Positive Feedback" });
+                const feedBackInfo = new UserFeedback({ userId: sessionId, messageContent: message, channel: channel, feedbackType: "Positive Feedback" });
                 await feedBackInfo.save();
                 const reply = "We are glad that you like it. Thank you for your valuable feedback";
                 const data = {

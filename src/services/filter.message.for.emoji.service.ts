@@ -1,26 +1,38 @@
 import emojiRegex from 'emoji-regex';
+import { autoInjectable } from 'tsyringe';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 
+@autoInjectable()
 export class EmojiFilter{
 
-    async checkForEmoji (message) {
+    constructor(private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+
+    async checkForEmoji(message: string) {
         console.log("inside checkForEmoji",message);
         const regex = emojiRegex();
-        const positiveEmoji: string[] = ['1f44d', '1f604', '1f601'];
-        const negativeEmoji: string[] = ['1f44e', '1f621', '1f92c'];
-
-        // let UnicodeEmoji: String[] = [];
+        let emojiObj;
+        if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("EMOJI")){
+            emojiObj = JSON.parse(this.clientEnvironmentProviderService.getClientEnvironmentVariable("EMOJI"));
+        }
+        else {
+            emojiObj = JSON.parse(process.env.EMOJI);
+        }
+        const emojiObjKeys = Object.keys(emojiObj);
+        console.log("emojiKeys", emojiObjKeys);
         let filteredMessage: string = message;
         for (const match of message.matchAll(regex)) {
             const convertToUnicodeEmoji = await this.emojiUnicode(match[0]);
+            console.log("convertToUnicodeEmoji", convertToUnicodeEmoji);
             if (convertToUnicodeEmoji !== undefined){
-                if (positiveEmoji.includes(convertToUnicodeEmoji)){
-                    filteredMessage = "PositiveFeedback";
-                }
-                else if (negativeEmoji.includes(convertToUnicodeEmoji)){
-                    filteredMessage = "NegativeFeedback";
+                if (emojiObjKeys.includes(convertToUnicodeEmoji)){
+                    filteredMessage = emojiObj[convertToUnicodeEmoji];
+                    console.log("filtered message", filteredMessage);
+                    return filteredMessage;
                 }
                 else {
-                    console.log("Emoji not present in either of the list!!!");
+                    console.log("not registered emoji");
+                    filteredMessage = message.replace(match[0]," ");
+                    return filteredMessage;
                 }
             }
             else {
@@ -28,33 +40,10 @@ export class EmojiFilter{
                 filteredMessage = message;
             }
         }
-
-        // ------------ block for future, if consider more than 1 emoji in the message -------///
-        // if (UnicodeEmoji !== null) {
-        //     let missingPositive = positiveEmoji.filter(item => UnicodeEmoji.indexOf(item) < 0);
-        //     console.log("missing positive", missingPositive);
-        //     let missingnegative = negativeEmoji.filter(item => UnicodeEmoji.indexOf(item) < 0);
-        //     console.log("missing negative", missingnegative);
-        //     if (missingPositive.length <= (positiveEmoji.length - 1)) {
-        //         filteredMessage = "PositiveFeedback";
-        //     }
-        //     else {
-        //         console.log("No positive emoji");
-        //     }
-        //     if (missingnegative.length <= (negativeEmoji.length - 1)) {
-        //         filteredMessage = "NegativeFeedback";
-        //     }
-        //     else {
-        //         console.log("No negative emoji");
-        //     }
-        // }
-        // else {
-        //     console.log("inside else")
-        //     filteredMessage = message;
-        // }
-        //----------------xxxxx--------------------------//
+        console.log("filtered message last", filteredMessage);
         return filteredMessage;
     }
+    
 
     emojiUnicode = async (emoji) => {
         // eslint-disable-next-line init-declarations

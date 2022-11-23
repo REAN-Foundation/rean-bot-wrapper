@@ -37,7 +37,7 @@ export class LiveAgent{
                 resolve(data);
             }
             else {
-                const feedBackInfo = new UserFeedback({ userId: payload.userId, message: message, channel: payload.source, humanHandoff: "true", feedbackType: "null", ts: "" });
+                const feedBackInfo = new UserFeedback({ userId: payload.userId, messageContent: message, channel: payload.source, humanHandoff: "true", feedbackType: "null", ts: ""});
                 await feedBackInfo.save();
                 const reply = "Our experts will connect with you shortly";
                 const data = {
