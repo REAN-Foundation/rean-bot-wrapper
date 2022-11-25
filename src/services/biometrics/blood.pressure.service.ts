@@ -9,7 +9,9 @@ const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatien
 let remark = '';
 const getremark = function (Systolic,Diastolic) {
 
-    if (Systolic <= 120 && Diastolic < 80) {
+    if (Systolic < 90 && Diastolic < 60) {
+        remark = 'in low range. Please consult your Doctor.';
+    } else if (Systolic < 120 && Diastolic < 80) {
         remark = 'in normal range. Stay healthy!';
     } else if (Systolic <= 129 && Diastolic < 80) {
         remark = 'in elevated range.';
@@ -17,8 +19,8 @@ const getremark = function (Systolic,Diastolic) {
         remark = 'high blood pressure stage 1.';
     } else if (Systolic < 180 || Diastolic < 120) {
         remark = 'high blood pressure stage 2. Please consult your Doctor.';
-    } else if (Systolic < 300 || Diastolic < 150) {
-        remark = 'high blood pressure stage 3. Please consult your Doctor.';
+    } else if (Systolic < 300 || Diastolic < 180) {
+        remark = 'in hypertensive crisis. Please immediately consult your Doctor.';
     }
     return remark;
 };
