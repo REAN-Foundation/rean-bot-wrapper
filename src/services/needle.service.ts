@@ -23,8 +23,10 @@ export const needleRequestForREAN = async (method: string,
         response = await needle(method, apiUrl, obj, options);
     }
 
-    if (response.statusCode !== 200) {
-        throw new Error("Failed to get response from API.");
+    if (response.statusCode === 200 || response.statusCode === 201) {
+        console.log('Reancare Api is successfull');
+    } else {
+        throw new Error("Failed to get response from Reancare API.");
     }
 
     return response.body;
