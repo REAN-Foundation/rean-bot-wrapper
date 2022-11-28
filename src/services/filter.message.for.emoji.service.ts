@@ -18,7 +18,8 @@ export class EmojiFilter{
             emojiObj = JSON.parse(process.env.EMOJI);
         }
         const emojiObjKeys = Object.keys(emojiObj);
-        console.log("emojiKeys", emojiObjKeys);
+        
+        // console.log("emojiKeys", emojiObjKeys);
         let filteredMessage: string = message;
         for (const match of message.matchAll(regex)) {
             const convertToUnicodeEmoji = await this.emojiUnicode(match[0]);

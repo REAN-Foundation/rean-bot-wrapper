@@ -49,6 +49,9 @@ export class ClickUpTask{
         await UserFeedback.update({ taskID: response.body.id }, { where: { id: objID } })
             .then(() => { console.log("updated"); })
             .catch(error => console.log("error on update", error));
+        await UserFeedback.update({ messageContent: topic }, { where: { id: objID } })
+            .then(() => { console.log("updated"); })
+            .catch(error => console.log("error on update", error));
 
     }
 
