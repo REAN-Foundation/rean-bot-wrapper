@@ -17,6 +17,8 @@ import needle from 'needle';
 import { getRequestOptions } from '../utils/helper';
 import util from "util";
 import { HandleMessagetypePayload } from './handle.messagetype.payload';
+import { EmojiFilter } from './filter.message.for.emoji.service';
+import { ChatMessage } from '../models/chat.message.model';
 
 @autoInjectable()
 @singleton()
@@ -241,15 +243,20 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
             postDataMeta.type = "text";
             const postDataString = JSON.stringify(postDataMeta);
             console.log(postDataString);
-            return await this.postRequestMessages(postDataString);
+            const needleResp:any = await this.postRequestMessages(postDataString);
+            const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: postDataMeta.to } });
+            const id = respChatMessage[respChatMessage.length - 1].id;
+            await ChatMessage.update({ whatsappResponseMessageId: needleResp.body.messages[0].id }, { where: { id: id } } )
+                .then(() => { console.log("updated"); })
+                .catch(error => console.log("error on update", error));
+            return (needleResp);
         }
     };
     
     getMessage = async (message: any) => {
         console.log("messages meta", message);
-        if (message.messages[0].type === "text") {
-            // eslint-disable-next-line max-len
-            return await this.messageFunctionalitiesmeta.textMessageFormat(message);
+        if (message.messages[0].type === "text" || message.messages[0].type === "reaction") {
+            return await this.messageFunctionalitiesmeta.textMessageFormat(message,message.messages[0].type);
         }
         else if (message.messages[0].type === "location") {
             return await this.messageFunctionalitiesmeta.locationMessageFormat(message);

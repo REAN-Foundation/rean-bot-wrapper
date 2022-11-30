@@ -68,7 +68,7 @@ export class DialogflowResponseService {
                     },
                 },
                 queryParams : {
-                    payload : struct.encode({source: platform, userId: userId, userName: completeMessage.name,location: location, contextId: completeMessage.contextId})
+                    payload : struct.encode({source: platform, userId: userId, userName: completeMessage.name,location: location, contextId: completeMessage.contextId, completeMessage: completeMessage})
                 },
             };
             let request_intent = null;
@@ -82,7 +82,7 @@ export class DialogflowResponseService {
                         },
                     },
                     queryParams : {
-                        payload : struct.encode({source: platform, userId: userId, userName: completeMessage.name,location: location })
+                        payload : struct.encode({source: platform, userId: userId, userName: completeMessage.name,location: location, contextId: completeMessage.contextId, completeMessage: completeMessage })
                     },
                 };
             }

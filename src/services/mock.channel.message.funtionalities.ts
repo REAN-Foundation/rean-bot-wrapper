@@ -21,7 +21,10 @@ export class MockCHannelMessageFunctionalities implements getMessageFunctionalit
     async textMessageFormat (msg) {
         const emojifilteredMessage = await this.emojiFilter.checkForEmoji(msg.messages[0].text.body);
         const returnmessage = this.inputMessageFormat(msg);
-        returnmessage.messageBody = emojifilteredMessage;
+        returnmessage.messageBody = msg.messages[0].text.body;
+        if (emojifilteredMessage === "NegativeFeedback"){
+            returnmessage.intent = "NegativeFeedback";
+        }
         return returnmessage;
     }
 

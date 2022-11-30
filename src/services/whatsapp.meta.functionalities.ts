@@ -19,10 +19,24 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         private awsS3manager?: AwsS3manager,
         private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
-    async textMessageFormat (msg) {
-        const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(msg.messages[0].text.body);
+    async textMessageFormat (msg, type) {
+        let emojiFilteredMessage;
         const returnMessage = this.inputMessageFormat(msg);
-        returnMessage.messageBody = emojiFilteredMessage;
+        if (type === "reaction"){
+            emojiFilteredMessage = await this.emojiFilter.checkForEmoji(msg.messages[0].reaction.emoji);
+            returnMessage.type = 'reaction';
+            returnMessage.messageBody = msg.messages[0].reaction.emoji;
+            returnMessage.whatsappResponseMessageId = msg.messages[0].reaction.message_id;
+        }
+        else {
+            emojiFilteredMessage = await this.emojiFilter.checkForEmoji(msg.messages[0].text.body);
+            // returnMessage.payload.originalMessage = emojiFilteredMessage;
+            returnMessage.messageBody = msg.messages[0].text.body;
+        }
+        // returnMessage.payload.originalMessage = emojiFilteredMessage;
+        if (emojiFilteredMessage === "NegativeFeedback"){
+            returnMessage.intent = "NegativeFeedback";
+        }
         return returnMessage;
     }
 
