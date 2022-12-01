@@ -9,17 +9,47 @@ const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatien
 let remark = '';
 const getremark = function (Systolic,Diastolic) {
 
-    if (Systolic < 90 && Diastolic < 60) {
-        remark = 'in low range. Please consult your Doctor.';
-    } else if (Systolic < 120 && Diastolic < 80) {
+    if (Systolic <= 119 ){
         remark = 'in normal range. Stay healthy!';
-    } else if (Systolic <= 129 && Diastolic < 80) {
+        if (Diastolic < 60){
+            remark = 'in low range. Please consult your Doctor.';
+        } else if (Diastolic < 80){
+            remark = 'in normal range. Stay healthy!';
+        } else if (Diastolic >= 80 && Diastolic <= 89){
+            remark = 'high blood pressure stage 1.';
+        } else if (Diastolic >= 90 && Diastolic <= 120){
+            remark = 'Stage 2';
+        } else if (Diastolic > 120){
+            remark = 'in hypertensive crisis. Please immediately consult your Doctor.';
+        }
+    } else if (Systolic >= 120 && Systolic <= 129 ){
         remark = 'in elevated range.';
-    } else if (Systolic <= 139 || Diastolic <= 89) {
+        if (Diastolic < 80){
+            remark = 'in elevated range.';
+        } else if (Diastolic >= 80 && Diastolic <= 89){
+            remark = 'high blood pressure stage 1.';
+        } else if (Diastolic >= 90 && Diastolic <= 120){
+            remark = 'high blood pressure stage 2. Please consult your Doctor.';
+        } else if (Diastolic > 120){
+            remark = 'in hypertensive crisis. Please immediately consult your Doctor.';
+        }
+    } else if (Systolic >= 130 && Systolic <= 139 ){
         remark = 'high blood pressure stage 1.';
-    } else if (Systolic < 180 || Diastolic < 120) {
-        remark = 'high blood pressure stage 2. Please consult your Doctor.';
-    } else if (Systolic < 300 || Diastolic < 180) {
+        if (Diastolic >= 80 && Diastolic <= 89){
+            remark = 'high blood pressure stage 1.';
+        } else if (Diastolic >= 90 && Diastolic <= 120){
+            remark = 'Stage 2';
+        } else if (Diastolic > 120){
+            remark = 'in hypertensive crisis. Please immediately consult your Doctor.';
+        }
+    } else if (Systolic >= 140 && Systolic <= 180 ){
+        remark = 'Stage 2';
+        if (Diastolic >= 90 && Diastolic <= 120){
+            remark = 'Stage 2';
+        } else if (Diastolic > 120){
+            remark = 'in hypertensive crisis. Please immediately consult your Doctor.';
+        }
+    } else if (Systolic > 180 ){
         remark = 'in hypertensive crisis. Please immediately consult your Doctor.';
     }
     return remark;
