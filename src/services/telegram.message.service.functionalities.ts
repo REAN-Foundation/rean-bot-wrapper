@@ -23,7 +23,10 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
     async textMessageFormat(message) {
         const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(message.text);
         const returnMessage = this.inputMessageFormat(message);
-        returnMessage.messageBody = emojiFilteredMessage;
+        returnMessage.messageBody = message.text;
+        if (emojiFilteredMessage === "NegativeFeedback"){
+            returnMessage.intent = "NegativeFeedback";
+        }
         return returnMessage;
     }
 

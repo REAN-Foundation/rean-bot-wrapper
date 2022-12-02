@@ -7,6 +7,7 @@ import FormData from 'form-data';
 import fs from 'fs';
 import axios from 'axios';
 import crypto from 'crypto';
+import { ChatMessage } from '../../models/chat.message.model';
 
 @autoInjectable()
 export class ClickUpTask{
@@ -52,7 +53,7 @@ export class ClickUpTask{
         await UserFeedback.update({ messageContent: topic }, { where: { id: objID } })
             .then(() => { console.log("updated"); })
             .catch(error => console.log("error on update", error));
-
+        return response;
     }
 
     async taskAttachment(taskID, imageLink){
@@ -78,4 +79,18 @@ export class ClickUpTask{
         
     }
 
+    async postCommentOnTask(taskID,comment){
+        const createTaskUrl = `https://api.clickup.com/api/v2/task/${taskID}/comment`;
+        const options = getRequestOptions();
+        const CLICKUP_AUTHENTICATION = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
+        options.headers["Authorization"] =  CLICKUP_AUTHENTICATION;
+        options.headers["Content-Type"] = `application/json`;
+        const obj = {
+            "comment_text" : comment,
+            "notify_all"   : true
+        };
+
+        await needle("post", createTaskUrl, obj, options);
+
+    }
 }
