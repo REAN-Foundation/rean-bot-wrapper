@@ -1,6 +1,8 @@
 import { GetLocation } from "./find.nearest.location.service";
 import { dialoflowMessageFormatting } from "./Dialogflow.service";
 import { autoInjectable } from "tsyringe";
+import {ClickUpTask} from "./clickup/clickup.task";
+import path from 'path';
 
 @autoInjectable()
 export class kerotoplastyService {
@@ -56,4 +58,23 @@ export class kerotoplastyService {
 
     }
 
+    async postImageOnClickup(intent,eventObj){
+        const URL = eventObj.body.queryResult.parameters.image;
+        console.log("our image url is ",URL);
+        const clickupService = new ClickUpTask();
+        const filename = path.basename(URL);
+        console.log("file name is ", filename);
+        const attachmentPath = `./photo/` + filename;
+        const condition = {
+            'hyperCriticalCondition' : 'HyperCritical',
+            'criticalCondition'      : 'Critical',
+            'normalCondition'        : 'Normal'
+        };
+        const condition_string = condition[intent];
+        const user_info = eventObj.body.queryResult.parameters.medicalRecordNumber;
+        const topic = condition_string + "_" + user_info;
+        console.log("topic is",topic);
+        clickupService.createTask(null, null,null,topic)
+            .then((id) => {clickupService.taskAttachment(id,attachmentPath);});
+    }
 }
