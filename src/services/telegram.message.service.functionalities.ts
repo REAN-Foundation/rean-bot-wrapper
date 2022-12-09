@@ -100,7 +100,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
     }
 
     inputMessageFormat (message){
-        console.log("the message", message);
+        //console.log("the message", message);
         const response_message: Imessage = {
             name                      : message.from.first_name,
             platform                  : "Telegram",
