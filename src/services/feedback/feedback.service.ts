@@ -27,7 +27,7 @@ export class FeedbackService implements feedbackInterface {
             try {
                 const channel = payload.source;
                 const userId = payload.userId;
-                // const contextId = payload.contextId;
+                const completeMessage = payload.completeMessage;
                 const client_name = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
                 const listOfUserRequestdata = await ChatMessage.findAll({ where: { userPlatformID: userId } });
                 const message = listOfUserRequestdata[listOfUserRequestdata.length - 3].messageContent;
@@ -60,16 +60,28 @@ export class FeedbackService implements feedbackInterface {
                 } else {
                     let response;
                     const responseUserFeedback = await UserFeedback.findAll({ where: { userId: userId } });
-                    if (payload.source === "whatsapp"){
-                        response = payload.contextId ? await ChatMessage.findAll({ where: { whatsappResponseMessageId: payload.contextId } }) : responseUserFeedback;
+                    if (payload.source === "whatsapp" || payload.source === "whatsappMeta"){
+                        if (payload.contextId){
+                            response = await ChatMessage.findAll({ where: { whatsappResponseMessageId: payload.contextId } });
+                        }
+                        else if (completeMessage.whatsappResponseMessageId){
+                            response = await ChatMessage.findAll({ where: { whatsappResponseMessageId: completeMessage.whatsappResponseMessageId } });
+                        }
+                        else {
+                            response = responseUserFeedback;
+                        }
                     }
                     else {
                         response = payload.contextId ? await ChatMessage.findAll({ where: { telegramResponseMessageId: payload.contextId } }) : responseUserFeedback;
                     }
-                    
                     const preferredSupportChannel = this.clientEnvironmentProviderService.getClientEnvironmentVariable("SUPPORT_CHANNEL");
                     if (preferredSupportChannel === "ClickUp"){
-                        await this.clickuptask.createTask(response, responseUserFeedback);
+                        const clickUpResponse:any = await this.clickuptask.createTask(response, responseUserFeedback,null,null);
+                        const messageContent = listOfUserRequestdata[listOfUserRequestdata.length - 1].messageContent;
+                        if (messageContent.length > 5){
+                            const comment = messageContent;
+                            this.clickuptask.postCommentOnTask(clickUpResponse.body.id,comment);
+                        }
                     }
                     else {
                         await this.slackMessageService.postMessage(response);

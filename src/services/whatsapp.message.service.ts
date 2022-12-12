@@ -201,7 +201,6 @@ export class WhatsappMessageService implements platformServiceInterface {
         });
     }
 
-    // eslint-disable-next-line max-len
     SendMediaMessage = async (contact: number | string, imageLink: string, message: string, messageType: string, payload: any) => {
         return new Promise(async(resolve) => {
             console.log("message type",messageType + imageLink);
@@ -331,9 +330,8 @@ export class WhatsappMessageService implements platformServiceInterface {
     };
 
     getMessage = async (msg: any) => {
-        if (msg.messages[0].type === "text") {
-            // eslint-disable-next-line max-len
-            return await this.messageFunctionalities.textMessageFormat(msg);
+        if (msg.messages[0].type === "text" || msg.messages[0].type === "reaction") {
+            return await this.messageFunctionalities.textMessageFormat(msg, msg.messages[0].type);
         }
         else if (msg.messages[0].type === "location") {
             return await this.messageFunctionalities.locationMessageFormat(msg);
