@@ -14,7 +14,7 @@ export class ClickUpTask{
 
     constructor(private clientEnvironmentProviderService?: ClientEnvironmentProviderService) { }
 
-    async createTask(rdsData,responseUserFeedback,imageLink:string = null){
+    async createTask(rdsData,responseUserFeedback,imageLink:string = null,postTopic:string = null){
         const listID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_LIST_ID");
         const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
         const createTaskUrl = `https://api.clickup.com/api/v2/list/${listID}/task`;
@@ -22,7 +22,13 @@ export class ClickUpTask{
         const CLICKUP_AUTHENTICATION = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
         options.headers["Authorization"] =  CLICKUP_AUTHENTICATION;
         options.headers["Content-Type"] = `application/json`;
-        const topic = rdsData[rdsData.length - 1].dataValues.messageContent;
+        let topic:any = null;
+        if (postTopic){
+            topic = postTopic;
+        }
+        else {
+            topic = rdsData[rdsData.length - 1].dataValues.messageContent;
+        }
         const obj = {
             "name"            : topic,
             "status"          : "TO DO",
@@ -44,16 +50,19 @@ export class ClickUpTask{
 
         // console.log("response status", response.statusCode);
         console.log("body", response.body.id);
-        const objID = responseUserFeedback[responseUserFeedback.length - 1].dataValues.id;
-
-        console.log("objId", objID);
-        await UserFeedback.update({ taskID: response.body.id }, { where: { id: objID } })
-            .then(() => { console.log("updated"); })
-            .catch(error => console.log("error on update", error));
-        await UserFeedback.update({ messageContent: topic }, { where: { id: objID } })
-            .then(() => { console.log("updated"); })
-            .catch(error => console.log("error on update", error));
-        return response;
+        if (responseUserFeedback){
+            const objID = responseUserFeedback[responseUserFeedback.length - 1].dataValues.id;
+            console.log("objId", objID);
+            await UserFeedback.update({ taskID: response.body.id }, { where: { id: objID } })
+                .then(() => { console.log("updated"); })
+                .catch(error => console.log("error on update", error));
+            await UserFeedback.update({ messageContent: topic }, { where: { id: objID } })
+                .then(() => { console.log("updated"); })
+                .catch(error => console.log("error on update", error));
+            return response;
+        }
+        const taskID = response.body.id;
+        return taskID;
     }
 
     async taskAttachment(taskID, imageLink){

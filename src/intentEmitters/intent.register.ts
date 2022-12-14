@@ -44,6 +44,10 @@ import { BloodWarriorVolunteer } from './intentListeners/bloodWarrior/volunteer.
 import { BloodBridgeStatusListener } from './intentListeners/bloodWarrior/blood.bridge.status.listener';
 import { ChecklistDateValidation } from './intentListeners/bloodWarrior/checklist.date.validation.listener';
 import { RejectDonorRequest } from './intentListeners/bloodWarrior/reject.donor.request.listener';
+import { ScheduleDonation } from './intentListeners/bloodWarrior/schedule.donation.listener';
+import { VerifyBloodBridge } from './intentListeners/bloodWarrior/Verify.bridge.listener';
+import { ScheduleDonationElligible } from './intentListeners/bloodWarrior/schedule.donation.eligible.listener';
+import { ScheduleDonationTakeValues } from './intentListeners/bloodWarrior/schedule.donation.take.values.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -156,6 +160,11 @@ export class IntentRegister {
         IntentEmitter.registerListener('Checklist_Yes_Date', ChecklistDateValidation);
         IntentEmitter.registerListener('Reject_Donation_Request', RejectDonorRequest);
         IntentEmitter.registerListener('Checklist_No', RejectDonorRequest);
+        IntentEmitter.registerListener('Schedule_Donation', ScheduleDonation);
+        IntentEmitter.registerListener('Schedule_Donation_Eligibity', ScheduleDonationElligible);
+        IntentEmitter.registerListener('Blood_Bridge_Verify', VerifyBloodBridge);
+        IntentEmitter.registerListener('Blood_Bridge_Verify_Take_Values', ScheduleDonationTakeValues);
+        IntentEmitter.registerListener('Donation_Request_BloodBridge', BloodBridgeStatusListener);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
