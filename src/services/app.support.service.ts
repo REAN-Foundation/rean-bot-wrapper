@@ -3,6 +3,7 @@ import { autoInjectable, singleton } from 'tsyringe';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { MessageFlow } from './get.put.message.flow.service';
 import { ResponseHandler } from '../utils/response.handler';
+import { RHGRequest } from './request.format/rhg.mobile.app';
 
 @autoInjectable()
 @singleton()
@@ -35,23 +36,44 @@ export class platformMessageService implements platformServiceInterface{
     }
 
     handleMessage(msg, client) {
-        return this.messageFlow.checkTheFlow(msg, client, this);
-    }
-
-    getMessage(msg) {
-        // eslint-disable-next-line init-declarations
-        let returnMessage: Imessage;
-        const phoneNumber = msg.phoneNumber.toString();
-
-        if (msg.type === "text") {
-            const message = msg.message; //+ ` PhoneNumber is ${phoneNumber}`;
-            returnMessage = { name: null,platform: "Rean_Support",chat_message_id: null, direction: "In",messageBody: message,imageUrl: null, sessionId: phoneNumber,replyPath: phoneNumber,latlong: null,type: 'text' , intent: null, whatsappResponseMessageId: null, contextId: null, telegramResponseMessageId : null};
-            return returnMessage;
+        const generatorRhgObj = new RHGRequest(msg);
+        const rhgGetMessageObj = generatorRhgObj.getMessage();
+        let done = false;
+        while (done === false) {
+            const rhgNextRequestObj = rhgGetMessageObj.next();
+            const rhgRequestBodyObj = rhgNextRequestObj.value;
+            done = rhgNextRequestObj.done;
+            let messagetoDialogflow: Imessage;
+            if (rhgRequestBodyObj){
+                const phoneNumber = rhgRequestBodyObj.getPhoneNumber();
+                if (rhgRequestBodyObj.isText() === true) {
+                    const message = rhgRequestBodyObj.getMessage(); //+ ` PhoneNumber is ${phoneNumber}`;
+                    messagetoDialogflow = {
+                        name                      : null,
+                        platform                  : "Rean_Support",
+                        chat_message_id           : null,
+                        direction                 : "In",
+                        messageBody               : message,
+                        imageUrl                  : null,
+                        platformId                : phoneNumber,
+                        replyPath                 : phoneNumber,
+                        latlong                   : null,
+                        type                      : 'text' ,
+                        intent                    : null,
+                        whatsappResponseMessageId : null,
+                        contextId                 : null,
+                        telegramResponseMessageId : null
+                    };
+                }
+            }
+            
+            return this.messageFlow.checkTheFlow(messagetoDialogflow, client, this);
         }
+        
     }
 
     postResponse (message, response: IprocessedDialogflowResponseFormat ){
-        const reansupport_Id = message.sessionId;
+        const reansupport_Id = message.platformId;
         const image = response.message_from_dialoglow.getImageObject();
         const message_type = image.url ? "image" : "text";
         // const raw_response_object = response.message_from_dialoglow.result && response.message_from_dialoglow.result.fulfillmentMessages ? JSON.stringify(response.message_from_dialoglow.result.fulfillmentMessages) : '';

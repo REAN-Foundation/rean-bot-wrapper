@@ -4,6 +4,7 @@ import { getMessageFunctionalities } from "../refactor/interface/message.service
 import { Imessage } from '../refactor/interface/message.interface';
 import { autoInjectable } from "tsyringe";
 import { EmojiFilter } from './filter.message.for.emoji.service';
+import { Message } from './request.format/whatsapp.message.format';
 
 @autoInjectable()
 export class MockCHannelMessageFunctionalities implements getMessageFunctionalities {
@@ -18,25 +19,27 @@ export class MockCHannelMessageFunctionalities implements getMessageFunctionalit
         throw new Error("Method not implemented.");
     }
 
-    async textMessageFormat (msg) {
-        const emojifilteredMessage = await this.emojiFilter.checkForEmoji(msg.messages[0].text.body);
-        const returnmessage = this.inputMessageFormat(msg);
-        returnmessage.messageBody = msg.messages[0].text.body;
-        if (emojifilteredMessage === "NegativeFeedback"){
-            returnmessage.intent = "NegativeFeedback";
+    async textMessageFormat (messageObj: Message) {
+        const messagetoDialogflow = this.inputMessageFormat(messageObj);
+        const text = messageObj.getText();
+        const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(text);
+        messagetoDialogflow.messageBody = text;
+        if (emojiFilteredMessage === "NegativeFeedback"){
+            messagetoDialogflow.intent = "NegativeFeedback";
         }
-        return returnmessage;
+        messagetoDialogflow.contextId = messageObj.getContextId();
+        return messagetoDialogflow;
     }
 
-    inputMessageFormat (message){
-        const response_message: Imessage = {
-            name                      : message.contacts[0].profile.name,
-            platform                  : "MockChannel",
-            chat_message_id           : message.messages[0].id,
+    inputMessageFormat (messageObj){
+        const messagetoDialogflow: Imessage = {
+            name                      : null,
+            platform                  : "Whatsapp",
+            chat_message_id           : null,
             direction                 : "In",
             messageBody               : null,
             imageUrl                  : null,
-            sessionId                 : message.contacts[0].wa_id,
+            platformId                : null,
             replyPath                 : null,
             latlong                   : null,
             type                      : "text",
@@ -45,7 +48,8 @@ export class MockCHannelMessageFunctionalities implements getMessageFunctionalit
             contextId                 : null,
             telegramResponseMessageId : null
         };
-        return response_message;
+        messagetoDialogflow.chat_message_id = messageObj.getChatId();
+        return messagetoDialogflow;
     }
 
 }

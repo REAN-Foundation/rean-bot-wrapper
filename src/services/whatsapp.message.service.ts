@@ -17,6 +17,8 @@ import needle from 'needle';
 import { getRequestOptions } from '../utils/helper';
 import { ChatMessage } from '../models/chat.message.model';
 import { HandleMessagetypePayload } from './handle.messagetype.payload';
+import { WhatsappRequest } from './request.format/whatsapp.request';
+import { WhatsappMessageToDialogflow } from './whatsapp.messagetodialogflow';
 
 @autoInjectable()
 @singleton()
@@ -29,10 +31,13 @@ export class WhatsappMessageService implements platformServiceInterface {
         private messageFunctionalities?: MessageFunctionalities,
         @inject("whatsapp.authenticator") private clientAuthenticator?: clientAuthenticator,
         private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        private whatsappMessageToDialogflow?: WhatsappMessageToDialogflow,
         private handleMessagetypePayload?: HandleMessagetypePayload){}
 
-    handleMessage(msg: any, channel: string) {
-        return this.messageFlow.checkTheFlow(msg, channel, this);
+    async handleMessage(requestBody: any, channel: string) {
+        const messagetoDialogflow = await this.whatsappMessageToDialogflow.messageToDialogflow(requestBody,channel);
+        return this.messageFlow.checkTheFlow(messagetoDialogflow, channel, this);
+
     }
 
     sendManualMesage(msg: any) {
@@ -329,35 +334,10 @@ export class WhatsappMessageService implements platformServiceInterface {
         });
     };
 
-    getMessage = async (msg: any) => {
-        if (msg.messages[0].type === "text" || msg.messages[0].type === "reaction") {
-            return await this.messageFunctionalities.textMessageFormat(msg, msg.messages[0].type);
-        }
-        else if (msg.messages[0].type === "location") {
-            return await this.messageFunctionalities.locationMessageFormat(msg);
-        }
-        else if (msg.messages[0].type === "voice") {
-            return await this.messageFunctionalities.voiceMessageFormat(msg, msg.messages[0].type, 'whatsapp');
-        }
-        else if (msg.messages[0].type === "image") {
-            return await this.messageFunctionalities.imageMessaegFormat(msg);
-        }
-        else if (msg.messages[0].type === "interactive") {
-            if (msg.messages[0].interactive.type === "list_reply"){
-                return await this.messageFunctionalities.interactiveListMessaegFormat(msg);
-            } else {
-                return await this.messageFunctionalities.interactiveMessaegFormat(msg);
-            }
-        }
-        else {
-            throw new Error("Message is neither text, voice nor location");
-        }
-    };
-
     postResponse = async (message: Imessage , processedResponse: IprocessedDialogflowResponseFormat) => {
         // eslint-disable-next-line init-declarations
         let reaponse_message: Iresponse;
-        const whatsapp_id = message.sessionId;
+        const whatsapp_id = message.platformId;
         const input_message = message.messageBody;
         const name = message.name;
         const chat_message_id = message.chat_message_id;

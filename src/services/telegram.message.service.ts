@@ -13,6 +13,7 @@ import { clientAuthenticator } from './clientAuthenticator/client.authenticator.
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import needle from 'needle';
 import { ChatMessage } from '../models/chat.message.model';
+import { TelegramMessageToDialogflow } from './telegram.messagetodialogflow';
 
 @autoInjectable()
 @singleton()
@@ -27,6 +28,7 @@ export class TelegramMessageService implements platformServiceInterface{
         private awsS3manager?: AwsS3manager,
         private telegramMessageServiceFunctionalities?: TelegramMessageServiceFunctionalities,
         private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        private telegramMessageToDialogflow?: TelegramMessageToDialogflow,
         @inject("telegram.authenticator") private clientAuthenticator?: clientAuthenticator) {
         this._telegram = new TelegramBot(this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
         this.init();
@@ -45,8 +47,9 @@ export class TelegramMessageService implements platformServiceInterface{
     }
 
     init(){
-        this._telegram.on('message', msg => {
-            this.messageFlow.checkTheFlow(msg, "telegram", this);
+        this._telegram.on('message', async msg => {
+            const messagetoDialogflow = await this.telegramMessageToDialogflow.messageToDialogflow(msg);
+            this.messageFlow.checkTheFlow(messagetoDialogflow, "telegram", this);
         });
     }
 
@@ -59,29 +62,11 @@ export class TelegramMessageService implements platformServiceInterface{
         console.log("Telegram webhook set");
     }
 
-    getMessage = async (message: any) =>{
-        console.log("enter the getMessage of telegram");
-
-        if (message.text) {
-            return await this.telegramMessageServiceFunctionalities.textMessageFormat(message);
-        } else if (message.voice) {
-            return await this.telegramMessageServiceFunctionalities.voiceMessageFormat(message);
-        } else if (message.location) {
-            return await this.telegramMessageServiceFunctionalities.locationMessageFormat(message);
-        } else if (message.photo){
-            return await this.telegramMessageServiceFunctionalities.imageMessaegFormat(message);
-        } else if (message.document){
-            return await this.telegramMessageServiceFunctionalities.documentMessageFormat(message);
-        } else {
-            throw new Error('Message is neither text, voice nor location');
-        }
-    };
-
     postResponse = async(message: Imessage, processedResponse: IprocessedDialogflowResponseFormat) => {
         console.log("enter the give response of tele");
         // eslint-disable-next-line init-declarations
         let reaponse_message: Iresponse;
-        const telegram_id = message.sessionId;
+        const telegram_id = message.platformId;
         const input_message = message.messageBody;
         const name = message.name;
         const chat_message_id = message.chat_message_id;

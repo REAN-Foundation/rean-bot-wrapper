@@ -3,6 +3,7 @@ import { autoInjectable, singleton } from 'tsyringe';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { MessageFlow } from './get.put.message.flow.service';
 import { ResponseHandler } from '../utils/response.handler';
+import { RHGRequest } from './request.format/rhg.mobile.app';
 
 @autoInjectable()
 @singleton()
@@ -32,19 +33,40 @@ export class snehaMessagePlatformService implements platformServiceInterface{
     }
 
     handleMessage(msg, client) {
-        return this.messageFlow.checkTheFlow(msg, client, this);
-    }
-
-    getMessage(msg) {
-        // eslint-disable-next-line init-declarations
-        let returnMsg: Imessage;
-        const phone = msg.phoneNumber.toString();
-
-        if (msg.type === "text") {
-            const message = msg.message; //+ ` PhoneNumber is ${phoneNumber}`;
-            returnMsg = { name: null,platform: "Sneha_Support",chat_message_id: null, direction: "In",messageBody: message,imageUrl: null, sessionId: phone,replyPath: phone,latlong: null,type: 'text' , intent: null, whatsappResponseMessageId: null, contextId: null, telegramResponseMessageId : null};
-            return returnMsg;
+        const generatorRhgObj = new RHGRequest(msg);
+        const rhgGetMessageObj = generatorRhgObj.getMessage();
+        let done = false;
+        while (done === false) {
+            const rhgNextRequestObj = rhgGetMessageObj.next();
+            const rhgRequestBodyObj = rhgNextRequestObj.value;
+            done = rhgNextRequestObj.done;
+            let messagetoDialogflow: Imessage;
+            if (rhgRequestBodyObj){
+                const phoneNumber = rhgRequestBodyObj.getPhoneNumber();
+                if (rhgRequestBodyObj.isText() === true) {
+                    const message = rhgRequestBodyObj.getMessage(); //+ ` PhoneNumber is ${phoneNumber}`;
+                    messagetoDialogflow = {
+                        name                      : null,
+                        platform                  : "Sneha_Support",
+                        chat_message_id           : null,
+                        direction                 : "In",
+                        messageBody               : message,
+                        imageUrl                  : null,
+                        platformId                : phoneNumber,
+                        replyPath                 : phoneNumber,
+                        latlong                   : null,
+                        type                      : 'text' ,
+                        intent                    : null,
+                        whatsappResponseMessageId : null,
+                        contextId                 : null,
+                        telegramResponseMessageId : null
+                    };
+                }
+            }
+            
+            return this.messageFlow.checkTheFlow(messagetoDialogflow, client, this);
         }
+        
     }
 
     postResponse (message, response: IprocessedDialogflowResponseFormat ){

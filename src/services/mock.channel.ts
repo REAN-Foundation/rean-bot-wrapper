@@ -15,6 +15,7 @@ import { MockCHannelMessageFunctionalities } from './mock.channel.message.funtio
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 // import { getRequestOptions } from '../utils/helper';
 import { ChatMessage } from '../models/chat.message.model';
+import { WhatsappRequest } from './request.format/whatsapp.request';
 
 @autoInjectable()
 @singleton()
@@ -27,8 +28,37 @@ export class MockMessageService implements platformServiceInterface {
         private messageFunctionalitiesmockchannel?: MockCHannelMessageFunctionalities,
         private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
-    handleMessage(requestBody: any, channel: string) {
-        return this.messageFlow.checkTheFlow(requestBody, channel, this);
+    async handleMessage(requestBody: any, channel: string) {
+        const whatsappRequestObj = new WhatsappRequest(requestBody);
+        const generatorGetMessage = whatsappRequestObj.getMessages();
+        const generatorGetContacts = whatsappRequestObj.getContacts();
+        let done = false;
+        while (done === false){
+            const messageNextObject = generatorGetMessage.next();
+            const contactsNextObject = generatorGetContacts.next();
+            const messageObj = messageNextObject.value;
+            const contactsObj = contactsNextObject.value;
+            done = messageNextObject.done;
+            let messagetoDialogflow;
+            if (messageObj){
+                if (messageObj.isText() === true) {
+                    messagetoDialogflow = await this.messageFunctionalitiesmockchannel.textMessageFormat(messageObj);
+                }
+                else {
+                    throw new Error("Message is not text");
+                }
+            }
+            else {
+
+                //messageObj is void
+            }
+            if (contactsObj){
+                messagetoDialogflow.platformId = contactsObj.getPlatformId();
+                messagetoDialogflow.name = contactsObj.getUserName();
+            }
+            console.log("message to dialogflow", messagetoDialogflow);
+            return this.messageFlow.checkTheFlow(messagetoDialogflow, channel, this);
+        }
     }
 
     sendManualMesage(msg: any) {
@@ -86,7 +116,7 @@ export class MockMessageService implements platformServiceInterface {
     postResponse = async (message: Imessage , processedResponse: IprocessedDialogflowResponseFormat) => {
         // eslint-disable-next-line init-declarations
         let reaponse_message: Iresponse;
-        const mock_whatsapp_id = message.sessionId;
+        const mock_whatsapp_id = message.platformId;
         const mock_input_message = message.messageBody;
         const mock_user_name = message.name;
         const mock_chat_message_id = message.chat_message_id;

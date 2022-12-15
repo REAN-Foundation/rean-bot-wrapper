@@ -10,7 +10,7 @@ import { EmojiFilter } from './filter.message.for.emoji.service';
 import { AwsS3manager } from "./aws.file.upload.service";
 import { UserLanguage } from "./set.language";
 import needle from 'needle';
-
+import { Message } from './request.format/whatsapp.message.format';
 @autoInjectable()
 export class MessageFunctionalities implements getMessageFunctionalities {
 
@@ -19,75 +19,81 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         private awsS3manager?: AwsS3manager,
         private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
-    async textMessageFormat (msg, type) {
-        let emojiFilteredMessage;
-        const returnMessage = this.inputMessageFormat(msg);
-        if (type === "reaction"){
-            emojiFilteredMessage = await this.emojiFilter.checkForEmoji(msg.messages[0].reaction.emoji);
-            returnMessage.type = 'reaction';
-            returnMessage.messageBody = msg.messages[0].reaction.emoji;
-            returnMessage.whatsappResponseMessageId = msg.messages[0].reaction.message_id;
-        }
-        else {
-            emojiFilteredMessage = await this.emojiFilter.checkForEmoji(msg.messages[0].text.body);
-            // returnMessage.payload.originalMessage = emojiFilteredMessage;
-            returnMessage.messageBody = msg.messages[0].text.body;
-        }
-        // returnMessage.payload.originalMessage = emojiFilteredMessage;
+    async textMessageFormat (messageObj: Message) {
+        const messagetoDialogflow = this.inputMessageFormat(messageObj);
+        // const textObj = { messageBody: null, intent: null };
+        const text = messageObj.getText();
+        const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(text);
+        messagetoDialogflow.messageBody = text;
         if (emojiFilteredMessage === "NegativeFeedback"){
-            returnMessage.intent = "NegativeFeedback";
+            messagetoDialogflow.intent = "NegativeFeedback";
         }
-        return returnMessage;
+        return messagetoDialogflow;
     }
 
-    async locationMessageFormat (msg) {
-        const loc = `latlong:${msg.messages[0].location.latitude}-${msg.messages[0].location.longitude}`;
-        const returnMessage = this.inputMessageFormat(msg);
-        returnMessage.type = 'location';
-        returnMessage.latlong = msg.messages[0].location;
-        returnMessage.messageBody = loc;
-        return returnMessage;
+    async reactMessageFormat (messageObj: Message) {
+        const messagetoDialogflow = this.inputMessageFormat(messageObj);
+        const reaction = messageObj.getReaction();
+        const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(reaction.emoji);
+        if (emojiFilteredMessage === "NegativeFeedback"){
+            messagetoDialogflow.intent = "NegativeFeedback";
+        }
+        messagetoDialogflow.messageBody = reaction.emoji;
+        messagetoDialogflow.type = 'reaction';
+        messagetoDialogflow.whatsappResponseMessageId = reaction.messageId;
+        return messagetoDialogflow;
     }
 
-    async voiceMessageFormat (msg, type, chanel) {
+    async locationMessageFormat (messageObj) {
+        const messagetoDialogflow = this.inputMessageFormat(messageObj);
+        const loc = `latlong:${messageObj.getLocation().latitude}-${messageObj.getLocation().longitude}`;
+        messagetoDialogflow.type = 'location';
+        messagetoDialogflow.latlong = messageObj.getLocation();
+        messagetoDialogflow.messageBody = loc;
+        return messagetoDialogflow;
+    }
+
+    async voiceMessageFormat (messageObj: Message, chanel) {
+
         let mediaUrl;
-        let preferredLanguageRequest;
+        let userId;
         if (chanel === "whatsappMeta") {
-            mediaUrl = await this.GetWhatsappMetaMedia('audio', msg.messages[0].url, '_voice.ogg');
+            mediaUrl = await this.GetWhatsappMetaMedia('audio', messageObj.getVoiceUrl(), '_voice.ogg');
             // mediaUrl = msg.messages[0].url;
-            preferredLanguageRequest = msg.messages[0].from;
+            userId = messageObj.getUserId();
         } else {
-            mediaUrl = await this.GetWhatsappMedia('audio', msg.messages[0][type].id, '_voice.ogg');
-            preferredLanguageRequest = msg.messages[0].from;
+            mediaUrl = await this.GetWhatsappMedia('audio', messageObj.getVoiceId(), '_voice.ogg');
+            userId = messageObj.getUserId();
         }
 
-        const preferredLanguage = await new UserLanguage().getPreferredLanguageofSession(preferredLanguageRequest);
+        const preferredLanguage = await new UserLanguage().getPreferredLanguageofSession(userId);
         const ConvertedToText = await this.speechtotext.SendSpeechRequest(mediaUrl, "whatsapp", preferredLanguage);
         if (preferredLanguage !== "null"){
             if (ConvertedToText) {
-                const returnMessage = this.inputMessageFormat(msg);
-                returnMessage.messageBody = String(ConvertedToText);
-                returnMessage.type = 'voice';
-                return returnMessage;
+                const messagetoDialogflow = this.inputMessageFormat(messageObj);
+                messagetoDialogflow.messageBody = String(ConvertedToText);
+                messagetoDialogflow.type = 'voice';
+                return messagetoDialogflow;
             }
             else {
-                const returnMessage = this.inputMessageFormat(msg);
-                returnMessage.messageBody = " ";
-                returnMessage.type = 'text';
-                return returnMessage;
+                const messagetoDialogflow = this.inputMessageFormat(messageObj);
+                messagetoDialogflow.messageBody = " ";
+                messagetoDialogflow.type = 'text';
+                return messagetoDialogflow;
             }
         }
         else {
-            const returnMessage = this.inputMessageFormat(msg);
-            returnMessage.messageBody = "Need to set language";
-            returnMessage.type = 'text';
-            return returnMessage;
+            const messagetoDialogflow = this.inputMessageFormat(messageObj);
+            messagetoDialogflow.messageBody = "Need to set language";
+            messagetoDialogflow.type = 'text';
+            return messagetoDialogflow;
         }
     }
 
-    async imageMessaegFormat(msg) {
+    async imageMessaegFormat(messageObj: Message) {
+
         let response: any = {};
-        response = await this.GetWhatsappMedia('photo', msg.messages[0].image.id, '.jpg');
+        response = await this.GetWhatsappMedia('photo', messageObj.getImageId(), '.jpg');
         console.log("response from GetWhatsappMedia", response);
         const location = await this.awsS3manager.uploadFile(response);
         console.log("response image whatsapp", location);
@@ -96,39 +102,39 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         const urlParse = url.parse(location);
         const imageUrl = (urlParse.protocol + urlParse.hostname + urlParse.pathname);
         if (response){
-            const returnMessage = this.inputMessageFormat(msg);
-            returnMessage.type = 'image';
-            returnMessage.messageBody = imageUrl;
-            returnMessage.imageUrl = location;
-            return returnMessage;
+            const messagetoDialogflow = this.inputMessageFormat(messageObj);
+            messagetoDialogflow.type = 'image';
+            messagetoDialogflow.messageBody = imageUrl;
+            messagetoDialogflow.imageUrl = location;
+            return messagetoDialogflow;
         } else {
             throw new Error("Unable to find the image file path");
         }
         
     }
 
-    async interactiveMessaegFormat(msg) {
-        const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(msg.messages[0].interactive.button_reply.title);
-        const returnMessage = this.inputMessageFormat(msg);
-        returnMessage.messageBody = emojiFilteredMessage;
-        returnMessage.intent = msg.messages[0].interactive.button_reply.id;
-        return returnMessage;
+    async interactiveMessaegFormat(messageObj: Message) {
+        const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(messageObj.getinteractivebutton().title);
+        const messagetoDialogflow = this.inputMessageFormat(messageObj);
+        messagetoDialogflow.messageBody = emojiFilteredMessage;
+        messagetoDialogflow.intent = messageObj.getinteractivebutton().id;
+        return messagetoDialogflow;
     }
 
-    async interactiveListMessaegFormat(msg){
-        const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(msg.messages[0].interactive.list_reply.title);
-        const returnMessage = this.inputMessageFormat(msg);
-        returnMessage.messageBody = emojiFilteredMessage;
-        returnMessage.intent = msg.messages[0].interactive.list_reply.id;
-        return returnMessage;
+    async interactiveListMessaegFormat(messageObj: Message){
+        const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(messageObj.getinteractivelist().title);
+        const messagetoDialogflow = this.inputMessageFormat(messageObj);
+        messagetoDialogflow.messageBody = emojiFilteredMessage;
+        messagetoDialogflow.intent = messageObj.getinteractivelist().id;
+        return messagetoDialogflow;
     }
 
-    async interactiveButtonMessaegFormat(msg){
-        const message = msg.messages[0].interactive.button_reply.title;
-        const returnMessage = this.inputMessageFormat(msg);
-        returnMessage.messageBody = message;
-        returnMessage.intent = msg.messages[0].interactive.button_reply.id;
-        return returnMessage;
+    async interactiveButtonMessaegFormat(messageObj: Message){
+        const message = messageObj.getinteractivebutton().title;
+        const messagetoDialogflow = this.inputMessageFormat(messageObj);
+        messagetoDialogflow.messageBody = message;
+        messagetoDialogflow.intent = messageObj.getinteractivebutton().id;
+        return messagetoDialogflow;
     }
 
     /*retrive whatsapp media */
@@ -210,24 +216,24 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         });
     };
 
-    inputMessageFormat (message){
-        const response_message: Imessage = {
-            name                      : message.contacts[0].profile.name,
+    inputMessageFormat (messageObj){
+        const messagetoDialogflow: Imessage = {
+            name                      : null,
             platform                  : "Whatsapp",
-            chat_message_id           : message.messages[0].id,
+            chat_message_id           : messageObj.getChatId(),
             direction                 : "In",
             messageBody               : null,
             imageUrl                  : null,
-            sessionId                 : message.contacts[0].wa_id,
+            platformId                : null,
             replyPath                 : null,
             latlong                   : null,
             type                      : "text",
             intent                    : null,
             whatsappResponseMessageId : null,
-            contextId                 : message.messages[0].context ? message.messages[0].context.id : null,
+            contextId                 : messageObj.getContextId(),
             telegramResponseMessageId : null
         };
-        return response_message;
+        return messagetoDialogflow;
     }
 
     sanitizeMessage = (message) => {

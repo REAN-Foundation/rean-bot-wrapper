@@ -22,7 +22,7 @@ export class DialogflowResponseService {
                 dialogflow = dialogflowv2;
             }
             const dialogflow_language = "en-US";
-            const userId: string = completeMessage.sessionId === null ? v4() : completeMessage.sessionId;
+            const userId: string = completeMessage.platformId === null ? v4() : completeMessage.platformId;
             const location = completeMessage.latlong === null ? v4() : completeMessage.latlong;
 
             let sessionClient = null;
