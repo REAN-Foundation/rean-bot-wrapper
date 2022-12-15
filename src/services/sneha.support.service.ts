@@ -3,7 +3,7 @@ import { autoInjectable, singleton } from 'tsyringe';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { MessageFlow } from './get.put.message.flow.service';
 import { ResponseHandler } from '../utils/response.handler';
-import { RHGRequest } from './request.format/rhg.mobile.app';
+import { RHGMessageToDialogflow } from './rhg.message.to.dialogflow';
 
 @autoInjectable()
 @singleton()
@@ -11,7 +11,9 @@ export class snehaMessagePlatformService implements platformServiceInterface{
 
     public res;
 
-    constructor(private messageFlow?: MessageFlow,private responseHandler?: ResponseHandler,
+    constructor(private messageFlow?: MessageFlow,
+        private responseHandler?: ResponseHandler,
+        private rhgMessageToDialogflow?: RHGMessageToDialogflow
     ) {
 
     }
@@ -32,41 +34,9 @@ export class snehaMessagePlatformService implements platformServiceInterface{
         console.log("Method not implemented.");
     }
 
-    handleMessage(msg, client) {
-        const generatorRhgObj = new RHGRequest(msg);
-        const rhgGetMessageObj = generatorRhgObj.getMessage();
-        let done = false;
-        while (done === false) {
-            const rhgNextRequestObj = rhgGetMessageObj.next();
-            const rhgRequestBodyObj = rhgNextRequestObj.value;
-            done = rhgNextRequestObj.done;
-            let messagetoDialogflow: Imessage;
-            if (rhgRequestBodyObj){
-                const phoneNumber = rhgRequestBodyObj.getPhoneNumber();
-                if (rhgRequestBodyObj.isText() === true) {
-                    const message = rhgRequestBodyObj.getMessage(); //+ ` PhoneNumber is ${phoneNumber}`;
-                    messagetoDialogflow = {
-                        name                      : null,
-                        platform                  : "Sneha_Support",
-                        chat_message_id           : null,
-                        direction                 : "In",
-                        messageBody               : message,
-                        imageUrl                  : null,
-                        platformId                : phoneNumber,
-                        replyPath                 : phoneNumber,
-                        latlong                   : null,
-                        type                      : 'text' ,
-                        intent                    : null,
-                        whatsappResponseMessageId : null,
-                        contextId                 : null,
-                        telegramResponseMessageId : null
-                    };
-                }
-            }
-            
-            return this.messageFlow.checkTheFlow(messagetoDialogflow, client, this);
-        }
-        
+    async handleMessage(msg, client) {
+        const messagetoDialogflow = await this.rhgMessageToDialogflow.messageToDialogflow(msg);
+        return this.messageFlow.checkTheFlow(messagetoDialogflow, client, this);
     }
 
     postResponse (message, response: IprocessedDialogflowResponseFormat ){
