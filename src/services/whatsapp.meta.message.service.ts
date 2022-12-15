@@ -347,7 +347,17 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
                     listOfPostDataMeta.push(postDatatemp);
                 }
             }
+            const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+            let delayClientPreference;
+            if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("DELAY_IN_RESPONSE")) {
+                delayClientPreference = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DELAY_IN_RESPONSE");
+            }
+            else {
+                delayClientPreference = 500;
+            }
+            
             for (let i = 0; i < listOfPostDataMeta.length; i++){
+                await delay(delayClientPreference);
                 await this.postRequestMessages(listOfPostDataMeta[i]);
             }
         });
