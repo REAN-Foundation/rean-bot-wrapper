@@ -76,7 +76,7 @@ export class FeedbackService implements feedbackInterface {
                     }
                     const preferredSupportChannel = this.clientEnvironmentProviderService.getClientEnvironmentVariable("SUPPORT_CHANNEL");
                     if (preferredSupportChannel === "ClickUp"){
-                        const clickUpResponse:any = await this.clickuptask.createTask(response, responseUserFeedback);
+                        const clickUpResponse:any = await this.clickuptask.createTask(response, responseUserFeedback,null,null);
                         const messageContent = listOfUserRequestdata[listOfUserRequestdata.length - 1].messageContent;
                         if (messageContent.length > 5){
                             const comment = messageContent;
