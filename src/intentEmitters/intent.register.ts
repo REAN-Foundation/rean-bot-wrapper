@@ -48,6 +48,8 @@ import { ScheduleDonation } from './intentListeners/bloodWarrior/schedule.donati
 import { VerifyBloodBridge } from './intentListeners/bloodWarrior/Verify.bridge.listener';
 import { ScheduleDonationElligible } from './intentListeners/bloodWarrior/schedule.donation.eligible.listener';
 import { ScheduleDonationTakeValues } from './intentListeners/bloodWarrior/schedule.donation.take.values.listener';
+import { DonationRequestYesListener } from './intentListeners/bloodWarrior/donation.request.yes.listener';
+import { AcceptVolunteerRequestListener } from './intentListeners/bloodWarrior/accept.volunteer.request.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -165,6 +167,8 @@ export class IntentRegister {
         IntentEmitter.registerListener('Blood_Bridge_Verify', VerifyBloodBridge);
         IntentEmitter.registerListener('Blood_Bridge_Verify_Take_Values', ScheduleDonationTakeValues);
         IntentEmitter.registerListener('Donation_Request_BloodBridge', BloodBridgeStatusListener);
+        IntentEmitter.registerListener('Donation_Request_Yes', DonationRequestYesListener);
+        IntentEmitter.registerListener('Accept_Volunteer_Request', AcceptVolunteerRequestListener);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
