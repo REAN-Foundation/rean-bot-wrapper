@@ -25,39 +25,40 @@ export class MockMessageService implements platformServiceInterface {
 
     constructor(@inject(delay(() => MessageFlow)) public messageFlow,
         private awsS3manager?: AwsS3manager,
-        private messageFunctionalitiesmockchannel?: MockCHannelMessageFunctionalities,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+        private messageFunctionalitiesmockchannel?: MockCHannelMessageFunctionalities){}
 
     async handleMessage(requestBody: any, channel: string) {
-        const whatsappRequestObj = new WhatsappRequest(requestBody);
-        const generatorGetMessage = whatsappRequestObj.getMessages();
-        const generatorGetContacts = whatsappRequestObj.getContacts();
+        const mockRequestObj = new WhatsappRequest(requestBody);
+        const generatorGetMessage = mockRequestObj.getMessages();
+        const generatorGetContacts = mockRequestObj.getContacts();
         let done = false;
         while (done === false){
             const messageNextObject = generatorGetMessage.next();
             const contactsNextObject = generatorGetContacts.next();
-            const messageObj = messageNextObject.value;
-            const contactsObj = contactsNextObject.value;
+            const mockMessageObj = messageNextObject.value;
+            const mockContactsObj = contactsNextObject.value;
             done = messageNextObject.done;
             let messagetoDialogflow;
-            if (messageObj){
-                if (messageObj.isText() === true) {
-                    messagetoDialogflow = await this.messageFunctionalitiesmockchannel.textMessageFormat(messageObj);
+            if (mockMessageObj){
+                const type = mockMessageObj.getType();
+                if (type) {
+                    const classmethod = `${type}MessageFormat`;
+                    messagetoDialogflow = await this.messageFunctionalitiesmockchannel[classmethod](mockMessageObj);
                 }
                 else {
-                    throw new Error("Message is not text");
+                    throw new Error(`${type}Message type is not known`);
                 }
             }
             else {
 
                 //messageObj is void
             }
-            if (contactsObj){
-                messagetoDialogflow.platformId = contactsObj.getPlatformId();
-                messagetoDialogflow.name = contactsObj.getUserName();
+            if (mockContactsObj){
+                messagetoDialogflow.platformId = mockContactsObj.getPlatformId();
+                messagetoDialogflow.name = mockContactsObj.getUserName();
             }
             console.log("message to dialogflow", messagetoDialogflow);
-            return this.messageFlow.checkTheFlow(messagetoDialogflow, channel, this);
+            await this.messageFlow.checkTheFlow(messagetoDialogflow, channel, this);
         }
     }
 

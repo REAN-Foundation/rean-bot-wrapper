@@ -6,14 +6,9 @@ export class Message implements IWhatsappRequestMessageEntities {
 
     private list;
 
-    isText() {
-        console.log(this.list);
-        if (this.list.type === "text"){
-            return true;
-        }
-        else {
-            return false;
-        }
+    getType() {
+        const currentListOfTypes = ["text","reaction","location","image","list_reply","voice","audio"];
+        return currentListOfTypes.includes(this.list.type) ? this.list.type : undefined;
     }
 
     getContextId() {
@@ -41,16 +36,6 @@ export class Message implements IWhatsappRequestMessageEntities {
         return userId;
     }
 
-    isReaction() {
-        console.log(this.list);
-        if (this.list.type === "reaction"){
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-
     getReaction() {
         const reaction = {
             emoji     : this.list.reaction.emoji,
@@ -61,15 +46,6 @@ export class Message implements IWhatsappRequestMessageEntities {
     getImageId() {
         const image = this.list.image.id;
         return image;
-    }
-
-    isType(type:string) {
-        if (this.list.type === type){
-            return true;
-        }
-        else {
-            return false;
-        }
     }
 
     getLocation() {
@@ -89,15 +65,6 @@ export class Message implements IWhatsappRequestMessageEntities {
     getAudioId() {
         const audioId = this.list.audio.id;
         return audioId;
-    }
-
-    setAudioUrl(mediaUrl) {
-        this.list.url = mediaUrl;
-    }
-
-    getVoiceUrl() {
-        const voiceUrl = this.list.url;
-        return voiceUrl;
     }
 
     getinteractivebutton() {

@@ -26,7 +26,6 @@ export class TelegramMessageService implements platformServiceInterface{
     // public req;
     constructor(@inject(delay(() => MessageFlow)) public messageFlow,
         private awsS3manager?: AwsS3manager,
-        private telegramMessageServiceFunctionalities?: TelegramMessageServiceFunctionalities,
         private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         private telegramMessageToDialogflow?: TelegramMessageToDialogflow,
         @inject("telegram.authenticator") private clientAuthenticator?: clientAuthenticator) {
@@ -48,8 +47,21 @@ export class TelegramMessageService implements platformServiceInterface{
 
     init(){
         this._telegram.on('message', async msg => {
-            const messagetoDialogflow = await this.telegramMessageToDialogflow.messageToDialogflow(msg);
-            this.messageFlow.checkTheFlow(messagetoDialogflow, "telegram", this);
+            const generatorTelegramMessage= await this.telegramMessageToDialogflow.messageToDialogflow(msg);
+            let done = false;
+            const telegramMessages = [];
+            let telegramMessagetoDialogflow: Imessage;
+            while (done === false) {
+                const nextgeneratorObj = generatorTelegramMessage.next();
+                telegramMessagetoDialogflow = (await nextgeneratorObj).value;
+                done = (await nextgeneratorObj).done;
+                telegramMessages.push(telegramMessagetoDialogflow);
+            }
+            for (telegramMessagetoDialogflow of telegramMessages){
+                if (telegramMessagetoDialogflow) {
+                    await this.messageFlow.checkTheFlow(telegramMessagetoDialogflow, "telegram", this);
+                }
+            }
         });
     }
 

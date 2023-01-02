@@ -38,8 +38,22 @@ export class platformMessageService implements platformServiceInterface{
     }
 
     async handleMessage(msg, client) {
-        const messagetoDialogflow = await this.rhgMessageToDialogflow.messageToDialogflow(msg);
-        return this.messageFlow.checkTheFlow(messagetoDialogflow, client, this);
+        const generatorRHGMessage = this.rhgMessageToDialogflow.messageToDialogflow(msg);
+        let done = false;
+        const rhgMessages = [];
+        let rhgMessagetoDialogflow: Imessage;
+        while (done === false) {
+            const nextgeneratorObj = generatorRHGMessage.next();
+            rhgMessagetoDialogflow = (await nextgeneratorObj).value;
+            done = (await nextgeneratorObj).done;
+            rhgMessages.push(rhgMessagetoDialogflow);
+        }
+        for (rhgMessagetoDialogflow of rhgMessages){
+            if (rhgMessagetoDialogflow) {
+                await this.messageFlow.checkTheFlow(rhgMessagetoDialogflow, client, this);
+            }
+        }
+        
     }
 
     postResponse (message, response: IprocessedDialogflowResponseFormat ){

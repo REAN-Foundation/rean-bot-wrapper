@@ -35,8 +35,21 @@ export class snehaMessagePlatformService implements platformServiceInterface{
     }
 
     async handleMessage(msg, client) {
-        const messagetoDialogflow = await this.rhgMessageToDialogflow.messageToDialogflow(msg);
-        return this.messageFlow.checkTheFlow(messagetoDialogflow, client, this);
+        const generatorRHGMessage = await this.rhgMessageToDialogflow.messageToDialogflow(msg);
+        let done = false;
+        const snehaMessages = [];
+        let snehaMessagetoDialogflow: Imessage;
+        while (done === false) {
+            const nextgeneratorObj = generatorRHGMessage.next();
+            snehaMessagetoDialogflow = (await nextgeneratorObj).value;
+            done = (await nextgeneratorObj).done;
+            snehaMessages.push(snehaMessagetoDialogflow);
+        }
+        for (snehaMessagetoDialogflow of snehaMessages){
+            if (snehaMessagetoDialogflow) {
+                await this.messageFlow.checkTheFlow(snehaMessagetoDialogflow, client, this);
+            }
+        }
     }
 
     postResponse (message, response: IprocessedDialogflowResponseFormat ){

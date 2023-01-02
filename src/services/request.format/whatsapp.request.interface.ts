@@ -3,7 +3,6 @@ export interface IWhatsappRequestMessageEntities {
     getText()
     getImageId()
     getVoiceId()
-    getVoiceUrl()
     getLocation()
     getReaction()
     getinteractivebutton()

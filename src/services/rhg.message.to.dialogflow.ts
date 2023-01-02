@@ -3,7 +3,7 @@ import { RHGRequest } from "./request.format/rhg.mobile.app";
 
 export class RHGMessageToDialogflow{
 
-    async messageToDialogflow(msg: any) {
+    async *messageToDialogflow(msg: any) {
         const generatorRhgObj = new RHGRequest(msg);
         const rhgGetMessageObj = generatorRhgObj.getMessage();
         let done = false;
@@ -11,11 +11,11 @@ export class RHGMessageToDialogflow{
             const rhgNextRequestObj = rhgGetMessageObj.next();
             const rhgRequestBodyObj = rhgNextRequestObj.value;
             done = rhgNextRequestObj.done;
-            let messagetoDialogflow: Imessage;
+            let messagetoDialogflow;
             if (rhgRequestBodyObj){
                 const phoneNumber = rhgRequestBodyObj.getPhoneNumber();
                 if (rhgRequestBodyObj.isText() === true) {
-                    const message = rhgRequestBodyObj.getMessage(); //+ ` PhoneNumber is ${phoneNumber}`;
+                    const message = rhgRequestBodyObj.getMessage();
                     messagetoDialogflow = {
                         name                      : null,
                         platform                  : "Rean_Support",
@@ -34,8 +34,7 @@ export class RHGMessageToDialogflow{
                     };
                 }
             }
-            
-            return messagetoDialogflow;
+            yield messagetoDialogflow;
         }
     }
 }

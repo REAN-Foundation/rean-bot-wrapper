@@ -11,6 +11,7 @@ import { AwsS3manager } from "./aws.file.upload.service";
 import { UserLanguage } from "./set.language";
 import needle from 'needle';
 import { Message } from './request.format/whatsapp.message.format';
+import { getRequestOptions } from "../utils/helper";
 @autoInjectable()
 export class MessageFunctionalities implements getMessageFunctionalities {
 
@@ -19,9 +20,8 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         private awsS3manager?: AwsS3manager,
         private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
-    async textMessageFormat (messageObj: Message) {
+    async textMessageFormat (messageObj:Message) {
         const messagetoDialogflow = this.inputMessageFormat(messageObj);
-        // const textObj = { messageBody: null, intent: null };
         const text = messageObj.getText();
         const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(text);
         messagetoDialogflow.messageBody = text;
@@ -31,7 +31,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         return messagetoDialogflow;
     }
 
-    async reactMessageFormat (messageObj: Message) {
+    async reactionMessageFormat (messageObj: Message) {
         const messagetoDialogflow = this.inputMessageFormat(messageObj);
         const reaction = messageObj.getReaction();
         const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(reaction.emoji);
@@ -44,7 +44,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         return messagetoDialogflow;
     }
 
-    async locationMessageFormat (messageObj) {
+    async locationMessageFormat (messageObj: Message) {
         const messagetoDialogflow = this.inputMessageFormat(messageObj);
         const loc = `latlong:${messageObj.getLocation().latitude}-${messageObj.getLocation().longitude}`;
         messagetoDialogflow.type = 'location';
@@ -53,44 +53,18 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         return messagetoDialogflow;
     }
 
-    async voiceMessageFormat (messageObj: Message, chanel) {
-
-        let mediaUrl;
-        let userId;
-        if (chanel === "whatsappMeta") {
-            mediaUrl = await this.GetWhatsappMetaMedia('audio', messageObj.getVoiceUrl(), '_voice.ogg');
-            // mediaUrl = msg.messages[0].url;
-            userId = messageObj.getUserId();
-        } else {
-            mediaUrl = await this.GetWhatsappMedia('audio', messageObj.getVoiceId(), '_voice.ogg');
-            userId = messageObj.getUserId();
-        }
-
-        const preferredLanguage = await new UserLanguage().getPreferredLanguageofSession(userId);
-        const ConvertedToText = await this.speechtotext.SendSpeechRequest(mediaUrl, "whatsapp", preferredLanguage);
-        if (preferredLanguage !== "null"){
-            if (ConvertedToText) {
-                const messagetoDialogflow = this.inputMessageFormat(messageObj);
-                messagetoDialogflow.messageBody = String(ConvertedToText);
-                messagetoDialogflow.type = 'voice';
-                return messagetoDialogflow;
-            }
-            else {
-                const messagetoDialogflow = this.inputMessageFormat(messageObj);
-                messagetoDialogflow.messageBody = " ";
-                messagetoDialogflow.type = 'text';
-                return messagetoDialogflow;
-            }
-        }
-        else {
-            const messagetoDialogflow = this.inputMessageFormat(messageObj);
-            messagetoDialogflow.messageBody = "Need to set language";
-            messagetoDialogflow.type = 'text';
-            return messagetoDialogflow;
-        }
+    async voiceMessageFormat (messageObj: Message) {
+        const mediaUrl = await this.GetWhatsappMedia('audio', messageObj.getVoiceId(), '_voice.ogg');
+        return await this.commonVoiceAudioFormat(messageObj, mediaUrl);
     }
 
-    async imageMessaegFormat(messageObj: Message) {
+    async audioMessageFormat (messageObj: Message) {
+        let mediaUrl = await this.getMetaMediaUrl(messageObj.getAudioId());
+        mediaUrl = await this.GetWhatsappMetaMedia('audio', mediaUrl, '_voice.ogg');
+        return await this.commonVoiceAudioFormat(messageObj, mediaUrl);
+    }
+
+    async imageMessageFormat(messageObj: Message) {
 
         let response: any = {};
         response = await this.GetWhatsappMedia('photo', messageObj.getImageId(), '.jpg');
@@ -253,5 +227,48 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         // console.log("msg  has been santised", message);
         return message;
     };
+
+    async commonVoiceAudioFormat(messageObj,mediaUrl) {
+        const userId = messageObj.getUserId();
+        const preferredLanguage = await new UserLanguage().getPreferredLanguageofSession(userId);
+        const ConvertedToText = await this.speechtotext.SendSpeechRequest(mediaUrl, "whatsapp", preferredLanguage);
+        if (preferredLanguage !== "null"){
+            if (ConvertedToText) {
+                const messagetoDialogflow = this.inputMessageFormat(messageObj);
+                messagetoDialogflow.messageBody = String(ConvertedToText);
+                messagetoDialogflow.type = 'voice';
+                return messagetoDialogflow;
+            }
+            else {
+                const messagetoDialogflow = this.inputMessageFormat(messageObj);
+                messagetoDialogflow.messageBody = " ";
+                messagetoDialogflow.type = 'text';
+                return messagetoDialogflow;
+            }
+        }
+        else {
+            const messagetoDialogflow = this.inputMessageFormat(messageObj);
+            messagetoDialogflow.messageBody = "Need to set language";
+            messagetoDialogflow.type = 'text';
+            return messagetoDialogflow;
+        }
+    }
+
+    async getMetaMediaUrl(mediaId){
+        try {
+            const options = getRequestOptions();
+            const token = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
+            options.headers['Content-Type'] = 'application/json';
+            options.headers['Authorization'] = `Bearer ${token}`;
+            const hostname = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
+            const path = `/v14.0/${mediaId}`;
+            const apiUrl_meta = hostname + path;
+            const response = await needle("get",apiUrl_meta, options);
+            return response.body.url;
+        }
+        catch (error) {
+            console.log("error", error);
+        }
+    }
 
 }

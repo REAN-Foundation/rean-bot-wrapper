@@ -8,7 +8,6 @@ import { autoInjectable } from "tsyringe";
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { AwsS3manager } from "./aws.file.upload.service";
 import { UserLanguage } from './set.language';
-import { SequelizeClient } from '../connection/sequelizeClient';
 import path from 'path';
 import fs from 'fs';
 import { Message } from './request.format/telegram.message.format';
@@ -75,7 +74,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         return messagetoDialogflow;
     }
 
-    async imageMessaegFormat(messageObj: Message) {
+    async photoMessageFormat(messageObj: Message) {
         let response: any = {};
         response = await this.GetTelegramMedia(messageObj.getPhotoFileId());
         console.log("response image get telegram", response);

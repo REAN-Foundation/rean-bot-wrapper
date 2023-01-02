@@ -18,6 +18,18 @@ export class Message implements ItelegramMessageEntities {
         return this.reqBody.message_id;
     }
 
+    getType() {
+        const currentListOfTypes = ["text","location","photo","voice","document"];
+        let type;
+        for (const ele of currentListOfTypes) {
+            if (this.isType(ele)){
+                type = ele;
+                break;
+            }
+        }
+        return type;
+    }
+
     isType(type:string) {
         console.log(this.reqBody);
         if (this.reqBody[type]){

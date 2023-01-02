@@ -1,15 +1,13 @@
 import { autoInjectable } from "tsyringe";
 import { TelegramRequest } from "./request.format/telegram.request";
-import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 import { TelegramMessageServiceFunctionalities } from "./telegram.message.service.functionalities";
 
 @autoInjectable()
 export class TelegramMessageToDialogflow {
 
-    constructor (private messageFunctionalities?: TelegramMessageServiceFunctionalities,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService,) {}
+    constructor (private messageFunctionalities?: TelegramMessageServiceFunctionalities) {}
 
-    async messageToDialogflow(requestBody: any) {
+    async *messageToDialogflow(requestBody: any) {
         const telegramRequestObject = new TelegramRequest(requestBody);
         const getMessageObj = telegramRequestObject.getMessage();
         let done = false;
@@ -19,23 +17,13 @@ export class TelegramMessageToDialogflow {
             done = messageNextObject.done;
             let messagetoDialogflow;
             if (messageObj){
-                if (messageObj.isType("text") === true) {
-                    messagetoDialogflow = await this.messageFunctionalities.textMessageFormat(messageObj);
-                }
-                else if (messageObj.isType('location') === true ) {
-                    messagetoDialogflow = await this.messageFunctionalities.locationMessageFormat(messageObj);
-                }
-                else if (messageObj.isType('photo') === true ) {
-                    messagetoDialogflow = await this.messageFunctionalities.imageMessaegFormat(messageObj);
-                }
-                else if (messageObj.isType('voice') === true ) {
-                    messagetoDialogflow = await this.messageFunctionalities.voiceMessageFormat(messageObj);
-                }
-                else if (messageObj.isType('document') === true ) {
-                    messagetoDialogflow = await this.messageFunctionalities.documentMessageFormat(messageObj);
+                const type = messageObj.getType();
+                if (type) {
+                    const classmethod = `${type}MessageFormat`;
+                    messagetoDialogflow = await this.messageFunctionalities[classmethod](messageObj);
                 }
                 else {
-                    throw new Error("Message is neither text, voice, location, photo nor document");
+                    throw new Error(`${type}Message type is not known`);
                 }
             }
             else {
@@ -43,7 +31,7 @@ export class TelegramMessageToDialogflow {
                 //messageObj is void
             }
             console.log("message to dialogflow", messagetoDialogflow);
-            return messagetoDialogflow;
+            yield messagetoDialogflow;
         }
     }
 }
