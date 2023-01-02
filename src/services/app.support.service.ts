@@ -1,3 +1,4 @@
+/* eslint-disable init-declarations */
 import { Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface';
 import { autoInjectable, singleton } from 'tsyringe';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
@@ -60,7 +61,6 @@ export class platformMessageService implements platformServiceInterface{
         const reansupport_Id = message.platformId;
         const image = response.message_from_dialoglow.getImageObject();
         const message_type = image.url ? "image" : "text";
-        // const raw_response_object = response.message_from_dialoglow.result && response.message_from_dialoglow.result.fulfillmentMessages ? JSON.stringify(response.message_from_dialoglow.result.fulfillmentMessages) : '';
         const intent = response.message_from_dialoglow.getIntent();
 
         const reaponse_message = { name: null,platform: "Rean_Support",chat_message_id: null,direction: "Out",message_type: message_type,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: reansupport_Id, messageText: response.processed_message[0] };

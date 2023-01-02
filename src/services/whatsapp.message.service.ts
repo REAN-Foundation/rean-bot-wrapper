@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 import http from 'https';
 import { AwsS3manager } from './aws.file.upload.service';
 import { autoInjectable, singleton, inject, delay } from 'tsyringe';
 import { MessageFlow } from './get.put.message.flow.service';
 import { MessageFunctionalities } from './whatsapp.meta.functionalities';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import needle from 'needle';
@@ -63,7 +63,6 @@ export class WhatsappMessageService extends CommonWhatsappService {
 
         return new Promise((resolve, reject) => {
             const webhookUrl = `${this.clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL")}/v1/${clientName}/whatsapp/${this.clientAuthenticator.urlToken}/receive`;
-            // console.log("whatsapp url",webhookUrl);
             const postData = JSON.stringify({
                 'url'     : webhookUrl,
                 "headers" : {
@@ -248,13 +247,13 @@ export class WhatsappMessageService extends CommonWhatsappService {
         }
         else if (messageType === "interactive-list"){
             const rows = [];
-            var header = "";
+            let header = "";
             const list = payload.fields.buttons.listValue.values;
             if (payload.fields.header){
                 header = payload.fields.header.stringValue;
             } else {
                 header = "LIST";
-            } 
+            }
             let count = 0;
             for (const lit of list){
                 let id = count;

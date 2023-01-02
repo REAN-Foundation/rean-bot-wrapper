@@ -1,4 +1,4 @@
-import { Imessage } from "../refactor/interface/message.interface";
+/* eslint-disable init-declarations */
 import { RHGRequest } from "./request.format/rhg.mobile.app";
 
 export class RHGMessageToDialogflow{
@@ -37,4 +37,5 @@ export class RHGMessageToDialogflow{
             yield messagetoDialogflow;
         }
     }
+    
 }

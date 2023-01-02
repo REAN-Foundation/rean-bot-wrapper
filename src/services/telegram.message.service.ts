@@ -1,3 +1,4 @@
+/* eslint-disable init-declarations */
 /* eslint-disable max-len */
 
 // import { DialogflowResponseService } from './dialogflow-response.service';
@@ -7,8 +8,6 @@ import { autoInjectable, singleton, inject, delay } from 'tsyringe';
 import  TelegramBot  from 'node-telegram-bot-api';
 import { MessageFlow } from './get.put.message.flow.service';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
-import { TelegramMessageServiceFunctionalities } from '../services/telegram.message.service.functionalities';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import needle from 'needle';
@@ -47,7 +46,7 @@ export class TelegramMessageService implements platformServiceInterface{
 
     init(){
         this._telegram.on('message', async msg => {
-            const generatorTelegramMessage= await this.telegramMessageToDialogflow.messageToDialogflow(msg);
+            const generatorTelegramMessage = await this.telegramMessageToDialogflow.messageToDialogflow(msg);
             let done = false;
             const telegramMessages = [];
             let telegramMessagetoDialogflow: Imessage;

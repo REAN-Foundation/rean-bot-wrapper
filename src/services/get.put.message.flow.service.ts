@@ -15,10 +15,7 @@ import { SlackMessageService } from "./slack.message.service";
 import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
 import { translateService } from './translate.service';
-import { v2 } from '@google-cloud/translate';
 import { sendApiButtonService } from './whatsappmeta.button.service';
-import { DialogflowResponseFormat } from './response.format/dialogflow.response.format';
-// import { IplatformResponseFunctionalities } from './response.format/response.interface';
 
 @autoInjectable()
 export class MessageFlow{

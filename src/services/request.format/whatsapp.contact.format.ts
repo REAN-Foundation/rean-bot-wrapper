@@ -15,5 +15,4 @@ export class Contacts implements IWhatsappRequestContactsEntities{
         return platformId;
     }
 
-
 }

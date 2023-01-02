@@ -1,8 +1,9 @@
+/* eslint-disable init-declarations */
 import { ItelegramMessageEntities } from './telegram.request.interface';
 
 export class Message implements ItelegramMessageEntities {
 
-    constructor(reqBody) {this.reqBody = reqBody;}
+    constructor(reqBody) { this.reqBody = reqBody; }
 
     private reqBody;
 

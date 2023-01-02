@@ -1,3 +1,4 @@
+/* eslint-disable init-declarations */
 import { autoInjectable } from "tsyringe";
 import { TelegramRequest } from "./request.format/telegram.request";
 import { TelegramMessageServiceFunctionalities } from "./telegram.message.service.functionalities";
@@ -34,4 +35,5 @@ export class TelegramMessageToDialogflow {
             yield messagetoDialogflow;
         }
     }
+
 }

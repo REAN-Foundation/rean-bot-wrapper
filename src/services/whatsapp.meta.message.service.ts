@@ -1,3 +1,4 @@
+/* eslint-disable init-declarations */
 /* eslint-disable max-len */
 import { AwsS3manager } from './aws.file.upload.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -68,6 +69,7 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
 
         // console.log("message type",messageType + imageLink);
         console.log("This is the payload", payload);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const messageBody = this.messageFunctionalitiesmeta.sanitizeMessage(message);
         const postDataMeta = this.postDataFormatWhatsapp(contact);
         if (messageType === "image") {
@@ -220,7 +222,7 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
     };
 
     SendPayloadMessageMeta = async (contact: number | string, imageLink: string, payloadContent: any) => {
-        return new Promise(async(resolve) => {
+        return new Promise(async() => {
             const listOfPostDataMeta = [];
             for (let i = 0; i < payloadContent.length; i++){
                 const postDataMeta = this.postDataFormatWhatsapp(contact);

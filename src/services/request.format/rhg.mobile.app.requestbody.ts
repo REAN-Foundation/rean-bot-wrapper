@@ -2,7 +2,7 @@ export class RHGAppRequestBody {
 
     constructor(reqBody){ this.reqBody = reqBody; }
 
-    private reqBody
+    private reqBody;
 
     getPhoneNumber() {
         const phoneNumber:string = (this.reqBody.phoneNumber).toString();
@@ -25,4 +25,5 @@ export class RHGAppRequestBody {
     getMessage() {
         return this.reqBody.message;
     }
+
 }

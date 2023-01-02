@@ -1,3 +1,4 @@
+/* eslint-disable init-declarations */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 import { AwsS3manager } from './aws.file.upload.service';
@@ -112,4 +113,5 @@ export class CommonWhatsappService implements platformServiceInterface {
         };
         return response_message;
     }
+    
 }

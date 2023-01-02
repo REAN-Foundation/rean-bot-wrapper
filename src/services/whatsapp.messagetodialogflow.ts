@@ -1,3 +1,4 @@
+/* eslint-disable init-declarations */
 import { WhatsappRequest } from "./request.format/whatsapp.request";
 import { MessageFunctionalities } from './whatsapp.meta.functionalities';
 import { autoInjectable } from "tsyringe";

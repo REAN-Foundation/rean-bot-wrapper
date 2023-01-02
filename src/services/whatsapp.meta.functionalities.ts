@@ -169,13 +169,13 @@ export class MessageFunctionalities implements getMessageFunctionalities {
                 }
             };
 
-            try { 
-                const request = needle.get(mediaUrl, headers, function(err, resp, body) { 
+            try {
+                needle.get(mediaUrl, headers, function(err, resp, body) {
                     if (err){
                         console.log('FAiled to REad File');
                     }
                     const file_name = `${type}/` + Date.now() + `${extension}`;
-                    fs.writeFile('./' + file_name,body, err => { 
+                    fs.writeFile('./' + file_name,body, err => {
                         if (err) {
                             console.log(err);
                             reject(err);
@@ -184,7 +184,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
                         }
                     } );
                 });
-            } catch (err) { 
+            } catch (err) {
                 console.log(err);
             }
         });
