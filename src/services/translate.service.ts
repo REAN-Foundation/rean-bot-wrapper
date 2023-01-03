@@ -31,7 +31,7 @@ export class translateService{
             detected_language = await this.checkLanguage(detected_language);
             return detected_language;
         }
-    }
+    };
 
     translateMessage = async (messageType, message:string, sessionId) => {
         const translate = new v2.Translate(this.obj);
