@@ -6,7 +6,7 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 import { Imessage } from '../refactor/interface/message.interface';
 let dialogflow = require('@google-cloud/dialogflow');
 const dialogflowv2 = require('@google-cloud/dialogflow').v2beta1;
-const {struct} = require('pb-util');
+const { struct } = require('pb-util');
 import { DialogflowResponseFormat } from './response.format/dialogflow.response.format';
 
 @injectable()
@@ -22,7 +22,7 @@ export class DialogflowResponseService {
                 dialogflow = dialogflowv2;
             }
             const dialogflow_language = "en-US";
-            const userId: string = completeMessage.sessionId === null ? v4() : completeMessage.sessionId;
+            const userId: string = completeMessage.platformId === null ? v4() : completeMessage.platformId;
             const location = completeMessage.latlong === null ? v4() : completeMessage.latlong;
 
             let sessionClient = null;
@@ -68,7 +68,7 @@ export class DialogflowResponseService {
                     },
                 },
                 queryParams : {
-                    payload : struct.encode({source: platform, userId: userId, userName: completeMessage.name,location: location, contextId: completeMessage.contextId, completeMessage: completeMessage})
+                    payload : struct.encode({ source: platform, userId: userId, userName: completeMessage.name,location: location, contextId: completeMessage.contextId, completeMessage: completeMessage })
                 },
             };
             let request_intent = null;
@@ -82,7 +82,7 @@ export class DialogflowResponseService {
                         },
                     },
                     queryParams : {
-                        payload : struct.encode({source: platform, userId: userId, userName: completeMessage.name,location: location, contextId: completeMessage.contextId, completeMessage: completeMessage })
+                        payload : struct.encode({ source: platform, userId: userId, userName: completeMessage.name,location: location, contextId: completeMessage.contextId, completeMessage: completeMessage })
                     },
                 };
             }

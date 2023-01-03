@@ -1,3 +1,4 @@
+/* eslint-disable init-declarations */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 // import http from 'https';
@@ -13,8 +14,8 @@ import { MessageFlow } from './get.put.message.flow.service';
 import { MockCHannelMessageFunctionalities } from './mock.channel.message.funtionalities';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-// import { getRequestOptions } from '../utils/helper';
 import { ChatMessage } from '../models/chat.message.model';
+import { WhatsappRequest } from './request.format/whatsapp.request';
 
 @autoInjectable()
 @singleton()
@@ -24,11 +25,41 @@ export class MockMessageService implements platformServiceInterface {
 
     constructor(@inject(delay(() => MessageFlow)) public messageFlow,
         private awsS3manager?: AwsS3manager,
-        private messageFunctionalitiesmockchannel?: MockCHannelMessageFunctionalities,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+        private messageFunctionalitiesmockchannel?: MockCHannelMessageFunctionalities){}
 
-    handleMessage(requestBody: any, channel: string) {
-        return this.messageFlow.checkTheFlow(requestBody, channel, this);
+    async handleMessage(requestBody: any, channel: string) {
+        const mockRequestObj = new WhatsappRequest(requestBody);
+        const generatorGetMessage = mockRequestObj.getMessages();
+        const generatorGetContacts = mockRequestObj.getContacts();
+        let done = false;
+        while (done === false){
+            const messageNextObject = generatorGetMessage.next();
+            const contactsNextObject = generatorGetContacts.next();
+            const mockMessageObj = messageNextObject.value;
+            const mockContactsObj = contactsNextObject.value;
+            done = messageNextObject.done;
+            let messagetoDialogflow;
+            if (mockMessageObj){
+                const type = mockMessageObj.getType();
+                if (type) {
+                    const classmethod = `${type}MessageFormat`;
+                    messagetoDialogflow = await this.messageFunctionalitiesmockchannel[classmethod](mockMessageObj);
+                }
+                else {
+                    throw new Error(`${type}Message type is not known`);
+                }
+            }
+            else {
+
+                //messageObj is void
+            }
+            if (mockContactsObj){
+                messagetoDialogflow.platformId = mockContactsObj.getPlatformId();
+                messagetoDialogflow.name = mockContactsObj.getUserName();
+            }
+            console.log("message to dialogflow", messagetoDialogflow);
+            await this.messageFlow.checkTheFlow(messagetoDialogflow, channel, this);
+        }
     }
 
     sendManualMesage(msg: any) {
@@ -68,7 +99,7 @@ export class MockMessageService implements platformServiceInterface {
         //call a function that creates csv
         const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: contact } });
         const lastMessageDate = respChatMessage[respChatMessage.length - 1].createdAt;
-        const obj = {timeStamp: lastMessageDate, message: message};
+        const obj = { timeStamp: lastMessageDate, message: message };
         console.log("obj", obj);
     };
 
@@ -86,7 +117,7 @@ export class MockMessageService implements platformServiceInterface {
     postResponse = async (message: Imessage , processedResponse: IprocessedDialogflowResponseFormat) => {
         // eslint-disable-next-line init-declarations
         let reaponse_message: Iresponse;
-        const mock_whatsapp_id = message.sessionId;
+        const mock_whatsapp_id = message.platformId;
         const mock_input_message = message.messageBody;
         const mock_user_name = message.name;
         const mock_chat_message_id = message.chat_message_id;
