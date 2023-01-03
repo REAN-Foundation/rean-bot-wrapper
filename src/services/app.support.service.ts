@@ -1,8 +1,10 @@
+/* eslint-disable init-declarations */
 import { Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface';
 import { autoInjectable, singleton } from 'tsyringe';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { MessageFlow } from './get.put.message.flow.service';
 import { ResponseHandler } from '../utils/response.handler';
+import { RHGMessageToDialogflow } from './rhg.message.to.dialogflow';
 
 @autoInjectable()
 @singleton()
@@ -12,7 +14,9 @@ export class platformMessageService implements platformServiceInterface{
 
     public res;
 
-    constructor(private messageFlow?: MessageFlow,private responseHandler?: ResponseHandler,
+    constructor(private messageFlow?: MessageFlow,
+        private responseHandler?: ResponseHandler,
+        private rhgMessageToDialogflow?: RHGMessageToDialogflow
     ) {
 
     }
@@ -34,27 +38,29 @@ export class platformMessageService implements platformServiceInterface{
         throw new Error('Method not implemented.');
     }
 
-    handleMessage(msg, client) {
-        return this.messageFlow.checkTheFlow(msg, client, this);
-    }
-
-    getMessage(msg) {
-        // eslint-disable-next-line init-declarations
-        let returnMessage: Imessage;
-        const phoneNumber = msg.phoneNumber.toString();
-
-        if (msg.type === "text") {
-            const message = msg.message; //+ ` PhoneNumber is ${phoneNumber}`;
-            returnMessage = { name: null,platform: "Rean_Support",chat_message_id: null, direction: "In",messageBody: message,imageUrl: null, sessionId: phoneNumber,replyPath: phoneNumber,latlong: null,type: 'text' , intent: null, whatsappResponseMessageId: null, contextId: null, telegramResponseMessageId : null};
-            return returnMessage;
+    async handleMessage(msg, client) {
+        const generatorRHGMessage = this.rhgMessageToDialogflow.messageToDialogflow(msg);
+        let done = false;
+        const rhgMessages = [];
+        let rhgMessagetoDialogflow: Imessage;
+        while (done === false) {
+            const nextgeneratorObj = generatorRHGMessage.next();
+            rhgMessagetoDialogflow = (await nextgeneratorObj).value;
+            done = (await nextgeneratorObj).done;
+            rhgMessages.push(rhgMessagetoDialogflow);
         }
+        for (rhgMessagetoDialogflow of rhgMessages){
+            if (rhgMessagetoDialogflow) {
+                await this.messageFlow.checkTheFlow(rhgMessagetoDialogflow, client, this);
+            }
+        }
+        
     }
 
     postResponse (message, response: IprocessedDialogflowResponseFormat ){
-        const reansupport_Id = message.sessionId;
+        const reansupport_Id = message.platformId;
         const image = response.message_from_dialoglow.getImageObject();
         const message_type = image.url ? "image" : "text";
-        // const raw_response_object = response.message_from_dialoglow.result && response.message_from_dialoglow.result.fulfillmentMessages ? JSON.stringify(response.message_from_dialoglow.result.fulfillmentMessages) : '';
         const intent = response.message_from_dialoglow.getIntent();
 
         const reaponse_message = { name: null,platform: "Rean_Support",chat_message_id: null,direction: "Out",message_type: message_type,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: reansupport_Id, messageText: response.processed_message[0] };
