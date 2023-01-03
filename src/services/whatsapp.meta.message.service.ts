@@ -12,6 +12,8 @@ import { HandleMessagetypePayload } from './handle.messagetype.payload';
 import { ChatMessage } from '../models/chat.message.model';
 import { WhatsappMessageToDialogflow } from './whatsapp.messagetodialogflow';
 import { CommonWhatsappService } from './whatsapp.common.service';
+import { translateService } from './translate.service';
+import { UserLanguage } from './set.language';
 
 @autoInjectable()
 @singleton()
@@ -224,6 +226,8 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
     SendPayloadMessageMeta = async (contact: number | string, imageLink: string, payloadContent: any) => {
         return new Promise(async() => {
             const listOfPostDataMeta = [];
+            const languageForSession = await new UserLanguage().getPreferredLanguageofSession(contact);
+            const translateObj = new translateService();
             for (let i = 0; i < payloadContent.length; i++){
                 const postDataMeta = this.postDataFormatWhatsapp(contact);
                 const payloadContentMessageTypeMeta = payloadContent[i].fields.messagetype.stringValue;
@@ -233,19 +237,21 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
                     for (let j = 0; j < numberOfButtons; j++){
                         const id = payloadContent[i].fields.buttons.listValue.values[j].structValue.fields.reply.structValue.fields.id.stringValue;
                         const title = payloadContent[i].fields.buttons.listValue.values[j].structValue.fields.reply.structValue.fields.title.stringValue;
+                        const translatedTitle = await translateObj.translateResponse([title],languageForSession);
                         const tempObject = {
                             "type"  : "reply",
                             "reply" : {
                                 "id"    : id,
-                                "title" : title
+                                "title" : translatedTitle[0]
                             }
                         };
                         buttonsMeta.push(tempObject);
                     }
+                    const translatedText = await translateObj.translateResponse([payloadContent[i].fields.message.stringValue], languageForSession);
                     postDataMeta["interactive"] = {
                         "type" : "button",
                         "body" : {
-                            "text" : payloadContent[i].fields.message.stringValue
+                            "text" : translatedText[0]
                         },
                         "action" : {
                             "buttons" : buttonsMeta
@@ -256,10 +262,10 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
                 }
                 else {
                     console.log("here in text",i);
-                    const payloadMessageMeta = payloadContent[i].fields.content;
+                    const payloadMessageMeta = await translateObj.translateResponse([payloadContent[i].fields.content], languageForSession);
                     const postDatatemp = this.postDataFormatWhatsapp(contact);
                     postDatatemp["text"] = {
-                        "body" : payloadMessageMeta
+                        "body" : payloadMessageMeta[0]
                     };
                     postDatatemp.type = "text";
                     listOfPostDataMeta.push(postDatatemp);
