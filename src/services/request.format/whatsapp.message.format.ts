@@ -7,8 +7,14 @@ export class Message implements IWhatsappRequestMessageEntities {
     private list;
 
     getType() {
-        const currentListOfTypes = ["text","reaction","location","image","list_reply","voice","audio"];
-        return currentListOfTypes.includes(this.list.type) ? this.list.type : undefined;
+        const currentListOfTypes = ["text","reaction","location","image","interactive","voice","audio"];
+        const type = currentListOfTypes.includes(this.list.type) ? this.list.type : undefined;
+        if (type === "interactive") {
+            return this.list.interactive.type ? this.list.interactive.type : "interactive";
+        }
+        else {
+            return type;
+        }
     }
 
     getContextId() {
