@@ -30,14 +30,22 @@ export class ChecklistDateValidationService {
                 if (transfusionDate.split("T")[0] === donationDate.split("T")[0]) {
                     dffMessage = `Date Validation Success. \nHere are your donation details.`;
 
-                    donationDate = new Date(donationDate.split("T")[0]).toDateString();
-                    const message = ` Donor Name: ${donor.DisplayName}, \n Blood Group: ${donor.BloodGroup}, \n Donation Date: ${donationDate}`;
+                    const stringDonationDate = new Date(donationDate.split("T")[0]).toDateString();
+                    const message = ` Donor Name: ${donor.DisplayName}, \n Blood Group: ${donor.BloodGroup}, \n Donation Date: ${stringDonationDate}`;
 
                     resolve( { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage + '\n' + message] } }] } });
 
                     const payload = eventObj.body.originalDetectIntentRequest.payload;
                     this._platformMessageService = container.resolve(payload.source);
                     const heading = `Here are the details of the confirmed donor`;
+
+                    //Fetch donation reminders for donors
+                    if (donationDate) {
+                        donationDate = new Date(donationDate.split("T")[0]);
+                        
+                        //donationDate.setDate(donationDate.getDate() - 1);
+                    }
+                    await this.bloodWarriorCommonService.fetchDonorDonationReminders(donor.UserId, donationDate);
 
                     //message send to patient
                     const patient = await this.bloodWarriorCommonService.getPatientPhoneByUserId(patientUserId);
