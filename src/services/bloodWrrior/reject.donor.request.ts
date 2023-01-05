@@ -22,6 +22,7 @@ export class RejectDonorRequestService {
 
                 const apiURL = `clinical/donation-record/search?donorUserId=${donor.UserId}`;
                 const requestBody = await needleRequestForREAN("get", apiURL);
+                const donationRecordId = requestBody.Data.DonationRecord.Items[0].id;
                 const patientUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.PatientUserId;
                 const volunteerUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.VolunteerUserId;
                 const dffMessage = `Sorry to know this. We will contact you later.`;
@@ -29,6 +30,12 @@ export class RejectDonorRequestService {
 
                 const payload = eventObj.body.originalDetectIntentRequest.payload;
                 this._platformMessageService = container.resolve(payload.source);
+
+                //update donation record with rejection
+                const obj = {
+                    DonorRejectedDate : new Date().toISOString()
+                };
+                await this.bloodWarriorCommonService.updateDonationRecord(donationRecordId, obj);
 
                 //message send to volunteer
                 const patient = await this.bloodWarriorCommonService.getPatientPhoneByUserId(patientUserId);
