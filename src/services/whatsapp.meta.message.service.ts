@@ -267,6 +267,11 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
                     postDatatemp["text"] = {
                         "body" : payloadMessageMeta[0]
                     };
+                    if (new RegExp("(https?:+)").test(payloadMessageMeta[0])) {
+                        postDatatemp["text"]["preview_url"] = true;
+                    } else {
+                        postDatatemp["text"]["preview_url"] = false;
+                    }
                     postDatatemp.type = "text";
                     listOfPostDataMeta.push(postDatatemp);
                 }
