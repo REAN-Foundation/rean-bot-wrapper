@@ -1,7 +1,6 @@
 import { Imessage } from "./message.interface";
 
 export interface platformServiceInterface{
-    getMessage (msg: any);
     handleMessage (msg: any, client);
     sendManualMesage(msg);
     init ();

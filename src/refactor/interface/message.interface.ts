@@ -3,7 +3,7 @@ import { DialogflowResponseFormat } from "../../services/response.format/dialogf
 export interface Imessage{
     name : string;
     platform : string;
-    sessionId : string;
+    platformId : string;
     chat_message_id : string;
     direction: string;
     type : string;
