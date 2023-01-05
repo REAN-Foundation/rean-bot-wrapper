@@ -71,4 +71,38 @@ export class BloodWarriorCommonService {
         }
     }
 
+    async updateDonationRecord (donationRecordId: string, obj: any) {
+        try {
+            const apiURL = `clinical/donation-record/${donationRecordId}`;
+            await needleRequestForREAN("put", apiURL, null, obj);
+            console.log(`Succesfully updated donation record.`);
+
+        } catch (error) {
+            Logger.instance()
+                .log_error(error.message,500,'Failed to create donation record');
+        }
+    }
+
+    async fetchDonorDonationReminders (donorUserId: string, bloodTransfusionDate: Date ) {
+        try {
+            let result = null;
+            const url = `care-plans/patients/${donorUserId}/enroll`;
+            const obj = {
+                Provider  : "REAN_BW",
+                PlanName  : "Donor messages",
+                PlanCode  : "Donor-Reminders",
+                StartDate : bloodTransfusionDate.toISOString().split("T")[0]
+            };
+            result = await needleRequestForREAN("post", url, null, obj);
+            if (result.HttpCode === 201) {
+                console.log(`Succesfully fetched donation reminders for donoR user Id ${donorUserId}`);
+
+            }
+        } catch (error) {
+            Logger.instance()
+                .log_error(error.message,500,'Failed to create donation record');
+        }
+    }
+
+
 }
