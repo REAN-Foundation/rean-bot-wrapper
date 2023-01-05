@@ -87,7 +87,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         
     }
 
-    async interactiveMessaegFormat(messageObj: Message) {
+    async interactiveMessageFormat(messageObj: Message) {
         const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(messageObj.getinteractivebutton().title);
         const messagetoDialogflow = this.inputMessageFormat(messageObj);
         messagetoDialogflow.messageBody = emojiFilteredMessage;
@@ -95,7 +95,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         return messagetoDialogflow;
     }
 
-    async interactiveListMessaegFormat(messageObj: Message){
+    async list_replyMessageFormat(messageObj: Message){
         const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(messageObj.getinteractivelist().title);
         const messagetoDialogflow = this.inputMessageFormat(messageObj);
         messagetoDialogflow.messageBody = emojiFilteredMessage;
@@ -103,7 +103,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         return messagetoDialogflow;
     }
 
-    async interactiveButtonMessaegFormat(messageObj: Message){
+    async button_replyMessageFormat(messageObj: Message){
         const message = messageObj.getinteractivebutton().title;
         const messagetoDialogflow = this.inputMessageFormat(messageObj);
         messagetoDialogflow.messageBody = message;
