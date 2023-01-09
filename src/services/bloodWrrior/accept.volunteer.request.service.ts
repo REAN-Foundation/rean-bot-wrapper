@@ -23,13 +23,21 @@ export class AcceptVolunteerRequestService {
 
                 const apiURL = `clinical/donation-record/search?donorUserId=${donor.UserId}`;
                 const requestBody = await needleRequestForREAN("get", apiURL);
+                const donationRecordId = requestBody.Data.DonationRecord.Items[0].id;
                 const volunteerUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.VolunteerUserId;
                 const dffMessage = `Thank you for accepting the request. We are in the process of scheduling a donation. \nRegards \nTeam Blood Warriors`;
                 resolve( { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } });
 
+                //update donation record with rejection
+                const obj = {
+                    DonorAcceptedDate : new Date().toISOString()
+                };
+                await this.bloodWarriorCommonService.updateDonationRecord(donationRecordId, obj);
+
                 const payload = eventObj.body.originalDetectIntentRequest.payload;
                 this._platformMessageService = container.resolve(payload.source);
 
+                //message send to volunteer
                 const volunteer = await this.bloodWarriorCommonService.getVolunteerPhoneByUserId(volunteerUserId);
                 const volunteerPhone =
                         this.raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(volunteer.User.Person.Phone);

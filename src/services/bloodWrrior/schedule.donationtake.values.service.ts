@@ -35,6 +35,10 @@ export const ScheduleDonationTakeValuesService = async (eventObj) => {
             Maps: ${location}`;
                 resolve( { message: { fulfillmentMessages: [{ text: { text: [dffMessage + commonMessage] } }] } });
 
+                //Fetch donation reminders for donors
+                const nextDonationDate = new Date(donation_Date.split("T")[0]);
+                await bloodWarriorCommonService.fetchDonorDonationReminders(patientDonors.DonorUserId,nextDonationDate);
+
                 //Message sent to patient
                 const heading = `Hi ${patient.User.Person.DisplayName}, `;
                 const payload = eventObj.body.originalDetectIntentRequest.payload;
