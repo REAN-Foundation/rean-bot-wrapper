@@ -6,7 +6,6 @@ on:
       - main1
 jobs:
   Deploy-ECS:
-    environment: prod
     runs-on: ubuntu-latest
     steps:
       - name: New Release Publish
