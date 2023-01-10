@@ -3,11 +3,15 @@ name: PROD-CI-CD
 on:
   push:
     branches:
-      - main1
+      - main
 jobs:
-  - name: New Release Publish
-    uses: release-drafter/release-drafter@v5
-    with:
-      publish: true
-    env:
-      GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
+  Deploy-ECS:
+    environment: prod
+    runs-on: ubuntu-latest
+    steps:
+      - name: New Release Publish
+        uses: release-drafter/release-drafter@v5
+        with:
+          publish: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
