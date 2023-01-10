@@ -3,7 +3,7 @@ name: PROD-CI-CD
 on:
   push:
     branches:
-      - main
+      - main1
 jobs:
   Deploy-ECS:
     environment: prod
