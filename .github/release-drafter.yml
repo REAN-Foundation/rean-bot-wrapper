@@ -1,6 +1,6 @@
-# change-template: "* $TITLE (#$NUMBER) by @$AUTHOR"
-# name-template: '$RESOLVED_VERSION'
-# tag-template: 'v$RESOLVED_VERSION'
+change-template: "* $TITLE (#$NUMBER) by @$AUTHOR"
+name-template: '$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
 # categories:
 #   - title: '⚡ Breaking Changes'
 #     labels:
@@ -28,27 +28,27 @@
 #       - 'dependencies'
 # exclude-labels:
 #   - 'skip-changelog'
-# version-resolver:
-#   major:
-#     labels:
-#       - 'major'
-#   minor:
-#     labels:
-#       - 'minor'
-#   patch:
-#     labels:
-#       - 'patch'
-#   default: major
-# template: |
-#   ## Summary
+version-resolver:
+  major:
+    labels:
+      - 'major'
+  minor:
+    labels:
+      - 'minor'
+  patch:
+    labels:
+      - 'patch'
+  default: minor
+template: |
+  ## Summary
 
-#   ## Changes
+  ## Changes
 
-#   $CHANGES
+  $CHANGES
 
-#   ## This release was made possible by the following contributors:
+  ## This release was made possible by the following contributors:
 
-#   $CONTRIBUTORS
+  $CONTRIBUTORS
 
 template: |
   ## What's Changed
