@@ -80,8 +80,10 @@ export class demoBotService {
 
             }
         }
-        
-        const delete_request = await intentsClient.batchDeleteIntents({parent: projectAgentPath, intents: intents});
+
+        if (intents.length != 0) {
+            await intentsClient.batchDeleteIntents({parent: projectAgentPath, intents: intents});
+        }
 
         var count = 0;
 
@@ -90,19 +92,26 @@ export class demoBotService {
             count++;
 
             const trainingPhrases = [];
-            const part = {
-                text : messages.Intent
-            };
 
-            const trainingPhrase = {
-                type  : 'EXAMPLE',
-                parts : [part],
-            };
+            const df_resp = messages.Response;
+            delete messages.Response;
+            for (const phrase in messages) {
 
-            trainingPhrases.push(trainingPhrase);
+                const part = {
+                    text : messages[phrase]
+                };
+    
+                const trainingPhrase = {
+                    type  : 'EXAMPLE',
+                    parts : [part],
+                };
+    
+                trainingPhrases.push(trainingPhrase);
+            }
+
 
             const messageText = {
-                text : [messages.Response],
+                text : [df_resp],
             };
 
             const message = {
