@@ -260,6 +260,19 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
                     postDataMeta.type = "interactive";
                     listOfPostDataMeta.push(postDataMeta);
                 }
+                else if (payloadContentMessageTypeMeta === "image") {
+                    if (!imageLink) {
+                        imageLink = payloadContent[i].fields.url.stringValue;
+                    }
+                    postDataMeta["image"] = {
+                        "link"    : imageLink,
+                        "caption" : payloadContent[i].fields.title.stringValue
+                    };
+                    postDataMeta.type = "image";
+                    const postDataString = JSON.stringify(postDataMeta);
+                    return await this.postRequestMessages(postDataString);
+        
+                }
                 else {
                     console.log("here in text",i);
                     const payloadMessageMeta = await translateObj.translateResponse([payloadContent[i].fields.content], languageForSession);
