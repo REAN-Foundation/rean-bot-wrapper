@@ -14,7 +14,7 @@ export class Timer {
         const diff = process.hrtime(start);
     
         return (diff[0] * nanosecond + diff[1]) / milliToNanoSecond;
-    }
+    };
 
     timingRequestAndResponseCycle = () => {
         this._app.use((req,res,next) => {
@@ -33,5 +33,6 @@ export class Timer {
         
             next();
         });
-    }
+    };
+
 }
