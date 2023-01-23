@@ -21,13 +21,12 @@ export class VolunteerService {
             if (lastDonationDate) {
                 lastDonationDate = new Date(lastDonationDate.split("T")[0]).toDateString();
             }
-            const dffMessage = `Welcome to Blood Warriors ${name},\nThank you for your continuous support as a volunteer:
-            Volunteer Name: ${name},
+            const dffMessage = `Welcome back Blood Warrior ${name},\nAs you are a registered Blood Warrior, we could fetch the following details:
             Blood Group: ${bloodGroup},
-            Last Donation Date: ${lastDonationDate}\nIf the details are correct, please click proceed or if you can register as a new volunteer.`;
+            Last Donation Date: ${lastDonationDate}\nIf the details are correct, please click proceed or if you can register as a new donor.`;
             console.log(dffMessage);
 
-            const payloadButtons = await whatsappMetaButtonService("Proceed","Volunteer_Confirm","Register Volunteer","Register_Volunteer");
+            const payloadButtons = await whatsappMetaButtonService("Proceed","Volunteer_Confirm","Register as a Donor","Register_Donor");
             const data = {
                 "fulfillmentMessages" : [
                     {

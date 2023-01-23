@@ -30,12 +30,13 @@ export class BloodBridgeStatusService {
                 if (nextTrnasfusionDate) {
                     nextTrnasfusionDate = new Date(nextTrnasfusionDate.split("T")[0]).toDateString();
                 }
-                dffMessage = `Here is the summary,
+                dffMessage = `Here is the summary:
         Bridge Name: ${bloodBridge.Name},
         Last Donation Date: ${lastDonationDate},
         Next Transfusion Date: ${nextTrnasfusionDate},
         Eligible Donors Count: ${result.Data.PatientDonors.Items.length},
-        Donors Signed Up on Bot: Yes\n`;
+        \nDonors Signed Up on Bot: X Out Y
+        Parent Registered: Yes`;
 
                 if (eventObj.body.queryResult.intent.displayName === 'Donation_Request_BloodBridge') {
                     const patient = await
@@ -48,7 +49,7 @@ export class BloodBridgeStatusService {
                 }
 
             } else {
-                dffMessage = "Error in Bridge Id Please try again. \nIf problem continues, please contact the admin";
+                dffMessage = "Error. Please re-enter \nIf problem continues, please contact the admin";
                 return { message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } };
             }
 
