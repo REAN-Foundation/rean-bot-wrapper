@@ -17,6 +17,14 @@ export class HandleMessagetypePayload{
                 // console.log("messageContent1",messageContent);
                 payloadContentInOrder.push(messageContent);
             }
+            else if (messageTypeInternal === "image") {
+
+                //handling messageType text
+                messageContent = payloadInternal[i].structValue;
+                console.log("messageContent",messageContent);
+                // console.log("messageList",messageList);
+                payloadContentInOrder.push(messageContent);
+            }
             else {
 
                 //handling messageType text

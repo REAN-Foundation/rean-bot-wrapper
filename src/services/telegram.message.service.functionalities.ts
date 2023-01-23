@@ -8,9 +8,9 @@ import { autoInjectable } from "tsyringe";
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { AwsS3manager } from "./aws.file.upload.service";
 import { UserLanguage } from './set.language';
-import { SequelizeClient } from '../connection/sequelizeClient';
 import path from 'path';
 import fs from 'fs';
+import { Message } from './request.format/telegram.message.format';
 
 @autoInjectable()
 export class TelegramMessageServiceFunctionalities implements getMessageFunctionalities{
@@ -20,63 +20,63 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         private awsS3manager?: AwsS3manager,
         private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
-    async textMessageFormat(message) {
-        const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(message.text);
-        const returnMessage = this.inputMessageFormat(message);
-        returnMessage.messageBody = message.text;
+    async textMessageFormat(messageObj: Message) {
+        const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(messageObj.getText());
+        const messageToDialogflow = this.inputMessageFormat(messageObj);
+        messageToDialogflow.messageBody = messageObj.getText();
         if (emojiFilteredMessage === "NegativeFeedback"){
-            returnMessage.intent = "NegativeFeedback";
+            messageToDialogflow.intent = "NegativeFeedback";
         }
-        return returnMessage;
+        return messageToDialogflow;
     }
 
-    async voiceMessageFormat(message) {
+    async voiceMessageFormat(messageObj: Message) {
         let response: any = {};
-        response = await this.GetTelegramMedia(message.voice.file_id);
+        response = await this.GetTelegramMedia(messageObj.getVoiceFileId());
         console.log("response of telegram media is", response);
         const file_path = response.result.file_path;
 
         // await new SequelizeClient().connect();
-        const preferredLanguage = await new UserLanguage().getPreferredLanguageofSession(message.from.id);
+        const preferredLanguage = await new UserLanguage().getPreferredLanguageofSession(messageObj.getUserId());
         if (preferredLanguage !== "null"){
             if (file_path) {
                 const ConvertedToText = await this.speechtotext.SendSpeechRequest('https://api.telegram.org/file/bot' + this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN") + '/' + response.result.file_path, "telegram", preferredLanguage);
                 console.log("Converted to text!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",ConvertedToText);
                 if (ConvertedToText) {
-                    const returnMessage = this.inputMessageFormat(message);
-                    returnMessage.messageBody = String(ConvertedToText);
-                    returnMessage.type = 'voice';
-                    return returnMessage;
+                    const messagetoDialogflow = this.inputMessageFormat(messageObj);
+                    messagetoDialogflow.messageBody = String(ConvertedToText);
+                    messagetoDialogflow.type = 'voice';
+                    return messagetoDialogflow;
                 } else {
-                    const returnMessage = this.inputMessageFormat(message);
-                    returnMessage.messageBody = " ";
-                    returnMessage.type = 'text';
-                    return returnMessage;
+                    const messagetoDialogflow = this.inputMessageFormat(messageObj);
+                    messagetoDialogflow.messageBody = " ";
+                    messagetoDialogflow.type = 'text';
+                    return messagetoDialogflow;
                 }
             } else {
                 throw new Error("Unable to find the audio file path");
             }
         }
         else {
-            const returnMessage = this.inputMessageFormat(message);
-            returnMessage.messageBody = "Need to set language";
-            returnMessage.type = 'text';
-            return returnMessage;
+            const messagetoDialogflow = this.inputMessageFormat(messageObj);
+            messagetoDialogflow.messageBody = "Need to set language";
+            messagetoDialogflow.type = 'text';
+            return messagetoDialogflow;
         }
     }
 
-    async locationMessageFormat(message) {
-        const location_message = `latlong:${message.location.latitude}-${message.location.longitude}`;
-        const returnMessage = this.inputMessageFormat(message);
-        returnMessage.type = 'location';
-        returnMessage.latlong = message.location;
-        returnMessage.messageBody = location_message;
-        return returnMessage;
+    async locationMessageFormat(messageObj: Message) {
+        const messagetoDialogflow = this.inputMessageFormat(messageObj);
+        const location_message = `latlong:${messageObj.getLocation().latitude}-${messageObj.getLocation().longitude}`;
+        messagetoDialogflow.type = 'location';
+        messagetoDialogflow.latlong = messageObj.getLocation();
+        messagetoDialogflow.messageBody = location_message;
+        return messagetoDialogflow;
     }
 
-    async imageMessaegFormat(message) {
+    async photoMessageFormat(messageObj: Message) {
         let response: any = {};
-        response = await this.GetTelegramMedia(message.photo[(message.photo).length - 1].file_id);
+        response = await this.GetTelegramMedia(messageObj.getPhotoFileId());
         console.log("response image get telegram", response);
         if (response.result.file_path){
             const filePath = await this.downloadTelegramMedia('https://api.telegram.org/file/bot' + this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN") + '/' + response.result.file_path, "photo");
@@ -85,53 +85,51 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
             const url = require('url');
             const urlParse = url.parse(location);
             const imageUrl = (urlParse.protocol + urlParse.hostname + urlParse.pathname);
-            const returnMessage = this.inputMessageFormat(message);
+            const messagetoDialogflow = this.inputMessageFormat(messageObj);
 
             // console.log("location image in S3", imageUrl);
-            returnMessage.type = 'image';
-            returnMessage.messageBody = imageUrl;
-            returnMessage.imageUrl = location;
-            console.log("return message", returnMessage);
-            return returnMessage;
+            messagetoDialogflow.type = 'image';
+            messagetoDialogflow.messageBody = imageUrl;
+            messagetoDialogflow.imageUrl = location;
+            return messagetoDialogflow;
         } else {
             throw new Error("Unable to find the image file path");
         }
         
     }
 
-    inputMessageFormat (message){
-        //console.log("the message", message);
-        const response_message: Imessage = {
-            name                      : message.from.first_name,
+    inputMessageFormat (messageObj: Message){
+        const messagetoDialogflow: Imessage = {
+            name                      : messageObj.getUsername(),
             platform                  : "Telegram",
-            chat_message_id           : message.message_id,
+            chat_message_id           : messageObj.getChatId(),
             direction                 : "In",
             messageBody               : null,
             imageUrl                  : null,
-            sessionId                 : message.chat.id.toString(),
+            platformId                : messageObj.getUserId(),
             replyPath                 : null,
             latlong                   : null,
             type                      : "text",
             intent                    : null,
             whatsappResponseMessageId : null,
-            contextId                 : message.reply_to_message ? message.reply_to_message.message_id : null,
+            contextId                 : messageObj.getContextId(),
             telegramResponseMessageId : null
         };
-        return response_message;
+        return messagetoDialogflow;
     }
 
-    async documentMessageFormat(message) {
+    async documentMessageFormat(messageObj: Message) {
         let response: any = {};
-        response = await this.GetTelegramMedia(message.document.file_id);
+        response = await this.GetTelegramMedia(messageObj.getdocumentFileId());
         console.log("response document get telegram", response);
         if (response.result.file_path){
             console.log("We are fetching the excel file here");
             const filePath = await this.downloadTelegramDocument('https://api.telegram.org/file/bot' + this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN") + '/' + response.result.file_path, "document");
             const location = filePath;
-            const returnMessage = this.inputMessageFormat(message);
-            returnMessage.type = 'document';
-            returnMessage.messageBody = location.toString();
-            return returnMessage;
+            const messagetoDialogflow = this.inputMessageFormat(messageObj);
+            messagetoDialogflow.type = 'document';
+            messagetoDialogflow.messageBody = location.toString();
+            return messagetoDialogflow;
         }
     }
 
