@@ -102,7 +102,8 @@ export class RaiseDonationRequestService {
                     donorList += seq;
                     num = num + 1;
                 });
-                const dffMessage = `Hi ${volunteerName}, \n"${patientName}" requires blood. The transfusion is scheduled to be ${transfusionDate}. \nDonation request is sent to the following donors.${donorList} \nRegards \nTeam Blood Warriors`;
+                const dffMessage = `Hi ${volunteerName}, \n"${patientName}" requires blood. The transfusion is scheduled to be ${transfusionDate}. \nDonation request is sent to the following donors.${donorList}
+                We will send you a reminder if no one responds or anyone accepts. \nRegards \nTeam Blood Warriors`;
                 const payload = eventObj.body.originalDetectIntentRequest.payload;
                 this._platformMessageService = container.resolve(payload.source);
                 result = await this._platformMessageService.SendMediaMessage(volunteerPhone,null,dffMessage,'text', null);
