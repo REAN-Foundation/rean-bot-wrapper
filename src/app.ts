@@ -14,6 +14,7 @@ import { IndexCreation } from './models/elasticsearchmodel';
 import { platformServiceInterface } from "./refactor/interface/platform.interface";
 import { ClientEnvironmentProviderService } from "./services/set.client/client.environment.provider.service";
 import { AwsSecretsManager } from "./services/aws.secret.manager.service";
+import { Timer } from "./middleware/timer";
 
 export default class Application {
 
@@ -28,6 +29,8 @@ export default class Application {
     private _IndexCreation: IndexCreation = null;
 
     private _awsSecretsManager: AwsSecretsManager = null;
+
+    private _timer: Timer = null;
 
     private clientsList = [];
 
@@ -162,6 +165,8 @@ export default class Application {
                 this._app.use(express.json());
                 this._app.use(helmet());
                 this._app.use(cors());
+                this._timer = new Timer(this._app);
+                this._timer.timingRequestAndResponseCycle();
 
                 // this._app.use(this.limiter);
                 

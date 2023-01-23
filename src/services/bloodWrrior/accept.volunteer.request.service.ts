@@ -27,8 +27,9 @@ export class AcceptVolunteerRequestService {
                 const volunteerUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.VolunteerUserId;
                 const dffMessage = `Thank you for accepting the request. We are in the process of scheduling a donation. \nRegards \nTeam Blood Warriors`;
                 resolve( { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } });
-
+                
                 //update donation record with acceptance
+                
                 const obj = {
                     DonorAcceptedDate : new Date().toISOString()
                 };

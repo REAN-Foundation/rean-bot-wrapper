@@ -15,10 +15,7 @@ import { SlackMessageService } from "./slack.message.service";
 import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
 import { translateService } from './translate.service';
-import { v2 } from '@google-cloud/translate';
 import { sendApiButtonService } from './whatsappmeta.button.service';
-import { DialogflowResponseFormat } from './response.format/dialogflow.response.format';
-// import { IplatformResponseFunctionalities } from './response.format/response.interface';
 
 @autoInjectable()
 export class MessageFlow{
@@ -31,8 +28,9 @@ export class MessageFlow{
         private translate?: translateService) {
     }
 
-    async checkTheFlow(msg: any, channel: string, platformMessageService: platformServiceInterface){
-        const messagetoDialogflow: Imessage = await platformMessageService.getMessage(msg);
+    async checkTheFlow(messagetoDialogflow, channel: string, platformMessageService: platformServiceInterface){
+        
+        // const messagetoDialogflow: Imessage = await platformMessageService.getMessage(msg);
 
         //initialising MySQL DB tables
         const chatMessageObj = await this.engageMySQL(messagetoDialogflow);
@@ -65,7 +63,7 @@ export class MessageFlow{
 
     async processMessage(messagetoDialogflow: Imessage, channel: string ,platformMessageService: platformServiceInterface) {
         if (messagetoDialogflow.messageBody === ' '){
-            const message_to_platform = await platformMessageService.SendMediaMessage(messagetoDialogflow.sessionId,null,"Sorry, I did not get that. Can you say it again?",messagetoDialogflow.type,null);
+            const message_to_platform = await platformMessageService.SendMediaMessage(messagetoDialogflow.platformId,null,"Sorry, I did not get that. Can you say it again?",messagetoDialogflow.type,null);
             return message_to_platform;
         }
         const processedResponse = await this.handleRequestservice.handleUserRequest(messagetoDialogflow, channel);
@@ -99,10 +97,10 @@ export class MessageFlow{
             await this.replyInAudio(messagetoDialogflow, response_format);
             if (intent === "anemiaInitialisation-followup") {
                 const messageToPlatform = await this.callAnemiaModel.callAnemiaModel(processedResponse.processed_message[0]);
-                platformMessageService.SendMediaMessage(messagetoDialogflow.sessionId,null,messageToPlatform,response_format.message_type,null);
+                platformMessageService.SendMediaMessage(messagetoDialogflow.platformId,null,messageToPlatform,response_format.message_type,null);
             }
             else {
-                message_to_platform = await platformMessageService.SendMediaMessage(messagetoDialogflow.sessionId, response_format.messageBody,response_format.messageText, response_format.message_type,payload);
+                message_to_platform = await platformMessageService.SendMediaMessage(messagetoDialogflow.platformId, response_format.messageBody,response_format.messageText, response_format.message_type,payload);
 
                 // console.log("the message to platform is", message_to_platform);
 
@@ -122,7 +120,7 @@ export class MessageFlow{
 
             // const obj = new AWSPolly();
             // const audioURL = await obj.texttoSpeech(response_format.messageText);
-            const id = message.sessionId;
+            const id = message.platformId;
             const obj = new GoogleTextToSpeech();
             const audioURL = await obj.texttoSpeech(response_format.messageText, id);
 
@@ -171,9 +169,9 @@ export class MessageFlow{
         return message_to_platform;
     }
 
-    async engageMySQL(messagetoDialogflow) {
+    async engageMySQL(messagetoDialogflow: Imessage) {
         return new Promise<IchatMessage>(async(resolve) =>{
-            const chatSessionModel = await ChatSession.findOne({ where: { userPlatformID: messagetoDialogflow.sessionId } });
+            const chatSessionModel = await ChatSession.findOne({ where: { userPlatformID: messagetoDialogflow.platformId } });
             let chatSessionId = null;
             if (chatSessionModel) {
                 chatSessionId = chatSessionModel.autoIncrementalID;
@@ -188,7 +186,7 @@ export class MessageFlow{
                 messageId                 : messagetoDialogflow.chat_message_id,
                 imageContent              : null,
                 imageUrl                  : messagetoDialogflow.imageUrl,
-                userPlatformID            : messagetoDialogflow.sessionId,
+                userPlatformID            : messagetoDialogflow.platformId,
                 intent                    : null,
                 whatsappResponseMessageId : null,
                 contextId                 : messagetoDialogflow.contextId,
@@ -212,7 +210,7 @@ export class MessageFlow{
             // console.log("respContactList!!!", respContactList);
             if (respContactList.length === 0) {
                 const newContactlistEntry = new ContactList({
-                    mobileNumber : messagetoDialogflow.sessionId,
+                    mobileNumber : messagetoDialogflow.platformId,
                     username     : messagetoDialogflow.name,
                     platform     : messagetoDialogflow.platform,
                     optOut       : "false" });
@@ -225,7 +223,7 @@ export class MessageFlow{
             if (respChatSession.length === 0 || respChatSession[respChatSession.length - 1].sessionOpen === "false") {
 
                 // console.log("starting a new session");
-                const newChatsession = new ChatSession({ userPlatformID  : messagetoDialogflow.sessionId,
+                const newChatsession = new ChatSession({ userPlatformID  : messagetoDialogflow.platformId,
                     platform        : messagetoDialogflow.platform, sessionOpen     : "true",
                     lastMessageDate : lastMessageDate, askForFeedback  : "flase" });
 

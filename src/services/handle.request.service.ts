@@ -3,9 +3,8 @@
 import { DialogflowResponseService } from './dialogflow.response.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { translateService } from './translate.service';
-import { autoInjectable, container, inject } from 'tsyringe';
+import { autoInjectable } from 'tsyringe';
 import { Imessage } from '../refactor/interface/message.interface';
-import util from 'util';
 import { ChatSession } from '../models/chat.session';
 
 @autoInjectable()
@@ -18,13 +17,14 @@ export class handleRequestservice{
     }
 
     async handleUserRequest (message: Imessage, channel: string) {
-        const platform_id = message.sessionId;
+        const platform_id = message.platformId;
 
         //get the translated message
         const translate_message = await this.translateService.translateMessage(message.type, message.messageBody, platform_id);
 
         // eslint-disable-next-line max-len
         const message_from_dialoglow = await this.DialogflowResponseService.getDialogflowMessage(translate_message.message, channel, message.intent,message);
+        console.log("message_from_dialoglow",message_from_dialoglow);
 
         // this.getTranslatedResponse(message_from_dialoglow, translate_message.languageForSession);
         // process the message from dialogflow before sending it to whatsapp
