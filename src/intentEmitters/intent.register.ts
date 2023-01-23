@@ -173,6 +173,13 @@ export class IntentRegister {
         IntentEmitter.registerListener('Accept_Volunteer_Request', AcceptVolunteerRequestListener);
         IntentEmitter.registerListener('Accept_Donation_Request', AcceptDonationRequestListener);
         IntentEmitter.registerListener('O_Positive', SelectBloodGroupListener);
+        IntentEmitter.registerListener('A_Positive', SelectBloodGroupListener);
+        IntentEmitter.registerListener('B_Positive', SelectBloodGroupListener);
+        IntentEmitter.registerListener('AB_Positive', SelectBloodGroupListener);
+        IntentEmitter.registerListener('O_Negative', SelectBloodGroupListener);
+        IntentEmitter.registerListener('A_Negative', SelectBloodGroupListener);
+        IntentEmitter.registerListener('B_Negative', SelectBloodGroupListener);
+        IntentEmitter.registerListener('AB_Negative', SelectBloodGroupListener);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
