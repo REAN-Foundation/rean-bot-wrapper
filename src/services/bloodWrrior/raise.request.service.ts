@@ -59,7 +59,14 @@ export class RaiseDonationRequestService {
                     if (lastDonationDate !== null) {
                         lastDonationDate = new Date(lastDonationDate.split("T")[0]).toDateString();
                     }
-                    await this.createDonationRecord(donor.PatientUserId, donor.id);
+                    const object = {
+                        PatientUserId     : donor.PatientUserId,
+                        NetworkId         : donor.id,
+                        RequestedQuantity : 1,
+                        RequestedDate     : new Date().toISOString()
+                            .split('T')[0]
+                    };
+                    await this.createDonationRecord(object);
                     const dffMessage = `Hi ${donorName}, \n"${name}" requires blood. \nThe transfusion is scheduled to be ${stringTFDate}.
                     Would you be willing to donate blood on or before ${stringDate}? \nRegards \nTeam Blood Warriors`;
 
@@ -118,16 +125,10 @@ export class RaiseDonationRequestService {
         }
     }
 
-    public async createDonationRecord (patientUserId: string, networkId: string) {
+    public async createDonationRecord (obj: any) {
         try {
             let result = null;
             const apiURL = `clinical/donation-record`;
-            const obj = {
-                PatientUserId     : patientUserId,
-                NetworkId         : networkId,
-                RequestedQuantity : 1,
-                RequestedDate     : new Date().toISOString().split('T')[0]
-            };
             result = await needleRequestForREAN("post", apiURL, null, obj);
             console.log(`Succesfully added donation record and Id is ${result.Data.DonationRecord.id}`);
 

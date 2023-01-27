@@ -11,12 +11,15 @@ export const ScheduleDonationTakeValuesService = async (eventObj) => {
             const raiseDonationRequestService = new RaiseDonationRequestService();
             const bloodWarriorCommonService = new BloodWarriorCommonService();
             const bridgeId = eventObj.body.queryResult.parameters.bridge_Id;
+            const phoneNumber = eventObj.body.queryResult.parameters.phoneNumber;
             const donation_Date = eventObj.body.queryResult.parameters.donation_Date;
             const location = eventObj.body.queryResult.parameters.location;
             let result = null;
             let dffMessage = "";
             const apiURL = `clinical/patient-donors/search?name=${bridgeId}&onlyElligible=true`;
             result = await needleRequestForREAN("get", apiURL);
+
+            //We need to iterate here if i want to send reminders to all donors having same blood bridge
             if (result.Data.PatientDonors.Items.length > 0) {
                 const patientDonors = result.Data.PatientDonors.Items[0];
                 let lastDonationDate = patientDonors.LastDonationDate ?? null;
@@ -24,7 +27,14 @@ export const ScheduleDonationTakeValuesService = async (eventObj) => {
                     lastDonationDate = new Date(lastDonationDate.split("T")[0]).toDateString();
                 }
                 const patient = await bloodWarriorCommonService.getPatientPhoneByUserId(patientDonors.PatientUserId);
-                await raiseDonationRequestService.createDonationRecord(patientDonors.PatientUserId, patientDonors.id);
+                const obj = {
+                    PatientUserId     : patientDonors.PatientUserId,
+                    NetworkId         : patientDonors.id,
+                    RequestedQuantity : 1,
+                    RequestedDate     : new Date().toISOString()
+                        .split('T')[0]
+                };
+                await raiseDonationRequestService.createDonationRecord(obj);
                 dffMessage = `Congratulations! \nThe donation has been successfully scheduled.`;
                 const commonMessage = `
             Donor name: ${patientDonors.DonorName},

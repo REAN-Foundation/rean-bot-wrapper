@@ -5,6 +5,7 @@ import { getPhoneNumber, needleRequestForREAN } from '../needle.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { sendApiButtonService } from '../whatsappmeta.button.service';
 import { RaiseDonationRequestService } from './raise.request.service';
+import { BloodWarriorCommonService } from './common.service';
 
 @autoInjectable()
 export class DonationRequestYesService {
@@ -15,9 +16,15 @@ export class DonationRequestYesService {
 
     private raiseDonationRequestService = new RaiseDonationRequestService();
 
+    private bloodWarriorCommonService = new BloodWarriorCommonService();
+
     async sendUserMessage (eventObj) {
         try {
-            const bridgeId = eventObj.body.queryResult.parameters.bridge_id;
+            let bridgeId = eventObj.body.queryResult.parameters.bridge_id;
+            if (bridgeId === null || bridgeId === undefined) {
+                const volunteer = await this.bloodWarriorCommonService.getVolunteerByPhoneNumber(eventObj);
+                bridgeId = volunteer.SelectedBridgeId;
+            }
             const apiURL = `clinical/patient-donors/search?name=${bridgeId}`;
             let result = null;
             result = await needleRequestForREAN("get", apiURL);
@@ -53,8 +60,14 @@ export class DonationRequestYesService {
                     const donorName = donor.DonorName;
                     const donorPhone =
                         this.raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(donor.DonorPhone);
-                    
-                    await this.raiseDonationRequestService.createDonationRecord(donor.PatientUserId, donor.id);
+                    const obj = {
+                        PatientUserId     : donor.PatientUserId,
+                        NetworkId         : donor.id,
+                        RequestedQuantity : 1,
+                        RequestedDate     : new Date().toISOString()
+                            .split('T')[0]
+                    };
+                    await this.raiseDonationRequestService.createDonationRecord(obj);
                     const dffMessage = `Hi ${donorName}, \nWe need blood in coming days. Are you able to donate blood? \nRegards \nTeam Blood Warriors`;
 
                     const payload = eventObj.body.originalDetectIntentRequest.payload;

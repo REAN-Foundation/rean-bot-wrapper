@@ -52,6 +52,7 @@ import { DonationRequestYesListener } from './intentListeners/bloodWarrior/donat
 import { AcceptVolunteerRequestListener } from './intentListeners/bloodWarrior/accept.volunteer.request.listener';
 import { AcceptDonationRequestListener } from './intentListeners/bloodWarrior/accept.donation.request.listener';
 import { SelectBloodGroupListener } from './intentListeners/bloodWarrior/select.blood.group.listener';
+import { DonateBloodListener } from './intentListeners/bloodWarrior/donate.blood.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -180,6 +181,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('A_Negative', SelectBloodGroupListener);
         IntentEmitter.registerListener('B_Negative', SelectBloodGroupListener);
         IntentEmitter.registerListener('AB_Negative', SelectBloodGroupListener);
+        IntentEmitter.registerListener('Donate_Blood', DonateBloodListener);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);

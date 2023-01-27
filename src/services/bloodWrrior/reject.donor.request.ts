@@ -23,8 +23,14 @@ export class RejectDonorRequestService {
                 const apiURL = `clinical/donation-record/search?donorUserId=${donor.UserId}`;
                 const requestBody = await needleRequestForREAN("get", apiURL);
                 const donationRecordId = requestBody.Data.DonationRecord.Items[0].id;
-                const patientUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.PatientUserId;
-                const volunteerUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.VolunteerUserId;
+                let volunteerUserId = null;
+                let patientUserId = null;
+                if (donor.DonorType === 'One time') {
+                    volunteerUserId = requestBody.Data.DonationRecord.Items[0].VolunteerOfEmergencyDonor;
+                } else {
+                    volunteerUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.VolunteerUserId;
+                    patientUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.PatientUserId;
+                }
                 const dffMessage = `Sorry to know this. We will contact you later.`;
                 resolve( { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } });
 
@@ -38,11 +44,15 @@ export class RejectDonorRequestService {
                 await this.bloodWarriorCommonService.updateDonationRecord(donationRecordId, obj);
 
                 //message send to volunteer
-                const patient = await this.bloodWarriorCommonService.getPatientPhoneByUserId(patientUserId);
+                let patientName = 'patient';
+                if (patientUserId !== null) {
+                    const patient = await this.bloodWarriorCommonService.getPatientPhoneByUserId(patientUserId);
+                    patientName = patient.User.Person.DisplayName;
+                }
                 const volunteer = await this.bloodWarriorCommonService.getVolunteerPhoneByUserId(volunteerUserId);
                 const volunteerPhone =
                         this.raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(volunteer.User.Person.Phone);
-                const message = `Hi ${volunteer.User.Person.DisplayName},\n${donor.DisplayName} has rejected or ineligible to donate for ${patient.User.Person.DisplayName}
+                const message = `Hi ${volunteer.User.Person.DisplayName},\n${donor.DisplayName} has rejected or ineligible to donate for ${patientName}.
             Please contact other eligible donors or raise a request.`;
                 await this._platformMessageService.SendMediaMessage(volunteerPhone,null,message,'text', null);
 
