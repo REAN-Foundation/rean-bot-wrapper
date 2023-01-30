@@ -24,20 +24,20 @@ export class MockMessageService implements platformServiceInterface {
 
     async handleMessage(requestBody: any, channel: string) {
 
-        const generatorWhatsappMessage = this.whatsappMessageToDialogflow.messageToDialogflow(requestBody);
+        const generatorMockMessage = this.whatsappMessageToDialogflow.messageToDialogflow(requestBody);
         let done = false;
-        const whatsappMessages = [];
-        let whatsappMessagetoDialogflow: Imessage;
+        const mockMessages = [];
+        let mockMessagetoDialogflow: Imessage;
         while (done === false) {
-            const nextgeneratorObj = generatorWhatsappMessage.next();
-            whatsappMessagetoDialogflow = (await nextgeneratorObj).value;
+            const nextgeneratorObj = generatorMockMessage.next();
+            mockMessagetoDialogflow = (await nextgeneratorObj).value;
             done = (await nextgeneratorObj).done;
-            whatsappMessages.push(whatsappMessagetoDialogflow);
+            mockMessages.push(mockMessagetoDialogflow);
         }
-        for (whatsappMessagetoDialogflow of whatsappMessages){
-            if (whatsappMessagetoDialogflow) {
-                whatsappMessagetoDialogflow.platform = 'MockChannel';
-                await this.messageFlow.checkTheFlow(whatsappMessagetoDialogflow, channel, this);
+        for (mockMessagetoDialogflow of mockMessages){
+            if (mockMessagetoDialogflow) {
+                mockMessagetoDialogflow.platform = 'MockChannel';
+                await this.messageFlow.checkTheFlow(mockMessagetoDialogflow, channel, this);
             }
         }
 
@@ -64,7 +64,6 @@ export class MockMessageService implements platformServiceInterface {
         //         }
         //     }
         //     else {
-
         //         //messageObj is void
         //     }
         //     if (mockContactsObj){
@@ -74,6 +73,7 @@ export class MockMessageService implements platformServiceInterface {
         //     console.log("message to dialogflow", messagetoDialogflow);
         //     await this.messageFlow.checkTheFlow(messagetoDialogflow, channel, this);
         // }
+        
     }
 
     sendManualMesage(msg: any) {
