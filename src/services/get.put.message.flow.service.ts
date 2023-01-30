@@ -90,6 +90,8 @@ export class MessageFlow{
         const personresponse = new ChatMessage(dfResponseObj);
         await personresponse.save();
 
+        await this.saveIntent(intent, response_format.sessionId);
+
         // console.log(processedResponse.message_from_dialoglow.text);
         if (processedResponse.message_from_dialoglow.getText()) {
             let message_to_platform = null;
@@ -239,6 +241,29 @@ export class MessageFlow{
             resolve(chatMessageObj);
         });
         
+    }
+
+    async saveIntent(intent: string, userPlatformID: string){
+        try {
+            const lastMessage = await ChatMessage.findAll({
+                limit : 1,
+                where : {
+                    userPlatformID : userPlatformID,
+                    direction      : 'IN'
+                },
+                order : [ [ 'createdAt', 'DESC' ]]
+            });
+            await ChatMessage.update(
+                {intent: intent},
+                {
+                    where : {
+                        id : lastMessage[0].id,
+                    }
+                }
+            );
+        } catch (error) {
+            console.log(error);
+        }
     }
 
 }
