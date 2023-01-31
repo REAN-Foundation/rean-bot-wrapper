@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 /* eslint-disable linebreak-style */
 import { Imessage, Iresponse, IchatMessage } from '../refactor/interface/message.interface';
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { handleRequestservice } from './handle.request.service';
 import { autoInjectable } from 'tsyringe';
@@ -29,8 +29,6 @@ export class MessageFlow{
     }
 
     async checkTheFlow(messagetoDialogflow, channel: string, platformMessageService: platformServiceInterface){
-        
-        // const messagetoDialogflow: Imessage = await platformMessageService.getMessage(msg);
 
         //initialising MySQL DB tables
         const chatMessageObj = await this.engageMySQL(messagetoDialogflow);
@@ -123,8 +121,6 @@ export class MessageFlow{
             const id = message.platformId;
             const obj = new GoogleTextToSpeech();
             const audioURL = await obj.texttoSpeech(response_format.messageText, id);
-
-            // console.log("audioURL", audioURL);
             response_format.message_type = "voice";
             response_format.messageBody = audioURL;
         }

@@ -1,18 +1,11 @@
-/* eslint-disable init-declarations */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
-// import http from 'https';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-// import fs from 'fs';
 import { AwsS3manager } from './aws.file.upload.service';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { autoInjectable, singleton, inject, delay } from 'tsyringe';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Iresponse, Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { MessageFlow } from './get.put.message.flow.service';
 import { MockCHannelMessageFunctionalities } from './mock.channel.message.funtionalities';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { ChatMessage } from '../models/chat.message.model';
 import { WhatsappRequest } from './request.format/whatsapp.request';

@@ -1,4 +1,3 @@
-/* eslint-disable init-declarations */
 import { Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface';
 import { autoInjectable, singleton } from 'tsyringe';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';

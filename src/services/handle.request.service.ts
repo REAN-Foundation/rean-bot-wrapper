@@ -1,7 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { DialogflowResponseService } from './dialogflow.response.service';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { translateService } from './translate.service';
 import { autoInjectable } from 'tsyringe';
 import { Imessage } from '../refactor/interface/message.interface';
@@ -24,7 +23,6 @@ export class handleRequestservice{
 
         // eslint-disable-next-line max-len
         const message_from_dialoglow = await this.DialogflowResponseService.getDialogflowMessage(translate_message.message, channel, message.intent,message);
-        console.log("message_from_dialoglow",message_from_dialoglow);
 
         // this.getTranslatedResponse(message_from_dialoglow, translate_message.languageForSession);
         // process the message from dialogflow before sending it to whatsapp
@@ -55,11 +53,9 @@ export class handleRequestservice{
         const customTranslations = [this.getTranslatedResponse(message_from_dialoglow, languageForSession)];
         if (customTranslations[0] === null){
             const googleTranslate = await this.translateService.processdialogflowmessage(message_from_dialoglow, languageForSession);
-            console.log("googleTranslate", googleTranslate);
             return googleTranslate;
         }
         else {
-            console.log("customTranslations", customTranslations);
             return customTranslations;
         }
     }

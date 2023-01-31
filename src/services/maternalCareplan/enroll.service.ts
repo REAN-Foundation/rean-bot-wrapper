@@ -1,3 +1,4 @@
+/* eslint-disable newline-per-chained-call */
 import { getHeaders } from '../../services/biometrics/get.headers';
 import { GetPatientInfoService } from '../../services/support.app.service';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';

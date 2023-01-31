@@ -28,7 +28,7 @@ export class Speechtotext {
     private obj_gcp;
 
     async SendSpeechRequest(fileUrl, chatServiceName, preferredLanguage) {
-        return new Promise(async (resolve, reject) => {
+        return new Promise(async (resolve) => {
             if (chatServiceName === 'telegram') {
                 http.get(fileUrl, async (res) => {
                     

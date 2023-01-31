@@ -2,7 +2,7 @@ import { Logger } from "../../common/logger";
 import { eyeSymptoms } from "../../services/eye.symptoms.service";
 
 export const eyeSymptomAssessment = async ( intent,eventObj ) => {
-    return new Promise(async (resolve,reject) => {
+    return new Promise(async (resolve) => {
         try {
             Logger.instance()
                 .log("Eye Symptom Assessment");

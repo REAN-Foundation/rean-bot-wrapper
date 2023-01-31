@@ -190,8 +190,6 @@ export class WhatsappMessageService extends CommonWhatsappService {
     }
 
     async SendMediaMessage (contact: number | string, imageLink: string, message: string, messageType: string, payload: any) {
-        
-        console.log("message type",messageType + imageLink);
         message = this.messageFunctionalities.sanitizeMessage(message);
         const postData = this.postDataFormatWhatsapp(contact);
         if (messageType === "image") {
@@ -213,7 +211,6 @@ export class WhatsappMessageService extends CommonWhatsappService {
             };
             postData.type = "audio";
             const postDataString = JSON.stringify(postData);
-            console.log("this is the postDataString", postDataString);
             return await this.postRequestMessages(postDataString);
         }
         else if (messageType === "interactive-buttons"){
@@ -242,7 +239,6 @@ export class WhatsappMessageService extends CommonWhatsappService {
             };
             postData.type = "interactive";
             const postDataString = JSON.stringify(postData);
-            console.log("this is the postDataString", postDataString);
             return await this.postRequestMessages(postDataString);
         }
         else if (messageType === "interactive-list"){

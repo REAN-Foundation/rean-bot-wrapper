@@ -3,7 +3,7 @@ import { RaiseDonationRequestService } from "../../../services/bloodWrrior/raise
 const raiseDonationRequestService = new RaiseDonationRequestService();
 
 export const RaiseBloodDonationRequest = async (intent, eventObj) => {
-    return new Promise(async (resolve,reject) => {
+    return new Promise(async (resolve) => {
         try {
             let response = null;
             response = await raiseDonationRequestService.sendUserMessage(eventObj);

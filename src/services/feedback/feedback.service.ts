@@ -1,4 +1,5 @@
 /* eslint-disable max-len */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { feedbackInterface } from './feedback.interface';
 import { autoInjectable, container } from 'tsyringe';
 import { SlackMessageService } from '../slack.message.service';

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 import { ResponseHandler } from '../../utils/response.handler';
 import { ErrorHandler } from '../../utils/error.handler';
@@ -94,6 +95,7 @@ export class ClientWebhookController {
     }
 
     receiveMessageMetaWhatsapp = async (req, res) => {
+        
         // console.log("receiveMessage webhook receiveMessageWhatsappNew");
         try {
             this._clientAuthenticatorService = container.resolve(req.params.channel + '.authenticator');
@@ -124,7 +126,7 @@ export class ClientWebhookController {
             }
             else {
                 const phone_number_id = this.clientEnvironment.getClientEnvironmentVariable('WHATSAPP_PHONE_NUMBER_ID');
-                if (req.body.entry[0].changes[0].value.metadata.phone_number_id == phone_number_id) {
+                if (req.body.entry[0].changes[0].value.metadata.phone_number_id === phone_number_id) {
                     console.log("receiveMessage webhook receiveMessageWhatsappNew");
                     if (req.params.channel !== "REAN_SUPPORT" &&
                         req.params.channel !== "slack" &&

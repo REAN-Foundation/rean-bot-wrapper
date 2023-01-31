@@ -55,7 +55,6 @@ export class translateService{
     };
 
     processdialogflowmessage = async (messageFromDialogflow: DialogflowResponseFormat, detected_language: string) => {
-        console.log("entered the processdialogflowmessage of translateService JJJJJJJJJJJ");
         // eslint-disable-next-line init-declarations
         let translatedResponse;
         const parse_mode = messageFromDialogflow.getParseMode();
@@ -72,10 +71,8 @@ export class translateService{
     translatePushNotifications = async ( message: string, phoneNumber: string) => {
         try {
             let languageForSession = await new UserLanguage().getPreferredLanguageofSession(phoneNumber);
-            console.log("languageForSession before", languageForSession);
 
             languageForSession = languageForSession !== 'null' ? languageForSession : 'en';
-            console.log("languageForSession after", languageForSession);
             const responseMessage = this.translateResponse([message], languageForSession);
             return responseMessage;
 
@@ -86,7 +83,6 @@ export class translateService{
     };
 
     translateResponse = async (responseMessage: string[], detected_language: string) => {
-        console.log(`entered the translateResponse of translateService JJJJJJJJJJJ`);
         const translate = new v2.Translate(this.obj);
         try {
             if (detected_language !== 'en') {
@@ -98,7 +94,7 @@ export class translateService{
             }
             return responseMessage;
         } catch (e) {
-            console.log("catch translate", e);
+            console.log("catch translate error", e);
             return responseMessage;
         }
     };

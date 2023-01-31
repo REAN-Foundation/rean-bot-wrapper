@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { container } from "tsyringe";
 import { kerotoplastyService } from "../../services/kerotoplasty.service";
-
 
 export const kerotoplastyLocationListener = async (intent:string, eventObj) => {
     const kerotoplastyServiceObj: kerotoplastyService = container.resolve(kerotoplastyService);

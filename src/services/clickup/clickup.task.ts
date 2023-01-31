@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import needle from 'needle';
 import { getRequestOptions } from '../../utils/helper';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';

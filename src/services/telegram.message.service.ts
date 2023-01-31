@@ -1,7 +1,5 @@
-/* eslint-disable init-declarations */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
-
-// import { DialogflowResponseService } from './dialogflow-response.service';
 import { AwsS3manager } from './aws.file.upload.service';
 import { Imessage, IprocessedDialogflowResponseFormat, Iresponse } from '../refactor/interface/message.interface';
 import { autoInjectable, singleton, inject, delay } from 'tsyringe';
