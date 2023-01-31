@@ -23,7 +23,7 @@ export const changeTransfusionDateService = async (eventObj) => {
             };
             const requestBody = await needleRequestForREAN("put", apiURL, accessToken, obj);
     
-            const dffMessage = `Date updated Successfully. We will notify you before expected blood transfusion date.`;
+            const dffMessage = `Date updated Successfully. We will remind you before expected transfusion`;
             resolve( { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } });
 
         } catch (error) {

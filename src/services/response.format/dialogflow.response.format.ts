@@ -52,19 +52,16 @@ export class DialogflowResponseFormat implements IserviceResponseFunctionalities
 
     getIntent(){
         const intent = this.response[0].queryResult && this.response[0].queryResult.intent ? this.response[0].queryResult.intent.displayName : '';
-        console.log("interface intent", intent);
         return intent;
     }
 
     getPayload() {
         let payload = null;
-        console.log("interface DF response", this.response);
         if (this.response[0].queryResult.fulfillmentMessages.length > 1) {
             if (this.response[0].queryResult.fulfillmentMessages[1].payload !== undefined) {
                 payload = this.response[0].queryResult.fulfillmentMessages[1].payload;
             }
         }
-        console.log("payload in interface", payload);
         return payload;
     }
 

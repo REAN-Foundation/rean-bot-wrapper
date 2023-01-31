@@ -61,7 +61,6 @@ export class UserLanguage {
     async getPreferredLanguageofSession(sessionId){
         return new Promise<string>(async(resolve) => {
             const userLanguageTableResponse = await ChatSession.findAll({ where: { userPlatformID: sessionId } });
-            // console.log("userLanguageTableResponse",userLanguageTableResponse);
             try {
                 console.log(`Push notification language table response length ${userLanguageTableResponse.length}`);
                 if (userLanguageTableResponse.length > 0 && userLanguageTableResponse[userLanguageTableResponse.length - 1].preferredLanguage !== null) {

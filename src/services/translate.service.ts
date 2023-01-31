@@ -31,7 +31,7 @@ export class translateService{
             detected_language = await this.checkLanguage(detected_language);
             return detected_language;
         }
-    }
+    };
 
     translateMessage = async (messageType, message:string, sessionId) => {
         const translate = new v2.Translate(this.obj);
@@ -55,8 +55,6 @@ export class translateService{
     };
 
     processdialogflowmessage = async (messageFromDialogflow: DialogflowResponseFormat, detected_language: string) => {
-        const translate = new v2.Translate(this.obj);
-        // console.log("entered the processdialogflowmessage of translateService JJJJJJJJJJJ", message);
         // eslint-disable-next-line init-declarations
         let translatedResponse;
         const parse_mode = messageFromDialogflow.getParseMode();
@@ -65,22 +63,17 @@ export class translateService{
             translatedResponse = text;
         }
         else {
-            translatedResponse = await this.translateResponse(translate, text, detected_language);
+            translatedResponse = await this.translateResponse(text, detected_language);
         }
-        console.log("translatedResponse",translatedResponse);
         return translatedResponse;
     };
 
     translatePushNotifications = async ( message: string, phoneNumber: string) => {
-        console.log(`entered the translation of push notification JJJJJJJJJJJ`);
         try {
-            const translate = new v2.Translate(this.obj);
             let languageForSession = await new UserLanguage().getPreferredLanguageofSession(phoneNumber);
-            console.log("languageForSession before", languageForSession);
 
             languageForSession = languageForSession !== 'null' ? languageForSession : 'en';
-            console.log("languageForSession after", languageForSession);
-            const responseMessage = this.translateResponse(translate, [message], languageForSession);
+            const responseMessage = this.translateResponse([message], languageForSession);
             return responseMessage;
 
         } catch (e) {
@@ -89,8 +82,8 @@ export class translateService{
         }
     };
 
-    translateResponse = async (translate, responseMessage: string[], detected_language: string) => {
-        console.log(`entered the translateResponse of translateService JJJJJJJJJJJ`);
+    translateResponse = async (responseMessage: string[], detected_language: string) => {
+        const translate = new v2.Translate(this.obj);
         try {
             if (detected_language !== 'en') {
                 const [translation] = await translate.translate(responseMessage[0], { to: detected_language, format: "text" });
@@ -101,7 +94,7 @@ export class translateService{
             }
             return responseMessage;
         } catch (e) {
-            console.log("catch translate", e);
+            console.log("catch translate error", e);
             return responseMessage;
         }
     };

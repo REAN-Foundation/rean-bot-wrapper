@@ -2,9 +2,13 @@ import { GetPatientInfoService } from '../support.app.service';
 import { container, autoInjectable } from 'tsyringe';
 import { Logger } from '../../common/logger';
 import {  needleRequestForREAN } from '../needle.service';
+import { BloodWarriorCommonService } from './common.service';
+import { whatsappMetaButtonService } from '../whatsappmeta.button.service';
 
 @autoInjectable()
 export class BloodBridgeStatusService {
+
+    bloodWarriorCommonService: BloodWarriorCommonService = new BloodWarriorCommonService();
 
     getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
 
@@ -26,26 +30,28 @@ export class BloodBridgeStatusService {
                 if (nextTrnasfusionDate) {
                     nextTrnasfusionDate = new Date(nextTrnasfusionDate.split("T")[0]).toDateString();
                 }
-                dffMessage = `Here is the summary,
+                dffMessage = `Here is the summary:
         Bridge Name: ${bloodBridge.Name},
         Last Donation Date: ${lastDonationDate},
         Next Transfusion Date: ${nextTrnasfusionDate},
         Eligible Donors Count: ${result.Data.PatientDonors.Items.length},
-        Donors Signed Up on Bot: Yes`;
+        \nDonors Signed Up on Bot: X Out Y
+        Parent Registered: Yes`;
+
+                if (eventObj.body.queryResult.intent.displayName === 'Donation_Request_BloodBridge') {
+                    const patient = await
+                    this.bloodWarriorCommonService.getPatientPhoneByUserId(bloodBridge.PatientUserId);
+                    const message = `        Patient Name: ${patient.User.Person.DisplayName} \nDo you want to send a request to all eligible donors?`;
+                    const buttons = await whatsappMetaButtonService("Yes", "Donation_Request_Yes","No", "Volunteer_Confirm");
+                    return { message: { fulfillmentMessages: [{ text: { text: [dffMessage + message] } }, buttons] } };
+                } else {
+                    return { message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } };
+                }
 
             } else {
-                dffMessage = "Error in Bridge Id Please try again. \nIf problem continues, please contact the admin";
+                dffMessage = "Error. Please re-enter \nIf problem continues, please contact the admin";
+                return { message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } };
             }
-            
-            console.log(dffMessage);
-            const data = {
-                "fulfillmentMessages" : [
-                    {
-                        "text" : { "text": [dffMessage] }
-                    },
-                ]
-            };
-            return await { sendDff: true, message: data };
 
         } catch (error) {
             Logger.instance()

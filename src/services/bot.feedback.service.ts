@@ -112,11 +112,7 @@ export class BotFeedback{
                     
                 }
                 const respOfChatSession = await ChatSession.findAll();
-
-                // console.log("respOfChatSession!!!!!!!!!!!", respOfChatSession);
                 for (let i = 0; i < respOfChatSession.length; i++) {
-
-                    // console.log("i",i);
                     const userId = respOfChatSession[i].userPlatformID;
                     console.log("userID", userId);
                     await testSettimeout(userId);
@@ -135,6 +131,3 @@ export class BotFeedback{
     }
 
 }
-
-// const botFeedback = new BotFeedback();
-// botFeedback.testSettimeout(false, "2077778107");

@@ -70,8 +70,6 @@ export class AwsS3manager{
                         if (err) {
                             reject(err);
                         }
-
-                        // console.log(`File uploaded successfully. ${data}`);
                         const location = process.env.CLOUD_FRONT_PATH + filename;
                         resolve(await new SignedUrls().getSignedUrl(location));
                     });

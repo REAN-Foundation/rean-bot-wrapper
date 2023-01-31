@@ -38,10 +38,8 @@ export class ClickUpMessageService implements platformServiceInterface {
         private clientEnvironmentProviderService?: ClientEnvironmentProviderService) {}
 
     async handleMessage(requestBody: any) {
-        console.log("request", requestBody);
-        
-        // console.log("user", util.inspect(requestBody.history_items[0].user));
-        // console.log("comment", util.inspect(requestBody.history_items[0].comment));
+
+        // console.log("request", requestBody);
         this.clickupEventHandler(requestBody);
         
     }
@@ -89,13 +87,11 @@ export class ClickUpMessageService implements platformServiceInterface {
                 console.log("requestbody of comment", requestBody.history_items[0].comment);
                 const commentObj = requestBody.history_items[0].comment.comment;
                 for (let i = 0; i < commentObj.length; i++){
-                    if (commentObj[i].type){
+                    if (commentObj[i].type && commentObj[i].text === "@watchers"){
                         const tag = commentObj[i].text;
                         this.eventComment(requestBody,tag);
                     }
                 }
-                
-                // console.log("requestbody of comment attributes", requestBody.history_items[0].comment.comment[1].attributes);
             }
         }
         else if (requestBody.event === "taskStatusUpdated") {

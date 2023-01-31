@@ -32,7 +32,7 @@ export class RaiseDonationRequestService {
         }
     }
 
-    async raiseBloodDonation (eventObj, patientUserId, name) {
+    async raiseBloodDonation (eventObj, patientUserId: string, name: string) {
         try {
             let result = null;
             let apiURL = `patient-health-profiles/${patientUserId}`;
@@ -50,9 +50,9 @@ export class RaiseDonationRequestService {
             const buttons = await sendApiButtonService(["Accept", "Accept_Donation_Request","Reject", "Reject_Donation_Request"]);
             const donorNames = [];
             if (result.Data.PatientDonors.Items.length > 0) {
-                result.Data.PatientDonors.Items.forEach( donor => {
+                for (const donor of result.Data.PatientDonors.Items) {
                     if (donor === null) {
-                        return;
+                        continue;
                     }
                     const donorName = donor.DonorName;
                     const donorPhone = this.convertPhoneNoReanToWhatsappMeta(donor.DonorPhone);
@@ -60,23 +60,24 @@ export class RaiseDonationRequestService {
                     if (lastDonationDate !== null) {
                         lastDonationDate = new Date(lastDonationDate.split("T")[0]).toDateString();
                     }
+                    await this.createDonationRecord(donor.PatientUserId, donor.id);
                     const dffMessage = `Hi ${donorName}, \n"${name}" requires blood. \nThe transfusion is scheduled to be ${stringTFDate}.
                     Would you be willing to donate blood on or before ${stringDate}? \nRegards \nTeam Blood Warriors`;
 
                     const payload = eventObj.body.originalDetectIntentRequest.payload;
                     this._platformMessageService = container.resolve(payload.source);
-                    this._platformMessageService.SendMediaMessage(donorPhone,null,dffMessage,'interactive-buttons', buttons);
+                    await this._platformMessageService.SendMediaMessage(donorPhone,null,dffMessage,'interactive-buttons', buttons);
 
                     donorNames.push(donorName);
-                });
+                }
             }
             console.log(`Succesfully donation request send to donor. DonorName : ${donorNames}.`);
 
-            return { donorNames, stringTFDate };
+            return { stringTFDate, donorNames };
 
         } catch (error) {
             Logger.instance()
-                .log_error(error.message,500,'Raise blood donation request with blood warrior service error');
+                .log_error(error.message,500,'Failed to send request to donors');
         }
     }
 
@@ -102,7 +103,8 @@ export class RaiseDonationRequestService {
                     donorList += seq;
                     num = num + 1;
                 });
-                const dffMessage = `Hi ${volunteerName}, \n"${patientName}" requires blood. The transfusion is scheduled to be ${transfusionDate}. \nDonation request is sent to the following donors.${donorList} \nRegards \nTeam Blood Warriors`;
+                const dffMessage = `Hi ${volunteerName}, \n"${patientName}" requires blood. The transfusion is scheduled to be ${transfusionDate}. \nDonation request is sent to the following donors.${donorList}
+                We will send you a reminder if no one responds or anyone accepts. \nRegards \nTeam Blood Warriors`;
                 const payload = eventObj.body.originalDetectIntentRequest.payload;
                 this._platformMessageService = container.resolve(payload.source);
                 result = await this._platformMessageService.SendMediaMessage(volunteerPhone,null,dffMessage,'text', null);
@@ -113,7 +115,26 @@ export class RaiseDonationRequestService {
 
         } catch (error) {
             Logger.instance()
-                .log_error(error.message,500,'Raise blood donation request with blood warrior service error');
+                .log_error(error.message,500,'Failed to notify volunteers about donor request');
+        }
+    }
+
+    public async createDonationRecord (patientUserId: string, networkId: string) {
+        try {
+            let result = null;
+            const apiURL = `clinical/donation-record`;
+            const obj = {
+                PatientUserId     : patientUserId,
+                NetworkId         : networkId,
+                RequestedQuantity : 1,
+                RequestedDate     : new Date().toISOString().split('T')[0]
+            };
+            result = await needleRequestForREAN("post", apiURL, null, obj);
+            console.log(`Succesfully added donation record and Id is ${result.Data.DonationRecord.id}`);
+
+        } catch (error) {
+            Logger.instance()
+                .log_error(error.message,500,'Failed to create donation record');
         }
     }
 
