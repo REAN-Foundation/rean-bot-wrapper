@@ -1,50 +1,36 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable init-declarations */
 /* eslint-disable max-len */
-import http from 'https';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import fs from 'fs';
 import { AwsS3manager } from './aws.file.upload.service';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { autoInjectable, singleton, inject, delay } from 'tsyringe';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Iresponse, Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface';
-import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { MessageFlow } from './get.put.message.flow.service';
 import { MessageFunctionalities } from './whatsapp.meta.functionalities';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import needle from 'needle';
 import { getRequestOptions } from '../utils/helper';
-import util from "util";
 import { HandleMessagetypePayload } from './handle.messagetype.payload';
+import { ChatMessage } from '../models/chat.message.model';
+import { WhatsappMessageToDialogflow } from './whatsapp.messagetodialogflow';
+import { CommonWhatsappService } from './whatsapp.common.service';
+import { translateService } from './translate.service';
+import { UserLanguage } from './set.language';
 
 @autoInjectable()
 @singleton()
-export class WhatsappMetaMessageService implements platformServiceInterface {
+export class WhatsappMetaMessageService extends CommonWhatsappService {
 
     public res;
 
     constructor(@inject(delay(() => MessageFlow)) public messageFlow,
-        private awsS3manager?: AwsS3manager,
+        awsS3manager?: AwsS3manager,
         private messageFunctionalitiesmeta?: MessageFunctionalities,
         private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
-        private handleMessagetypePayload?: HandleMessagetypePayload){}
-
-    handleMessage(requestBody: any, channel: string) {
-        return this.messageFlow.checkTheFlow(requestBody, channel, this);
+        private handleMessagetypePayload?: HandleMessagetypePayload,
+        whatsappMessageToDialogflow?: WhatsappMessageToDialogflow){
+        super(messageFlow, awsS3manager, whatsappMessageToDialogflow);
     }
 
     async sendManualMesage(msg: any) {
         return await this.messageFlow.send_manual_msg(msg, this);
-    }
-
-    init() {
-        throw new Error('Method not implemented.');
-    }
-
-    setWebhook(clientName: string){
-        throw new Error('Method not implemented.');
     }
 
     postDataFormatWhatsapp = (contact) => {
@@ -80,26 +66,8 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
         });
     }
 
-    async getMetaMediaUrl(mediaId){
-        try {
-            const options = getRequestOptions();
-            const token = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
-            options.headers['Content-Type'] = 'application/json';
-            options.headers['Authorization'] = `Bearer ${token}`;
-            const hostname = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
-            const path = `/v14.0/${mediaId}`;
-            const apiUrl_meta = hostname + path;
-            const response = await needle("get",apiUrl_meta, options);
-            return response.body.url;
-        }
-        catch (error) {
-            console.log("error", error);
-        }
-    }
-
     SendMediaMessage = async (contact: number | string, imageLink: string, message: string, messageType: string, payload: any) => {
 
-        // console.log("message type",messageType + imageLink);
         console.log("This is the payload", payload);
         const messageBody = this.messageFunctionalitiesmeta.sanitizeMessage(message);
         const postDataMeta = this.postDataFormatWhatsapp(contact);
@@ -242,111 +210,21 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
             postDataMeta.type = "text";
             const postDataString = JSON.stringify(postDataMeta);
             console.log(postDataString);
-            return await this.postRequestMessages(postDataString);
+            const needleResp:any = await this.postRequestMessages(postDataString);
+            const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: postDataMeta.to } });
+            const id = respChatMessage[respChatMessage.length - 1].id;
+            await ChatMessage.update({ whatsappResponseMessageId: needleResp.body.messages[0].id }, { where: { id: id } } )
+                .then(() => { console.log("updated"); })
+                .catch(error => console.log("error on update", error));
+            return (needleResp);
         }
     };
-    
-    getMessage = async (message: any) => {
-        console.log("messages meta", message);
-        if (message.messages[0].type === "text") {
-            // eslint-disable-next-line max-len
-            return await this.messageFunctionalitiesmeta.textMessageFormat(message);
-        }
-        else if (message.messages[0].type === "location") {
-            return await this.messageFunctionalitiesmeta.locationMessageFormat(message);
-        }
-        else if (message.messages[0].type === "audio") {
-            const mediaUrl = await this.getMetaMediaUrl(message.messages[0].audio.id);
-            message.messages[0]['url'] = mediaUrl;
-            return await this.messageFunctionalitiesmeta.voiceMessageFormat(message, message.messages[0].type, 'whatsappMeta');
-        }
-        else if (message.messages[0].type === "image") {
-            return await this.messageFunctionalitiesmeta.imageMessaegFormat(message);
-        }
-        else if (message.messages[0].type === "interactive") {
-            if (message.messages[0].interactive.type === "list_reply"){
-                return await this.messageFunctionalitiesmeta.interactiveListMessaegFormat(message);
-            } else if (message.messages[0].interactive.type === "button_reply"){
-                return await this.messageFunctionalitiesmeta.interactiveButtonMessaegFormat(message);
-            } else {
-                return await this.messageFunctionalitiesmeta.interactiveMessaegFormat(message);
-            }
-        }
-        else if (message.messages[0].type === "button") {
-            console.log("msg.messages[0].interactive",util.inspect(message.messages[0].button));
-
-            // return await this.messageFunctionalitiesmeta.interactiveMessaegFormat(msg);
-        }
-        else {
-            throw new Error("Message is neither text, voice nor location");
-        }
-    };
-
-    postResponse = async (message: Imessage , processedResponse: IprocessedDialogflowResponseFormat) => {
-        // eslint-disable-next-line init-declarations
-        let reaponse_message: Iresponse;
-        const meta_whatsapp_id = message.sessionId;
-        const meta_input_message = message.messageBody;
-        const meta_user_name = message.name;
-        const meta_chat_message_id = message.chat_message_id;
-        const image = processedResponse.message_from_dialoglow.getImageObject();
-        const pasrseMode = processedResponse.message_from_dialoglow.getParseMode();
-        const payload = processedResponse.message_from_dialoglow.getPayload();
-        const intent = processedResponse.message_from_dialoglow.getIntent();
-
-        if (processedResponse) {
-            if (image && image.url) {
-                reaponse_message = { name: meta_user_name, platform: "Whatsapp", chat_message_id: meta_chat_message_id, direction: "Out", message_type: "image", intent: intent, messageBody: image.url, messageImageUrl: image.url, messageImageCaption: image.caption, sessionId: meta_whatsapp_id, input_message: meta_input_message, messageText: image.caption };
-            }
-            else if (processedResponse.processed_message.length > 1) {
-                if (pasrseMode && pasrseMode === 'HTML') {
-                    // eslint-disable-next-line max-len
-                    const uploadImageName = await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
-                    const vaacinationImageFile = await this.awsS3manager.uploadFile(uploadImageName);
-                    if (vaacinationImageFile) {
-                        reaponse_message = { name: meta_user_name, platform: "Whatsapp", chat_message_id: meta_chat_message_id, direction: "Out", message_type: "image", intent: intent, messageBody: String(vaacinationImageFile), messageImageUrl: null, messageImageCaption: null, sessionId: meta_whatsapp_id, input_message: meta_input_message, messageText: processedResponse.processed_message[1] };
-                    }
-                }
-                else {
-                    reaponse_message = { name: meta_user_name, platform: "Whatsapp", chat_message_id: meta_chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: meta_whatsapp_id, input_message: meta_input_message, messageText: processedResponse.processed_message[0] };
-                    reaponse_message = { name: meta_user_name, platform: "Whatsapp", chat_message_id: meta_chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: meta_whatsapp_id, input_message: meta_input_message, messageText: processedResponse.processed_message[1] };
-                }
-            }
-            else {
-                let message_type = "text";
-                if (payload !== null){
-                    message_type = payload.fields.messagetype.stringValue;
-                }
-                
-                reaponse_message = { name: meta_user_name, platform: "Whatsapp", chat_message_id: meta_chat_message_id, direction: "Out", message_type: message_type, intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: meta_whatsapp_id, input_message: meta_input_message, messageText: processedResponse.processed_message[0] };
-            }
-        }
-        return reaponse_message;
-    };
-
-    createFinalMessageFromHumanhandOver(requestBody) {
-        const response_message: Iresponse = {
-            name                : requestBody.agentName,
-            platform            : "whatsapp",
-            chat_message_id     : null,
-            direction           : "Out",
-            input_message       : null,
-            message_type        : requestBody.type,
-            intent              : null,
-            messageBody         : null,
-            messageImageUrl     : null,
-            messageImageCaption : null,
-            sessionId           : requestBody.userId,
-            messageText         : requestBody.message
-        };
-        return response_message;
-
-        // return response_message;
-    }
 
     SendPayloadMessageMeta = async (contact: number | string, imageLink: string, payloadContent: any) => {
-        return new Promise(async(resolve) => {
+        return new Promise(async() => {
             const listOfPostDataMeta = [];
+            const languageForSession = await new UserLanguage().getPreferredLanguageofSession(contact);
+            const translateObj = new translateService();
             for (let i = 0; i < payloadContent.length; i++){
                 const postDataMeta = this.postDataFormatWhatsapp(contact);
                 const payloadContentMessageTypeMeta = payloadContent[i].fields.messagetype.stringValue;
@@ -356,19 +234,21 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
                     for (let j = 0; j < numberOfButtons; j++){
                         const id = payloadContent[i].fields.buttons.listValue.values[j].structValue.fields.reply.structValue.fields.id.stringValue;
                         const title = payloadContent[i].fields.buttons.listValue.values[j].structValue.fields.reply.structValue.fields.title.stringValue;
+                        const translatedTitle = await translateObj.translateResponse([title],languageForSession);
                         const tempObject = {
                             "type"  : "reply",
                             "reply" : {
                                 "id"    : id,
-                                "title" : title
+                                "title" : translatedTitle[0]
                             }
                         };
                         buttonsMeta.push(tempObject);
                     }
+                    const translatedText = await translateObj.translateResponse([payloadContent[i].fields.message.stringValue], languageForSession);
                     postDataMeta["interactive"] = {
                         "type" : "button",
                         "body" : {
-                            "text" : payloadContent[i].fields.message.stringValue
+                            "text" : translatedText[0]
                         },
                         "action" : {
                             "buttons" : buttonsMeta
@@ -377,20 +257,49 @@ export class WhatsappMetaMessageService implements platformServiceInterface {
                     postDataMeta.type = "interactive";
                     listOfPostDataMeta.push(postDataMeta);
                 }
+                else if (payloadContentMessageTypeMeta === "image") {
+                    if (!imageLink) {
+                        imageLink = payloadContent[i].fields.url.stringValue;
+                    }
+                    postDataMeta["image"] = {
+                        "link"    : imageLink,
+                        "caption" : payloadContent[i].fields.title.stringValue
+                    };
+                    postDataMeta.type = "image";
+                    const postDataString = JSON.stringify(postDataMeta);
+                    return await this.postRequestMessages(postDataString);
+        
+                }
                 else {
                     console.log("here in text",i);
-                    const payloadMessageMeta = payloadContent[i].fields.content;
+                    const payloadMessageMeta = await translateObj.translateResponse([payloadContent[i].fields.content], languageForSession);
                     const postDatatemp = this.postDataFormatWhatsapp(contact);
                     postDatatemp["text"] = {
-                        "body" : payloadMessageMeta
+                        "body" : payloadMessageMeta[0]
                     };
+                    if (new RegExp("(https?:+)").test(payloadMessageMeta[0])) {
+                        postDatatemp["text"]["preview_url"] = true;
+                    } else {
+                        postDatatemp["text"]["preview_url"] = false;
+                    }
                     postDatatemp.type = "text";
                     listOfPostDataMeta.push(postDatatemp);
                 }
             }
+            const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+            let delayClientPreference;
+            if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("DELAY_IN_RESPONSE")) {
+                delayClientPreference = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DELAY_IN_RESPONSE");
+            }
+            else {
+                delayClientPreference = 500;
+            }
+            
             for (let i = 0; i < listOfPostDataMeta.length; i++){
+                await delay(delayClientPreference);
                 await this.postRequestMessages(listOfPostDataMeta[i]);
             }
         });
     };
+    
 }

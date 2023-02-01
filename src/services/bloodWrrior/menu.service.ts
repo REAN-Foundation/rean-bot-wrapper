@@ -26,7 +26,8 @@ export class BloodWarriorMenuService {
         const message = {
             2  : "BloodWarrior_Patient",
             11 : "Donor_Confirm",
-            1  : "Admin_Confirm"
+            1  : "Admin_Confirm",
+            12 : "Volunteer_Confirm"
         };
         return message[roleId] ?? "New_User";
     }

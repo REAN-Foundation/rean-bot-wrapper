@@ -22,7 +22,7 @@ export class DialogflowResponseService {
                 dialogflow = dialogflowv2;
             }
             const dialogflow_language = "en-US";
-            const userId: string = completeMessage.sessionId === null ? v4() : completeMessage.sessionId;
+            const userId: string = completeMessage.platformId === null ? v4() : completeMessage.platformId;
             const location = completeMessage.latlong === null ? v4() : completeMessage.latlong;
 
             let sessionClient = null;
@@ -68,7 +68,7 @@ export class DialogflowResponseService {
                     },
                 },
                 queryParams : {
-                    payload : struct.encode({ source: platform, userId: userId, userName: completeMessage.name,location: location, contextId: completeMessage.contextId })
+                    payload : struct.encode({ source: platform, userId: userId, userName: completeMessage.name, location: location, contextId: completeMessage.contextId, completeMessage: completeMessage })
                 },
             };
             let request_intent = null;
@@ -82,7 +82,7 @@ export class DialogflowResponseService {
                         },
                     },
                     queryParams : {
-                        payload : struct.encode({ source: platform, userId: userId, userName: completeMessage.name,location: location })
+                        payload : struct.encode({ source: platform, userId: userId, userName: completeMessage.name, location: location, contextId: completeMessage.contextId, completeMessage: completeMessage })
                     },
                 };
             }

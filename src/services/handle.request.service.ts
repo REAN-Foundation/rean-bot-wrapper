@@ -1,12 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { DialogflowResponseService } from './dialogflow.response.service';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { translateService } from './translate.service';
-import { autoInjectable, container, inject } from 'tsyringe';
+import { autoInjectable } from 'tsyringe';
 import { Imessage } from '../refactor/interface/message.interface';
-import util from 'util';
 import { ChatSession } from '../models/chat.session';
 
 @autoInjectable()
@@ -19,8 +16,7 @@ export class handleRequestservice{
     }
 
     async handleUserRequest (message: Imessage, channel: string) {
-        const platform_id = message.sessionId;
-        const userName = message.name;
+        const platform_id = message.platformId;
 
         //get the translated message
         const translate_message = await this.translateService.translateMessage(message.type, message.messageBody, platform_id);
@@ -57,11 +53,9 @@ export class handleRequestservice{
         const customTranslations = [this.getTranslatedResponse(message_from_dialoglow, languageForSession)];
         if (customTranslations[0] === null){
             const googleTranslate = await this.translateService.processdialogflowmessage(message_from_dialoglow, languageForSession);
-            console.log("googleTranslate", googleTranslate);
             return googleTranslate;
         }
         else {
-            console.log("customTranslations", customTranslations);
             return customTranslations;
         }
     }
