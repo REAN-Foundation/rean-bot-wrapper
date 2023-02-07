@@ -14,6 +14,7 @@ export const ScheduleDonationTakeValuesService = async (eventObj) => {
             const phoneNumber = eventObj.body.queryResult.parameters.phoneNumber;
             const donation_Date = eventObj.body.queryResult.parameters.donation_Date;
             const location = eventObj.body.queryResult.parameters.location;
+            console.log(`TAKE value phonenumber is ${phoneNumber}`);
             let result = null;
             let dffMessage = "";
             const apiURL = `clinical/patient-donors/search?name=${bridgeId}&onlyElligible=true`;
@@ -55,7 +56,32 @@ export const ScheduleDonationTakeValuesService = async (eventObj) => {
                 const _platformMessageService: platformServiceInterface = container.resolve(payload.source);
                 const patientPhone =
                     raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(patient.User.Person.Phone);
-                await _platformMessageService.SendMediaMessage(patientPhone,null,heading + dffMessage + commonMessage,'text', null);
+                const variables = [
+                    {
+                        type : "text",
+                        text : patientDonors.DonorName
+                    },
+                    {
+                        type : "text",
+                        text : patientDonors.BloodGroup
+                    },
+                    {
+                        type : "text",
+                        text : new Date(donation_Date.split("T")[0]).toDateString()
+                    },
+                    {
+                        type : "text",
+                        text : location
+                    },
+                    {
+                        type : "text",
+                        text : patient.User.Person.DisplayName
+                    },
+                    {
+                        type : "text",
+                        text : patientDonors.DonorType
+                    }];
+                await _platformMessageService.SendMediaMessage(patientPhone,null,heading + dffMessage + commonMessage,'template', null, 'patient_volunteer_donation_update', variables);
 
                 //Message sent to donor
                 const heading1 = `Hi ${patientDonors.DonorName}, \nThe donation request has been created by volunteer.`;
