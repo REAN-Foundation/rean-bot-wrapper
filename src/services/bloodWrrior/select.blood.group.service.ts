@@ -2,7 +2,7 @@ import { Logger } from '../../common/logger';
 import { needleRequestForREAN } from '../needle.service';
 import { RaiseDonationRequestService } from './raise.request.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { sendApiButtonService } from '../whatsappmeta.button.service';
+import { templateButtonService } from '../whatsappmeta.button.service';
 import { container } from 'tsyringe';
 import { BloodWarriorCommonService } from './common.service';
 
@@ -59,8 +59,13 @@ export class SelectBloodGroupService {
 
                         const payload = eventObj.body.originalDetectIntentRequest.payload;
                         this._platformMessageService = container.resolve(payload.source);
-                        const buttons = await sendApiButtonService(["Accept", "Accept_Volunteer_Request","Reject", "Reject_Donation_Request"]);
-                        await this._platformMessageService.SendMediaMessage(donorPhone,null,dffMessage,'interactive-buttons', buttons);
+                        const variable = [
+                            {
+                                type : "text",
+                                text : donorName
+                            }];
+                        const buttons = await templateButtonService(["Accept_Volunteer_Request","Reject_Donation_Request"]);
+                        await this._platformMessageService.SendMediaMessage(donorPhone,null,dffMessage,'template', buttons, "donor_donation_volunteer", variable);
 
                     }
                     const apiURL = `volunteers/${volunteer.UserId}`;
