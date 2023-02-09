@@ -15,7 +15,7 @@ import { SlackMessageService } from "./slack.message.service";
 import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
 import { translateService } from './translate.service';
-import { sendApiButtonService } from './whatsappmeta.button.service';
+import { sendApiButtonService, templateButtonService } from './whatsappmeta.button.service';
 
 @autoInjectable()
 export class MessageFlow{
@@ -134,12 +134,24 @@ export class MessageFlow{
     }
 
     async send_manual_msg (msg,platformMessageService: platformServiceInterface) {
-        const translatedMessage = await this.translate.translatePushNotifications( msg.message, msg.userId);
-        msg.message = translatedMessage;
 
+        let templateName = null;
+        let variables = null;
+
+        if (msg.type === "template") {
+            templateName = msg.templateName;
+            if (msg.agentName !== 'postman') {
+                msg.message = JSON.parse(msg.message);
+            }
+            variables = msg.message.Variables;
+        } else {
+            const translatedMessage = await this.translate.translatePushNotifications( msg.message, msg.userId);
+            msg.message = translatedMessage;
+        }
+        
         let payload = null;
-        if (msg.payload !== null) {
-            payload = await sendApiButtonService(msg.payload);
+        if (msg.message.ButtonsIds != null) {
+            payload = await templateButtonService(msg.message.ButtonsIds);
         }
         const response_format = await platformMessageService.createFinalMessageFromHumanhandOver(msg);
         const chatSessionModel = await ChatSession.findOne({ where: { userPlatformID: response_format.sessionId } });
@@ -165,7 +177,7 @@ export class MessageFlow{
 
         let message_to_platform = null;
         // eslint-disable-next-line max-len
-        message_to_platform = await platformMessageService.SendMediaMessage(response_format.sessionId, response_format.messageBody,response_format.messageText[0], response_format.message_type,payload);
+        message_to_platform = await platformMessageService.SendMediaMessage(response_format.sessionId, response_format.messageBody,response_format.messageText[0], response_format.message_type,payload, templateName, variables);
         return message_to_platform;
     }
 

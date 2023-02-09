@@ -111,6 +111,14 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         return messagetoDialogflow;
     }
 
+    async buttonMessageFormat(messageObj: Message){
+        const message = messageObj.getTemplateReplyButton().title;
+        const messagetoDialogflow = this.inputMessageFormat(messageObj);
+        messagetoDialogflow.messageBody = message;
+        messagetoDialogflow.intent = messageObj.getTemplateReplyButton().id;
+        return messagetoDialogflow;
+    }
+
     /*retrive whatsapp media */
     GetWhatsappMedia = async (type, mediaId, extension) => {
         return new Promise((resolve, reject) => {
