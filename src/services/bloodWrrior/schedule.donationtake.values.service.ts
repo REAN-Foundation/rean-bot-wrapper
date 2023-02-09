@@ -35,6 +35,7 @@ export const ScheduleDonationTakeValuesService = async (eventObj) => {
                     RequestedDate     : new Date().toISOString()
                         .split('T')[0]
                 };
+                //yaha pe pehle donation record nikalo from db agar nahi mile to create new one
                 await raiseDonationRequestService.createDonationRecord(obj);
                 dffMessage = `Congratulations! \nThe donation has been successfully scheduled.`;
                 const commonMessage = `

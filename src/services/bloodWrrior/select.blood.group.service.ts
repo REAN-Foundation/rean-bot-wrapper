@@ -18,9 +18,13 @@ export class SelectBloodGroupService {
         return new Promise(async (resolve,reject) => {
             try {
 
-                const bloodGroup = eventObj.body.queryResult.parameters.Blood_Group;
-                const bloodGroupString = eventObj.body.queryResult.intent.displayName;
-                
+                let bloodGroup = eventObj.body.queryResult.parameters.Blood_Group;
+                let bloodGroupString = eventObj.body.queryResult.intent.displayName;
+                if (bloodGroup === null || bloodGroup === undefined) {
+                    const volunteer = await this.bloodWarriorCommonService.getVolunteerByPhoneNumber(eventObj);
+                    bloodGroup = volunteer.SelectedBloodGroup;
+                    bloodGroupString = decodeURIComponent(`${bloodGroup}`);
+                }
                 const apiURL = `donors/search?onlyElligible=true&bloodGroup=${bloodGroup}&donorType=One time`;
                 const requestBody = await needleRequestForREAN("get", apiURL);
                 const donors = requestBody.Data.Donors.Items;
@@ -40,14 +44,21 @@ export class SelectBloodGroupService {
                         resolve( { donorList : donors, message   : { fulfillmentMessages : [{ text :
                             { text: [ heading + donorList + dffMessage] } }] } });
                     }
-                    const volunteer = await this.bloodWarriorCommonService.getVolunteerByPhoneNumber(eventObj);
 
+                    let patient = null;
+                    const patientURL = `patients/search?name=dummy_patient`;
+                    const result = await needleRequestForREAN("get", patientURL);
+                    if (result.Data.Patients.Items.length > 0) {
+                        patient = result.Data.Patients.Items[0];
+                    }
+                    const volunteer = await this.bloodWarriorCommonService.getVolunteerByPhoneNumber(eventObj);
                     for (const donor of donors) {
                         const donorName = donor.DisplayName;
 
                         const donorPhone =
                             this.raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(donor.Phone);
                         const obj = {
+                            PatientUserId             : patient.UserId,
                             EmergencyDonor            : donor.UserId,
                             VolunteerOfEmergencyDonor : volunteer.UserId,
                             RequestedQuantity         : 1,

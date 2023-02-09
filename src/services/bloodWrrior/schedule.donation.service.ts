@@ -1,6 +1,8 @@
 import { Logger } from '../../common/logger';
 import { needleRequestForREAN } from '../needle.service';
 import { whatsappMetaButtonService } from '../whatsappmeta.button.service';
+import { BloodWarriorCommonService } from './common.service';
+const bloodWarriorCommonService = new BloodWarriorCommonService();
 
 export const ScheduleDonationService = async (eventObj) => {
     return new Promise(async (resolve,reject) => {
@@ -21,6 +23,14 @@ export const ScheduleDonationService = async (eventObj) => {
                 \nClick "Yes" to proceed`;
                 payloadButtons = await whatsappMetaButtonService("Yes","Schedule_Donation_Elligibity","No! Re-enter details","Schedule_Donation");
                 resolve( { message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }, payloadButtons] } });
+
+                //update phone number in volunteer profile
+                const volunteer = await bloodWarriorCommonService.getVolunteerByPhoneNumber(eventObj);
+                const apiURL = `volunteers/${volunteer.UserId}`;
+                const obj = {
+                    SelectedPhoneNumber : phoneNumber
+                };
+                await needleRequestForREAN("put", apiURL, null, obj);
             } else {
                 dffMessage = `Donor not Found. \nPlease register the donor and schedule the donation`;
                 resolve( { message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } });

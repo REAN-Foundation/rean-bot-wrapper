@@ -184,6 +184,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('AB_Negative', SelectBloodGroupListener);
         IntentEmitter.registerListener('Donate_Blood', DonateBloodListener);
         IntentEmitter.registerListener('Blood_OneTime_Take_Values', ScheduleOneTimeTakeValuesListener);
+        IntentEmitter.registerListener('Send_OneTimeDonor', SelectBloodGroupListener);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);

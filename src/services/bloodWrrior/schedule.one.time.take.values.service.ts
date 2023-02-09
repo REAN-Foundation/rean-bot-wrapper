@@ -10,14 +10,13 @@ export const ScheduleOneTimeTakeValuesService = async (eventObj) => {
         try {
             const raiseDonationRequestService = new RaiseDonationRequestService();
             const bloodWarriorCommonService = new BloodWarriorCommonService();
-            const phoneNumber = eventObj.body.queryResult.parameters.phoneNumber;
             const donation_Date = eventObj.body.queryResult.parameters.donation_Date;
             const location = eventObj.body.queryResult.parameters.location;
             const volunteer = await bloodWarriorCommonService.getVolunteerByPhoneNumber(eventObj);
             let result = null;
             let dffMessage = "";
             let donor = null;
-            const apiURL = `donors/search?phone=${phoneNumber}&donorType=One time`;
+            const apiURL = `donors/search?phone=${volunteer.SelectedPhoneNumber}&donorType=One time`;
             result = await needleRequestForREAN("get", apiURL);
             if (result.Data.Donors.Items.length > 0) {
                 donor = result.Data.Donors.Items[0];
@@ -52,7 +51,7 @@ export const ScheduleOneTimeTakeValuesService = async (eventObj) => {
                 const _platformMessageService: platformServiceInterface = container.resolve(payload.source);
                 await _platformMessageService.SendMediaMessage(donorPhone,null,heading1 + commonMessage,'text', null);
             } else {
-                dffMessage = `Donor not found with this ${phoneNumber} phone number.`;
+                dffMessage = `Donor not found with this ${volunteer.SelectedPhoneNumber} phone number.`;
                 resolve( { message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } });
             }
             
