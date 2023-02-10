@@ -28,6 +28,8 @@ export class MockMessageService implements platformServiceInterface {
         let done = false;
         const mockMessages = [];
         let mockMessagetoDialogflow: Imessage;
+        
+        // Checking Mock messages
         while (done === false) {
             const nextgeneratorObj = generatorMockMessage.next();
             mockMessagetoDialogflow = (await nextgeneratorObj).value;
