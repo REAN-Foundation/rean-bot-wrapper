@@ -20,6 +20,8 @@ import { sendApiButtonService, templateButtonService } from './whatsappmeta.butt
 @autoInjectable()
 export class MessageFlow{
 
+    private chatMessageConnection;
+
     constructor(
         private slackMessageService?: SlackMessageService,
         private handleRequestservice?: handleRequestservice,
@@ -89,6 +91,8 @@ export class MessageFlow{
 
         const personresponse = new ChatMessage(dfResponseObj);
         await personresponse.save();
+
+        await this.saveIntent(intent, response_format.sessionId);
 
         // console.log(processedResponse.message_from_dialoglow.text);
         if (processedResponse.message_from_dialoglow.getText()) {
@@ -208,6 +212,9 @@ export class MessageFlow{
             // await this.sequelizeClient.connect();
             const personrequest = new ChatMessage(chatMessageObj);
             await personrequest.save();
+            if (messagetoDialogflow.direction === "In"){
+                this.chatMessageConnection = personrequest;
+            }
             const userId = chatMessageObj.userPlatformID;
             const respChatSession = await ChatSession.findAll({ where: { userPlatformID: userId } });
             const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: userId } });
@@ -251,6 +258,32 @@ export class MessageFlow{
             resolve(chatMessageObj);
         });
         
+    }
+
+    async saveIntent(intent: string, userPlatformID: string){
+        try {
+            this.chatMessageConnection.intent = intent;
+            this.chatMessageConnection.save();
+
+            // const lastMessage = await ChatMessage.findAll({
+            //     limit : 1,
+            //     where : {
+            //         userPlatformID : userPlatformID,
+            //         direction      : 'IN'
+            //     },
+            //     order : [ [ 'createdAt', 'DESC' ]]
+            // });
+            // await ChatMessage.update(
+            //     {intent: intent},
+            //     {
+            //         where : {
+            //             id : lastMessage[0].id,
+            //         }
+            //     }
+            // );
+        } catch (error) {
+            console.log(error);
+        }
     }
 
 }
