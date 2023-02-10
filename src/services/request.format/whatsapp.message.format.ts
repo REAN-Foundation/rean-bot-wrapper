@@ -7,7 +7,7 @@ export class Message implements IWhatsappRequestMessageEntities {
     private list;
 
     getType() {
-        const currentListOfTypes = ["text","reaction","location","image","interactive","voice","audio"];
+        const currentListOfTypes = ["text","reaction","location","image","interactive","voice","audio","button"];
         const type = currentListOfTypes.includes(this.list.type) ? this.list.type : undefined;
         if (type === "interactive") {
             return this.list.interactive.type ? this.list.interactive.type : "interactive";
@@ -79,6 +79,14 @@ export class Message implements IWhatsappRequestMessageEntities {
             id    : this.list.interactive.button_reply.id
         };
         return interactiveButton;
+    }
+
+    getTemplateReplyButton() {
+        const interactiveReplyButton = {
+            title : this.list.button.text,
+            id    : this.list.button.payload
+        };
+        return interactiveReplyButton;
     }
 
     getinteractivelist() {
