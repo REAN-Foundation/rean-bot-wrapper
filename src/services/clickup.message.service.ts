@@ -1,24 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
-import { autoInjectable, singleton, inject, delay } from 'tsyringe';
 import { Iresponse, Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { ChatMessage } from '../models/chat.message.model';
-import { WhatsappMessageService } from './whatsapp.message.service';
-import { WhatsappMetaMessageService } from './whatsapp.meta.message.service';
-import { TelegramMessageService } from './telegram.message.service';
 import { UserFeedback } from '../models/user.feedback.model';
-import { commonResponseMessageFormat } from './common.response.format.object';
+import { autoInjectable } from 'tsyringe';
+import { SlackClickupCommonFunctions } from './slackAndCkickupSendCustomMessage';
 
 @autoInjectable()
-@singleton()
 export class ClickUpMessageService implements platformServiceInterface {
 
-    public res;
+    constructor(private slackClickupCommonFunctions?: SlackClickupCommonFunctions){}
 
-    constructor(@inject(delay(() => WhatsappMessageService)) public whatsappMessageService,
-        @inject(delay(() => WhatsappMetaMessageService)) public whatsappNewMessageService,
-        private telegramMessageservice?: TelegramMessageService) {}
+    public res;
 
     async handleMessage(requestBody: any) {
         console.log("request", requestBody);
@@ -97,7 +91,7 @@ export class ClickUpMessageService implements platformServiceInterface {
         const filterText = (requestBody.history_items[0].comment.text_content).replace(tag, '');
         const textToUser = `Our Experts have responded to your query. \nYour Query: ${data.messageContent} \nExpert: ${filterText}`;
         console.log("textToUser", textToUser);
-        await this.sendCustomMessage(data.channel, data.userId, textToUser);
+        await this.slackClickupCommonFunctions.sendCustomMessage(data.channel, data.userId, textToUser);
     }
 
     async eventStatusUpdated(requestBody) {
@@ -106,25 +100,8 @@ export class ClickUpMessageService implements platformServiceInterface {
         console.log("data", data);
         const textToUser = `As our expert have provided their insight, we are closing the ticket. If you are still usatisfied with the answer provided, contact us at ${contactMail}`;
         console.log("textToUser", textToUser);
-        await this.sendCustomMessage(data.channel, data.userId, textToUser);
+        await this.slackClickupCommonFunctions.sendCustomMessage(data.channel, data.userId, textToUser);
     }
 
-    async sendCustomMessage(channel, contact, message) {
-        const response_format: Iresponse = commonResponseMessageFormat();
-        response_format.platform = channel;
-        response_format.sessionId = contact;
-        response_format.messageText = message;
-        response_format.message_type = "text";
-        if (channel === "telegram"){
-            await this.telegramMessageservice.SendMediaMessage(response_format,null);
-        }
-        else if (channel === "whatsapp"){
-            response_format.sessionId = contact.toString();
-            await this.whatsappMessageService.SendMediaMessage(response_format,null);
-        }
-        else if (channel === "whatsappNew"){
-            response_format.sessionId = contact.toString();
-            await this.whatsappNewMessageService.SendMediaMessage(response_format,null);
-        }
-    }
+
 }

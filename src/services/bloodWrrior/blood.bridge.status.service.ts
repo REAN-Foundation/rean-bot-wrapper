@@ -35,13 +35,19 @@ export class BloodBridgeStatusService {
         Last Donation Date: ${lastDonationDate},
         Next Transfusion Date: ${nextTrnasfusionDate},
         Eligible Donors Count: ${result.Data.PatientDonors.Items.length},
-        \nDonors Signed Up on Bot: X Out Y
+        \n        Donors Signed Up on Bot: X Out Y
         Parent Registered: Yes`;
 
                 if (eventObj.body.queryResult.intent.displayName === 'Donation_Request_BloodBridge') {
+                    const volunteer = await this.bloodWarriorCommonService.getVolunteerByPhoneNumber(eventObj);
+                    const apiURL = `volunteers/${volunteer.UserId}`;
+                    const obj = {
+                        SelectedBridgeId : bridgeId
+                    };
+                    await needleRequestForREAN("put", apiURL, null, obj);
                     const patient = await
                     this.bloodWarriorCommonService.getPatientPhoneByUserId(bloodBridge.PatientUserId);
-                    const message = `        Patient Name: ${patient.User.Person.DisplayName} \nDo you want to send a request to all eligible donors?`;
+                    const message = `\n        Patient Name: ${patient.User.Person.DisplayName} \nDo you want to send a request to all eligible donors?`;
                     const buttons = await whatsappMetaButtonService("Yes", "Donation_Request_Yes","No", "Volunteer_Confirm");
                     return { message: { fulfillmentMessages: [{ text: { text: [dffMessage + message] } }, buttons] } };
                 } else {

@@ -49,29 +49,6 @@ export class WhatsappPostResponseFunctionalities{
         return postDataMeta;
     }
 
-    templateResponseFormat = (response_format:Iresponse,payload) =>{
-        const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
-        postDataMeta["template"] = {
-            "name"     : "transactional_test",
-            "language" : {
-                "code" : "en"
-            },
-            "components" : [{
-                "type"       : "body",
-                "parameters" : [{
-                    "type" : "text",
-                    "text" : "twelve"
-                },
-                {
-                    "type" : "text",
-                    "text" : "Vitamins"
-                }]
-            }]
-        };
-        postDataMeta.type = "template";
-        return postDataMeta;
-    }
-
     interactivebuttonsResponseFormat = async(response_format:Iresponse,payload) =>{
         const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
         const buttons = [];
@@ -157,6 +134,25 @@ export class WhatsappPostResponseFunctionalities{
         postDataMeta.type = "interactive";
         return postDataMeta;
     }
+
+    // templateResponseFormat = (response_format:Iresponse,payload) => {
+    //     const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
+    //     postDataMeta["template"] = {
+    //         "name"     : templateName,
+    //         "language" : {
+    //             "code" : "en"
+    //         },
+    //         "components" : [{
+    //             "type"       : "body",
+    //             "parameters" : variables,
+
+    //         },
+    //         payload ? payload[0] : null,
+    //         payload ? payload[1] : null]
+    //     };
+    //     postDataMeta.type = "template";
+    //     return postDataMeta;
+    // }
 
     custom_payloadResponseFormat = async(response_format:Iresponse,payload) =>{
         const payloadContent = this.handleMessagetypePayload.getPayloadContent(payload);
