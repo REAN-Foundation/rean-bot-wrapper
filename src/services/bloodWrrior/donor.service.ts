@@ -25,9 +25,9 @@ export class DonorService {
             }
 
             const dffMessage = `Welcome back Blood Warrior ${name},\nThank you for your continuous support as a ${donorTypeString} Donor. As you are a registered Blood Warrior,
-            we could fetch the following details:
-            Blood Group: ${bloodGroup},
-            Last Donation Date: ${lastDonationDate}\nIf the details are correct, please click proceed or if you can register as a new donor.`;
+            We could fetch the following details:
+            Blood Group: *${bloodGroup}*,
+            Last Donation Date: *${lastDonationDate}*\nIf the details are correct, please click proceed or if you can register as a new donor.`;
             console.log(dffMessage);
 
             const proceedButtonId = donorType === "One time" ? "Donor_Confirm_Emergency" : "Donor_Confirm_Bridge";

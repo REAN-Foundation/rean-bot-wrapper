@@ -67,7 +67,7 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
         });
     }
 
-    SendMediaMessage = async (contact: number | string, imageLink: string, message: string, messageType: string, payload: any) => {
+    SendMediaMessage = async (contact: number | string, imageLink: string, message: string, messageType: string, payload: any, templateName?, variables? ) => {
 
         // console.log("message type",messageType + imageLink);
         console.log("This is the payload", payload);
@@ -98,21 +98,17 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
         }
         else if (messageType === "template"){
             postDataMeta["template"] = {
-                "name"     : "transactional_test",
+                "name"     : templateName,
                 "language" : {
                     "code" : "en"
                 },
                 "components" : [{
                     "type"       : "body",
-                    "parameters" : [{
-                        "type" : "text",
-                        "text" : "twelve"
-                    },
-                    {
-                        "type" : "text",
-                        "text" : "Vitamins"
-                    }]
-                }]
+                    "parameters" : variables,
+
+                },
+                payload ? payload[0] : null,
+                payload ? payload[1] : null]
             };
             postDataMeta.type = "template";
             const postDataString = JSON.stringify(postDataMeta);

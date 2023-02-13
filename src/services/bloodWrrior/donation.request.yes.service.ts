@@ -3,8 +3,9 @@ import { container, autoInjectable } from 'tsyringe';
 import { Logger } from '../../common/logger';
 import { getPhoneNumber, needleRequestForREAN } from '../needle.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { sendApiButtonService } from '../whatsappmeta.button.service';
+import { templateButtonService } from '../whatsappmeta.button.service';
 import { RaiseDonationRequestService } from './raise.request.service';
+import { BloodWarriorCommonService } from './common.service';
 
 @autoInjectable()
 export class DonationRequestYesService {
@@ -15,9 +16,15 @@ export class DonationRequestYesService {
 
     private raiseDonationRequestService = new RaiseDonationRequestService();
 
+    private bloodWarriorCommonService = new BloodWarriorCommonService();
+
     async sendUserMessage (eventObj) {
         try {
-            const bridgeId = eventObj.body.queryResult.parameters.bridge_id;
+            let bridgeId = eventObj.body.queryResult.parameters.bridge_id;
+            if (bridgeId === null || bridgeId === undefined) {
+                const volunteer = await this.bloodWarriorCommonService.getVolunteerByPhoneNumber(eventObj);
+                bridgeId = volunteer.SelectedBridgeId;
+            }
             const apiURL = `clinical/patient-donors/search?name=${bridgeId}`;
             let result = null;
             result = await needleRequestForREAN("get", apiURL);
@@ -43,7 +50,7 @@ export class DonationRequestYesService {
 
             const apiURL = `clinical/patient-donors/search?patientUserId=${patientUserId}&onlyElligible=true`;
             result = await needleRequestForREAN("get", apiURL);
-            const buttons = await sendApiButtonService(["Accept", "Accept_Volunteer_Request","Reject", "Reject_Donation_Request"]);
+            const buttons = await templateButtonService(["Accept_Volunteer_Request","Reject_Donation_Request"]);
             const donorNames = [];
             if (result.Data.PatientDonors.Items.length > 0) {
                 for (const donor of result.Data.PatientDonors.Items) {
@@ -53,13 +60,24 @@ export class DonationRequestYesService {
                     const donorName = donor.DonorName;
                     const donorPhone =
                         this.raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(donor.DonorPhone);
-                    
-                    await this.raiseDonationRequestService.createDonationRecord(donor.PatientUserId, donor.id);
+                    const obj = {
+                        PatientUserId     : donor.PatientUserId,
+                        NetworkId         : donor.id,
+                        RequestedQuantity : 1,
+                        RequestedDate     : new Date().toISOString()
+                            .split('T')[0]
+                    };
+                    await this.raiseDonationRequestService.createDonationRecord(obj);
                     const dffMessage = `Hi ${donorName}, \nWe need blood in coming days. Are you able to donate blood? \nRegards \nTeam Blood Warriors`;
+                    const variable = [
+                        {
+                            type : "text",
+                            text : donorName
+                        }];
 
                     const payload = eventObj.body.originalDetectIntentRequest.payload;
                     this._platformMessageService = container.resolve(payload.source);
-                    await this._platformMessageService.SendMediaMessage(donorPhone,null,dffMessage,'interactive-buttons', buttons);
+                    await this._platformMessageService.SendMediaMessage(donorPhone,null,dffMessage,'template', buttons, "donor_donation_volunteer", variable);
 
                     donorNames.push(donorName);
                 }
