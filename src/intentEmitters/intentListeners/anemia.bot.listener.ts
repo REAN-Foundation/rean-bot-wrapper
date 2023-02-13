@@ -1,7 +1,10 @@
+/* eslint-disable max-len */
 import { Logger } from '../../common/logger';
-import { AnemiaModel } from '../../services/anemia.service';
 import { container } from 'tsyringe';
-const anemiaModel: AnemiaModel = container.resolve(AnemiaModel);
+import { CallAnemiaModel } from '../../services/call.anemia.model';
+import { needleRequestForWhatsapp, needleRequestForTelegram } from '../../services/needle.service';
+
+const callAnemiaModel: CallAnemiaModel = container.resolve(CallAnemiaModel);
 
 export const AnemiaBotListener = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
@@ -11,20 +14,30 @@ export const AnemiaBotListener = async (intent, eventObj) => {
             Logger.instance()
                 .log('Calling Anemia Bot Service !!!!!!');
 
-            // Service Call
-            let response = null;
+            const messageToPlatform = await callAnemiaModel.callAnemiaModel(eventObj.body.queryResult.queryText);
 
-            // res = 5;
-            response = await anemiaModel.getAnemiaImagePath(eventObj);
+            if (eventObj.body.originalDetectIntentRequest.payload.completeMessage.platform !== "Telegram") {
+                const endPoint = 'messages';
+                const postData = {
+                    "messaging_product" : "whatsapp",
+                    "recipient_type"    : "individual",
+                    "to"                : eventObj.body.originalDetectIntentRequest.payload.userId,
+                    "type"              : "text",
+                    "text"              : {
+                        "body" : messageToPlatform
+                    }
+                };
 
-            console.log('Inside listener: ', response);
-
-            if (!response) {
-                console.log('I am failed');
-                reject(response);
+                await needleRequestForWhatsapp("post", endPoint, JSON.stringify(postData));
             }
-
-            resolve(response);
+            else {
+                const postData = {
+                    chat_id : eventObj.body.originalDetectIntentRequest.payload.userId,
+                    text    : messageToPlatform
+                };
+                const endPoint = `sendMessage`;
+                await needleRequestForTelegram("post",endPoint,postData);
+            }
 
         } catch (error) {
             Logger.instance()

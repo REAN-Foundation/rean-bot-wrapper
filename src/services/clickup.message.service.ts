@@ -1,30 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
-import http from 'https';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import fs from 'fs';
-import { AwsS3manager } from './aws.file.upload.service';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { autoInjectable, singleton, inject, delay } from 'tsyringe';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Iresponse, Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
-import { MessageFlow } from './get.put.message.flow.service';
-import { MockCHannelMessageFunctionalities } from './mock.channel.message.funtionalities';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import needle from 'needle';
-import { getRequestOptions } from '../utils/helper';
 import { ChatMessage } from '../models/chat.message.model';
-import request from 'request';
-import util from 'util';
 import { WhatsappMessageService } from './whatsapp.message.service';
 import { WhatsappMetaMessageService } from './whatsapp.meta.message.service';
-import { ResponseHandler } from '../utils/response.handler';
 import { TelegramMessageService } from './telegram.message.service';
 import { UserFeedback } from '../models/user.feedback.model';
-import FormData from 'form-data';
-import axios from 'axios';
+import { commonResponseMessageFormat } from './common.response.format.object';
 
 @autoInjectable()
 @singleton()
@@ -34,14 +18,10 @@ export class ClickUpMessageService implements platformServiceInterface {
 
     constructor(@inject(delay(() => WhatsappMessageService)) public whatsappMessageService,
         @inject(delay(() => WhatsappMetaMessageService)) public whatsappNewMessageService,
-        private telegramMessageservice?: TelegramMessageService,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService) {}
+        private telegramMessageservice?: TelegramMessageService) {}
 
     async handleMessage(requestBody: any) {
         console.log("request", requestBody);
-
-        // console.log("user", util.inspect(requestBody.history_items[0].user));
-        // console.log("comment", util.inspect(requestBody.history_items[0].comment));
         this.clickupEventHandler(requestBody);
         
     }
@@ -62,12 +42,12 @@ export class ClickUpMessageService implements platformServiceInterface {
         throw new Error('Method not implemented.');
     }
 
-    SendMediaMessage = async (contact: number | string, imageLink: string, message: string, messageType: string, payload: any) => {
+    SendMediaMessage = async (response_format:Iresponse, payload: any) => {
 
         //call a function that creates csv
-        const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: contact } });
+        const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: response_format.sessionId } });
         const lastMessageDate = respChatMessage[respChatMessage.length - 1].createdAt;
-        const obj = {timeStamp: lastMessageDate, message: message};
+        const obj = {timeStamp: lastMessageDate, message: response_format.messageText};
         console.log("obj", obj);
     };
 
@@ -130,14 +110,21 @@ export class ClickUpMessageService implements platformServiceInterface {
     }
 
     async sendCustomMessage(channel, contact, message) {
+        const response_format: Iresponse = commonResponseMessageFormat();
+        response_format.platform = channel;
+        response_format.sessionId = contact;
+        response_format.messageText = message;
+        response_format.message_type = "text";
         if (channel === "telegram"){
-            await this.telegramMessageservice.SendMediaMessage(contact, null, message, "text");
+            await this.telegramMessageservice.SendMediaMessage(response_format,null);
         }
         else if (channel === "whatsapp"){
-            await this.whatsappMessageService.SendMediaMessage(contact.toString(), null, message, "text");
+            response_format.sessionId = contact.toString();
+            await this.whatsappMessageService.SendMediaMessage(response_format,null);
         }
         else if (channel === "whatsappNew"){
-            await this.whatsappNewMessageService.SendMediaMessage(contact.toString(), null, message, "text");
+            response_format.sessionId = contact.toString();
+            await this.whatsappNewMessageService.SendMediaMessage(response_format,null);
         }
     }
 }

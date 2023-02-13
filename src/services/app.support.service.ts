@@ -1,5 +1,5 @@
 /* eslint-disable init-declarations */
-import { Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface';
+import { Imessage, IprocessedDialogflowResponseFormat, Iresponse } from '../refactor/interface/message.interface';
 import { autoInjectable, singleton } from 'tsyringe';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { MessageFlow } from './get.put.message.flow.service';
@@ -68,9 +68,9 @@ export class platformMessageService implements platformServiceInterface{
 
     }
 
-    SendMediaMessage(contact,imageLink, message){
-        this.responseHandler.sendSuccessResponseForApp(this.res, 201, "Message processed successfully.", { response_message: message });
-        return message;
+    SendMediaMessage(response_format:Iresponse){
+        this.responseHandler.sendSuccessResponseForApp(this.res, 201, "Message processed successfully.", { response_message: response_format.messageText });
+        return response_format.messageText;
     }
 
 }

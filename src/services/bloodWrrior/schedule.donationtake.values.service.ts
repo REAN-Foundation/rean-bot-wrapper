@@ -4,6 +4,8 @@ import { Logger } from '../../common/logger';
 import { needleRequestForREAN } from '../needle.service';
 import { BloodWarriorCommonService } from './common.service';
 import { RaiseDonationRequestService } from './raise.request.service';
+import { Iresponse } from '../../refactor/interface/message.interface';
+import { commonResponseMessageFormat } from '../common.response.format.object';
 
 export const ScheduleDonationTakeValuesService = async (eventObj) => {
     return new Promise(async (resolve,reject) => {
@@ -45,13 +47,20 @@ export const ScheduleDonationTakeValuesService = async (eventObj) => {
                 const _platformMessageService: platformServiceInterface = container.resolve(payload.source);
                 const patientPhone =
                     raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(patient.User.Person.Phone);
-                await _platformMessageService.SendMediaMessage(patientPhone,null,heading + dffMessage + commonMessage,'text', null);
+                const response_format: Iresponse = commonResponseMessageFormat();
+                response_format.platform = payload.source;
+                response_format.sessionId = patientPhone;
+                response_format.messageText = heading + dffMessage + commonMessage;
+                response_format.message_type = "text";
+                await _platformMessageService.SendMediaMessage(response_format, null);
 
                 //Message sent to donor
                 const heading1 = `Hi ${patientDonors.DonorName}, \nThe donation request has been created by volunteer.`;
                 const donorPhone =
                     raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(patientDonors.DonorPhone);
-                await _platformMessageService.SendMediaMessage(donorPhone,null,heading1 + commonMessage,'text', null);
+                response_format.sessionId = donorPhone;
+                response_format.messageText = heading1 + commonMessage;
+                await _platformMessageService.SendMediaMessage(response_format, null);
             } else {
                 dffMessage = `Sorry for the inconvenience, something went wrong.`;
                 resolve( { message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } });

@@ -1,7 +1,7 @@
 import { WebClient } from '@slack/web-api';
 import { createEventAdapter } from '@slack/events-api';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
-import { Imessage } from '../refactor/interface/message.interface';
+import { Imessage, Iresponse } from '../refactor/interface/message.interface';
 import { autoInjectable, delay, inject } from 'tsyringe';
 import { ResponseHandler } from '../utils/response.handler';
 import { TelegramMessageService } from './telegram.message.service';
@@ -9,6 +9,7 @@ import { WhatsappMessageService } from './whatsapp.message.service';
 import { WhatsappMetaMessageService } from './whatsapp.meta.message.service';
 import { UserFeedback } from '../models/user.feedback.model';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { commonResponseMessageFormat } from './common.response.format.object';
 
 @autoInjectable()
 export class SlackMessageService implements platformServiceInterface {
@@ -139,14 +140,21 @@ export class SlackMessageService implements platformServiceInterface {
     }
 
     async sendCustomMessage(channel, contact, message) {
+        const response_format: Iresponse = commonResponseMessageFormat();
+        response_format.platform = channel;
+        response_format.sessionId = contact;
+        response_format.messageText = message;
+        response_format.message_type = "text";
         if (channel === "telegram"){
-            await this.telegramMessageservice.SendMediaMessage(contact, null, message, "text");
+            await this.telegramMessageservice.SendMediaMessage(response_format, null);
         }
         else if (channel === "whatsapp"){
-            await this.whatsappMessageService.SendMediaMessage(contact.toString(), null, message, "text");
+            response_format.sessionId = contact.toString();
+            await this.whatsappMessageService.SendMediaMessage(response_format, null);
         }
         else if (channel === "whatsappMeta"){
-            await this.whatsappNewMessageService.SendMediaMessage(contact.toString(), null, message, "text");
+            response_format.sessionId = contact.toString();
+            await this.whatsappNewMessageService.SendMediaMessage(response_format, null);
         }
     }
 
@@ -170,7 +178,7 @@ export class SlackMessageService implements platformServiceInterface {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    SendMediaMessage(sessionId: string, messageBody: string, messageText: string) {
+    SendMediaMessage(response_format:Iresponse, payload:any) {
         throw new Error('Method not implemented.');
     }
 

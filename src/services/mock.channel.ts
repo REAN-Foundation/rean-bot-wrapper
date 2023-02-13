@@ -94,12 +94,12 @@ export class MockMessageService implements platformServiceInterface {
         //Not required
     }
 
-    SendMediaMessage = async (contact: number | string, imageLink: string, message: string, messageType: string, payload: any) => {
+    SendMediaMessage = async (response_format:Iresponse, payload: any) => {
 
         //call a function that creates csv
-        const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: contact } });
+        const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: response_format.sessionId } });
         const lastMessageDate = respChatMessage[respChatMessage.length - 1].createdAt;
-        const obj = { timeStamp: lastMessageDate, message: message };
+        const obj = { timeStamp: lastMessageDate, message: response_format.messageText };
         console.log("obj", obj);
     };
 

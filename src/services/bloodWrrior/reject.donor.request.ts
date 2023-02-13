@@ -4,6 +4,8 @@ import { BloodWarriorCommonService } from './common.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { autoInjectable, container } from 'tsyringe';
 import { RaiseDonationRequestService } from './raise.request.service';
+import { Iresponse } from '../../refactor/interface/message.interface';
+import { commonResponseMessageFormat } from '../common.response.format.object';
 
 @autoInjectable()
 export class RejectDonorRequestService {
@@ -44,7 +46,12 @@ export class RejectDonorRequestService {
                         this.raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(volunteer.User.Person.Phone);
                 const message = `Hi ${volunteer.User.Person.DisplayName},\n${donor.DisplayName} has rejected or ineligible to donate for ${patient.User.Person.DisplayName}
             Please contact other eligible donors or raise a request.`;
-                await this._platformMessageService.SendMediaMessage(volunteerPhone,null,message,'text', null);
+                const response_format: Iresponse = commonResponseMessageFormat();
+                response_format.platform = payload.source;
+                response_format.sessionId = volunteerPhone;
+                response_format.messageText = message;
+                response_format.message_type = "text";
+                await this._platformMessageService.SendMediaMessage(response_format, null);
 
             } catch (error) {
                 Logger.instance()

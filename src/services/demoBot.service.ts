@@ -3,6 +3,8 @@ import XLSX = require('xlsx');
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 import { platformServiceInterface } from "../refactor/interface/platform.interface";
 import dialogflow = require('@google-cloud/dialogflow');
+import { Iresponse } from "../refactor/interface/message.interface";
+import { commonResponseMessageFormat } from "./common.response.format.object";
 
 @autoInjectable()
 export class demoBotService {
@@ -141,7 +143,12 @@ export class demoBotService {
 
     async postResponseDemo(sessionId: any, client: any, data:any) {
         console.log("Sending demo bot success message");
+        const response_format: Iresponse = commonResponseMessageFormat();
+        response_format.platform = client;
+        response_format.sessionId = sessionId;
+        response_format.messageText = data;
+        response_format.message_type = "text";
         this._platformMessageService = container.resolve(client);
-        await this._platformMessageService.SendMediaMessage(sessionId,null,data,'text',null);
+        await this._platformMessageService.SendMediaMessage(response_format,null);
     }
 }

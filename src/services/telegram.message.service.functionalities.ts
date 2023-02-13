@@ -33,7 +33,6 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
     async voiceMessageFormat(messageObj: Message) {
         let response: any = {};
         response = await this.GetTelegramMedia(messageObj.getVoiceFileId());
-        console.log("response of telegram media is", response);
         const file_path = response.result.file_path;
 
         // await new SequelizeClient().connect();
@@ -41,7 +40,6 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         if (preferredLanguage !== "null"){
             if (file_path) {
                 const ConvertedToText = await this.speechtotext.SendSpeechRequest('https://api.telegram.org/file/bot' + this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN") + '/' + response.result.file_path, "telegram", preferredLanguage);
-                console.log("Converted to text!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",ConvertedToText);
                 if (ConvertedToText) {
                     const messagetoDialogflow = this.inputMessageFormat(messageObj);
                     messagetoDialogflow.messageBody = String(ConvertedToText);
@@ -77,7 +75,6 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
     async photoMessageFormat(messageObj: Message) {
         let response: any = {};
         response = await this.GetTelegramMedia(messageObj.getPhotoFileId());
-        console.log("response image get telegram", response);
         if (response.result.file_path){
             const filePath = await this.downloadTelegramMedia('https://api.telegram.org/file/bot' + this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN") + '/' + response.result.file_path, "photo");
             const location = await this.awsS3manager.uploadFile(filePath);
@@ -86,8 +83,6 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
             const urlParse = url.parse(location);
             const imageUrl = (urlParse.protocol + urlParse.hostname + urlParse.pathname);
             const messagetoDialogflow = this.inputMessageFormat(messageObj);
-
-            // console.log("location image in S3", imageUrl);
             messagetoDialogflow.type = 'image';
             messagetoDialogflow.messageBody = imageUrl;
             messagetoDialogflow.imageUrl = location;
@@ -121,9 +116,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
     async documentMessageFormat(messageObj: Message) {
         let response: any = {};
         response = await this.GetTelegramMedia(messageObj.getdocumentFileId());
-        console.log("response document get telegram", response);
         if (response.result.file_path){
-            console.log("We are fetching the excel file here");
             const filePath = await this.downloadTelegramDocument('https://api.telegram.org/file/bot' + this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN") + '/' + response.result.file_path, "document");
             const location = filePath;
             const messagetoDialogflow = this.inputMessageFormat(messageObj);
@@ -137,8 +130,6 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
 
         return new Promise((resolve, reject) => {
             const telgramMediaPath = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_MEDIA_PATH_URL");
-            
-            // console.log("afgshhhhhhhhhhhhh", (telgramMediaPath + '?file_id=' + fileid));
             const req = http.request(telgramMediaPath + '?file_id=' + fileid, res => {
                 let data = " ";
                 res.on('data', d => {
@@ -162,11 +153,9 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
                     
                 //add time stamp - pending
                 const filename = path.basename(fileUrl);
-                console.log("filename", filename);
     
                 // Audio file will be stored at this path
                 const uploadpath = `./${media}/` + filename;
-                console.log("uploadpath", uploadpath);
     
                 const filePath = fs.createWriteStream(uploadpath);
                 res.pipe(filePath);
@@ -178,8 +167,6 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
     }
 
     async downloadTelegramDocument(url,media) {
-        console.log(media);
-        console.log("this is the media");
         const proto = !url.charAt(4).localeCompare('s') ? http : http_tp;
         const filename = path.basename(url);
         const filePath = `./${media}/` + filename;

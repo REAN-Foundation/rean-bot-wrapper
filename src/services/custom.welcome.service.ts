@@ -2,6 +2,8 @@ import { autoInjectable,container} from "tsyringe";
 import { platformServiceInterface } from "../refactor/interface/platform.interface";
 import { ChatMessage } from '../models/chat.message.model';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { Iresponse } from "../refactor/interface/message.interface";
+import { commonResponseMessageFormat } from "./common.response.format.object";
 
 @autoInjectable()
 export class CustomWelcomeService {
@@ -37,6 +39,11 @@ export class CustomWelcomeService {
     async postResponseCustom(userId: any, client: any, data: any) {
         console.log("Sending calorie data to client");
         this._platformMessageService = container.resolve(client);
-        await this._platformMessageService.SendMediaMessage(userId,data,null,'image',null);
+        const response_format: Iresponse = commonResponseMessageFormat();
+        response_format.platform = client;
+        response_format.sessionId = userId;
+        response_format.messageBody = data;
+        response_format.message_type = "image";
+        await this._platformMessageService.SendMediaMessage(response_format,null);
     }
 }

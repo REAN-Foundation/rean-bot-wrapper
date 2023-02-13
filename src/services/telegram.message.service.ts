@@ -10,9 +10,8 @@ import { MessageFlow } from './get.put.message.flow.service';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import needle from 'needle';
-import { ChatMessage } from '../models/chat.message.model';
 import { TelegramMessageToDialogflow } from './telegram.messagetodialogflow';
+import { TelegramPostResponseFunctionalities } from './telegram.post.response.functionalities';
 
 @autoInjectable()
 @singleton()
@@ -27,6 +26,7 @@ export class TelegramMessageService implements platformServiceInterface{
         private awsS3manager?: AwsS3manager,
         private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         private telegramMessageToDialogflow?: TelegramMessageToDialogflow,
+        private telegramPostResponseFunctionalities?: TelegramPostResponseFunctionalities,
         @inject("telegram.authenticator") private clientAuthenticator?: clientAuthenticator) {
         this._telegram = new TelegramBot(this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
         this.init();
@@ -68,8 +68,6 @@ export class TelegramMessageService implements platformServiceInterface{
         this._telegram = new TelegramBot(this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
         const webhookUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL") + '/v1/' + clientName + '/telegram/' + this.clientAuthenticator.urlToken + '/receive';
         this._telegram.setWebHook(webhookUrl);
-
-        // console.log("url tele",webhookUrl)
         console.log("Telegram webhook set");
     }
 
@@ -126,54 +124,12 @@ export class TelegramMessageService implements platformServiceInterface{
         return response_message;
     }
 
-    SendMediaMessage = async (contact, imageLink = null, message, messageType, payload = null) => {
-        message = this.sanitizeMessage(message);
-        return new Promise((resolve) => {
-
-            if (imageLink === null){
-                this._telegram.sendMessage(contact, message, { parse_mode: 'HTML' }).then(async function (data) {
-                    console.log("Telegram send body is", data);
-                    const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: contact } });
-                    const id = respChatMessage[respChatMessage.length - 1].id;
-                    ChatMessage.update({ telegramResponseMessageId: data.message_id }, { where: { id: id } } )
-                        .then(() => { console.log("updated telegram respomse id"); })
-                        .catch(error => console.log("error on update", error));
-                    resolve(data);
-                });
-            }
-            else if (messageType === "voice") {
-                var data = {
-                    chat_id : contact,
-                    voice   : imageLink
-                };
-                const botToken = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN");
-                const channelUrl = `https://api.telegram.org/bot${botToken}/sendVoice`;
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                needle.post(channelUrl, data, function(err, resp, body) {
-                    if (err) {
-                        console.log("error", err);
-                    }
-                });
-            }
-            else this._telegram.sendPhoto(
-                contact,
-                imageLink,
-                { caption: message }
-            )
-                .then(function (data) {
-                    resolve(data);
-                });
-        });
-    };
-
-    sanitizeMessage(message) {
-        if (message > 4096) {
-            var strshortened = message.slice(0, 3800);
-            strshortened = strshortened.substring(0, strshortened.lastIndexOf("\n\n") + 1);
-            strshortened = strshortened.replace(/(<\/ b>|<\/b>)/mgi, "</b>");
-            message = strshortened + '\n\n Too many appointments to display here, please visit the CoWin website - https://www.cowin.gov.in/home -  to view more appointments. \n or \n Enter additional details to filter the results.';
+    SendMediaMessage = async (response_format:Iresponse, payload = null) => {
+        
+        const type = response_format.message_type;
+        if (type) {
+            const classmethod = `send${type}Response`;
+            return await this.telegramPostResponseFunctionalities[classmethod](response_format,this._telegram);
         }
-        return message;
     }
-
 }

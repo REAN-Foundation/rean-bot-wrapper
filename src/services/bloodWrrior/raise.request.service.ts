@@ -4,6 +4,8 @@ import { Logger } from '../../common/logger';
 import { needleRequestForREAN } from '../needle.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { sendApiButtonService } from '../whatsappmeta.button.service';
+import { Iresponse } from '../../refactor/interface/message.interface';
+import { commonResponseMessageFormat } from '../common.response.format.object';
 
 @autoInjectable()
 export class RaiseDonationRequestService {
@@ -65,7 +67,12 @@ export class RaiseDonationRequestService {
 
                     const payload = eventObj.body.originalDetectIntentRequest.payload;
                     this._platformMessageService = container.resolve(payload.source);
-                    await this._platformMessageService.SendMediaMessage(donorPhone,null,dffMessage,'interactive-buttons', buttons);
+                    const response_format: Iresponse = commonResponseMessageFormat();
+                    response_format.platform = payload.source;
+                    response_format.sessionId = donorPhone;
+                    response_format.messageText = dffMessage;
+                    response_format.message_type = "interactive-buttons";
+                    await this._platformMessageService.SendMediaMessage(response_format, buttons);
 
                     donorNames.push(donorName);
                 }
@@ -106,7 +113,12 @@ export class RaiseDonationRequestService {
                 We will send you a reminder if no one responds or anyone accepts. \nRegards \nTeam Blood Warriors`;
                 const payload = eventObj.body.originalDetectIntentRequest.payload;
                 this._platformMessageService = container.resolve(payload.source);
-                result = await this._platformMessageService.SendMediaMessage(volunteerPhone,null,dffMessage,'text', null);
+                const response_format: Iresponse = commonResponseMessageFormat();
+                response_format.platform = payload.source;
+                response_format.sessionId = volunteerPhone;
+                response_format.messageText = dffMessage;
+                response_format.message_type = "text";
+                result = await this._platformMessageService.SendMediaMessage(response_format, null);
                 if (result.statusCode === 200 ) {
                     console.log(`Succesfully notification send to volunteer. Volunteer Name : ${volunteerName}.`);
                 }

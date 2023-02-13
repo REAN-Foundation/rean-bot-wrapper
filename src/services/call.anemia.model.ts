@@ -20,7 +20,6 @@ export class CallAnemiaModel {
         const obj = {
             "path" : respChatMessage[respChatMessage.length - 1].imageUrl
         };
-        console.log("obj", obj);
         const response = await needle("post", anemiaModelUrl, obj, options);
 
         console.log("response from anemia model", response.body);

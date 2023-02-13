@@ -4,6 +4,8 @@ import { RaiseDonationRequestService } from './raise.request.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { sendApiButtonService } from '../whatsappmeta.button.service';
 import { container } from 'tsyringe';
+import { Iresponse } from '../../refactor/interface/message.interface';
+import { commonResponseMessageFormat } from '../common.response.format.object';
 
 export class SelectBloodGroupService {
 
@@ -52,7 +54,12 @@ export class SelectBloodGroupService {
                         const payload = eventObj.body.originalDetectIntentRequest.payload;
                         this._platformMessageService = container.resolve(payload.source);
                         const buttons = await sendApiButtonService(["Accept", "Accept_Volunteer_Request","Reject", "Reject_Donation_Request"]);
-                        await this._platformMessageService.SendMediaMessage(donorPhone,null,dffMessage,'interactive-buttons', buttons);
+                        const response_format: Iresponse = commonResponseMessageFormat();
+                        response_format.platform = payload.source;
+                        response_format.sessionId = donorPhone;
+                        response_format.messageText = dffMessage;
+                        response_format.message_type = "interactive-buttons";
+                        await this._platformMessageService.SendMediaMessage(response_format, buttons);
 
                         //await whatsappMetaButtonService("Yes", "Emergency_Donation_Yes","No", "Volunteer_Confirm");
 

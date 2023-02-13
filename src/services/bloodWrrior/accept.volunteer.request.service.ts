@@ -5,6 +5,8 @@ import { platformServiceInterface } from '../../refactor/interface/platform.inte
 import { sendApiButtonService } from '../whatsappmeta.button.service';
 import { RaiseDonationRequestService } from './raise.request.service';
 import { BloodWarriorCommonService } from './common.service';
+import { Iresponse } from '../../refactor/interface/message.interface';
+import { commonResponseMessageFormat } from '../common.response.format.object';
 
 @autoInjectable()
 export class AcceptVolunteerRequestService {
@@ -45,7 +47,12 @@ export class AcceptVolunteerRequestService {
                 const message = `Hi ${volunteer.User.Person.DisplayName},\n${donor.DisplayName} has accepted the request.
             Please contact the donor and schedule the donation`;
                 const buttons = await sendApiButtonService(["Schedule a Donation", "Schedule_Donation", "End This Process", "End_This_Process"]);
-                await this._platformMessageService.SendMediaMessage(volunteerPhone,null,message,'interactive-buttons', buttons);
+                const response_format: Iresponse = commonResponseMessageFormat();
+                response_format.platform = payload.source;
+                response_format.sessionId = volunteerPhone;
+                response_format.messageText = message;
+                response_format.message_type = "interactive-buttons";
+                await this._platformMessageService.SendMediaMessage(response_format, buttons);
 
             } catch (error) {
                 Logger.instance()

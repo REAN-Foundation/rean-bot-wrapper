@@ -2,6 +2,8 @@ import { autoInjectable,container} from "tsyringe";
 import { platformServiceInterface } from "../refactor/interface/platform.interface";
 import { MessageFlow } from "./get.put.message.flow.service";
 import { GetCalories } from "./get.calorie.service";
+import { Iresponse } from "../refactor/interface/message.interface";
+import { commonResponseMessageFormat } from "./common.response.format.object";
 
 @autoInjectable()
 export class CalorieService {
@@ -25,12 +27,17 @@ export class CalorieService {
 
     async postResponseCalorie(userId: any, client: any, data: any) {
         console.log("Sending calorie data to client");
+        const response_format: Iresponse = commonResponseMessageFormat();
+        response_format.platform = client;
+        response_format.sessionId = userId;
+        response_format.messageBody = data;
+        response_format.message_type = "image";
         this._platformMessageService = container.resolve(client);
-        await this._platformMessageService.SendMediaMessage(userId,null,data,'text',null);
+        await this._platformMessageService.SendMediaMessage(response_format,null);
     }
 
     async sendCalorieToDF(req){
-        return new Promise(async (resolve,reject)=> {
+        return new Promise(async (resolve)=> {
             console.log("Start food calorie service...");
             const params = req.body.queryResult.parameters;
             console.log(params);

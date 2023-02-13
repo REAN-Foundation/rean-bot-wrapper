@@ -7,8 +7,6 @@ import { handleRequestservice } from './handle.request.service';
 import { autoInjectable } from 'tsyringe';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { ChatMessage } from '../models/chat.message.model';
-import { SequelizeClient } from '../connection/sequelizeClient';
-import { CallAnemiaModel } from './call.anemia.model';
 import { GoogleTextToSpeech } from './text.to.speech';
 import { UserFeedback } from '../models/user.feedback.model';
 import { SlackMessageService } from "./slack.message.service";
@@ -23,21 +21,21 @@ export class MessageFlow{
     constructor(
         private slackMessageService?: SlackMessageService,
         private handleRequestservice?: handleRequestservice,
-        private sequelizeClient?: SequelizeClient,
-        private callAnemiaModel?: CallAnemiaModel,
         private translate?: translateService) {
     }
 
     async checkTheFlow(messagetoDialogflow, channel: string, platformMessageService: platformServiceInterface){
-        
-        // const messagetoDialogflow: Imessage = await platformMessageService.getMessage(msg);
+
+        if (messagetoDialogflow.messageBody === ' '){
+            messagetoDialogflow.messageBody = 'Empty message Body';
+        }
 
         //initialising MySQL DB tables
         const chatMessageObj = await this.engageMySQL(messagetoDialogflow);
         
         const resp = await UserFeedback.findAll({ where: { userId: chatMessageObj.userPlatformID } });
         if (resp.length === 0) {
-            this.get_put_msg_Dialogflow(messagetoDialogflow, channel, platformMessageService);
+            this.processMessage(messagetoDialogflow, channel, platformMessageService);
         }
         else {
             const humanHandoff = resp[resp.length - 1].humanHandoff;
@@ -50,65 +48,34 @@ export class MessageFlow{
                 
             }
             else {
-                this.get_put_msg_Dialogflow(messagetoDialogflow, channel, platformMessageService);
+                this.processMessage(messagetoDialogflow, channel, platformMessageService);
             }
         }
         
     }
 
-    async get_put_msg_Dialogflow (messagetoDialogflow: Imessage, channel: string ,platformMessageService: platformServiceInterface) {
-        
-        return this.processMessage(messagetoDialogflow, channel ,platformMessageService);
-    }
-
     async processMessage(messagetoDialogflow: Imessage, channel: string ,platformMessageService: platformServiceInterface) {
-        if (messagetoDialogflow.messageBody === ' '){
-            const message_to_platform = await platformMessageService.SendMediaMessage(messagetoDialogflow.platformId,null,"Sorry, I did not get that. Can you say it again?",messagetoDialogflow.type,null);
-            return message_to_platform;
-        }
+
+        //response Object from Dialogflow
         const processedResponse = await this.handleRequestservice.handleUserRequest(messagetoDialogflow, channel);
+
+        //converting the response Object to proper response object as per interface
         const response_format: Iresponse = await platformMessageService.postResponse(messagetoDialogflow, processedResponse);
-        const intent = processedResponse.message_from_dialoglow.getIntent();
+
+        //save the response data to DB
+        await this.saveResponseDataToUser(response_format,processedResponse);
+
         const payload = processedResponse.message_from_dialoglow.getPayload();
-        const chatSessionModel = await ChatSession.findOne({ where: { userPlatformID: response_format.sessionId } });
-        let chatSessionId = null;
-        if (chatSessionModel) {
-            chatSessionId = chatSessionModel.autoIncrementalID;
-        }
-        const dfResponseObj = {
-            chatSessionID  : chatSessionId,
-            platform       : response_format.platform,
-            direction      : response_format.direction,
-            messageType    : response_format.message_type,
-            messageContent : response_format.messageText,
-            imageContent   : response_format.messageBody,
-            imageUrl       : response_format.messageImageUrl,
-            userPlatformID : response_format.sessionId,
-            intent         : intent
-        };
-
-        const personresponse = new ChatMessage(dfResponseObj);
-        await personresponse.save();
-
-        // console.log(processedResponse.message_from_dialoglow.text);
         if (processedResponse.message_from_dialoglow.getText()) {
             let message_to_platform = null;
 
             await this.replyInAudio(messagetoDialogflow, response_format);
-            if (intent === "anemiaInitialisation-followup") {
-                const messageToPlatform = await this.callAnemiaModel.callAnemiaModel(processedResponse.processed_message[0]);
-                platformMessageService.SendMediaMessage(messagetoDialogflow.platformId,null,messageToPlatform,response_format.message_type,null);
-            }
-            else {
-                message_to_platform = await platformMessageService.SendMediaMessage(messagetoDialogflow.platformId, response_format.messageBody,response_format.messageText, response_format.message_type,payload);
+            message_to_platform = await platformMessageService.SendMediaMessage(response_format,payload);
 
-                // console.log("the message to platform is", message_to_platform);
-
-                if (!processedResponse.message_from_dialoglow.getText()) {
-                    console.log('An error occurred while sending messages!');
-                }
-                return message_to_platform;
+            if (!processedResponse.message_from_dialoglow.getText()) {
+                console.log('An error occurred while sending messages!');
             }
+            return message_to_platform;
         }
         else {
             console.log('An error occurred while processing messages!');
@@ -117,14 +84,9 @@ export class MessageFlow{
 
     async replyInAudio(message: Imessage, response_format: Iresponse) {
         if (message.type === "voice") {
-
-            // const obj = new AWSPolly();
-            // const audioURL = await obj.texttoSpeech(response_format.messageText);
             const id = message.platformId;
             const obj = new GoogleTextToSpeech();
             const audioURL = await obj.texttoSpeech(response_format.messageText, id);
-
-            // console.log("audioURL", audioURL);
             response_format.message_type = "voice";
             response_format.messageBody = audioURL;
         }
@@ -165,7 +127,7 @@ export class MessageFlow{
 
         let message_to_platform = null;
         // eslint-disable-next-line max-len
-        message_to_platform = await platformMessageService.SendMediaMessage(response_format.sessionId, response_format.messageBody,response_format.messageText[0], response_format.message_type,payload);
+        message_to_platform = await platformMessageService.SendMediaMessage(response_format,payload);
         return message_to_platform;
     }
 
@@ -200,9 +162,6 @@ export class MessageFlow{
             const respChatSession = await ChatSession.findAll({ where: { userPlatformID: userId } });
             const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: userId } });
             const lastMessageDate = respChatMessage[respChatMessage.length - 1].createdAt;
-
-            // console.log("lastMessageDate",lastMessageDate);
-            // console.log("respChatSession!!!", respChatSession);
 
             //check if user is new, if new then make a new entry in table contact list
             const respContactList = await ContactList.findAll({ where: { mobileNumber: userId } });
@@ -239,6 +198,29 @@ export class MessageFlow{
             resolve(chatMessageObj);
         });
         
+    }
+
+    saveResponseDataToUser = async(response_format,processedResponse) => {
+        const intent = processedResponse.message_from_dialoglow.getIntent();
+        const chatSessionModel = await ChatSession.findOne({ where: { userPlatformID: response_format.sessionId } });
+        let chatSessionId = null;
+        if (chatSessionModel) {
+            chatSessionId = chatSessionModel.autoIncrementalID;
+        }
+        const dfResponseObj = {
+            chatSessionID  : chatSessionId,
+            platform       : response_format.platform,
+            direction      : response_format.direction,
+            messageType    : response_format.message_type,
+            messageContent : response_format.messageText,
+            imageContent   : response_format.messageBody,
+            imageUrl       : response_format.messageImageUrl,
+            userPlatformID : response_format.sessionId,
+            intent         : intent
+        };
+
+        const personresponse = new ChatMessage(dfResponseObj);
+        await personresponse.save();
     }
 
 }
