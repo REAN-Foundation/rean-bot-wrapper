@@ -23,7 +23,6 @@ export class DatabaseConnection{
             }
         }
         else {
-            console.log("req.body", req.body);
             await this.sequelizeClient.connect();
         }
         next();
