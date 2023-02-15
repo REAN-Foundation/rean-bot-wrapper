@@ -265,8 +265,7 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
                         "caption" : payloadContent[i].fields.title.stringValue
                     };
                     postDataMeta.type = "image";
-                    const postDataString = JSON.stringify(postDataMeta);
-                    return await this.postRequestMessages(postDataString);
+                    listOfPostDataMeta.push(postDataMeta);
         
                 }
                 else {
