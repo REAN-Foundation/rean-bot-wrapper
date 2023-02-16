@@ -37,6 +37,7 @@ export const ScheduleDonationTakeValuesService = async (eventObj) => {
                     RequestedDate     : new Date().toISOString()
                         .split('T')[0]
                 };
+
                 //yaha pe pehle donation record nikalo from db agar nahi mile to create new one
                 await raiseDonationRequestService.createDonationRecord(obj);
                 dffMessage = `Congratulations! \nThe donation has been successfully scheduled.`;
@@ -55,17 +56,12 @@ export const ScheduleDonationTakeValuesService = async (eventObj) => {
 
                 //Message sent to patient
                 const heading = `Hi ${patient.User.Person.DisplayName}, `;
-                const payload = eventObj.body.originalDetectIntentRequest.payload;
-                const _platformMessageService: platformServiceInterface = container.resolve(payload.source);
+                const previousPayload = eventObj.body.originalDetectIntentRequest.payload;
+                const _platformMessageService:platformServiceInterface = container.resolve(previousPayload.source);
                 const patientPhone =
                     raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(patient.User.Person.Phone);
-                const response_format: Iresponse = commonResponseMessageFormat();
-                response_format.platform = payload.source;
-                response_format.sessionId = patientPhone;
-                response_format.messageText = heading + dffMessage + commonMessage;
-                response_format.message_type = "text";
-                await _platformMessageService.SendMediaMessage(response_format, null);
-                const variables = [
+                const payload = {};
+                payload["variables"] = [
                     {
                         type : "text",
                         text : patientDonors.DonorName
@@ -90,7 +86,13 @@ export const ScheduleDonationTakeValuesService = async (eventObj) => {
                         type : "text",
                         text : patientDonors.DonorType
                     }];
-                // await _platformMessageService.SendMediaMessage(patientPhone,null,heading + dffMessage + commonMessage,'template', null, 'patient_volunteer_donation_update', variables);
+                payload["templateName"] = "patient_volunteer_donation_update";
+                const response_format: Iresponse = commonResponseMessageFormat();
+                response_format.platform = previousPayload.source;
+                response_format.sessionId = patientPhone;
+                response_format.messageText = heading + dffMessage + commonMessage;
+                response_format.message_type = "template";
+                await _platformMessageService.SendMediaMessage(response_format, payload);
 
                 //Message sent to donor
                 const heading1 = `Hi ${patientDonors.DonorName}, \nThe donation request has been created by volunteer.`;
@@ -98,6 +100,7 @@ export const ScheduleDonationTakeValuesService = async (eventObj) => {
                     raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(patientDonors.DonorPhone);
                 response_format.sessionId = donorPhone;
                 response_format.messageText = heading1 + commonMessage;
+                response_format.message_type = "text";
                 await _platformMessageService.SendMediaMessage(response_format, null);
             } else {
                 dffMessage = `Sorry for the inconvenience, something went wrong.`;

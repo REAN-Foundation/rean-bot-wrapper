@@ -52,7 +52,8 @@ export class DonationRequestYesService {
 
             const apiURL = `clinical/patient-donors/search?patientUserId=${patientUserId}&onlyElligible=true`;
             result = await needleRequestForREAN("get", apiURL);
-            const buttons = await templateButtonService(["Accept_Volunteer_Request","Reject_Donation_Request"]);
+            const payload = {};
+            payload["buttonIds"] = await templateButtonService(["Accept_Volunteer_Request","Reject_Donation_Request"]);
             const donorNames = [];
             if (result.Data.PatientDonors.Items.length > 0) {
                 for (const donor of result.Data.PatientDonors.Items) {
@@ -71,21 +72,20 @@ export class DonationRequestYesService {
                     };
                     await this.raiseDonationRequestService.createDonationRecord(obj);
                     const dffMessage = `Hi ${donorName}, \nWe need blood in coming days. Are you able to donate blood? \nRegards \nTeam Blood Warriors`;
-                    const variable = [
+                    payload["variables"] = [
                         {
                             type : "text",
                             text : donorName
                         }];
-
-                    const payload = eventObj.body.originalDetectIntentRequest.payload;
-                    this._platformMessageService = container.resolve(payload.source);
+                    payload["templateName"] = "donor_donation_volunteer";
+                    const previousIntentPayload = eventObj.body.originalDetectIntentRequest.payload;
+                    this._platformMessageService = container.resolve(previousIntentPayload.source);
                     const response_format: Iresponse = commonResponseMessageFormat();
-                    response_format.platform = payload.source;
+                    response_format.platform = previousIntentPayload.source;
                     response_format.sessionId = donorPhone;
                     response_format.messageText = dffMessage;
-                    response_format.message_type = "interactive-buttons";
-                    await this._platformMessageService.SendMediaMessage(response_format, buttons);
-                    // await this._platformMessageService.SendMediaMessage(donorPhone,null,dffMessage,'template', buttons, "donor_donation_volunteer", variable);
+                    response_format.message_type = "template";
+                    await this._platformMessageService.SendMediaMessage(response_format, payload);
 
                     donorNames.push(donorName);
                 }

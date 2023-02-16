@@ -85,7 +85,7 @@ export class WhatsappPostResponseFunctionalities{
     }
 
     interactivelistResponseFormat = (response_format:Iresponse,payload) =>{
-        const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId)
+        const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
         const rows_meta = [];
         var header = "";
         const list_meta = payload.fields.buttons.listValue.values;
@@ -135,24 +135,24 @@ export class WhatsappPostResponseFunctionalities{
         return postDataMeta;
     }
 
-    // templateResponseFormat = (response_format:Iresponse,payload) => {
-    //     const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
-    //     postDataMeta["template"] = {
-    //         "name"     : templateName,
-    //         "language" : {
-    //             "code" : "en"
-    //         },
-    //         "components" : [{
-    //             "type"       : "body",
-    //             "parameters" : variables,
+    templateResponseFormat = (response_format:Iresponse,payload) => {
+        const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
+        postDataMeta["template"] = {
+            "name"     : payload.templateName,
+            "language" : {
+                "code" : "en"
+            },
+            "components" : [{
+                "type"       : "body",
+                "parameters" : payload.variables,
 
-    //         },
-    //         payload ? payload[0] : null,
-    //         payload ? payload[1] : null]
-    //     };
-    //     postDataMeta.type = "template";
-    //     return postDataMeta;
-    // }
+            },
+            payload.buttonIds ? payload.buttonIds[0] : null,
+            payload.buttonIds ? payload.buttonIds[1] : null]
+        };
+        postDataMeta.type = "template";
+        return postDataMeta;
+    }
 
     custom_payloadResponseFormat = async(response_format:Iresponse,payload) =>{
         const payloadContent = this.handleMessagetypePayload.getPayloadContent(payload);
