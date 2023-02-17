@@ -5,6 +5,8 @@ import { getPhoneNumber, needleRequestForREAN } from '../needle.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { templateButtonService } from '../whatsappmeta.button.service';
 import { RaiseDonationRequestService } from './raise.request.service';
+import { Iresponse } from '../../refactor/interface/message.interface';
+import { commonResponseMessageFormat } from '../common.response.format.object';
 import { BloodWarriorCommonService } from './common.service';
 
 @autoInjectable()
@@ -69,15 +71,14 @@ export class DonationRequestYesService {
                     };
                     await this.raiseDonationRequestService.createDonationRecord(obj);
                     const dffMessage = `Hi ${donorName}, \nWe need blood in coming days. Are you able to donate blood? \nRegards \nTeam Blood Warriors`;
-                    const variable = [
-                        {
-                            type : "text",
-                            text : donorName
-                        }];
-
                     const payload = eventObj.body.originalDetectIntentRequest.payload;
                     this._platformMessageService = container.resolve(payload.source);
-                    await this._platformMessageService.SendMediaMessage(donorPhone,null,dffMessage,'template', buttons, "donor_donation_volunteer", variable);
+                    const response_format: Iresponse = commonResponseMessageFormat();
+                    response_format.platform = payload.source;
+                    response_format.sessionId = donorPhone;
+                    response_format.messageText = dffMessage;
+                    response_format.message_type = "interactive-buttons";
+                    await this._platformMessageService.SendMediaMessage(response_format, buttons);
 
                     donorNames.push(donorName);
                 }
@@ -106,7 +107,12 @@ export class DonationRequestYesService {
             const dffMessage = `Request sent successfully to following Donors.${donorList} \nRegards \nTeam Blood Warriors`;
             const payload = eventObj.body.originalDetectIntentRequest.payload;
             this._platformMessageService = container.resolve(payload.source);
-            const result = await this._platformMessageService.SendMediaMessage(volunteerPhone,null,dffMessage,'text', null);
+            const response_format: Iresponse = commonResponseMessageFormat();
+            response_format.platform = payload.source;
+            response_format.sessionId = volunteerPhone;
+            response_format.messageText = dffMessage;
+            response_format.message_type = "text";
+            const result = await this._platformMessageService.SendMediaMessage(response_format, null);
             if (result.statusCode === 200 ) {
                 console.log(`Succesfully notification send to volunteer. Volunteer Phone : ${volunteerPhone}.`);
             }

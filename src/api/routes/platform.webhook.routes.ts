@@ -17,11 +17,10 @@ export class PlatformWebhookRoutes{
 
     register (app: express.Application) {
         const router = express.Router();
-        router.post(`/:client/:channel/:unique_token/send`, this.clientEnvironmentProviderService.clientNameMiddleware,this.dbconnectioMiddleware.myLogger, this._clientWebhookController.sendMessage);
+        router.post(`/:client/:channel/:unique_token/send`, this.clientEnvironmentProviderService.clientNameMiddleware, this.dbconnectioMiddleware.myLogger, this._clientWebhookController.sendMessage);
         router.post(`/:client/:channel/:unique_token/receive`, this.clientEnvironmentProviderService.clientNameMiddleware, this.dbconnectioMiddleware.myLogger, this._clientWebhookController.receiveMessage);
         router.get(`/:client/:channel/:unique_token/webhook`, this.clientEnvironmentProviderService.clientNameMiddleware, this._clientWebhookController.authenticateMetaWhatsappWebhook);
         router.post(`/:client/:channel/:unique_token/webhook`, this.clientEnvironmentProviderService.clientNameMiddleware, this.dbconnectioMiddleware.metaDBConnection, this._clientWebhookController.receiveMessageMetaWhatsapp);
-        // router.use();
         app.use('/v1/', router);
     }
 

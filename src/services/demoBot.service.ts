@@ -3,6 +3,8 @@ import XLSX = require('xlsx');
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 import { platformServiceInterface } from "../refactor/interface/platform.interface";
 import dialogflow = require('@google-cloud/dialogflow');
+import { Iresponse } from "../refactor/interface/message.interface";
+import { commonResponseMessageFormat } from "./common.response.format.object";
 
 @autoInjectable()
 export class demoBotService {
@@ -19,7 +21,7 @@ export class demoBotService {
 
             var data = [];
 
-            for (let y=0; y < sheet_name_list.length; y++) {
+            for (let y = 0; y < sheet_name_list.length; y++) {
                 const sheet_name = sheet_name_list[y];
                 var worksheet = workbook.Sheets[sheet_name];
                 var headers = {};
@@ -50,6 +52,7 @@ export class demoBotService {
         }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async createIntent(excelData, userSessionId){
         console.log('Creating intents');
         const dfBotGCPCredentials = JSON.parse(this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS"));
@@ -75,14 +78,14 @@ export class demoBotService {
         for (const filter_intent of intent_list[0]){
             if (filter_intent.displayName.match(/FAQ.*/) ) {
                 const intentPath = intentsClient.projectAgentIntentPath(projectIdFinal,filter_intent.name.split('/').pop());
-                const delete_request = {name: intentPath};
+                const delete_request = { name: intentPath };
                 intents.push(delete_request);
 
             }
         }
 
-        if (intents.length != 0) {
-            await intentsClient.batchDeleteIntents({parent: projectAgentPath, intents: intents});
+        if (intents.length !== 0) {
+            await intentsClient.batchDeleteIntents({ parent: projectAgentPath, intents: intents });
         }
 
         var count = 0;
@@ -108,7 +111,6 @@ export class demoBotService {
     
                 trainingPhrases.push(trainingPhrase);
             }
-
 
             const messageText = {
                 text : [df_resp],
@@ -141,7 +143,13 @@ export class demoBotService {
 
     async postResponseDemo(sessionId: any, client: any, data:any) {
         console.log("Sending demo bot success message");
+        const response_format: Iresponse = commonResponseMessageFormat();
+        response_format.platform = client;
+        response_format.sessionId = sessionId;
+        response_format.messageText = data;
+        response_format.message_type = "text";
         this._platformMessageService = container.resolve(client);
-        await this._platformMessageService.SendMediaMessage(sessionId,null,data,'text',null);
+        await this._platformMessageService.SendMediaMessage(response_format,null);
     }
+
 }
