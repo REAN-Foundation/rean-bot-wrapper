@@ -85,7 +85,7 @@ export class WhatsappPostResponseFunctionalities{
     };
 
     interactivelistResponseFormat = (response_format:Iresponse,payload) =>{
-        const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId)
+        const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
         const rows_meta = [];
         var header = "";
         const list_meta = payload.fields.buttons.listValue.values;
@@ -182,7 +182,7 @@ export class WhatsappPostResponseFunctionalities{
                 message = payload.fields.title.stringValue;
             }
             else {
-                
+
                 //
             }
         }
