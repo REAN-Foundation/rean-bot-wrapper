@@ -111,5 +111,4 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
         }
         await delay(delayClientPreference);
     }
-
 }

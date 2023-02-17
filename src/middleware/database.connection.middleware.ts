@@ -23,11 +23,10 @@ export class DatabaseConnection{
             }
         }
         else {
-            console.log("req.body", req.body);
             await this.sequelizeClient.connect();
         }
         next();
-    }
+    };
 
     metaDBConnection = async (req, res, next) => {
         if (!req.body.entry[0].changes[0].value.statuses){
@@ -36,5 +35,6 @@ export class DatabaseConnection{
             console.log("Meta DB Connection Skipped");
         }
         next();
-    }
+    };
+
 }
