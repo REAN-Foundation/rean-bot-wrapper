@@ -71,12 +71,6 @@ export class DonationRequestYesService {
                     };
                     await this.raiseDonationRequestService.createDonationRecord(obj);
                     const dffMessage = `Hi ${donorName}, \nWe need blood in coming days. Are you able to donate blood? \nRegards \nTeam Blood Warriors`;
-                    const variable = [
-                        {
-                            type : "text",
-                            text : donorName
-                        }];
-
                     const payload = eventObj.body.originalDetectIntentRequest.payload;
                     this._platformMessageService = container.resolve(payload.source);
                     const response_format: Iresponse = commonResponseMessageFormat();
@@ -85,7 +79,6 @@ export class DonationRequestYesService {
                     response_format.messageText = dffMessage;
                     response_format.message_type = "interactive-buttons";
                     await this._platformMessageService.SendMediaMessage(response_format, buttons);
-                    // await this._platformMessageService.SendMediaMessage(donorPhone,null,dffMessage,'template', buttons, "donor_donation_volunteer", variable);
 
                     donorNames.push(donorName);
                 }

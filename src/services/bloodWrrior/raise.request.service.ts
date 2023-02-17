@@ -69,35 +69,6 @@ export class RaiseDonationRequestService {
                             .split('T')[0]
                     };
                     await this.createDonationRecord(object);
-                    const variables = [
-                        {
-                            type : "text",
-                            text : donorName
-                        },
-                        {
-                            type : "text",
-                            text : name
-                        },
-                        {
-                            type : "text",
-                            text : "blood"
-                        },
-                        {
-                            type : "text",
-                            text : stringTFDate
-                        },
-                        {
-                            type : "text",
-                            text : "blood"
-                        },
-                        {
-                            type : "text",
-                            text : stringDate
-                        },
-                        {
-                            type : "text",
-                            text : "Blood"
-                        }];
                     const dffMessage = `Hi ${donorName}, \n"${name}" requires blood. \nThe transfusion is scheduled to be ${stringTFDate}.
                     Would you be willing to donate blood on or before ${stringDate}? \nRegards \nTeam Blood Warriors`;
 
@@ -109,7 +80,6 @@ export class RaiseDonationRequestService {
                     response_format.messageText = dffMessage;
                     response_format.message_type = "interactive-buttons";
                     await this._platformMessageService.SendMediaMessage(response_format, buttons);
-                    // await this._platformMessageService.SendMediaMessage(donorPhone,null,dffMessage,'template', buttons, "donor_push_notification", variables);
 
                     donorNames.push(donorName);
                 }
@@ -146,31 +116,6 @@ export class RaiseDonationRequestService {
                     donorList += seq;
                     num = num + 1;
                 });
-                const variables = [
-                    {
-                        type : "text",
-                        text : volunteerName
-                    },
-                    {
-                        type : "text",
-                        text : patientName
-                    },
-                    {
-                        type : "text",
-                        text : "blood"
-                    },
-                    {
-                        type : "text",
-                        text : transfusionDate
-                    },
-                    {
-                        type : "text",
-                        text : donorList
-                    },
-                    {
-                        type : "text",
-                        text : "Blood"
-                    }];
 
                 //const dffMessage = `Hi ${volunteerName}, \n"${patientName}" requires blood.
                 //The transfusion is scheduled to be ${transfusionDate}.
@@ -184,7 +129,6 @@ export class RaiseDonationRequestService {
                 response_format.messageText = null;
                 response_format.message_type = "template";
                 result = await this._platformMessageService.SendMediaMessage(response_format, null);
-                // result = await this._platformMessageService.SendMediaMessage(volunteerPhone,null,null,'template', null, "volunteer_push_notification", variables);
                 if (result.statusCode === 200 ) {
                     console.log(`Succesfully notification send to volunteer. Volunteer Name : ${volunteerName}.`);
                 }

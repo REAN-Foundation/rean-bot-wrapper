@@ -30,6 +30,6 @@ export class SlackClickupCommonFunctions {
             response_format.sessionId = contact.toString();
             await this.whatsappNewMessageService.SendMediaMessage(response_format,null);
         }
-    }
+    };
 
 }

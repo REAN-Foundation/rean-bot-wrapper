@@ -17,7 +17,7 @@ export class ChecklistDateValidationService {
     private raiseDonationRequestService = new RaiseDonationRequestService();
 
     checklistDateValidationService = async (eventObj) => {
-        return new Promise(async (resolve,reject) => {
+        return new Promise(async (resolve) => {
             try {
                 const transfusionDate = eventObj.body.queryResult.parameters.date;
                 let donor = null;

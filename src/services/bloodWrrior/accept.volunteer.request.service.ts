@@ -1,6 +1,6 @@
 import { container, autoInjectable } from 'tsyringe';
 import { Logger } from '../../common/logger';
-import { getPhoneNumber, needleRequestForREAN } from '../needle.service';
+import { needleRequestForREAN } from '../needle.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { sendApiButtonService } from '../whatsappmeta.button.service';
 import { RaiseDonationRequestService } from './raise.request.service';
@@ -18,7 +18,7 @@ export class AcceptVolunteerRequestService {
     private bloodWarriorCommonService = new BloodWarriorCommonService();
 
     async sendUserMessage (eventObj) {
-        return new Promise(async (resolve,reject) => {
+        return new Promise(async (resolve) => {
             try {
                 let donor = null;
                 donor = await this.bloodWarriorCommonService.getDonorByPhoneNumber(eventObj);

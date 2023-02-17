@@ -8,7 +8,7 @@ import { Iresponse } from '../../refactor/interface/message.interface';
 import { commonResponseMessageFormat } from '../common.response.format.object';
 
 export const ScheduleDonationTakeValuesService = async (eventObj) => {
-    return new Promise(async (resolve,reject) => {
+    return new Promise(async (resolve) => {
         try {
             const raiseDonationRequestService = new RaiseDonationRequestService();
             const bloodWarriorCommonService = new BloodWarriorCommonService();
@@ -37,6 +37,7 @@ export const ScheduleDonationTakeValuesService = async (eventObj) => {
                     RequestedDate     : new Date().toISOString()
                         .split('T')[0]
                 };
+
                 //yaha pe pehle donation record nikalo from db agar nahi mile to create new one
                 await raiseDonationRequestService.createDonationRecord(obj);
                 dffMessage = `Congratulations! \nThe donation has been successfully scheduled.`;
@@ -65,32 +66,6 @@ export const ScheduleDonationTakeValuesService = async (eventObj) => {
                 response_format.messageText = heading + dffMessage + commonMessage;
                 response_format.message_type = "text";
                 await _platformMessageService.SendMediaMessage(response_format, null);
-                const variables = [
-                    {
-                        type : "text",
-                        text : patientDonors.DonorName
-                    },
-                    {
-                        type : "text",
-                        text : patientDonors.BloodGroup
-                    },
-                    {
-                        type : "text",
-                        text : new Date(donation_Date.split("T")[0]).toDateString()
-                    },
-                    {
-                        type : "text",
-                        text : location
-                    },
-                    {
-                        type : "text",
-                        text : patient.User.Person.DisplayName
-                    },
-                    {
-                        type : "text",
-                        text : patientDonors.DonorType
-                    }];
-                // await _platformMessageService.SendMediaMessage(patientPhone,null,heading + dffMessage + commonMessage,'template', null, 'patient_volunteer_donation_update', variables);
 
                 //Message sent to donor
                 const heading1 = `Hi ${patientDonors.DonorName}, \nThe donation request has been created by volunteer.`;

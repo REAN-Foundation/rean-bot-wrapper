@@ -2,7 +2,7 @@ import { Logger } from '../../common/logger';
 import { needleRequestForREAN } from '../needle.service';
 import { RaiseDonationRequestService } from './raise.request.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { sendApiButtonService, templateButtonService } from '../whatsappmeta.button.service';
+import { sendApiButtonService } from '../whatsappmeta.button.service';
 import { container } from 'tsyringe';
 import { Iresponse } from '../../refactor/interface/message.interface';
 import { commonResponseMessageFormat } from '../common.response.format.object';
@@ -17,7 +17,7 @@ export class SelectBloodGroupService {
     private bloodWarriorCommonService = new BloodWarriorCommonService();
 
     async bloodGroupService (eventObj) {
-        return new Promise(async (resolve,reject) => {
+        return new Promise(async (resolve) => {
             try {
 
                 let bloodGroup = eventObj.body.queryResult.parameters.Blood_Group;
@@ -81,13 +81,6 @@ export class SelectBloodGroupService {
                         await this._platformMessageService.SendMediaMessage(response_format, buttons);
 
                         //await whatsappMetaButtonService("Yes", "Emergency_Donation_Yes","No", "Volunteer_Confirm");
-                        const variable = [
-                            {
-                                type : "text",
-                                text : donorName
-                            }];
-                        // const buttons = await templateButtonService(["Accept_Volunteer_Request","Reject_Donation_Request"]);
-                        // await this._platformMessageService.SendMediaMessage(donorPhone,null,dffMessage,'template', buttons, "donor_donation_volunteer", variable);
 
                     }
                     const apiURL = `volunteers/${volunteer.UserId}`;

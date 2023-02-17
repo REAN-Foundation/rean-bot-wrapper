@@ -6,7 +6,7 @@ import { BloodWarriorCommonService } from './common.service';
 import { RaiseDonationRequestService } from './raise.request.service';
 
 export const ScheduleOneTimeTakeValuesService = async (eventObj) => {
-    return new Promise(async (resolve,reject) => {
+    return new Promise(async (resolve) => {
         try {
             const raiseDonationRequestService = new RaiseDonationRequestService();
             const bloodWarriorCommonService = new BloodWarriorCommonService();
@@ -43,13 +43,6 @@ export const ScheduleOneTimeTakeValuesService = async (eventObj) => {
                 const nextDonationDate = new Date(donation_Date.split("T")[0]);
                 await bloodWarriorCommonService.fetchDonorDonationReminders(donor.UserId,nextDonationDate);
 
-                //Message sent to donor
-                const heading1 = `Hi ${donor.DisplayName}, \nThe donation request has been created by volunteer.`;
-                const payload = eventObj.body.originalDetectIntentRequest.payload;
-                const donorPhone =
-                    raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(donor.Phone);
-                const _platformMessageService: platformServiceInterface = container.resolve(payload.source);
-                // await _platformMessageService.SendMediaMessage(donorPhone,null,heading1 + commonMessage,'text', null);
             } else {
                 dffMessage = `Donor not found with this ${volunteer.SelectedPhoneNumber} phone number.`;
                 resolve( { message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } });

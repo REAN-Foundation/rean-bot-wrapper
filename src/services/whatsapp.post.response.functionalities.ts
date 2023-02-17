@@ -23,7 +23,7 @@ export class WhatsappPostResponseFunctionalities{
         }
         postDataMeta.type = "text";
         return postDataMeta;
-    }
+    };
 
     imageResponseFormat = (response_format:Iresponse,payload) => {
         const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
@@ -38,7 +38,7 @@ export class WhatsappPostResponseFunctionalities{
         };
         postDataMeta.type = "image";
         return postDataMeta;
-    }
+    };
 
     voiceResponseFormat = (response_format:Iresponse,payload) => {
         const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
@@ -47,7 +47,7 @@ export class WhatsappPostResponseFunctionalities{
         };
         postDataMeta.type = "audio";
         return postDataMeta;
-    }
+    };
 
     interactivebuttonsResponseFormat = async(response_format:Iresponse,payload) =>{
         const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
@@ -82,7 +82,7 @@ export class WhatsappPostResponseFunctionalities{
         postDataMeta.type = "interactive";
         return postDataMeta;
 
-    }
+    };
 
     interactivelistResponseFormat = (response_format:Iresponse,payload) =>{
         const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId)
@@ -133,26 +133,7 @@ export class WhatsappPostResponseFunctionalities{
         };
         postDataMeta.type = "interactive";
         return postDataMeta;
-    }
-
-    // templateResponseFormat = (response_format:Iresponse,payload) => {
-    //     const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
-    //     postDataMeta["template"] = {
-    //         "name"     : templateName,
-    //         "language" : {
-    //             "code" : "en"
-    //         },
-    //         "components" : [{
-    //             "type"       : "body",
-    //             "parameters" : variables,
-
-    //         },
-    //         payload ? payload[0] : null,
-    //         payload ? payload[1] : null]
-    //     };
-    //     postDataMeta.type = "template";
-    //     return postDataMeta;
-    // }
+    };
 
     custom_payloadResponseFormat = async(response_format:Iresponse,payload) =>{
         const payloadContent = this.handleMessagetypePayload.getPayloadContent(payload);
@@ -178,7 +159,7 @@ export class WhatsappPostResponseFunctionalities{
             }
         }
         return listOfPostDataMeta;
-    }
+    };
 
     postDataFormatWhatsapp = (contact) => {
 
@@ -201,6 +182,7 @@ export class WhatsappPostResponseFunctionalities{
                 message = payload.fields.title.stringValue;
             }
             else {
+                
                 //
             }
         }
@@ -208,6 +190,6 @@ export class WhatsappPostResponseFunctionalities{
             message = response_format.messageText;
         }
         return message;
-    }
+    };
 
 }

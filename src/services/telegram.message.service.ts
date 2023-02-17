@@ -8,6 +8,8 @@ import { autoInjectable, singleton, inject, delay } from 'tsyringe';
 import  TelegramBot  from 'node-telegram-bot-api';
 import { MessageFlow } from './get.put.message.flow.service';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { TelegramMessageToDialogflow } from './telegram.messagetodialogflow';
@@ -124,6 +126,7 @@ export class TelegramMessageService implements platformServiceInterface{
         return response_message;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     SendMediaMessage = async (response_format:Iresponse, payload = null) => {
         
         const type = response_format.message_type;
@@ -131,5 +134,6 @@ export class TelegramMessageService implements platformServiceInterface{
             const classmethod = `send${type}Response`;
             return await this.telegramPostResponseFunctionalities[classmethod](response_format,this._telegram);
         }
-    }
+    };
+
 }

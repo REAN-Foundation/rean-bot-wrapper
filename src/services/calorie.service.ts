@@ -1,4 +1,4 @@
-import { autoInjectable,container} from "tsyringe";
+import { autoInjectable,container } from "tsyringe";
 import { platformServiceInterface } from "../refactor/interface/platform.interface";
 import { MessageFlow } from "./get.put.message.flow.service";
 import { GetCalories } from "./get.calorie.service";
@@ -57,4 +57,5 @@ export class CalorieService {
             resolve(data);
         });
     }
+
 }

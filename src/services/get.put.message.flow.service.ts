@@ -227,8 +227,9 @@ export class MessageFlow{
 
         const personresponse = new ChatMessage(dfResponseObj);
         await personresponse.save();
-    }
+    };
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async saveIntent(intent:string, userPlatformID: string){
         try {
             this.chatMessageConnection.intent = intent;
