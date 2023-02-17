@@ -1,14 +1,12 @@
 import { WebClient } from '@slack/web-api';
 import { createEventAdapter } from '@slack/events-api';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
-import { Imessage } from '../refactor/interface/message.interface';
-import { autoInjectable, delay, inject } from 'tsyringe';
+import { Imessage, Iresponse } from '../refactor/interface/message.interface';
+import { autoInjectable } from 'tsyringe';
 import { ResponseHandler } from '../utils/response.handler';
-import { TelegramMessageService } from './telegram.message.service';
-import { WhatsappMessageService } from './whatsapp.message.service';
-import { WhatsappMetaMessageService } from './whatsapp.meta.message.service';
 import { UserFeedback } from '../models/user.feedback.model';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { SlackClickupCommonFunctions } from './slackAndCkickupSendCustomMessage';
 
 @autoInjectable()
 export class SlackMessageService implements platformServiceInterface {
@@ -23,11 +21,10 @@ export class SlackMessageService implements platformServiceInterface {
 
     private isInitialised = false;
 
-    constructor(@inject(delay(() => WhatsappMessageService)) public whatsappMessageService,
-        @inject(delay(() => WhatsappMetaMessageService)) public whatsappNewMessageService,
+    constructor(
         private responseHandler?: ResponseHandler,
         private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
-        private telegramMessageservice?: TelegramMessageService) {}
+        private slackClickupCommonFunctions?: SlackClickupCommonFunctions) {}
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async handleMessage(message, client) {
@@ -68,10 +65,12 @@ export class SlackMessageService implements platformServiceInterface {
                                 .catch(error => console.log("error on update", error));
 
                             const message = "Thank you for connecting.";
-                            await this.sendCustomMessage(channel, contact, message);
+                            await this.slackClickupCommonFunctions.sendCustomMessage(channel, contact, message);
                         }
                         else {
-                            await this.sendCustomMessage(channel, contact, message.event.text);
+
+                            // eslint-disable-next-line max-len
+                            await this.slackClickupCommonFunctions.sendCustomMessage(channel, contact, message.event.text);
                         }
                         
                     }
@@ -82,7 +81,7 @@ export class SlackMessageService implements platformServiceInterface {
                 else {
                     console.log("child message HH off");
                     const textToUser = `Our Experts have responded to your query. \nYour Query: ${data.messageContent} \nExpert: ${message.event.text}`;
-                    await this.sendCustomMessage(channel, contact, textToUser);
+                    await this.slackClickupCommonFunctions.sendCustomMessage(channel, contact, textToUser);
                 }
                 
             }
@@ -138,18 +137,6 @@ export class SlackMessageService implements platformServiceInterface {
         throw new Error('Method not implemented.');
     }
 
-    async sendCustomMessage(channel, contact, message) {
-        if (channel === "telegram"){
-            await this.telegramMessageservice.SendMediaMessage(contact, null, message, "text");
-        }
-        else if (channel === "whatsapp"){
-            await this.whatsappMessageService.SendMediaMessage(contact.toString(), null, message, "text");
-        }
-        else if (channel === "whatsappMeta"){
-            await this.whatsappNewMessageService.SendMediaMessage(contact.toString(), null, message, "text");
-        }
-    }
-
     init() {
         throw new Error('Method not implemented.');
     }
@@ -170,7 +157,7 @@ export class SlackMessageService implements platformServiceInterface {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    SendMediaMessage(sessionId: string, messageBody: string, messageText: string) {
+    SendMediaMessage(response_format:Iresponse, payload:any) {
         throw new Error('Method not implemented.');
     }
 

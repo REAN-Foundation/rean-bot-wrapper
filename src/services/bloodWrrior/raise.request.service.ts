@@ -3,6 +3,8 @@ import { container, autoInjectable } from 'tsyringe';
 import { Logger } from '../../common/logger';
 import { needleRequestForREAN } from '../needle.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
+import { Iresponse } from '../../refactor/interface/message.interface';
+import { commonResponseMessageFormat } from '../common.response.format.object';
 import { templateButtonService } from '../whatsappmeta.button.service';
 
 @autoInjectable()
@@ -67,41 +69,17 @@ export class RaiseDonationRequestService {
                             .split('T')[0]
                     };
                     await this.createDonationRecord(object);
-                    const variables = [
-                        {
-                            type : "text",
-                            text : donorName
-                        },
-                        {
-                            type : "text",
-                            text : name
-                        },
-                        {
-                            type : "text",
-                            text : "blood"
-                        },
-                        {
-                            type : "text",
-                            text : stringTFDate
-                        },
-                        {
-                            type : "text",
-                            text : "blood"
-                        },
-                        {
-                            type : "text",
-                            text : stringDate
-                        },
-                        {
-                            type : "text",
-                            text : "Blood"
-                        }];
                     const dffMessage = `Hi ${donorName}, \n"${name}" requires blood. \nThe transfusion is scheduled to be ${stringTFDate}.
                     Would you be willing to donate blood on or before ${stringDate}? \nRegards \nTeam Blood Warriors`;
 
                     const payload = eventObj.body.originalDetectIntentRequest.payload;
                     this._platformMessageService = container.resolve(payload.source);
-                    await this._platformMessageService.SendMediaMessage(donorPhone,null,dffMessage,'template', buttons, "donor_push_notification", variables);
+                    const response_format: Iresponse = commonResponseMessageFormat();
+                    response_format.platform = payload.source;
+                    response_format.sessionId = donorPhone;
+                    response_format.messageText = dffMessage;
+                    response_format.message_type = "interactive-buttons";
+                    await this._platformMessageService.SendMediaMessage(response_format, buttons);
 
                     donorNames.push(donorName);
                 }
@@ -135,34 +113,11 @@ export class RaiseDonationRequestService {
                 let num = 1;
                 donorNames.forEach(name => {
                     const seq = `\\n${num}-${name}`;
+                    
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     donorList += seq;
                     num = num + 1;
                 });
-                const variables = [
-                    {
-                        type : "text",
-                        text : volunteerName
-                    },
-                    {
-                        type : "text",
-                        text : patientName
-                    },
-                    {
-                        type : "text",
-                        text : "blood"
-                    },
-                    {
-                        type : "text",
-                        text : transfusionDate
-                    },
-                    {
-                        type : "text",
-                        text : donorList
-                    },
-                    {
-                        type : "text",
-                        text : "Blood"
-                    }];
 
                 //const dffMessage = `Hi ${volunteerName}, \n"${patientName}" requires blood.
                 //The transfusion is scheduled to be ${transfusionDate}.
@@ -170,7 +125,12 @@ export class RaiseDonationRequestService {
                 //We will send you a reminder if no one responds or anyone accepts. \nRegards \nTeam Blood Warriors`;
                 const payload = eventObj.body.originalDetectIntentRequest.payload;
                 this._platformMessageService = container.resolve(payload.source);
-                result = await this._platformMessageService.SendMediaMessage(volunteerPhone,null,null,'template', null, "volunteer_push_notification", variables);
+                const response_format: Iresponse = commonResponseMessageFormat();
+                response_format.platform = payload.source;
+                response_format.sessionId = volunteerPhone;
+                response_format.messageText = null;
+                response_format.message_type = "template";
+                result = await this._platformMessageService.SendMediaMessage(response_format, null);
                 if (result.statusCode === 200 ) {
                     console.log(`Succesfully notification send to volunteer. Volunteer Name : ${volunteerName}.`);
                 }

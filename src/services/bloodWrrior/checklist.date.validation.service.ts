@@ -4,6 +4,8 @@ import { BloodWarriorCommonService } from './common.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { autoInjectable, container } from 'tsyringe';
 import { RaiseDonationRequestService } from './raise.request.service';
+import { Iresponse } from '../../refactor/interface/message.interface';
+import { commonResponseMessageFormat } from '../common.response.format.object';
 
 @autoInjectable()
 export class ChecklistDateValidationService {
@@ -15,7 +17,7 @@ export class ChecklistDateValidationService {
     private raiseDonationRequestService = new RaiseDonationRequestService();
 
     checklistDateValidationService = async (eventObj) => {
-        return new Promise(async (resolve,reject) => {
+        return new Promise(async (resolve) => {
             try {
                 const transfusionDate = eventObj.body.queryResult.parameters.date;
                 let donor = null;
@@ -51,13 +53,20 @@ export class ChecklistDateValidationService {
                     const patient = await this.bloodWarriorCommonService.getPatientPhoneByUserId(patientUserId);
                     const patientPhone =
                         this.raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(patient.User.Person.Phone);
-                    await this._platformMessageService.SendMediaMessage(patientPhone,null,heading + `\n` + message,'text', null);
+                    const response_format: Iresponse = commonResponseMessageFormat();
+                    response_format.platform = payload.source;
+                    response_format.sessionId = patientPhone;
+                    response_format.messageText = heading + `\n` + message;
+                    response_format.message_type = "text";
+                    await this._platformMessageService.SendMediaMessage(response_format, null);
 
                     //message send to volunteer
                     const volunteer = await this.bloodWarriorCommonService.getVolunteerPhoneByUserId(volunteerUserId);
                     const volunteerPhone =
                         this.raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(volunteer.User.Person.Phone);
-                    await this._platformMessageService.SendMediaMessage(volunteerPhone,null,heading + `\n` + message,'text', null);
+                    response_format.sessionId = volunteerPhone;
+                    response_format.messageText = heading + `\n` + message;
+                    await this._platformMessageService.SendMediaMessage(response_format, null);
                 } else {
                     dffMessage = "The donation date you entered is not correct please try again.";
                     resolve( { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } });

@@ -110,10 +110,10 @@ export class MockMessageService implements platformServiceInterface {
         //Not required
     }
 
-    SendMediaMessage = async (contact: number | string, imageLink: string, message: string, messageType: string, payload: any) => {
-        const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: contact } });
+    SendMediaMessage = async (response_format:Iresponse, payload: any) => {
+        const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: response_format.sessionId } });
         const lastMessageDate = respChatMessage[respChatMessage.length - 1].createdAt;
-        const obj = { timeStamp: lastMessageDate, message: message };
+        const obj = { timeStamp: lastMessageDate, message: response_format.messageText };
         const mockUri = "http://127.0.0.1:80/listener";
         try {
             const response = await request({
@@ -123,7 +123,7 @@ export class MockMessageService implements platformServiceInterface {
                     conversationId : `${respChatMessage[respChatMessage.length - 2].messageId}`,
                     responses      : [
                         {
-                            text    : message,
+                            text    : response_format.messageText,
                             payload : payload
                         }
                     ]
@@ -132,8 +132,8 @@ export class MockMessageService implements platformServiceInterface {
             });
         } catch (error) {
             console.log("Error in sending to botium");
-        } 
-        console.log("obj", obj);
+        }
+        
     };
 
     getMessage = async (message: any) => {
