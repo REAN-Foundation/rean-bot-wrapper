@@ -21,7 +21,7 @@ export const DonateBloodService = async (eventObj) => {
                 d.setDate(d.getDate() + 90);
                 const stringDate = new Date(d).toDateString();
                 const dffMessage = `You are eligible to donate after ${stringDate} \n    Last Donation Date: ${lastDonationDate}\n    Donations Till Date: 1
-                Someone from Blood Warriors Team will contact you soon. \n    You are a superhero`;
+          Someone from Blood Warriors Team will contact you soon. \n    You are a superhero`;
                 resolve( { fulfillmentMessages: [{ text: { text: [dffMessage] } } ] });
             } else {
                 const dffMessage = `No history of donations found.

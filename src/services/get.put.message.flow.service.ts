@@ -101,9 +101,6 @@ export class MessageFlow{
     }
 
     async send_manual_msg (msg,platformMessageService: platformServiceInterface) {
-        const translatedMessage = await this.translate.translatePushNotifications( msg.message, msg.userId);
-        msg.message = translatedMessage;
-
         const payload = {};
         if (msg.type === "template") {
             payload["templateName"] = msg.templateName;
@@ -111,6 +108,13 @@ export class MessageFlow{
                 msg.message = JSON.parse(msg.message);
             }
             payload["variables"] = msg.message.Variables;
+            if (msg.provider === "REAN") {
+                const languageForSession = await this.translate.detectUsersLanguage( msg.userId);
+                msg.message.Variables = JSON.parse(msg.message.Variables);
+                if (msg.message.Variables[`${languageForSession}`]) {
+                    payload["variables"] = msg.message.Variables[`${languageForSession}`];
+                }
+            }
         } else {
             const translatedMessage = await this.translate.translatePushNotifications( msg.message, msg.userId);
             msg.message = translatedMessage;
