@@ -39,11 +39,22 @@ export class RegisterAllProfileService {
                     const apiURL = `patients`;
                     await needleRequestForREAN("post", apiURL, null, obj);
                     const message = `Hi ${body.PatientFirstName}, \nYou have successfully registered with blood warrior team as patient.`;
+                    const sendPayload = {};
+                    sendPayload["variables"] = [
+                        {
+                            type : "text",
+                            text : body.PatientFirstName
+                        },
+                        {
+                            type : "text",
+                            text : "patient"
+                        }];
+                    sendPayload["templateName"] = "bot_reg_confirmation";
                     response_format.platform = payload.source;
                     response_format.sessionId = `91${body.PatientPhone}`;
                     response_format.messageText = message;
-                    response_format.message_type = "text";
-                    await this._platformMessageService.SendMediaMessage(response_format, null);
+                    response_format.message_type = "template";
+                    await this._platformMessageService.SendMediaMessage(response_format, sendPayload);
 
                 } else if (body.Profile === "Donor") {
                     const registerObj = {
@@ -71,11 +82,22 @@ export class RegisterAllProfileService {
                     apiURL = `donors/${donorUserId}`;
                     await needleRequestForREAN("put", apiURL, null, obj);
                     const message = `Hi ${body.DonorFirstName}, \nYou have successfully registered with blood warrior team as ${body.DonorType}.`;
+                    const sendPayload = {};
+                    sendPayload["variables"] = [
+                        {
+                            type : "text",
+                            text : body.DonorFirstName
+                        },
+                        {
+                            type : "text",
+                            text : donorType
+                        }];
+                    sendPayload["templateName"] = "bot_reg_confirmation";
                     response_format.platform = payload.source;
                     response_format.sessionId = `91${body.DonorPhone}`;
                     response_format.messageText = message;
-                    response_format.message_type = "text";
-                    await this._platformMessageService.SendMediaMessage(response_format, null);
+                    response_format.message_type = "template";
+                    await this._platformMessageService.SendMediaMessage(response_format, sendPayload);
 
                 } else if (body.Profile === "Volunteer") {
 
@@ -97,12 +119,23 @@ export class RegisterAllProfileService {
                     console.log("Volunteer object", obj);
                     apiURL = `volunteers/${volunteerUserId}`;
                     await needleRequestForREAN("put", apiURL, null, obj);
+                    const sendPayload = {};
+                    sendPayload["variables"] = [
+                        {
+                            type : "text",
+                            text : body.VolunteerFirstName
+                        },
+                        {
+                            type : "text",
+                            text : "volunteer"
+                        }];
+                    sendPayload["templateName"] = "bot_reg_confirmation";
                     const message = `Hi ${body.VolunteerFirstName}, \nYou have successfully registered with blood warrior team as volunteer.`;
                     response_format.platform = payload.source;
                     response_format.sessionId = `91${body.VolunteerPhone}`;
                     response_format.messageText = message;
-                    response_format.message_type = "text";
-                    await this._platformMessageService.SendMediaMessage(response_format, null);
+                    response_format.message_type = "template";
+                    await this._platformMessageService.SendMediaMessage(response_format, sendPayload);
 
                 } else if (body.Profile === 'Blood Bridge') {
                     let patientUserId = null;
@@ -150,15 +183,22 @@ export class RegisterAllProfileService {
                     await needleRequestForREAN("post", bridgeURL, null, object);
 
                     const phoneArray = [patientPhone,donorPhone, volunteerPhone];
+                    const sendPayload = {};
+                    sendPayload["variables"] = [
+                        {
+                            type : "text",
+                            text : bridgeId
+                        }];
+                    sendPayload["templateName"] = "bridge_confirmation";
                     phoneArray.forEach(async (phone) => {
                         const message = `Hi, \nYou have successfully registered with blood bridge ${bridgeId}.\nRegards \nTeam Blood Warriors`;
                         response_format.platform = payload.source;
                         response_format.sessionId = `91${phone}`;
                         response_format.messageText = message;
-                        response_format.message_type = "text";
-                        await this._platformMessageService.SendMediaMessage(response_format, null);
+                        response_format.message_type = "template";
+                        await this._platformMessageService.SendMediaMessage(response_format, sendPayload);
                     });
-
+                    
                 }
 
             } catch (error) {
