@@ -4,6 +4,8 @@ import { Logger } from '../../common/logger';
 import { needleRequestForREAN } from '../needle.service';
 import { BloodWarriorCommonService } from './common.service';
 import { RaiseDonationRequestService } from './raise.request.service';
+import { commonResponseMessageFormat } from '../common.response.format.object';
+import { Iresponse } from '../../refactor/interface/message.interface';
 
 export const ScheduleOneTimeTakeValuesService = async (eventObj) => {
     return new Promise(async (resolve) => {
@@ -43,6 +45,19 @@ export const ScheduleOneTimeTakeValuesService = async (eventObj) => {
                 const nextDonationDate = new Date(donation_Date.split("T")[0]);
                 await bloodWarriorCommonService.fetchDonorDonationReminders(donor.UserId,nextDonationDate);
 
+                //Message sent to donor
+                const heading1 = `Hi ${donor.DisplayName}, \nThe donation request has been created by volunteer.`;
+                const previousPayload = eventObj.body.originalDetectIntentRequest.payload;
+                const donorPhone =
+                    raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(donor.Phone);
+                const _platformMessageService: platformServiceInterface = container.resolve(previousPayload.source);
+                const response_format: Iresponse = commonResponseMessageFormat();
+                response_format.platform = previousPayload.source;
+                response_format.sessionId = donorPhone;
+                response_format.messageText = heading1 + commonMessage;
+                response_format.message_type = "text";
+
+                await _platformMessageService.SendMediaMessage(response_format, null);
             } else {
                 dffMessage = `Donor not found with this ${volunteer.SelectedPhoneNumber} phone number.`;
                 resolve( { message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } });

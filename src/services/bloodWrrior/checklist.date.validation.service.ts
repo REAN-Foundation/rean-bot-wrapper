@@ -66,6 +66,7 @@ export class ChecklistDateValidationService {
                         this.raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(volunteer.User.Person.Phone);
                     response_format.sessionId = volunteerPhone;
                     response_format.messageText = heading + `\n` + message;
+                    response_format.message_type = "text";
                     await this._platformMessageService.SendMediaMessage(response_format, null);
                 } else {
                     dffMessage = "The donation date you entered is not correct please try again.";

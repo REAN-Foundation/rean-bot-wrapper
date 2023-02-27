@@ -2,7 +2,7 @@ import { Logger } from '../../common/logger';
 import { needleRequestForREAN } from '../needle.service';
 import { RaiseDonationRequestService } from './raise.request.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { sendApiButtonService } from '../whatsappmeta.button.service';
+import { sendApiButtonService, templateButtonService } from '../whatsappmeta.button.service';
 import { container } from 'tsyringe';
 import { Iresponse } from '../../refactor/interface/message.interface';
 import { commonResponseMessageFormat } from '../common.response.format.object';
@@ -70,18 +70,24 @@ export class SelectBloodGroupService {
                         await this.raiseDonationRequestService.createDonationRecord(obj);
                         const dffMessage = `Hi ${donorName}, \nYou are an emergency donor. We need blood in coming days. Are you able to donate blood? \nRegards \nTeam Blood Warriors`;
 
-                        const payload = eventObj.body.originalDetectIntentRequest.payload;
-                        this._platformMessageService = container.resolve(payload.source);
-                        const buttons = await sendApiButtonService(["Accept", "Accept_Volunteer_Request","Reject", "Reject_Donation_Request"]);
+                        const previousIntentPayload = eventObj.body.originalDetectIntentRequest.payload;
+                        this._platformMessageService = container.resolve(previousIntentPayload.source);
+                        
+                        const payload = {};
+                        payload["variables"] = [
+                            {
+                                type : "text",
+                                text : donorName
+                            }];
+                        payload["templateName"] = "donor_donation_volunteer";
                         const response_format: Iresponse = commonResponseMessageFormat();
-                        response_format.platform = payload.source;
+                        response_format.platform = previousIntentPayload.source;
                         response_format.sessionId = donorPhone;
                         response_format.messageText = dffMessage;
-                        response_format.message_type = "interactive-buttons";
-                        await this._platformMessageService.SendMediaMessage(response_format, buttons);
+                        response_format.message_type = "template";
 
-                        //await whatsappMetaButtonService("Yes", "Emergency_Donation_Yes","No", "Volunteer_Confirm");
-
+                        payload["buttonIds"] = await templateButtonService(["Accept_Volunteer_Request","Reject_Donation_Request"]);
+                        await this._platformMessageService.SendMediaMessage(response_format, payload);
                     }
                     const apiURL = `volunteers/${volunteer.UserId}`;
                     const obj = {

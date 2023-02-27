@@ -4,7 +4,7 @@ import { Imessage, Iresponse, IchatMessage } from '../refactor/interface/message
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { handleRequestservice } from './handle.request.service';
-import { autoInjectable } from 'tsyringe';
+import { autoInjectable, delay, inject } from 'tsyringe';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { ChatMessage } from '../models/chat.message.model';
 import { GoogleTextToSpeech } from './text.to.speech';
@@ -21,7 +21,7 @@ export class MessageFlow{
     private chatMessageConnection;
     
     constructor(
-        private slackMessageService?: SlackMessageService,
+        @inject(delay(() => SlackMessageService)) private slackMessageService,
         private handleRequestservice?: handleRequestservice,
         private translate?: translateService) {
     }
@@ -119,7 +119,7 @@ export class MessageFlow{
             const translatedMessage = await this.translate.translatePushNotifications( msg.message, msg.userId);
             msg.message = translatedMessage;
         }
-
+        
         if (msg.message.ButtonsIds != null) {
             payload["buttonIds"] = await templateButtonService(msg.message.ButtonsIds);
         }
