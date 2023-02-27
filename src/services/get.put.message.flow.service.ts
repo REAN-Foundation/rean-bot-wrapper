@@ -4,7 +4,7 @@ import { Imessage, Iresponse, IchatMessage } from '../refactor/interface/message
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { handleRequestservice } from './handle.request.service';
-import { autoInjectable } from 'tsyringe';
+import { autoInjectable, delay, inject } from 'tsyringe';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { ChatMessage } from '../models/chat.message.model';
 import { GoogleTextToSpeech } from './text.to.speech';
@@ -13,7 +13,7 @@ import { SlackMessageService } from "./slack.message.service";
 import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
 import { translateService } from './translate.service';
-import { sendApiButtonService } from './whatsappmeta.button.service';
+import { templateButtonService } from './whatsappmeta.button.service';
 
 @autoInjectable()
 export class MessageFlow{
@@ -21,7 +21,7 @@ export class MessageFlow{
     private chatMessageConnection;
     
     constructor(
-        private slackMessageService?: SlackMessageService,
+        @inject(delay(() => SlackMessageService)) private slackMessageService,
         private handleRequestservice?: handleRequestservice,
         private translate?: translateService) {
     }
@@ -104,9 +104,20 @@ export class MessageFlow{
         const translatedMessage = await this.translate.translatePushNotifications( msg.message, msg.userId);
         msg.message = translatedMessage;
 
-        let payload = null;
-        if (msg.payload !== null) {
-            payload = await sendApiButtonService(msg.payload);
+        const payload = {};
+        if (msg.type === "template") {
+            payload["templateName"] = msg.templateName;
+            if (msg.agentName !== 'postman') {
+                msg.message = JSON.parse(msg.message);
+            }
+            payload["variables"] = msg.message.Variables;
+        } else {
+            const translatedMessage = await this.translate.translatePushNotifications( msg.message, msg.userId);
+            msg.message = translatedMessage;
+        }
+        
+        if (msg.message.ButtonsIds != null) {
+            payload["buttonIds"] = await templateButtonService(msg.message.ButtonsIds);
         }
         const response_format = await platformMessageService.createFinalMessageFromHumanhandOver(msg);
         const chatSessionModel = await ChatSession.findOne({ where: { userPlatformID: response_format.sessionId } });
@@ -119,7 +130,7 @@ export class MessageFlow{
             platform       : response_format.platform,
             direction      : response_format.direction,
             messageType    : response_format.message_type,
-            messageContent : response_format.messageText[0],
+            messageContent : response_format.messageText,
             imageContent   : response_format.messageBody,
             imageUrl       : response_format.messageImageUrl,
             userPlatformID : response_format.sessionId,
@@ -132,7 +143,7 @@ export class MessageFlow{
 
         let message_to_platform = null;
         // eslint-disable-next-line max-len
-        message_to_platform = await platformMessageService.SendMediaMessage(response_format,payload);
+        message_to_platform = await platformMessageService.SendMediaMessage(response_format, payload);
         return message_to_platform;
     }
 

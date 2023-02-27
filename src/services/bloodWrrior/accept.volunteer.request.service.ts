@@ -56,7 +56,7 @@ export class AcceptVolunteerRequestService {
                 response_format.platform = payload.source;
                 response_format.sessionId = volunteerPhone;
                 response_format.messageText = message;
-                response_format.message_type = "interactive-buttons";
+                response_format.message_type = "interactivebuttons";
                 await this._platformMessageService.SendMediaMessage(response_format, buttons);
 
             } catch (error) {

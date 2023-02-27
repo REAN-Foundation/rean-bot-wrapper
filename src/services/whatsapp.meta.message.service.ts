@@ -87,7 +87,7 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
                 const needleResp:any = await this.postRequestMessages(postDataString);
 
                 //improve this DB query
-                if (needleResp.statuscode === 200) {
+                if (needleResp.statusCode === 200) {
                     const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: response_format.sessionId } });
                     const id = respChatMessage[respChatMessage.length - 1].id;
                     await ChatMessage.update({ whatsappResponseMessageId: needleResp.body.messages[0].id }, { where: { id: id } } )
