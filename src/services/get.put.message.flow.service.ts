@@ -101,6 +101,8 @@ export class MessageFlow{
     }
 
     async send_manual_msg (msg,platformMessageService: platformServiceInterface) {
+        const translatedMessage = await this.translate.translatePushNotifications( msg.message, msg.userId);
+        msg.message = translatedMessage;
 
         const payload = {};
         if (msg.type === "template") {
@@ -236,8 +238,9 @@ export class MessageFlow{
 
         const personresponse = new ChatMessage(dfResponseObj);
         await personresponse.save();
-    }
+    };
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async saveIntent(intent:string, userPlatformID: string){
         try {
             this.chatMessageConnection.intent = intent;

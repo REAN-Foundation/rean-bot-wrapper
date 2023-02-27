@@ -8,7 +8,7 @@ import { Iresponse } from '../../refactor/interface/message.interface';
 import { commonResponseMessageFormat } from '../common.response.format.object';
 
 export const ScheduleDonationTakeValuesService = async (eventObj) => {
-    return new Promise(async (resolve,reject) => {
+    return new Promise(async (resolve) => {
         try {
             const raiseDonationRequestService = new RaiseDonationRequestService();
             const bloodWarriorCommonService = new BloodWarriorCommonService();

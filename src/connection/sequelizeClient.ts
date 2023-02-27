@@ -51,7 +51,7 @@ export class SequelizeClient {
                 }
             })
             .catch(error => console.log("DB connection failed", error));
-        await this._sequelize.sync({ alter: true });
+        await this._sequelize.sync({ alter: false });
     };
     
 }

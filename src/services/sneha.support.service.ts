@@ -39,6 +39,8 @@ export class snehaMessagePlatformService implements platformServiceInterface{
         const generatorRHGMessage = await this.rhgMessageToDialogflow.messageToDialogflow(msg);
         let done = false;
         const snehaMessages = [];
+        
+        // eslint-disable-next-line init-declarations
         let snehaMessagetoDialogflow: Imessage;
         while (done === false) {
             const nextgeneratorObj = generatorRHGMessage.next();

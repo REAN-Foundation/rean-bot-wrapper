@@ -1,4 +1,4 @@
-import { autoInjectable,container} from "tsyringe";
+import { autoInjectable,container } from "tsyringe";
 import { platformServiceInterface } from "../refactor/interface/platform.interface";
 import { ChatMessage } from '../models/chat.message.model';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
@@ -32,6 +32,7 @@ export class CustomWelcomeService {
         return url;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async handleMessageCustom(sessionId: any, client: any, req: any) {
         console.log('Here in the handle message of custom welcome service');
     }
@@ -46,4 +47,5 @@ export class CustomWelcomeService {
         response_format.message_type = "image";
         await this._platformMessageService.SendMediaMessage(response_format,null);
     }
+    
 }

@@ -41,7 +41,7 @@ export class ClickUpMessageService implements platformServiceInterface {
         //call a function that creates csv
         const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: response_format.sessionId } });
         const lastMessageDate = respChatMessage[respChatMessage.length - 1].createdAt;
-        const obj = {timeStamp: lastMessageDate, message: response_format.messageText};
+        const obj = { timeStamp: lastMessageDate, message: response_format.messageText };
         console.log("obj", obj);
     };
 
@@ -102,6 +102,5 @@ export class ClickUpMessageService implements platformServiceInterface {
         console.log("textToUser", textToUser);
         await this.slackClickupCommonFunctions.sendCustomMessage(data.channel, data.userId, textToUser);
     }
-
 
 }

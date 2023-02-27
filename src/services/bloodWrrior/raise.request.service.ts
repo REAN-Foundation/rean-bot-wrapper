@@ -145,6 +145,8 @@ export class RaiseDonationRequestService {
                 let num = 1;
                 donorNames.forEach(name => {
                     const seq = `\\n${num}-${name}`;
+                    
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     donorList += seq;
                     num = num + 1;
                 });

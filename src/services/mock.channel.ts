@@ -132,8 +132,8 @@ export class MockMessageService implements platformServiceInterface {
             });
         } catch (error) {
             console.log("Error in sending to botium");
-        } 
-        console.log("obj", obj);
+        }
+        
     };
 
     getMessage = async (message: any) => {

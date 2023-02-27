@@ -17,7 +17,7 @@ export class RejectDonorRequestService {
     private bloodWarriorCommonService = new BloodWarriorCommonService();
 
     public rejectDonorRequest = async (eventObj) => {
-        return new Promise(async (resolve,reject) => {
+        return new Promise(async (resolve) => {
             try {
                 let donor = null;
                 donor = await this.bloodWarriorCommonService.getDonorByPhoneNumber(eventObj);

@@ -20,8 +20,9 @@ export class TelegramPostResponseFunctionalities {
         });
         await this.updateResponseMessageId(responseId,response_format.sessionId);
         return telegramReswponseData;
-    }
+    };
     
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     sendvoiceResponse = async(response_format:Iresponse,telegram) => {
         let telegramReswponseData;
         var data = {
@@ -41,7 +42,7 @@ export class TelegramPostResponseFunctionalities {
             }
         });
         return telegramReswponseData;
-    }
+    };
 
     sendimageResponse = (response_format:Iresponse,telegram) => {
         let telegramReswponseData;
@@ -51,7 +52,7 @@ export class TelegramPostResponseFunctionalities {
                 telegramReswponseData = data;
             });
         return telegramReswponseData;
-    }
+    };
 
     updateResponseMessageId = async(responseId, userPlatformID) => {
         const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: userPlatformID } });
@@ -59,7 +60,7 @@ export class TelegramPostResponseFunctionalities {
         ChatMessage.update({ telegramResponseMessageId: responseId }, { where: { id: id } } )
             .then(() => { console.log("updated telegram respomse id"); })
             .catch(error => console.log("error on update", error));
-    }
+    };
 
     sanitizeMessage = (message) => {
         if (message > 4096) {
@@ -69,6 +70,6 @@ export class TelegramPostResponseFunctionalities {
             message = strshortened + '\n\n Too many appointments to display here, please visit the CoWin website - https://www.cowin.gov.in/home -  to view more appointments. \n or \n Enter additional details to filter the results.';
         }
         return message;
-    }
+    };
 
 }

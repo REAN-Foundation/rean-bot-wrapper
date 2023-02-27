@@ -17,7 +17,7 @@ export class SelectBloodGroupService {
     private bloodWarriorCommonService = new BloodWarriorCommonService();
 
     async bloodGroupService (eventObj) {
-        return new Promise(async (resolve,reject) => {
+        return new Promise(async (resolve) => {
             try {
 
                 let bloodGroup = eventObj.body.queryResult.parameters.Blood_Group;
