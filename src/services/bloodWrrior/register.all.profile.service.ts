@@ -35,7 +35,6 @@ export class RegisterAllProfileService {
                         BloodTransfusionDate : new Date(body.BloodTransfusionDate).toISOString()
                             .split('T')[0],
                     };
-                    console.log("Patient object", obj);
                     const apiURL = `patients`;
                     await needleRequestForREAN("post", apiURL, null, obj);
                     const message = `Hi ${body.PatientFirstName}, \nYou have successfully registered with blood warrior team as patient.`;
@@ -78,7 +77,6 @@ export class RegisterAllProfileService {
                             .split('T')[0],
                         DonorType : donorType,
                     };
-                    console.log("Donor object", obj);
                     apiURL = `donors/${donorUserId}`;
                     await needleRequestForREAN("put", apiURL, null, obj);
                     const message = `Hi ${body.DonorFirstName}, \nYou have successfully registered with blood warrior team as ${body.DonorType}.`;
@@ -116,7 +114,6 @@ export class RegisterAllProfileService {
                             .split('T')[0],
                         BloodGroup : body.VolunteerBloodGroup
                     };
-                    console.log("Volunteer object", obj);
                     apiURL = `volunteers/${volunteerUserId}`;
                     await needleRequestForREAN("put", apiURL, null, obj);
                     const sendPayload = {};
