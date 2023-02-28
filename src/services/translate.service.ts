@@ -94,6 +94,21 @@ export class translateService{
         }
     };
 
+    detectUsersLanguage = async ( phoneNumber: string) => {
+        try {
+            let languageForSession = await new UserLanguage().getPreferredLanguageofSession(phoneNumber);
+            console.log("languageForSession before", languageForSession);
+
+            languageForSession = languageForSession !== 'null' ? languageForSession : 'en';
+            console.log("languageForSession after", languageForSession);
+            return languageForSession;
+
+        } catch (e) {
+            console.log("catch translate", e);
+            return "en";
+        }
+    };
+
     translateResponse = async (responseMessage: string[], detected_language: string) => {
         console.log(`entered the translateResponse of translateService JJJJJJJJJJJ`);
         const translate = new v2.Translate(this.obj);
