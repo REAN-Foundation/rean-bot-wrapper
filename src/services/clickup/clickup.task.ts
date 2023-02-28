@@ -51,6 +51,7 @@ export class ClickUpTask{
         // console.log("response status", response.statusCode);
         console.log("body", response.body.id);
         if (responseUserFeedback){
+            console.log("responseUserFeedback",responseUserFeedback);
             const objID = responseUserFeedback[responseUserFeedback.length - 1].dataValues.id;
             console.log("objId", objID);
             await UserFeedback.update({ taskID: response.body.id }, { where: { id: objID } })
