@@ -22,8 +22,8 @@ export class VolunteerService {
                 lastDonationDate = new Date(lastDonationDate.split("T")[0]).toDateString();
             }
             const dffMessage = `Welcome back Blood Warrior ${name},\nAs you are a registered Blood Warrior, we could fetch the following details:
-            Blood Group: ${bloodGroup},
-            Last Donation Date: ${lastDonationDate}\nIf the details are correct, please click proceed or if you can register as a new donor.`;
+            Blood Group: *${bloodGroup}*,
+            Last Donation Date: *${lastDonationDate}*\nIf the details are correct, please click proceed or if you can register as a new donor.`;
             console.log(dffMessage);
 
             const payloadButtons = await whatsappMetaButtonService("Proceed","Volunteer_Confirm","Register as a Donor","Register_Donor");
