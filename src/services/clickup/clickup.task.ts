@@ -77,14 +77,14 @@ export class ClickUpTask{
         const headers = form.getHeaders();
         headers.Authorization = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
         
-        axios({
+        await axios({
             method : 'post',
             url    : `https://api.clickup.com/api/v2/task/${taskID}/attachment`,
             data   : form,
             headers,
         })
             .then(() => console.log('success'))
-            .catch(() => console.log('fail'));
+            .catch((e) => console.log('fail',e.response.status));
         
     }
 
