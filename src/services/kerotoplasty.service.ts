@@ -78,6 +78,6 @@ export class kerotoplastyService {
         const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
         const responseUserFeedback = await UserFeedback.findAll({ where: { userId: userId } });
         clickupService.createTask(null, responseUserFeedback,null,topic)
-            .then((id) => {clickupService.taskAttachment(id,attachmentPath);});
+            .then((response) => {clickupService.taskAttachment(response.body.id,attachmentPath);});
     }
 }
