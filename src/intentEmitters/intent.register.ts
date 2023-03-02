@@ -54,6 +54,7 @@ import { AcceptDonationRequestListener } from './intentListeners/bloodWarrior/ac
 import { SelectBloodGroupListener } from './intentListeners/bloodWarrior/select.blood.group.listener';
 import { DonateBloodListener } from './intentListeners/bloodWarrior/donate.blood.listener';
 import { ScheduleOneTimeTakeValuesListener } from './intentListeners/bloodWarrior/schedule.one.time.take.values.listener';
+import { RegisterAllProfileListener } from './intentListeners/bloodWarrior/register.all.profile.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -185,6 +186,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('Donate_Blood', DonateBloodListener);
         IntentEmitter.registerListener('Blood_OneTime_Take_Values', ScheduleOneTimeTakeValuesListener);
         IntentEmitter.registerListener('Send_OneTimeDonor', SelectBloodGroupListener);
+        IntentEmitter.registerListener('Register_Volunteer', RegisterAllProfileListener);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
