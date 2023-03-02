@@ -14,10 +14,6 @@ export class TelegramPostResponseFunctionalities {
         // let responseId = 0;
         let telegramReswponseData;
         const message = this.sanitizeMessage(response_format.messageText);
-        // telegram.sendMessage(response_format.sessionId, message, { parse_mode: 'HTML' }).then(async function (data) {
-        //     responseId = data.message_id;
-        //     telegramReswponseData = data;
-        // });
         const botToken = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN");
         const channelUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
 
