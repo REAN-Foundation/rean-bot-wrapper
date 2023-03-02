@@ -11,14 +11,20 @@ export class TelegramPostResponseFunctionalities {
     constructor(private clientEnvironmentProviderService?:ClientEnvironmentProviderService){}
 
     sendtextResponse = async(response_format:Iresponse,telegram) => {
-        let responseId = 0;
+        // let responseId = 0;
         let telegramReswponseData;
         const message = this.sanitizeMessage(response_format.messageText);
-        telegram.sendMessage(response_format.sessionId, message, { parse_mode: 'HTML' }).then(async function (data) {
-            responseId = data.message_id;
-            telegramReswponseData = data;
+        const botToken = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN");
+        const channelUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const data = {"chat_id":response_format.sessionId,"text":message};
+        needle.post(channelUrl, data, function(err, resp, body) {
+            if (err) {
+                console.log("error", err);
+            }
         });
-        await this.updateResponseMessageId(responseId,response_format.sessionId);
+        // await this.updateResponseMessageId(responseId,response_format.sessionId);
         return telegramReswponseData;
     };
     
