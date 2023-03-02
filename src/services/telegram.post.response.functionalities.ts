@@ -11,16 +11,14 @@ export class TelegramPostResponseFunctionalities {
     constructor(private clientEnvironmentProviderService?:ClientEnvironmentProviderService){}
 
     sendtextResponse = async(response_format:Iresponse,telegram) => {
-        let responseId = 0;
+        // let responseId = 0;
         let telegramReswponseData;
         const message = this.sanitizeMessage(response_format.messageText);
-        
-        //send text message
         telegram.sendMessage(response_format.sessionId, message, { parse_mode: 'HTML' }).then(async function (data) {
             responseId = data.message_id;
             telegramReswponseData = data;
         });
-        await this.updateResponseMessageId(responseId,response_format.sessionId);
+        // await this.updateResponseMessageId(responseId,response_format.sessionId);
         return telegramReswponseData;
     };
     
