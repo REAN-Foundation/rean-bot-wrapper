@@ -14,6 +14,8 @@ export class TelegramPostResponseFunctionalities {
         let responseId = 0;
         let telegramReswponseData;
         const message = this.sanitizeMessage(response_format.messageText);
+        
+        //send text message
         telegram.sendMessage(response_format.sessionId, message, { parse_mode: 'HTML' }).then(async function (data) {
             responseId = data.message_id;
             telegramReswponseData = data;
