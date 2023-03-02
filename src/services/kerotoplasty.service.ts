@@ -76,6 +76,9 @@ export class kerotoplastyService {
         const topic = condition_string + "_" + user_info;
         console.log("topic is",topic);
         const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
+        const channel = eventObj.body.originalDetectIntentRequest.payload.source;
+        const feedBackInfo = new UserFeedback({ userId: userId, channel: channel,humanHandoff: "false"});
+        await feedBackInfo.save();
         const responseUserFeedback = await UserFeedback.findAll({ where: { userId: userId } });
         clickupService.createTask(null, responseUserFeedback,null,topic)
             .then((response) => {clickupService.taskAttachment(response.body.id,attachmentPath);});
