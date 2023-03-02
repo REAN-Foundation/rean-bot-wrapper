@@ -31,7 +31,8 @@ export class CalorieService {
         response_format.platform = client;
         response_format.sessionId = userId;
         response_format.messageBody = data;
-        response_format.message_type = "image";
+        response_format.message_type = "text";
+        response_format.messageText = data;
         this._platformMessageService = container.resolve(client);
         await this._platformMessageService.SendMediaMessage(response_format,null);
     }

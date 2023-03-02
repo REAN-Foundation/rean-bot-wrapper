@@ -4,6 +4,7 @@ import { Logger } from '../../common/logger';
 import {  needleRequestForREAN } from '../needle.service';
 import { BloodWarriorCommonService } from './common.service';
 import { whatsappMetaButtonService } from '../whatsappmeta.button.service';
+import { BloodWarriorWelcomeService } from './welcome.service';
 
 @autoInjectable()
 export class BloodBridgeStatusService {
@@ -12,16 +13,29 @@ export class BloodBridgeStatusService {
 
     getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
 
+    bloodWarriorWelcomeService: BloodWarriorWelcomeService = new BloodWarriorWelcomeService();
+
     async bloodBridgeStatus (eventObj) {
         try {
             const bridgeId = eventObj.body.queryResult.parameters.bridge_id;
             const apiURL = `clinical/patient-donors/search?name=${bridgeId}`;
+            const roleId = await this.bloodWarriorWelcomeService.getRoleId(eventObj);
             let result = null;
             let dffMessage = null;
             result = await needleRequestForREAN("get", apiURL);
             if (result.Data.PatientDonors.Items.length > 0) {
-
                 const bloodBridge = result.Data.PatientDonors.Items[0];
+
+                //check patient authorized to see the bridge information
+                if (roleId === 2) {
+                    let result = null;
+                    result = await this.getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
+                    const patientUserId = result.message[0].UserId;
+                    if (bloodBridge.PatientUserId !== patientUserId) {
+                        const msg = `Sorry, You don't have permission to access the information of bridge name ${bridgeId}.`;
+                        return { message: { fulfillmentMessages: [{ text: { text: [msg] } }] } };
+                    }
+                }
                 let lastDonationDate = bloodBridge.LastDonationDate ?? null;
                 if (lastDonationDate) {
                     lastDonationDate = new Date(lastDonationDate.split("T")[0]).toDateString();
@@ -35,7 +49,7 @@ export class BloodBridgeStatusService {
         Last Donation Date: ${lastDonationDate},
         Next Transfusion Date: ${nextTrnasfusionDate},
         Eligible Donors Count: ${result.Data.PatientDonors.Items.length},
-        \n        Donors Signed Up on Bot: X Out Y
+        \n        Donors Signed Up on Bot: ${result.Data.PatientDonors.Items.length} Out 10
         Parent Registered: Yes`;
 
                 if (eventObj.body.queryResult.intent.displayName === 'Donation_Request_BloodBridge') {
