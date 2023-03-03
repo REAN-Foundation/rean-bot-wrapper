@@ -51,7 +51,10 @@ export class UserLanguage {
             }
             else {
                 // const detected_language = await new translateService().detectLanguage(message);
-                const detected_language = await this.toDetectLangugaeOrNot(messageType, message);
+                let detected_language = await this.toDetectLangugaeOrNot(messageType, message);
+                if (messageType === "image") {
+                    detected_language = preferredLanguage;
+                }
                 await ChatSession.update({ preferredLanguage: detected_language, sessionOpen: "true" }, { where: { autoIncrementalID: autoIncrementalID } });
                 return detected_language;
             }
