@@ -20,8 +20,6 @@ export const createDemoBot = async (intent, eventObj) => {
             resolve(data);
 
             const excel_data = await DemoBotService.readExcel(eventObj.body.queryResult.queryText);
-            console.log("This is the excel data we are getting");
-            console.log(excel_data);
             const create_bot = await DemoBotService.createIntent(excel_data, payload.userId);
 
             if (create_bot){
