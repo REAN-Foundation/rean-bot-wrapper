@@ -179,7 +179,7 @@ export class RegisterAllProfileService {
                     const bridgeURL = `clinical/patient-donors`;
                     await needleRequestForREAN("post", bridgeURL, null, object);
 
-                    const phoneArray = [patientPhone,donorPhone, volunteerPhone];
+                    const phoneArray = [donorPhone, volunteerPhone];
                     const sendPayload = {};
                     sendPayload["variables"] = [
                         {

@@ -133,6 +133,7 @@ export class demoBotService {
                 intent : intent,
             };
 
+            await this.sleep(1500);
             const [response] = await intentsClient.createIntent(createIntentRequest);
             console.log(`Intent ${response.name} created`);
         }
@@ -150,6 +151,12 @@ export class demoBotService {
         response_format.message_type = "text";
         this._platformMessageService = container.resolve(client);
         await this._platformMessageService.SendMediaMessage(response_format,null);
+    }
+    
+    async sleep(ms) {
+        return new Promise((resolve) => {
+            setTimeout(resolve, ms);
+        });
     }
 
 }

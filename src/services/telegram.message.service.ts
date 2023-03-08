@@ -132,7 +132,8 @@ export class TelegramMessageService implements platformServiceInterface{
         const type = response_format.message_type;
         if (type) {
             const classmethod = `send${type}Response`;
-            return await this.telegramPostResponseFunctionalities[classmethod](response_format,this._telegram);
+            const telegram = new TelegramBot(this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
+            return await this.telegramPostResponseFunctionalities[classmethod](response_format,telegram);
         }
     };
 

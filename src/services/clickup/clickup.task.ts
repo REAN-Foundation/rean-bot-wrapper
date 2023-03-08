@@ -51,6 +51,7 @@ export class ClickUpTask{
         // console.log("response status", response.statusCode);
         console.log("body", response.body.id);
         if (responseUserFeedback){
+            console.log("responseUserFeedback",responseUserFeedback);
             const objID = responseUserFeedback[responseUserFeedback.length - 1].dataValues.id;
             console.log("objId", objID);
             await UserFeedback.update({ taskID: response.body.id }, { where: { id: objID } })
@@ -77,14 +78,14 @@ export class ClickUpTask{
         const headers = form.getHeaders();
         headers.Authorization = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
         
-        axios({
+        await axios({
             method : 'post',
             url    : `https://api.clickup.com/api/v2/task/${taskID}/attachment`,
             data   : form,
             headers,
         })
             .then(() => console.log('success'))
-            .catch(() => console.log('fail'));
+            .catch((e) => console.log('fail',e.response.status));
         
     }
 

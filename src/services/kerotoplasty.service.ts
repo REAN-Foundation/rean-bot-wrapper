@@ -3,6 +3,7 @@ import { dialoflowMessageFormatting } from "./Dialogflow.service";
 import { autoInjectable } from "tsyringe";
 import {ClickUpTask} from "./clickup/clickup.task";
 import path from 'path';
+import { UserFeedback } from "../models/user.feedback.model";
 
 @autoInjectable()
 export class kerotoplastyService {
@@ -74,7 +75,12 @@ export class kerotoplastyService {
         const user_info = eventObj.body.queryResult.parameters.medicalRecordNumber;
         const topic = condition_string + "_" + user_info;
         console.log("topic is",topic);
-        clickupService.createTask(null, null,null,topic)
-            .then((id) => {clickupService.taskAttachment(id,attachmentPath);});
+        const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
+        const channel = eventObj.body.originalDetectIntentRequest.payload.source;
+        const feedBackInfo = new UserFeedback({ userId: userId, channel: channel,humanHandoff: "false"});
+        await feedBackInfo.save();
+        const responseUserFeedback = await UserFeedback.findAll({ where: { userId: userId } });
+        clickupService.createTask(null, responseUserFeedback,null,topic)
+            .then((response) => {clickupService.taskAttachment(response.body.id,attachmentPath);});
     }
 }
