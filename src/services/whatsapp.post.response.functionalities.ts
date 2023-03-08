@@ -140,7 +140,7 @@ export class WhatsappPostResponseFunctionalities{
         postDataMeta["template"] = {
             "name"     : payload.templateName,
             "language" : {
-                "code" : "en"
+                "code" : payload.languageForSession
             },
             "components" : [{
                 "type"       : "body",

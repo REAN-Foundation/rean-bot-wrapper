@@ -21,7 +21,7 @@ export class RaiseDonationRequestService {
             result = await this.getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
             const patientUserId = result.message[0].UserId;
             const name = result.message[0].DisplayName;
-            const dffMessage = `Hi ${name}, \nThe blood donation request is raised successfully and request to donors is sent. We will send you a confirmation when donation is scheduled. \nRegards \nTeam Blood Warriors.`;
+            const dffMessage = `Hi ${name}, \n\nThe blood transfusion request is raised successfully and request to donors is sent. \n\nWe will send you a confirmation when donation is scheduled. \n\nRegards \nTeam Blood Warriors.`;
             return { sendDff       : true,
                 message       : { fulfillmentMessages: [{ text: { text: [dffMessage] } }] },
                 patientUserId : patientUserId,

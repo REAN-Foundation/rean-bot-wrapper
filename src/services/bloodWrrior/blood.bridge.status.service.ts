@@ -44,13 +44,13 @@ export class BloodBridgeStatusService {
                 if (nextTrnasfusionDate) {
                     nextTrnasfusionDate = new Date(nextTrnasfusionDate.split("T")[0]).toDateString();
                 }
-                dffMessage = `Here is the summary:
-        Bridge Name: ${bloodBridge.Name},
-        Last Donation Date: ${lastDonationDate},
-        Next Transfusion Date: ${nextTrnasfusionDate},
-        Eligible Donors Count: ${result.Data.PatientDonors.Items.length},
-        \n        Donors Signed Up on Bot: ${result.Data.PatientDonors.Items.length} Out 10
-        Parent Registered: Yes`;
+                dffMessage = `Here is the summary: \n
+*Bridge Name:* ${bloodBridge.Name}
+*Last Donation Date:* ${lastDonationDate}
+*Next Transfusion Date:* ${nextTrnasfusionDate}
+*Eligible Donors Count:* ${result.Data.PatientDonors.Items.length}
+\n*Donors Signed up on Bridge:* ${result.Data.PatientDonors.Items.length} Out 10
+*Parent Registered:* Yes`;
 
                 if (eventObj.body.queryResult.intent.displayName === 'Donation_Request_BloodBridge') {
                     const volunteer = await this.bloodWarriorCommonService.getVolunteerByPhoneNumber(eventObj);
