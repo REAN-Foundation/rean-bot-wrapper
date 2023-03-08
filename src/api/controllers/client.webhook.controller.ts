@@ -92,7 +92,7 @@ export class ClientWebhookController {
             this.errorHandler.handle_controller_error(error, res, req);
         }
 
-    }
+    };
 
     receiveMessageMetaWhatsapp = async (req, res) => {
         // console.log("receiveMessage webhook receiveMessageWhatsappNew");
