@@ -108,11 +108,18 @@ export class MessageFlow{
                 msg.message = JSON.parse(msg.message);
             }
             payload["variables"] = msg.message.Variables;
+            payload["languageForSession"] = "en";
             if (msg.provider === "REAN") {
                 const languageForSession = await this.translate.detectUsersLanguage( msg.userId);
-                msg.message.Variables = JSON.parse(msg.message.Variables);
+                if (msg.agentName !== 'postman') {
+                    msg.message.Variables = JSON.parse(msg.message.Variables);
+                }
                 if (msg.message.Variables[`${languageForSession}`]) {
                     payload["variables"] = msg.message.Variables[`${languageForSession}`];
+                    payload["languageForSession"] = languageForSession;
+                } else {
+                    payload["variables"] = msg.message.Variables[`en`];
+                    payload["languageForSession"] = "en";
                 }
             }
         } else {

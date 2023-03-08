@@ -88,7 +88,7 @@ export class RegisterAllProfileService {
                         },
                         {
                             type : "text",
-                            text : donorType
+                            text : body.DonorType
                         }];
                     sendPayload["templateName"] = "bot_reg_confirmation";
                     response_format.platform = payload.source;
