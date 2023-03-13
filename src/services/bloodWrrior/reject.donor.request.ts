@@ -54,8 +54,8 @@ export class RejectDonorRequestService {
                 const volunteer = await this.bloodWarriorCommonService.getVolunteerPhoneByUserId(volunteerUserId);
                 const volunteerPhone =
                         this.raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(volunteer.User.Person.Phone);
-                const message = `Hi ${volunteer.User.Person.DisplayName},\n${donor.DisplayName} has rejected or ineligible to donate for ${patientName}.
-            Please contact other eligible donors or raise a request.`;
+                const message = `Hi ${volunteer.User.Person.DisplayName},\n\n${donor.DisplayName} has rejected or ineligible to donate for ${patientName}.
+            \n\nPlease contact other eligible donors or raise a request.`;
                 const response_format: Iresponse = commonResponseMessageFormat();
                 response_format.platform = payload.source;
                 response_format.sessionId = volunteerPhone;

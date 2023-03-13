@@ -33,7 +33,7 @@ export class ChecklistDateValidationService {
                     dffMessage = `Date Validation Success. \nHere are your donation details.`;
 
                     const stringDonationDate = new Date(donationDate.split("T")[0]).toDateString();
-                    const message = ` Donor Name: ${donor.DisplayName}, \n Blood Group: ${donor.BloodGroup}, \n Donation Date: ${stringDonationDate}`;
+                    const message = ` *Donor Name:* ${donor.DisplayName}, \n *Blood Group:* ${donor.BloodGroup}, \n *Donation Date:* ${stringDonationDate}`;
 
                     resolve( { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage + '\n' + message] } }] } });
 

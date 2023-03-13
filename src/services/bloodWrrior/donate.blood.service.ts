@@ -20,13 +20,11 @@ export const DonateBloodService = async (eventObj) => {
                 const d = new Date(`${user.LastDonationDate.split("T")[0]}`);
                 d.setDate(d.getDate() + 90);
                 const stringDate = new Date(d).toDateString();
-                const dffMessage = `You are eligible to donate after ${stringDate} \n    Last Donation Date: ${lastDonationDate}\n    Donations Till Date: 1
-          Someone from Blood Warriors Team will contact you soon. \n    You are a superhero`;
+                const dffMessage = `You are eligible to donate after ${stringDate} \n    *Last Donation Date:* ${lastDonationDate}\n    *Donations Till Date:* 1
+                \nSomeone from Blood Warriors Team will contact you soon. \n    You are a superhero.`;
                 resolve( { fulfillmentMessages: [{ text: { text: [dffMessage] } } ] });
             } else {
-                const dffMessage = `No history of donations found.
-                    Wola! that's not a bad news at all.
-                 You can register as a donor and donate blood.`;
+                const dffMessage = `No history of donations found.\n \nWola! that's not a bad news at all. You can register as a donor and donate blood.`;
                 const buttons = await whatsappMetaButtonService("Register as a Donor", "Register_Donor","Go back to Menu", "Home_Menu");
                 resolve( { fulfillmentMessages: [{ text: { text: [dffMessage] } }, buttons ] });
             }
