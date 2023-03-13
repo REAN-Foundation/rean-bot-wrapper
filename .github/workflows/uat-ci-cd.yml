@@ -16,7 +16,7 @@ on:
       - '!release/aha**'   # excludes aha release branches
   
   pull_request:
-    types: [opened, edited, reopened]
+    types: [opened, edited]
     branches: main
 
 
