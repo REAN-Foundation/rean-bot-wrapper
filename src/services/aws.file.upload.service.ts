@@ -2,11 +2,16 @@ import AWS from 'aws-sdk';
 import fs from 'fs';
 import nodeHtmlToImage from 'node-html-to-image';
 import path from 'path';
+import { autoInjectable, container } from 'tsyringe';
 import { SignedUrls } from './signed.urls.service';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 
 // import { TempCredentials } from './get.temporary.aws.credentials';
-
+@autoInjectable()
 export class AwsS3manager{
+
+    constructor(
+        private clientEnvironment?: ClientEnvironmentProviderService) {}
 
     async getCrossAccountCredentials() {
         return new Promise((resolve, reject) => {
@@ -27,6 +32,34 @@ export class AwsS3manager{
                 }
             });
         });
+    }
+
+    async uploadKoboData(key,fileContent)
+    {
+        try {
+            console.log("function is called ");
+            const responseCredentials: any = await this.getCrossAccountCredentials();
+            var BUCKET_NAME = process.env.BUCKET_NAME;
+            if (this.clientEnvironment.getClientEnvironmentVariable("S3_BUCKET_NAME")) {
+                var BUCKET_NAME = this.clientEnvironment.getClientEnvironmentVariable("S3_BUCKET_NAME");
+            }
+            console.log("bucket_name is ",BUCKET_NAME);
+            console.log("file path",key);
+            console.log(fileContent);
+            const params = {
+                Bucket        : BUCKET_NAME,
+                Key           : key,// File name you want to save as in S3
+                Body          : JSON.stringify(fileContent)
+            };
+            const s3 = new AWS.S3(responseCredentials);
+            await s3.upload(params, function(err,data){
+                console.log(err);
+            });
+        }
+        catch (error){
+            console.log(error);
+        }
+
     }
 
     async uploadFile (filePath) {
@@ -62,15 +95,11 @@ export class AwsS3manager{
                         }
                     }
 
-                    // eslint-disable-next-line max-len
                     const s3 = new AWS.S3(responseCredentials);
-
-                    // Uploading files to the bucket
                     s3.upload(params, async function (err, data) {
                         if (err) {
                             reject(err);
                         }
-                        // console.log(`File uploaded successfully. ${data}`);
                         const location = process.env.CLOUD_FRONT_PATH + filename;
                         resolve(await new SignedUrls().getSignedUrl(location));
                     });
@@ -117,13 +146,18 @@ export class AwsS3manager{
     async getFile (key) {
         return new Promise<any>(async(resolve,reject) => {
             const responseCredentials: any = await this.getCrossAccountCredentials();
-            const BUCKET_NAME = process.env.BUCKET_NAME;
+            var BUCKET_NAME = process.env.BUCKET_NAME;
+            if (this.clientEnvironment.getClientEnvironmentVariable("S3_BUCKET_NAME")) {
+                var BUCKET_NAME = this.clientEnvironment.getClientEnvironmentVariable("S3_BUCKET_NAME");
+            }
+            console.log("DBCJNKJCLNDSKOSCHKLSDNCKLNSD",BUCKET_NAME);
             const s3 = new AWS.S3(responseCredentials);
 
             const downloadParams = {
                 Key    : key,
                 Bucket : BUCKET_NAME
             };
+
 
             s3.getObject(downloadParams, function (error, data) {
                 if (error) {
