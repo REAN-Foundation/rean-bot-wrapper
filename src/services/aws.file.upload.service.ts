@@ -2,7 +2,7 @@ import AWS from 'aws-sdk';
 import fs from 'fs';
 import nodeHtmlToImage from 'node-html-to-image';
 import path from 'path';
-import { autoInjectable, container } from 'tsyringe';
+import { autoInjectable } from 'tsyringe';
 import { SignedUrls } from './signed.urls.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 
@@ -47,9 +47,9 @@ export class AwsS3manager{
             console.log("file path",key);
             console.log(fileContent);
             const params = {
-                Bucket        : BUCKET_NAME,
-                Key           : key,// File name you want to save as in S3
-                Body          : JSON.stringify(fileContent)
+                Bucket : BUCKET_NAME,
+                Key    : key,// File name you want to save as in S3
+                Body   : JSON.stringify(fileContent)
             };
             const s3 = new AWS.S3(responseCredentials);
             await s3.upload(params, function(err,data){
@@ -96,7 +96,7 @@ export class AwsS3manager{
                     }
 
                     const s3 = new AWS.S3(responseCredentials);
-                    s3.upload(params, async function (err, data) {
+                    s3.upload(params, async function (err) {
                         if (err) {
                             reject(err);
                         }
@@ -157,7 +157,6 @@ export class AwsS3manager{
                 Key    : key,
                 Bucket : BUCKET_NAME
             };
-
 
             s3.getObject(downloadParams, function (error, data) {
                 if (error) {

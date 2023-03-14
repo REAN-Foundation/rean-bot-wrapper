@@ -1,5 +1,5 @@
 import { ResponseHandler } from '../../utils/response.handler';
-import { autoInjectable, container } from 'tsyringe';
+import { autoInjectable } from 'tsyringe';
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
 import { AwsS3manager } from '../../services/aws.file.upload.service';
 @autoInjectable()
@@ -11,7 +11,7 @@ export class kobotoolboxController{
 
     }
 
-    private reformedData = {}
+    private reformedData = {};
 
     async getKeys(req,fileName){
         const clientName = req.params.client;
@@ -35,7 +35,7 @@ export class kobotoolboxController{
         const length = Object.keys(datastructure).length;
         for (let i = 0, len = length ; i < len; i++) {
             if (body[keys[i]]){
-                this.reformedData[datastructure[keys[i]]["new_name"]]= body[keys[i]];
+                this.reformedData[datastructure[keys[i]]["new_name"]] = body[keys[i]];
             }
             try {
                 if (this.reformedData[datastructure[keys[i]]["new_name"]] !== null ) {
@@ -44,7 +44,7 @@ export class kobotoolboxController{
                 
             } catch (error) {
 
-                this.reformedData[datastructure[keys[i]]["new_name"]]= "null";
+                this.reformedData[datastructure[keys[i]]["new_name"]] = "null";
             }
 
         }
@@ -52,14 +52,14 @@ export class kobotoolboxController{
         return this.reformedData;
     }
 
-kobotoolbox = async(req, res)=>{
-    console.log(req.body);
-    const fileName = req.body["_id"];
-    const [getFileKey, uploadFileKey] = await this.getKeys(req,fileName);
-    const datastructure = await this.getdatastructure(getFileKey);
-    const data = await this.restructuring(req.body,datastructure);
-    await this.awss3manager.uploadKoboData(uploadFileKey,data);
-    this.responseHandler.sendSuccessResponse(res, 200, 'Message is sent successfully!', "");
+    kobotoolbox = async(req, res)=>{
+        console.log(req.body);
+        const fileName = req.body["_id"];
+        const [getFileKey, uploadFileKey] = await this.getKeys(req,fileName);
+        const datastructure = await this.getdatastructure(getFileKey);
+        const data = await this.restructuring(req.body,datastructure);
+        await this.awss3manager.uploadKoboData(uploadFileKey,data);
+        this.responseHandler.sendSuccessResponse(res, 200, 'Message is sent successfully!', "");
 
-}
+    };
 }
