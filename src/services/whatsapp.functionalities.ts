@@ -59,23 +59,32 @@ export class MessageFunctionalities implements getMessageFunctionalities {
     }
 
     async audioMessageFormat (messageObj: Message) {
-        let mediaUrl = await this.getMetaMediaUrl(messageObj.getAudioId());
-        mediaUrl = await this.GetWhatsappMetaMedia('audio', mediaUrl, '_voice.ogg');
-        return await this.commonVoiceAudioFormat(messageObj, mediaUrl);
+        // eslint-disable-next-line init-declarations
+        let audioFilePath = '';
+        if (messageObj.getChannel() === "whatsappMeta") {
+            const audioUrlsentByMeta = await this.getMetaMediaUrl(messageObj.getAudioId());
+            audioFilePath = await this.GetWhatsappMetaMedia('audio', audioUrlsentByMeta, '_voice.ogg');
+        } else {
+            audioFilePath = await this.GetWhatsappMedia('audio', messageObj.getAudioId(), '_voice.ogg');
+        }
+        return await this.commonVoiceAudioFormat(messageObj, audioFilePath);
     }
 
     async imageMessageFormat(messageObj: Message) {
-
-        let response: any = {};
-        response = await this.GetWhatsappMedia('photo', messageObj.getImageId(), '.jpg');
-        console.log("response from GetWhatsappMedia", response);
-        const location = await this.awsS3manager.uploadFile(response);
-        console.log("response image whatsapp", location);
+        let imageFilePath = '';
+        if (messageObj.getChannel() === 'whatsapp'){
+            imageFilePath = await this.GetWhatsappMedia('photo', messageObj.getImageId(), '.jpg');
+        }
+        else {
+            const imageUrlSentByMeta = await this.getMetaMediaUrl(messageObj.getImageId());
+            imageFilePath = await this.GetWhatsappMetaMedia('photo', imageUrlSentByMeta, '.jpg');
+        }
+        const location = await this.awsS3manager.uploadFile(imageFilePath);
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const url = require('url');
         const urlParse = url.parse(location);
         const imageUrl = (urlParse.protocol + urlParse.hostname + urlParse.pathname);
-        if (response){
+        if (imageFilePath){
             const messagetoDialogflow = this.inputMessageFormat(messageObj);
             messagetoDialogflow.type = 'image';
             messagetoDialogflow.messageBody = imageUrl;
@@ -121,7 +130,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
 
     /*retrive whatsapp media */
     GetWhatsappMedia = async (type, mediaId, extension) => {
-        return new Promise((resolve, reject) => {
+        return new Promise<string>((resolve, reject) => {
             const options = {
                 hostname : this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST"),
                 path     : '/v1/media/' + mediaId,
@@ -168,19 +177,18 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         });
     };
 
-    GetWhatsappMetaMedia = async (type, mediaUrl, extension) => {
-        return new Promise((resolve, reject) => {
+    GetWhatsappMetaMedia = async (type, imageUrl, extension) => {
+        return new Promise<string>((resolve, reject) => {
             const token = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
             const headers = {
                 headers : {
                     'Authorization' : `Bearer ${token}`,
                 }
             };
-
             try {
-                needle.get(mediaUrl, headers, function(err, resp, body) {
+                needle.get(imageUrl, headers, function(err, resp, body) {
                     if (err){
-                        console.log('FAiled to REad File');
+                        console.log('FAiled to REad File',err);
                     }
                     const file_name = `${type}/` + Date.now() + `${extension}`;
                     fs.writeFile('./' + file_name,body, err => {

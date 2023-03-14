@@ -24,6 +24,8 @@ export class WhatsappMessageToDialogflow {
                 const type = messageObj.getType();
                 if (type) {
                     const classmethod = `${type}MessageFormat`;
+                    messageObj.setChannel(requestBody.channel);
+                    // eslint-disable-next-line max-len
                     messagetoDialogflow = await this.messageFunctionalities[classmethod](messageObj);
                 }
                 else {

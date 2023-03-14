@@ -20,6 +20,7 @@ export class CommonWhatsappService implements platformServiceInterface {
         public whatsappMessageToDialogflow?: WhatsappMessageToDialogflow){}
 
     async handleMessage(requestBody: any, channel: string) {
+        requestBody.channel = channel;
         const generatorWhatsappMessage = this.whatsappMessageToDialogflow.messageToDialogflow(requestBody);
         let done = false;
         const whatsappMessages = [];
