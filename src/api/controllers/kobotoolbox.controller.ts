@@ -11,19 +11,19 @@ export class kobotoolboxController{
 
     }
 
-    private reformed_data = {}
+    private reformedData = {}
 
-    async getKeys(req,file_name){
-        const client_name = req.params.client;
-        const folder_name = req.params.form_name;
-        const getFileKey = `${client_name}/${folder_name}/datastructure/datastructure.json`;
-        const uploadFileKey = `${client_name}/${folder_name}/data/${file_name}.json`;
+    async getKeys(req,fileName){
+        const clientName = req.params.client;
+        const folderName = req.params.form_name;
+        const getFileKey = `${clientName}/${folderName}/datastructure/datastructure.json`;
+        const uploadFileKey = `${clientName}/${folderName}/data/${fileName}.json`;
         return [getFileKey, uploadFileKey];
     }
 
     async getdatastructure(getFileKey){
-        const awsfile = await this.awss3manager.getFile(getFileKey);
-        const datastructure = JSON.parse(awsfile.Body.toString('utf-8'));
+        const awsFile = await this.awss3manager.getFile(getFileKey);
+        const datastructure = JSON.parse(awsFile.Body.toString('utf-8'));
         console.log("data structure is ",datastructure);
         return datastructure;
     }
@@ -35,21 +35,21 @@ export class kobotoolboxController{
         const length = Object.keys(datastructure).length;
         for (let i = 0, len = length ; i < len; i++) {
             if (body[keys[i]]){
-                this.reformed_data[datastructure[keys[i]]["new_name"]]= body[keys[i]];
+                this.reformedData[datastructure[keys[i]]["new_name"]]= body[keys[i]];
             }
             try {
-                if (this.reformed_data[datastructure[keys[i]]["new_name"]] !== null ) {
+                if (this.reformedData[datastructure[keys[i]]["new_name"]] !== null ) {
                     console.log("bot altered");
                 }
                 
             } catch (error) {
 
-                this.reformed_data[datastructure[keys[i]]["new_name"]]= "null";
+                this.reformedData[datastructure[keys[i]]["new_name"]]= "null";
             }
 
         }
-        console.log("reformed_Data ",this.reformed_data);
-        return this.reformed_data;
+        console.log("reformed_Data ",this.reformedData);
+        return this.reformedData;
     }
 
 kobotoolbox = async(req, res)=>{
