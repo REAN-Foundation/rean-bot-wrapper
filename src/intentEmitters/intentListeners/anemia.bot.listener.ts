@@ -11,7 +11,6 @@ const rekognitionService: RekognitionService = container.resolve(RekognitionServ
 
 export const AnemiaBotListener = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
-        // let res;
         try {
             Logger.instance()
                 .log('Calling Anemia Bot Service !!!!!!');

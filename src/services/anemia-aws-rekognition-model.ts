@@ -12,7 +12,7 @@ export class RekognitionService {
     }
 
     detectAnemia = async(imagePathFromDF) => {
-        const crossAccountCredentials: any = await this.awsS3manager.getCrossAccountCredentials();
+        await this.awsS3manager.getCrossAccountCredentials();
         const rekognition = new AWS.Rekognition({ region: 'us-west-2' });
         const bucketName = process.env.BUCKET_NAME;
         const projectVersionArn = this.clientEnvironmentProviderService.getClientEnvironmentVariable("ANEMIA_PROJECT_VERSION_ARN");
@@ -39,8 +39,6 @@ export class RekognitionService {
                 }
             });
         });
-    }
-
-
+    };
 
 }
