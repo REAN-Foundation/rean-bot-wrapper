@@ -8,41 +8,44 @@ import { ClientEnvironmentProviderService } from '../../services/set.client/clie
 
 const callAnemiaModel: CallAnemiaModel = container.resolve(CallAnemiaModel);
 const rekognitionService: RekognitionService = container.resolve(RekognitionService);
+const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(
+    ClientEnvironmentProviderService);
 
 export const AnemiaBotListener = async (intent, eventObj) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            Logger.instance()
-                .log('Calling Anemia Bot Service !!!!!!');
-            const clientEnvironmentProviderService = new ClientEnvironmentProviderService();
-            const useAwsRekognitionAnemiaModel = clientEnvironmentProviderService.getClientEnvironmentVariable('USE_AWS_REKOGNITION_ANEMIA_MODEL');
-            let messageToPlatform = '';
-            if (useAwsRekognitionAnemiaModel === 'false') {
-                messageToPlatform = await callAnemiaModel.callAnemiaModel(eventObj.body.queryResult.queryText);
-            }
-            else {
-                messageToPlatform = await rekognitionService.detectAnemia(eventObj.body.queryResult.queryText);
-            }
-            
+    try {
+        Logger.instance()
+            .log('Calling Anemia Bot Service !!!!!!');
+        const useAwsRekognitionAnemiaModel = clientEnvironmentProviderService.getClientEnvironmentVariable('USE_AWS_REKOGNITION_ANEMIA_MODEL');
+        let messageToPlatform = '';
+        if (useAwsRekognitionAnemiaModel === 'true') {
+            messageToPlatform = await rekognitionService.detectAnemia(eventObj.body.queryResult.queryText);
+            const dfFulfillmentCustomResponse = {
+                "fulfillmentMessages" : [
+                    {
+                        "text" : {
+                            "text" : [
+                                messageToPlatform
+                            ]
+                        }
+                    }
+                ]
+            };
+            return dfFulfillmentCustomResponse;
+        }
+        else {
+            messageToPlatform = await callAnemiaModel.callAnemiaModel(eventObj.body.queryResult.queryText);
             if (eventObj.body.originalDetectIntentRequest.payload.completeMessage.platform !== "Telegram") {
                 sendMessageToWhatsapp(messageToPlatform,eventObj);
             }
             else {
                 sendMessageToTelegram(messageToPlatform,eventObj);
             }
-
-        } catch (error) {
-            Logger.instance()
-                .log_error(error.message, 500, 'Anemia Bot Listener Error!');
-            if (eventObj.body.originalDetectIntentRequest.payload.completeMessage.platform !== "Telegram") {
-                sendMessageToWhatsapp(error.message,eventObj);
-            }
-            else {
-                sendMessageToTelegram(error.message,eventObj);
-            }
-            reject(error.message);
         }
-    });
+
+    } catch (error) {
+        Logger.instance()
+            .log_error(error.message, 500, 'Anemia Bot Listener Error!');
+    }
 
 };
 

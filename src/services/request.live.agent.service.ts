@@ -14,11 +14,8 @@ export class LiveAgent{
     private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     async requestLiveAgent(body) {
-        console.log("eventobj for live agent",body);
         const payload = body.originalDetectIntentRequest.payload;
-        console.log("payload", payload);
         const message = body.queryResult.queryText;
-        console.log("message", message);
         return new Promise(async(resolve) =>{
             if (await humanHandoff.checkTime() === "false") {
                 const startHHhour = parseFloat(this.clientEnvironmentProviderService.getClientEnvironmentVariable("HH_START_HOUR_LOCAL"));
