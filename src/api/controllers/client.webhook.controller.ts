@@ -26,7 +26,6 @@ export class ClientWebhookController {
         try {
             // eslint-disable-next-line max-len
             this._platformMessageService = container.resolve(req.params.channel);
-            console.log(req.body);
             const response = await this._platformMessageService.sendManualMesage(req.body);
             if (response.statusCode === 200 || response.message_id !== undefined) {
                 this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', response.body);
