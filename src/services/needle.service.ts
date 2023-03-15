@@ -96,7 +96,7 @@ export const needleRequestForTelegram = async (method: string, endPoint:string, 
     }
 
     if (response.statusCode === 200 || response.statusCode === 201) {
-        console.log('Whatsapp Api is successfull');
+        console.log('Telegram Api is successfull');
     } else {
         throw new Error("Failed");
     }
