@@ -75,6 +75,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
     async photoMessageFormat(messageObj: Message) {
         let response: any = {};
         response = await this.GetTelegramMedia(messageObj.getPhotoFileId());
+        console.log("response telegram photoMessageFormat", response);
         if (response.result.file_path){
             const filePath = await this.downloadTelegramMedia('https://api.telegram.org/file/bot' + this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN") + '/' + response.result.file_path, "photo");
             const location = await this.awsS3manager.uploadFile(filePath);
@@ -136,6 +137,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
                     data += d;
                 });
                 res.on("end", () => {
+                    console.log("data GetTelegramMedia", data);
                     resolve(JSON.parse(data));
                 });
             });

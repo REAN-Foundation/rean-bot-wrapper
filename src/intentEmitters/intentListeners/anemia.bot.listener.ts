@@ -46,7 +46,7 @@ export const AnemiaBotListener = async (intent, eventObj) => {
 
 };
 
-const sendMessageToTelegram = async(messageToPlatform,eventObj) => {
+const sendMessageToWhatsapp = async(messageToPlatform,eventObj) => {
     const endPoint = 'messages';
     const postData = {
         "messaging_product" : "whatsapp",
@@ -60,7 +60,7 @@ const sendMessageToTelegram = async(messageToPlatform,eventObj) => {
     await needleRequestForWhatsapp("post", endPoint, JSON.stringify(postData));
 };
 
-const sendMessageToWhatsapp = async(messageToPlatform,eventObj) => {
+const sendMessageToTelegram = async(messageToPlatform,eventObj) => {
     const postData = {
         chat_id : eventObj.body.originalDetectIntentRequest.payload.userId,
         text    : messageToPlatform
