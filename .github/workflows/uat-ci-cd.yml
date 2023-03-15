@@ -47,14 +47,13 @@ jobs:
           fetch-depth: 0
           
       - name: Check labels
-        if: ${{github.event_name == 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request' }}
         uses: docker://agilepathway/pull-request-label-checker:latest
         with:
            one_of: major,minor,patch
            repo_token: ${{ secrets.GITHUB_TOKEN }}
 
   Deploy-ECS:
-    needs: Label_Checks
     environment: uat
     runs-on: ubuntu-latest
 
