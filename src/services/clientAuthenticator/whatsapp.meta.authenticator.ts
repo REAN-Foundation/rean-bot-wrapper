@@ -17,6 +17,7 @@ export class WhatsappMetaAuthenticator implements clientAuthenticator{
     }
 
     authenticate(req: any, res: any) {
+        console.log("this.urlToken:" + this.urlToken + " req.params.unique_token:" + req.params.unique_token);
         if (this.urlToken === req.params.unique_token){
             return;
         }
