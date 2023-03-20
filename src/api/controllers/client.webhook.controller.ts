@@ -96,50 +96,48 @@ export class ClientWebhookController {
     receiveMessageMetaWhatsapp = async (req, res) => {
         // console.log("receiveMessage webhook receiveMessageWhatsappNew");
         try {
-            this._clientAuthenticatorService = container.resolve(req.params.channel + '.authenticator');
-            this._clientAuthenticatorService.authenticate(req,res);
-            const statuses = req.body.entry[0].changes[0].value.statuses;
-            if (statuses) {
-                if (statuses[0].status === "sent") {
+            const phone_number_id = this.clientEnvironment.getClientEnvironmentVariable('WHATSAPP_PHONE_NUMBER_ID');
+            if (req.body.entry[0].changes[0].value.metadata.phone_number_id !== phone_number_id){
+                this.responseHandler.sendSuccessResponse(res, 200, 'Cross Connection', "");
+                console.log("Cross connection");
+            }
+            else {
+                this._clientAuthenticatorService = container.resolve(req.params.channel + '.authenticator');
+                this._clientAuthenticatorService.authenticate(req,res);
+                const statuses = req.body.entry[0].changes[0].value.statuses;
+                if (statuses) {
+                    if (statuses[0].status === "sent") {
 
-                    // console.log("sent", statuses);
-                    this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', "");
-                }
-                else if (statuses[0].status === "delivered") {
+                        // console.log("sent", statuses);
+                        this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', "");
+                    }
+                    else if (statuses[0].status === "delivered") {
 
-                    // console.log("delivered", statuses);
-                    this.responseHandler.sendSuccessResponse(res, 200, 'Message delivered successfully!', "");
-                }
-                else if (statuses[0].status === "read") {
+                        // console.log("delivered", statuses);
+                        this.responseHandler.sendSuccessResponse(res, 200, 'Message delivered successfully!', "");
+                    }
+                    else if (statuses[0].status === "read") {
 
-                    // console.log("read", statuses);
-                    this.responseHandler.sendSuccessResponse(res, 200, 'Message read successfully!', "");
-                }
-                else {
-                    this.responseHandler.sendSuccessResponse(res, 200, 'Notification received successfully!', "");
+                        // console.log("read", statuses);
+                        this.responseHandler.sendSuccessResponse(res, 200, 'Message read successfully!', "");
+                    }
+                    else {
+                        this.responseHandler.sendSuccessResponse(res, 200, 'Notification received successfully!', "");
 
                     //deal accordingly
                     // console.log("Check status", statuses[0].status);
+                    }
                 }
-            }
-            else {
-                const phone_number_id = this.clientEnvironment.getClientEnvironmentVariable('WHATSAPP_PHONE_NUMBER_ID');
-                if (req.body.entry[0].changes[0].value.metadata.phone_number_id == phone_number_id) {
+                else {
                     console.log("receiveMessage webhook receiveMessageWhatsappNew");
                     if (req.params.channel !== "REAN_SUPPORT" &&
-                        req.params.channel !== "slack" &&
-                        req.params.channel !== "SNEHA_SUPPORT") {
+                    req.params.channel !== "slack" &&
+                    req.params.channel !== "SNEHA_SUPPORT") {
                         this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
                     }
                     this._platformMessageService = container.resolve(req.params.channel);
                     this._platformMessageService.res = res;
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    // console.log("reqbody content", util.inspect(req.body));
-                    // console.log("changes content", util.inspect(req.body.entry[0].changes[0]));
                     const response = this._platformMessageService.handleMessage(req.body.entry[0].changes[0].value, req.params.channel);
-                } else {
-                    this.responseHandler.sendSuccessResponse(res, 200, 'Message Processed', "");
-                    console.log("Process exited");
                 }
             }
         }
