@@ -8,7 +8,6 @@ const kerotoplastyServiceObj: kerotoplastyService = container.resolve(kerotoplas
 export const kerotoplastyConditionIdentificationListener= async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
 
-        // let res;
         try {
             const response = await kerotoplastyServiceObj.identifyCondition(eventObj);
             if (!response) {

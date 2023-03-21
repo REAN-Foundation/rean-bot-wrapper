@@ -2,14 +2,19 @@ import { GetLocation } from "./find.nearest.location.service";
 import { dialoflowMessageFormatting } from "./Dialogflow.service";
 import { autoInjectable } from "tsyringe";
 import {ClickUpTask} from "./clickup/clickup.task";
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import path from 'path';
 import { UserFeedback } from "../models/user.feedback.model";
+import needle from 'needle';
 
 @autoInjectable()
 export class kerotoplastyService {
 
+    private retryNumber = 0;
+
     constructor(
-        private DialogflowServices?: dialoflowMessageFormatting){}
+        private DialogflowServices?: dialoflowMessageFormatting,
+        private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     identifyCondition = async (eventObj) => {
         if (eventObj) {
@@ -73,6 +78,7 @@ export class kerotoplastyService {
         };
         const condition_string = condition[intent];
         const user_info = eventObj.body.queryResult.parameters.medicalRecordNumber;
+        const user_details = await this.getEMRDetails(user_info);
         const topic = condition_string + "_" + user_info;
         console.log("topic is",topic);
         const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
@@ -80,7 +86,94 @@ export class kerotoplastyService {
         const feedBackInfo = new UserFeedback({ userId: userId, channel: channel,humanHandoff: "false"});
         await feedBackInfo.save();
         const responseUserFeedback = await UserFeedback.findAll({ where: { userId: userId } });
-        clickupService.createTask(null, responseUserFeedback,null,topic)
+        clickupService.createTask(null, responseUserFeedback,null,topic,user_details)
             .then((response) => {clickupService.taskAttachment(response.body.id,attachmentPath);});
+    }
+
+    async getEMRDetails(emr_number){
+        try {
+            let response: any = {};
+            response = await this.makeApiCall(emr_number);
+            let report = "### Patient Details\n";
+            const patient_details = response.body.patient_details;
+            if (response.body.patient_details) {
+                report = report + "- Name : " + patient_details.FirstName + ' ' + patient_details.LastName + '\n';
+                report = report + "- Gender : " + patient_details.Gender + '\n';
+                report = report + "- DOB : " + patient_details.DOB + '\n';
+                report = report + "### Previous Diagnosis : \n";
+                for (const diag of response.body.diagnosis) {
+                    report = report + `- ` + diag.diag_title + '\n';
+                }
+                report = report + "### Surgeries \n";
+                for (const operate of response.body.surgeries) {
+                    report = report + '- Procedure Info : ' + operate.procedure_info + '\n';
+                    report = report + '  - Surgeon Name : ' + operate.surgeon_name + '\n';
+                }
+                report = report + '### Patient Visit History\n';
+                report = report + '- ' + 'First Visit Date : ' + patient_details.first_visit_date + '\n';
+                report = report + '- ' + 'First Visited Doctor : ' + patient_details.first_visted_doctor + '\n';
+                report = report + '- ' + 'Last Visit Date : ' + patient_details.last_visted_date + '\n';
+                report = report + '- ' + 'Last Visited Doctor : ' + patient_details.last_visted_doctor + '\n';
+            }
+            console.log(report);
+            return report;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async retryWithDelay(fn, retries = 3, delay = 1000) {
+        return new Promise((resolve, reject) => {
+            function attempt() {
+                fn()
+                    .then(resolve)
+                    .catch((err) => {
+                        if (retries === 0) {
+                            reject(err);
+                        } else {
+                            retries--;
+                            setTimeout(attempt, delay);
+                        }
+                    });
+            }
+            attempt();
+        });
+    }
+
+    async makeApiCall(emr_number) {
+        const url = this.clientEnvironmentProviderService.getClientEnvironmentVariable("EMR_URL");
+        const key = this.clientEnvironmentProviderService.getClientEnvironmentVariable("EMR_KEY");
+        const code = this.clientEnvironmentProviderService.getClientEnvironmentVariable("EMR_CODE");
+        var headers = {
+            'Content-Type' : 'application/json',
+            accept         : 'application/json'
+        };
+        const options = {
+            headers      : headers,
+            open_timeout : 60000
+        };
+        const obj = {
+            code : code,
+            key  : key,
+            mrno : emr_number
+        };
+        try {
+            const response = await needle("get",url, obj,options);
+            this.retryNumber = 0;
+            return response;
+        } catch (err) {
+            console.log(err);
+            this.retryNumber++;
+            if (this.retryNumber < 5){
+                await this.sleep(10000);
+                return await this.makeApiCall(emr_number);
+            }
+        }
+    }
+
+    async sleep(ms) {
+        return new Promise((resolve) => {
+            setTimeout(resolve, ms);
+        });
     }
 }
