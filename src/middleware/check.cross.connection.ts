@@ -12,7 +12,7 @@ export class CheckCrossConnection {
     checkCrossConnection = (req, res, next): void => {
         const set_phone_number_id = this.clientEnvironment.getClientEnvironmentVariable('WHATSAPP_PHONE_NUMBER_ID');
         const urlParsed = req.url.split('/');
-        if (!urlParsed.includes("telegram")) {
+        if (urlParsed.includes("whatsappMeta")) {
             if (req.body.entry[0].changes[0].value.metadata.phone_number_id != set_phone_number_id){
                 this.responseHandler.sendSuccessResponse(res, 200, 'Cross Connection', "");
                 console.log("Cross connection");
