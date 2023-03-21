@@ -12,9 +12,12 @@ import { ChatMessage } from '../../models/chat.message.model';
 @autoInjectable()
 export class ClickUpTask{
 
+    private description = null;
+
     constructor(private clientEnvironmentProviderService?: ClientEnvironmentProviderService) { }
 
-    async createTask(rdsData,responseUserFeedback,imageLink:string = null,postTopic:string = null){
+    // eslint-disable-next-line max-len
+    async createTask(rdsData,responseUserFeedback,imageLink:string = null,postTopic:string = null, description:string = null){
         const listID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_LIST_ID");
         const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
         const createTaskUrl = `https://api.clickup.com/api/v2/list/${listID}/task`;
@@ -30,16 +33,17 @@ export class ClickUpTask{
             topic = rdsData[rdsData.length - 1].dataValues.messageContent;
         }
         const obj = {
-            "name"            : topic,
-            "status"          : "TO DO",
-            "priority"        : 3,
-            "due_date"        : null,
-            "due_date_time"   : false,
-            "start_date_time" : false,
-            "notify_all"      : true,
-            "parent"          : null,
-            "tags"            : [clientName],
-            "links_to"        : null
+            "name"                 : topic,
+            "status"               : "TO DO",
+            "priority"             : 3,
+            "due_date"             : null,
+            "due_date_time"        : false,
+            "start_date_time"      : false,
+            "notify_all"           : true,
+            "parent"               : null,
+            "tags"                 : [clientName],
+            "links_to"             : null,
+            "markdown_description" : description
         };
 
         if (imageLink !== null) {
@@ -49,11 +53,13 @@ export class ClickUpTask{
         const response = await needle("post", createTaskUrl, obj, options);
 
         // console.log("response status", response.statusCode);
-        console.log("body", response.body.id);
+        // console.log("body", response.body.id);
         if (responseUserFeedback){
-            console.log("responseUserFeedback",responseUserFeedback);
+
+            // console.log("responseUserFeedback",responseUserFeedback);
             const objID = responseUserFeedback[responseUserFeedback.length - 1].dataValues.id;
-            console.log("objId", objID);
+            
+            // console.log("objId", objID);
             await UserFeedback.update({ taskID: response.body.id }, { where: { id: objID } })
                 .then(() => { console.log("updated"); })
                 .catch(error => console.log("error on update", error));
