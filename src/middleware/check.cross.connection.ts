@@ -10,8 +10,9 @@ export class CheckCrossConnection {
         private clientEnvironment?: ClientEnvironmentProviderService) {}
 
     checkCrossConnection = (req, res, next): void => {
-        const phone_number_id = this.clientEnvironment.getClientEnvironmentVariable('WHATSAPP_PHONE_NUMBER_ID');
-        if (req.body.entry[0].changes[0].value.metadata.phone_number_id !== phone_number_id){
+        const set_phone_number_id = this.clientEnvironment.getClientEnvironmentVariable('WHATSAPP_PHONE_NUMBER_ID');
+        const phone_number_id_in_request = req.body.entry[0].changes[0].value.metadata.phone_number_id;
+        if (phone_number_id_in_request && phone_number_id_in_request != set_phone_number_id){
             this.responseHandler.sendSuccessResponse(res, 200, 'Cross Connection', "");
             console.log("Cross connection");
         }
