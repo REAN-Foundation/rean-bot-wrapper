@@ -97,4 +97,12 @@ export class Message implements IWhatsappRequestMessageEntities {
         return interactiveList;
     }
 
+    getChannel() {
+        return this.list.channel;
+    }
+
+    setChannel(channel) {
+        this.list.channel = channel;
+    }
+
 }

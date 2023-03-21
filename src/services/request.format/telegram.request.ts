@@ -11,7 +11,6 @@ export class TelegramRequest {
     *getMessage () {
         const messages = [this.reqBody];
         for (const message of messages) {
-            console.log("message", message);
             yield new Message(message);
         }
     }

@@ -60,10 +60,10 @@ export class BloodWarriorWelcomeService {
             if (transfusionDate) {
                 transfusionDate = new Date(transfusionDate.split("T")[0]).toDateString();
             }
-            const dffMessage = `Welcome to Blood Warriors ${name},\nHere are the details we have found:
-            Patient Name: *${name}*,
-            Blood Group: *${bloodGroup}*,
-            Expected Next Blood Transfusion Date: *${transfusionDate}*\nIf the details are correct, please click *proceed* to get reminders or if you can register as a new patient.`;
+            const dffMessage = `Welcome to Blood Warriors ${name},\n\nHere are the details we have found:
+            *Patient Name:* ${name},
+            *Blood Group:* ${bloodGroup},
+            *Expected Next Blood Transfusion Date:* ${transfusionDate}\nIf the details are correct, please click *proceed* to get reminders or if you can register as a new patient.`;
             console.log(dffMessage);
             
             const payloadButtons = await whatsappMetaButtonService("Proceed","Patient_Confirm","Change Donation Date","Change_TF_Date");
