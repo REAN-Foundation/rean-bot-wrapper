@@ -15,6 +15,7 @@ import { platformServiceInterface } from "./refactor/interface/platform.interfac
 import { ClientEnvironmentProviderService } from "./services/set.client/client.environment.provider.service";
 import { AwsSecretsManager } from "./services/aws.secret.manager.service";
 import { Timer } from "./middleware/timer";
+import { CheckCrossConnection } from "./middleware/check.cross.connection";
 
 export default class Application {
 
@@ -31,6 +32,8 @@ export default class Application {
     private _awsSecretsManager: AwsSecretsManager = null;
 
     private _timer: Timer = null;
+
+    private _checkCrossConnection: CheckCrossConnection = null;
 
     private clientsList = [];
 
@@ -167,6 +170,8 @@ export default class Application {
                 this._app.use(cors());
                 this._timer = new Timer(this._app);
                 this._timer.timingRequestAndResponseCycle();
+                this._checkCrossConnection = new CheckCrossConnection(this._app);
+                this._checkCrossConnection.checkCrossConnection();
 
                 // this._app.use(this.limiter);
                 
