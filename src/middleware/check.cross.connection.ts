@@ -19,7 +19,7 @@ export class CheckCrossConnection {
                 console.log("Cross connection");
             }
             else {
-                console.log("No cross connection");
+                console.log("No cross connection",req.url);
                 next();
             }
         });
