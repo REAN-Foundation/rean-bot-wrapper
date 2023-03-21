@@ -170,8 +170,8 @@ export default class Application {
                 this._app.use(cors());
                 this._timer = new Timer(this._app);
                 this._timer.timingRequestAndResponseCycle();
-                this._checkCrossConnection = new CheckCrossConnection(this._app);
-                this._checkCrossConnection.checkCrossConnection();
+                this._checkCrossConnection = new CheckCrossConnection();
+                this._app.use(this._checkCrossConnection.checkCrossConnection);
 
                 // this._app.use(this.limiter);
                 
