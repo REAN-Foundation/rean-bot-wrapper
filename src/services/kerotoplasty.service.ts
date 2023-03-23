@@ -63,13 +63,30 @@ export class kerotoplastyService {
         return responseToSend;
 
     }
+    async symptomByUser(parameters){
+        var symptomComment = "Patient is suffering from \n";
+        
+        if(parameters.complexNormalSymptoms.length != 0){
+            for(let i = 0; i < parameters.complexNormalSymptoms.length; i++){
+                symptomComment += ` ${parameters.complexNormalSymptoms[i].name} \n`;
+            }
+            
+        };
+        if(parameters.complexSeverePain.name == "Yes"){
+            symptomComment += "Severe pain \n";
+        };
+        if(parameters.complexDropInVision.name == "Yes"){
+            symptomComment +="Drop in vision \n";
+        };
+        return (symptomComment)
+    }
 
-    async postImageOnClickup(intent,eventObj){
-        const URL = eventObj.body.queryResult.parameters.image;
-        console.log("our image url is ",URL);
+    async postingOnClickup(intent,eventObj){
         const clickupService = new ClickUpTask();
-        const filename = path.basename(URL);
-        console.log("file name is ", filename);
+        const parameters = eventObj.body.queryResult.parameters;
+        const payload = eventObj.body.originalDetectIntentRequest.payload;
+        const symptomComment = await this.symptomByUser(parameters);
+        const filename = path.basename(parameters.image);
         const attachmentPath = `./photo/` + filename;
         const condition = {
             'hyperCriticalCondition' : 'HyperCritical',
@@ -77,17 +94,16 @@ export class kerotoplastyService {
             'normalCondition'        : 'Normal'
         };
         const condition_string = condition[intent];
-        const user_info = eventObj.body.queryResult.parameters.medicalRecordNumber;
-        const user_details = await this.getEMRDetails(user_info);
-        const topic = condition_string + "_" + user_info;
-        console.log("topic is",topic);
-        const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
-        const channel = eventObj.body.originalDetectIntentRequest.payload.source;
-        const feedBackInfo = new UserFeedback({ userId: userId, channel: channel,humanHandoff: "false"});
+        const user_details = await this.getEMRDetails(parameters.medicalRecordNumber);
+        const topic = condition_string + "_" + parameters.medicalRecordNumber;
+        const feedBackInfo = new UserFeedback({ userId: payload.userId, channel: payload.source,humanHandoff: "false"});
         await feedBackInfo.save();
-        const responseUserFeedback = await UserFeedback.findAll({ where: { userId: userId } });
-        clickupService.createTask(null, responseUserFeedback,null,topic,user_details)
-            .then((response) => {clickupService.taskAttachment(response.body.id,attachmentPath);});
+        const responseUserFeedback = await UserFeedback.findAll({ where: { userId: payload.userId } });
+        const taskID = await clickupService.createTask(null, responseUserFeedback,attachmentPath,topic,user_details)
+        console.log(taskID)
+        await clickupService.taskAttachment(taskID,attachmentPath);
+        await clickupService.postCommentOnTask(taskID,symptomComment);
+            
     }
 
     async getEMRDetails(emr_number){
