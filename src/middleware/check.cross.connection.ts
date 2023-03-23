@@ -1,7 +1,8 @@
-import { container } from "tsyringe";
+import { autoInjectable, container } from "tsyringe";
 import { ClientEnvironmentProviderService } from "../services/set.client/client.environment.provider.service";
 import { ResponseHandler } from '../utils/response.handler';
 
+@autoInjectable()
 export class CheckCrossConnection {
 
     constructor(
