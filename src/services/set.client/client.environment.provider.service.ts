@@ -29,7 +29,11 @@ export class ClientEnvironmentProviderService {
         if (req.params.client){
             this.setClientName(req.params.client);
         }
+        else {
+            const urlParsed = req.url.split('/');
+            this.setClientName(urlParsed[2]);
+        }
         next();
     };
-    
+
 }
