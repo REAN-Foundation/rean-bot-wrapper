@@ -170,8 +170,8 @@ export default class Application {
                 this._app.use(cors());
                 this._timer = new Timer(this._app);
                 this._timer.timingRequestAndResponseCycle();
-                const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
-                this._app.use(clientEnvironmentProviderService.clientNameMiddleware);
+                // const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
+                // this._app.use(clientEnvironmentProviderService.clientNameMiddleware);
                 this._checkCrossConnection = new CheckCrossConnection();
                 this._app.use(this._checkCrossConnection.checkCrossConnection);
 
