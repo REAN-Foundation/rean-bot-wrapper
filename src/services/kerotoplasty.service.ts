@@ -72,11 +72,11 @@ export class kerotoplastyService {
             }
             
         }
-        if(parameters.complexSeverePain.name === "Yes"){
+        if (parameters.complexSeverePain.name === "Yes"){
             symptomComment += "Severe pain \n";
         }
-        if(parameters.complexDropInVision.name === "Yes"){
-            symptomComment +="Drop in vision \n";
+        if (parameters.complexDropInVision.name === "Yes"){
+            symptomComment += "Drop in vision \n";
         }
         return (symptomComment);
     }

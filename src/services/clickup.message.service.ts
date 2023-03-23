@@ -67,7 +67,7 @@ export class ClickUpMessageService implements platformServiceInterface {
                         const tag = commentObj[i].text;
                         this.eventComment(requestBody,tag);
                     }
-                };
+                }
             }
         }
         else if (requestBody.event === "taskStatusUpdated") {
