@@ -69,14 +69,13 @@ export class ClickUpTask{
             return response.body.id;
         }
         const taskID = response.body.id;
-        console.log(taskID)
         return taskID;
     }
 
     async taskAttachment(taskID, imageLink){
 
         //For now attachment is only image
-        try{
+        try {
             const form = new FormData();
             const filename = crypto.randomBytes(16).toString('hex');
             
@@ -93,16 +92,12 @@ export class ClickUpTask{
                 headers,
             });
         }
-        catch(error){
+        catch (error){
             console.log(error);
-        }
-
-        
+        }  
     }
 
     async postCommentOnTask(taskID,comment){
-        console.log("task ID is  ",taskID)
-        console.log("comment is",comment)
         const createTaskUrl = `https://api.clickup.com/api/v2/task/${taskID}/comment`;
         const options = getRequestOptions();
         const CLICKUP_AUTHENTICATION = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");

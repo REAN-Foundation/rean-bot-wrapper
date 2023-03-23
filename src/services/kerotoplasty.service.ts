@@ -14,7 +14,7 @@ export class kerotoplastyService {
 
     constructor(
         private DialogflowServices?: dialoflowMessageFormatting,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+        private clientEnvironmentProviderService?: ClientEnvironmentProviderService){ }
 
     identifyCondition = async (eventObj) => {
         if (eventObj) {
@@ -42,7 +42,7 @@ export class kerotoplastyService {
         const locationData = await getLocationService.getLoctionData(eventObj);
         let message = null;
         console.log("our location data is ",locationData);
-        const postalAddress= locationData["Postal Addres"];
+        const postalAddress = locationData["Postal Addres"];
         const keys = Object.keys(locationData["Postal Addres"]);
         switch (intent) {
         case 'hyperCriticalCondition': {
@@ -66,19 +66,19 @@ export class kerotoplastyService {
     async symptomByUser(parameters){
         var symptomComment = "Patient is suffering from \n";
         
-        if(parameters.complexNormalSymptoms.length != 0){
-            for(let i = 0; i < parameters.complexNormalSymptoms.length; i++){
+        if (parameters.complexNormalSymptoms.length !== 0){
+            for (let i = 0; i < parameters.complexNormalSymptoms.length; i++){
                 symptomComment += ` ${parameters.complexNormalSymptoms[i].name} \n`;
             }
             
-        };
-        if(parameters.complexSeverePain.name == "Yes"){
+        }
+        if(parameters.complexSeverePain.name === "Yes"){
             symptomComment += "Severe pain \n";
-        };
-        if(parameters.complexDropInVision.name == "Yes"){
+        }
+        if(parameters.complexDropInVision.name === "Yes"){
             symptomComment +="Drop in vision \n";
-        };
-        return (symptomComment)
+        }
+        return (symptomComment);
     }
 
     async postingOnClickup(intent,eventObj){
@@ -96,11 +96,10 @@ export class kerotoplastyService {
         const condition_string = condition[intent];
         const user_details = await this.getEMRDetails(parameters.medicalRecordNumber);
         const topic = condition_string + "_" + parameters.medicalRecordNumber;
-        const feedBackInfo = new UserFeedback({ userId: payload.userId, channel: payload.source,humanHandoff: "false"});
+        const feedBackInfo = new UserFeedback({ userId: payload.userId, channel: payload.source,humanHandoff: "false" });
         await feedBackInfo.save();
         const responseUserFeedback = await UserFeedback.findAll({ where: { userId: payload.userId } });
-        const taskID = await clickupService.createTask(null, responseUserFeedback,attachmentPath,topic,user_details)
-        console.log(taskID)
+        const taskID = await clickupService.createTask(null, responseUserFeedback,attachmentPath,topic,user_details);
         await clickupService.taskAttachment(taskID,attachmentPath);
         await clickupService.postCommentOnTask(taskID,symptomComment);
             
