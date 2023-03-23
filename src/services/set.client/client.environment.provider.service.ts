@@ -26,14 +26,16 @@ export class ClientEnvironmentProviderService {
     clientNameMiddleware = (req, res, next) => {
 
         // console.log('params in middleware ',req.params);
-        if (req.params.client){
+        if (req.params.client) {
             this.setClientName(req.params.client);
+            next();
+        } else if (req.url.split('/')[2] !== "") {
+            this.setClientName(req.url.split('/')[2]);
+            next();
+        } else {
+            console.log('No client name provided');
+            res.status(400).send('No client name provided');
         }
-        else {
-            const urlParsed = req.url.split('/');
-            this.setClientName(urlParsed[2]);
-        }
-        next();
     };
 
 }
