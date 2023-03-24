@@ -22,7 +22,7 @@ export class PlatformWebhookRoutes{
         router.post(`/:client/:channel/:unique_token/send`, this.clientEnvironmentProviderService.clientNameMiddleware, this.dbconnectioMiddleware.myLogger, this._clientWebhookController.sendMessage);
         router.post(`/:client/:channel/:unique_token/receive`, this.clientEnvironmentProviderService.clientNameMiddleware, this.dbconnectioMiddleware.myLogger, this._clientWebhookController.receiveMessage);
         router.get(`/:client/:channel/:unique_token/webhook`, this.clientEnvironmentProviderService.clientNameMiddleware, this._clientWebhookController.authenticateMetaWhatsappWebhook);
-        router.post(`/:client/:channel/:unique_token/webhook`, this.dbconnectioMiddleware.metaDBConnection, this._clientWebhookController.receiveMessageMetaWhatsapp);
+        router.post(`/:client/:channel/:unique_token/webhook`, this.clientEnvironmentProviderService.clientNameMiddleware, this.dbconnectioMiddleware.metaDBConnection, this._clientWebhookController.receiveMessageMetaWhatsapp);
         router.post(`/:client/:form_name/kobotoolbox/abcd/getData`, this.clientEnvironmentProviderService.clientNameMiddleware, this._kobotoolboxController.kobotoolbox );
         app.use('/v1/', router);
     }

@@ -15,6 +15,7 @@ export class CheckCrossConnection {
         const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
         const urlParsed = req.url.split('/');
         if (urlParsed.includes("whatsappMeta") && req.method === "POST") {
+            clientEnvironmentProviderService.setClientName(urlParsed[2]);
             const set_phone_number_id = clientEnvironmentProviderService.getClientEnvironmentVariable('WHATSAPP_PHONE_NUMBER_ID');
             const phone_number_id_in_request = req.body.entry[0].changes[0].value.metadata.phone_number_id;
             console.log("phone_number_id_in_request:" + phone_number_id_in_request + " type is: " + typeof(phone_number_id_in_request));
