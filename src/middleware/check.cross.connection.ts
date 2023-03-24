@@ -16,7 +16,6 @@ export class CheckCrossConnection {
         const urlParsed = req.url.split('/');
         if (urlParsed.includes("whatsappMeta") && req.method === "POST") {
 
-            // clientEnvironmentProviderService.setClientName(urlParsed[2]);
             const set_phone_number_id = process.env[`${urlParsed[2]}_WHATSAPP_PHONE_NUMBER_ID`];
             const phone_number_id_in_request = req.body.entry[0].changes[0].value.metadata.phone_number_id;
             console.log("phone_number_id_in_request:" + phone_number_id_in_request + " type is: " + typeof(phone_number_id_in_request));
@@ -28,6 +27,7 @@ export class CheckCrossConnection {
             else {
                 console.log("No cross connection");
                 clientEnvironmentProviderService.setClientName(urlParsed[2]);
+                console.log("Client name is set to" + urlParsed[2]);
                 next();
             }
         }
