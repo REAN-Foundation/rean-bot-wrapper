@@ -4,15 +4,17 @@ import { v2, TranslationServiceClient } from '@google-cloud/translate';
 import { UserLanguage } from './set.language';
 import { DialogflowResponseFormat } from './response.format/dialogflow.response.format';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { autoInjectable, singleton } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 
 let detected_language = 'en';
 let dialogflow_language = "en-US";
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class translateService{
 
-    constructor(private clientEnvironmentProviderService?: ClientEnvironmentProviderService) {}
+    constructor(
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
+    ) {}
 
     private GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
 

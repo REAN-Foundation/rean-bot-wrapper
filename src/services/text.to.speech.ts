@@ -5,13 +5,15 @@ import util from 'util';
 import fs from 'fs';
 import crypto from 'crypto';
 import { AwsS3manager } from './aws.file.upload.service';
-import { autoInjectable } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { ChatSession } from '../models/chat.session';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class GoogleTextToSpeech {
 
-    constructor(private awsS3manager?: AwsS3manager) {}
+    constructor(
+        @inject(AwsS3manager) private awsS3manager?: AwsS3manager
+    ) {}
 
     async texttoSpeech(text, id) {
         return new Promise<string>(async (resolve) => {

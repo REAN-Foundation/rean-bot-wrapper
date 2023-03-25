@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize-typescript';
 import { UserFeedback } from '../models/user.feedback.model';
-import { autoInjectable, scoped, Lifecycle } from 'tsyringe';
+import { scoped, Lifecycle, inject } from 'tsyringe';
 import { ChatMessage } from '../models/chat.message.model';
 import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
@@ -8,11 +8,13 @@ import { ClientEnvironmentProviderService } from '../services/set.client/client.
 import { CalorieInfo } from '../models/calorie.info.model';
 import { CalorieDatabase } from '../models/calorie.db.model';
 
-@autoInjectable()
 @scoped(Lifecycle.ContainerScoped)
 export class SequelizeClient {
 
-    constructor(private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+    constructor(
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
+    ){}
 
     public _sequelize: Sequelize = null;
 
