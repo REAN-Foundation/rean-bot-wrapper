@@ -30,11 +30,15 @@ export class CheckCrossConnection {
             }
         }
         else {
-            console.log("No cross connection",req.url);
-            clientEnvironmentProviderService.setClientName(urlParsed[2]);
-            console.log("Client name is set to" + urlParsed[2]);
-            next();
-            
+            if (req.method === "GET"){
+                console.log("Reject GET request");
+                next();
+            } else {
+                console.log("No cross connection",req.url);
+                clientEnvironmentProviderService.setClientName(urlParsed[2]);
+                console.log("Client name is set to" + urlParsed[2]);
+                next();
+            }
         }
         
     };

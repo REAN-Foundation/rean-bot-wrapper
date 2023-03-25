@@ -2,7 +2,7 @@
 /* eslint-disable max-len */
 import { AwsS3manager } from './aws.file.upload.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { autoInjectable, singleton, inject, delay, scoped, Lifecycle } from 'tsyringe';
+import { inject, delay, scoped, Lifecycle } from 'tsyringe';
 import { MessageFlow } from './get.put.message.flow.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import needle from 'needle';
@@ -13,7 +13,6 @@ import { CommonWhatsappService } from './whatsapp.common.service';
 import { Iresponse } from '../refactor/interface/message.interface';
 import { WhatsappPostResponseFunctionalities } from './whatsapp.post.response.functionalities';
 
-// @autoInjectable()
 @scoped(Lifecycle.ContainerScoped)
 export class WhatsappMetaMessageService extends CommonWhatsappService {
 

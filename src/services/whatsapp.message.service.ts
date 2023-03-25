@@ -2,7 +2,7 @@
 /* eslint-disable max-len */
 import http from 'https';
 import { AwsS3manager } from './aws.file.upload.service';
-import { autoInjectable, singleton, inject, delay, scoped, Lifecycle } from 'tsyringe';
+import { inject, delay, scoped, Lifecycle } from 'tsyringe';
 import { MessageFlow } from './get.put.message.flow.service';
 import { MessageFunctionalities } from './whatsapp.functionalities';
 import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface';
@@ -15,7 +15,6 @@ import { CommonWhatsappService } from './whatsapp.common.service';
 import { Iresponse } from '../refactor/interface/message.interface';
 import { WhatsappPostResponseFunctionalities } from './whatsapp.post.response.functionalities';
 
-// @autoInjectable()
 @scoped(Lifecycle.ContainerScoped)
 export class WhatsappMessageService extends CommonWhatsappService {
 
