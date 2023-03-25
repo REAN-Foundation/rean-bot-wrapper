@@ -4,12 +4,14 @@ import { Iresponse } from "../refactor/interface/message.interface";
 import { UserLanguage } from "./set.language";
 import { translateService } from "./translate.service";
 import { HandleMessagetypePayload } from './handle.messagetype.payload';
-import { autoInjectable } from "tsyringe";
+import { inject, Lifecycle, scoped } from "tsyringe";
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class WhatsappPostResponseFunctionalities{
 
-    constructor ( private handleMessagetypePayload?: HandleMessagetypePayload) {}
+    constructor ( 
+        @inject(HandleMessagetypePayload) private handleMessagetypePayload?: HandleMessagetypePayload
+    ) {}
 
     textResponseFormat = (response_format:Iresponse,payload) =>{
         const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);

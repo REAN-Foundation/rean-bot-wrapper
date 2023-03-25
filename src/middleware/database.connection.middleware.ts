@@ -1,10 +1,11 @@
-import { autoInjectable } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { SequelizeClient } from '../connection/sequelizeClient';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class DatabaseConnection{
 
-    constructor(private sequelizeClient?: SequelizeClient){}
+    constructor(
+        @inject(SequelizeClient) private sequelizeClient?: SequelizeClient){}
 
     myLogger = async (req, res, next) => {
         if (req.body.statuses){

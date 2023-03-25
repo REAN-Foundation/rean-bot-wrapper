@@ -3,12 +3,14 @@ import AWS from 'aws-sdk';
 import fs from 'fs';
 import crypto from 'crypto';
 import { AwsS3manager } from './aws.file.upload.service';
-import { autoInjectable } from 'tsyringe';
+import { autoInjectable, inject, Lifecycle, scoped } from 'tsyringe';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class AWSPolly {
 
-    constructor(private awsS3manager?: AwsS3manager) {}
+    constructor(
+        @inject(AwsS3manager) private awsS3manager?: AwsS3manager
+    ) {}
 
     async texttoSpeech(text) {
         return new Promise<string>(async (resolve) => {

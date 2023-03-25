@@ -3,12 +3,15 @@ import { ChatMessage } from "../models/chat.message.model";
 import { Iresponse } from "../refactor/interface/message.interface";
 import needle from 'needle';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { autoInjectable } from "tsyringe";
+import { inject, Lifecycle, scoped } from "tsyringe";
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class TelegramPostResponseFunctionalities {
 
-    constructor(private clientEnvironmentProviderService?:ClientEnvironmentProviderService){}
+    constructor(
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?:ClientEnvironmentProviderService
+    ){}
 
     sendtextResponse = async(response_format:Iresponse,telegram) => {
         let responseId = 0;

@@ -1,17 +1,18 @@
-import { autoInjectable, Lifecycle, scoped } from "tsyringe";
+import { inject, Lifecycle, scoped } from "tsyringe";
 import { platformServiceInterface } from "../refactor/interface/platform.interface";
 import { ChatMessage } from '../models/chat.message.model';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { Iresponse } from "../refactor/interface/message.interface";
 import { commonResponseMessageFormat } from "./common.response.format.object";
 
-@autoInjectable()
 @scoped(Lifecycle.ContainerScoped)
 export class CustomWelcomeService {
 
     public res;
 
-    constructor(private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+    constructor(
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         private _platformMessageService?: platformServiceInterface){}
 
     async checkSession(userId:any){

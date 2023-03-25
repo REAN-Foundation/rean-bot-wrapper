@@ -3,14 +3,16 @@
 import { ChatSession } from '../models/chat.session';
 import { translateService } from './translate.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { autoInjectable } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class UserLanguage {
 
     private translateSetting;
 
-    constructor(private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+    constructor(
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
+    ){}
 
     async setLanguageForSession(messageType, sessionId, message) {
         const respChatSession = await ChatSession.findAll({ where: { userPlatformID: sessionId } });
