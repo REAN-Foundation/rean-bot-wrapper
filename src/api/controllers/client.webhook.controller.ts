@@ -2,9 +2,8 @@
 import { ResponseHandler } from '../../utils/response.handler';
 import { ErrorHandler } from '../../utils/error.handler';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { autoInjectable, container, scoped, Lifecycle, inject } from 'tsyringe';
+import { scoped, Lifecycle, inject } from 'tsyringe';
 import { clientAuthenticator } from '../../services/clientAuthenticator/client.authenticator.interface';
-import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
 import util from 'util';
 
 @scoped(Lifecycle.ContainerScoped)
@@ -16,8 +15,7 @@ export class ClientWebhookController {
 
     constructor(
         @inject(ResponseHandler) private responseHandler?: ResponseHandler,
-        @inject(ErrorHandler) private errorHandler?: ErrorHandler,
-        // @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
+        @inject(ErrorHandler) private errorHandler?: ErrorHandler
     ) {
 
     }
@@ -95,18 +93,7 @@ export class ClientWebhookController {
     };
 
     receiveMessageMetaWhatsapp = async (req, res) => {
-        // console.log("receiveMessage webhook receiveMessageWhatsappNew");
         try {
-
-            // const clientEnvironmentProviderService2: ClientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
-            // console.log(this.clientEnvironmentProviderService.getClientName());
-            // console.log(clientEnvironmentProviderService2.getClientName());
-            // const phone_number_id = this.clientEnvironment.getClientEnvironmentVariable('WHATSAPP_PHONE_NUMBER_ID');
-            // if (req.body.entry[0].changes[0].value.metadata.phone_number_id !== phone_number_id){
-            //     this.responseHandler.sendSuccessResponse(res, 200, 'Cross Connection', "");
-            //     console.log("Cross connection");
-            // }
-            // else {
             this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
             this._clientAuthenticatorService.authenticate(req,res);
             const statuses = req.body.entry[0].changes[0].value.statuses;
@@ -142,9 +129,9 @@ export class ClientWebhookController {
                 }
                 this._platformMessageService = req.container.resolve(req.params.channel);
                 this._platformMessageService.res = res;
-                const response = this._platformMessageService.handleMessage(req.body.entry[0].changes[0].value, req.params.channel);
+                this._platformMessageService.handleMessage(req.body.entry[0].changes[0].value, req.params.channel);
             }
-            // }
+            
         }
         catch (error) {
             console.log("in error", error);

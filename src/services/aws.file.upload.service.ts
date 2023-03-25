@@ -2,12 +2,10 @@ import AWS from 'aws-sdk';
 import fs from 'fs';
 import nodeHtmlToImage from 'node-html-to-image';
 import path from 'path';
-import { autoInjectable, inject, Lifecycle, scoped } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { SignedUrls } from './signed.urls.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 
-// import { TempCredentials } from './get.temporary.aws.credentials';
-// @autoInjectable()
 @scoped(Lifecycle.ContainerScoped)
 export class AwsS3manager{
 
@@ -54,7 +52,7 @@ export class AwsS3manager{
                 Body   : JSON.stringify(fileContent)
             };
             const s3 = new AWS.S3(responseCredentials);
-            await s3.upload(params, function(err,data){
+            await s3.upload(params, function(err){
                 console.log(err);
             });
         }
@@ -146,7 +144,7 @@ export class AwsS3manager{
     }
 
     async getFile (key) {
-        return new Promise<any>(async(resolve,reject) => {
+        return new Promise<any>(async(resolve) => {
             const responseCredentials: any = await this.getCrossAccountCredentials();
             var BUCKET_NAME = process.env.BUCKET_NAME;
             if (this.clientEnvironment.getClientEnvironmentVariable("S3_BUCKET_NAME")) {

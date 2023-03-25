@@ -35,7 +35,7 @@ export class HumanHandoff {
     async humanHandover(eventObj){
         return new Promise(async(resolve) =>{
             const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
-            const resp = await UserFeedback.findAll({where:{userId: userId}});
+            const resp = await UserFeedback.findAll({ where: { userId: userId } });
             console.log("resp human handover find one", resp);
             const objID = resp[resp.length - 1].id;
             await UserFeedback.update({ humanHandoff: "true" }, { where: { id: objID } } )
@@ -60,7 +60,7 @@ export class HumanHandoff {
             await this.slackMessageService.delayedInitialisation();
             const client = this.slackMessageService.client;
             const channelID = this.slackMessageService.channelID;
-            await client.chat.postMessage({ channel: channelID, text: "This user wants to connect to an expert", thread_ts: ts});
+            await client.chat.postMessage({ channel: channelID, text: "This user wants to connect to an expert", thread_ts: ts });
         });
 
     }

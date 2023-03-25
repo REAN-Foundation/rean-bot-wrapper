@@ -1,5 +1,5 @@
 import { clientAuthenticator } from './client.authenticator.interface';
-import { inject, injectable, Lifecycle, scoped, singleton } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 
 // @injectable()
@@ -19,7 +19,7 @@ export class MockChannelAuthenticator implements clientAuthenticator{
         throw new Error('Method not implemented.');
     }
 
-    authenticate(req: any, res: any) {
+    authenticate(req: any) {
         if (this.urlToken === req.params.unique_token){
             return;
         }

@@ -1,5 +1,5 @@
 import { ResponseHandler } from '../../utils/response.handler';
-import { autoInjectable, inject, Lifecycle, scoped } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
 import { AwsS3manager } from '../../services/aws.file.upload.service';
 
@@ -66,4 +66,5 @@ export class kobotoolboxController{
         this.responseHandler.sendSuccessResponse(res, 200, 'Message is sent successfully!', "");
 
     };
+    
 }

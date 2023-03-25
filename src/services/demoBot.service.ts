@@ -1,4 +1,4 @@
-import { autoInjectable,container } from "tsyringe";
+import { autoInjectable } from "tsyringe";
 import XLSX = require('xlsx');
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 import { platformServiceInterface } from "../refactor/interface/platform.interface";

@@ -2,7 +2,7 @@
 import { Logger } from "../../common/logger";
 import { kerotoplastyService } from "../../services/kerotoplasty.service";
 
-export const kerotoplastyConditionIdentificationListener= async (intent, eventObj) => {
+export const kerotoplastyConditionIdentificationListener = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
 
         const kerotoplastyServiceObj: kerotoplastyService = eventObj.container.resolve(kerotoplastyService);

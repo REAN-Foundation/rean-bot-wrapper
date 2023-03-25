@@ -1,4 +1,4 @@
-import { injectable, singleton, scoped, Lifecycle } from 'tsyringe';
+import { scoped, Lifecycle } from 'tsyringe';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ClientEnvironmentProviderService {

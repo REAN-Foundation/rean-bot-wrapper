@@ -1,5 +1,5 @@
 import { clientAuthenticator } from './client.authenticator.interface';
-import { inject, injectable, Lifecycle, scoped, singleton } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 
 // @injectable()

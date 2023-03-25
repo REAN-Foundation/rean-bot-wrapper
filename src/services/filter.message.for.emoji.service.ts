@@ -45,7 +45,6 @@ export class EmojiFilter{
         console.log("filtered message last", filteredMessage);
         return filteredMessage;
     }
-    
 
     emojiUnicode = async (emoji) => {
         // eslint-disable-next-line init-declarations

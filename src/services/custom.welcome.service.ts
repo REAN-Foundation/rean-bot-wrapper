@@ -1,4 +1,4 @@
-import { autoInjectable,container, Lifecycle, scoped } from "tsyringe";
+import { autoInjectable, Lifecycle, scoped } from "tsyringe";
 import { platformServiceInterface } from "../refactor/interface/platform.interface";
 import { ChatMessage } from '../models/chat.message.model';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';

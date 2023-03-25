@@ -9,7 +9,7 @@ import { Loader } from './startup/loader';
 import { Logger } from './common/logger';
 import { ConfigurationManager } from "./configs/configuration.manager";
 import { IntentRegister } from './intentEmitters/intent.register';
-import {container, DependencyContainer, scoped} from "tsyringe";
+import { container, DependencyContainer } from "tsyringe";
 import { IndexCreation } from './models/elasticsearchmodel';
 import { platformServiceInterface } from "./refactor/interface/platform.interface";
 import { ClientEnvironmentProviderService } from "./services/set.client/client.environment.provider.service";
@@ -182,8 +182,6 @@ export default class Application {
                 this._app.use(cors());
                 this._timer = new Timer(this._app);
                 this._timer.timingRequestAndResponseCycle();
-                // const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
-                // this._app.use(clientEnvironmentProviderService.clientNameMiddleware);
                 this._checkCrossConnection = new CheckCrossConnection();
                 this._app.use(this._checkCrossConnection.checkCrossConnection);
 

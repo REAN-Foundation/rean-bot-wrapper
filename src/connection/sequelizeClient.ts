@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize-typescript';
 import { UserFeedback } from '../models/user.feedback.model';
-import { autoInjectable, singleton, scoped, Lifecycle } from 'tsyringe';
+import { autoInjectable, scoped, Lifecycle } from 'tsyringe';
 import { ChatMessage } from '../models/chat.message.model';
 import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
@@ -18,7 +18,6 @@ export class SequelizeClient {
 
     public connect = async() => {
 
-        const client = this.clientEnvironmentProviderService.getClientName();
         const dbName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DATA_BASE_NAME");
         const dbPassword = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DB_PASSWORD");
         const dbUser = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DB_USER_NAME");

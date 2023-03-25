@@ -4,7 +4,7 @@
 // import { DialogflowResponseService } from './dialogflow-response.service';
 import { AwsS3manager } from './aws.file.upload.service';
 import { Imessage, IprocessedDialogflowResponseFormat, Iresponse } from '../refactor/interface/message.interface';
-import { autoInjectable, singleton, inject, delay, scoped, Lifecycle } from 'tsyringe';
+import { inject, delay, scoped, Lifecycle } from 'tsyringe';
 import  TelegramBot  from 'node-telegram-bot-api';
 import { MessageFlow } from './get.put.message.flow.service';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
@@ -15,7 +15,6 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 import { TelegramMessageToDialogflow } from './telegram.messagetodialogflow';
 import { TelegramPostResponseFunctionalities } from './telegram.post.response.functionalities';
 
-// @autoInjectable()
 @scoped(Lifecycle.ContainerScoped)
 export class TelegramMessageService implements platformServiceInterface{
 

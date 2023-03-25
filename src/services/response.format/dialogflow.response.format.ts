@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
-import { autoInjectable, Lifecycle, scoped, singleton } from "tsyringe";
-import {IserviceResponseFunctionalities } from "./response.interface";
+import { autoInjectable, Lifecycle, scoped } from "tsyringe";
+import { IserviceResponseFunctionalities } from "./response.interface";
 
 @autoInjectable()
 @scoped(Lifecycle.ContainerScoped)
@@ -32,7 +32,7 @@ export class DialogflowResponseFormat implements IserviceResponseFunctionalities
     }
 
     getImageObject() {
-        let image = {url: "",caption: ""};
+        let image = { url: "",caption: "" };
         if (this.response[0].queryResult.fulfillmentMessages[0].platform && this.response[0].queryResult.fulfillmentMessages[0].platform === "TELEGRAM" && this.response[0].queryResult.fulfillmentMessages[0].payload){
             if (this.response[0].queryResult.fulfillmentMessages[1]){
                 if (this.response[0].queryResult.fulfillmentMessages[1].image){
@@ -41,7 +41,7 @@ export class DialogflowResponseFormat implements IserviceResponseFunctionalities
             }
         }
         else if (this.response[0].queryResult.fulfillmentMessages[1] && this.response[0].queryResult.fulfillmentMessages[1].image){
-            image = {url: this.response[0].queryResult.fulfillmentMessages[1].image.imageUri, caption: this.response[0].queryResult.fulfillmentMessages[1].image.accessibilityText};
+            image = { url: this.response[0].queryResult.fulfillmentMessages[1].image.imageUri, caption: this.response[0].queryResult.fulfillmentMessages[1].image.accessibilityText };
         }
         else {
             console.log("no image");
@@ -52,19 +52,16 @@ export class DialogflowResponseFormat implements IserviceResponseFunctionalities
 
     getIntent(){
         const intent = this.response[0].queryResult && this.response[0].queryResult.intent ? this.response[0].queryResult.intent.displayName : '';
-        // console.log("interface intent", intent);
         return intent;
     }
 
     getPayload() {
         let payload = null;
-        // console.log("interface DF response", this.response);
         if (this.response[0].queryResult.fulfillmentMessages.length > 1) {
             if (this.response[0].queryResult.fulfillmentMessages[1].payload !== undefined) {
                 payload = this.response[0].queryResult.fulfillmentMessages[1].payload;
             }
         }
-        // console.log("payload in interface", payload);
         return payload;
     }
 

@@ -3,11 +3,10 @@
 import { DialogflowResponseService } from './dialogflow.response.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { translateService } from './translate.service';
-import { autoInjectable, inject, Lifecycle, scoped } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { Imessage } from '../refactor/interface/message.interface';
 import { ChatSession } from '../models/chat.session';
 
-// @autoInjectable()
 @scoped(Lifecycle.ContainerScoped)
 export class handleRequestservice{
 

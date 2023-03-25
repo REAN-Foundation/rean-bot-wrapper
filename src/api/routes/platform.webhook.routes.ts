@@ -1,6 +1,6 @@
 import express from 'express';
 import { Logger } from '../../common/logger';
-import { inject, injectable, Lifecycle, scoped } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { ClientWebhookController } from '../controllers/client.webhook.controller';
 import { kobotoolboxController } from '../controllers/kobotoolbox.controller';
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';

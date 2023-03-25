@@ -92,18 +92,6 @@ export class SlackMessageService implements platformServiceInterface {
             console.log("testing endpoint");
         }
 
-        // this.slackEvent.on("message", (event) => {
-        //     console.log(`Received a message event123: user ${event.user} in channel ${event.channel} says ${event.text}`);
-        //     (async () => {
-        //         try {
-        //             console.log("Testing", event.user);
-        //         }
-        //         catch (error) {
-        //             console.log("error", error.data);
-        //         }
-        //     })();
-        // });
-
     }
 
     SendMessage(message) {

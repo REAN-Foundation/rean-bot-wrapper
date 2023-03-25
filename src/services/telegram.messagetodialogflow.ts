@@ -1,9 +1,8 @@
 /* eslint-disable init-declarations */
-import { autoInjectable, inject, Lifecycle, scoped } from "tsyringe";
+import { inject, Lifecycle, scoped } from "tsyringe";
 import { TelegramRequest } from "./request.format/telegram.request";
 import { TelegramMessageServiceFunctionalities } from "./telegram.message.service.functionalities";
 
-// @autoInjectable()
 @scoped(Lifecycle.ContainerScoped)
 export class TelegramMessageToDialogflow {
 

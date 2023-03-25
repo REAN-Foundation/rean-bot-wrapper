@@ -1,7 +1,7 @@
 import { GetLocation } from "./find.nearest.location.service";
 import { dialoflowMessageFormatting } from "./Dialogflow.service";
 import { inject, Lifecycle, scoped } from "tsyringe";
-import {ClickUpTask} from "./clickup/clickup.task";
+import { ClickUpTask } from "./clickup/clickup.task";
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import path from 'path';
 import { UserFeedback } from "../models/user.feedback.model";
@@ -45,7 +45,7 @@ export class kerotoplastyService {
         const locationData = await getLocationService.getLoctionData(eventObj);
         let message = null;
         console.log("our location data is ",locationData);
-        const postalAddress= locationData["Postal Addres"];
+        const postalAddress = locationData["Postal Addres"];
         const keys = Object.keys(locationData["Postal Addres"]);
         switch (intent) {
         case 'hyperCriticalCondition': {
@@ -86,7 +86,7 @@ export class kerotoplastyService {
         console.log("topic is",topic);
         const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
         const channel = eventObj.body.originalDetectIntentRequest.payload.source;
-        const feedBackInfo = new UserFeedback({ userId: userId, channel: channel,humanHandoff: "false"});
+        const feedBackInfo = new UserFeedback({ userId: userId, channel: channel,humanHandoff: "false" });
         await feedBackInfo.save();
         const responseUserFeedback = await UserFeedback.findAll({ where: { userId: userId } });
         clickupService.createTask(null, responseUserFeedback,null,topic,user_details)
@@ -180,4 +180,5 @@ export class kerotoplastyService {
             setTimeout(resolve, ms);
         });
     }
+    
 }
