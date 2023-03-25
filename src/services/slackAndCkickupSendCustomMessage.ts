@@ -3,10 +3,10 @@ import { commonResponseMessageFormat } from "./common.response.format.object";
 import { WhatsappMessageService } from './whatsapp.message.service';
 import { WhatsappMetaMessageService } from './whatsapp.meta.message.service';
 import { TelegramMessageService } from './telegram.message.service';
-import { autoInjectable, delay, inject, singleton } from "tsyringe";
+import { autoInjectable, delay, inject, Lifecycle, scoped, singleton } from "tsyringe";
 
 @autoInjectable()
-@singleton()
+@scoped(Lifecycle.ContainerScoped)
 export class SlackClickupCommonFunctions {
 
     constructor(@inject(delay(() => TelegramMessageService)) public telegramMessageservice,

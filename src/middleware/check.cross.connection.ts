@@ -1,9 +1,9 @@
-import { autoInjectable, container, singleton } from "tsyringe";
+import { autoInjectable, container, singleton, Lifecycle, scoped } from "tsyringe";
 import { ClientEnvironmentProviderService } from "../services/set.client/client.environment.provider.service";
 import { ResponseHandler } from '../utils/response.handler';
 
 @autoInjectable()
-@singleton()
+@scoped(Lifecycle.ContainerScoped)
 export class CheckCrossConnection {
 
     constructor(
@@ -12,7 +12,7 @@ export class CheckCrossConnection {
     checkCrossConnection = (req, res, next): void => {
 
         // eslint-disable-next-line max-len
-        const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
+        const clientEnvironmentProviderService: ClientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
         const urlParsed = req.url.split('/');
         if (urlParsed.includes("whatsappMeta") && req.method === "POST") {
 
@@ -28,11 +28,20 @@ export class CheckCrossConnection {
                 console.log("No cross connection");
                 clientEnvironmentProviderService.setClientName(urlParsed[2]);
                 console.log("Client name is set to" + urlParsed[2]);
+                // const interval = setInterval(function() {
+                //     console.log("Current Client name is:" + clientEnvironmentProviderService.getClientName());
+                //     console.log("Original Client Name was :" + urlParsed[2]);
+                // }, 2000);
+                // setTimeout(function() {
+                //     clearInterval(interval);
+                // }, 500000);
                 next();
             }
         }
         else {
             console.log("No cross connection",req.url);
+            clientEnvironmentProviderService.setClientName(urlParsed[2]);
+            console.log("Client name is set to" + urlParsed[2]);
             next();
         }
     };

@@ -4,13 +4,16 @@ import { Iresponse, Imessage, IprocessedDialogflowResponseFormat } from '../refa
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { ChatMessage } from '../models/chat.message.model';
 import { UserFeedback } from '../models/user.feedback.model';
-import { autoInjectable } from 'tsyringe';
+import { autoInjectable, scoped, Lifecycle, inject } from 'tsyringe';
 import { SlackClickupCommonFunctions } from './slackAndCkickupSendCustomMessage';
 
-@autoInjectable()
+// @autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class ClickUpMessageService implements platformServiceInterface {
 
-    constructor(private slackClickupCommonFunctions?: SlackClickupCommonFunctions){}
+    constructor(
+        @inject(SlackClickupCommonFunctions) private slackClickupCommonFunctions?: SlackClickupCommonFunctions
+    ){}
 
     public res;
 

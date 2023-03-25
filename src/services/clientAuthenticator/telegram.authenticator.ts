@@ -1,12 +1,14 @@
 import { clientAuthenticator } from './client.authenticator.interface';
-import { injectable, singleton } from 'tsyringe';
+import { inject, Lifecycle, scoped} from 'tsyringe';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 
-@injectable()
-@singleton()
+@scoped(Lifecycle.ContainerScoped)
 export class TelegramAuthenticator implements clientAuthenticator{
 
-    constructor(private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+    constructor(
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
+    ){}
 
     get headerToken(): any {
         throw new Error('Method not implemented.');
@@ -17,6 +19,7 @@ export class TelegramAuthenticator implements clientAuthenticator{
     }
 
     authenticate(req: any) {
+        console.log(this.clientEnvironmentProviderService.getClientName());
         if (this.urlToken === req.params.unique_token){
             return;
         }

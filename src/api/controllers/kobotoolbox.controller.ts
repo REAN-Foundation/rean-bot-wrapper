@@ -1,13 +1,17 @@
 import { ResponseHandler } from '../../utils/response.handler';
-import { autoInjectable } from 'tsyringe';
+import { autoInjectable, inject, Lifecycle, scoped } from 'tsyringe';
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
 import { AwsS3manager } from '../../services/aws.file.upload.service';
-@autoInjectable()
+
+// @autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class kobotoolboxController{
+    
     constructor(
-        private responseHandler?: ResponseHandler,
-        private clientEnvironment?: ClientEnvironmentProviderService,
-        private awss3manager?: AwsS3manager) {
+        @inject(ResponseHandler) private responseHandler?: ResponseHandler,
+        @inject(ClientEnvironmentProviderService) private clientEnvironment?: ClientEnvironmentProviderService,
+        @inject(AwsS3manager) private awss3manager?: AwsS3manager
+    ) {
 
     }
 

@@ -2,16 +2,18 @@ import AWS from 'aws-sdk';
 import fs from 'fs';
 import nodeHtmlToImage from 'node-html-to-image';
 import path from 'path';
-import { autoInjectable } from 'tsyringe';
+import { autoInjectable, inject, Lifecycle, scoped } from 'tsyringe';
 import { SignedUrls } from './signed.urls.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 
 // import { TempCredentials } from './get.temporary.aws.credentials';
-@autoInjectable()
+// @autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class AwsS3manager{
 
     constructor(
-        private clientEnvironment?: ClientEnvironmentProviderService) {}
+        @inject(ClientEnvironmentProviderService) private clientEnvironment?: ClientEnvironmentProviderService
+    ) {}
 
     async getCrossAccountCredentials() {
         return new Promise((resolve, reject) => {

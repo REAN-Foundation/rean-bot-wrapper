@@ -1,9 +1,9 @@
 /* eslint-disable max-len */
-import { autoInjectable, singleton } from "tsyringe";
+import { autoInjectable, Lifecycle, scoped, singleton } from "tsyringe";
 import {IserviceResponseFunctionalities } from "./response.interface";
 
 @autoInjectable()
-@singleton()
+@scoped(Lifecycle.ContainerScoped)
 export class DialogflowResponseFormat implements IserviceResponseFunctionalities{
 
     constructor(private response){}

@@ -1,7 +1,6 @@
-import { injectable, singleton } from 'tsyringe';
+import { injectable, singleton, scoped, Lifecycle } from 'tsyringe';
 
-@injectable()
-@singleton()
+@scoped(Lifecycle.ContainerScoped)
 export class ClientEnvironmentProviderService {
 
     private clientName;

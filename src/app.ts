@@ -9,13 +9,20 @@ import { Loader } from './startup/loader';
 import { Logger } from './common/logger';
 import { ConfigurationManager } from "./configs/configuration.manager";
 import { IntentRegister } from './intentEmitters/intent.register';
-import { container } from "tsyringe";
+import {container, DependencyContainer, scoped} from "tsyringe";
 import { IndexCreation } from './models/elasticsearchmodel';
 import { platformServiceInterface } from "./refactor/interface/platform.interface";
 import { ClientEnvironmentProviderService } from "./services/set.client/client.environment.provider.service";
 import { AwsSecretsManager } from "./services/aws.secret.manager.service";
 import { Timer } from "./middleware/timer";
 import { CheckCrossConnection } from "./middleware/check.cross.connection";
+import { Injector } from "./startup/injector";
+
+declare module "express-serve-static-core" {
+    interface Request {
+      container: DependencyContainer;
+    }
+  }
 
 export default class Application {
 
@@ -164,6 +171,11 @@ export default class Application {
 
         return new Promise((resolve, reject) => {
             try {
+                this._app.use((req, _res, next) => {
+                    req.container = Loader.container.createChildContainer();
+                    Injector.registerInjections(req.container);
+                    next();
+                });
                 this._app.use(express.urlencoded({ extended: true }));
                 this._app.use(express.json());
                 this._app.use(helmet());
