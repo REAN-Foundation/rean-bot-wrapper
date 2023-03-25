@@ -9,6 +9,10 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 @scoped(Lifecycle.ContainerScoped)
 export class AwsS3manager{
 
+    private params;
+
+    private fileName;
+
     constructor(
         @inject(ClientEnvironmentProviderService) private clientEnvironment?: ClientEnvironmentProviderService,
         @inject(SignedUrls) private signedUrls?: SignedUrls
@@ -64,68 +68,97 @@ export class AwsS3manager{
     }
 
     async uploadFile (filePath) {
+        return new Promise<string>( async (resolve, reject) => { 
+            const fileLocation = await this.uploadFileToS3(filePath);
+            // const signedUrl = await this.signedUrls.getSignedUrl(fileLocation);
+            resolve(fileLocation);
+        });
+    }
+
+    readFileAndReturnAwsUploadParams =  (filePath, cloudFrontPathSplit, BucketName) => {
+        const fileContent = fs.readFileSync(filePath);
+        var filename = filePath.replace(/^.*[\\/]/, '');
+        this.fileName = filename;
+        const extension = path.parse(filename).ext;
+
+        // Setting up S3 upload parameters
+        const params = {
+            Bucket        : BucketName,
+            Key           : cloudFrontPathSplit[3] + '/' + filename , // File name you want to save as in S3
+            Body          : fileContent,
+            'ContentType' : 'image/jpeg'
+        };
+        if (extension === '.ogg' || extension === '.mp3' || extension === '.oga'){
+            console.log("Detected as an Audio file");
+            params.ContentType = 'audio/ogg';
+            if (extension === ".mp3" ){
+                params.ContentType = 'audio/mpeg';
+                this.params = params;
+            }
+            this.params = params;
+        } else {
+            this.params = params;
+        }
+
+        // fs.stat(filePath, function (err) {
+        //     try {
+        //         if (err === null) {
+        //             console.log('File exists');
+        //             const fileContent = fs.readFileSync(filePath);
+        //             var filename = filePath.replace(/^.*[\\/]/, '');
+        //             this.fileName = filename;
+        //             const extension = path.parse(filename).ext;
+        
+        //             // Setting up S3 upload parameters
+        //             const params = {
+        //                 Bucket        : BucketName,
+        //                 Key           : cloudFrontPathSplit[3] + '/' + filename , // File name you want to save as in S3
+        //                 Body          : fileContent,
+        //                 'ContentType' : 'image/jpeg'
+        //             };
+            
+        //             if (extension === '.ogg' || extension === '.mp3' || extension === '.oga'){
+        //                 console.log("Detected as an Audio file");
+        //                 params.ContentType = 'audio/ogg';
+        //                 if (extension === ".mp3" ){
+        //                     params.ContentType = 'audio/mpeg';
+        //                     this.params = params;
+        //                 }
+        //                 this.params = params;
+        //             }
+        //             this.params = params;
+        //         } else if (err.code === 'ENOENT') {
+        //             console.log('File not exists');
+        //         } else {
+        //             console.log('Some other error: ', err.code);
+        //         }
+        //     }
+        //     catch (error){
+        //         console.log(error);
+        //     }
+                
+        // });
+        
+    }
+
+    async uploadFileToS3 (filePath) {
         const responseCredentials: any = await this.getCrossAccountCredentials();
-        const BUCKET_NAME = process.env.BUCKET_NAME;
+        const BucketName = process.env.BUCKET_NAME;
         const cloudFrontPath = process.env.CLOUD_FRONT_PATH;
         const cloudFrontPathSplit = cloudFrontPath.split("/");
-
-        console.log('FILE UPLOAD STARTING', BUCKET_NAME);
-        return new Promise<string>(async (resolve, reject) => {
-
-            // Read content from the file
-            fs.stat(filePath, async function (err) {
-                if (err === null) {
-                    console.log('File exists');
-                    const fileContent = fs.readFileSync(filePath);
-                    var filename = filePath.replace(/^.*[\\/]/, '');
-                    const extension = path.parse(filename).ext;
-
-                    // Setting up S3 upload parameters
-                    const params = {
-                        Bucket        : BUCKET_NAME,
-                        Key           : cloudFrontPathSplit[3] + '/' + filename , // File name you want to save as in S3
-                        Body          : fileContent,
-                        'ContentType' : 'image/jpeg'
-                    };
-
-                    if (extension === '.ogg' || extension === '.mp3' || extension === '.oga'){
-                        console.log("Detected as an Audio file");
-                        params.ContentType = 'audio/ogg';
-                        if (extension === ".mp3" ){
-                            params.ContentType = 'audio/mpeg';
-                        }
-                    }
-
-                    const s3 = new AWS.S3(responseCredentials);
-                    try {
-                        s3.upload(params, function (err) {
-                            if (err) {
-                                reject(err);
-                            }
-                        });
-                        const location = process.env.CLOUD_FRONT_PATH + filename;
-                        resolve(await this.signedUrls.getSignedUrl(location));
-                    } catch (err) {
-                        console.error(err);
-                    }
-
-                    // s3.upload(params, async function (err) {
-                    //     if (err) {
-                    //         reject(err);
-                    //     }
-                    //     const location = process.env.CLOUD_FRONT_PATH + filename;
-                    //     resolve(await this.signedUrls.getSignedUrl(location));
-                    // });
-                } else if (err.code === 'ENOENT') {
-                    console.log('File not exists');
-                    reject('File not exists');
-                } else {
-                    console.log('Some other error: ', err.code);
-                    reject(err.code);
+        const s3 = new AWS.S3(responseCredentials);
+        try {
+            this.readFileAndReturnAwsUploadParams(filePath, cloudFrontPathSplit, BucketName);
+            s3.upload(this.params, function (err) {
+                if (err) {
+                    console.log(err);
                 }
             });
-
-        });
+            const location = process.env.CLOUD_FRONT_PATH + this.fileName;
+            return (await this.signedUrls.getSignedUrl(location));
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     async createFileFromHTML (html) {
@@ -180,5 +213,4 @@ export class AwsS3manager{
         });
 
     }
-
 }
