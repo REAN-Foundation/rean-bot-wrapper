@@ -13,7 +13,8 @@ let dialogflow_language = "en-US";
 export class translateService{
 
     constructor(
-        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(UserLanguage) private userLanguage?: UserLanguage
     ) {}
 
     private GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
@@ -46,7 +47,7 @@ export class translateService{
 
     translateMessage = async (messageType, message:string, sessionId) => {
         const translate = new v2.Translate(this.obj);
-        const languageForSession = await new UserLanguage().setLanguageForSession(messageType, sessionId, message);
+        const languageForSession = await this.userLanguage.setLanguageForSession(messageType, sessionId, message);
         console.log("languageForSession", languageForSession);
         // if (languageForSession === "change language") {
         //     const message = "change language";
@@ -82,7 +83,7 @@ export class translateService{
 
     translatePushNotifications = async ( message: string, phoneNumber: string) => {
         try {
-            let languageForSession = await new UserLanguage().getPreferredLanguageofSession(phoneNumber);
+            let languageForSession = await this.userLanguage.getPreferredLanguageofSession(phoneNumber);
             console.log("languageForSession before", languageForSession);
 
             languageForSession = languageForSession !== 'null' ? languageForSession : 'en';
@@ -98,7 +99,7 @@ export class translateService{
 
     detectUsersLanguage = async ( phoneNumber: string) => {
         try {
-            let languageForSession = await new UserLanguage().getPreferredLanguageofSession(phoneNumber);
+            let languageForSession = await this.userLanguage.getPreferredLanguageofSession(phoneNumber);
             console.log("languageForSession before", languageForSession);
 
             languageForSession = languageForSession !== 'null' ? languageForSession : 'en';

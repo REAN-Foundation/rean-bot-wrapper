@@ -10,7 +10,8 @@ import { inject, Lifecycle, scoped } from "tsyringe";
 export class WhatsappPostResponseFunctionalities{
 
     constructor ( 
-        @inject(HandleMessagetypePayload) private handleMessagetypePayload?: HandleMessagetypePayload
+        @inject(HandleMessagetypePayload) private handleMessagetypePayload?: HandleMessagetypePayload,
+        @inject(UserLanguage) private userLanguage?: UserLanguage
     ) {}
 
     textResponseFormat = (response_format:Iresponse,payload) =>{
@@ -55,7 +56,7 @@ export class WhatsappPostResponseFunctionalities{
         const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
         const buttons = [];
         const numberOfButtons = (payload.fields.buttons.listValue.values).length;
-        const languageForSession = await new UserLanguage().getPreferredLanguageofSession(response_format.sessionId);
+        const languageForSession = await this.userLanguage.getPreferredLanguageofSession(response_format.sessionId);
         const translateObj = new translateService();
         for (let i = 0; i < numberOfButtons; i++){
             const id = payload.fields.buttons.listValue.values[i].structValue.fields.reply.structValue.fields.id.stringValue;
@@ -159,7 +160,7 @@ export class WhatsappPostResponseFunctionalities{
     custom_payloadResponseFormat = async(response_format:Iresponse,payload) =>{
         const payloadContent = this.handleMessagetypePayload.getPayloadContent(payload);
         const listOfPostDataMeta = [];
-        const languageForSession = await new UserLanguage().getPreferredLanguageofSession(response_format.sessionId);
+        const languageForSession = await this.userLanguage.getPreferredLanguageofSession(response_format.sessionId);
         const translateObj = new translateService();
         for (let i = 0; i < payloadContent.length; i++){
             const payloadContentMessageTypeMeta = payloadContent[i].fields.messagetype.stringValue;
