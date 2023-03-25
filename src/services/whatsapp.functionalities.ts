@@ -19,6 +19,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
     constructor(@inject(EmojiFilter) private emojiFilter?: EmojiFilter,
         @inject(Speechtotext) private speechtotext?: Speechtotext,
         @inject(AwsS3manager) private awsS3manager?: AwsS3manager,
+        @inject(UserLanguage) private userLanguage?: UserLanguage,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     async textMessageFormat (messageObj:Message) {
@@ -247,7 +248,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
 
     async commonVoiceAudioFormat(messageObj,mediaUrl) {
         const userId = messageObj.getUserId();
-        const preferredLanguage = await new UserLanguage().getPreferredLanguageofSession(userId);
+        const preferredLanguage = await this.userLanguage.getPreferredLanguageofSession(userId);
         const ConvertedToText = await this.speechtotext.SendSpeechRequest(mediaUrl, "whatsapp", preferredLanguage);
         if (preferredLanguage !== "null"){
             if (ConvertedToText) {

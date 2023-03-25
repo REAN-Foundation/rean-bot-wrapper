@@ -19,6 +19,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
     constructor(@inject(EmojiFilter) private emojiFilter?: EmojiFilter,
         @inject(Speechtotext ) private speechtotext?: Speechtotext,
         @inject(AwsS3manager) private awsS3manager?: AwsS3manager,
+        @inject(UserLanguage) private userLanguage?: UserLanguage,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     async textMessageFormat(messageObj: Message) {
@@ -37,7 +38,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         const file_path = response.result.file_path;
 
         // await new SequelizeClient().connect();
-        const preferredLanguage = await new UserLanguage().getPreferredLanguageofSession(messageObj.getUserId());
+        const preferredLanguage = await this.userLanguage.getPreferredLanguageofSession(messageObj.getUserId());
         if (preferredLanguage !== "null"){
             if (file_path) {
                 const ConvertedToText = await this.speechtotext.SendSpeechRequest('https://api.telegram.org/file/bot' + this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN") + '/' + response.result.file_path, "telegram", preferredLanguage);

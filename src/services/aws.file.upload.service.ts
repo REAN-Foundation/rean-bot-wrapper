@@ -10,7 +10,8 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 export class AwsS3manager{
 
     constructor(
-        @inject(ClientEnvironmentProviderService) private clientEnvironment?: ClientEnvironmentProviderService
+        @inject(ClientEnvironmentProviderService) private clientEnvironment?: ClientEnvironmentProviderService,
+        @inject(SignedUrls) private signedUrls?: SignedUrls
     ) {}
 
     async getCrossAccountCredentials() {
@@ -72,7 +73,7 @@ export class AwsS3manager{
         return new Promise<string>(async (resolve, reject) => {
 
             // Read content from the file
-            fs.stat(filePath, function (err) {
+            fs.stat(filePath, async function (err) {
                 if (err === null) {
                     console.log('File exists');
                     const fileContent = fs.readFileSync(filePath);
@@ -96,13 +97,25 @@ export class AwsS3manager{
                     }
 
                     const s3 = new AWS.S3(responseCredentials);
-                    s3.upload(params, async function (err) {
-                        if (err) {
-                            reject(err);
-                        }
+                    try {
+                        s3.upload(params, function (err) {
+                            if (err) {
+                                reject(err);
+                            }
+                        });
                         const location = process.env.CLOUD_FRONT_PATH + filename;
-                        resolve(await new SignedUrls().getSignedUrl(location));
-                    });
+                        resolve(await this.signedUrls.getSignedUrl(location));
+                    } catch (err) {
+                        console.error(err);
+                    }
+
+                    // s3.upload(params, async function (err) {
+                    //     if (err) {
+                    //         reject(err);
+                    //     }
+                    //     const location = process.env.CLOUD_FRONT_PATH + filename;
+                    //     resolve(await this.signedUrls.getSignedUrl(location));
+                    // });
                 } else if (err.code === 'ENOENT') {
                     console.log('File not exists');
                     reject('File not exists');
