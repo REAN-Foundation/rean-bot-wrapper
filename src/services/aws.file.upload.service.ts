@@ -139,7 +139,7 @@ export class AwsS3manager{
                 
         // });
         
-    }
+    };
 
     async uploadFileToS3 (filePath) {
         const responseCredentials: any = await this.getCrossAccountCredentials();
