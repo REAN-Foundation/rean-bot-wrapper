@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { v4 } from 'uuid';
-import { injectable } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { Imessage } from '../refactor/interface/message.interface';
 let dialogflow = require('@google-cloud/dialogflow');
@@ -9,14 +9,14 @@ const dialogflowv2 = require('@google-cloud/dialogflow').v2beta1;
 const { struct } = require('pb-util');
 import { DialogflowResponseFormat } from './response.format/dialogflow.response.format';
 
-@injectable()
+@scoped(Lifecycle.ContainerScoped)
 export class DialogflowResponseService {
 
-    constructor(private clientEnvironment?: ClientEnvironmentProviderService) { }
+    constructor(@inject(ClientEnvironmentProviderService) private clientEnvironment?: ClientEnvironmentProviderService) { }
 
     getDialogflowMessage = async (message: string, platform: string = null, intent: string = null, completeMessage:Imessage = null ) => {
         try {
-
+            
             const env_name = this.clientEnvironment.getClientEnvironmentVariable("NAME");
             if (env_name === "UNION"){
                 dialogflow = dialogflowv2;

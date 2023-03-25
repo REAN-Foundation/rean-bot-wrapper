@@ -2,7 +2,7 @@
 /* eslint-disable max-len */
 import { AwsS3manager } from './aws.file.upload.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { autoInjectable, singleton, inject, delay } from 'tsyringe';
+import { autoInjectable, singleton, inject, delay, scoped, Lifecycle } from 'tsyringe';
 import { MessageFlow } from './get.put.message.flow.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import needle from 'needle';
@@ -13,17 +13,17 @@ import { CommonWhatsappService } from './whatsapp.common.service';
 import { Iresponse } from '../refactor/interface/message.interface';
 import { WhatsappPostResponseFunctionalities } from './whatsapp.post.response.functionalities';
 
-@autoInjectable()
-@singleton()
+// @autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class WhatsappMetaMessageService extends CommonWhatsappService {
 
     public res;
 
     constructor(@inject(delay(() => MessageFlow)) public messageFlow,
-        awsS3manager?: AwsS3manager,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
-        whatsappMessageToDialogflow?: WhatsappMessageToDialogflow,
-        private whatsappPostResponseFunctionalities?: WhatsappPostResponseFunctionalities){
+        @inject(AwsS3manager) awsS3manager?: AwsS3manager,
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(WhatsappMessageToDialogflow) whatsappMessageToDialogflow?: WhatsappMessageToDialogflow,
+        @inject(WhatsappPostResponseFunctionalities) private whatsappPostResponseFunctionalities?: WhatsappPostResponseFunctionalities){
         super(messageFlow, awsS3manager, whatsappMessageToDialogflow);
     }
 

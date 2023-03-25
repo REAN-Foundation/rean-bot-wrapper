@@ -1,4 +1,4 @@
-import { autoInjectable,container } from "tsyringe";
+import { autoInjectable } from "tsyringe";
 import XLSX = require('xlsx');
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 import { platformServiceInterface } from "../refactor/interface/platform.interface";
@@ -9,9 +9,8 @@ import { commonResponseMessageFormat } from "./common.response.format.object";
 @autoInjectable()
 export class demoBotService {
 
-    private _platformMessageService?: platformServiceInterface;
-
-    constructor(private clientEnvironment?: ClientEnvironmentProviderService) {}
+    constructor(private clientEnvironment?: ClientEnvironmentProviderService,
+        private _platformMessageService?: platformServiceInterface) {}
 
     async readExcel(path){
         try {
@@ -149,7 +148,8 @@ export class demoBotService {
         response_format.sessionId = sessionId;
         response_format.messageText = data;
         response_format.message_type = "text";
-        this._platformMessageService = container.resolve(client);
+        
+        // this._platformMessageService = container.resolve(client);
         await this._platformMessageService.SendMediaMessage(response_format,null);
     }
     

@@ -1,10 +1,10 @@
 import { Logger } from '../common/logger';
-import { injectable } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 
-@injectable()
+@scoped(Lifecycle.ContainerScoped)
 export class ResponseHandler {
 
-    constructor(private logger: Logger) {
+    constructor(@inject(Logger) private logger: Logger) {
     }
 
     sendSuccessResponse = (response, code, message, data, log_data = false) => {

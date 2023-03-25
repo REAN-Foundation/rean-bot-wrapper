@@ -2,22 +2,21 @@
 import { ResponseHandler } from '../../utils/response.handler';
 import { ErrorHandler } from '../../utils/error.handler';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { autoInjectable, container } from 'tsyringe';
+import { scoped, Lifecycle, inject } from 'tsyringe';
 import { clientAuthenticator } from '../../services/clientAuthenticator/client.authenticator.interface';
-import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
 import util from 'util';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class ClientWebhookController {
 
-    private _platformMessageService?: platformServiceInterface;
-    
     private _clientAuthenticatorService?: clientAuthenticator;
 
+    private _platformMessageService?: platformServiceInterface;
+
     constructor(
-        private responseHandler?: ResponseHandler,
-        private errorHandler?: ErrorHandler,
-        private clientEnvironment?: ClientEnvironmentProviderService) {
+        @inject(ResponseHandler) private responseHandler?: ResponseHandler,
+        @inject(ErrorHandler) private errorHandler?: ErrorHandler
+    ) {
 
     }
 
@@ -25,7 +24,7 @@ export class ClientWebhookController {
         console.log("sendMessage webhook");
         try {
             // eslint-disable-next-line max-len
-            this._platformMessageService = container.resolve(req.params.channel);
+            this._platformMessageService = req.container.resolve(req.params.channel);
             const response = await this._platformMessageService.sendManualMesage(req.body);
             if (response.statusCode === 200 || response.message_id !== undefined) {
                 this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', response.body);
@@ -42,7 +41,7 @@ export class ClientWebhookController {
     receiveMessage = async (req, res) => {
         console.log("receiveMessage webhook");
         try {
-            this._clientAuthenticatorService = container.resolve(req.params.channel + '.authenticator');
+            this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
             this._clientAuthenticatorService.authenticate(req,res);
             const status = req.body.statuses;
             if (status) {
@@ -69,7 +68,7 @@ export class ClientWebhookController {
                     req.params.channel !== "SNEHA_SUPPORT") {
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
                 }
-                this._platformMessageService = container.resolve(req.params.channel);
+                this._platformMessageService = req.container.resolve(req.params.channel);
                 this._platformMessageService.res = res;
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const response = this._platformMessageService.handleMessage(req.body, req.params.channel);
@@ -94,52 +93,45 @@ export class ClientWebhookController {
     };
 
     receiveMessageMetaWhatsapp = async (req, res) => {
-        // console.log("receiveMessage webhook receiveMessageWhatsappNew");
         try {
-            const phone_number_id = this.clientEnvironment.getClientEnvironmentVariable('WHATSAPP_PHONE_NUMBER_ID');
-            if (req.body.entry[0].changes[0].value.metadata.phone_number_id !== phone_number_id){
-                this.responseHandler.sendSuccessResponse(res, 200, 'Cross Connection', "");
-                console.log("Cross connection");
-            }
-            else {
-                this._clientAuthenticatorService = container.resolve(req.params.channel + '.authenticator');
-                this._clientAuthenticatorService.authenticate(req,res);
-                const statuses = req.body.entry[0].changes[0].value.statuses;
-                if (statuses) {
-                    if (statuses[0].status === "sent") {
+            this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
+            this._clientAuthenticatorService.authenticate(req,res);
+            const statuses = req.body.entry[0].changes[0].value.statuses;
+            if (statuses) {
+                if (statuses[0].status === "sent") {
 
-                        // console.log("sent", statuses);
-                        this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', "");
-                    }
-                    else if (statuses[0].status === "delivered") {
+                    // console.log("sent", statuses);
+                    this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', "");
+                }
+                else if (statuses[0].status === "delivered") {
 
-                        // console.log("delivered", statuses);
-                        this.responseHandler.sendSuccessResponse(res, 200, 'Message delivered successfully!', "");
-                    }
-                    else if (statuses[0].status === "read") {
+                    // console.log("delivered", statuses);
+                    this.responseHandler.sendSuccessResponse(res, 200, 'Message delivered successfully!', "");
+                }
+                else if (statuses[0].status === "read") {
 
-                        // console.log("read", statuses);
-                        this.responseHandler.sendSuccessResponse(res, 200, 'Message read successfully!', "");
-                    }
-                    else {
-                        this.responseHandler.sendSuccessResponse(res, 200, 'Notification received successfully!', "");
-
-                    //deal accordingly
-                    // console.log("Check status", statuses[0].status);
-                    }
+                    // console.log("read", statuses);
+                    this.responseHandler.sendSuccessResponse(res, 200, 'Message read successfully!', "");
                 }
                 else {
-                    console.log("receiveMessage webhook receiveMessageWhatsappNew");
-                    if (req.params.channel !== "REAN_SUPPORT" &&
-                    req.params.channel !== "slack" &&
-                    req.params.channel !== "SNEHA_SUPPORT") {
-                        this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
-                    }
-                    this._platformMessageService = container.resolve(req.params.channel);
-                    this._platformMessageService.res = res;
-                    const response = this._platformMessageService.handleMessage(req.body.entry[0].changes[0].value, req.params.channel);
+                    this.responseHandler.sendSuccessResponse(res, 200, 'Notification received successfully!', "");
+
+                //deal accordingly
+                // console.log("Check status", statuses[0].status);
                 }
             }
+            else {
+                console.log("receiveMessage webhook receiveMessageWhatsappNew");
+                if (req.params.channel !== "REAN_SUPPORT" &&
+                req.params.channel !== "slack" &&
+                req.params.channel !== "SNEHA_SUPPORT") {
+                    this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
+                }
+                this._platformMessageService = req.container.resolve(req.params.channel);
+                this._platformMessageService.res = res;
+                this._platformMessageService.handleMessage(req.body.entry[0].changes[0].value, req.params.channel);
+            }
+            
         }
         catch (error) {
             console.log("in error", error);
@@ -159,7 +151,7 @@ export class ClientWebhookController {
 
                 // eslint-disable-next-line max-len
                 // const response_message = "We have migrated REAN Health Guru to a new number. Click this link to chat with REAN Health Guru. Link: https://api.whatsapp.com/send/?phone=15712152682&text=Hey&app_absent=0";
-                this._platformMessageService = container.resolve('whatsapp');
+                this._platformMessageService = req.container.resolve('whatsapp');
 
                 this._platformMessageService.handleMessage(req.body, req.params.client);
             }

@@ -3,17 +3,17 @@
 import { DialogflowResponseService } from './dialogflow.response.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { translateService } from './translate.service';
-import { autoInjectable } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { Imessage } from '../refactor/interface/message.interface';
 import { ChatSession } from '../models/chat.session';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class handleRequestservice{
 
     // constructor(
     constructor(
-        private DialogflowResponseService?: DialogflowResponseService,
-        private translateService?: translateService) {
+        @inject(DialogflowResponseService) private DialogflowResponseService?: DialogflowResponseService,
+        @inject(translateService) private translateService?: translateService) {
     }
 
     async handleUserRequest (message: Imessage, channel: string) {
