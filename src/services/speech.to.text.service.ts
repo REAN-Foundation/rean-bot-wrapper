@@ -5,14 +5,15 @@ import path from 'path';
 import speech from '@google-cloud/speech';
 import fs from 'fs';
 import { AwsS3manager } from './aws.file.upload.service';
-import { autoInjectable } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-@autoInjectable()
+
+@scoped(Lifecycle.ContainerScoped)
 export class Speechtotext {
 
     constructor(
-        private awss3manager?: AwsS3manager,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService) {
+        @inject(AwsS3manager) private awss3manager?: AwsS3manager,
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService) {
         this.GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
         this.obj_gcp = {
             credentials : this.GCPCredentials,
@@ -28,7 +29,7 @@ export class Speechtotext {
     private obj_gcp;
 
     async SendSpeechRequest(fileUrl, chatServiceName, preferredLanguage) {
-        return new Promise(async (resolve, reject) => {
+        return new Promise(async (resolve) => {
             if (chatServiceName === 'telegram') {
                 http.get(fileUrl, async (res) => {
                     
@@ -101,6 +102,6 @@ export class Speechtotext {
         else {
             return 16000;
         }
-    }
+    };
 
 }

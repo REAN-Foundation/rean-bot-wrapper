@@ -2,7 +2,7 @@
 /* eslint-disable max-len */
 import http from 'https';
 import { AwsS3manager } from './aws.file.upload.service';
-import { autoInjectable, singleton, inject, delay } from 'tsyringe';
+import { autoInjectable, singleton, inject, delay, scoped, Lifecycle } from 'tsyringe';
 import { MessageFlow } from './get.put.message.flow.service';
 import { MessageFunctionalities } from './whatsapp.functionalities';
 import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface';
@@ -15,17 +15,17 @@ import { CommonWhatsappService } from './whatsapp.common.service';
 import { Iresponse } from '../refactor/interface/message.interface';
 import { WhatsappPostResponseFunctionalities } from './whatsapp.post.response.functionalities';
 
-@autoInjectable()
-@singleton()
+// @autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class WhatsappMessageService extends CommonWhatsappService {
 
     public res;
 
     constructor(@inject(delay(() => MessageFlow)) public messageFlow,
-        awsS3manager?: AwsS3manager,
+        @inject(AwsS3manager) awsS3manager?: AwsS3manager,
         @inject("whatsapp.authenticator") private clientAuthenticator?: clientAuthenticator,
-        private whatsappPostResponseFunctionalities?: WhatsappPostResponseFunctionalities,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(WhatsappPostResponseFunctionalities) private whatsappPostResponseFunctionalities?: WhatsappPostResponseFunctionalities,
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         whatsappMessageToDialogflow?: WhatsappMessageToDialogflow){
         super(messageFlow, awsS3manager, whatsappMessageToDialogflow);
     }

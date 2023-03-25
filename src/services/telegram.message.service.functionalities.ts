@@ -1,10 +1,11 @@
+/* eslint-disable max-len */
 import http from  'https';
 import http_tp from 'http';
 import { getMessageFunctionalities } from "../refactor/interface/message.service.functionalities.interface";
 import { Imessage } from '../refactor/interface/message.interface';
 import { EmojiFilter } from './filter.message.for.emoji.service';
 import { Speechtotext } from './speech.to.text.service';
-import { autoInjectable } from "tsyringe";
+import { inject, Lifecycle, scoped } from "tsyringe";
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { AwsS3manager } from "./aws.file.upload.service";
 import { UserLanguage } from './set.language';
@@ -12,13 +13,13 @@ import path from 'path';
 import fs from 'fs';
 import { Message } from './request.format/telegram.message.format';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class TelegramMessageServiceFunctionalities implements getMessageFunctionalities{
 
-    constructor(private emojiFilter?: EmojiFilter,
-        private speechtotext?: Speechtotext,
-        private awsS3manager?: AwsS3manager,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+    constructor(@inject(EmojiFilter) private emojiFilter?: EmojiFilter,
+        @inject(Speechtotext ) private speechtotext?: Speechtotext,
+        @inject(AwsS3manager) private awsS3manager?: AwsS3manager,
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     async textMessageFormat(messageObj: Message) {
         const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(messageObj.getText());

@@ -1,11 +1,12 @@
 import express from 'express';
 import { FrontendController } from '../controllers/Frontend.Controller';
-import { injectable } from 'tsyringe';
+import { inject, injectable, Lifecycle, scoped } from 'tsyringe';
 
 @injectable()
+@scoped(Lifecycle.ContainerScoped)
 export class FrontendRoutes {
 
-    constructor(private frontendController?: FrontendController){
+    constructor(@inject(FrontendController) private frontendController?: FrontendController){
     }
 
     register (app: express.Application) {

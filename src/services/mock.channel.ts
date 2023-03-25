@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 import { AwsS3manager } from './aws.file.upload.service';
-import { autoInjectable, singleton, inject, delay } from 'tsyringe';
+import { autoInjectable, singleton, inject, delay, scoped, Lifecycle } from 'tsyringe';
 import { Iresponse, Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { MessageFlow } from './get.put.message.flow.service';
@@ -11,16 +11,16 @@ import { ChatMessage } from '../models/chat.message.model';
 import { WhatsappMessageToDialogflow } from './whatsapp.messagetodialogflow';
 import request from 'request';
 
-@autoInjectable()
-@singleton()
+// @autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class MockMessageService implements platformServiceInterface {
 
     public res;
 
     constructor(@inject(delay(() => MessageFlow)) public messageFlow,
-        private awsS3manager?: AwsS3manager,
-        private messageFunctionalitiesmockchannel?: MockCHannelMessageFunctionalities,
-        public whatsappMessageToDialogflow?: WhatsappMessageToDialogflow){}
+        @inject( AwsS3manager ) private awsS3manager?: AwsS3manager,
+        @inject(MockCHannelMessageFunctionalities) private messageFunctionalitiesmockchannel?: MockCHannelMessageFunctionalities,
+        @inject(WhatsappMessageToDialogflow) public whatsappMessageToDialogflow?: WhatsappMessageToDialogflow){}
 
     async handleMessage(requestBody: any, channel: string) {
 

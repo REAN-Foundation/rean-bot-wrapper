@@ -4,7 +4,7 @@
 // import { DialogflowResponseService } from './dialogflow-response.service';
 import { AwsS3manager } from './aws.file.upload.service';
 import { Imessage, IprocessedDialogflowResponseFormat, Iresponse } from '../refactor/interface/message.interface';
-import { autoInjectable, singleton, inject, delay } from 'tsyringe';
+import { inject, delay, scoped, Lifecycle } from 'tsyringe';
 import  TelegramBot  from 'node-telegram-bot-api';
 import { MessageFlow } from './get.put.message.flow.service';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
@@ -15,8 +15,7 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 import { TelegramMessageToDialogflow } from './telegram.messagetodialogflow';
 import { TelegramPostResponseFunctionalities } from './telegram.post.response.functionalities';
 
-@autoInjectable()
-@singleton()
+@scoped(Lifecycle.ContainerScoped)
 export class TelegramMessageService implements platformServiceInterface{
 
     public _telegram: TelegramBot = null;
@@ -25,10 +24,10 @@ export class TelegramMessageService implements platformServiceInterface{
 
     // public req;
     constructor(@inject(delay(() => MessageFlow)) public messageFlow,
-        private awsS3manager?: AwsS3manager,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
-        private telegramMessageToDialogflow?: TelegramMessageToDialogflow,
-        private telegramPostResponseFunctionalities?: TelegramPostResponseFunctionalities,
+        @inject(AwsS3manager) private awsS3manager?: AwsS3manager,
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(TelegramMessageToDialogflow) private telegramMessageToDialogflow?: TelegramMessageToDialogflow,
+        @inject(TelegramPostResponseFunctionalities) private telegramPostResponseFunctionalities?: TelegramPostResponseFunctionalities,
         @inject("telegram.authenticator") private clientAuthenticator?: clientAuthenticator) {
         this._telegram = new TelegramBot(this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
         this.init();
@@ -70,7 +69,7 @@ export class TelegramMessageService implements platformServiceInterface{
         this._telegram = new TelegramBot(this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
         const webhookUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL") + '/v1/' + clientName + '/telegram/' + this.clientAuthenticator.urlToken + '/receive';
         this._telegram.setWebHook(webhookUrl);
-        console.log("Telegram webhook set");
+        console.log("Telegram webhook set", webhookUrl);
     }
 
     postResponse = async(message: Imessage, processedResponse: IprocessedDialogflowResponseFormat) => {

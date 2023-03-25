@@ -4,7 +4,7 @@ import { Imessage, Iresponse, IchatMessage } from '../refactor/interface/message
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { handleRequestservice } from './handle.request.service';
-import { autoInjectable, delay, inject } from 'tsyringe';
+import { delay, inject, Lifecycle, scoped } from 'tsyringe';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { ChatMessage } from '../models/chat.message.model';
 import { GoogleTextToSpeech } from './text.to.speech';
@@ -15,15 +15,15 @@ import { ContactList } from '../models/contact.list';
 import { translateService } from './translate.service';
 import { templateButtonService } from './whatsappmeta.button.service';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class MessageFlow{
 
     private chatMessageConnection;
     
     constructor(
         @inject(delay(() => SlackMessageService)) private slackMessageService,
-        private handleRequestservice?: handleRequestservice,
-        private translate?: translateService) {
+        @inject(handleRequestservice) private handleRequestservice?: handleRequestservice,
+        @inject(translateService) private translate?: translateService) {
     }
 
     async checkTheFlow(messagetoDialogflow, channel: string, platformMessageService: platformServiceInterface){

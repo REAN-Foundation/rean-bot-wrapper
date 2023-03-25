@@ -1,20 +1,20 @@
 import needle from 'needle';
 import { getRequestOptions } from '../../utils/helper';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
-import { autoInjectable } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { UserFeedback } from '../../models/user.feedback.model';
 import FormData from 'form-data';
 import fs from 'fs';
 import axios from 'axios';
 import crypto from 'crypto';
-import { ChatMessage } from '../../models/chat.message.model';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class ClickUpTask{
 
     private description = null;
 
-    constructor(private clientEnvironmentProviderService?: ClientEnvironmentProviderService) { }
+    // eslint-disable-next-line max-len
+    constructor(@inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService) { }
 
     // eslint-disable-next-line max-len
     async createTask(rdsData,responseUserFeedback,imageLink:string = null,postTopic:string = null, description:string = null){
@@ -109,4 +109,5 @@ export class ClickUpTask{
         await needle("post", createTaskUrl, obj, options);
 
     }
+    
 }
