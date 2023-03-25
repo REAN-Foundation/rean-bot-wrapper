@@ -1,5 +1,5 @@
 import { UserFeedback } from "../models/user.feedback.model";
-import { autoInjectable, container, delay, inject } from "tsyringe";
+import { container, delay, inject, Lifecycle, scoped } from "tsyringe";
 import { HumanHandoff } from "./human.handoff.service";
 import { SlackMessageService } from "./slack.message.service";
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
@@ -7,11 +7,12 @@ import { ClientEnvironmentProviderService } from "./set.client/client.environmen
 
 const humanHandoff: HumanHandoff = container.resolve(HumanHandoff);
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class LiveAgent{
 
     constructor(@inject(delay(() => SlackMessageService)) public slackMessageService,
-    private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+    // eslint-disable-next-line max-len
+    @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     async requestLiveAgent(body) {
         const payload = body.originalDetectIntentRequest.payload;

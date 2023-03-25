@@ -1,13 +1,11 @@
 
 import { Logger } from "../../common/logger";
-import { container } from "tsyringe";
 import { kerotoplastyService } from "../../services/kerotoplasty.service";
-
-const kerotoplastyServiceObj: kerotoplastyService = container.resolve(kerotoplastyService);
 
 export const kerotoplastyConditionIdentificationListener= async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
 
+        const kerotoplastyServiceObj: kerotoplastyService = eventObj.container.resolve(kerotoplastyService);
         try {
             const response = await kerotoplastyServiceObj.identifyCondition(eventObj);
             if (!response) {

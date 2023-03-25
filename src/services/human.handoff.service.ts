@@ -1,15 +1,14 @@
 /* eslint-disable max-len */
 import { UserFeedback } from "../models/user.feedback.model";
-import { delay, inject } from "tsyringe";
-import { autoInjectable } from 'tsyringe';
+import { delay, inject, Lifecycle, scoped } from "tsyringe";
 import { SlackMessageService } from "./slack.message.service";
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class HumanHandoff {
 
     constructor(@inject(delay(() => SlackMessageService)) public slackMessageService,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     async checkTime(){
         const time_obj = new Date();

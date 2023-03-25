@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import { feedbackInterface } from './feedback.interface';
-import { autoInjectable, container } from 'tsyringe';
+import { container, inject, Lifecycle, scoped } from 'tsyringe';
 import { SlackMessageService } from '../slack.message.service';
 import { UserFeedback } from '../../models/user.feedback.model';
 import { ChatMessage } from '../../models/chat.message.model';
@@ -11,20 +11,20 @@ import { Op } from 'sequelize';
 import { ClickUpTask } from '../clickup/clickup.task';
 
 const humanHandoff: HumanHandoff = container.resolve(HumanHandoff);
-// eslint-disable-next-line max-len
-const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class FeedbackService implements feedbackInterface {
 
     constructor(
-        private slackMessageService?: SlackMessageService,
-        private clickuptask?: ClickUpTask,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+        @inject(SlackMessageService) private slackMessageService?: SlackMessageService,
+        @inject(ClickUpTask) private clickuptask?: ClickUpTask
+    ){}
 
-    async NegativeFeedback(payload) {
+    async NegativeFeedback(eventObj) {
         return new Promise(async(resolve, reject) =>{
             try {
+                const clientEnvironmentProviderService = eventObj.container.resolve(ClientEnvironmentProviderService);
+                const payload = eventObj.body.originalDetectIntentRequest.payload;
                 const channel = payload.source;
                 const userId = payload.userId;
                 const completeMessage = payload.completeMessage;
@@ -74,7 +74,7 @@ export class FeedbackService implements feedbackInterface {
                     else {
                         response = payload.contextId ? await ChatMessage.findAll({ where: { telegramResponseMessageId: payload.contextId } }) : responseUserFeedback;
                     }
-                    const preferredSupportChannel = this.clientEnvironmentProviderService.getClientEnvironmentVariable("SUPPORT_CHANNEL");
+                    const preferredSupportChannel = clientEnvironmentProviderService.getClientEnvironmentVariable("SUPPORT_CHANNEL");
                     if (preferredSupportChannel === "ClickUp"){
                         const clickUpResponse:any = await this.clickuptask.createTask(response, responseUserFeedback,null,null);
                         const messageContent = listOfUserRequestdata[listOfUserRequestdata.length - 1].messageContent;

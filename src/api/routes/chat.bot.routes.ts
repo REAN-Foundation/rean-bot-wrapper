@@ -7,10 +7,6 @@ import { injectable } from 'tsyringe';
 @injectable()
 export class ChatBotRoutes {
 
-
-
-
-
     register (app: express.Application): void {
 
         const router = express.Router();
@@ -18,20 +14,12 @@ export class ChatBotRoutes {
         const authenticator = Loader.authenticator;
         const controller = new ChatBotController();
 
-        router.get('/ping', authenticator.authenticateUser, controller.ping);
-        router.get('/intent/validate', authenticator.authenticateUser, controller.validateIntent);
-        router.post('/intent/fulfill', authenticator.authenticateUser, controller.processIntent);
+        router.get('/:client/chat-bot/ping', authenticator.authenticateUser, controller.ping);
+        router.get('/:client/chat-bot/intent/validate', authenticator.authenticateUser, controller.validateIntent);
+        router.post('/:client/chat-bot/intent/fulfill', authenticator.authenticateUser, controller.processIntent);
 
+        app.use('/v1', router);
 
-
-
-
-
-        app.use('/v1/chat-bot', router);
-
-
-
-        
     }
 
 }

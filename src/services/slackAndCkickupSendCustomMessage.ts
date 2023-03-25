@@ -3,9 +3,8 @@ import { commonResponseMessageFormat } from "./common.response.format.object";
 import { WhatsappMessageService } from './whatsapp.message.service';
 import { WhatsappMetaMessageService } from './whatsapp.meta.message.service';
 import { TelegramMessageService } from './telegram.message.service';
-import { autoInjectable, delay, inject, Lifecycle, scoped, singleton } from "tsyringe";
+import { delay, inject, Lifecycle, scoped } from "tsyringe";
 
-@autoInjectable()
 @scoped(Lifecycle.ContainerScoped)
 export class SlackClickupCommonFunctions {
 
@@ -14,6 +13,7 @@ export class SlackClickupCommonFunctions {
                 @inject(delay(() => WhatsappMessageService)) public whatsappMessageService){}
 
     sendCustomMessage = async(channel, contact, message) => {
+        console.log("sendCustomMessage", channel, contact, message);
         const response_format: Iresponse = commonResponseMessageFormat();
         response_format.platform = channel;
         response_format.sessionId = contact;
@@ -26,7 +26,7 @@ export class SlackClickupCommonFunctions {
             response_format.sessionId = contact.toString();
             await this.whatsappMessageService.SendMediaMessage(response_format,null);
         }
-        else if (channel === "whatsappNew"){
+        else if (channel === "whatsappMeta"){
             response_format.sessionId = contact.toString();
             await this.whatsappNewMessageService.SendMediaMessage(response_format,null);
         }

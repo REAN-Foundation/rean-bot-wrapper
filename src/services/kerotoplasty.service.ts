@@ -1,20 +1,23 @@
 import { GetLocation } from "./find.nearest.location.service";
 import { dialoflowMessageFormatting } from "./Dialogflow.service";
-import { autoInjectable } from "tsyringe";
+import { inject, Lifecycle, scoped } from "tsyringe";
 import {ClickUpTask} from "./clickup/clickup.task";
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import path from 'path';
 import { UserFeedback } from "../models/user.feedback.model";
 import needle from 'needle';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class kerotoplastyService {
 
     private retryNumber = 0;
 
     constructor(
-        private DialogflowServices?: dialoflowMessageFormatting,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+        @inject(dialoflowMessageFormatting) private DialogflowServices?: dialoflowMessageFormatting,
+
+        // eslint-disable-next-line max-len
+        // @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
+    ){}
 
     identifyCondition = async (eventObj) => {
         if (eventObj) {
@@ -78,7 +81,7 @@ export class kerotoplastyService {
         };
         const condition_string = condition[intent];
         const user_info = eventObj.body.queryResult.parameters.medicalRecordNumber;
-        const user_details = await this.getEMRDetails(user_info);
+        const user_details = await this.getEMRDetails(user_info, eventObj);
         const topic = condition_string + "_" + user_info;
         console.log("topic is",topic);
         const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
@@ -90,10 +93,10 @@ export class kerotoplastyService {
             .then((response) => {clickupService.taskAttachment(response.body.id,attachmentPath);});
     }
 
-    async getEMRDetails(emr_number){
+    async getEMRDetails(emr_number, eventObj){
         try {
             let response: any = {};
-            response = await this.makeApiCall(emr_number);
+            response = await this.makeApiCall(emr_number, eventObj);
             let report = "### Patient Details\n";
             const patient_details = response.body.patient_details;
             if (response.body.patient_details) {
@@ -140,10 +143,11 @@ export class kerotoplastyService {
         });
     }
 
-    async makeApiCall(emr_number) {
-        const url = this.clientEnvironmentProviderService.getClientEnvironmentVariable("EMR_URL");
-        const key = this.clientEnvironmentProviderService.getClientEnvironmentVariable("EMR_KEY");
-        const code = this.clientEnvironmentProviderService.getClientEnvironmentVariable("EMR_CODE");
+    async makeApiCall(emr_number, eventObj) {
+        const clientEnvironmentProviderService = eventObj.container.resolve(ClientEnvironmentProviderService);
+        const url = clientEnvironmentProviderService.getClientEnvironmentVariable("EMR_URL");
+        const key = clientEnvironmentProviderService.getClientEnvironmentVariable("EMR_KEY");
+        const code = clientEnvironmentProviderService.getClientEnvironmentVariable("EMR_CODE");
         var headers = {
             'Content-Type' : 'application/json',
             accept         : 'application/json'
@@ -166,7 +170,7 @@ export class kerotoplastyService {
             this.retryNumber++;
             if (this.retryNumber < 5){
                 await this.sleep(10000);
-                return await this.makeApiCall(emr_number);
+                return await this.makeApiCall(emr_number,eventObj);
             }
         }
     }

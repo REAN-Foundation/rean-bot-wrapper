@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { v4 } from 'uuid';
-import { autoInjectable, inject, injectable, Lifecycle, scoped } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { Imessage } from '../refactor/interface/message.interface';
 let dialogflow = require('@google-cloud/dialogflow');
@@ -18,15 +18,6 @@ export class DialogflowResponseService {
         try {
             
             const env_name = this.clientEnvironment.getClientEnvironmentVariable("NAME");
-
-            const interval = setInterval(() => {
-                console.log("Current Client name is:" + this.clientEnvironment.getClientName());
-                // console.log("Original Client Name was :" + urlParsed[2]);
-            }, 2000);
-            setTimeout(() => {
-                clearInterval(interval);
-            }, 500000);
-
             if (env_name === "UNION"){
                 dialogflow = dialogflowv2;
             }

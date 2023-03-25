@@ -1,11 +1,12 @@
 import emojiRegex from 'emoji-regex';
-import { autoInjectable } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class EmojiFilter{
 
-    constructor(private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+    // eslint-disable-next-line max-len
+    constructor(@inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     async checkForEmoji(message: string) {
         console.log("inside checkForEmoji",message);

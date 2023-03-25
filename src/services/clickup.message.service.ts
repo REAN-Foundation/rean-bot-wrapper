@@ -4,10 +4,9 @@ import { Iresponse, Imessage, IprocessedDialogflowResponseFormat } from '../refa
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { ChatMessage } from '../models/chat.message.model';
 import { UserFeedback } from '../models/user.feedback.model';
-import { autoInjectable, scoped, Lifecycle, inject } from 'tsyringe';
+import { scoped, Lifecycle, inject, autoInjectable } from 'tsyringe';
 import { SlackClickupCommonFunctions } from './slackAndCkickupSendCustomMessage';
 
-// @autoInjectable()
 @scoped(Lifecycle.ContainerScoped)
 export class ClickUpMessageService implements platformServiceInterface {
 

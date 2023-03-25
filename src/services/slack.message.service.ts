@@ -2,13 +2,13 @@ import { WebClient } from '@slack/web-api';
 import { createEventAdapter } from '@slack/events-api';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { Imessage, Iresponse } from '../refactor/interface/message.interface';
-import { autoInjectable } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { ResponseHandler } from '../utils/response.handler';
 import { UserFeedback } from '../models/user.feedback.model';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { SlackClickupCommonFunctions } from './slackAndCkickupSendCustomMessage';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class SlackMessageService implements platformServiceInterface {
 
     public res;
@@ -22,9 +22,11 @@ export class SlackMessageService implements platformServiceInterface {
     private isInitialised = false;
 
     constructor(
-        private responseHandler?: ResponseHandler,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
-        private slackClickupCommonFunctions?: SlackClickupCommonFunctions) {}
+        @inject(ResponseHandler) private responseHandler?: ResponseHandler,
+
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(SlackClickupCommonFunctions) private slackClickupCommonFunctions?: SlackClickupCommonFunctions) {}
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async handleMessage(message, client) {
@@ -90,17 +92,17 @@ export class SlackMessageService implements platformServiceInterface {
             console.log("testing endpoint");
         }
 
-        this.slackEvent.on("message", (event) => {
-            console.log(`Received a message event123: user ${event.user} in channel ${event.channel} says ${event.text}`);
-            (async () => {
-                try {
-                    console.log("Testing", event.user);
-                }
-                catch (error) {
-                    console.log("error", error.data);
-                }
-            })();
-        });
+        // this.slackEvent.on("message", (event) => {
+        //     console.log(`Received a message event123: user ${event.user} in channel ${event.channel} says ${event.text}`);
+        //     (async () => {
+        //         try {
+        //             console.log("Testing", event.user);
+        //         }
+        //         catch (error) {
+        //             console.log("error", error.data);
+        //         }
+        //     })();
+        // });
 
     }
 
