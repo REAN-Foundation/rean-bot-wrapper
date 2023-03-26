@@ -14,6 +14,8 @@ export class kerotoplastyService {
 
     constructor(
         @inject(dialoflowMessageFormatting) private DialogflowServices?: dialoflowMessageFormatting,
+        @inject(GetLocation) private getLocation?: GetLocation,
+        @inject(ClickUpTask) private clickUpTask?: ClickUpTask
 
         // eslint-disable-next-line max-len
         // @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
@@ -41,8 +43,7 @@ export class kerotoplastyService {
     };
 
     async conditionSpecificResponse(intent,eventObj){
-        const getLocationService = new GetLocation();
-        const locationData = await getLocationService.getLoctionData(eventObj);
+        const locationData = await this.getLocation.getLoctionData(eventObj);
         let message = null;
         console.log("our location data is ",locationData);
         const postalAddress = locationData["Postal Addres"];
@@ -70,7 +71,6 @@ export class kerotoplastyService {
     async postImageOnClickup(intent,eventObj){
         const URL = eventObj.body.queryResult.parameters.image;
         console.log("our image url is ",URL);
-        const clickupService = new ClickUpTask();
         const filename = path.basename(URL);
         console.log("file name is ", filename);
         const attachmentPath = `./photo/` + filename;
@@ -89,8 +89,8 @@ export class kerotoplastyService {
         const feedBackInfo = new UserFeedback({ userId: userId, channel: channel,humanHandoff: "false" });
         await feedBackInfo.save();
         const responseUserFeedback = await UserFeedback.findAll({ where: { userId: userId } });
-        clickupService.createTask(null, responseUserFeedback,null,topic,user_details)
-            .then((response) => {clickupService.taskAttachment(response.body.id,attachmentPath);});
+        this.clickUpTask.createTask(null, responseUserFeedback,null,topic,user_details)
+            .then((response) => {this.clickUpTask.taskAttachment(response.body.id,attachmentPath);});
     }
 
     async getEMRDetails(emr_number, eventObj){
