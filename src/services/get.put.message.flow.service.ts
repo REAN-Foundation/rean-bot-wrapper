@@ -23,7 +23,8 @@ export class MessageFlow{
     constructor(
         @inject(delay(() => SlackMessageService)) private slackMessageService,
         @inject(handleRequestservice) private handleRequestservice?: handleRequestservice,
-        @inject(translateService) private translate?: translateService) {
+        @inject(translateService) private translate?: translateService,
+        @inject(GoogleTextToSpeech) private googleTextToSpeech?: GoogleTextToSpeech) {
     }
 
     async checkTheFlow(messagetoDialogflow, channel: string, platformMessageService: platformServiceInterface){
@@ -90,8 +91,7 @@ export class MessageFlow{
     async replyInAudio(message: Imessage, response_format: Iresponse) {
         if (message.type === "voice") {
             const id = message.platformId;
-            const obj = new GoogleTextToSpeech();
-            const audioURL = await obj.texttoSpeech(response_format.messageText, id);
+            const audioURL = await this.googleTextToSpeech.texttoSpeech(response_format.messageText, id);
             response_format.message_type = "voice";
             response_format.messageBody = audioURL;
         }
