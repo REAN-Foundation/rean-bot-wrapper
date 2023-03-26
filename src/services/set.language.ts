@@ -11,7 +11,8 @@ export class UserLanguage {
     private translateSetting;
 
     constructor(
-        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(translateService) private _translateService?: translateService
     ){}
 
     async setLanguageForSession(messageType, sessionId, message) {
@@ -98,7 +99,7 @@ export class UserLanguage {
         // eslint-disable-next-line init-declarations
         let detected_language:string;
         if (messageType !== "location"){
-            detected_language = await new translateService().detectLanguage(message);
+            detected_language = await this._translateService.detectLanguage(message);
         }
         else {
             console.log("it was latlong");
