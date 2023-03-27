@@ -17,16 +17,23 @@ export class CheckCrossConnection {
         if (urlParsed.includes("whatsappMeta") && req.method === "POST") {
 
             const set_phone_number_id = process.env[`${urlParsed[2]}_WHATSAPP_PHONE_NUMBER_ID`];
-            const phone_number_id_in_request = req.body.entry[0].changes[0].value.metadata.phone_number_id;
-            if (phone_number_id_in_request !== set_phone_number_id){
-                this.responseHandler.sendSuccessResponse(res, 200, 'Cross Connection', "");
-                console.log("Cross connection");
-            }
-            else {
-                console.log("No cross connection");
+            if (urlParsed[5] === 'send'){
+                console.log("No cross connection",req.url);
                 clientEnvironmentProviderService.setClientName(urlParsed[2]);
                 console.log("Client name is set to" + urlParsed[2]);
                 next();
+            } else {
+                const phone_number_id_in_request = req.body.entry[0].changes[0].value.metadata.phone_number_id;
+                if (phone_number_id_in_request !== set_phone_number_id){
+                    this.responseHandler.sendSuccessResponse(res, 200, 'Cross Connection', "");
+                    console.log("Cross connection");
+                }
+                else {
+                    console.log("No cross connection");
+                    clientEnvironmentProviderService.setClientName(urlParsed[2]);
+                    console.log("Client name is set to" + urlParsed[2]);
+                    next();
+                }
             }
         }
         else {
