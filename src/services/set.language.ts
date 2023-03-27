@@ -3,7 +3,7 @@
 import { ChatSession } from '../models/chat.session';
 import { translateService } from './translate.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { inject, Lifecycle, scoped } from 'tsyringe';
+import { delay, inject, Lifecycle, scoped } from 'tsyringe';
 
 @scoped(Lifecycle.ContainerScoped)
 export class UserLanguage {
@@ -11,8 +11,8 @@ export class UserLanguage {
     private translateSetting;
 
     constructor(
-        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
-        @inject(translateService) private _translateService?: translateService
+        @inject(delay(() => translateService)) private _translateService,
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
     ){}
 
     async setLanguageForSession(messageType, sessionId, message) {
