@@ -1,22 +1,25 @@
-import { container, autoInjectable } from 'tsyringe';
+import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../common/logger';
-import { needleRequestForREAN } from '../needle.service';
+import { NeedleService } from '../needle.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { Iresponse } from '../../refactor/interface/message.interface';
 import { commonResponseMessageFormat } from '../common.response.format.object';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class RegisterAllProfileService {
 
-    private _platformMessageService?: platformServiceInterface;
+    constructor(
+        private _platformMessageService?: platformServiceInterface,
+        @inject(NeedleService) private needleService?: NeedleService
+    ){}
 
     async sendUserMessage (eventObj) {
-        return new Promise(async (resolve,reject) => {
+        return new Promise(async (resolve) => {
             try {
 
                 const response_format: Iresponse = commonResponseMessageFormat();
                 const payload = eventObj.body.originalDetectIntentRequest.payload;
-                this._platformMessageService = container.resolve(payload.source);
+                this._platformMessageService = eventObj.container.resolve(payload.source);
                 const body = payload.body;
                 const message = `Hi, You have successfully registered with blood warrior team as patient.`;
                 resolve( { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [message] } }] } });
@@ -36,7 +39,7 @@ export class RegisterAllProfileService {
                             .split('T')[0],
                     };
                     const apiURL = `patients`;
-                    await needleRequestForREAN("post", apiURL, null, obj);
+                    await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
                     const message = `Hi ${body.PatientFirstName}, \nYou have successfully registered with blood warrior team as patient.`;
                     const sendPayload = {};
                     sendPayload["variables"] = [
@@ -62,7 +65,7 @@ export class RegisterAllProfileService {
                     };
 
                     let apiURL = `donors`;
-                    const response = await needleRequestForREAN("post", apiURL, null, registerObj);
+                    const response = await this.needleService.needleRequestForREAN("post", apiURL, null, registerObj);
                     const donorUserId = response.Data.Donor.UserId;
 
                     const donorType = body.DonorType === "Bridge Donor" ? "Blood bridge" : "One time";
@@ -78,7 +81,7 @@ export class RegisterAllProfileService {
                         DonorType : donorType,
                     };
                     apiURL = `donors/${donorUserId}`;
-                    await needleRequestForREAN("put", apiURL, null, obj);
+                    await this.needleService.needleRequestForREAN("put", apiURL, null, obj);
                     const message = `Hi ${body.DonorFirstName}, \nYou have successfully registered with blood warrior team as ${body.DonorType}.`;
                     const sendPayload = {};
                     sendPayload["variables"] = [
@@ -105,7 +108,7 @@ export class RegisterAllProfileService {
                     };
 
                     let apiURL = `volunteers`;
-                    const response = await needleRequestForREAN("post", apiURL, null, registerObj);
+                    const response = await this.needleService.needleRequestForREAN("post", apiURL, null, registerObj);
                     const volunteerUserId = response.Data.Volunteer.UserId;
                     const obj = {
                         Gender    : body.VolunteerGender,
@@ -115,7 +118,7 @@ export class RegisterAllProfileService {
                         BloodGroup : body.VolunteerBloodGroup
                     };
                     apiURL = `volunteers/${volunteerUserId}`;
-                    await needleRequestForREAN("put", apiURL, null, obj);
+                    await this.needleService.needleRequestForREAN("put", apiURL, null, obj);
                     const sendPayload = {};
                     sendPayload["variables"] = [
                         {
@@ -144,22 +147,22 @@ export class RegisterAllProfileService {
                     const volunteerPhone = body.BridgeVolunteerPhone;
 
                     const URL = `patients/search?phone=${patientPhone}`;
-                    const response = await needleRequestForREAN("get", URL);
+                    const response = await this.needleService.needleRequestForREAN("get", URL);
                     if (response.Data.Patients.Items.length > 0) {
                         patientUserId = response.Data.Patients.Items[0].UserId;
                     }
                     const patientURL = `patients/${patientUserId}`;
-                    const response1 = await needleRequestForREAN("get", patientURL);
+                    const response1 = await this.needleService.needleRequestForREAN("get", patientURL);
                     const bloodTransfusionDate = response1.Data.Patient.HealthProfile.BloodTransfusionDate;
 
                     const apiURL = `donors/search?phone=${donorPhone}`;
-                    const result = await needleRequestForREAN("get", apiURL);
+                    const result = await this.needleService.needleRequestForREAN("get", apiURL);
                     if (result.Data.Donors.Items.length > 0) {
                         donorUserId = result.Data.Donors.Items[0].UserId;
                     }
 
                     const apiURL1 = `volunteers/search?phone=${volunteerPhone}`;
-                    const result1 = await needleRequestForREAN("get", apiURL1);
+                    const result1 = await this.needleService.needleRequestForREAN("get", apiURL1);
                     if (result1.Data.Volunteers.Items.length > 0) {
                         volunteerUserId = result1.Data.Volunteers.Items[0].UserId;
                     }
@@ -177,7 +180,7 @@ export class RegisterAllProfileService {
                         "Status"           : "active"
                     };
                     const bridgeURL = `clinical/patient-donors`;
-                    await needleRequestForREAN("post", bridgeURL, null, object);
+                    await this.needleService.needleRequestForREAN("post", bridgeURL, null, object);
 
                     const phoneArray = [donorPhone, volunteerPhone];
                     const sendPayload = {};

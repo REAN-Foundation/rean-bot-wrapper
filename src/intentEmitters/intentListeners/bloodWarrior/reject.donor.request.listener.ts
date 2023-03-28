@@ -1,9 +1,8 @@
 import { RejectDonorRequestService } from "../../../services/bloodWrrior/reject.donor.request";
 
-const rejectDonorRequestService: RejectDonorRequestService  = new RejectDonorRequestService;
-
 export const RejectDonorRequest = async (intent, eventObj) => {
-    return new Promise(async (resolve,reject) => {
+    const rejectDonorRequestService: RejectDonorRequestService = eventObj.container.resolve(RejectDonorRequestService);
+    return new Promise(async (resolve) => {
         try {
             let result = null;
             result = await rejectDonorRequestService.rejectDonorRequest(eventObj);

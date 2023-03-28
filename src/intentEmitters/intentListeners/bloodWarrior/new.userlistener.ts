@@ -1,8 +1,7 @@
-import { container } from "tsyringe";
 import { NewUserService } from "../../../services/bloodWrrior/new.user.service";
-const newUserService: NewUserService = container.resolve(NewUserService);
 
 export const BloodWarriorNewUser = async (intent, eventObj) => {
+    const newUserService: NewUserService = eventObj.container.resolve(NewUserService);
     return new Promise(async (resolve,reject) => {
         try {
             let result = null;

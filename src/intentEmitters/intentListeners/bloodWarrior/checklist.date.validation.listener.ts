@@ -1,8 +1,9 @@
 import { ChecklistDateValidationService } from "../../../services/bloodWrrior/checklist.date.validation.service";
-const checklistDateValidation = new ChecklistDateValidationService();
 
 export const ChecklistDateValidation = async (intent, eventObj) => {
-    return new Promise(async (resolve,reject) => {
+    // eslint-disable-next-line max-len
+    const checklistDateValidation: ChecklistDateValidationService = eventObj.container.resolve(ChecklistDateValidationService);
+    return new Promise(async (resolve) => {
         try {
             let result = null;
             result = await checklistDateValidation.checklistDateValidationService(eventObj);

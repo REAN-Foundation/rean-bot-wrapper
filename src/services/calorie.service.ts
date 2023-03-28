@@ -11,9 +11,7 @@ export class CalorieService {
 
     constructor(
         private _platformMessageService?: platformServiceInterface
-    ) {
-    
-    }
+    ) {}
 
     async handleMessageCalorie(sessionId: any, client: any, req: any) {
         console.log('Here in the handle message of food');

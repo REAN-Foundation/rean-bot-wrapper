@@ -1,8 +1,9 @@
 import { AcceptDonationRequestService } from "../../../services/bloodWrrior/accept.donation.request.service";
-const acceptDonationRequestService: AcceptDonationRequestService = new AcceptDonationRequestService();
 
 export const AcceptDonationRequestListener = async (intent, eventObj) => {
-    return new Promise(async (resolve,reject) => {
+    // eslint-disable-next-line max-len
+    const acceptDonationRequestService: AcceptDonationRequestService = eventObj.container.resolve(AcceptDonationRequestService);
+    return new Promise(async (resolve) => {
         try {
             let result = null;
             result = await acceptDonationRequestService.sendUserMessage(eventObj);

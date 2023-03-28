@@ -1,7 +1,8 @@
 import { BloodBridgeStatusService } from "../../../services/bloodWrrior/blood.bridge.status.service";
-const bloodBridgeStatusService: BloodBridgeStatusService  = new BloodBridgeStatusService;
 
 export const BloodBridgeStatusListener = async (intent, eventObj) => {
+    // eslint-disable-next-line max-len
+    const bloodBridgeStatusService: BloodBridgeStatusService = eventObj.container.resolve(BloodBridgeStatusService);
     return new Promise(async (resolve,reject) => {
         try {
             let result = null;

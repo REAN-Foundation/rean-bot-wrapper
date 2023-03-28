@@ -6,7 +6,6 @@ import { MessageFlow } from './get.put.message.flow.service';
 import { ResponseHandler } from '../utils/response.handler';
 import { RHGMessageToDialogflow } from './rhg.message.to.dialogflow';
 
-// @autoInjectable()
 @scoped(Lifecycle.ContainerScoped)
 export class platformMessageService implements platformServiceInterface{
 

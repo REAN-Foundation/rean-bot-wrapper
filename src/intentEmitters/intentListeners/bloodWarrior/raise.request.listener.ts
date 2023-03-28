@@ -1,9 +1,9 @@
 import { RaiseDonationRequestService } from "../../../services/bloodWrrior/raise.request.service";
 
-const raiseDonationRequestService = new RaiseDonationRequestService();
-
 export const RaiseBloodDonationRequest = async (intent, eventObj) => {
-    return new Promise(async (resolve,reject) => {
+    // eslint-disable-next-line max-len
+    const raiseDonationRequestService: RaiseDonationRequestService = eventObj.container.resolve(RaiseDonationRequestService);
+    return new Promise(async (resolve) => {
         try {
             let response = null;
             response = await raiseDonationRequestService.sendUserMessage(eventObj);

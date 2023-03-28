@@ -1,8 +1,9 @@
 import { AcceptVolunteerRequestService } from "../../../services/bloodWrrior/accept.volunteer.request.service";
-const acceptVolunteerRequestService: AcceptVolunteerRequestService = new AcceptVolunteerRequestService();
 
 export const AcceptVolunteerRequestListener = async (intent, eventObj) => {
-    return new Promise(async (resolve,reject) => {
+    // eslint-disable-next-line max-len
+    const acceptVolunteerRequestService: AcceptVolunteerRequestService = eventObj.container.resolve(AcceptVolunteerRequestService);
+    return new Promise(async (resolve) => {
         try {
             let result = null;
             result = await acceptVolunteerRequestService.sendUserMessage(eventObj);

@@ -1,8 +1,8 @@
 import { DonationRequestYesService } from "../../../services/bloodWrrior/donation.request.yes.service";
-const donationRequestYesService: DonationRequestYesService  = new DonationRequestYesService;
 
 export const DonationRequestYesListener = async (intent, eventObj) => {
-    return new Promise(async (resolve,reject) => {
+    const donationRequestYesService: DonationRequestYesService = eventObj.container.resolve(DonationRequestYesService);
+    return new Promise(async (resolve) => {
         try {
             let result = null;
             result = await donationRequestYesService.sendUserMessage(eventObj);
