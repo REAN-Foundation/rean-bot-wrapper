@@ -102,7 +102,7 @@ export class translateService{
             let languageForSession = await this.userLanguage.getPreferredLanguageofSession(phoneNumber);
             console.log("languageForSession before", languageForSession);
 
-            languageForSession = languageForSession !== 'null' ? languageForSession : 'en';
+            languageForSession = languageForSession !== 'null' ? languageForSession : this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
             console.log("languageForSession after", languageForSession);
             return languageForSession;
 
