@@ -14,6 +14,7 @@ import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
 import { translateService } from './translate.service';
 import { templateButtonService } from './whatsappmeta.button.service';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class MessageFlow{
@@ -24,7 +25,8 @@ export class MessageFlow{
         @inject(delay(() => SlackMessageService)) private slackMessageService,
         @inject(handleRequestservice) private handleRequestservice?: handleRequestservice,
         @inject(translateService) private translate?: translateService,
-        @inject(GoogleTextToSpeech) private googleTextToSpeech?: GoogleTextToSpeech) {
+        @inject(GoogleTextToSpeech) private googleTextToSpeech?: GoogleTextToSpeech,
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService) {
     }
 
     async checkTheFlow(messagetoDialogflow, channel: string, platformMessageService: platformServiceInterface){
@@ -118,8 +120,8 @@ export class MessageFlow{
                     payload["variables"] = msg.message.Variables[`${languageForSession}`];
                     payload["languageForSession"] = languageForSession;
                 } else {
-                    payload["variables"] = msg.message.Variables[`en`];
-                    payload["languageForSession"] = "en";
+                    payload["variables"] = msg.message.Variables[this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE")];
+                    payload["languageForSession"] = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
                 }
             }
         } else {
