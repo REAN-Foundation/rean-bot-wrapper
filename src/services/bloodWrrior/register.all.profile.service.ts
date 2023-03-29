@@ -14,18 +14,16 @@ export class RegisterAllProfileService {
     ){}
 
     async sendUserMessage (eventObj) {
-        return new Promise(async (resolve) => {
-            try {
-                const payload = eventObj.body.originalDetectIntentRequest.payload;
-                this._platformMessageService = eventObj.container.resolve(payload.source);
+        try {
+            const payload = eventObj.body.originalDetectIntentRequest.payload;
+            this._platformMessageService = eventObj.container.resolve(payload.source);
 
-                const message = `Hi, You have successfully registered with blood warrior team as patient.`;
-                resolve( { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [message] } }] } });
-            } catch (err) {
-                Logger.instance()
-                    .log_error(err.message,500,'Register patient with blood warrior messaging service error');
-            }
-        });
+            const message = `Hi, You have successfully registered with blood warrior team as patient.`;
+            return { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [message] } }] } };
+        } catch (err) {
+            Logger.instance()
+                .log_error(err.message,500,'Register patient with blood warrior messaging service error');
+        }
     }
 
     async sendUserMessageAfter(eventObj){
