@@ -2,7 +2,7 @@
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { container } from 'tsyringe';
 import needle from "needle";
-import { getHeaders } from './biometrics/get.headers';
+import { GetHeaders } from './biometrics/get.headers';
 import { getRequestOptions } from '../utils/helper';
 
 export const needleRequestForREAN = async (method: string,
@@ -13,7 +13,8 @@ export const needleRequestForREAN = async (method: string,
     if (!accessToken) {
         accessToken = null;
     }
-    const options = getHeaders(accessToken);
+    const getHeaders = container.resolve(GetHeaders);
+    const options = getHeaders.getHeaders(accessToken);
     const apiUrl = ReanBackendBaseUrl + url;
     let response = null;
     if (method === "get") {
