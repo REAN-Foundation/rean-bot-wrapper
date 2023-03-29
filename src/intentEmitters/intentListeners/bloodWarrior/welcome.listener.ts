@@ -2,14 +2,12 @@ import { BloodWarriorWelcomeService } from "../../../services/bloodWrrior/welcom
 
 export const BloodWarriorWelcome = async (intent, eventObj) => {
     const welcomeService: BloodWarriorWelcomeService = eventObj.container.resolve(BloodWarriorWelcomeService);
-    return new Promise(async (resolve) => {
-        try {
-            const result = await welcomeService.registrationService(eventObj);
-            console.log(result);
-            resolve(result);
+    try {
+        const result = await welcomeService.registrationService(eventObj);
+        console.log(result);
+        return result;
 
-        } catch (error) {
-            console.log(error);
-        }
-    });
+    } catch (error) {
+        console.log(error);
+    }
 };

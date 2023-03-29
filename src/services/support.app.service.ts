@@ -2,7 +2,7 @@ import { Logger } from '../common/logger';
 import { getRequestOptions } from '../utils/helper';
 import needle from "needle";
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { container,  } from 'tsyringe';
+import { inject, Lifecycle, scoped,  } from 'tsyringe';
 import { GetHeaders } from '../services/biometrics/get.headers';
 import { Dose,Duration,MedicationAdministrationRoutes,MedicationDomainModel,MedicineName } from '../refactor/interface/medication.interface';
 import { NeedleService } from './needle.service';
@@ -15,6 +15,7 @@ export class GetPatientInfoService{
         // eslint-disable-next-line max-len
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(NeedleService) private needleService?: NeedleService,
+        @inject(GetHeaders) private getHeaders?: GetHeaders,
     ){}
 
     async getPatientsByPhoneNumberservice (eventObj) {
@@ -23,7 +24,7 @@ export class GetPatientInfoService{
                 Logger.instance().log(`Get Patient Info API ${this.clientEnvironmentProviderService.getClientName()}`);
 
                 const phoneNumber = await this.needleService.getPhoneNumber(eventObj);
-                const options = getHeaders();
+                const options = this.getHeaders.getHeaders();
                 const ReanBackendBaseUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
                 const apiUrl = `${ReanBackendBaseUrl}patients/byPhone?phone=${encodeURIComponent(phoneNumber)}`;
                 console.log("apiUrl", apiUrl);

@@ -10,8 +10,9 @@ export class RegistrationService {
 
     constructor(
         @inject(GetHeaders) private getHeaders: GetHeaders,
-        @inject(ClientEnvironmentProviderService)
-        private clientEnvironmentProviderService: ClientEnvironmentProviderService
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService: ClientEnvironmentProviderService,
+        @inject(NeedleService) private needleService?: NeedleService
     ) {}
 
     registrationService = async (eventObj) => {
@@ -20,7 +21,7 @@ export class RegistrationService {
             const name : string = eventObj.body.queryResult.parameters.Name.name;
             const lmp : string = eventObj.body.queryResult.parameters.LMP;
     
-            const phoneNumber = await getPhoneNumber(eventObj);
+            const phoneNumber = await this.needleService.getPhoneNumber(eventObj);
             
             const options = this.getHeaders.getHeaders();
             const ReanBackendBaseUrl =

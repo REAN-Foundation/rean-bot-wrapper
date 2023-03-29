@@ -11,6 +11,7 @@ export class NeedleService {
     constructor(
         // eslint-disable-next-line max-len
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(GetHeaders) private getHeaders?: GetHeaders
     ) {}
 
     async needleRequestForREAN (method: string, url:string, accessToken?, obj?) {
@@ -18,7 +19,7 @@ export class NeedleService {
         if (!accessToken) {
             accessToken = null;
         }
-        const options = getHeaders(accessToken);
+        const options = this.getHeaders.getHeaders(accessToken);
         const apiUrl = ReanBackendBaseUrl + url;
         let response = null;
         if (method === "get") {

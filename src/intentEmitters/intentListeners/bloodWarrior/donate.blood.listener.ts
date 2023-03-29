@@ -2,14 +2,12 @@ import { DonateBloodService } from "../../../services/bloodWrrior/donate.blood.s
 
 export const DonateBloodListener = async (intent, eventObj) => {
     const donateBloodService: DonateBloodService = eventObj.container.resolve(DonateBloodService);
-    return new Promise(async (resolve) => {
-        try {
-            let result = null;
-            result = await donateBloodService.DonateBlood(eventObj);
-            resolve(result);
+    try {
+        let result = null;
+        result = await donateBloodService.DonateBlood(eventObj);
+        return result;
 
-        } catch (error) {
-            console.log(error);
-        }
-    });
+    } catch (error) {
+        console.log(error);
+    }
 };
