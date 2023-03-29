@@ -62,6 +62,7 @@ export class FeedbackService implements feedbackInterface {
                     };
                     resolve(data);
                 } else {
+                    // eslint-disable-next-line init-declarations
                     let response;
                     const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
                     const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);

@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize-typescript';
 import { UserFeedback } from '../models/user.feedback.model';
-import { scoped, Lifecycle, inject, autoInjectable, singleton } from 'tsyringe';
+import { autoInjectable, singleton } from 'tsyringe';
 import { ChatMessage } from '../models/chat.message.model';
 import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
@@ -8,17 +8,9 @@ import { ClientEnvironmentProviderService } from '../services/set.client/client.
 import { CalorieInfo } from '../models/calorie.info.model';
 import { CalorieDatabase } from '../models/calorie.db.model';
 const sequrlizeClients = new Map<string, Sequelize>();
-// @scoped(Lifecycle.ContainerScoped)
 @autoInjectable()
 @singleton()
 export class SequelizeClient {
-
-    // constructor(
-    //     // eslint-disable-next-line max-len
-    //     @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
-    // ){}
-
-    // public _sequelize: Sequelize = null;
 
     public connect = async(clientEnvironmentProviderService) => {
         
@@ -40,10 +32,6 @@ export class SequelizeClient {
         } else {
             sequelizeClient.addModels([ChatMessage, UserFeedback, ChatSession, ContactList]);
         }
-
-        // ChatSession.hasMany(ChatMessage);
-        // ChatMessage.belongsTo(ChatSession);
-        // this._sequelize = sequelizeClient;
 
         await sequelizeClient.authenticate()
             .then(async () => {
@@ -69,6 +57,6 @@ export class SequelizeClient {
             sequrlizeClients[clientName] = await this.connect(getClientEnvironmentVariable);
             return sequrlizeClients[clientName];
         }
-    }
+    };
     
 }

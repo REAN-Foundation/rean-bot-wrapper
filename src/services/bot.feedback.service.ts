@@ -30,10 +30,10 @@ export class BotFeedback{
                     let date: string | number | Date;
                     date = new Date();
                     date = date.getUTCFullYear() + '-' +
-                    ('00' + (date.getUTCMonth()+1)).slice(-2) + '-' +
-                    ('00' + date.getUTCDate()).slice(-2) + 'T' + 
-                    ('00' + date.getUTCHours()).slice(-2) + ':' + 
-                    ('00' + date.getUTCMinutes()).slice(-2) + ':' + 
+                    ('00' + (date.getUTCMonth() + 1)).slice(-2) + '-' +
+                    ('00' + date.getUTCDate()).slice(-2) + 'T' +
+                    ('00' + date.getUTCHours()).slice(-2) + ':' +
+                    ('00' + date.getUTCMinutes()).slice(-2) + ':' +
                     ('00' + date.getUTCSeconds()).slice(-2) + '.000Z';
                     console.log("date",date);
                     const date1:any = new Date(date);
@@ -60,7 +60,6 @@ export class BotFeedback{
                                             messageContent : message,
                                             userPlatformID : userId
                                         });
-                                        // await personresponse.save();
                                     })
                                     .catch(error => console.log("error", error));
                             }
@@ -70,7 +69,7 @@ export class BotFeedback{
                                     'recipient_type' : 'individual',
                                     'to'             : userId.toString(),
                                     'type'           : "text",
-                                    'text'           : {'body': message}
+                                    'text'           : { 'body': message }
                                 };
                                 
                                 const options = getRequestOptions();
@@ -115,8 +114,10 @@ export class BotFeedback{
                 }
                 const chatSessionRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatSession);
                 const respOfChatSession = await chatSessionRepository.findAll();
+
                 // console.log("respOfChatSession!!!!!!!!!!!", respOfChatSession);
                 for (let i = 0; i < respOfChatSession.length; i++) {
+
                     // console.log("i",i);
                     const userId = respOfChatSession[i].userPlatformID;
                     console.log("userID", userId);
@@ -134,6 +135,7 @@ export class BotFeedback{
     async asdf(){
         console.log("jshdj");
     }
+
 }
 
 // const botFeedback = new BotFeedback();

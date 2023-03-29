@@ -15,8 +15,8 @@ export class WhatsAppOptingOption{
         const contactListRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ContactList);
         return new Promise(async(resolve) =>{
             if (intent === "OptOut"){
-                await contactListRepository.update({ optOut: "true" }, { where:{ mobileNumber: payload.userId } })
-                    .then(() => {console.log("updated");})
+                await contactListRepository.update({ optOut: "true" }, { where: { mobileNumber: payload.userId } })
+                    .then(() => { console.log("updated"); })
                     .catch(error =>console.log("error on update", error));
                 const data = {
                     "fulfillmentMessages" : [
@@ -32,8 +32,8 @@ export class WhatsAppOptingOption{
                 resolve(data);
             }
             else if (intent === "OptIn"){
-                await contactListRepository.update({ optOut: "false" }, { where:{ mobileNumber: payload.userId } })
-                    .then(() => {console.log("updated");})
+                await contactListRepository.update({ optOut: "false" }, { where: { mobileNumber: payload.userId } })
+                    .then(() => { console.log("updated"); })
                     .catch(error =>console.log("error on update", error));
         
                 const data = {

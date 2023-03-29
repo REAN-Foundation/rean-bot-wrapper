@@ -14,5 +14,6 @@ export  class EntityManagerProvider{
     getEntityManager = async () => {
         const sequelize =  await this.sequelizeClient.getSequelizeClient(this.clientEnvironmentPrviderService);
         return sequelize;
-    }
+    };
+
 }

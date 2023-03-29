@@ -12,7 +12,7 @@ export class ChatSession extends Model implements chatSession {
     @AutoIncrement
     @PrimaryKey
     @Column({
-        type : DataType.INTEGER,
+        type      : DataType.INTEGER,
         allowNull : false
     })
         autoIncrementalID: number;
@@ -53,6 +53,6 @@ export class ChatSession extends Model implements chatSession {
         askForFeedback: string;
 
     @HasMany(() => ChatMessage)
-    ChatMessage: ChatMessage[];
+        ChatMessage: ChatMessage[];
 
 }

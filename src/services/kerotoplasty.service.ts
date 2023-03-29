@@ -93,7 +93,7 @@ export class kerotoplastyService {
         await userFeedbackRepository.create({ userId: userId, channel: channel,humanHandoff: "false" });
         const responseUserFeedback = await userFeedbackRepository.findAll({ where: { userId: userId } });
         this.clickUpTask.createTask(null, responseUserFeedback,null,topic,user_details)
-            .then((response) => {this.clickUpTask.taskAttachment(response.body.id,attachmentPath);});
+            .then((response) => { this.clickUpTask.taskAttachment(response.body.id,attachmentPath); });
     }
 
     async getEMRDetails(emr_number, eventObj){
