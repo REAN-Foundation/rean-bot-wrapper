@@ -17,6 +17,7 @@ import { AwsSecretsManager } from "./services/aws.secret.manager.service";
 import { Timer } from "./middleware/timer";
 import { CheckCrossConnection } from "./middleware/check.cross.connection";
 import { Injector } from "./startup/injector";
+import { SequelizeClient } from "./connection/sequelizeClient";
 
 declare module "express-serve-static-core" {
     interface Request {
@@ -93,12 +94,14 @@ export default class Application {
         }
     }
 
-    setWebhooksForClients() {
+    async setWebhooksForClients() {
         const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
+        const sequelizeClient: SequelizeClient = container.resolve(SequelizeClient);
         const telegram: platformServiceInterface = container.resolve('telegram');
         const whatsapp: platformServiceInterface = container.resolve('whatsapp');
         for (const clientName of this.clientsList) {
             clientEnvironmentProviderService.setClientName(clientName);
+            await sequelizeClient.getSequelizeClient(clientEnvironmentProviderService);
             if (clientName === "NSMI"){
                 telegram.setWebhook(clientName);
             } else if (clientName === "UNION"){
@@ -146,7 +149,7 @@ export default class Application {
             this._IndexCreation.createIndexes();
 
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            this.setWebhooksForClients();
+            await this.setWebhooksForClients();
 
             //Start listening
             await this.listen();

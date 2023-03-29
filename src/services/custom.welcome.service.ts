@@ -4,6 +4,7 @@ import { ChatMessage } from '../models/chat.message.model';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { Iresponse } from "../refactor/interface/message.interface";
 import { commonResponseMessageFormat } from "./common.response.format.object";
+import { EntityManagerProvider } from "./entity.manager.provider.service";
 
 @scoped(Lifecycle.ContainerScoped)
 export class CustomWelcomeService {
@@ -13,10 +14,12 @@ export class CustomWelcomeService {
     constructor(
         // eslint-disable-next-line max-len
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
-        private _platformMessageService?: platformServiceInterface){}
+        private _platformMessageService?: platformServiceInterface,
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider){}
 
     async checkSession(userId:any){
-        const prevSessions = await ChatMessage.findAll({
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+        const prevSessions = await chatMessageRepository.findAll({
             where : {
                 userPlatformID : userId,
             }
