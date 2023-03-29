@@ -2,8 +2,8 @@ import { Logger } from '../common/logger';
 import { getRequestOptions } from '../utils/helper';
 import needle from "needle";
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { inject, Lifecycle, scoped,  } from 'tsyringe';
-import { getHeaders } from '../services/biometrics/get.headers';
+import { container,  } from 'tsyringe';
+import { GetHeaders } from '../services/biometrics/get.headers';
 import { Dose,Duration,MedicationAdministrationRoutes,MedicationDomainModel,MedicineName } from '../refactor/interface/medication.interface';
 import { NeedleService } from './needle.service';
 

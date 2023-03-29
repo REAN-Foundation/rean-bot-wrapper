@@ -2,7 +2,7 @@
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { container, inject, Lifecycle, scoped } from 'tsyringe';
 import needle from "needle";
-import { getHeaders } from './biometrics/get.headers';
+import { GetHeaders } from './biometrics/get.headers';
 import { getRequestOptions } from '../utils/helper';
 
 @scoped(Lifecycle.ContainerScoped)

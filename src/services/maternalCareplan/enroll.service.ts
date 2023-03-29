@@ -1,20 +1,21 @@
-import { getHeaders } from '../../services/biometrics/get.headers';
+import { GetHeaders } from '../../services/biometrics/get.headers';
 import { GetPatientInfoService } from '../../services/support.app.service';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
-import { container, inject, Lifecycle, scoped } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { Logger } from '../../common/logger';
 import needle from 'needle';
 
 @scoped(Lifecycle.ContainerScoped)
-export class EnrollService{
+export class EnrollService {
 
     constructor(
+        @inject(GetHeaders) private getHeaders: GetHeaders,
+        @inject(GetPatientInfoService) private getPatientInfoService: GetPatientInfoService,
         // eslint-disable-next-line max-len
-        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
-        @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService: ClientEnvironmentProviderService
     ){}
 
-    async enrollService(eventObj) {
+    enrollService = async (eventObj) => {
         if (eventObj) {
             const name = eventObj.body.queryResult.parameters.Name.name;
             const lmp = eventObj.body.queryResult.parameters.LMP;
@@ -34,7 +35,7 @@ export class EnrollService{
     
             const patientUserId = result.message[0].UserId;
             const accessToken = result.message[0].accessToken;
-            const options = getHeaders(accessToken);
+            const options = this.getHeaders.getHeaders(accessToken);
     
             //Update patient information
             const ReanBackendBaseUrl =
@@ -73,6 +74,6 @@ export class EnrollService{
         } else {
             throw new Error(`500, Maternity careplan enrollment service error!`);
         }
-    }
-
+    };
+    
 }

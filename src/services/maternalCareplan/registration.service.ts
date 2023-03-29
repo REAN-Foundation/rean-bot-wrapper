@@ -1,4 +1,4 @@
-import { getHeaders } from '../../services/biometrics/get.headers';
+import { GetHeaders } from '../../services/biometrics/get.headers';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import needle from 'needle';
@@ -7,22 +7,22 @@ import { NeedleService } from '../needle.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class RegistrationService {
-    
-    constructor(
-        // eslint-disable-next-line max-len
-        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
-        @inject(NeedleService) private needleService?: NeedleService
-    ){}
 
-    async registrationService(eventObj) {
+    constructor(
+        @inject(GetHeaders) private getHeaders: GetHeaders,
+        @inject(ClientEnvironmentProviderService)
+        private clientEnvironmentProviderService: ClientEnvironmentProviderService
+    ) {}
+
+    registrationService = async (eventObj) => {
 
         if (eventObj) {
             const name : string = eventObj.body.queryResult.parameters.Name.name;
             const lmp : string = eventObj.body.queryResult.parameters.LMP;
     
-            const phoneNumber = await this.needleService.getPhoneNumber(eventObj);
+            const phoneNumber = await getPhoneNumber(eventObj);
             
-            const options = getHeaders();
+            const options = this.getHeaders.getHeaders();
             const ReanBackendBaseUrl =
                 this.clientEnvironmentProviderService.getClientEnvironmentVariable('REAN_APP_BACKEND_BASE_URL');
             const url = `${ReanBackendBaseUrl}patients`;
@@ -45,6 +45,6 @@ export class RegistrationService {
         } else {
             throw new Error(`500, Register patient with maternity careplan error!`);
         }
-    }
-    
+    };
 }
+

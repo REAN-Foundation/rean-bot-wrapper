@@ -67,8 +67,8 @@ export class snehaMessagePlatformService implements platformServiceInterface{
     }
 
     SendMediaMessage(response_format:Iresponse, message){
-        this.responseHandler.sendSuccessResponseForApp(this.res, 201, "Message processed successfully.", { response_message: message });
-        return message;
+        this.responseHandler.sendSuccessResponseForApp(this.res, 201, "Message processed successfully.", { response_message: response_format.messageText });
+        return response_format.messageText;
     }
 
 }
