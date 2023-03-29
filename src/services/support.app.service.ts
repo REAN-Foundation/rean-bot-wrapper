@@ -3,12 +3,13 @@ import { getRequestOptions } from '../utils/helper';
 import needle from "needle";
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { container,  } from 'tsyringe';
-import { getHeaders } from '../services/biometrics/get.headers';
+import { GetHeaders } from '../services/biometrics/get.headers';
 import { Dose,Duration,MedicationAdministrationRoutes,MedicationDomainModel,MedicineName } from '../refactor/interface/medication.interface';
 import { getPhoneNumber } from './needle.service';
 
 // eslint-disable-next-line max-len
 const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
+const getHeaders: GetHeaders = container.resolve(GetHeaders);
 
 export class GetPatientInfoService{
 
@@ -18,7 +19,7 @@ export class GetPatientInfoService{
                 Logger.instance().log(`Get Patient Info API ${clientEnvironmentProviderService.getClientName()}`);
 
                 const phoneNumber = await getPhoneNumber(eventObj);
-                const options = getHeaders();
+                const options = getHeaders.getHeaders();
                 const ReanBackendBaseUrl = clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
                 const apiUrl = `${ReanBackendBaseUrl}patients/byPhone?phone=${encodeURIComponent(phoneNumber)}`;
                 console.log("apiUrl", apiUrl);
