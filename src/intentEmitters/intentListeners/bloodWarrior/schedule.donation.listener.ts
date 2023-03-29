@@ -6,7 +6,10 @@ export const ScheduleDonation = async (intent, eventObj) => {
         let result = null;
         result = await scheduleDonationService.ScheduleDonation(eventObj);
         console.log(result);
-        return result.message;
+        return Promise.resolve(result.message)
+            .then(async (eventObj) => {
+                await scheduleDonationService.ScheduleDonationEligibity(eventObj);
+            });
 
     } catch (error) {
         console.log(error);
