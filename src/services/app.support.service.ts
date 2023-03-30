@@ -1,22 +1,21 @@
 /* eslint-disable init-declarations */
 import { Imessage, IprocessedDialogflowResponseFormat, Iresponse } from '../refactor/interface/message.interface';
-import { autoInjectable, singleton } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { MessageFlow } from './get.put.message.flow.service';
 import { ResponseHandler } from '../utils/response.handler';
 import { RHGMessageToDialogflow } from './rhg.message.to.dialogflow';
 
-@autoInjectable()
-@singleton()
+@scoped(Lifecycle.ContainerScoped)
 export class platformMessageService implements platformServiceInterface{
 
     public translate = false;
 
     public res;
 
-    constructor(private messageFlow?: MessageFlow,
-        private responseHandler?: ResponseHandler,
-        private rhgMessageToDialogflow?: RHGMessageToDialogflow
+    constructor(@inject(MessageFlow) private messageFlow?: MessageFlow,
+        @inject(ResponseHandler) private responseHandler?: ResponseHandler,
+        @inject(RHGMessageToDialogflow) private rhgMessageToDialogflow?: RHGMessageToDialogflow
     ) {
 
     }

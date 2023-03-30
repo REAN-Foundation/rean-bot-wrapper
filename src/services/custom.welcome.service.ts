@@ -1,21 +1,25 @@
-import { autoInjectable,container } from "tsyringe";
+import { inject, Lifecycle, scoped } from "tsyringe";
 import { platformServiceInterface } from "../refactor/interface/platform.interface";
 import { ChatMessage } from '../models/chat.message.model';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { Iresponse } from "../refactor/interface/message.interface";
 import { commonResponseMessageFormat } from "./common.response.format.object";
+import { EntityManagerProvider } from "./entity.manager.provider.service";
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class CustomWelcomeService {
 
     public res;
 
-    private _platformMessageService?: platformServiceInterface;
-
-    constructor(private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+    constructor(
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        private _platformMessageService?: platformServiceInterface,
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider){}
 
     async checkSession(userId:any){
-        const prevSessions = await ChatMessage.findAll({
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+        const prevSessions = await chatMessageRepository.findAll({
             where : {
                 userPlatformID : userId,
             }
@@ -39,7 +43,8 @@ export class CustomWelcomeService {
 
     async postResponseCustom(userId: any, client: any, data: any) {
         console.log("Sending calorie data to client");
-        this._platformMessageService = container.resolve(client);
+        
+        // this._platformMessageService = container.resolve(client);
         const response_format: Iresponse = commonResponseMessageFormat();
         response_format.platform = client;
         response_format.sessionId = userId;

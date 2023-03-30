@@ -3,32 +3,38 @@
 import { ChatSession } from '../models/chat.session';
 import { translateService } from './translate.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { autoInjectable } from 'tsyringe';
+import { delay, inject, Lifecycle, scoped } from 'tsyringe';
+import { EntityManagerProvider } from './entity.manager.provider.service';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class UserLanguage {
 
     private translateSetting;
 
-    constructor(private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+    constructor(
+        @inject(delay(() => translateService)) private _translateService,
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider
+    ){}
 
     async setLanguageForSession(messageType, sessionId, message) {
-        const respChatSession = await ChatSession.findAll({ where: { userPlatformID: sessionId } });
+        const chatSessionRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatSession);
+        const respChatSession = await chatSessionRepository.findAll({ where: { userPlatformID: sessionId } });
         const autoIncrementalID = respChatSession[respChatSession.length - 1].autoIncrementalID;
         const preferredLanguage = await this.getPreferredLanguageofSession(sessionId);
         console.log("preferredLanguage",preferredLanguage);
         if (preferredLanguage === "null"){
             console.log('Will create a session if it is the first entry in the chat session or if session is not open');
             const detected_language = await this.toDetectLangugaeOrNot(messageType, message);
-            const setUserLanguage = new ChatSession({ userPlatformID: sessionId, preferredLanguage: detected_language, sessionOpen: "true" });
-            await setUserLanguage.save();
+            await chatSessionRepository.create({ userPlatformID: sessionId, preferredLanguage: detected_language, sessionOpen: "true" });
+            // await setUserLanguage.save();
             return detected_language;
         }
         else if (preferredLanguage === "update"){
             console.log("autoIncrementalID", autoIncrementalID);
             // const detected_language = await new translateService().detectLanguage(message);
             const detected_language = await this.toDetectLangugaeOrNot(messageType, message);
-            await ChatSession.update({ preferredLanguage: detected_language }, { where: { autoIncrementalID: autoIncrementalID } } )
+            await chatSessionRepository.update({ preferredLanguage: detected_language }, { where: { autoIncrementalID: autoIncrementalID } } )
                 .then(() => { console.log("updated lastMessageDate"); })
                 .catch(error => console.log("error on update", error));
             return detected_language;
@@ -55,7 +61,7 @@ export class UserLanguage {
                 if (messageType === "image") {
                     detected_language = preferredLanguage;
                 }
-                await ChatSession.update({ preferredLanguage: detected_language, sessionOpen: "true" }, { where: { autoIncrementalID: autoIncrementalID } });
+                await chatSessionRepository.update({ preferredLanguage: detected_language, sessionOpen: "true" }, { where: { autoIncrementalID: autoIncrementalID } });
                 return detected_language;
             }
         }
@@ -63,7 +69,8 @@ export class UserLanguage {
 
     async getPreferredLanguageofSession(sessionId){
         return new Promise<string>(async(resolve) => {
-            const userLanguageTableResponse = await ChatSession.findAll({ where: { userPlatformID: sessionId } });
+            const chatSessionRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatSession);
+            const userLanguageTableResponse = await chatSessionRepository.findAll({ where: { userPlatformID: sessionId } });
             //console.log("userLanguageTableResponse",userLanguageTableResponse);
             try {
                 console.log(`Push notification language table response length ${userLanguageTableResponse.length}`);
@@ -96,7 +103,7 @@ export class UserLanguage {
         // eslint-disable-next-line init-declarations
         let detected_language:string;
         if (messageType !== "location"){
-            detected_language = await new translateService().detectLanguage(message);
+            detected_language = await this._translateService.detectLanguage(message);
         }
         else {
             console.log("it was latlong");

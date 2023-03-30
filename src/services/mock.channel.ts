@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 import { AwsS3manager } from './aws.file.upload.service';
-import { autoInjectable, singleton, inject, delay } from 'tsyringe';
+import { inject, delay, scoped, Lifecycle } from 'tsyringe';
 import { Iresponse, Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { MessageFlow } from './get.put.message.flow.service';
@@ -10,17 +10,19 @@ import { MockCHannelMessageFunctionalities } from './mock.channel.message.funtio
 import { ChatMessage } from '../models/chat.message.model';
 import { WhatsappMessageToDialogflow } from './whatsapp.messagetodialogflow';
 import request from 'request';
+import { EntityManagerProvider } from './entity.manager.provider.service';
 
-@autoInjectable()
-@singleton()
+// @autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class MockMessageService implements platformServiceInterface {
 
     public res;
 
     constructor(@inject(delay(() => MessageFlow)) public messageFlow,
-        private awsS3manager?: AwsS3manager,
-        private messageFunctionalitiesmockchannel?: MockCHannelMessageFunctionalities,
-        public whatsappMessageToDialogflow?: WhatsappMessageToDialogflow){}
+        @inject( AwsS3manager ) private awsS3manager?: AwsS3manager,
+        @inject(MockCHannelMessageFunctionalities) private messageFunctionalitiesmockchannel?: MockCHannelMessageFunctionalities,
+        @inject(WhatsappMessageToDialogflow) public whatsappMessageToDialogflow?: WhatsappMessageToDialogflow,
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider){}
 
     async handleMessage(requestBody: any, channel: string) {
 
@@ -111,7 +113,8 @@ export class MockMessageService implements platformServiceInterface {
     }
 
     SendMediaMessage = async (response_format:Iresponse, payload: any) => {
-        const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: response_format.sessionId } });
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+        const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.sessionId } });
         const lastMessageDate = respChatMessage[respChatMessage.length - 1].createdAt;
         const obj = { timeStamp: lastMessageDate, message: response_format.messageText };
         const mockUri = "http://127.0.0.1:80/listener";

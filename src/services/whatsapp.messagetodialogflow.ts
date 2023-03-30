@@ -1,12 +1,14 @@
 /* eslint-disable init-declarations */
 import { WhatsappRequest } from "./request.format/whatsapp.request";
 import { MessageFunctionalities } from './whatsapp.functionalities';
-import { autoInjectable } from "tsyringe";
+import { inject, Lifecycle, scoped } from "tsyringe";
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class WhatsappMessageToDialogflow {
 
-    constructor (private messageFunctionalities?: MessageFunctionalities) {}
+    constructor (
+        @inject(MessageFunctionalities) private messageFunctionalities?: MessageFunctionalities
+    ) {}
 
     async *messageToDialogflow (requestBody: any) {
         const whatsappRequestObj = new WhatsappRequest(requestBody);

@@ -5,20 +5,22 @@ import fs from 'fs';
 import { Imessage } from '../refactor/interface/message.interface';
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 import { Speechtotext } from './speech.to.text.service';
-import { autoInjectable } from "tsyringe";
+import { inject, Lifecycle, scoped } from "tsyringe";
 import { EmojiFilter } from './filter.message.for.emoji.service';
 import { AwsS3manager } from "./aws.file.upload.service";
 import { UserLanguage } from "./set.language";
 import needle from 'needle';
 import { Message } from './request.format/whatsapp.message.format';
 import { getRequestOptions } from "../utils/helper";
-@autoInjectable()
+
+@scoped(Lifecycle.ContainerScoped)
 export class MessageFunctionalities implements getMessageFunctionalities {
 
-    constructor(private emojiFilter?: EmojiFilter,
-        private speechtotext?: Speechtotext,
-        private awsS3manager?: AwsS3manager,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+    constructor(@inject(EmojiFilter) private emojiFilter?: EmojiFilter,
+        @inject(Speechtotext) private speechtotext?: Speechtotext,
+        @inject(AwsS3manager) private awsS3manager?: AwsS3manager,
+        @inject(UserLanguage) private userLanguage?: UserLanguage,
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     async textMessageFormat (messageObj:Message) {
         const messagetoDialogflow = this.inputMessageFormat(messageObj);
@@ -246,7 +248,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
 
     async commonVoiceAudioFormat(messageObj,mediaUrl) {
         const userId = messageObj.getUserId();
-        const preferredLanguage = await new UserLanguage().getPreferredLanguageofSession(userId);
+        const preferredLanguage = await this.userLanguage.getPreferredLanguageofSession(userId);
         const ConvertedToText = await this.speechtotext.SendSpeechRequest(mediaUrl, "whatsapp", preferredLanguage);
         if (preferredLanguage !== "null"){
             if (ConvertedToText) {

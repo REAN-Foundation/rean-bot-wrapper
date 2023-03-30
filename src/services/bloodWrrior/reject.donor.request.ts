@@ -1,20 +1,21 @@
 import { Logger } from '../../common/logger';
-import { needleRequestForREAN } from '../needle.service';
+import { NeedleService } from '../needle.service';
 import { BloodWarriorCommonService } from './common.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { autoInjectable, container } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { RaiseDonationRequestService } from './raise.request.service';
 import { Iresponse } from '../../refactor/interface/message.interface';
 import { commonResponseMessageFormat } from '../common.response.format.object';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class RejectDonorRequestService {
 
-    private _platformMessageService?: platformServiceInterface;
-
-    private raiseDonationRequestService = new RaiseDonationRequestService();
-
-    private bloodWarriorCommonService = new BloodWarriorCommonService();
+    constructor(
+        private _platformMessageService?: platformServiceInterface,
+        @inject(RaiseDonationRequestService) private raiseDonationRequestService?: RaiseDonationRequestService,
+        @inject(BloodWarriorCommonService) private bloodWarriorCommonService?: BloodWarriorCommonService,
+        @inject(NeedleService) private needleService?: NeedleService,
+    ) {}
 
     public rejectDonorRequest = async (eventObj) => {
         return new Promise(async (resolve) => {
@@ -23,7 +24,7 @@ export class RejectDonorRequestService {
                 donor = await this.bloodWarriorCommonService.getDonorByPhoneNumber(eventObj);
 
                 const apiURL = `clinical/donation-record/search?donorUserId=${donor.UserId}`;
-                const requestBody = await needleRequestForREAN("get", apiURL);
+                const requestBody = await this.needleService.needleRequestForREAN("get", apiURL);
                 const donationRecordId = requestBody.Data.DonationRecord.Items[0].id;
                 let volunteerUserId = null;
                 let patientUserId = null;
@@ -37,7 +38,7 @@ export class RejectDonorRequestService {
                 resolve( { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } });
 
                 const payload = eventObj.body.originalDetectIntentRequest.payload;
-                this._platformMessageService = container.resolve(payload.source);
+                this._platformMessageService = eventObj.container.resolve(payload.source);
 
                 //update donation record with rejection
                 const obj = {

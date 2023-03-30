@@ -2,9 +2,8 @@
 /* eslint-disable max-len */
 import http from 'https';
 import { AwsS3manager } from './aws.file.upload.service';
-import { autoInjectable, singleton, inject, delay } from 'tsyringe';
+import { inject, delay, scoped, Lifecycle } from 'tsyringe';
 import { MessageFlow } from './get.put.message.flow.service';
-import { MessageFunctionalities } from './whatsapp.functionalities';
 import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import needle from 'needle';
@@ -14,18 +13,19 @@ import { WhatsappMessageToDialogflow } from './whatsapp.messagetodialogflow';
 import { CommonWhatsappService } from './whatsapp.common.service';
 import { Iresponse } from '../refactor/interface/message.interface';
 import { WhatsappPostResponseFunctionalities } from './whatsapp.post.response.functionalities';
+import { EntityManagerProvider } from './entity.manager.provider.service';
 
-@autoInjectable()
-@singleton()
+@scoped(Lifecycle.ContainerScoped)
 export class WhatsappMessageService extends CommonWhatsappService {
 
     public res;
 
     constructor(@inject(delay(() => MessageFlow)) public messageFlow,
-        awsS3manager?: AwsS3manager,
+        @inject(AwsS3manager) awsS3manager?: AwsS3manager,
         @inject("whatsapp.authenticator") private clientAuthenticator?: clientAuthenticator,
-        private whatsappPostResponseFunctionalities?: WhatsappPostResponseFunctionalities,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(WhatsappPostResponseFunctionalities) private whatsappPostResponseFunctionalities?: WhatsappPostResponseFunctionalities,
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         whatsappMessageToDialogflow?: WhatsappMessageToDialogflow){
         super(messageFlow, awsS3manager, whatsappMessageToDialogflow);
     }
@@ -200,9 +200,10 @@ export class WhatsappMessageService extends CommonWhatsappService {
 
             //improve this DB query
             if (needleResp.statuscode === 200) {
-                const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: response_format.sessionId } });
+                const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+                const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.sessionId } });
                 const id = respChatMessage[respChatMessage.length - 1].id;
-                await ChatMessage.update({ whatsappResponseMessageId: needleResp.body.messages[0].id }, { where: { id: id } } )
+                await chatMessageRepository.update({ whatsappResponseMessageId: needleResp.body.messages[0].id }, { where: { id: id } } )
                     .then(() => { console.log("updated"); })
                     .catch(error => console.log("error on update", error));
                 return needleResp;

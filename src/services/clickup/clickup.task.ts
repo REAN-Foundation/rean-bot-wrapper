@@ -1,20 +1,22 @@
 import needle from 'needle';
 import { getRequestOptions } from '../../utils/helper';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
-import { autoInjectable } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { UserFeedback } from '../../models/user.feedback.model';
 import FormData from 'form-data';
 import fs from 'fs';
 import axios from 'axios';
 import crypto from 'crypto';
-import { ChatMessage } from '../../models/chat.message.model';
+import { EntityManagerProvider } from '../entity.manager.provider.service';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class ClickUpTask{
 
     private description = null;
 
-    constructor(private clientEnvironmentProviderService?: ClientEnvironmentProviderService) { }
+    // eslint-disable-next-line max-len
+    constructor(@inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+    @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider) { }
 
     // eslint-disable-next-line max-len
     async createTask(rdsData,responseUserFeedback,imageLink:string = null,postTopic:string = null, description:string = null){
@@ -51,19 +53,14 @@ export class ClickUpTask{
         }
 
         const response = await needle("post", createTaskUrl, obj, options);
-
-        // console.log("response status", response.statusCode);
-        // console.log("body", response.body.id);
+        // eslint-disable-next-line max-len
+        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
         if (responseUserFeedback){
-
-            // console.log("responseUserFeedback",responseUserFeedback);
             const objID = responseUserFeedback[responseUserFeedback.length - 1].dataValues.id;
-            
-            // console.log("objId", objID);
-            await UserFeedback.update({ taskID: response.body.id }, { where: { id: objID } })
+            await userFeedbackRepository.update({ taskID: response.body.id }, { where: { id: objID } })
                 .then(() => { console.log("updated"); })
                 .catch(error => console.log("error on update", error));
-            await UserFeedback.update({ messageContent: topic }, { where: { id: objID } })
+            await userFeedbackRepository.update({ messageContent: topic }, { where: { id: objID } })
                 .then(() => { console.log("updated"); })
                 .catch(error => console.log("error on update", error));
             return response.body.id;
@@ -110,4 +107,5 @@ export class ClickUpTask{
         await needle("post", createTaskUrl, obj, options);
 
     }
+    
 }

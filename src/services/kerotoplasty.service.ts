@@ -1,20 +1,27 @@
 import { GetLocation } from "./find.nearest.location.service";
 import { dialoflowMessageFormatting } from "./Dialogflow.service";
-import { autoInjectable } from "tsyringe";
-import {ClickUpTask} from "./clickup/clickup.task";
+import { inject, Lifecycle, scoped } from "tsyringe";
+import { ClickUpTask } from "./clickup/clickup.task";
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import path from 'path';
 import { UserFeedback } from "../models/user.feedback.model";
 import needle from 'needle';
+import { EntityManagerProvider } from "./entity.manager.provider.service";
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class kerotoplastyService {
 
     private retryNumber = 0;
 
     constructor(
-        private DialogflowServices?: dialoflowMessageFormatting,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService){ }
+        @inject(dialoflowMessageFormatting) private DialogflowServices?: dialoflowMessageFormatting,
+        @inject(GetLocation) private getLocation?: GetLocation,
+        @inject(ClickUpTask) private clickUpTask?: ClickUpTask,
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
+
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
+    ){}
 
     identifyCondition = async (eventObj) => {
         if (eventObj) {
@@ -38,8 +45,7 @@ export class kerotoplastyService {
     };
 
     async conditionSpecificResponse(intent,eventObj){
-        const getLocationService = new GetLocation();
-        const locationData = await getLocationService.getLoctionData(eventObj);
+        const locationData = await this.getLocation.getLoctionData(eventObj);
         let message = null;
         console.log("our location data is ",locationData);
         const postalAddress = locationData["Postal Addres"];
@@ -81,12 +87,11 @@ export class kerotoplastyService {
         return (symptomComment);
     }
 
-    async postingOnClickup(intent,eventObj){
-        const clickupService = new ClickUpTask();
+    async postImageOnClickup(intent,eventObj){
         const parameters = eventObj.body.queryResult.parameters;
         const payload = eventObj.body.originalDetectIntentRequest.payload;
-        const symptomComment = await this.symptomByUser(parameters);
         const filename = path.basename(parameters.image);
+        const symptomComment = await this.symptomByUser(parameters);
         const attachmentPath = `./photo/` + filename;
         const condition = {
             'hyperCriticalCondition' : 'HyperCritical',
@@ -94,21 +99,20 @@ export class kerotoplastyService {
             'normalCondition'        : 'Normal'
         };
         const condition_string = condition[intent];
-        const user_details = await this.getEMRDetails(parameters.medicalRecordNumber);
+        const user_details = await this.getEMRDetails(parameters.medicalRecordNumber, eventObj);
         const topic = condition_string + "_" + parameters.medicalRecordNumber;
-        const feedBackInfo = new UserFeedback({ userId: payload.userId, channel: payload.source,humanHandoff: "false" });
-        await feedBackInfo.save();
-        const responseUserFeedback = await UserFeedback.findAll({ where: { userId: payload.userId } });
-        const taskID = await clickupService.createTask(null, responseUserFeedback,attachmentPath,topic,user_details);
-        await clickupService.taskAttachment(taskID,attachmentPath);
-        await clickupService.postCommentOnTask(taskID,symptomComment);
-            
+        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
+        await userFeedbackRepository.create({ userId: payload.userId, channel: payload.source,humanHandoff: "false" });
+        const responseUserFeedback = await userFeedbackRepository.findAll({ where: { userId: payload.userId } });
+        const taskID = await this.clickUpTask.createTask(null, responseUserFeedback,attachmentPath,topic,user_details);
+        await this.clickUpTask.taskAttachment(taskID,attachmentPath);
+        await this.clickUpTask.postCommentOnTask(taskID,symptomComment);
     }
 
-    async getEMRDetails(emr_number){
+    async getEMRDetails(emr_number, eventObj){
         try {
             let response: any = {};
-            response = await this.makeApiCall(emr_number);
+            response = await this.makeApiCall(emr_number, eventObj);
             let report = "### Patient Details\n";
             const patient_details = response.body.patient_details;
             if (response.body.patient_details) {
@@ -155,10 +159,11 @@ export class kerotoplastyService {
         });
     }
 
-    async makeApiCall(emr_number) {
-        const url = this.clientEnvironmentProviderService.getClientEnvironmentVariable("EMR_URL");
-        const key = this.clientEnvironmentProviderService.getClientEnvironmentVariable("EMR_KEY");
-        const code = this.clientEnvironmentProviderService.getClientEnvironmentVariable("EMR_CODE");
+    async makeApiCall(emr_number, eventObj) {
+        const clientEnvironmentProviderService = eventObj.container.resolve(ClientEnvironmentProviderService);
+        const url = clientEnvironmentProviderService.getClientEnvironmentVariable("EMR_URL");
+        const key = clientEnvironmentProviderService.getClientEnvironmentVariable("EMR_KEY");
+        const code = clientEnvironmentProviderService.getClientEnvironmentVariable("EMR_CODE");
         var headers = {
             'Content-Type' : 'application/json',
             accept         : 'application/json'
@@ -181,7 +186,7 @@ export class kerotoplastyService {
             this.retryNumber++;
             if (this.retryNumber < 5){
                 await this.sleep(10000);
-                return await this.makeApiCall(emr_number);
+                return await this.makeApiCall(emr_number,eventObj);
             }
         }
     }
@@ -191,4 +196,5 @@ export class kerotoplastyService {
             setTimeout(resolve, ms);
         });
     }
+    
 }

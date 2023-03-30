@@ -1,6 +1,5 @@
-import { howDoFeelBetterInfoService,howDoFeelWorseInfoService,
-    howDoFeelSameInfoService } from "../../services/symptom/how.do.you.feel";
-import { howDoFeelWorse2InfoService } from "../../services/symptom/how.do.you.feel.worse";
+import { HowDoYouFeelService } from "../../services/symptom/how.do.you.feel";
+import { HowDoYouFeelWorseService } from "../../services/symptom/how.do.you.feel.worse";
 
 export class AppSymptomListener {
 
@@ -9,20 +8,23 @@ export class AppSymptomListener {
         try {
             switch (intent) {
             case 'HowYouFeel - Better': {
-                response = await howDoFeelBetterInfoService(eventObj);
+                const howDoYouFeelService = eventObj.container.resolve(HowDoYouFeelService);
+                response = await howDoYouFeelService.howDoFeelBetterInfoService(eventObj);
                 break;
             }
             case 'HowYouFeel - same': {
-                response = await howDoFeelSameInfoService(eventObj);
+                const howDoYouFeelService = eventObj.container.resolve(HowDoYouFeelService);
+                response = await howDoYouFeelService.howDoYouFeelServicehowDoFeelSameInfoService(eventObj);
                 break;
             }
             case 'HowYouFeel - worse': {
-                response = await howDoFeelWorseInfoService(eventObj);
+                const howDoYouFeelService = eventObj.container.resolve(HowDoYouFeelService);
+                response = await howDoYouFeelService.howDoFeelWorseInfoService(eventObj);
                 break;
             }
             case 'HowYouFeel - worse - custom - worse': {
-
-                response = await howDoFeelWorse2InfoService(eventObj);
+                const howDoFeelWorse2InfoService = eventObj.container.resolve(HowDoYouFeelWorseService);
+                response = await howDoFeelWorse2InfoService.howDoFeelWorse2InfoService(eventObj);
                 break;
             }
             }

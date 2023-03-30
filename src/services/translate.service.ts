@@ -4,15 +4,18 @@ import { v2, TranslationServiceClient } from '@google-cloud/translate';
 import { UserLanguage } from './set.language';
 import { DialogflowResponseFormat } from './response.format/dialogflow.response.format';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { autoInjectable, singleton } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 
 let detected_language = 'en';
 let dialogflow_language = "en-US";
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class translateService{
 
-    constructor(private clientEnvironmentProviderService?: ClientEnvironmentProviderService) {}
+    constructor(
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(UserLanguage) private userLanguage?: UserLanguage
+    ) {}
 
     private GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
 
@@ -44,7 +47,7 @@ export class translateService{
 
     translateMessage = async (messageType, message:string, sessionId) => {
         const translate = new v2.Translate(this.obj);
-        const languageForSession = await new UserLanguage().setLanguageForSession(messageType, sessionId, message);
+        const languageForSession = await this.userLanguage.setLanguageForSession(messageType, sessionId, message);
         console.log("languageForSession", languageForSession);
         // if (languageForSession === "change language") {
         //     const message = "change language";
@@ -80,7 +83,7 @@ export class translateService{
 
     translatePushNotifications = async ( message: string, phoneNumber: string) => {
         try {
-            let languageForSession = await new UserLanguage().getPreferredLanguageofSession(phoneNumber);
+            let languageForSession = await this.userLanguage.getPreferredLanguageofSession(phoneNumber);
             console.log("languageForSession before", languageForSession);
 
             languageForSession = languageForSession !== 'null' ? languageForSession : 'en';
@@ -96,10 +99,10 @@ export class translateService{
 
     detectUsersLanguage = async ( phoneNumber: string) => {
         try {
-            let languageForSession = await new UserLanguage().getPreferredLanguageofSession(phoneNumber);
+            let languageForSession = await this.userLanguage.getPreferredLanguageofSession(phoneNumber);
             console.log("languageForSession before", languageForSession);
 
-            languageForSession = languageForSession !== 'null' ? languageForSession : 'en';
+            languageForSession = languageForSession !== 'null' ? languageForSession : this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
             console.log("languageForSession after", languageForSession);
             return languageForSession;
 

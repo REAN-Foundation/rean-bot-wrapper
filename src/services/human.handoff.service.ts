@@ -1,15 +1,16 @@
 /* eslint-disable max-len */
 import { UserFeedback } from "../models/user.feedback.model";
-import { delay, inject } from "tsyringe";
-import { autoInjectable } from 'tsyringe';
+import { delay, inject, Lifecycle, scoped } from "tsyringe";
 import { SlackMessageService } from "./slack.message.service";
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
+import { EntityManagerProvider } from "./entity.manager.provider.service";
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class HumanHandoff {
 
     constructor(@inject(delay(() => SlackMessageService)) public slackMessageService,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider){}
 
     async checkTime(){
         const time_obj = new Date();
@@ -36,10 +37,10 @@ export class HumanHandoff {
     async humanHandover(eventObj){
         return new Promise(async(resolve) =>{
             const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
-            const resp = await UserFeedback.findAll({where:{userId: userId}});
-            console.log("resp human handover find one", resp);
+            const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
+            const resp = await userFeedbackRepository.findAll({ where: { userId: userId } });
             const objID = resp[resp.length - 1].id;
-            await UserFeedback.update({ humanHandoff: "true" }, { where: { id: objID } } )
+            await userFeedbackRepository.update({ humanHandoff: "true" }, { where: { id: objID } } )
                 .then(() => { console.log("updated"); })
                 .catch(error => console.log("error on update", error));
             const reply = "Our expert will connect to you soon";
@@ -61,7 +62,7 @@ export class HumanHandoff {
             await this.slackMessageService.delayedInitialisation();
             const client = this.slackMessageService.client;
             const channelID = this.slackMessageService.channelID;
-            await client.chat.postMessage({ channel: channelID, text: "This user wants to connect to an expert", thread_ts: ts});
+            await client.chat.postMessage({ channel: channelID, text: "This user wants to connect to an expert", thread_ts: ts });
         });
 
     }

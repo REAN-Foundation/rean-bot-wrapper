@@ -3,12 +3,17 @@ import { ChatMessage } from "../models/chat.message.model";
 import { Iresponse } from "../refactor/interface/message.interface";
 import needle from 'needle';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { autoInjectable } from "tsyringe";
+import { inject, Lifecycle, scoped } from "tsyringe";
+import { EntityManagerProvider } from "./entity.manager.provider.service";
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class TelegramPostResponseFunctionalities {
 
-    constructor(private clientEnvironmentProviderService?:ClientEnvironmentProviderService){}
+    constructor(
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?:ClientEnvironmentProviderService,
+        @inject(EntityManagerProvider) private entityManagerProvider?:EntityManagerProvider
+    ){}
 
     sendtextResponse = async(response_format:Iresponse,telegram) => {
         let responseId = 0;
@@ -55,9 +60,10 @@ export class TelegramPostResponseFunctionalities {
     };
 
     updateResponseMessageId = async(responseId, userPlatformID) => {
-        const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: userPlatformID } });
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+        const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: userPlatformID } });
         const id = respChatMessage[respChatMessage.length - 1].id;
-        ChatMessage.update({ telegramResponseMessageId: responseId }, { where: { id: id } } )
+        await chatMessageRepository.update({ telegramResponseMessageId: responseId }, { where: { id: id } } )
             .then(() => { console.log("updated telegram respomse id"); })
             .catch(error => console.log("error on update", error));
     };

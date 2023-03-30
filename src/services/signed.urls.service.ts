@@ -2,13 +2,16 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 const cfsign = require('aws-cloudfront-sign');
-import { autoInjectable } from "tsyringe";
+import { inject, Lifecycle, scoped } from "tsyringe";
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class SignedUrls{
 
-    constructor(private clientEnvironmentProviderservice?: ClientEnvironmentProviderService){}
+    constructor(
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderservice?: ClientEnvironmentProviderService
+    ){}
 
     async getSignedUrl(url){
         return new Promise<string> ((resolve,reject) => {

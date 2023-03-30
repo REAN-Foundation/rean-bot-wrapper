@@ -1,17 +1,19 @@
 import { UserFeedback } from "../models/user.feedback.model";
-import { autoInjectable, container, delay, inject } from "tsyringe";
+import { container, delay, inject, Lifecycle, scoped } from "tsyringe";
 import { HumanHandoff } from "./human.handoff.service";
 import { SlackMessageService } from "./slack.message.service";
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
-
+import { EntityManagerProvider } from "./entity.manager.provider.service";
 
 const humanHandoff: HumanHandoff = container.resolve(HumanHandoff);
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class LiveAgent{
 
     constructor(@inject(delay(() => SlackMessageService)) public slackMessageService,
-    private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+    // eslint-disable-next-line max-len
+    @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+    @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider){}
 
     async requestLiveAgent(body) {
         const payload = body.originalDetectIntentRequest.payload;
@@ -35,8 +37,9 @@ export class LiveAgent{
                 resolve(data);
             }
             else {
-                const feedBackInfo = new UserFeedback({ userId: payload.userId, messageContent: message, channel: payload.source, humanHandoff: "true", feedbackType: "null", ts: ""});
-                await feedBackInfo.save();
+                // eslint-disable-next-line max-len
+                const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
+                const feedBackInfo = await userFeedbackRepository.create({ userId: payload.userId, messageContent: message, channel: payload.source, humanHandoff: "true", feedbackType: "null", ts: "" });
                 const reply = "Our experts will connect with you shortly";
                 const data = {
                     "fulfillmentMessages" : [
@@ -53,8 +56,8 @@ export class LiveAgent{
                 await this.slackMessageService.delayedInitialisation();
                 const client = this.slackMessageService.client;
                 const slackchannelID = this.slackMessageService.channelID;
-                const response = await client.chat.postMessage({ channel: slackchannelID, text: `${payload.userName} wants to connect with an expert`,});
-                await UserFeedback.update({ ts: response.ts }, { where: { id: feedBackInfo.id } })
+                const response = await client.chat.postMessage({ channel: slackchannelID, text: `${payload.userName} wants to connect with an expert`, });
+                await userFeedbackRepository.update({ ts: response.ts }, { where: { id: feedBackInfo.id } })
                     .then(() => { console.log("updated"); })
                     .catch(error => console.log("error on update", error));
             }
@@ -62,7 +65,4 @@ export class LiveAgent{
 
     }
 
-    // async localTime(){
-        
-    // }
 }

@@ -3,17 +3,19 @@
 import { DialogflowResponseService } from './dialogflow.response.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { translateService } from './translate.service';
-import { autoInjectable } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { Imessage } from '../refactor/interface/message.interface';
 import { ChatSession } from '../models/chat.session';
+import { EntityManagerProvider } from './entity.manager.provider.service';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class handleRequestservice{
 
     // constructor(
     constructor(
-        private DialogflowResponseService?: DialogflowResponseService,
-        private translateService?: translateService) {
+        @inject(DialogflowResponseService) private DialogflowResponseService?: DialogflowResponseService,
+        @inject(translateService) private translateService?: translateService,
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider) {
     }
 
     async handleUserRequest (message: Imessage, channel: string) {
@@ -45,7 +47,8 @@ export class handleRequestservice{
     }
 
     async processMessage(message_from_dialoglow, platformId){
-        const languagefromdb = await ChatSession.findAll({
+        const chatSessionRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatSession);
+        const languagefromdb = await chatSessionRepository.findAll({
             where : {
                 userPlatformID : platformId,
                 sessionOpen    : 'true'

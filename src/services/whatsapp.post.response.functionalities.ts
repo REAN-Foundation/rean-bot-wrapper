@@ -4,12 +4,16 @@ import { Iresponse } from "../refactor/interface/message.interface";
 import { UserLanguage } from "./set.language";
 import { translateService } from "./translate.service";
 import { HandleMessagetypePayload } from './handle.messagetype.payload';
-import { autoInjectable } from "tsyringe";
+import { inject, Lifecycle, scoped } from "tsyringe";
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class WhatsappPostResponseFunctionalities{
 
-    constructor ( private handleMessagetypePayload?: HandleMessagetypePayload) {}
+    constructor ( 
+        @inject(HandleMessagetypePayload) private handleMessagetypePayload?: HandleMessagetypePayload,
+        @inject(UserLanguage) private userLanguage?: UserLanguage,
+        @inject(translateService) private _translateService?: translateService
+    ) {}
 
     textResponseFormat = (response_format:Iresponse,payload) =>{
         const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
@@ -53,12 +57,11 @@ export class WhatsappPostResponseFunctionalities{
         const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
         const buttons = [];
         const numberOfButtons = (payload.fields.buttons.listValue.values).length;
-        const languageForSession = await new UserLanguage().getPreferredLanguageofSession(response_format.sessionId);
-        const translateObj = new translateService();
+        const languageForSession = await this.userLanguage.getPreferredLanguageofSession(response_format.sessionId);
         for (let i = 0; i < numberOfButtons; i++){
             const id = payload.fields.buttons.listValue.values[i].structValue.fields.reply.structValue.fields.id.stringValue;
             const title = payload.fields.buttons.listValue.values[i].structValue.fields.reply.structValue.fields.title.stringValue;
-            const translatedTitle = await translateObj.translateResponse([title],languageForSession);
+            const translatedTitle = await this._translateService.translateResponse([title],languageForSession);
             const tempObject = {
                 "type"  : "reply",
                 "reply" : {
@@ -69,7 +72,7 @@ export class WhatsappPostResponseFunctionalities{
             buttons.push(tempObject);
         }
         const message = this.messageTextAccordingToMessageType(response_format,payload,"interactive-buttons");
-        const translatedText = await translateObj.translateResponse([message], languageForSession);
+        const translatedText = await this._translateService.translateResponse([message], languageForSession);
         postDataMeta["interactive"] = {
             "type" : "button",
             "body" : {
@@ -157,8 +160,7 @@ export class WhatsappPostResponseFunctionalities{
     custom_payloadResponseFormat = async(response_format:Iresponse,payload) =>{
         const payloadContent = this.handleMessagetypePayload.getPayloadContent(payload);
         const listOfPostDataMeta = [];
-        const languageForSession = await new UserLanguage().getPreferredLanguageofSession(response_format.sessionId);
-        const translateObj = new translateService();
+        const languageForSession = await this.userLanguage.getPreferredLanguageofSession(response_format.sessionId);
         for (let i = 0; i < payloadContent.length; i++){
             const payloadContentMessageTypeMeta = payloadContent[i].fields.messagetype.stringValue;
             if ( payloadContentMessageTypeMeta === "interactive-buttons"){
@@ -171,7 +173,7 @@ export class WhatsappPostResponseFunctionalities{
         
             }
             else {
-                const payloadMessageMeta = await translateObj.translateResponse([payloadContent[i].fields.content], languageForSession);
+                const payloadMessageMeta = await this._translateService.translateResponse([payloadContent[i].fields.content], languageForSession);
                 response_format.messageText = payloadMessageMeta[0];
                 const postDataMeta = this.textResponseFormat(response_format,payloadContent[i]);
                 listOfPostDataMeta.push(postDataMeta);

@@ -1,11 +1,14 @@
-import { autoInjectable } from "tsyringe";
+import { inject, Lifecycle, scoped } from "tsyringe";
 import needle from "needle";
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class GetLocation{
     
-    constructor(private clientEnvironmentProviderService?: ClientEnvironmentProviderService) { }
+    constructor(
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
+    ) { }
 
     async getLoctionData(eventObj){
         let  userLocation = null;
