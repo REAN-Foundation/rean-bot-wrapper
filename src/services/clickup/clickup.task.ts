@@ -19,7 +19,7 @@ export class ClickUpTask{
     @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider) { }
 
     // eslint-disable-next-line max-len
-    async createTask(rdsData,responseUserFeedback,imageLink:string = null,postTopic:string = null, description:string = null){
+    async createTask(rdsData,responseUserFeedback,postTopic:string = null, description:string = null){
         const listID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_LIST_ID");
         const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
         const createTaskUrl = `https://api.clickup.com/api/v2/list/${listID}/task`;
@@ -48,8 +48,8 @@ export class ClickUpTask{
             "markdown_description" : description
         };
 
-        if (imageLink !== null) {
-            obj["markdown_description"] = `![This is an image](${imageLink})`;
+        if (description !== null) {
+            obj["markdown_description"] = `User details not found`;
         }
 
         const response = await needle("post", createTaskUrl, obj, options);
