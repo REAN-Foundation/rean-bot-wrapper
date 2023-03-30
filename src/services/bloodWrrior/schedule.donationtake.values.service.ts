@@ -1,7 +1,7 @@
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import { Logger } from '../../common/logger';
-import { needleRequestForREAN } from '../needle.service';
+import { NeedleService } from '../needle.service';
 import { BloodWarriorCommonService } from './common.service';
 import { RaiseDonationRequestService } from './raise.request.service';
 import { Iresponse } from '../../refactor/interface/message.interface';
@@ -11,9 +11,10 @@ import { commonResponseMessageFormat } from '../common.response.format.object';
 export class ScheduleDonationTakeValuesService {
 
     constructor(
-        @inject(RaiseDonationRequestService) private raiseDonationRequestService: RaiseDonationRequestService,
-        @inject(BloodWarriorCommonService) private bloodWarriorCommonService: BloodWarriorCommonService,
-        private _platformMessageService: platformServiceInterface,
+        @inject(RaiseDonationRequestService) private raiseDonationRequestService?: RaiseDonationRequestService,
+        @inject(BloodWarriorCommonService) private bloodWarriorCommonService?: BloodWarriorCommonService,
+        @inject(NeedleService) private needleService?: NeedleService,
+        private _platformMessageService?: platformServiceInterface,
     ) {}
 
     async ScheduleDonationTakeValuesService(eventObj){
@@ -27,7 +28,7 @@ export class ScheduleDonationTakeValuesService {
                 let result = null;
                 let dffMessage = "";
                 const apiURL = `clinical/patient-donors/search?name=${bridgeId}&onlyElligible=true`;
-                result = await needleRequestForREAN("get", apiURL);
+                result = await this.needleService.needleRequestForREAN("get", apiURL);
     
                 //We need to iterate here if i want to send reminders to all donors having same blood bridge
                 if (result.Data.PatientDonors.Items.length > 0) {
