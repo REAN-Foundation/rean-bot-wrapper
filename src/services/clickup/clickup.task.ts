@@ -63,7 +63,7 @@ export class ClickUpTask{
             await userFeedbackRepository.update({ messageContent: topic }, { where: { id: objID } })
                 .then(() => { console.log("updated"); })
                 .catch(error => console.log("error on update", error));
-            return response;
+            return response.body.id;
         }
         const taskID = response.body.id;
         return taskID;
@@ -72,24 +72,26 @@ export class ClickUpTask{
     async taskAttachment(taskID, imageLink){
 
         //For now attachment is only image
-        const form = new FormData();
-        const filename = crypto.randomBytes(16).toString('hex');
-        
-        form.append(filename, '');
-        form.append('attachment', fs.createReadStream(imageLink));
-        
-        const headers = form.getHeaders();
-        headers.Authorization = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
-        
-        await axios({
-            method : 'post',
-            url    : `https://api.clickup.com/api/v2/task/${taskID}/attachment`,
-            data   : form,
-            headers,
-        })
-            .then(() => console.log('success'))
-            .catch((e) => console.log('fail',e.response.status));
-        
+        try {
+            const form = new FormData();
+            const filename = crypto.randomBytes(16).toString('hex');
+            
+            form.append(filename, '');
+            form.append('attachment', fs.createReadStream(imageLink));
+            
+            const headers = form.getHeaders();
+            headers.Authorization = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
+            
+            await axios({
+                method : 'post',
+                url    : `https://api.clickup.com/api/v2/task/${taskID}/attachment`,
+                data   : form,
+                headers,
+            });
+        }
+        catch (error){
+            console.log(error);
+        }  
     }
 
     async postCommentOnTask(taskID,comment){
@@ -102,7 +104,6 @@ export class ClickUpTask{
             "comment_text" : comment,
             "notify_all"   : true
         };
-
         await needle("post", createTaskUrl, obj, options);
 
     }
