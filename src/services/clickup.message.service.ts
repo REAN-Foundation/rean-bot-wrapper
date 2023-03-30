@@ -4,14 +4,16 @@ import { Iresponse, Imessage, IprocessedDialogflowResponseFormat } from '../refa
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { ChatMessage } from '../models/chat.message.model';
 import { UserFeedback } from '../models/user.feedback.model';
-import { scoped, Lifecycle, inject, autoInjectable } from 'tsyringe';
+import { scoped, Lifecycle, inject } from 'tsyringe';
 import { SlackClickupCommonFunctions } from './slackAndCkickupSendCustomMessage';
+import { EntityManagerProvider } from './entity.manager.provider.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ClickUpMessageService implements platformServiceInterface {
 
     constructor(
-        @inject(SlackClickupCommonFunctions) private slackClickupCommonFunctions?: SlackClickupCommonFunctions
+        @inject(SlackClickupCommonFunctions) private slackClickupCommonFunctions?: SlackClickupCommonFunctions,
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider
     ){}
 
     public res;
@@ -41,7 +43,8 @@ export class ClickUpMessageService implements platformServiceInterface {
     SendMediaMessage = async (response_format:Iresponse, payload: any) => {
 
         //call a function that creates csv
-        const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: response_format.sessionId } });
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+        const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.sessionId } });
         const lastMessageDate = respChatMessage[respChatMessage.length - 1].createdAt;
         const obj = { timeStamp: lastMessageDate, message: response_format.messageText };
         console.log("obj", obj);
@@ -88,7 +91,8 @@ export class ClickUpMessageService implements platformServiceInterface {
     }
 
     async eventComment(requestBody,tag) {
-        const data = await UserFeedback.findOne({ where: { taskID: requestBody.task_id } });
+        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
+        const data = await userFeedbackRepository.findOne({ where: { taskID: requestBody.task_id } });
         console.log("data", data);
         const filterText = (requestBody.history_items[0].comment.text_content).replace(tag, '');
         const textToUser = `Our Experts have responded to your query. \nYour Query: ${data.messageContent} \nExpert: ${filterText}`;
@@ -98,7 +102,8 @@ export class ClickUpMessageService implements platformServiceInterface {
 
     async eventStatusUpdated(requestBody) {
         const contactMail = "example@gmail.com";
-        const data = await UserFeedback.findOne({ where: { taskID: requestBody.task_id } });
+        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
+        const data = await userFeedbackRepository.findOne({ where: { taskID: requestBody.task_id } });
         console.log("data", data);
         const textToUser = `As our expert have provided their insight, we are closing the ticket. If you are still usatisfied with the answer provided, contact us at ${contactMail}`;
         console.log("textToUser", textToUser);

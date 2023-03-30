@@ -7,6 +7,7 @@ import { ResponseHandler } from '../utils/response.handler';
 import { UserFeedback } from '../models/user.feedback.model';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { SlackClickupCommonFunctions } from './slackAndCkickupSendCustomMessage';
+import { EntityManagerProvider } from './entity.manager.provider.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class SlackMessageService implements platformServiceInterface {
@@ -26,7 +27,8 @@ export class SlackMessageService implements platformServiceInterface {
 
         // eslint-disable-next-line max-len
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
-        @inject(SlackClickupCommonFunctions) private slackClickupCommonFunctions?: SlackClickupCommonFunctions) {}
+        @inject(SlackClickupCommonFunctions) private slackClickupCommonFunctions?: SlackClickupCommonFunctions,
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider) {}
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async handleMessage(message, client) {
@@ -49,8 +51,9 @@ export class SlackMessageService implements platformServiceInterface {
             // find the parent message(user) and inform the user about reply
             else {
                 console.log("child message");
-                const data = await UserFeedback.findOne({ where: { ts: message.event.thread_ts } });
-                console.log("data", data);
+                // eslint-disable-next-line max-len
+                const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
+                const data = await userFeedbackRepository.findOne({ where: { ts: message.event.thread_ts } });
                 const contact = data.userId;
                 const humanHandoff = data.humanHandoff;
                 const channel = data.channel;
@@ -62,7 +65,7 @@ export class SlackMessageService implements platformServiceInterface {
 
                         //This text from support will update the humanHandOff attribute to false at the end of the chat
                         if (message.event.text === "Exit" || message.event.text === "exit"){
-                            await UserFeedback.update({ humanHandoff: "false" }, { where: { id: data.id } } )
+                            await userFeedbackRepository.update({ humanHandoff: "false" }, { where: { id: data.id } } )
                                 .then(() => { console.log("updated"); })
                                 .catch(error => console.log("error on update", error));
 
@@ -104,7 +107,9 @@ export class SlackMessageService implements platformServiceInterface {
         const topic = response[response.length - 1].dataValues.messageContent;
         this.delayedInitialisation();
         const message = await this.client.chat.postMessage({ channel: this.channelID, text: topic });
-        await UserFeedback.update({ ts: message.ts }, { where: { id: objID } })
+        // eslint-disable-next-line max-len
+        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
+        await userFeedbackRepository.update({ ts: message.ts }, { where: { id: objID } })
             .then(() => { console.log("updated"); })
             .catch(error => console.log("error on update", error));
     }

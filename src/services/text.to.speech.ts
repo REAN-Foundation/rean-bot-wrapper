@@ -7,12 +7,14 @@ import crypto from 'crypto';
 import { AwsS3manager } from './aws.file.upload.service';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import { ChatSession } from '../models/chat.session';
+import { EntityManagerProvider } from './entity.manager.provider.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class GoogleTextToSpeech {
 
     constructor(
-        @inject(AwsS3manager) private awsS3manager?: AwsS3manager
+        @inject(AwsS3manager) private awsS3manager?: AwsS3manager,
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider
     ) {}
 
     async texttoSpeech(text, id) {
@@ -34,8 +36,9 @@ export class GoogleTextToSpeech {
                 projectId   : GCPCredentials.project_id
             };
             const client = new textToSpeech.TextToSpeechClient(gcp);
-
-            const userLanguageTableResponse = await ChatSession.findAll({ where: { userPlatformID: id } });
+            // eslint-disable-next-line max-len
+            const chatSessionRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatSession);
+            const userLanguageTableResponse = await chatSessionRepository.findAll({ where: { userPlatformID: id } });
             const setUserLanguage = userLanguageTableResponse[userLanguageTableResponse.length - 1].preferredLanguage;
 
             // Construct the request
