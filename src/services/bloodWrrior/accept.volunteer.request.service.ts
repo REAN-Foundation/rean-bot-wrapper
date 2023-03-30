@@ -1,6 +1,6 @@
-import { container, autoInjectable } from 'tsyringe';
+import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../common/logger';
-import { needleRequestForREAN } from '../needle.service';
+import { NeedleService } from '../needle.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { sendApiButtonService } from '../whatsappmeta.button.service';
 import { RaiseDonationRequestService } from './raise.request.service';
@@ -8,14 +8,15 @@ import { BloodWarriorCommonService } from './common.service';
 import { Iresponse } from '../../refactor/interface/message.interface';
 import { commonResponseMessageFormat } from '../common.response.format.object';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class AcceptVolunteerRequestService {
 
-    private _platformMessageService?: platformServiceInterface;
-
-    private raiseDonationRequestService = new RaiseDonationRequestService();
-
-    private bloodWarriorCommonService = new BloodWarriorCommonService();
+    constructor(
+        @inject(BloodWarriorCommonService) private bloodWarriorCommonService?: BloodWarriorCommonService,
+        @inject(RaiseDonationRequestService) private raiseDonationRequestService?: RaiseDonationRequestService,
+        @inject(NeedleService) private needleService?: NeedleService,
+        private _platformMessageService?: platformServiceInterface
+    ) {}
 
     async sendUserMessage (eventObj) {
         return new Promise(async (resolve) => {
@@ -24,7 +25,7 @@ export class AcceptVolunteerRequestService {
                 donor = await this.bloodWarriorCommonService.getDonorByPhoneNumber(eventObj);
 
                 const apiURL = `clinical/donation-record/search?donorUserId=${donor.UserId}`;
-                const requestBody = await needleRequestForREAN("get", apiURL);
+                const requestBody = await this.needleService.needleRequestForREAN("get", apiURL);
                 const donationRecordId = requestBody.Data.DonationRecord.Items[0].id;
                 let volunteerUserId = null;
                 if (donor.DonorType === 'One time') {
@@ -43,7 +44,7 @@ export class AcceptVolunteerRequestService {
                 await this.bloodWarriorCommonService.updateDonationRecord(donationRecordId, obj);
 
                 const payload = eventObj.body.originalDetectIntentRequest.payload;
-                this._platformMessageService = container.resolve(payload.source);
+                this._platformMessageService = eventObj.container.resolve(payload.source);
 
                 //message send to volunteer
                 const volunteer = await this.bloodWarriorCommonService.getVolunteerPhoneByUserId(volunteerUserId);

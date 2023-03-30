@@ -1,7 +1,5 @@
-import { autoInjectable } from 'tsyringe';
 import { Logger } from '../../common/logger';
 
-@autoInjectable()
 export class NewUserService {
 
     async newUserService (eventObj) {

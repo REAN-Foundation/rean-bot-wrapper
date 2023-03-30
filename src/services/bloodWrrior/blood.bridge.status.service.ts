@@ -1,35 +1,37 @@
 import { GetPatientInfoService } from '../support.app.service';
-import { container, autoInjectable } from 'tsyringe';
+import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../common/logger';
-import {  needleRequestForREAN } from '../needle.service';
+import { NeedleService } from '../needle.service';
 import { BloodWarriorCommonService } from './common.service';
 import { whatsappMetaButtonService } from '../whatsappmeta.button.service';
 import { BloodWarriorWelcomeService } from './welcome.service';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class BloodBridgeStatusService {
 
-    bloodWarriorCommonService: BloodWarriorCommonService = new BloodWarriorCommonService();
-
-    getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
-
-    bloodWarriorWelcomeService: BloodWarriorWelcomeService = new BloodWarriorWelcomeService();
+    constructor(
+        @inject(BloodWarriorCommonService) private bloodWarriorCommonService?: BloodWarriorCommonService,
+        @inject(BloodWarriorWelcomeService) private bloodWarriorWelcomeService?: BloodWarriorWelcomeService,
+        @inject(NeedleService) private needleService?: NeedleService,
+    ) {}
 
     async bloodBridgeStatus (eventObj) {
+        const getPatientInfoService: GetPatientInfoService = eventObj.container.resolve(GetPatientInfoService);
+
         try {
             const bridgeId = eventObj.body.queryResult.parameters.bridge_id;
             const apiURL = `clinical/patient-donors/search?name=${bridgeId}`;
             const roleId = await this.bloodWarriorWelcomeService.getRoleId(eventObj);
             let result = null;
             let dffMessage = null;
-            result = await needleRequestForREAN("get", apiURL);
+            result = await this.needleService.needleRequestForREAN("get", apiURL);
             if (result.Data.PatientDonors.Items.length > 0) {
                 const bloodBridge = result.Data.PatientDonors.Items[0];
 
                 //check patient authorized to see the bridge information
                 if (roleId === 2) {
                     let result = null;
-                    result = await this.getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
+                    result = await getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
                     const patientUserId = result.message[0].UserId;
                     if (bloodBridge.PatientUserId !== patientUserId) {
                         const msg = `Sorry, You don't have permission to access the information of bridge name ${bridgeId}.`;
@@ -58,7 +60,7 @@ export class BloodBridgeStatusService {
                     const obj = {
                         SelectedBridgeId : bridgeId
                     };
-                    await needleRequestForREAN("put", apiURL, null, obj);
+                    await this.needleService.needleRequestForREAN("put", apiURL, null, obj);
                     const patient = await
                     this.bloodWarriorCommonService.getPatientPhoneByUserId(bloodBridge.PatientUserId);
                     const message = `\n        Patient Name: ${patient.User.Person.DisplayName} \nDo you want to send a request to all eligible donors?`;
