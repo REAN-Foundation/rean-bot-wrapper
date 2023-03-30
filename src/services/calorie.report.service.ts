@@ -1,8 +1,6 @@
 import dfff from '../libs/dialogflow-fulfillment';
 import { CalorieInfo } from "../models/calorie.info.model";
-import { SequelizeClient } from '../connection/sequelizeClient';
 import sequelize = require("sequelize");
-import { Op } from "sequelize";
 
 export const getCalorieReport = async (req,res) => {
 

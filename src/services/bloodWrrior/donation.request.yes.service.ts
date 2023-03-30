@@ -1,7 +1,7 @@
 import { GetPatientInfoService } from '../support.app.service';
-import { container, autoInjectable } from 'tsyringe';
+import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../common/logger';
-import { getPhoneNumber, needleRequestForREAN } from '../needle.service';
+import { NeedleService } from '../needle.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { templateButtonService } from '../whatsappmeta.button.service';
 import { RaiseDonationRequestService } from './raise.request.service';
@@ -9,16 +9,16 @@ import { Iresponse } from '../../refactor/interface/message.interface';
 import { commonResponseMessageFormat } from '../common.response.format.object';
 import { BloodWarriorCommonService } from './common.service';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class DonationRequestYesService {
 
-    private _platformMessageService?: platformServiceInterface;
-
-    getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
-
-    private raiseDonationRequestService = new RaiseDonationRequestService();
-
-    private bloodWarriorCommonService = new BloodWarriorCommonService();
+    constructor (
+        @inject(RaiseDonationRequestService) private raiseDonationRequestService: RaiseDonationRequestService,
+        @inject(BloodWarriorCommonService) private bloodWarriorCommonService: BloodWarriorCommonService,
+        @inject(NeedleService) private needleService?: NeedleService,
+        @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,
+        private _platformMessageService?: platformServiceInterface
+    ) {}
 
     async sendUserMessage (eventObj) {
         try {
@@ -29,7 +29,7 @@ export class DonationRequestYesService {
             }
             const apiURL = `clinical/patient-donors/search?name=${bridgeId}`;
             let result = null;
-            result = await needleRequestForREAN("get", apiURL);
+            result = await this.needleService.needleRequestForREAN("get", apiURL);
             if (result.Data.PatientDonors.Items.length > 0) {
 
                 const bloodBridge = result.Data.PatientDonors.Items[0];
@@ -51,7 +51,7 @@ export class DonationRequestYesService {
             let result = null;
 
             const apiURL = `clinical/patient-donors/search?patientUserId=${patientUserId}&onlyElligible=true`;
-            result = await needleRequestForREAN("get", apiURL);
+            result = await this.needleService.needleRequestForREAN("get", apiURL);
             const payload = {};
             payload["buttonIds"] = await templateButtonService(["Accept_Volunteer_Request","Reject_Donation_Request"]);
             const donorNames = [];
@@ -79,7 +79,7 @@ export class DonationRequestYesService {
                         }];
                     payload["templateName"] = "donor_donation_volunteer";
                     const previousIntentPayload = eventObj.body.originalDetectIntentRequest.payload;
-                    this._platformMessageService = container.resolve(previousIntentPayload.source);
+                    this._platformMessageService = eventObj.container.resolve(previousIntentPayload.source);
                     const response_format: Iresponse = commonResponseMessageFormat();
                     response_format.platform = previousIntentPayload.source;
                     response_format.sessionId = donorPhone;
@@ -102,7 +102,7 @@ export class DonationRequestYesService {
 
     async notifyVolunteer (eventObj, patientUserId, donorNames) {
         try {
-            let volunteerPhone = await getPhoneNumber(eventObj);
+            let volunteerPhone = await this.needleService.getPhoneNumber(eventObj);
             volunteerPhone = this.raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(volunteerPhone);
             let donorList = "";
             let num = 1;
@@ -113,7 +113,7 @@ export class DonationRequestYesService {
             });
             const dffMessage = `Request sent successfully to following Donors.${donorList} \nRegards \nTeam Blood Warriors`;
             const payload = eventObj.body.originalDetectIntentRequest.payload;
-            this._platformMessageService = container.resolve(payload.source);
+            this._platformMessageService = eventObj.container.resolve(payload.source);
             const response_format: Iresponse = commonResponseMessageFormat();
             response_format.platform = payload.source;
             response_format.sessionId = volunteerPhone;

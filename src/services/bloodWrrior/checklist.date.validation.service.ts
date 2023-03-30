@@ -1,20 +1,21 @@
 import { Logger } from '../../common/logger';
-import { needleRequestForREAN } from '../needle.service';
+import { NeedleService } from '../needle.service';
 import { BloodWarriorCommonService } from './common.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { autoInjectable, container } from 'tsyringe';
+import { container, inject, Lifecycle, scoped } from 'tsyringe';
 import { RaiseDonationRequestService } from './raise.request.service';
 import { Iresponse } from '../../refactor/interface/message.interface';
 import { commonResponseMessageFormat } from '../common.response.format.object';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class ChecklistDateValidationService {
 
-    private _platformMessageService?: platformServiceInterface;
-
-    private bloodWarriorCommonService = new BloodWarriorCommonService();
-
-    private raiseDonationRequestService = new RaiseDonationRequestService();
+    constructor(
+        @inject(BloodWarriorCommonService) private bloodWarriorCommonService?: BloodWarriorCommonService,
+        @inject(RaiseDonationRequestService) private raiseDonationRequestService?: RaiseDonationRequestService,
+        @inject(NeedleService) private needleService?: NeedleService,
+        private _platformMessageService?: platformServiceInterface
+    ) {}
 
     checklistDateValidationService = async (eventObj) => {
         return new Promise(async (resolve) => {
@@ -24,7 +25,7 @@ export class ChecklistDateValidationService {
                 donor = await this.bloodWarriorCommonService.getDonorByPhoneNumber(eventObj);
 
                 const apiURL = `clinical/donation-record/search?donorUserId=${donor.UserId}`;
-                const requestBody = await needleRequestForREAN("get", apiURL);
+                const requestBody = await this.needleService.needleRequestForREAN("get", apiURL);
                 let donationDate = requestBody.Data.DonationRecord.Items[0].DonationDetails.NextDonationDate;
                 const volunteerUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.VolunteerUserId;
                 const patientUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.PatientUserId;
@@ -38,7 +39,7 @@ export class ChecklistDateValidationService {
                     resolve( { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage + '\n' + message] } }] } });
 
                     const payload = eventObj.body.originalDetectIntentRequest.payload;
-                    this._platformMessageService = container.resolve(payload.source);
+                    this._platformMessageService = eventObj.container.resolve(payload.source);
                     const heading = `Here are the details of the confirmed donor`;
 
                     //Fetch donation reminders for donors

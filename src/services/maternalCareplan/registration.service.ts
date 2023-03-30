@@ -3,15 +3,16 @@ import { ClientEnvironmentProviderService } from '../set.client/client.environme
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import needle from 'needle';
 import { Logger } from '../../common/logger';
-import { getPhoneNumber } from '../needle.service';
+import { NeedleService } from '../needle.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class RegistrationService {
 
     constructor(
         @inject(GetHeaders) private getHeaders: GetHeaders,
-        @inject(ClientEnvironmentProviderService)
-        private clientEnvironmentProviderService: ClientEnvironmentProviderService
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService: ClientEnvironmentProviderService,
+        @inject(NeedleService) private needleService?: NeedleService
     ) {}
 
     registrationService = async (eventObj) => {
@@ -20,7 +21,7 @@ export class RegistrationService {
             const name : string = eventObj.body.queryResult.parameters.Name.name;
             const lmp : string = eventObj.body.queryResult.parameters.LMP;
     
-            const phoneNumber = await getPhoneNumber(eventObj);
+            const phoneNumber = await this.needleService.getPhoneNumber(eventObj);
             
             const options = this.getHeaders.getHeaders();
             const ReanBackendBaseUrl =
