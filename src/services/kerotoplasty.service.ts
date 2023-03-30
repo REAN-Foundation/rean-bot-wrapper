@@ -6,6 +6,7 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 import path from 'path';
 import { UserFeedback } from "../models/user.feedback.model";
 import needle from 'needle';
+import { EntityManagerProvider } from "./entity.manager.provider.service";
 
 @scoped(Lifecycle.ContainerScoped)
 export class kerotoplastyService {
@@ -15,10 +16,11 @@ export class kerotoplastyService {
     constructor(
         @inject(dialoflowMessageFormatting) private DialogflowServices?: dialoflowMessageFormatting,
         @inject(GetLocation) private getLocation?: GetLocation,
-        @inject(ClickUpTask) private clickUpTask?: ClickUpTask
+        @inject(ClickUpTask) private clickUpTask?: ClickUpTask,
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
 
         // eslint-disable-next-line max-len
-        // @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
     ){}
 
     identifyCondition = async (eventObj) => {
@@ -86,11 +88,12 @@ export class kerotoplastyService {
         console.log("topic is",topic);
         const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
         const channel = eventObj.body.originalDetectIntentRequest.payload.source;
-        const feedBackInfo = new UserFeedback({ userId: userId, channel: channel,humanHandoff: "false" });
-        await feedBackInfo.save();
-        const responseUserFeedback = await UserFeedback.findAll({ where: { userId: userId } });
+        // eslint-disable-next-line max-len
+        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
+        await userFeedbackRepository.create({ userId: userId, channel: channel,humanHandoff: "false" });
+        const responseUserFeedback = await userFeedbackRepository.findAll({ where: { userId: userId } });
         this.clickUpTask.createTask(null, responseUserFeedback,null,topic,user_details)
-            .then((response) => {this.clickUpTask.taskAttachment(response.body.id,attachmentPath);});
+            .then((response) => { this.clickUpTask.taskAttachment(response.body.id,attachmentPath); });
     }
 
     async getEMRDetails(emr_number, eventObj){

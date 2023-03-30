@@ -12,6 +12,7 @@ import { WhatsappMessageToDialogflow } from './whatsapp.messagetodialogflow';
 import { CommonWhatsappService } from './whatsapp.common.service';
 import { Iresponse } from '../refactor/interface/message.interface';
 import { WhatsappPostResponseFunctionalities } from './whatsapp.post.response.functionalities';
+import { EntityManagerProvider } from './entity.manager.provider.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class WhatsappMetaMessageService extends CommonWhatsappService {
@@ -22,7 +23,8 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
         @inject(AwsS3manager) awsS3manager?: AwsS3manager,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(WhatsappMessageToDialogflow) whatsappMessageToDialogflow?: WhatsappMessageToDialogflow,
-        @inject(WhatsappPostResponseFunctionalities) private whatsappPostResponseFunctionalities?: WhatsappPostResponseFunctionalities){
+        @inject(WhatsappPostResponseFunctionalities) private whatsappPostResponseFunctionalities?: WhatsappPostResponseFunctionalities,
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider){
         super(messageFlow, awsS3manager, whatsappMessageToDialogflow);
     }
 
@@ -87,9 +89,10 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
 
                 //improve this DB query
                 if (needleResp.statusCode === 200) {
-                    const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: response_format.sessionId } });
+                    const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+                    const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.sessionId } });
                     const id = respChatMessage[respChatMessage.length - 1].id;
-                    await ChatMessage.update({ whatsappResponseMessageId: needleResp.body.messages[0].id }, { where: { id: id } } )
+                    await chatMessageRepository.update({ whatsappResponseMessageId: needleResp.body.messages[0].id }, { where: { id: id } } )
                         .then(() => { console.log("updated"); })
                         .catch(error => console.log("error on update", error));
                     return needleResp;
