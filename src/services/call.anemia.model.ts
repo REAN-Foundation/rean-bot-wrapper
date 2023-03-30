@@ -1,13 +1,16 @@
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { getRequestOptions } from '../utils/helper';
 import needle from "needle";
-import { autoInjectable } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { ChatMessage } from '../models/chat.message.model';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class CallAnemiaModel {
 
-    constructor(private clientEnvironmentProviderService?: ClientEnvironmentProviderService) { }
+    constructor(
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
+    ) { }
 
     async callAnemiaModel(imagePathFromDF) {
 

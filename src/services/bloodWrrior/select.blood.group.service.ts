@@ -1,20 +1,22 @@
 import { Logger } from '../../common/logger';
-import { needleRequestForREAN } from '../needle.service';
+import { NeedleService } from '../needle.service';
 import { RaiseDonationRequestService } from './raise.request.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { sendApiButtonService, templateButtonService } from '../whatsappmeta.button.service';
-import { container } from 'tsyringe';
+import { templateButtonService } from '../whatsappmeta.button.service';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { Iresponse } from '../../refactor/interface/message.interface';
 import { commonResponseMessageFormat } from '../common.response.format.object';
 import { BloodWarriorCommonService } from './common.service';
 
+@scoped(Lifecycle.ContainerScoped)
 export class SelectBloodGroupService {
 
-    private _platformMessageService?: platformServiceInterface;
-
-    private raiseDonationRequestService = new RaiseDonationRequestService();
-
-    private bloodWarriorCommonService = new BloodWarriorCommonService();
+    constructor(
+        @inject(RaiseDonationRequestService) private raiseDonationRequestService?: RaiseDonationRequestService,
+        @inject(BloodWarriorCommonService) private bloodWarriorCommonService?: BloodWarriorCommonService,
+        @inject(NeedleService) private needleService?: NeedleService,
+        private _platformMessageService?: platformServiceInterface
+    ) {}
 
     async bloodGroupService (eventObj) {
         return new Promise(async (resolve) => {
@@ -28,7 +30,7 @@ export class SelectBloodGroupService {
                     bloodGroupString = decodeURIComponent(`${bloodGroup}`);
                 }
                 const apiURL = `donors/search?onlyElligible=true&bloodGroup=${bloodGroup}&donorType=One time`;
-                const requestBody = await needleRequestForREAN("get", apiURL);
+                const requestBody = await this.needleService.needleRequestForREAN("get", apiURL);
                 const donors = requestBody.Data.Donors.Items;
 
                 if (donors.length > 0) {
@@ -49,7 +51,7 @@ export class SelectBloodGroupService {
 
                     let patient = null;
                     const patientURL = `patients/search?name=dummy_patient`;
-                    const result = await needleRequestForREAN("get", patientURL);
+                    const result = await this.needleService.needleRequestForREAN("get", patientURL);
                     if (result.Data.Patients.Items.length > 0) {
                         patient = result.Data.Patients.Items[0];
                     }
@@ -71,7 +73,7 @@ export class SelectBloodGroupService {
                         const dffMessage = `Hi ${donorName}, \nYou are an emergency donor. We need blood in coming days. Are you able to donate blood? \nRegards \nTeam Blood Warriors`;
 
                         const previousIntentPayload = eventObj.body.originalDetectIntentRequest.payload;
-                        this._platformMessageService = container.resolve(previousIntentPayload.source);
+                        this._platformMessageService = eventObj.container.resolve(previousIntentPayload.source);
                         
                         const payload = {};
                         payload["variables"] = [
@@ -93,7 +95,7 @@ export class SelectBloodGroupService {
                     const obj = {
                         SelectedBloodGroup : bloodGroup
                     };
-                    await needleRequestForREAN("put", apiURL, null, obj);
+                    await this.needleService.needleRequestForREAN("put", apiURL, null, obj);
                 } else {
                     const dffMessage = `No, any one-time donors are eligible Or We don't find any donor having ${bloodGroupString} blood group. \nRegards \nTeam Blood Warriors`;
                     resolve( { message: { fulfillmentMessages: [{ text: { text: [ dffMessage] } }] } });
