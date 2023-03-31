@@ -104,7 +104,7 @@ export class kerotoplastyService {
         const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
         await userFeedbackRepository.create({ userId: payload.userId, channel: payload.source,humanHandoff: "false" });
         const responseUserFeedback = await userFeedbackRepository.findAll({ where: { userId: payload.userId } });
-        const taskID = await this.clickUpTask.createTask(null, responseUserFeedback,attachmentPath,topic,user_details);
+        const taskID = await this.clickUpTask.createTask(null, responseUserFeedback,topic,user_details);
         await this.clickUpTask.taskAttachment(taskID,attachmentPath);
         await this.clickUpTask.postCommentOnTask(taskID,symptomComment);
     }
