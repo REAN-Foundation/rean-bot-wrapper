@@ -73,8 +73,6 @@ export class ClickUpMessageService implements platformServiceInterface {
                         this.eventComment(requestBody,tag);
                     }
                 }
-
-                // console.log("requestbody of comment attributes", requestBody.history_items[0].comment.comment[1].attributes);
             }
         }
         else if (requestBody.event === "taskStatusUpdated") {

@@ -19,7 +19,7 @@ export class ClickUpTask{
     @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider) { }
 
     // eslint-disable-next-line max-len
-    async createTask(rdsData,responseUserFeedback,imageLink:string = null,postTopic:string = null, description:string = null){
+    async createTask(rdsData,responseUserFeedback,postTopic:string = null, description:string = null){
         const listID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_LIST_ID");
         const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
         const createTaskUrl = `https://api.clickup.com/api/v2/list/${listID}/task`;
@@ -48,8 +48,8 @@ export class ClickUpTask{
             "markdown_description" : description
         };
 
-        if (imageLink !== null) {
-            obj["markdown_description"] = `![This is an image](${imageLink})`;
+        if (description === null) {
+            obj["markdown_description"] = `User details not found`;
         }
 
         const response = await needle("post", createTaskUrl, obj, options);
@@ -63,7 +63,7 @@ export class ClickUpTask{
             await userFeedbackRepository.update({ messageContent: topic }, { where: { id: objID } })
                 .then(() => { console.log("updated"); })
                 .catch(error => console.log("error on update", error));
-            return response;
+            return response.body.id;
         }
         const taskID = response.body.id;
         return taskID;
@@ -72,24 +72,26 @@ export class ClickUpTask{
     async taskAttachment(taskID, imageLink){
 
         //For now attachment is only image
-        const form = new FormData();
-        const filename = crypto.randomBytes(16).toString('hex');
-        
-        form.append(filename, '');
-        form.append('attachment', fs.createReadStream(imageLink));
-        
-        const headers = form.getHeaders();
-        headers.Authorization = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
-        
-        await axios({
-            method : 'post',
-            url    : `https://api.clickup.com/api/v2/task/${taskID}/attachment`,
-            data   : form,
-            headers,
-        })
-            .then(() => console.log('success'))
-            .catch((e) => console.log('fail',e.response.status));
-        
+        try {
+            const form = new FormData();
+            const filename = crypto.randomBytes(16).toString('hex');
+            
+            form.append(filename, '');
+            form.append('attachment', fs.createReadStream(imageLink));
+            
+            const headers = form.getHeaders();
+            headers.Authorization = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
+            
+            await axios({
+                method : 'post',
+                url    : `https://api.clickup.com/api/v2/task/${taskID}/attachment`,
+                data   : form,
+                headers,
+            });
+        }
+        catch (error){
+            console.log(error);
+        }  
     }
 
     async postCommentOnTask(taskID,comment){
@@ -102,7 +104,6 @@ export class ClickUpTask{
             "comment_text" : comment,
             "notify_all"   : true
         };
-
         await needle("post", createTaskUrl, obj, options);
 
     }
