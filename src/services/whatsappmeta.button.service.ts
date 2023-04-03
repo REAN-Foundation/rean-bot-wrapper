@@ -24,6 +24,25 @@ export const whatsappMetaButtonService = async (button_1, buttonId_1, button_2, 
     return payloadButtons;
 };
 
+export const whatsappSingleMetaButtonService = async (button_1, buttonId_1) => {
+    const payloadButtons = {
+        "payload" : {
+            "messagetype" : "interactive-buttons",
+            "buttons"     : [
+                {
+                    "reply" : {
+                        "title" : button_1,
+                        "id"    : buttonId_1
+                    },
+                    "type" : "reply"
+                }
+            ]
+        }
+    };
+
+    return payloadButtons;
+};
+
 export const sendApiButtonService = async (buttons) => {
     const payload = {
         "fields" : {

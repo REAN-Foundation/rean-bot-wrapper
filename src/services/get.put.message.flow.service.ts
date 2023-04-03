@@ -136,7 +136,8 @@ export class MessageFlow{
             payload["buttonIds"] = await templateButtonService(msg.message.ButtonsIds);
         }
         const response_format = await platformMessageService.createFinalMessageFromHumanhandOver(msg);
-        const chatSessionModel = await ChatSession.findOne({ where: { userPlatformID: response_format.sessionId } });
+        const chatSessionRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatSession);
+        const chatSessionModel = await chatSessionRepository.findOne({ where: { userPlatformID: response_format.sessionId } });
         let chatSessionId = null;
         if (chatSessionModel) {
             chatSessionId = chatSessionModel.autoIncrementalID;
@@ -153,9 +154,9 @@ export class MessageFlow{
             intent         : response_format.intent
         };
 
-        const person = new ChatMessage(chatMessageObj);
-        const db_response = await person.save();
-        console.log(`DB response ${db_response}`);
+        const ChatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+        const person = ChatMessageRepository.create(chatMessageObj);
+        console.log(`DB response ${person}`);
 
         let message_to_platform = null;
         // eslint-disable-next-line max-len
