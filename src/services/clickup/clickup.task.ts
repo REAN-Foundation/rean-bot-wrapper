@@ -89,7 +89,6 @@ export class ClickUpTask{
                 data   : form,
                 headers,
             });
-            console.log("image is attached at ticket ID ", taskID)
         }
         catch (error){
             console.log(error);
@@ -109,15 +108,14 @@ export class ClickUpTask{
             };
             await needle("post", createTaskUrl, obj, options);
         }
-        catch(error){
+        catch (error){
             console.log(error);
         }
-
 
     }
 
     async updateTask(taskID,priority){
-        try{
+        try {
             const updateTaskUrl = `https://api.clickup.com/api/v2/task/${taskID}`;
             const options = getRequestOptions();
             const CLICKUP_AUTHENTICATION = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
@@ -134,10 +132,9 @@ export class ClickUpTask{
                 "links_to"             : null,
             };
     
-            const response = await needle("put", updateTaskUrl, obj, options);
-            console.log("ticket updated",response.body);
+            await needle("put", updateTaskUrl, obj, options);
         }
-        catch(error){
+        catch (error){
             console.log(error);
         }
         

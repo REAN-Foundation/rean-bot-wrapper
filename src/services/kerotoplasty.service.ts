@@ -103,9 +103,9 @@ export class kerotoplastyService {
         const topic =  parameters.medicalRecordNumber;
         const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
         const responseUserFeedback = await userFeedbackRepository.findAll({ where: { userId: payload.userId } });
-        if(responseUserFeedback[responseUserFeedback.length-1].taskID){
-            const taskID = responseUserFeedback[responseUserFeedback.length-1].taskID
-            await this.clickUpTask.updateTask(taskID,priority)
+        if (responseUserFeedback[responseUserFeedback.length - 1].taskID){
+            const taskID = responseUserFeedback[responseUserFeedback.length-1].taskID;
+            await this.clickUpTask.updateTask(taskID,priority);
             await this.clickUpTask.taskAttachment(taskID,attachmentPath);
             await this.clickUpTask.postCommentOnTask(taskID,symptomComment);
         }
@@ -114,7 +114,7 @@ export class kerotoplastyService {
             const taskID = await this.clickUpTask.createTask(null, responseUserFeedback,topic,user_details,priority);
             await this.clickUpTask.taskAttachment(taskID,attachmentPath);
             await this.clickUpTask.postCommentOnTask(taskID,symptomComment);
-            await userFeedbackRepository.create({userId: payload.userId, taskID: taskID,channel: payload.source,humanHandoff: "false"})
+            await userFeedbackRepository.create({userId: payload.userId, taskID: taskID,channel: payload.source,humanHandoff: "false"});
 
         }
 
