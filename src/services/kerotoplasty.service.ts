@@ -87,26 +87,37 @@ export class kerotoplastyService {
         return (symptomComment);
     }
 
-    async postImageOnClickup(intent,eventObj){
+    async postingOnClickup(intent,eventObj){
         const parameters = eventObj.body.queryResult.parameters;
         const payload = eventObj.body.originalDetectIntentRequest.payload;
         const filename = path.basename(parameters.image);
         const symptomComment = await this.symptomByUser(parameters);
         const attachmentPath = `./photo/` + filename;
-        const condition = {
-            'hyperCriticalCondition' : 'HyperCritical',
-            'criticalCondition'      : 'Critical',
-            'normalCondition'        : 'Normal'
+        const set_priority = {
+            'hyperCriticalCondition' : 1,
+            'criticalCondition'      : 2,
+            'normalCondition'        : 3
         };
-        const condition_string = condition[intent];
+        const priority = set_priority[intent];
         const user_details = await this.getEMRDetails(parameters.medicalRecordNumber, eventObj);
-        const topic = condition_string + "_" + parameters.medicalRecordNumber;
+        const topic =  parameters.medicalRecordNumber;
         const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
-        await userFeedbackRepository.create({ userId: payload.userId, channel: payload.source,humanHandoff: "false" });
         const responseUserFeedback = await userFeedbackRepository.findAll({ where: { userId: payload.userId } });
-        const taskID = await this.clickUpTask.createTask(null, responseUserFeedback,topic,user_details);
-        await this.clickUpTask.taskAttachment(taskID,attachmentPath);
-        await this.clickUpTask.postCommentOnTask(taskID,symptomComment);
+        if(responseUserFeedback[responseUserFeedback.length-1].taskID){
+            const taskID = responseUserFeedback[responseUserFeedback.length-1].taskID
+            await this.clickUpTask.updateTask(taskID,priority)
+            await this.clickUpTask.taskAttachment(taskID,attachmentPath);
+            await this.clickUpTask.postCommentOnTask(taskID,symptomComment);
+        }
+        else
+        {
+            const taskID = await this.clickUpTask.createTask(null, responseUserFeedback,topic,user_details,priority);
+            await this.clickUpTask.taskAttachment(taskID,attachmentPath);
+            await this.clickUpTask.postCommentOnTask(taskID,symptomComment);
+            await userFeedbackRepository.create({userId: payload.userId, taskID: taskID,channel: payload.source,humanHandoff: "false"})
+
+        }
+
     }
 
     async getEMRDetails(emr_number, eventObj){
