@@ -108,5 +108,15 @@ export class BloodWarriorCommonService {
         }
     }
 
+    async differenceBetweenTwoDates (date_2 :Date, date_1 :Date ) : Promise<number> {
+        try {
+            const difference = date_2.getTime() - date_1.getTime();
+            const TotalDays = Math.ceil(difference / (1000 * 3600 * 24));
+            return TotalDays;
 
+        } catch (error) {
+            Logger.instance()
+                .log_error(error.message,500,'Failed to calculate day difference');
+        }
+    }
 }
