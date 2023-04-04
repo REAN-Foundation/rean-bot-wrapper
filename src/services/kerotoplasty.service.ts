@@ -69,6 +69,7 @@ export class kerotoplastyService {
         return responseToSend;
 
     }
+    
     async symptomByUser(parameters){
         var symptomComment = "Patient is suffering from \n";
         
@@ -101,11 +102,12 @@ export class kerotoplastyService {
         const priority = set_priority[intent];
         const user_details = await this.getEMRDetails(parameters.medicalRecordNumber, eventObj);
         const topic =  parameters.medicalRecordNumber;
+        // eslint-disable-next-line max-len
         const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
         const responseUserFeedback = await userFeedbackRepository.findAll({ where: { userId: payload.userId } });
         if (responseUserFeedback[responseUserFeedback.length - 1].taskID){
             const taskID = responseUserFeedback[responseUserFeedback.length-1].taskID;
-            await this.clickUpTask.updateTask(taskID,priority);
+            await this.clickUpTask.updateTask(taskID,priority,user_details);
             await this.clickUpTask.taskAttachment(taskID,attachmentPath);
             await this.clickUpTask.postCommentOnTask(taskID,symptomComment);
         }
@@ -125,8 +127,8 @@ export class kerotoplastyService {
             let response: any = {};
             response = await this.makeApiCall(emr_number, eventObj);
             let report = "### Patient Details\n";
-            const patient_details = response.body.patient_details;
             if (response.body.patient_details) {
+                const patient_details = response.body.patient_details;
                 report = report + "- Name : " + patient_details.FirstName + ' ' + patient_details.LastName + '\n';
                 report = report + "- Gender : " + patient_details.Gender + '\n';
                 report = report + "- DOB : " + patient_details.DOB + '\n';
@@ -144,6 +146,8 @@ export class kerotoplastyService {
                 report = report + '- ' + 'First Visited Doctor : ' + patient_details.first_visted_doctor + '\n';
                 report = report + '- ' + 'Last Visit Date : ' + patient_details.last_visted_date + '\n';
                 report = report + '- ' + 'Last Visited Doctor : ' + patient_details.last_visted_doctor + '\n';
+            } else {
+                report = report + "No Patient Details Found";
             }
             console.log(report);
             return report;

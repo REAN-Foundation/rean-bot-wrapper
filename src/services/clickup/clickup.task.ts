@@ -114,7 +114,7 @@ export class ClickUpTask{
 
     }
 
-    async updateTask(taskID,priority){
+    async updateTask(taskID,priority,user_details){
         try {
             const updateTaskUrl = `https://api.clickup.com/api/v2/task/${taskID}`;
             const options = getRequestOptions();
@@ -130,6 +130,7 @@ export class ClickUpTask{
                 "notify_all"           : true,
                 "parent"               : null,
                 "links_to"             : null,
+                "markdown_description" : user_details
             };
     
             await needle("put", updateTaskUrl, obj, options);
