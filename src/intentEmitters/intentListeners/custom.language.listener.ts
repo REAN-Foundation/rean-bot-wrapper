@@ -12,8 +12,8 @@ export const CustomLanguageListener = async (intent, eventObj) => {
             let response = null;
             const payload = eventObj.body.originalDetectIntentRequest.payload;
 
-            const WelcomeService = new CustomWelcomeService();
-            const changeLanguage = new ChangeLanguage();
+            const WelcomeService = eventObj.container.resolve(CustomWelcomeService);
+            const changeLanguage = eventObj.container.resolve(ChangeLanguage);
 
             response = await changeLanguage.askForLanguage(eventObj);
             const imageUrl = await WelcomeService.getImageUrl();
