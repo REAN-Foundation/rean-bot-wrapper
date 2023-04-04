@@ -5,7 +5,7 @@ export const kerotoplastyLocationListener = async (intent:string, eventObj) => {
     return new Promise(async (resolve) => {
         const location_response = await kerotoplastyServiceObj.conditionSpecificResponse(intent,eventObj);
         resolve(location_response);
-        await kerotoplastyServiceObj.postImageOnClickup(intent,eventObj);
+        await kerotoplastyServiceObj.postingOnClickup(intent,eventObj);
     });
 
 };
