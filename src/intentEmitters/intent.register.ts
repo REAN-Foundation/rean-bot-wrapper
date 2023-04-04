@@ -66,7 +66,6 @@ export class IntentRegister {
 
     register(){
         Logger.instance().log("Begin registering Intents...");
-
         IntentEmitter.registerListener('Vaccination.AppointmentAvailability', getVaccinationAppointments);
         IntentEmitter.registerListener('vaccination:appointments', secondListener);
 
@@ -78,7 +77,7 @@ export class IntentRegister {
 
         IntentEmitter.registerListener('Custom Welcome Intent', CustomWelcomeIntent);
         IntentEmitter.registerListener('Custom Language - custom', CustomLanguageListener);
-        IntentEmitter.registerListener('Change Language - custom', LanguageChangeListener);
+        IntentEmitter.registerListener('Change Language', LanguageChangeListener);
 
         IntentEmitter.registerListener('life - no', getSymptomAssessment);
 
