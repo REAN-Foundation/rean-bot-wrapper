@@ -175,6 +175,7 @@ export class kerotoplastyService {
     }
 
     async makeApiCall(emr_number, eventObj) {
+        console.log("Making API Call for EMR Details");
         const clientEnvironmentProviderService = eventObj.container.resolve(ClientEnvironmentProviderService);
         const url = clientEnvironmentProviderService.getClientEnvironmentVariable("EMR_URL");
         const key = clientEnvironmentProviderService.getClientEnvironmentVariable("EMR_KEY");
@@ -183,6 +184,7 @@ export class kerotoplastyService {
             'Content-Type' : 'application/json',
             accept         : 'application/json'
         };
+        console.log("EMR Headers", headers);
         const options = {
             headers      : headers,
             open_timeout : 60000
@@ -195,10 +197,12 @@ export class kerotoplastyService {
         try {
             const response = await needle("get",url, obj,options);
             this.retryNumber = 0;
+            console.log("Retry number: ",this.retryNumber);
             return response;
         } catch (err) {
             console.log(err);
             this.retryNumber++;
+            console.log("Retry number: ",this.retryNumber);
             if (this.retryNumber < 5){
                 await this.sleep(10000);
                 return await this.makeApiCall(emr_number,eventObj);
