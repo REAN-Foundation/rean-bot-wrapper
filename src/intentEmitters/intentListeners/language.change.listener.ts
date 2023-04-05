@@ -13,7 +13,7 @@ export const LanguageChangeListener = async (intent, eventObj) => {
             let response = null;
 
             // res = 5;
-            const changeLanguage = new ChangeLanguage();
+            const changeLanguage = eventObj.container.resolve(ChangeLanguage);
             response = await changeLanguage.askForLanguage(eventObj);
 
             console.log('Inside listener: ', response);

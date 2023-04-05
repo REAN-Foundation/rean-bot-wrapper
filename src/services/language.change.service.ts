@@ -13,7 +13,7 @@ export class ChangeLanguage{
         return new Promise(async(resolve, reject) =>{
             try {
                 console.log("eventobj.body", eventObj.body);
-                const newLanguage = eventObj.body.queryResult.queryText.toLowerCase();
+                const newLanguage = eventObj.body.queryResult.parameters.Language.toLowerCase();
                 const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
                 const listOfLanguages = {
                     "hindi"     : "hi",
@@ -36,14 +36,14 @@ export class ChangeLanguage{
                 //stop the old session
                 // eslint-disable-next-line max-len
                 const chatSessionRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatSession);
-                await chatSessionRepository.update({ sessionOpen: "false" }, {
+                await chatSessionRepository.update({ preferredLanguage: newLanguageCode }, {
                     where : {
                         userPlatformID : userId
                     }
                 });
 
                 //create a new session
-                await chatSessionRepository.create({ userPlatformID: userId, preferredLanguage: newLanguageCode, sessionOpen: "true" });
+                // await chatSessionRepository.create({ userPlatformID: userId, preferredLanguage: newLanguageCode, sessionOpen: "true" });
                 const reply = `Language changed to: ${newLanguage}`;
                 const data = {
                     "fulfillmentMessages" : [
