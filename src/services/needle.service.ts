@@ -89,6 +89,7 @@ export class NeedleService {
         const telegramBotToken = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN");
         const url = `/bot${telegramBotToken}/${endPoint}`;
         const telegramApi = telegramHost + url;
+        console.log("The telegram URL is:"+ telegramApi);
         let response = null;
         if (method === "get") {
             response = await needle(method, telegramApi, options);
