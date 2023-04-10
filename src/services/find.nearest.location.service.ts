@@ -36,7 +36,12 @@ export class GetLocation{
                 location : userLocation
             };
             const response = await needle("post",url, obj,options);
-            return response.body;
+            if (response.statusCode === 200){
+                return response.body;
+            } else {
+                return null;
+            }
+
         } 
         catch (error) {
             console.log('LVPEI Institute location Listener Error!');
