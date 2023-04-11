@@ -64,6 +64,7 @@
     "node-cron": "^2.0.3",
     "node-html-to-image": "3.2.0",
     "node-telegram-bot-api": "^0.54.0",
+    "openai": "^3.2.1",
     "pb-util": "^1.0.3",
     "pg": "^8.6.0",
     "pg-hstore": "^2.3.3",

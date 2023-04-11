@@ -73,17 +73,17 @@ export class MessageFlow{
         //save the response data to DB
         await this.saveResponseDataToUser(response_format,processedResponse);
 
-        const intent = processedResponse.message_from_dialoglow.getIntent();
+        const intent = processedResponse.message_from_nlp.getIntent();
         await this.saveIntent(intent,response_format.sessionId);
 
-        const payload = processedResponse.message_from_dialoglow.getPayload();
-        if (processedResponse.message_from_dialoglow.getText()) {
+        const payload = processedResponse.message_from_nlp.getPayload();
+        if (processedResponse.message_from_nlp.getText()) {
             let message_to_platform = null;
 
             await this.replyInAudio(messagetoDialogflow, response_format);
             message_to_platform = await platformMessageService.SendMediaMessage(response_format,payload);
 
-            if (!processedResponse.message_from_dialoglow.getText()) {
+            if (!processedResponse.message_from_nlp.getText()) {
                 console.log('An error occurred while sending messages!');
             }
             return message_to_platform;
@@ -238,7 +238,7 @@ export class MessageFlow{
     }
 
     saveResponseDataToUser = async(response_format,processedResponse) => {
-        const intent = processedResponse.message_from_dialoglow.getIntent();
+        const intent = processedResponse.message_from_nlp.getIntent();
         const chatSessionRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatSession);
         const chatSessionModel = await chatSessionRepository.findOne({ where: { userPlatformID: response_format.sessionId } });
         let chatSessionId = null;
