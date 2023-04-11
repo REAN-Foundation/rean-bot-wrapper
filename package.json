@@ -29,7 +29,7 @@
     "@types/sequelize": "^4.28.9",
     "actions-on-google": "^2.5",
     "approx-string-match": "^1.1.0",
-    "ansi-regex": "^6.0.1"
+    "ansi-regex": "^6.0.1",
     "async-request": "^1.0.0",
     "aws-cloudfront-sign": "^2.2.0",
     "aws-sdk": "^2.1184.0",
