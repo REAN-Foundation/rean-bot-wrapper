@@ -10,8 +10,9 @@ import { commonResponseMessageFormat } from '../common.response.format.object';
 @scoped(Lifecycle.ContainerScoped)
 export class RejectDonorRequestService {
 
+    private _platformMessageService :  platformServiceInterface = null;
+
     constructor(
-        private _platformMessageService?: platformServiceInterface,
         @inject(RaiseDonationRequestService) private raiseDonationRequestService?: RaiseDonationRequestService,
         @inject(BloodWarriorCommonService) private bloodWarriorCommonService?: BloodWarriorCommonService,
         @inject(NeedleService) private needleService?: NeedleService,

@@ -7,10 +7,7 @@ export const RegisterAllProfileListener = async (intent, eventObj) => {
         let result = null;
         result = await registerAllProfileService.sendUserMessage(eventObj);
         console.log(result);
-        return Promise.resolve(result.message)
-            .then(async (eventObj) => {
-                await registerAllProfileService.sendUserMessageAfter(eventObj);
-            });
+        return result.message;
 
     } catch (error) {
         console.log(error);

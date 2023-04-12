@@ -10,8 +10,9 @@ import { Iresponse } from '../../refactor/interface/message.interface';
 @scoped(Lifecycle.ContainerScoped)
 export class ScheduleOneTimeTakeValuesService {
 
+    private _platformMessageService :  platformServiceInterface = null;
+
     constructor(
-        private _platformMessageService?: platformServiceInterface,
         @inject(RaiseDonationRequestService) private raiseDonationRequestService?: RaiseDonationRequestService,
         @inject(BloodWarriorCommonService) private bloodWarriorCommonService?: BloodWarriorCommonService,
         @inject(NeedleService) private needleService?: NeedleService
@@ -64,9 +65,11 @@ export class ScheduleOneTimeTakeValuesService {
                     response_format.messageText = heading1 + commonMessage;
                     response_format.message_type = "text";
     
+                    const previousIntentPayload = eventObj.body.originalDetectIntentRequest.payload;
+                    this._platformMessageService = eventObj.container.resolve(previousIntentPayload.source);
                     await this._platformMessageService.SendMediaMessage(response_format, null);
                 } else {
-                    dffMessage = `Donor not found with this ${volunteer.SelectedPhoneNumber} phone number.`;
+                    dffMessage = `One time donor not found with this ${volunteer.SelectedPhoneNumber} phone number.`;
                     resolve( { message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } });
                 }
                 

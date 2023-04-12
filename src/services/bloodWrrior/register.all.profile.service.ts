@@ -8,16 +8,18 @@ import { commonResponseMessageFormat } from '../common.response.format.object';
 @scoped(Lifecycle.ContainerScoped)
 export class RegisterAllProfileService {
 
+    private _platformMessageService : platformServiceInterface = null;
+
     constructor(
-        private _platformMessageService?: platformServiceInterface,
         @inject(NeedleService) private needleService?: NeedleService
-    ){}
+    ) {}
 
     async sendUserMessage (eventObj) {
         try {
             const payload = eventObj.body.originalDetectIntentRequest.payload;
             this._platformMessageService = eventObj.container.resolve(payload.source);
 
+            await this.sendUserMessageAfter(eventObj);
             const message = `Hi, You have successfully registered with blood warrior team as patient.`;
             return { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [message] } }] } };
         } catch (err) {
@@ -26,7 +28,7 @@ export class RegisterAllProfileService {
         }
     }
 
-    async sendUserMessageAfter(eventObj){
+    async sendUserMessageAfter(eventObj) {
         try {
             const response_format: Iresponse = commonResponseMessageFormat();
             const payload = eventObj.body.originalDetectIntentRequest.payload;
@@ -60,6 +62,7 @@ export class RegisterAllProfileService {
                         text : "patient"
                     }];
                 sendPayload["templateName"] = "bot_reg_confirmation";
+                payload["languageForSession"] = "en";
                 response_format.platform = payload.source;
                 response_format.sessionId = `91${body.PatientPhone}`;
                 response_format.messageText = message;
@@ -102,6 +105,7 @@ export class RegisterAllProfileService {
                         text : body.DonorType
                     }];
                 sendPayload["templateName"] = "bot_reg_confirmation";
+                payload["languageForSession"] = "en";
                 response_format.platform = payload.source;
                 response_format.sessionId = `91${body.DonorPhone}`;
                 response_format.messageText = message;
@@ -138,6 +142,7 @@ export class RegisterAllProfileService {
                         text : "volunteer"
                     }];
                 sendPayload["templateName"] = "bot_reg_confirmation";
+                payload["languageForSession"] = "en";
                 const message = `Hi ${body.VolunteerFirstName}, \nYou have successfully registered with blood warrior team as volunteer.`;
                 response_format.platform = payload.source;
                 response_format.sessionId = `91${body.VolunteerPhone}`;
@@ -198,6 +203,7 @@ export class RegisterAllProfileService {
                         text : bridgeId
                     }];
                 sendPayload["templateName"] = "bridge_confirmation";
+                payload["languageForSession"] = "en";
                 phoneArray.forEach(async (phone) => {
                     const message = `Hi, \nYou have successfully registered with blood bridge ${bridgeId}.\nRegards \nTeam Blood Warriors`;
                     response_format.platform = payload.source;
@@ -211,7 +217,7 @@ export class RegisterAllProfileService {
 
         } catch (error) {
             Logger.instance()
-                .log_error(error.message,500,'Raise blood donation request with blood warrior service error');
+                .log_error(error.message,500,'Register all profile with blood warrior service error');
         }
     }
 

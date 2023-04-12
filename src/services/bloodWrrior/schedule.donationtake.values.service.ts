@@ -10,14 +10,15 @@ import { commonResponseMessageFormat } from '../common.response.format.object';
 @scoped(Lifecycle.ContainerScoped)
 export class ScheduleDonationTakeValuesService {
 
+    private _platformMessageService :  platformServiceInterface = null;
+
     constructor(
         @inject(RaiseDonationRequestService) private raiseDonationRequestService?: RaiseDonationRequestService,
         @inject(BloodWarriorCommonService) private bloodWarriorCommonService?: BloodWarriorCommonService,
         @inject(NeedleService) private needleService?: NeedleService,
-        private _platformMessageService?: platformServiceInterface,
     ) {}
 
-    async ScheduleDonationTakeValuesService(eventObj){
+    async ScheduleDonationTakeValues(eventObj){
         return new Promise(async (resolve) => {
             try {
                 const bridgeId = eventObj.body.queryResult.parameters.bridge_Id;
@@ -96,11 +97,14 @@ export class ScheduleDonationTakeValuesService {
                             text : patientDonors.DonorType
                         }];
                     payload["templateName"] = "patient_volunteer_donation_update";
+                    payload["languageForSession"] = "en";
                     const response_format: Iresponse = commonResponseMessageFormat();
                     response_format.platform = previousPayload.source;
                     response_format.sessionId = patientPhone;
                     response_format.messageText = heading + dffMessage + commonMessage;
                     response_format.message_type = "template";
+                    const previousIntentPayload = eventObj.body.originalDetectIntentRequest.payload;
+                    this._platformMessageService = eventObj.container.resolve(previousIntentPayload.source);
                     await this._platformMessageService.SendMediaMessage(response_format, payload);
     
                     //Message sent to donor
