@@ -62,7 +62,7 @@ export class RegisterAllProfileService {
                         text : "patient"
                     }];
                 sendPayload["templateName"] = "bot_reg_confirmation";
-                payload["languageForSession"] = "en";
+                sendPayload["languageForSession"] = "en";
                 response_format.platform = payload.source;
                 response_format.sessionId = `91${body.PatientPhone}`;
                 response_format.messageText = message;
@@ -105,7 +105,7 @@ export class RegisterAllProfileService {
                         text : body.DonorType
                     }];
                 sendPayload["templateName"] = "bot_reg_confirmation";
-                payload["languageForSession"] = "en";
+                sendPayload["languageForSession"] = "en";
                 response_format.platform = payload.source;
                 response_format.sessionId = `91${body.DonorPhone}`;
                 response_format.messageText = message;
@@ -142,7 +142,7 @@ export class RegisterAllProfileService {
                         text : "volunteer"
                     }];
                 sendPayload["templateName"] = "bot_reg_confirmation";
-                payload["languageForSession"] = "en";
+                sendPayload["languageForSession"] = "en";
                 const message = `Hi ${body.VolunteerFirstName}, \nYou have successfully registered with blood warrior team as volunteer.`;
                 response_format.platform = payload.source;
                 response_format.sessionId = `91${body.VolunteerPhone}`;
@@ -203,7 +203,7 @@ export class RegisterAllProfileService {
                         text : bridgeId
                     }];
                 sendPayload["templateName"] = "bridge_confirmation";
-                payload["languageForSession"] = "en";
+                sendPayload["languageForSession"] = "en";
                 phoneArray.forEach(async (phone) => {
                     const message = `Hi, \nYou have successfully registered with blood bridge ${bridgeId}.\nRegards \nTeam Blood Warriors`;
                     response_format.platform = payload.source;
