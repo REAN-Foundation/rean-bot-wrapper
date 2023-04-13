@@ -10,8 +10,9 @@ import { templateButtonService } from '../whatsappmeta.button.service';
 @scoped(Lifecycle.ContainerScoped)
 export class RaiseDonationRequestService {
 
+    private _platformMessageService :  platformServiceInterface = null;
+
     constructor (
-        private _platformMessageService?: platformServiceInterface,
         @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,
         @inject(NeedleService) private needleService?: NeedleService
     ) {}
@@ -101,6 +102,7 @@ export class RaiseDonationRequestService {
                             text : "Blood"
                         }];
                     payload["templateName"] = "donor_push_notification";
+                    payload["languageForSession"] = "en";
                     const dffMessage = `Hi ${donorName}, \n"${name}" requires blood. \nThe transfusion is scheduled to be ${stringTFDate}.
                     Would you be willing to donate blood on or before ${stringDate}? \nRegards \nTeam Blood Warriors`;
 
@@ -177,6 +179,7 @@ export class RaiseDonationRequestService {
                         text : "Blood"
                     }];
                 payload["templateName"] = "volunteer_push_notification";
+                payload["languageForSession"] = "en";
 
                 //const dffMessage = `Hi ${volunteerName}, \n"${patientName}" requires blood.
                 //The transfusion is scheduled to be ${transfusionDate}.
