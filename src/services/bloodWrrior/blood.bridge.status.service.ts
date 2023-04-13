@@ -63,7 +63,7 @@ export class BloodBridgeStatusService {
                     await this.needleService.needleRequestForREAN("put", apiURL, null, obj);
                     const patient = await
                     this.bloodWarriorCommonService.getPatientPhoneByUserId(bloodBridge.PatientUserId);
-                    const message = `\n        Patient Name: ${patient.User.Person.DisplayName} \nDo you want to send a request to all eligible donors?`;
+                    const message = `\n*Patient Name:* ${patient.User.Person.DisplayName} \nDo you want to send a request to all eligible donors?`;
                     const buttons = await whatsappMetaButtonService("Yes", "Donation_Request_Yes","No", "Volunteer_Confirm");
                     return { message: { fulfillmentMessages: [{ text: { text: [dffMessage + message] } }, buttons] } };
                 } else {

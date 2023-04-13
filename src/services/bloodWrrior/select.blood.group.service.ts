@@ -11,11 +11,12 @@ import { BloodWarriorCommonService } from './common.service';
 @scoped(Lifecycle.ContainerScoped)
 export class SelectBloodGroupService {
 
+    private _platformMessageService :  platformServiceInterface = null;
+
     constructor(
         @inject(RaiseDonationRequestService) private raiseDonationRequestService?: RaiseDonationRequestService,
         @inject(BloodWarriorCommonService) private bloodWarriorCommonService?: BloodWarriorCommonService,
         @inject(NeedleService) private needleService?: NeedleService,
-        private _platformMessageService?: platformServiceInterface
     ) {}
 
     async bloodGroupService (eventObj) {
@@ -82,6 +83,7 @@ export class SelectBloodGroupService {
                                 text : donorName
                             }];
                         payload["templateName"] = "donor_donation_volunteer";
+                        payload["languageForSession"] = "en";
                         const response_format: Iresponse = commonResponseMessageFormat();
                         response_format.platform = previousIntentPayload.source;
                         response_format.sessionId = donorPhone;

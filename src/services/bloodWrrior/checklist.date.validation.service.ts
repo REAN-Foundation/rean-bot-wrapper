@@ -10,11 +10,12 @@ import { commonResponseMessageFormat } from '../common.response.format.object';
 @scoped(Lifecycle.ContainerScoped)
 export class ChecklistDateValidationService {
 
+    private _platformMessageService :  platformServiceInterface = null;
+
     constructor(
         @inject(BloodWarriorCommonService) private bloodWarriorCommonService?: BloodWarriorCommonService,
         @inject(RaiseDonationRequestService) private raiseDonationRequestService?: RaiseDonationRequestService,
         @inject(NeedleService) private needleService?: NeedleService,
-        private _platformMessageService?: platformServiceInterface
     ) {}
 
     checklistDateValidationService = async (eventObj) => {

@@ -1,11 +1,10 @@
 import { Logger } from '../../common/logger';
 import { GetPatientInfoService } from "../../services/support.app.service";
-import { container } from 'tsyringe';
-const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
 
 export const getMedicationInfo = async (intent, eventObj) => {
     return new Promise(async (resolve, reject) => {
         try {
+            const getPatientInfoService: GetPatientInfoService = eventObj.container.resolve(GetPatientInfoService);
             Logger.instance().log('Calling support app Service !!!!!!');
 
             // Service Call
