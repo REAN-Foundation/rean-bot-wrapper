@@ -1,21 +1,23 @@
 import { DonationRequestYesService } from "../../../services/bloodWrrior/donation.request.yes.service";
 
-export const DonationRequestYesListener = async (intent, eventObj, resolve, reject) => {
+export const DonationRequestYesListener = async (intent, eventObj) => {
     const donationRequestYesService: DonationRequestYesService = eventObj.container.resolve(DonationRequestYesService);
-    // return new Promise(async (resolve) => {
     try {
         let result = null;
         result = await donationRequestYesService.sendUserMessage(eventObj);
         const patientUserId = result.patientUserId;
-        resolve(result.message);
-
-        await donationRequestYesService.raiseDonorRequest(eventObj,
-            patientUserId )
-            .then((result) => { donationRequestYesService.notifyVolunteer(
-                eventObj, patientUserId, result.donorNames); });
-
+        sendRequestToDonor(patientUserId);
+        return result.message;
     } catch (error) {
         console.log(error);
     }
-    // });
+
+    async function sendRequestToDonor(patientUserId: any) {
+        await donationRequestYesService.raiseDonorRequest(eventObj,
+            patientUserId)
+            .then((result) => {
+                donationRequestYesService.notifyVolunteer(
+                    eventObj, patientUserId, result.donorNames);
+            });
+    }
 };
