@@ -1,20 +1,26 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { autoInjectable,container } from "tsyringe";
+import { inject, Lifecycle, scoped } from "tsyringe";
 import { platformServiceInterface } from "../refactor/interface/platform.interface";
 import { ChatMessage } from '../models/chat.message.model';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { Iresponse } from "../refactor/interface/message.interface";
+import { commonResponseMessageFormat } from "./common.response.format.object";
+import { EntityManagerProvider } from "./entity.manager.provider.service";
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class CustomWelcomeService {
 
     public res;
+    
+    private _platformMessageService :  platformServiceInterface = null;
 
-    private _platformMessageService?: platformServiceInterface;
-
-    constructor(private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+    constructor(
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider){}
 
     async checkSession(userId:any){
-        const prevSessions = await ChatMessage.findAll({
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+        const prevSessions = await chatMessageRepository.findAll({
             where : {
                 userPlatformID : userId,
             }
@@ -31,14 +37,21 @@ export class CustomWelcomeService {
         return url;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async handleMessageCustom(sessionId: any, client: any, req: any) {
         console.log('Here in the handle message of custom welcome service');
     }
 
     async postResponseCustom(userId: any, client: any, data: any) {
         console.log("Sending calorie data to client");
-        this._platformMessageService = container.resolve(client);
-        await this._platformMessageService.SendMediaMessage(userId,data,null,'image',null);
+        
+        // this._platformMessageService = container.resolve(client);
+        const response_format: Iresponse = commonResponseMessageFormat();
+        response_format.platform = client;
+        response_format.sessionId = userId;
+        response_format.messageBody = data;
+        response_format.message_type = "image";
+        await this._platformMessageService.SendMediaMessage(response_format,null);
     }
-
+    
 }

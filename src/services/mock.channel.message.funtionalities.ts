@@ -31,6 +31,14 @@ export class MockCHannelMessageFunctionalities implements getMessageFunctionalit
         return messagetoDialogflow;
     }
 
+    async interactiveListMessaegFormat(messageObj: Message){
+        const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(messageObj.getinteractivelist().title);
+        const messagetoDialogflow = this.inputMessageFormat(messageObj);
+        messagetoDialogflow.messageBody = emojiFilteredMessage;
+        messagetoDialogflow.intent = messageObj.getinteractivelist().id;
+        return messagetoDialogflow;
+    }
+
     inputMessageFormat (messageObj){
         const messagetoDialogflow: Imessage = {
             name                      : null,

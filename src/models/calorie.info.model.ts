@@ -2,13 +2,11 @@ import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, Index, HasMa
 import { calorieInfo } from '../refactor/interface/message.interface';
 import { CalorieDatabase } from './calorie.db.model';
 
-@Table(
-    {
+@Table({
     timestamps : true,
     modelName  : 'CalorieInfo',
     tableName  : 'calorie_info'
-    }
-)
+})
 
 export class CalorieInfo extends Model implements calorieInfo {
 
@@ -23,7 +21,7 @@ export class CalorieInfo extends Model implements calorieInfo {
         type : DataType.STRING,
         allowNull : true
     })
-        user_id: string
+        user_id: string;
 
     @Index
     @Column({
@@ -84,6 +82,6 @@ export class CalorieInfo extends Model implements calorieInfo {
         record_date: Date;
 
     @HasMany(() => CalorieDatabase)
-    CalorieDatabase: CalorieDatabase[];
+        CalorieDatabase: CalorieDatabase[];
 
 }

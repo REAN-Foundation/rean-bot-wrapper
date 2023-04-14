@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface';
-import { autoInjectable, singleton } from 'tsyringe';
+import { Imessage, IprocessedDialogflowResponseFormat, Iresponse } from '../refactor/interface/message.interface';
+import { autoInjectable, inject, Lifecycle, scoped, singleton } from 'tsyringe';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { MessageFlow } from './get.put.message.flow.service';
 import { ResponseHandler } from '../utils/response.handler';
 import { RHGMessageToDialogflow } from './rhg.message.to.dialogflow';
 
-@autoInjectable()
-@singleton()
+// @autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class snehaMessagePlatformService implements platformServiceInterface{
 
     public res;
 
-    constructor(private messageFlow?: MessageFlow,
-        private responseHandler?: ResponseHandler,
-        private rhgMessageToDialogflow?: RHGMessageToDialogflow
+    constructor(@inject(MessageFlow) private messageFlow?: MessageFlow,
+        @inject(ResponseHandler) private responseHandler?: ResponseHandler,
+        @inject(RHGMessageToDialogflow) private rhgMessageToDialogflow?: RHGMessageToDialogflow
     ) {
 
     }
@@ -39,6 +39,8 @@ export class snehaMessagePlatformService implements platformServiceInterface{
         const generatorRHGMessage = await this.rhgMessageToDialogflow.messageToDialogflow(msg);
         let done = false;
         const snehaMessages = [];
+        
+        // eslint-disable-next-line init-declarations
         let snehaMessagetoDialogflow: Imessage;
         while (done === false) {
             const nextgeneratorObj = generatorRHGMessage.next();
@@ -64,9 +66,9 @@ export class snehaMessagePlatformService implements platformServiceInterface{
 
     }
 
-    SendMediaMessage(contact,imageLink, message){
-        this.responseHandler.sendSuccessResponseForApp(this.res, 201, "Message processed successfully.", { response_message: message });
-        return message;
+    SendMediaMessage(response_format:Iresponse, message){
+        this.responseHandler.sendSuccessResponseForApp(this.res, 201, "Message processed successfully.", { response_message: response_format.messageText });
+        return response_format.messageText;
     }
 
 }

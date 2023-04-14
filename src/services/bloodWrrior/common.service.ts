@@ -1,16 +1,20 @@
-import { autoInjectable } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { Logger } from '../../common/logger';
-import { getPhoneNumber, needleRequestForREAN } from '../needle.service';
+import { NeedleService } from '../needle.service';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class BloodWarriorCommonService {
+
+    constructor(
+        @inject(NeedleService) private needleService: NeedleService
+    ){}
 
     async getDonorByPhoneNumber (eventObj) {
         try {
             let result = null;
-            const phoneNumber = await getPhoneNumber(eventObj);
+            const phoneNumber = await this.needleService.getPhoneNumber(eventObj);
             const apiURL = `donors/search?phone=${phoneNumber}`;
-            result = await needleRequestForREAN("get", apiURL);
+            result = await this.needleService.needleRequestForREAN("get", apiURL);
             if (result.Data.Donors.Items.length > 0) {
                 return result.Data.Donors.Items[0];
             }
@@ -23,9 +27,9 @@ export class BloodWarriorCommonService {
     async getVolunteerByPhoneNumber (eventObj) {
         try {
             let result = null;
-            const phoneNumber = await getPhoneNumber(eventObj);
+            const phoneNumber = await this.needleService.getPhoneNumber(eventObj);
             const apiURL = `volunteers/search?phone=${phoneNumber}`;
-            result = await needleRequestForREAN("get", apiURL);
+            result = await this.needleService.needleRequestForREAN("get", apiURL);
             if (result.Data.Volunteers.Items.length > 0) {
                 return result.Data.Volunteers.Items[0];
             }
@@ -39,7 +43,7 @@ export class BloodWarriorCommonService {
         try {
             let result = null;
             const apiURL = `donors/${donorUserId}`;
-            result = await needleRequestForREAN("get", apiURL);
+            result = await this.needleService.needleRequestForREAN("get", apiURL);
             return result.Data.Donor;
         } catch (error) {
             Logger.instance()
@@ -51,7 +55,7 @@ export class BloodWarriorCommonService {
         try {
             let result = null;
             const apiURL = `volunteers/${volunteerUserId}`;
-            result = await needleRequestForREAN("get", apiURL);
+            result = await this.needleService.needleRequestForREAN("get", apiURL);
             return result.Data.Volunteer;
         } catch (error) {
             Logger.instance()
@@ -63,7 +67,7 @@ export class BloodWarriorCommonService {
         try {
             let result = null;
             const apiURL = `patients/${patientUserId}`;
-            result = await needleRequestForREAN("get", apiURL);
+            result = await this.needleService.needleRequestForREAN("get", apiURL);
             return result.Data.Patient;
         } catch (error) {
             Logger.instance()
@@ -74,7 +78,7 @@ export class BloodWarriorCommonService {
     async updateDonationRecord (donationRecordId: string, obj: any) {
         try {
             const apiURL = `clinical/donation-record/${donationRecordId}`;
-            await needleRequestForREAN("put", apiURL, null, obj);
+            await this.needleService.needleRequestForREAN("put", apiURL, null, obj);
             console.log(`Succesfully updated donation record.`);
 
         } catch (error) {
@@ -93,7 +97,7 @@ export class BloodWarriorCommonService {
                 PlanCode  : "Donor-Reminders",
                 StartDate : bloodTransfusionDate.toISOString().split("T")[0]
             };
-            result = await needleRequestForREAN("post", url, null, obj);
+            result = await this.needleService.needleRequestForREAN("post", url, null, obj);
             if (result.HttpCode === 201) {
                 console.log(`Succesfully fetched donation reminders for donoR user Id ${donorUserId}`);
 
@@ -104,5 +108,15 @@ export class BloodWarriorCommonService {
         }
     }
 
+    async differenceBetweenTwoDates (date_2 :Date, date_1 :Date ) : Promise<number> {
+        try {
+            const difference = date_2.getTime() - date_1.getTime();
+            const TotalDays = Math.ceil(difference / (1000 * 3600 * 24));
+            return TotalDays;
 
+        } catch (error) {
+            Logger.instance()
+                .log_error(error.message,500,'Failed to calculate day difference');
+        }
+    }
 }

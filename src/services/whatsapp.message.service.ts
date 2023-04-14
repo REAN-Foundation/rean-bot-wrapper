@@ -2,9 +2,8 @@
 /* eslint-disable max-len */
 import http from 'https';
 import { AwsS3manager } from './aws.file.upload.service';
-import { autoInjectable, singleton, inject, delay } from 'tsyringe';
+import { inject, delay, scoped, Lifecycle } from 'tsyringe';
 import { MessageFlow } from './get.put.message.flow.service';
-import { MessageFunctionalities } from './whatsapp.meta.functionalities';
 import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import needle from 'needle';
@@ -12,18 +11,21 @@ import { getRequestOptions } from '../utils/helper';
 import { ChatMessage } from '../models/chat.message.model';
 import { WhatsappMessageToDialogflow } from './whatsapp.messagetodialogflow';
 import { CommonWhatsappService } from './whatsapp.common.service';
+import { Iresponse } from '../refactor/interface/message.interface';
+import { WhatsappPostResponseFunctionalities } from './whatsapp.post.response.functionalities';
+import { EntityManagerProvider } from './entity.manager.provider.service';
 
-@autoInjectable()
-@singleton()
+@scoped(Lifecycle.ContainerScoped)
 export class WhatsappMessageService extends CommonWhatsappService {
 
     public res;
 
     constructor(@inject(delay(() => MessageFlow)) public messageFlow,
-        awsS3manager?: AwsS3manager,
-        private messageFunctionalities?: MessageFunctionalities,
+        @inject(AwsS3manager) awsS3manager?: AwsS3manager,
         @inject("whatsapp.authenticator") private clientAuthenticator?: clientAuthenticator,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(WhatsappPostResponseFunctionalities) private whatsappPostResponseFunctionalities?: WhatsappPostResponseFunctionalities,
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         whatsappMessageToDialogflow?: WhatsappMessageToDialogflow){
         super(messageFlow, awsS3manager, whatsappMessageToDialogflow);
     }
@@ -170,7 +172,6 @@ export class WhatsappMessageService extends CommonWhatsappService {
                 const hostname = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST");
                 const path = '/v1/messages';
                 const apiUrl = "https://" + hostname + path;
-                console.log("apiuri",apiUrl);
                 // eslint-disable-next-line init-declarations
                 await needle.post(apiUrl, postdata, options, function(err, resp) {
                     if (err) {
@@ -189,126 +190,25 @@ export class WhatsappMessageService extends CommonWhatsappService {
         });
     }
 
-    async SendMediaMessage (contact: number | string, imageLink: string, message: string, messageType: string, payload: any) {
-        message = this.messageFunctionalities.sanitizeMessage(message);
-        const postData = this.postDataFormatWhatsapp(contact);
-        if (messageType === "image") {
-            if (!imageLink) {
-                imageLink = payload.fields.url.stringValue;
-            }
-            postData["image"] = {
-                "link"    : imageLink,
-                "caption" : message
-            };
-            postData.type = "image";
-            const postDataString = JSON.stringify(postData);
-            return await this.postRequestMessages(postDataString);
+    async SendMediaMessage (response_format:Iresponse, payload: any) {
+        const type = response_format.message_type;
+        if (type) {
+            const classmethod = `${type}ResponseFormat`;
+            const postDataMeta = await this.whatsappPostResponseFunctionalities[classmethod](response_format,payload);
+            const postDataString = JSON.stringify(postDataMeta);
+            const needleResp:any = await this.postRequestMessages(postDataString);
 
-        }
-        else if (messageType === "voice"){
-            postData["audio"] = {
-                "link" : imageLink
-            };
-            postData.type = "audio";
-            const postDataString = JSON.stringify(postData);
-            return await this.postRequestMessages(postDataString);
-        }
-        else if (messageType === "interactive-buttons"){
-            const buttons1 = [];
-            const numberOfButtons1 = (payload.fields.buttons.listValue.values).length;
-            for (let i = 0; i < numberOfButtons1; i++){
-                const id1 = payload.fields.buttons.listValue.values[i].structValue.fields.reply.structValue.fields.id.stringValue;
-                const title1 = payload.fields.buttons.listValue.values[i].structValue.fields.reply.structValue.fields.title.stringValue;
-                const tempObject1 = {
-                    "type"  : "reply",
-                    "reply" : {
-                        "id"    : id1,
-                        "title" : title1
-                    }
-                };
-                buttons1.push(tempObject1);
+            //improve this DB query
+            if (needleResp.statuscode === 200) {
+                const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+                const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.sessionId } });
+                const id = respChatMessage[respChatMessage.length - 1].id;
+                await chatMessageRepository.update({ whatsappResponseMessageId: needleResp.body.messages[0].id }, { where: { id: id } } )
+                    .then(() => { console.log("updated"); })
+                    .catch(error => console.log("error on update", error));
+                return needleResp;
             }
-            postData["interactive"] = {
-                "type" : "button",
-                "body" : {
-                    "text" : message
-                },
-                "action" : {
-                    "buttons" : buttons1
-                }
-            };
-            postData.type = "interactive";
-            const postDataString = JSON.stringify(postData);
-            return await this.postRequestMessages(postDataString);
-        }
-        else if (messageType === "interactive-list"){
-            const rows = [];
-            let header = "";
-            const list = payload.fields.buttons.listValue.values;
-            if (payload.fields.header){
-                header = payload.fields.header.stringValue;
-            } else {
-                header = "LIST";
-            }
-            let count = 0;
-            for (const lit of list){
-                let id = count;
-                let description_meta = "";
-                if (lit.structValue.fields.description){
-                    description_meta = lit.structValue.fields.description.stringValue;
-                }
-                if (lit.structValue.fields.id){
-                    id = lit.structValue.fields.id.stringValue;
-                }
-                const temp = {
-                    "id"          : id,
-                    "title"       : lit.structValue.fields.title.stringValue,
-                    "description" : description_meta
-                };
-                rows.push(temp);
-                count++;
-            }
-            postData["interactive"] = {
-                "type" : "list",
-                "body" : {
-                    "text" : message
-                },
-                "action" : {
-                    "button"   : "Select From Here",
-                    "sections" : [
-                        {
-                            "rows" : rows
-                        }
-                    ]
-                }
-            };
-            postData.type = "interactive";
-            const postDataString = JSON.stringify(postData);
-            return await this.postRequestMessages(postDataString);
-                
-            // }
-            // else if (messageType === "custom_payload") {
-            //     const payloadContent = this.handleMessagetypePayload.getPayloadContent(payload);
-            //     this.SendPayloadMessage(contact, imageLink, payloadContent);
-        }
-        else {
-            postData["text"] = {
-                "body" : message
-            };
-            if (new RegExp("(https?:+)").test(message)) {
-                postData["preview_url"] = true;
-            } else {
-                postData["preview_url"] = false;
-            }
-            postData.type = "text";
-            const postDataString = JSON.stringify(postData);
-            const needleResp = await this.postRequestMessages(postDataString);
-            const respChatMessage = await ChatMessage.findAll({ where: { userPlatformID: postData.to } });
-            const id = respChatMessage[respChatMessage.length - 1].id;
-            await ChatMessage.update({ whatsappResponseMessageId: needleResp.messages[0].id }, { where: { id: id } } )
-                .then(() => { console.log("updated"); })
-                .catch(error => console.log("error on update", error));
-            return needleResp;
+            
         }
     }
 

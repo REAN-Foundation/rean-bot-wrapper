@@ -1,8 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { autoInjectable } from 'tsyringe';
 import { Logger } from '../../common/logger';
 
-@autoInjectable()
 export class NewUserService {
 
     async newUserService (eventObj) {

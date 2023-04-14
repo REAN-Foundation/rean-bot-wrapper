@@ -1,16 +1,16 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { autoInjectable,container } from "tsyringe";
+import { autoInjectable } from "tsyringe";
 import XLSX = require('xlsx');
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 import { platformServiceInterface } from "../refactor/interface/platform.interface";
 import dialogflow = require('@google-cloud/dialogflow');
+import { Iresponse } from "../refactor/interface/message.interface";
+import { commonResponseMessageFormat } from "./common.response.format.object";
 
 @autoInjectable()
 export class demoBotService {
 
-    private _platformMessageService?: platformServiceInterface;
-
-    constructor(private clientEnvironment?: ClientEnvironmentProviderService) {}
+    constructor(private clientEnvironment?: ClientEnvironmentProviderService,
+        private _platformMessageService?: platformServiceInterface) {}
 
     async readExcel(path){
         try {
@@ -51,6 +51,7 @@ export class demoBotService {
         }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async createIntent(excelData, userSessionId){
         console.log('Creating intents');
         const dfBotGCPCredentials = JSON.parse(this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS"));
@@ -82,8 +83,8 @@ export class demoBotService {
             }
         }
 
-        if (intents.length != 0) {
-            await intentsClient.batchDeleteIntents({parent: projectAgentPath, intents: intents});
+        if (intents.length !== 0) {
+            await intentsClient.batchDeleteIntents({ parent: projectAgentPath, intents: intents });
         }
 
         var count = 0;
@@ -110,7 +111,6 @@ export class demoBotService {
                 trainingPhrases.push(trainingPhrase);
             }
 
-
             const messageText = {
                 text : [df_resp],
             };
@@ -132,6 +132,7 @@ export class demoBotService {
                 intent : intent,
             };
 
+            await this.sleep(1500);
             const [response] = await intentsClient.createIntent(createIntentRequest);
             console.log(`Intent ${response.name} created`);
         }
@@ -142,8 +143,20 @@ export class demoBotService {
 
     async postResponseDemo(sessionId: any, client: any, data:any) {
         console.log("Sending demo bot success message");
-        this._platformMessageService = container.resolve(client);
-        await this._platformMessageService.SendMediaMessage(sessionId,null,data,'text',null);
+        const response_format: Iresponse = commonResponseMessageFormat();
+        response_format.platform = client;
+        response_format.sessionId = sessionId;
+        response_format.messageText = data;
+        response_format.message_type = "text";
+        
+        // this._platformMessageService = container.resolve(client);
+        await this._platformMessageService.SendMediaMessage(response_format,null);
+    }
+    
+    async sleep(ms) {
+        return new Promise((resolve) => {
+            setTimeout(resolve, ms);
+        });
     }
 
 }

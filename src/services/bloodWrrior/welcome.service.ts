@@ -1,18 +1,21 @@
 import { GetPatientInfoService } from '../support.app.service';
-import { container, autoInjectable } from 'tsyringe';
+import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../common/logger';
-import { getPhoneNumber, needleRequestForREAN } from '../needle.service';
+import { NeedleService } from '../needle.service';
 import { whatsappMetaButtonService } from '../whatsappmeta.button.service';
 import { dialoflowMessageFormatting } from '../Dialogflow.service';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class BloodWarriorWelcomeService {
 
-    getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
-
-    dialoflowMessageFormattingService: dialoflowMessageFormatting = container.resolve(dialoflowMessageFormatting);
+    constructor(
+        @inject(NeedleService) private needleService?: NeedleService,
+        @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,
+        @inject(dialoflowMessageFormatting) private dialoflowMessageFormattingService?: dialoflowMessageFormatting,
+    ){}
     
     async registrationService (eventObj) {
+        // eslint-disable-next-line max-len
         try {
             const roleId = await this.getRoleId(eventObj);
             const triggering_event = await this.getEvent(roleId);
@@ -35,9 +38,9 @@ export class BloodWarriorWelcomeService {
     }
 
     public async getRoleId(eventObj) {
-        const phoneNumber = await getPhoneNumber(eventObj);
+        const phoneNumber = await this.needleService.getPhoneNumber(eventObj);
         const apiURL = `persons/phone/${phoneNumber}`;
-        const requestBody = await needleRequestForREAN("get", apiURL);
+        const requestBody = await this.needleService.needleRequestForREAN("get", apiURL);
         let roleId = 0;
         if (requestBody.Data.Persons !== null) {
             roleId = requestBody.Data.Persons.Roles[0].RoleId;
@@ -54,16 +57,16 @@ export class BloodWarriorWelcomeService {
 
             //get medical details for patient
             const apiURL = `patient-health-profiles/${patientUserId}`;
-            result = await needleRequestForREAN("get", apiURL);
+            result = await this.needleService.needleRequestForREAN("get", apiURL);
             const bloodGroup = result.Data.HealthProfile.BloodGroup;
             let transfusionDate = result.Data.HealthProfile.BloodTransfusionDate ?? null;
             if (transfusionDate) {
                 transfusionDate = new Date(transfusionDate.split("T")[0]).toDateString();
             }
-            const dffMessage = `Welcome to Blood Warriors ${name},\nHere are the details we have found:
-            Patient Name: *${name}*,
-            Blood Group: *${bloodGroup}*,
-            Expected Next Blood Transfusion Date: *${transfusionDate}*\nIf the details are correct, please click *proceed* to get reminders or if you can register as a new patient.`;
+            const dffMessage = `Welcome to Blood Warriors ${name},\n\nHere are the details we have found:
+            *Patient Name:* ${name},
+            *Blood Group:* ${bloodGroup},
+            *Expected Next Blood Transfusion Date:* ${transfusionDate}\nIf the details are correct, please click *proceed* to get reminders or if you can register as a new patient.`;
             console.log(dffMessage);
             
             const payloadButtons = await whatsappMetaButtonService("Proceed","Patient_Confirm","Change Donation Date","Change_TF_Date");

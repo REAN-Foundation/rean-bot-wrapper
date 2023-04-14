@@ -34,7 +34,7 @@ import { BloodWarriorDonor } from './intentListeners/bloodWarrior/donor.listener
 import { BloodWarriorNewUser } from './intentListeners/bloodWarrior/new.userlistener';
 import { BloodWarriorPatientEnroll } from './intentListeners/bloodWarrior/patient.enroll.listener';
 import { ChangeTransfusionDate } from './intentListeners/bloodWarrior/change.tf.date.listener';
-import { kerotoplastyConditionIdentificationListener } from './intentListeners/kerotoplasty.bot.condition.Identification.listener';
+import { kerotoplastyConditionIdentificationListener} from './intentListeners/kerotoplasty.bot.condition.Identification.listener';
 import { kerotoplastyLocationListener } from './intentListeners/kerotoplasty.find.nearest.location.listener';
 import { BloodWarriorMenu } from './intentListeners/bloodWarrior/menu.listener';
 import { RaiseBloodDonationRequest } from './intentListeners/bloodWarrior/raise.request.listener';
@@ -52,6 +52,9 @@ import { DonationRequestYesListener } from './intentListeners/bloodWarrior/donat
 import { AcceptVolunteerRequestListener } from './intentListeners/bloodWarrior/accept.volunteer.request.listener';
 import { AcceptDonationRequestListener } from './intentListeners/bloodWarrior/accept.donation.request.listener';
 import { SelectBloodGroupListener } from './intentListeners/bloodWarrior/select.blood.group.listener';
+import { DonateBloodListener } from './intentListeners/bloodWarrior/donate.blood.listener';
+import { ScheduleOneTimeTakeValuesListener } from './intentListeners/bloodWarrior/schedule.one.time.take.values.listener';
+import { RegisterAllProfileListener } from './intentListeners/bloodWarrior/register.all.profile.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -63,7 +66,6 @@ export class IntentRegister {
 
     register(){
         Logger.instance().log("Begin registering Intents...");
-
         IntentEmitter.registerListener('Vaccination.AppointmentAvailability', getVaccinationAppointments);
         IntentEmitter.registerListener('vaccination:appointments', secondListener);
 
@@ -75,7 +77,7 @@ export class IntentRegister {
 
         IntentEmitter.registerListener('Custom Welcome Intent', CustomWelcomeIntent);
         IntentEmitter.registerListener('Custom Language - custom', CustomLanguageListener);
-        IntentEmitter.registerListener('Change Language - custom', LanguageChangeListener);
+        IntentEmitter.registerListener('Change Language', LanguageChangeListener);
 
         IntentEmitter.registerListener('life - no', getSymptomAssessment);
 
@@ -180,6 +182,10 @@ export class IntentRegister {
         IntentEmitter.registerListener('A_Negative', SelectBloodGroupListener);
         IntentEmitter.registerListener('B_Negative', SelectBloodGroupListener);
         IntentEmitter.registerListener('AB_Negative', SelectBloodGroupListener);
+        IntentEmitter.registerListener('Donate_Blood', DonateBloodListener);
+        IntentEmitter.registerListener('Blood_OneTime_Take_Values', ScheduleOneTimeTakeValuesListener);
+        IntentEmitter.registerListener('Send_OneTimeDonor', SelectBloodGroupListener);
+        IntentEmitter.registerListener('Register_Volunteer', RegisterAllProfileListener);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);

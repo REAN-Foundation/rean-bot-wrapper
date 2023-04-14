@@ -1,13 +1,15 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { clientAuthenticator } from './client.authenticator.interface';
-import { injectable, singleton } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 
-@injectable()
-@singleton()
+// @injectable()
+@scoped(Lifecycle.ContainerScoped)
 export class ClickUpAuthenticator implements clientAuthenticator{
 
-    constructor(private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+    constructor(
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
+    ){}
 
     get urlToken(): any {
         return this.clientEnvironmentProviderService.getClientEnvironmentVariable("WEBHOOK_CLICKUP_CLIENT_URL_TOKEN");
@@ -17,7 +19,7 @@ export class ClickUpAuthenticator implements clientAuthenticator{
         throw new Error('Method not implemented.');
     }
 
-    authenticate(req: any, res: any) {
+    authenticate(req: any) {
         if (this.urlToken === req.params.unique_token){
             return;
         }

@@ -9,12 +9,21 @@ import { Loader } from './startup/loader';
 import { Logger } from './common/logger';
 import { ConfigurationManager } from "./configs/configuration.manager";
 import { IntentRegister } from './intentEmitters/intent.register';
-import { container } from "tsyringe";
+import { container, DependencyContainer } from "tsyringe";
 import { IndexCreation } from './models/elasticsearchmodel';
 import { platformServiceInterface } from "./refactor/interface/platform.interface";
 import { ClientEnvironmentProviderService } from "./services/set.client/client.environment.provider.service";
 import { AwsSecretsManager } from "./services/aws.secret.manager.service";
 import { Timer } from "./middleware/timer";
+import { CheckCrossConnection } from "./middleware/check.cross.connection";
+import { Injector } from "./startup/injector";
+import { SequelizeClient } from "./connection/sequelizeClient";
+
+declare module "express-serve-static-core" {
+    interface Request {
+      container: DependencyContainer;
+    }
+  }
 
 export default class Application {
 
@@ -31,6 +40,8 @@ export default class Application {
     private _awsSecretsManager: AwsSecretsManager = null;
 
     private _timer: Timer = null;
+
+    private _checkCrossConnection: CheckCrossConnection = null;
 
     private clientsList = [];
 
@@ -83,12 +94,14 @@ export default class Application {
         }
     }
 
-    setWebhooksForClients() {
+    async setWebhooksForClients() {
         const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
+        const sequelizeClient: SequelizeClient = container.resolve(SequelizeClient);
         const telegram: platformServiceInterface = container.resolve('telegram');
         const whatsapp: platformServiceInterface = container.resolve('whatsapp');
         for (const clientName of this.clientsList) {
             clientEnvironmentProviderService.setClientName(clientName);
+            await sequelizeClient.getSequelizeClient(clientEnvironmentProviderService);
             if (clientName === "NSMI"){
                 telegram.setWebhook(clientName);
             } else if (clientName === "UNION"){
@@ -136,7 +149,7 @@ export default class Application {
             this._IndexCreation.createIndexes();
 
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            this.setWebhooksForClients();
+            await this.setWebhooksForClients();
 
             //Start listening
             await this.listen();
@@ -161,12 +174,19 @@ export default class Application {
 
         return new Promise((resolve, reject) => {
             try {
+                this._app.use((req, _res, next) => {
+                    req.container = Loader.container.createChildContainer();
+                    Injector.registerInjections(req.container);
+                    next();
+                });
                 this._app.use(express.urlencoded({ extended: true }));
                 this._app.use(express.json());
                 this._app.use(helmet());
                 this._app.use(cors());
                 this._timer = new Timer(this._app);
                 this._timer.timingRequestAndResponseCycle();
+                this._checkCrossConnection = new CheckCrossConnection();
+                this._app.use(this._checkCrossConnection.checkCrossConnection);
 
                 // this._app.use(this.limiter);
                 

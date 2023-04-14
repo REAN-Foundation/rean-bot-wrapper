@@ -1,18 +1,21 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { DialogflowResponseService } from './dialogflow.response.service';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { translateService } from './translate.service';
-import { autoInjectable } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { Imessage } from '../refactor/interface/message.interface';
 import { ChatSession } from '../models/chat.session';
+import { EntityManagerProvider } from './entity.manager.provider.service';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class handleRequestservice{
 
     // constructor(
     constructor(
-        private DialogflowResponseService?: DialogflowResponseService,
-        private translateService?: translateService) {
+        @inject(DialogflowResponseService) private DialogflowResponseService?: DialogflowResponseService,
+        @inject(translateService) private translateService?: translateService,
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider) {
     }
 
     async handleUserRequest (message: Imessage, channel: string) {
@@ -23,6 +26,7 @@ export class handleRequestservice{
 
         // eslint-disable-next-line max-len
         const message_from_dialoglow = await this.DialogflowResponseService.getDialogflowMessage(translate_message.message, channel, message.intent,message);
+        console.log("message_from_dialoglow",message_from_dialoglow);
 
         // this.getTranslatedResponse(message_from_dialoglow, translate_message.languageForSession);
         // process the message from dialogflow before sending it to whatsapp
@@ -43,7 +47,8 @@ export class handleRequestservice{
     }
 
     async processMessage(message_from_dialoglow, platformId){
-        const languagefromdb = await ChatSession.findAll({
+        const chatSessionRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatSession);
+        const languagefromdb = await chatSessionRepository.findAll({
             where : {
                 userPlatformID : platformId,
                 sessionOpen    : 'true'
@@ -53,9 +58,11 @@ export class handleRequestservice{
         const customTranslations = [this.getTranslatedResponse(message_from_dialoglow, languageForSession)];
         if (customTranslations[0] === null){
             const googleTranslate = await this.translateService.processdialogflowmessage(message_from_dialoglow, languageForSession);
+            console.log("googleTranslate", googleTranslate);
             return googleTranslate;
         }
         else {
+            console.log("customTranslations", customTranslations);
             return customTranslations;
         }
     }

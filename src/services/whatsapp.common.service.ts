@@ -2,23 +2,24 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 import { AwsS3manager } from './aws.file.upload.service';
-import { autoInjectable, singleton, inject, delay } from 'tsyringe';
+import { inject, delay, scoped, Lifecycle } from 'tsyringe';
 import { Iresponse, Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { MessageFlow } from './get.put.message.flow.service';
 import { WhatsappMessageToDialogflow } from './whatsapp.messagetodialogflow';
+import { WhatsappPostResponseFunctionalities } from './whatsapp.post.response.functionalities';
 
-@autoInjectable()
-@singleton()
+@scoped(Lifecycle.ContainerScoped)
 export class CommonWhatsappService implements platformServiceInterface {
 
     public res;
 
     constructor(@inject(delay(() => MessageFlow)) public messageFlow,
-        private awsS3manager?: AwsS3manager,
-        public whatsappMessageToDialogflow?: WhatsappMessageToDialogflow){}
+        @inject(AwsS3manager) private awsS3manager?: AwsS3manager,
+        @inject(WhatsappMessageToDialogflow) public whatsappMessageToDialogflow?: WhatsappMessageToDialogflow){}
 
     async handleMessage(requestBody: any, channel: string) {
+        requestBody.channel = channel;
         const generatorWhatsappMessage = this.whatsappMessageToDialogflow.messageToDialogflow(requestBody);
         let done = false;
         const whatsappMessages = [];
@@ -49,7 +50,7 @@ export class CommonWhatsappService implements platformServiceInterface {
         throw new Error('Method not implemented.');
     }
 
-    async SendMediaMessage (contact: number | string, imageLink: string, message: string, messageType: string, payload: any) {
+    async SendMediaMessage (response_format:Iresponse, payload: any) {
 
         // Childclass will implement
     }
@@ -88,6 +89,12 @@ export class CommonWhatsappService implements platformServiceInterface {
                 let message_type = "text";
                 if (payload !== null){
                     message_type = payload.fields.messagetype.stringValue;
+                    if (message_type === "interactive-buttons") {
+                        message_type = "interactivebuttons";
+                    }
+                    else if (message_type === "interactive-list") {
+                        message_type = "interactivelist";
+                    }
                 }
                 
                 reaponse_message = { name: user_name, platform: "Whatsapp", chat_message_id: chat_message_id, direction: "Out", message_type: message_type, intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[0] };
@@ -109,7 +116,7 @@ export class CommonWhatsappService implements platformServiceInterface {
             messageImageUrl     : null,
             messageImageCaption : null,
             sessionId           : requestBody.userId,
-            messageText         : requestBody.message
+            messageText         : requestBody.message[0]
         };
         return response_message;
     }
