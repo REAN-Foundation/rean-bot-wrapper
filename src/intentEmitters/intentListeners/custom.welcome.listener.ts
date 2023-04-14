@@ -10,7 +10,7 @@ export const CustomWelcomeIntent = async (intent, eventObj) => {
                 .log('Custom Welcome Intent!!!!!');
 
             let response = null;
-            const WelcomeService = new CustomWelcomeService();
+            const WelcomeService = eventObj.container.resolve(CustomWelcomeService);
 
             const payload = eventObj.body.originalDetectIntentRequest.payload;
             const toCheckSession = await WelcomeService.checkSession(payload.userId);
