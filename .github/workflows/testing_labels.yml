@@ -10,11 +10,18 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
-        
-      - name: New Release Publish
-        uses: release-drafter/release-drafter@v5
-        with:
-          publish : true
+     
+      - name: Bump version and push tag
+        uses: anothrNick/github-tag-action@1.61.0 # Don't use @master unless you're happy to test the latest version
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+         WITH_V: true
+
+        
+     # - name: New Release Publish
+      #  uses: release-drafter/release-drafter@v5
+       # with:
+        #  publish : true
+        #env:
+         # GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
     
