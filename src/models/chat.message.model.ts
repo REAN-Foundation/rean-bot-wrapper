@@ -35,7 +35,6 @@ export class ChatMessage extends Model implements IchatMessage {
     })
         name: string;
 
-
     @Column({
         type : DataType.STRING(256)
     })
