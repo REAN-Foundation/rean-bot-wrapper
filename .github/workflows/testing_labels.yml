@@ -8,6 +8,9 @@ jobs:
   labels:
     runs-on: ubuntu-latest
     steps:
+      - name: checkout
+        uses: actions/checkout@v2
+        
       - name: New Release Publish
         uses: release-drafter/release-drafter@v5
         with:
