@@ -1,0 +1,17 @@
+name: testing labels
+
+on:
+  push:
+    branches: feature/fix_snyk
+
+jobs:
+  labels:
+  runs-on:ubuntu-latest
+  steps:
+    - name: New Release Publish
+        uses: release-drafter/release-drafter@v5
+        with:
+          publish : true
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
+    
