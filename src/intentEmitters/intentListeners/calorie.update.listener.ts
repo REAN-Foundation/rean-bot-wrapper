@@ -3,7 +3,7 @@ import { CalorieFeedback } from "../../services/calories/calorie.feedback.servic
 
 export const CalorieUpdate = async ( intent, eventObj ) => {
     const calorie_Feedback = new CalorieFeedback();
-    return new Promise(async (resolve) => {
+    return new Promise(async (resolve,reject) => {
         try {
             Logger.instance()
                 .log("Calorie Updating!!!!");

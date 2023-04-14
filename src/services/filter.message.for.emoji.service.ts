@@ -1,11 +1,12 @@
 import emojiRegex from 'emoji-regex';
-import { autoInjectable } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class EmojiFilter{
 
-    constructor(private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+    // eslint-disable-next-line max-len
+    constructor(@inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     async checkForEmoji(message: string) {
         console.log("inside checkForEmoji",message);
@@ -18,6 +19,8 @@ export class EmojiFilter{
             emojiObj = JSON.parse(process.env.EMOJI);
         }
         const emojiObjKeys = Object.keys(emojiObj);
+        
+        // console.log("emojiKeys", emojiObjKeys);
         let filteredMessage: string = message;
         for (const match of message.matchAll(regex)) {
             const convertToUnicodeEmoji = await this.emojiUnicode(match[0]);
@@ -42,7 +45,6 @@ export class EmojiFilter{
         console.log("filtered message last", filteredMessage);
         return filteredMessage;
     }
-    
 
     emojiUnicode = async (emoji) => {
         // eslint-disable-next-line init-declarations

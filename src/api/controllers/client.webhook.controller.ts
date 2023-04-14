@@ -1,24 +1,22 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 import { ResponseHandler } from '../../utils/response.handler';
 import { ErrorHandler } from '../../utils/error.handler';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { autoInjectable, container } from 'tsyringe';
+import { scoped, Lifecycle, inject } from 'tsyringe';
 import { clientAuthenticator } from '../../services/clientAuthenticator/client.authenticator.interface';
-import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
 import util from 'util';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class ClientWebhookController {
 
-    private _platformMessageService?: platformServiceInterface;
-    
     private _clientAuthenticatorService?: clientAuthenticator;
 
+    private _platformMessageService?: platformServiceInterface;
+
     constructor(
-        private responseHandler?: ResponseHandler,
-        private errorHandler?: ErrorHandler,
-        private clientEnvironment?: ClientEnvironmentProviderService) {
+        @inject(ResponseHandler) private responseHandler?: ResponseHandler,
+        @inject(ErrorHandler) private errorHandler?: ErrorHandler
+    ) {
 
     }
 
@@ -26,7 +24,7 @@ export class ClientWebhookController {
         console.log("sendMessage webhook");
         try {
             // eslint-disable-next-line max-len
-            this._platformMessageService = container.resolve(req.params.channel);
+            this._platformMessageService = req.container.resolve(req.params.channel);
             const response = await this._platformMessageService.sendManualMesage(req.body);
             if (response.statusCode === 200 || response.message_id !== undefined) {
                 this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', response.body);
@@ -43,7 +41,7 @@ export class ClientWebhookController {
     receiveMessage = async (req, res) => {
         console.log("receiveMessage webhook");
         try {
-            this._clientAuthenticatorService = container.resolve(req.params.channel + '.authenticator');
+            this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
             this._clientAuthenticatorService.authenticate(req,res);
             const status = req.body.statuses;
             if (status) {
@@ -70,7 +68,7 @@ export class ClientWebhookController {
                     req.params.channel !== "SNEHA_SUPPORT") {
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
                 }
-                this._platformMessageService = container.resolve(req.params.channel);
+                this._platformMessageService = req.container.resolve(req.params.channel);
                 this._platformMessageService.res = res;
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const response = this._platformMessageService.handleMessage(req.body, req.params.channel);
@@ -92,13 +90,11 @@ export class ClientWebhookController {
             this.errorHandler.handle_controller_error(error, res, req);
         }
 
-    }
+    };
 
     receiveMessageMetaWhatsapp = async (req, res) => {
-        
-        // console.log("receiveMessage webhook receiveMessageWhatsappNew");
         try {
-            this._clientAuthenticatorService = container.resolve(req.params.channel + '.authenticator');
+            this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
             this._clientAuthenticatorService.authenticate(req,res);
             const statuses = req.body.entry[0].changes[0].value.statuses;
             if (statuses) {
@@ -120,30 +116,22 @@ export class ClientWebhookController {
                 else {
                     this.responseHandler.sendSuccessResponse(res, 200, 'Notification received successfully!', "");
 
-                    //deal accordingly
-                    // console.log("Check status", statuses[0].status);
+                //deal accordingly
+                // console.log("Check status", statuses[0].status);
                 }
             }
             else {
-                const phone_number_id = this.clientEnvironment.getClientEnvironmentVariable('WHATSAPP_PHONE_NUMBER_ID');
-                if (req.body.entry[0].changes[0].value.metadata.phone_number_id === phone_number_id) {
-                    console.log("receiveMessage webhook receiveMessageWhatsappNew");
-                    if (req.params.channel !== "REAN_SUPPORT" &&
-                        req.params.channel !== "slack" &&
-                        req.params.channel !== "SNEHA_SUPPORT") {
-                        this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
-                    }
-                    this._platformMessageService = container.resolve(req.params.channel);
-                    this._platformMessageService.res = res;
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    // console.log("reqbody content", util.inspect(req.body));
-                    // console.log("changes content", util.inspect(req.body.entry[0].changes[0]));
-                    const response = this._platformMessageService.handleMessage(req.body.entry[0].changes[0].value, req.params.channel);
-                } else {
-                    this.responseHandler.sendSuccessResponse(res, 200, 'Message Processed', "");
-                    console.log("Process exited");
+                console.log("receiveMessage webhook receiveMessageWhatsappNew");
+                if (req.params.channel !== "REAN_SUPPORT" &&
+                req.params.channel !== "slack" &&
+                req.params.channel !== "SNEHA_SUPPORT") {
+                    this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
                 }
+                this._platformMessageService = req.container.resolve(req.params.channel);
+                this._platformMessageService.res = res;
+                this._platformMessageService.handleMessage(req.body.entry[0].changes[0].value, req.params.channel);
             }
+            
         }
         catch (error) {
             console.log("in error", error);
@@ -163,7 +151,7 @@ export class ClientWebhookController {
 
                 // eslint-disable-next-line max-len
                 // const response_message = "We have migrated REAN Health Guru to a new number. Click this link to chat with REAN Health Guru. Link: https://api.whatsapp.com/send/?phone=15712152682&text=Hey&app_absent=0";
-                this._platformMessageService = container.resolve('whatsapp');
+                this._platformMessageService = req.container.resolve('whatsapp');
 
                 this._platformMessageService.handleMessage(req.body, req.params.client);
             }

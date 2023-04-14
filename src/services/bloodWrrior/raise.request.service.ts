@@ -1,26 +1,29 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { GetPatientInfoService } from '../support.app.service';
-import { container, autoInjectable } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { Logger } from '../../common/logger';
-import { needleRequestForREAN } from '../needle.service';
+import { NeedleService } from '../needle.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { sendApiButtonService } from '../whatsappmeta.button.service';
+import { Iresponse } from '../../refactor/interface/message.interface';
+import { commonResponseMessageFormat } from '../common.response.format.object';
+import { templateButtonService } from '../whatsappmeta.button.service';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class RaiseDonationRequestService {
 
-    private _platformMessageService?: platformServiceInterface;
+    private _platformMessageService :  platformServiceInterface = null;
 
-    getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
+    constructor (
+        @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,
+        @inject(NeedleService) private needleService?: NeedleService
+    ) {}
 
     async sendUserMessage (eventObj) {
-
         try {
             let result = null;
             result = await this.getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
             const patientUserId = result.message[0].UserId;
             const name = result.message[0].DisplayName;
-            const dffMessage = `Hi ${name}, \nThe blood donation request is raised successfully and request to donors is sent. We will send you a confirmation when donation is scheduled. \nRegards \nTeam Blood Warriors.`;
+            const dffMessage = `Hi ${name}, \n\nThe blood transfusion request is raised successfully and request to donors is sent. \n\nWe will send you a confirmation when donation is scheduled. \n\nRegards \nTeam Blood Warriors.`;
             return { sendDff       : true,
                 message       : { fulfillmentMessages: [{ text: { text: [dffMessage] } }] },
                 patientUserId : patientUserId,
@@ -36,7 +39,7 @@ export class RaiseDonationRequestService {
         try {
             let result = null;
             let apiURL = `patient-health-profiles/${patientUserId}`;
-            result = await needleRequestForREAN("get", apiURL);
+            result = await this.needleService.needleRequestForREAN("get", apiURL);
             const transfusionDate = result.Data.HealthProfile.BloodTransfusionDate;
             const stringTFDate = new Date(transfusionDate).toDateString();
 
@@ -46,8 +49,9 @@ export class RaiseDonationRequestService {
             const stringDate = new Date(d).toDateString();
 
             apiURL = `clinical/patient-donors/search?patientUserId=${patientUserId}&onlyElligible=true`;
-            result = await needleRequestForREAN("get", apiURL);
-            const buttons = await sendApiButtonService(["Accept", "Accept_Donation_Request","Reject", "Reject_Donation_Request"]);
+            result = await this.needleService.needleRequestForREAN("get", apiURL);
+            const payload = {};
+            payload["buttonIds"] = await templateButtonService(["Accept_Donation_Request","Reject_Donation_Request"]);
             const donorNames = [];
             if (result.Data.PatientDonors.Items.length > 0) {
                 for (const donor of result.Data.PatientDonors.Items) {
@@ -60,13 +64,56 @@ export class RaiseDonationRequestService {
                     if (lastDonationDate !== null) {
                         lastDonationDate = new Date(lastDonationDate.split("T")[0]).toDateString();
                     }
-                    await this.createDonationRecord(donor.PatientUserId, donor.id);
+                    const object = {
+                        PatientUserId     : donor.PatientUserId,
+                        NetworkId         : donor.id,
+                        RequestedQuantity : 1,
+                        RequestedDate     : new Date().toISOString()
+                            .split('T')[0]
+                    };
+                    await this.createDonationRecord(object);
+                    payload["variables"] = [
+                        {
+                            type : "text",
+                            text : donorName
+                        },
+                        {
+                            type : "text",
+                            text : name
+                        },
+                        {
+                            type : "text",
+                            text : "blood"
+                        },
+                        {
+                            type : "text",
+                            text : stringTFDate
+                        },
+                        {
+                            type : "text",
+                            text : "blood"
+                        },
+                        {
+                            type : "text",
+                            text : stringDate
+                        },
+                        {
+                            type : "text",
+                            text : "Blood"
+                        }];
+                    payload["templateName"] = "donor_push_notification";
+                    payload["languageForSession"] = "en";
                     const dffMessage = `Hi ${donorName}, \n"${name}" requires blood. \nThe transfusion is scheduled to be ${stringTFDate}.
                     Would you be willing to donate blood on or before ${stringDate}? \nRegards \nTeam Blood Warriors`;
 
-                    const payload = eventObj.body.originalDetectIntentRequest.payload;
-                    this._platformMessageService = container.resolve(payload.source);
-                    await this._platformMessageService.SendMediaMessage(donorPhone,null,dffMessage,'interactive-buttons', buttons);
+                    const previousIntentPayload = eventObj.body.originalDetectIntentRequest.payload;
+                    this._platformMessageService = eventObj.container.resolve(previousIntentPayload.source);
+                    const response_format: Iresponse = commonResponseMessageFormat();
+                    response_format.platform = previousIntentPayload.source;
+                    response_format.sessionId = donorPhone;
+                    response_format.messageText = dffMessage;
+                    response_format.message_type = "template";
+                    await this._platformMessageService.SendMediaMessage(response_format, payload);
 
                     donorNames.push(donorName);
                 }
@@ -85,29 +132,67 @@ export class RaiseDonationRequestService {
         try {
             let result = null;
             const apiURL = `clinical/patient-donors/search?patientUserId=${patientUserId}&onlyElligible=true`;
-            result = await needleRequestForREAN("get", apiURL);
+            result = await this.needleService.needleRequestForREAN("get", apiURL);
             if (result.Data.PatientDonors.Items.length > 0) {
 
                 const bloodBridge = result.Data.PatientDonors.Items[0];
 
                 const apiURL = `volunteers/${bloodBridge.VolunteerUserId}`;
-                const response = await needleRequestForREAN("get", apiURL);
+                const response = await this.needleService.needleRequestForREAN("get", apiURL);
 
                 const volunteerName = response.Data.Volunteer.User.Person.DisplayName;
                 const volunteerPhone = await this.convertPhoneNoReanToWhatsappMeta(
                     response.Data.Volunteer.User.Person.Phone);
+                const payload = {};
                 let donorList = "";
                 let num = 1;
                 donorNames.forEach(name => {
-                    const seq = `\n${num}-${name}`;
+                    const seq = `\\n${num}-${name}`;
+                    
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     donorList += seq;
                     num = num + 1;
                 });
-                const dffMessage = `Hi ${volunteerName}, \n"${patientName}" requires blood. The transfusion is scheduled to be ${transfusionDate}. \nDonation request is sent to the following donors.${donorList}
-                We will send you a reminder if no one responds or anyone accepts. \nRegards \nTeam Blood Warriors`;
-                const payload = eventObj.body.originalDetectIntentRequest.payload;
-                this._platformMessageService = container.resolve(payload.source);
-                result = await this._platformMessageService.SendMediaMessage(volunteerPhone,null,dffMessage,'text', null);
+                payload["variables"] = [
+                    {
+                        type : "text",
+                        text : volunteerName
+                    },
+                    {
+                        type : "text",
+                        text : patientName
+                    },
+                    {
+                        type : "text",
+                        text : "blood"
+                    },
+                    {
+                        type : "text",
+                        text : transfusionDate
+                    },
+                    {
+                        type : "text",
+                        text : donorList
+                    },
+                    {
+                        type : "text",
+                        text : "Blood"
+                    }];
+                payload["templateName"] = "volunteer_push_notification";
+                payload["languageForSession"] = "en";
+
+                //const dffMessage = `Hi ${volunteerName}, \n"${patientName}" requires blood.
+                //The transfusion is scheduled to be ${transfusionDate}.
+                //Donation request is sent to the following donors.${donorList}
+                //We will send you a reminder if no one responds or anyone accepts. \nRegards \nTeam Blood Warriors`;
+                const previousIntentPayload = eventObj.body.originalDetectIntentRequest.payload;
+                this._platformMessageService = eventObj.container.resolve(previousIntentPayload.source);
+                const response_format: Iresponse = commonResponseMessageFormat();
+                response_format.platform = previousIntentPayload.source;
+                response_format.sessionId = volunteerPhone;
+                response_format.messageText = null;
+                response_format.message_type = "template";
+                result = await this._platformMessageService.SendMediaMessage(response_format, payload);
                 if (result.statusCode === 200 ) {
                     console.log(`Succesfully notification send to volunteer. Volunteer Name : ${volunteerName}.`);
                 }
@@ -119,17 +204,11 @@ export class RaiseDonationRequestService {
         }
     }
 
-    public async createDonationRecord (patientUserId: string, networkId: string) {
+    public async createDonationRecord (obj: any) {
         try {
             let result = null;
             const apiURL = `clinical/donation-record`;
-            const obj = {
-                PatientUserId     : patientUserId,
-                NetworkId         : networkId,
-                RequestedQuantity : 1,
-                RequestedDate     : new Date().toISOString().split('T')[0]
-            };
-            result = await needleRequestForREAN("post", apiURL, null, obj);
+            result = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
             console.log(`Succesfully added donation record and Id is ${result.Data.DonationRecord.id}`);
 
         } catch (error) {

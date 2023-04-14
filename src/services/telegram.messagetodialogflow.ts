@@ -1,12 +1,15 @@
 /* eslint-disable init-declarations */
-import { autoInjectable } from "tsyringe";
+import { inject, Lifecycle, scoped } from "tsyringe";
 import { TelegramRequest } from "./request.format/telegram.request";
 import { TelegramMessageServiceFunctionalities } from "./telegram.message.service.functionalities";
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class TelegramMessageToDialogflow {
 
-    constructor (private messageFunctionalities?: TelegramMessageServiceFunctionalities) {}
+    constructor (
+        // eslint-disable-next-line max-len
+        @inject(TelegramMessageServiceFunctionalities) private messageFunctionalities?: TelegramMessageServiceFunctionalities
+    ) {}
 
     async *messageToDialogflow(requestBody: any) {
         const telegramRequestObject = new TelegramRequest(requestBody);

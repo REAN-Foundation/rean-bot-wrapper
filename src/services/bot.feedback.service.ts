@@ -19,7 +19,9 @@ export class BotFeedback{
                 console.log("inside");
                 async function testSettimeout(userId){
                     const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
-                    const respOfChatSession = await ChatSession.findAll({ where: { userPlatformID: userId } });
+                    const chatSessionRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatSession);
+                    const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+                    const respOfChatSession = await chatSessionRepository.findAll({ where: { userPlatformID: userId } });
                     const timeOfLastMessage = respOfChatSession[respOfChatSession.length - 1].lastMessageDate;
                     const askForFeedback = respOfChatSession[respOfChatSession.length - 1].askForFeedback;
                     console.log("timeOfLastMessage", timeOfLastMessage);
@@ -48,17 +50,17 @@ export class BotFeedback{
                                 const telegram = new TelegramBot(clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
                                 telegram.sendMessage(userId, message, { parse_mode: 'HTML' })
                                     .then(async(data) => { console.log("message sent", data);
-                                        await ChatSession.update({ askForFeedback: "false" }, { where: { userPlatformID: userId } } )
+                                        await chatSessionRepository.update({ askForFeedback: "false" }, { where: { userPlatformID: userId } } )
                                             .then(() => { console.log("updated askFeedback"); })
                                             .catch(error => console.log("error on update", error));
-                                        const personresponse = new ChatMessage({
+                                        await chatMessageRepository.create({
                                             platform       : "Telegram",
                                             direction      : "Out",
                                             messageType    : "text",
                                             messageContent : message,
                                             userPlatformID : userId
                                         });
-                                        await personresponse.save(); })
+                                    })
                                     .catch(error => console.log("error", error));
                             }
                             else if (platform === "Whatsapp"){
@@ -82,17 +84,16 @@ export class BotFeedback{
                                     if (err) {
                                         console.log("err", err);
                                     }
-                                    await ChatSession.update({ askForFeedback: "false" }, { where: { userPlatformID: userId } } )
+                                    await chatSessionRepository.update({ askForFeedback: "false" }, { where: { userPlatformID: userId } } )
                                         .then(() => { console.log("updated askFeedback"); })
                                         .catch(error => console.log("error on update", error));
-                                    const personresponse = new ChatMessage({
+                                    await chatMessageRepository.create({
                                         platform       : "Whatsapp",
                                         direction      : "Out",
                                         messageType    : "text",
                                         messageContent : message,
                                         userPlatformID : userId
                                     });
-                                    await personresponse.save();
                                     console.log("resp", resp.body);
                                 });
                             }
@@ -111,8 +112,13 @@ export class BotFeedback{
                     }
                     
                 }
-                const respOfChatSession = await ChatSession.findAll();
+                const chatSessionRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatSession);
+                const respOfChatSession = await chatSessionRepository.findAll();
+
+                // console.log("respOfChatSession!!!!!!!!!!!", respOfChatSession);
                 for (let i = 0; i < respOfChatSession.length; i++) {
+
+                    // console.log("i",i);
                     const userId = respOfChatSession[i].userPlatformID;
                     console.log("userID", userId);
                     await testSettimeout(userId);
@@ -131,3 +137,6 @@ export class BotFeedback{
     }
 
 }
+
+// const botFeedback = new BotFeedback();
+// botFeedback.testSettimeout(false, "2077778107");

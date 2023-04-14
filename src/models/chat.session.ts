@@ -2,19 +2,17 @@ import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, HasMany } fr
 import { chatSession } from '../refactor/interface/message.interface';
 import { ChatMessage } from './chat.message.model';
 
-@Table(
-    {
+@Table({
     timestamps : true,
     modelName  : 'ChatSession',
     tableName  : 'chat_session'
-    }
-)
+})
 export class ChatSession extends Model implements chatSession {
     
     @AutoIncrement
     @PrimaryKey
     @Column({
-        type : DataType.INTEGER,
+        type      : DataType.INTEGER,
         allowNull : false
     })
         autoIncrementalID: number;
@@ -55,6 +53,6 @@ export class ChatSession extends Model implements chatSession {
         askForFeedback: string;
 
     @HasMany(() => ChatMessage)
-    ChatMessage: ChatMessage[];
+        ChatMessage: ChatMessage[];
 
 }

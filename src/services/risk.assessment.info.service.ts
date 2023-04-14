@@ -85,7 +85,7 @@ export const getRiskAssessmentInfo = async (req) => {
                                     " Based on Age -" + params.Age.amount + ", Gender - " + genderText + ", BMI " + BMIValue + " and given complications Final risk score is " + riskData.finalScore + "  \n\n(Reference - https://www.reanfoundation.org/risk-assessment-tool/) \n\n" +
                                     " We can also  help you  with covid related questions, symptom assessment or vaccination availability.";
                                 imagePath = image[riskData.risk_level.toLocaleLowerCase()];
-                                const data = getEndofConvData(imagePath,response);
+                                const data = getEndofConvData(imagePath,response,req);
                                 console.log(imagePath);
                                 
                                 resolve(data);
@@ -116,7 +116,7 @@ export const getRiskAssessmentInfo = async (req) => {
                     " We can also  help you  with covid related questions, symptom assessment or vaccination availability.";
 
                 imagePath = image[riskData.risk_level.toLocaleLowerCase()];
-                const data = getEndofConvData(imagePath,response);
+                const data = getEndofConvData(imagePath,response,req);
                 console.log(imagePath);
                 
                 resolve(data);
@@ -163,8 +163,9 @@ function calculateRisk(params){
     return returnArray;
 }
 
-async function getEndofConvData(imagePath,response){
-    const signedUrl = await new SignedUrls().getSignedUrl(imagePath);
+async function getEndofConvData(imagePath,response,req){
+    const signedUrls = req.container.resolve(SignedUrls);
+    const signedUrl = await signedUrls.getSignedUrl(imagePath);
     const data = {
         "fulfillmentMessages" : [
             {

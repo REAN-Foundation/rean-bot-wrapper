@@ -1,12 +1,13 @@
-import { registrationService } from "../../services/maternalCareplan/registration.service";
-import { enrollService } from "../../services/maternalCareplan/enroll.service";
+import { RegistrationService } from "../../services/maternalCareplan/registration.service";
+import { EnrollService } from "../../services/maternalCareplan/enroll.service";
 
 export class MaternityCareplanListener {
 
     public static handleIntent = async (_intent, eventObj) => {
+        const _registrationService:  RegistrationService = eventObj.container.resolve(RegistrationService);
         try {
 
-            const response = await registrationService(eventObj);
+            const response = await _registrationService.registrationService(eventObj);
 
             if (!response) {
                 throw new Error('Maternity careplan registration service error!');
@@ -21,9 +22,10 @@ export class MaternityCareplanListener {
     };
 
     public static handleEnrollIntent = async (_intent, eventObj) => {
+        const _enrollService:  EnrollService = eventObj.container.resolve(EnrollService);
         try {
 
-            const response = await enrollService(eventObj);
+            const response = await _enrollService.enrollService(eventObj);
 
             if (!response) {
                 throw new Error('Maternity careplan enrollment service error!');

@@ -1,12 +1,23 @@
+import { inject, Lifecycle, scoped } from "tsyringe";
 import { ChatSession } from "../models/chat.session";
+import { EntityManagerProvider } from "./entity.manager.provider.service";
 
+@scoped(Lifecycle.ContainerScoped)
 export class ChangeLanguage{
+
+    constructor(
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider) {
+    }
 
     async askForLanguage(eventObj) {
         return new Promise(async(resolve, reject) =>{
             try {
                 console.log("eventobj.body", eventObj.body);
-                const newLanguage = eventObj.body.queryResult.queryText.toLowerCase();
+                let newLanguage = eventObj.body.queryResult.parameters.Language.toLowerCase();
+                if (!eventObj.body.queryResult.parameters.Language) {
+                    newLanguage = eventObj.body.queryResult.queryText.toLowerCase();
+                }
+
                 const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
                 const listOfLanguages = {
                     "hindi"     : "hi",
@@ -25,17 +36,18 @@ export class ChangeLanguage{
                     "spanish"   : "es"
                 };
                 const newLanguageCode = await this.languageCode(newLanguage,listOfLanguages);
-
+                
                 //stop the old session
-                await ChatSession.update({ sessionOpen: "false" }, {
+                // eslint-disable-next-line max-len
+                const chatSessionRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatSession);
+                await chatSessionRepository.update({ preferredLanguage: newLanguageCode }, {
                     where : {
                         userPlatformID : userId
                     }
                 });
 
                 //create a new session
-                const newSession = new ChatSession({ userPlatformID: userId, preferredLanguage: newLanguageCode, sessionOpen: "true" });
-                await newSession.save();
+                // await chatSessionRepository.create({ userPlatformID: userId, preferredLanguage: newLanguageCode, sessionOpen: "true" });
                 const reply = `Language changed to: ${newLanguage}`;
                 const data = {
                     "fulfillmentMessages" : [

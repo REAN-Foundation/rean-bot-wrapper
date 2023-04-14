@@ -1,15 +1,14 @@
 import { ScheduleDonationElligibleService } from "../../../services/bloodWrrior/schedule.donation.elligible.service";
 
 export const ScheduleDonationElligible = async (intent, eventObj) => {
-    return new Promise(async (resolve,reject) => {
-        try {
-            let result = null;
-            result = await ScheduleDonationElligibleService(eventObj);
-            console.log("fullfillment object", result);
-            resolve(result);
+    const scheduleDOnationElligibleService = eventObj.container.resolve(ScheduleDonationElligibleService);
+    try {
+        let result = null;
+        result = await scheduleDOnationElligibleService.ScheduleDonationElligible(eventObj);
+        console.log("fullfillment object", result);
+        return result;
 
-        } catch (error) {
-            console.log(error);
-        }
-    });
+    } catch (error) {
+        console.log(error);
+    }
 };

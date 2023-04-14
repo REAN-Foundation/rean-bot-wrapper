@@ -1,30 +1,39 @@
-import { container, autoInjectable } from 'tsyringe';
+import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../common/logger';
-import { getPhoneNumber, needleRequestForREAN } from '../needle.service';
+import { NeedleService } from '../needle.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { sendApiButtonService } from '../whatsappmeta.button.service';
 import { RaiseDonationRequestService } from './raise.request.service';
 import { BloodWarriorCommonService } from './common.service';
+import { Iresponse } from '../../refactor/interface/message.interface';
+import { commonResponseMessageFormat } from '../common.response.format.object';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class AcceptVolunteerRequestService {
 
-    private _platformMessageService?: platformServiceInterface;
+    private _platformMessageService :  platformServiceInterface = null;
 
-    private raiseDonationRequestService = new RaiseDonationRequestService();
-
-    private bloodWarriorCommonService = new BloodWarriorCommonService();
+    constructor(
+        @inject(BloodWarriorCommonService) private bloodWarriorCommonService?: BloodWarriorCommonService,
+        @inject(RaiseDonationRequestService) private raiseDonationRequestService?: RaiseDonationRequestService,
+        @inject(NeedleService) private needleService?: NeedleService,
+    ) {}
 
     async sendUserMessage (eventObj) {
-        return new Promise(async (resolve,reject) => {
+        return new Promise(async (resolve) => {
             try {
                 let donor = null;
                 donor = await this.bloodWarriorCommonService.getDonorByPhoneNumber(eventObj);
 
                 const apiURL = `clinical/donation-record/search?donorUserId=${donor.UserId}`;
-                const requestBody = await needleRequestForREAN("get", apiURL);
+                const requestBody = await this.needleService.needleRequestForREAN("get", apiURL);
                 const donationRecordId = requestBody.Data.DonationRecord.Items[0].id;
-                const volunteerUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.VolunteerUserId;
+                let volunteerUserId = null;
+                if (donor.DonorType === 'One time') {
+                    volunteerUserId = requestBody.Data.DonationRecord.Items[0].VolunteerOfEmergencyDonor;
+                } else {
+                    volunteerUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.VolunteerUserId;
+                }
                 const dffMessage = `Thank you for accepting the request. We are in the process of scheduling a donation. \nRegards \nTeam Blood Warriors`;
                 resolve( { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } });
                 
@@ -36,7 +45,7 @@ export class AcceptVolunteerRequestService {
                 await this.bloodWarriorCommonService.updateDonationRecord(donationRecordId, obj);
 
                 const payload = eventObj.body.originalDetectIntentRequest.payload;
-                this._platformMessageService = container.resolve(payload.source);
+                this._platformMessageService = eventObj.container.resolve(payload.source);
 
                 //message send to volunteer
                 const volunteer = await this.bloodWarriorCommonService.getVolunteerPhoneByUserId(volunteerUserId);
@@ -45,7 +54,12 @@ export class AcceptVolunteerRequestService {
                 const message = `Hi ${volunteer.User.Person.DisplayName},\n${donor.DisplayName} has accepted the request.
             Please contact the donor and schedule the donation`;
                 const buttons = await sendApiButtonService(["Schedule a Donation", "Schedule_Donation", "End This Process", "End_This_Process"]);
-                await this._platformMessageService.SendMediaMessage(volunteerPhone,null,message,'interactive-buttons', buttons);
+                const response_format: Iresponse = commonResponseMessageFormat();
+                response_format.platform = payload.source;
+                response_format.sessionId = volunteerPhone;
+                response_format.messageText = message;
+                response_format.message_type = "interactivebuttons";
+                await this._platformMessageService.SendMediaMessage(response_format, buttons);
 
             } catch (error) {
                 Logger.instance()

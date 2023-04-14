@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-var-requires */
 const pdf = require('html-pdf');
 const fs = require('fs');
@@ -16,3 +15,4 @@ async function htmlToPDF(){
     });
 }
 
+htmlToPDF();

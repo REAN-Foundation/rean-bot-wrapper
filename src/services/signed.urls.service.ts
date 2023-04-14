@@ -2,16 +2,19 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 const cfsign = require('aws-cloudfront-sign');
-import { autoInjectable } from "tsyringe";
+import { inject, Lifecycle, scoped } from "tsyringe";
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class SignedUrls{
 
-    constructor(private clientEnvironmentProviderservice?: ClientEnvironmentProviderService){}
+    constructor(
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderservice?: ClientEnvironmentProviderService
+    ){}
 
     async getSignedUrl(url){
-        return new Promise<string>((resolve) => {
+        return new Promise<string> ((resolve,reject) => {
             const millisecond = parseFloat(this.clientEnvironmentProviderservice.getClientEnvironmentVariable("EXPIRE_LINK_TIME"));
             var signingParams = {
                 keypairId        : process.env.CF_KEY_PAIR_ID,
@@ -22,7 +25,7 @@ export class SignedUrls{
 
             // Generating a signed URL
             var signedUrl = cfsign.getSignedUrl(
-                url,
+                url, 
                 signingParams
             );
             

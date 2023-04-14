@@ -1,11 +1,12 @@
 import { ResponseHandler } from '../../utils/response.handler';
-import { autoInjectable } from 'tsyringe';
+import { autoInjectable, inject, Lifecycle, scoped } from 'tsyringe';
 import { elasticsearchUtilities } from '../../utils/elasticsearch.utility';
-@autoInjectable()
+
+@scoped(Lifecycle.ContainerScoped)
 export class FrontendController {
 
-    constructor(private responseHandler?: ResponseHandler,
-                private _elasticsearchUtilities ?: elasticsearchUtilities
+    constructor(@inject(ResponseHandler) private responseHandler?: ResponseHandler,
+                @inject(elasticsearchUtilities) private _elasticsearchUtilities ?: elasticsearchUtilities
     ) {
     }
     

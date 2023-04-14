@@ -5,20 +5,22 @@ import fs from 'fs';
 import { Imessage } from '../refactor/interface/message.interface';
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 import { Speechtotext } from './speech.to.text.service';
-import { autoInjectable } from "tsyringe";
+import { inject, Lifecycle, scoped } from "tsyringe";
 import { EmojiFilter } from './filter.message.for.emoji.service';
 import { AwsS3manager } from "./aws.file.upload.service";
 import { UserLanguage } from "./set.language";
 import needle from 'needle';
 import { Message } from './request.format/whatsapp.message.format';
 import { getRequestOptions } from "../utils/helper";
-@autoInjectable()
+
+@scoped(Lifecycle.ContainerScoped)
 export class MessageFunctionalities implements getMessageFunctionalities {
 
-    constructor(private emojiFilter?: EmojiFilter,
-        private speechtotext?: Speechtotext,
-        private awsS3manager?: AwsS3manager,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+    constructor(@inject(EmojiFilter) private emojiFilter?: EmojiFilter,
+        @inject(Speechtotext) private speechtotext?: Speechtotext,
+        @inject(AwsS3manager) private awsS3manager?: AwsS3manager,
+        @inject(UserLanguage) private userLanguage?: UserLanguage,
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     async textMessageFormat (messageObj:Message) {
         const messagetoDialogflow = this.inputMessageFormat(messageObj);
@@ -59,23 +61,32 @@ export class MessageFunctionalities implements getMessageFunctionalities {
     }
 
     async audioMessageFormat (messageObj: Message) {
-        let mediaUrl = await this.getMetaMediaUrl(messageObj.getAudioId());
-        mediaUrl = await this.GetWhatsappMetaMedia('audio', mediaUrl, '_voice.ogg');
-        return await this.commonVoiceAudioFormat(messageObj, mediaUrl);
+        // eslint-disable-next-line init-declarations
+        let audioFilePath = '';
+        if (messageObj.getChannel() === "whatsappMeta") {
+            const audioUrlsentByMeta = await this.getMetaMediaUrl(messageObj.getAudioId());
+            audioFilePath = await this.GetWhatsappMetaMedia('audio', audioUrlsentByMeta, '_voice.ogg');
+        } else {
+            audioFilePath = await this.GetWhatsappMedia('audio', messageObj.getAudioId(), '_voice.ogg');
+        }
+        return await this.commonVoiceAudioFormat(messageObj, audioFilePath);
     }
 
     async imageMessageFormat(messageObj: Message) {
-
-        let response: any = {};
-        response = await this.GetWhatsappMedia('photo', messageObj.getImageId(), '.jpg');
-        console.log("response from GetWhatsappMedia", response);
-        const location = await this.awsS3manager.uploadFile(response);
-        console.log("response image whatsapp", location);
+        let imageFilePath = '';
+        if (messageObj.getChannel() === 'whatsapp'){
+            imageFilePath = await this.GetWhatsappMedia('photo', messageObj.getImageId(), '.jpg');
+        }
+        else {
+            const imageUrlSentByMeta = await this.getMetaMediaUrl(messageObj.getImageId());
+            imageFilePath = await this.GetWhatsappMetaMedia('photo', imageUrlSentByMeta, '.jpg');
+        }
+        const location = await this.awsS3manager.uploadFile(imageFilePath);
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const url = require('url');
         const urlParse = url.parse(location);
         const imageUrl = (urlParse.protocol + urlParse.hostname + urlParse.pathname);
-        if (response){
+        if (imageFilePath){
             const messagetoDialogflow = this.inputMessageFormat(messageObj);
             messagetoDialogflow.type = 'image';
             messagetoDialogflow.messageBody = imageUrl;
@@ -111,9 +122,17 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         return messagetoDialogflow;
     }
 
+    async buttonMessageFormat(messageObj: Message){
+        const message = messageObj.getTemplateReplyButton().title;
+        const messagetoDialogflow = this.inputMessageFormat(messageObj);
+        messagetoDialogflow.messageBody = message;
+        messagetoDialogflow.intent = messageObj.getTemplateReplyButton().id;
+        return messagetoDialogflow;
+    }
+
     /*retrive whatsapp media */
     GetWhatsappMedia = async (type, mediaId, extension) => {
-        return new Promise((resolve, reject) => {
+        return new Promise<string>((resolve, reject) => {
             const options = {
                 hostname : this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST"),
                 path     : '/v1/media/' + mediaId,
@@ -160,19 +179,18 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         });
     };
 
-    GetWhatsappMetaMedia = async (type, mediaUrl, extension) => {
-        return new Promise((resolve, reject) => {
+    GetWhatsappMetaMedia = async (type, imageUrl, extension) => {
+        return new Promise<string>((resolve, reject) => {
             const token = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
             const headers = {
                 headers : {
                     'Authorization' : `Bearer ${token}`,
                 }
             };
-
             try {
-                needle.get(mediaUrl, headers, function(err, resp, body) {
+                needle.get(imageUrl, headers, function(err, resp, body) {
                     if (err){
-                        console.log('FAiled to REad File');
+                        console.log('FAiled to REad File',err);
                     }
                     const file_name = `${type}/` + Date.now() + `${extension}`;
                     fs.writeFile('./' + file_name,body, err => {
@@ -230,7 +248,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
 
     async commonVoiceAudioFormat(messageObj,mediaUrl) {
         const userId = messageObj.getUserId();
-        const preferredLanguage = await new UserLanguage().getPreferredLanguageofSession(userId);
+        const preferredLanguage = await this.userLanguage.getPreferredLanguageofSession(userId);
         const ConvertedToText = await this.speechtotext.SendSpeechRequest(mediaUrl, "whatsapp", preferredLanguage);
         if (preferredLanguage !== "null"){
             if (ConvertedToText) {

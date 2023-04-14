@@ -1,13 +1,21 @@
 /* eslint-disable lines-around-comment */
 /* eslint-disable max-len */
-import { v2 } from '@google-cloud/translate';
+import { v2, TranslationServiceClient } from '@google-cloud/translate';
 import { UserLanguage } from './set.language';
 import { DialogflowResponseFormat } from './response.format/dialogflow.response.format';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 
 let detected_language = 'en';
 let dialogflow_language = "en-US";
 
+@scoped(Lifecycle.ContainerScoped)
 export class translateService{
+
+    constructor(
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(UserLanguage) private userLanguage?: UserLanguage
+    ) {}
 
     private GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
 
@@ -15,6 +23,10 @@ export class translateService{
         credentials : this.GCPCredentials,
         projectId   : this.GCPCredentials.project_id
     };
+
+    private translated_message;
+
+    private translateGlossaryId: string;
 
     detectLanguage = async (message:string) => {
 
@@ -35,7 +47,7 @@ export class translateService{
 
     translateMessage = async (messageType, message:string, sessionId) => {
         const translate = new v2.Translate(this.obj);
-        const languageForSession = await new UserLanguage().setLanguageForSession(messageType, sessionId, message);
+        const languageForSession = await this.userLanguage.setLanguageForSession(messageType, sessionId, message);
         console.log("languageForSession", languageForSession);
         // if (languageForSession === "change language") {
         //     const message = "change language";
@@ -55,6 +67,7 @@ export class translateService{
     };
 
     processdialogflowmessage = async (messageFromDialogflow: DialogflowResponseFormat, detected_language: string) => {
+        console.log("entered the processdialogflowmessage of translateService JJJJJJJJJJJ");
         // eslint-disable-next-line init-declarations
         let translatedResponse;
         const parse_mode = messageFromDialogflow.getParseMode();
@@ -70,9 +83,11 @@ export class translateService{
 
     translatePushNotifications = async ( message: string, phoneNumber: string) => {
         try {
-            let languageForSession = await new UserLanguage().getPreferredLanguageofSession(phoneNumber);
+            let languageForSession = await this.userLanguage.getPreferredLanguageofSession(phoneNumber);
+            console.log("languageForSession before", languageForSession);
 
             languageForSession = languageForSession !== 'null' ? languageForSession : 'en';
+            console.log("languageForSession after", languageForSession);
             const responseMessage = this.translateResponse([message], languageForSession);
             return responseMessage;
 
@@ -82,11 +97,33 @@ export class translateService{
         }
     };
 
+    detectUsersLanguage = async ( phoneNumber: string) => {
+        try {
+            let languageForSession = await this.userLanguage.getPreferredLanguageofSession(phoneNumber);
+            console.log("languageForSession before", languageForSession);
+
+            languageForSession = languageForSession !== 'null' ? languageForSession : this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+            console.log("languageForSession after", languageForSession);
+            return languageForSession;
+
+        } catch (e) {
+            console.log("catch translate", e);
+            return "en";
+        }
+    };
+
     translateResponse = async (responseMessage: string[], detected_language: string) => {
+        console.log(`entered the translateResponse of translateService JJJJJJJJJJJ`);
         const translate = new v2.Translate(this.obj);
+        this.translateGlossaryId = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TRANSLATE_GLOSSARY");
         try {
             if (detected_language !== 'en') {
-                const [translation] = await translate.translate(responseMessage[0], { to: detected_language, format: "text" });
+                if (this.translateGlossaryId) {
+                    this.translated_message = await this.translateTextWithGlossary(responseMessage[0], detected_language, translate); 
+                } else {
+                    this.translated_message = await translate.translate(responseMessage[0], { to: detected_language, format: "text" });
+                }
+                const [translation] = this.translated_message;
                 responseMessage = [translation];
             }
             else {
@@ -94,7 +131,7 @@ export class translateService{
             }
             return responseMessage;
         } catch (e) {
-            console.log("catch translate error", e);
+            console.log("catch translate", e);
             return responseMessage;
         }
     };
@@ -105,6 +142,35 @@ export class translateService{
         }
         else {
             return language;
+        }
+    };
+
+    translateTextWithGlossary = async(message: string, target_language: string, translate: any, ) => {
+        const translationClient = new TranslationServiceClient(this.obj);
+        const projectId = this.GCPCredentials.project_id;
+        const location = 'us-central1';
+        const glossaryId = this.translateGlossaryId;
+        const glossaryConfig = {
+            glossary : `projects/${projectId}/locations/${location}/glossaries/${glossaryId}`,
+        };
+        const request = {
+            parent             : `projects/${projectId}/locations/${location}`,
+            contents           : [message],
+            mimeType           : 'text/plain', // mime types: text/plain, text/html
+            sourceLanguageCode : 'en',
+            targetLanguageCode : target_language,
+            glossaryConfig     : glossaryConfig,
+        };
+        try {
+            const [response] = await translationClient.translateText(request);
+
+            const glossary_response = response.glossaryTranslations[0].translatedText;
+        
+            return [glossary_response];
+        } catch {
+            const translated_response = await translate.translate(message, { to: target_language, format: "text" });
+
+            return translated_response;
         }
     };
 

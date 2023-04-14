@@ -1,20 +1,17 @@
-import { autoInjectable,container } from "tsyringe";
+import { Lifecycle, scoped } from "tsyringe";
 import { platformServiceInterface } from "../refactor/interface/platform.interface";
-import { MessageFlow } from "./get.put.message.flow.service";
-import { GetCalories } from "./get.calorie.service";
+import { Iresponse } from "../refactor/interface/message.interface";
+import { commonResponseMessageFormat } from "./common.response.format.object";
 
-@autoInjectable()
+// @autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class CalorieService {
 
     public res;
 
-    private _platformMessageService?: platformServiceInterface;
-
-    constructor(private messageFlow?: MessageFlow,
-        private getCalorieService?: GetCalories
-    ) {
-    
-    }
+    constructor(
+        private _platformMessageService?: platformServiceInterface
+    ) {}
 
     async handleMessageCalorie(sessionId: any, client: any, req: any) {
         console.log('Here in the handle message of food');
@@ -25,8 +22,15 @@ export class CalorieService {
 
     async postResponseCalorie(userId: any, client: any, data: any) {
         console.log("Sending calorie data to client");
-        this._platformMessageService = container.resolve(client);
-        await this._platformMessageService.SendMediaMessage(userId,null,data,'text',null);
+        const response_format: Iresponse = commonResponseMessageFormat();
+        response_format.platform = client;
+        response_format.sessionId = userId;
+        response_format.messageBody = data;
+        response_format.message_type = "text";
+        response_format.messageText = data;
+        
+        // this._platformMessageService = container.resolve(client);
+        await this._platformMessageService.SendMediaMessage(response_format,null);
     }
 
     async sendCalorieToDF(req){

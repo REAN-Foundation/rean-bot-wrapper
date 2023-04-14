@@ -1,11 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable max-len */
 import http from  'https';
 import http_tp from 'http';
 import { getMessageFunctionalities } from "../refactor/interface/message.service.functionalities.interface";
 import { Imessage } from '../refactor/interface/message.interface';
 import { EmojiFilter } from './filter.message.for.emoji.service';
 import { Speechtotext } from './speech.to.text.service';
-import { autoInjectable } from "tsyringe";
+import { inject, Lifecycle, scoped } from "tsyringe";
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { AwsS3manager } from "./aws.file.upload.service";
 import { UserLanguage } from './set.language';
@@ -13,13 +13,14 @@ import path from 'path';
 import fs from 'fs';
 import { Message } from './request.format/telegram.message.format';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class TelegramMessageServiceFunctionalities implements getMessageFunctionalities{
 
-    constructor(private emojiFilter?: EmojiFilter,
-        private speechtotext?: Speechtotext,
-        private awsS3manager?: AwsS3manager,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+    constructor(@inject(EmojiFilter) private emojiFilter?: EmojiFilter,
+        @inject(Speechtotext ) private speechtotext?: Speechtotext,
+        @inject(AwsS3manager) private awsS3manager?: AwsS3manager,
+        @inject(UserLanguage) private userLanguage?: UserLanguage,
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     async textMessageFormat(messageObj: Message) {
         const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(messageObj.getText());
@@ -37,7 +38,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         const file_path = response.result.file_path;
 
         // await new SequelizeClient().connect();
-        const preferredLanguage = await new UserLanguage().getPreferredLanguageofSession(messageObj.getUserId());
+        const preferredLanguage = await this.userLanguage.getPreferredLanguageofSession(messageObj.getUserId());
         if (preferredLanguage !== "null"){
             if (file_path) {
                 const ConvertedToText = await this.speechtotext.SendSpeechRequest('https://api.telegram.org/file/bot' + this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN") + '/' + response.result.file_path, "telegram", preferredLanguage);
@@ -76,6 +77,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
     async photoMessageFormat(messageObj: Message) {
         let response: any = {};
         response = await this.GetTelegramMedia(messageObj.getPhotoFileId());
+        console.log("response telegram photoMessageFormat", response);
         if (response.result.file_path){
             const filePath = await this.downloadTelegramMedia('https://api.telegram.org/file/bot' + this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN") + '/' + response.result.file_path, "photo");
             const location = await this.awsS3manager.uploadFile(filePath);
@@ -137,6 +139,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
                     data += d;
                 });
                 res.on("end", () => {
+                    console.log("data GetTelegramMedia", data);
                     resolve(JSON.parse(data));
                 });
             });

@@ -1,7 +1,6 @@
 /* eslint-disable max-len */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { feedbackInterface } from './feedback.interface';
-import { autoInjectable, container } from 'tsyringe';
+import { container, inject, Lifecycle, scoped } from 'tsyringe';
 import { SlackMessageService } from '../slack.message.service';
 import { UserFeedback } from '../../models/user.feedback.model';
 import { ChatMessage } from '../../models/chat.message.model';
@@ -10,41 +9,45 @@ import { ClientEnvironmentProviderService } from '../../services/set.client/clie
 import { CalorieInfo } from '../../models/calorie.info.model';
 import { Op } from 'sequelize';
 import { ClickUpTask } from '../clickup/clickup.task';
+import { EntityManagerProvider } from '../entity.manager.provider.service';
 
 const humanHandoff: HumanHandoff = container.resolve(HumanHandoff);
-// eslint-disable-next-line max-len
-const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class FeedbackService implements feedbackInterface {
 
     constructor(
-        private slackMessageService?: SlackMessageService,
-        private clickuptask?: ClickUpTask,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+        @inject(SlackMessageService) private slackMessageService?: SlackMessageService,
+        @inject(ClickUpTask) private clickuptask?: ClickUpTask,
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider
+    ){}
 
-    async NegativeFeedback(payload) {
+    async NegativeFeedback(eventObj) {
         return new Promise(async(resolve, reject) =>{
             try {
+                const clientEnvironmentProviderService = eventObj.container.resolve(ClientEnvironmentProviderService);
+                const payload = eventObj.body.originalDetectIntentRequest.payload;
                 const channel = payload.source;
                 const userId = payload.userId;
                 const completeMessage = payload.completeMessage;
                 const client_name = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-                const listOfUserRequestdata = await ChatMessage.findAll({ where: { userPlatformID: userId } });
+                const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+                const listOfUserRequestdata = await chatMessageRepository.findAll({ where: { userPlatformID: userId } });
                 const message = listOfUserRequestdata[listOfUserRequestdata.length - 3].messageContent;
-                const feedBackInfo = new UserFeedback({ userId: userId, messageContent: message, channel: channel,humanHandoff: "false", feedbackType: "Negative Feedback"});
-                await feedBackInfo.save();
+                const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
+                await userFeedbackRepository.create({ userId: userId, messageContent: message, channel: channel,humanHandoff: "false", feedbackType: "Negative Feedback" });
                 if (client_name === "CALORIE_BOT") {
                     console.log("Calorie negative feedback received.");
-                    const response = await ChatMessage.findAll({limit: 2, where: {userPlatformId: userId, direction: "In"}, raw: true, order: [['createdAt', 'DESC']]});
-                    const negativeResponse = response[response.length-1].messageContent;
-                    const findit = await CalorieInfo.findOne(
+                    const response = await chatMessageRepository.findAll({ limit: 2, where: { userPlatformId: userId, direction: "In" }, raw: true, order: [['createdAt', 'DESC']] });
+                    const negativeResponse = response[response.length - 1].messageContent;
+                    const CalorieInfoRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(CalorieInfo);
+                    await CalorieInfoRepository.findOne(
                         {
-                            where : {user_message: { [Op.like]: `${negativeResponse}`}},
+                            where : { user_message: { [Op.like]: `${negativeResponse}` } },
                             order : [['updatedAt', 'DESC']],
                             limit : 1,
                         }).then(function (record) {
-                        return record.update({negative_feedback: 1});
+                        return record.update({ negative_feedback: 1 });
                     });
                     const data = {
                         "fulfillmentMessages" : [
@@ -59,29 +62,32 @@ export class FeedbackService implements feedbackInterface {
                     };
                     resolve(data);
                 } else {
+                    // eslint-disable-next-line init-declarations
                     let response;
-                    const responseUserFeedback = await UserFeedback.findAll({ where: { userId: userId } });
+                    const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
+                    const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+                    const responseUserFeedback = await userFeedbackRepository.findAll({ where: { userId: userId } });
                     if (payload.source === "whatsapp" || payload.source === "whatsappMeta"){
                         if (payload.contextId){
-                            response = await ChatMessage.findAll({ where: { whatsappResponseMessageId: payload.contextId } });
+                            response = await chatMessageRepository.findAll({ where: { whatsappResponseMessageId: payload.contextId } });
                         }
                         else if (completeMessage.whatsappResponseMessageId){
-                            response = await ChatMessage.findAll({ where: { whatsappResponseMessageId: completeMessage.whatsappResponseMessageId } });
+                            response = await chatMessageRepository.findAll({ where: { whatsappResponseMessageId: completeMessage.whatsappResponseMessageId } });
                         }
                         else {
                             response = responseUserFeedback;
                         }
                     }
                     else {
-                        response = payload.contextId ? await ChatMessage.findAll({ where: { telegramResponseMessageId: payload.contextId } }) : responseUserFeedback;
+                        response = payload.contextId ? await chatMessageRepository.findAll({ where: { telegramResponseMessageId: payload.contextId } }) : responseUserFeedback;
                     }
-                    const preferredSupportChannel = this.clientEnvironmentProviderService.getClientEnvironmentVariable("SUPPORT_CHANNEL");
+                    const preferredSupportChannel = clientEnvironmentProviderService.getClientEnvironmentVariable("SUPPORT_CHANNEL");
                     if (preferredSupportChannel === "ClickUp"){
-                        const clickUpResponse:any = await this.clickuptask.createTask(response, responseUserFeedback,null,null);
+                        const clickUpResponseTaskID:any = await this.clickuptask.createTask(response, responseUserFeedback,null,null);
                         const messageContent = listOfUserRequestdata[listOfUserRequestdata.length - 1].messageContent;
                         if (messageContent.length > 5){
                             const comment = messageContent;
-                            this.clickuptask.postCommentOnTask(clickUpResponse.body.id,comment);
+                            this.clickuptask.postCommentOnTask(clickUpResponseTaskID,comment);
                         }
                     }
                     else {
@@ -148,10 +154,11 @@ export class FeedbackService implements feedbackInterface {
     async PositiveFeedback(channel, sessionId) {
         return new Promise(async(resolve, reject) =>{
             try {
-                const listOfUserRequestdata = await ChatMessage.findAll({ where: { userPlatformID: sessionId } });
+                const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+                const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
+                const listOfUserRequestdata = await chatMessageRepository.findAll({ where: { userPlatformID: sessionId } });
                 const message = listOfUserRequestdata[listOfUserRequestdata.length - 2].messageContent;
-                const feedBackInfo = new UserFeedback({ userId: sessionId, messageContent: message, channel: channel, feedbackType: "Positive Feedback" });
-                await feedBackInfo.save();
+                await userFeedbackRepository.create({ userId: sessionId, messageContent: message, channel: channel, feedbackType: "Positive Feedback" });
                 const reply = "We are glad that you like it. Thank you for your valuable feedback";
                 const data = {
                     "fulfillmentMessages" : [
