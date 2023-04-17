@@ -28,7 +28,6 @@ export interface Iresponse{
     message_type: string;
     messageBody: string;
     messageText: string;
-    // raw_response_object: string;
     intent: string;
     messageImageUrl: string;
     messageImageCaption: string;

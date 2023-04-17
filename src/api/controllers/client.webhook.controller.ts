@@ -56,7 +56,7 @@ export class ClientWebhookController {
                 }
                 else if (status[0].status === "read") {
                     const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
-                    await chatMessageRepository.update({whatsappResponseStatusRead: "true", whatsappResponseStatusReadTimestamp: status[0].timestamp},{where: {whatsappResponseMessageId: status[0].id}});
+                    await chatMessageRepository.update({ whatsappResponseStatusRead: "true", whatsappResponseStatusReadTimestamp: status[0].timestamp },{ where: { whatsappResponseMessageId: status[0].id } });
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message is read successfully!', "");
                 }
                 else {
@@ -118,8 +118,8 @@ export class ClientWebhookController {
                     // console.log("read", statuses);
                     const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
                     const date = new Date(parseInt(statuses[0].timestamp) * 1000);
-                    await chatMessageRepository.update({whatsappResponseStatusRead: "true", whatsappResponseStatusReadTimestamp: date},{where: {whatsappResponseMessageId: statuses[0].id}})
-                        .then(() => {console.log("timestamp of entered in database");});
+                    await chatMessageRepository.update({ whatsappResponseStatusRead: "true", whatsappResponseStatusReadTimestamp: date },{ where: { whatsappResponseMessageId: statuses[0].id } })
+                        .then(() => { console.log("timestamp of entered in database"); });
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message read successfully!', "");
                 }
                 else {

@@ -129,54 +129,55 @@ function migrateSchemaTimestampAdd(args) {
   }).catch(e => _helpers.default.view.error(e));
 }
 
-class AwsSecretsManager {
+//Uncomment this class before using it in your local machine
+// class AwsSecretsManager {
 
-  async getCrossAccountCredentials() {
-      return new Promise((resolve, reject) => {
-          const sts = new AWS.STS();
-          const timestamp = (new Date()).getTime();
-          const params = {
-              RoleArn         : process.env.ROLE_ARN,
-              RoleSessionName : `be-descriptibe-here-${timestamp}`
-          };
-          sts.assumeRole(params, (err, data) => {
-              if (err) reject(err);
-              else {
-                  resolve({
-                      accessKeyId     : data.Credentials.AccessKeyId,
-                      secretAccessKey : data.Credentials.SecretAccessKey,
-                      sessionToken    : data.Credentials.SessionToken,
-                  });
-              }
-          });
-      });
-  }
+//   async getCrossAccountCredentials() {
+//       return new Promise((resolve, reject) => {
+//           const sts = new AWS.STS();
+//           const timestamp = (new Date()).getTime();
+//           const params = {
+//               RoleArn         : process.env.ROLE_ARN,
+//               RoleSessionName : `be-descriptibe-here-${timestamp}`
+//           };
+//           sts.assumeRole(params, (err, data) => {
+//               if (err) reject(err);
+//               else {
+//                   resolve({
+//                       accessKeyId     : data.Credentials.AccessKeyId,
+//                       secretAccessKey : data.Credentials.SecretAccessKey,
+//                       sessionToken    : data.Credentials.SessionToken,
+//                   });
+//               }
+//           });
+//       });
+//   }
 
-  async getSecrets() {
+//   async getSecrets() {
 
-      const responseCredentials = await this.getCrossAccountCredentials();
-      const region = process.env.region;
-      const secretNameList = process.env.SECRET_NAME_LIST.split(',');
-      const secretObjectList = [];
+//       const responseCredentials = await this.getCrossAccountCredentials();
+//       const region = process.env.region;
+//       const secretNameList = process.env.SECRET_NAME_LIST.split(',');
+//       const secretObjectList = [];
 
-      // eslint-disable-next-line max-len
-      const client = new AWS.SecretsManager({ region: region, accessKeyId: responseCredentials.accessKeyId, secretAccessKey: responseCredentials.secretAccessKey, sessionToken: responseCredentials.sessionToken });
+//       // eslint-disable-next-line max-len
+//       const client = new AWS.SecretsManager({ region: region, accessKeyId: responseCredentials.accessKeyId, secretAccessKey: responseCredentials.secretAccessKey, sessionToken: responseCredentials.sessionToken });
 
-      let error;
+//       let error;
 
-      // For the list of secrets, get the respective values and store as list of objects
-      for (const ele of secretNameList) {
-          // eslint-disable-next-line max-len
-          const responseSecretValue = await client.getSecretValue({ SecretId: ele }).promise()
-              .catch(err => (error = err));
-          const secretStringToObj = JSON.parse(responseSecretValue.SecretString);
-          secretObjectList.push(secretStringToObj);
-      }
+//       // For the list of secrets, get the respective values and store as list of objects
+//       for (const ele of secretNameList) {
+//           // eslint-disable-next-line max-len
+//           const responseSecretValue = await client.getSecretValue({ SecretId: ele }).promise()
+//               .catch(err => (error = err));
+//           const secretStringToObj = JSON.parse(responseSecretValue.SecretString);
+//           secretObjectList.push(secretStringToObj);
+//       }
 
-      return secretObjectList;
-  }
+//       return secretObjectList;
+//   }
   
-}
+// }
 
 const createConfig = async() => {
   const obj = new AwsSecretsManager()
