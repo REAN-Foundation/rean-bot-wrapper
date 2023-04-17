@@ -13,4 +13,4 @@ const yargs = (0, _yargs.default)();
 
 _index.default.view.teaser();
 
-yargs.help().version().command('db:migrate', 'Run pending migrations', _migrate.default).wrap(yargs.terminalWidth()).demandCommand(1, 'Please specify a command').help().strict().recommendCommands().argv;
+// yargs.help().version().command('db:migrate', 'Run pending migrations', _migrate.default).wrap(yargs.terminalWidth()).demandCommand(1, 'Please specify a command').help().strict().recommendCommands().argv;
