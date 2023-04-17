@@ -91,4 +91,9 @@ export class ChatMessage extends Model implements IchatMessage {
     })
         telegramResponseMessageId : string
 
+    @Column({
+        type : DataType.DATE
+    })
+        whatsappResponseStatusReadTimestamp : string
+
 }

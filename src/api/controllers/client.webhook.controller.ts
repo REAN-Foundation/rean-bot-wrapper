@@ -5,6 +5,8 @@ import { platformServiceInterface } from '../../refactor/interface/platform.inte
 import { scoped, Lifecycle, inject } from 'tsyringe';
 import { clientAuthenticator } from '../../services/clientAuthenticator/client.authenticator.interface';
 import util from 'util';
+import { ChatMessage } from '../../models/chat.message.model';
+import { EntityManagerProvider } from '../../services/entity.manager.provider.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ClientWebhookController {
@@ -15,7 +17,8 @@ export class ClientWebhookController {
 
     constructor(
         @inject(ResponseHandler) private responseHandler?: ResponseHandler,
-        @inject(ErrorHandler) private errorHandler?: ErrorHandler
+        @inject(ErrorHandler) private errorHandler?: ErrorHandler,
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider
     ) {
 
     }
@@ -52,6 +55,8 @@ export class ClientWebhookController {
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message is delivered successfully!', "");
                 }
                 else if (status[0].status === "read") {
+                    const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+                    await chatMessageRepository.update({whatsappResponseStatusRead: "true", whatsappResponseStatusReadTimestamp: status[0].timestamp},{where: {whatsappResponseMessageId: status[0].id}});
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message is read successfully!', "");
                 }
                 else {
@@ -111,6 +116,10 @@ export class ClientWebhookController {
                 else if (statuses[0].status === "read") {
 
                     // console.log("read", statuses);
+                    const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+                    const date = new Date(parseInt(statuses[0].timestamp) * 1000);
+                    await chatMessageRepository.update({whatsappResponseStatusRead: "true", whatsappResponseStatusReadTimestamp: date},{where: {whatsappResponseMessageId: statuses[0].id}})
+                        .then(() => {console.log("timestamp of entered in database");});
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message read successfully!', "");
                 }
                 else {
