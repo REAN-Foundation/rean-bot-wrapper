@@ -57,7 +57,7 @@ export class NeedleService {
         return phoneNumber;
     }
 
-    async needleRequestForWhatsapp(method: string, endPoint:string, obj?){
+    async needleRequestForWhatsappMeta(method: string, endPoint:string, obj?){
         const whatsappHost = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
         const options = getRequestOptions();
         const whatsappToken = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
@@ -105,6 +105,22 @@ export class NeedleService {
         }
     
         return response.body;
+    }
+
+    async needleRequestForWhatsapp(method: string, endPoint:string, obj?){
+        const options = getRequestOptions();
+        options.headers['Content-Type'] = 'application/json';
+        options.headers['D360-Api-Key'] = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY");
+        const hostname = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST");
+        const apiUrl = "https://" + hostname + endPoint;
+        // eslint-disable-next-line init-declarations
+        await needle.post(apiUrl, obj, options, function(err, resp) {
+            if (err) {
+                console.log("err", err);
+            }
+            console.log("resp", resp.body);
+            return (resp.body);
+        });
     }
 
 }
