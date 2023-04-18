@@ -3,11 +3,14 @@ name: testing labels
 on:
   push:
     branches: feature/fix_snyk
+    
+permissions:
+  contents: write
 
 jobs:
   labels:
-    permissions:
-      contents: write
+#     permissions:
+#       contents: write
 #       pull-requests: write
     runs-on: ubuntu-latest
     steps:
@@ -19,5 +22,5 @@ jobs:
         with:
           publish : true
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
