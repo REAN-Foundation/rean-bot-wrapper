@@ -6,8 +6,8 @@ on:
 
 jobs:
   labels:
-#     permissions:
-#       contents: write
+    permissions:
+      contents: write
 #       pull-requests: write
     runs-on: ubuntu-latest
     steps:
