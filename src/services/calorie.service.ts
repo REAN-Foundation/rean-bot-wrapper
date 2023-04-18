@@ -20,7 +20,7 @@ export class CalorieService {
         return responseFromDF;
     }
 
-    async postResponseCalorie(userId: any, client: any, data: any) {
+    async postResponseCalorie(eventObj, userId: any, client: any, data: any) {
         console.log("Sending calorie data to client");
         const response_format: Iresponse = commonResponseMessageFormat();
         response_format.platform = client;
@@ -29,7 +29,7 @@ export class CalorieService {
         response_format.message_type = "text";
         response_format.messageText = data;
         
-        // this._platformMessageService = container.resolve(client);
+        this._platformMessageService = eventObj.container.resolve(client);
         await this._platformMessageService.SendMediaMessage(response_format,null);
     }
 

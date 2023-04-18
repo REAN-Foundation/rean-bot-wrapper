@@ -2,7 +2,7 @@ import { Logger } from "../../common/logger";
 import { CalorieFeedback } from "../../services/calories/calorie.feedback.service";
 
 export const CalorieUpdate = async ( intent, eventObj ) => {
-    const calorie_Feedback = new CalorieFeedback();
+    const calorie_Feedback = eventObj.container.resolve(CalorieFeedback);
     return new Promise(async (resolve,reject) => {
         try {
             Logger.instance()
