@@ -28,7 +28,6 @@ export interface Iresponse{
     message_type: string;
     messageBody: string;
     messageText: string;
-    // raw_response_object: string;
     intent: string;
     messageImageUrl: string;
     messageImageCaption: string;
@@ -60,6 +59,7 @@ export interface IchatMessage {
     messageId: string;
     whatsappResponseMessageId : string;
     telegramResponseMessageId : string
+    whatsappResponseStatusReadTimestamp : string;
 }
 
 export interface chatSession {
