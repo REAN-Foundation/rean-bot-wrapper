@@ -93,6 +93,16 @@ export class ChatMessage extends Model implements IchatMessage {
     @Column({
         type : DataType.DATE
     })
+        whatsappResponseStatusSentTimestamp : string;
+
+    @Column({
+        type : DataType.DATE
+    })
+        whatsappResponseStatusDeliveredTimestamp : string;
+
+    @Column({
+        type : DataType.DATE
+    })
         whatsappResponseStatusReadTimestamp : string;
 
 }

@@ -174,21 +174,23 @@ export class MessageFlow{
                 chatSessionId = chatSessionModel.autoIncrementalID;
             }
             const chatMessageObj = {
-                chatSessionID                       : chatSessionId,
-                name                                : messagetoDialogflow.name,
-                platform                            : messagetoDialogflow.platform,
-                direction                           : messagetoDialogflow.direction,
-                messageType                         : messagetoDialogflow.type,
-                messageContent                      : messagetoDialogflow.messageBody,
-                messageId                           : messagetoDialogflow.chat_message_id,
-                imageContent                        : null,
-                imageUrl                            : messagetoDialogflow.imageUrl,
-                userPlatformID                      : messagetoDialogflow.platformId,
-                intent                              : null,
-                whatsappResponseMessageId           : null,
-                contextId                           : messagetoDialogflow.contextId,
-                telegramResponseMessageId           : null,
-                whatsappResponseStatusReadTimestamp : null
+                chatSessionID                            : chatSessionId,
+                name                                     : messagetoDialogflow.name,
+                platform                                 : messagetoDialogflow.platform,
+                direction                                : messagetoDialogflow.direction,
+                messageType                              : messagetoDialogflow.type,
+                messageContent                           : messagetoDialogflow.messageBody,
+                messageId                                : messagetoDialogflow.chat_message_id,
+                imageContent                             : null,
+                imageUrl                                 : messagetoDialogflow.imageUrl,
+                userPlatformID                           : messagetoDialogflow.platformId,
+                intent                                   : null,
+                whatsappResponseMessageId                : null,
+                contextId                                : messagetoDialogflow.contextId,
+                telegramResponseMessageId                : null,
+                whatsappResponseStatusSentTimestamp      : null,
+                whatsappResponseStatusDeliveredTimestamp : null,
+                whatsappResponseStatusReadTimestamp      : null
             };
 
             // await this.sequelizeClient.connect();
