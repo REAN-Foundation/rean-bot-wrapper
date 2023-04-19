@@ -14,15 +14,32 @@ export const kerotoplastyLocationListener = async (intent:string, eventObj) => {
 async function keratoplastyNextSteps(intent,eventObj) {
     try {
         console.log("STEP 4");
+        const channel = eventObj.body.originalDetectIntentRequest.payload.source;
         const kerotoplastyServiceObj: kerotoplastyService = eventObj.container.resolve(kerotoplastyService);
         const needleService: NeedleService = eventObj.container.resolve(NeedleService);
 
         const location_response = await kerotoplastyServiceObj.conditionSpecificResponse(intent,eventObj);
-        const postData = {
-            chat_id : eventObj.body.originalDetectIntentRequest.payload.userId,
-            text    : location_response
-        };
-        await needleService.needleRequestForTelegram("post", "sendMessage", postData);
+        if (channel === "whatsappMeta") {
+            const endPoint = 'messages';
+            const postData = {
+                "messaging_product" : "whatsapp",
+                "recipient_type"    : "individual",
+                "to"                : eventObj.body.originalDetectIntentRequest.payload.userId,
+                "type"              : "text",
+                "text"              : {
+                    "body" : location_response
+                }
+            };
+            await needleService.needleRequestForWhatsappMeta("post", endPoint, JSON.stringify(postData));
+        } else if (channel === "telegram") {
+            const postData = {
+                chat_id : eventObj.body.originalDetectIntentRequest.payload.userId,
+                text    : location_response
+            };
+            await needleService.needleRequestForTelegram("post", "sendMessage", postData);
+        } else {
+            throw new Error("Invalid Channel");
+        }
         await kerotoplastyServiceObj.postingOnClickup(intent,eventObj);
         console.log("STEP 5! Final");
     } catch (error) {
