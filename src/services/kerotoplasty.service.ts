@@ -107,19 +107,32 @@ export class kerotoplastyService {
         // eslint-disable-next-line max-len
         const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
         const responseUserFeedback = await userFeedbackRepository.findAll({ where: { userId: payload.userId } });
-        if (responseUserFeedback[responseUserFeedback.length - 1].taskID){
-            const taskID = responseUserFeedback[responseUserFeedback.length-1].taskID;
-            await this.clickUpTask.updateTask(taskID,priority,user_details);
-            await this.clickUpTask.taskAttachment(taskID,attachmentPath);
-            await this.clickUpTask.postCommentOnTask(taskID,symptomComment);
+        if (responseUserFeedback[responseUserFeedback.length - 1]){
+            const object = responseUserFeedback[responseUserFeedback.length - 1]
+            console.log("in the first if")
+            if (object.taskID) {
+                console.log("in the 2 if")
+                const taskID = responseUserFeedback[responseUserFeedback.length-1].taskID;
+                await this.clickUpTask.updateTask(taskID,priority,user_details);
+                await this.clickUpTask.taskAttachment(taskID,attachmentPath);
+                await this.clickUpTask.postCommentOnTask(taskID,symptomComment);
+            } 
+            else
+            {
+                const taskID = await this.clickUpTask.createTask(null, responseUserFeedback, topic, user_details, priority);
+                await this.clickUpTask.taskAttachment(taskID, attachmentPath);
+                await this.clickUpTask.postCommentOnTask(taskID, symptomComment);
+                await userFeedbackRepository.create({ userId: payload.userId, taskID: taskID, channel: payload.source, humanHandoff: "false" });
+
+            }           
         }
         else
         {
-            const taskID = await this.clickUpTask.createTask(null, responseUserFeedback,topic,user_details,priority);
-            await this.clickUpTask.taskAttachment(taskID,attachmentPath);
-            await this.clickUpTask.postCommentOnTask(taskID,symptomComment);
-            await userFeedbackRepository.create({userId: payload.userId, taskID: taskID,channel: payload.source,humanHandoff: "false"});
-
+            const taskID = await this.clickUpTask.createTask(null, responseUserFeedback, topic, user_details, priority);
+            await this.clickUpTask.taskAttachment(taskID, attachmentPath);
+            await this.clickUpTask.postCommentOnTask(taskID, symptomComment);
+            console.log("we are Here")
+            await userFeedbackRepository.create({ userId: payload.userId, taskID: taskID, channel: payload.source, humanHandoff: "false" });
         }
 
     }
