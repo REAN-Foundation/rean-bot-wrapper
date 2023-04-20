@@ -60,6 +60,9 @@ export interface IchatMessage {
     whatsappResponseMessageId : string;
     telegramResponseMessageId : string
     whatsappResponseStatusReadTimestamp : string;
+    whatsappResponseStatusSentTimestamp : string;
+    whatsappResponseStatusDeliveredTimestamp : string;
+
 }
 
 export interface chatSession {
