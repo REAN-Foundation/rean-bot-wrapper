@@ -48,5 +48,4 @@ export class GetLocation{
         }
     }
 
-
 }
