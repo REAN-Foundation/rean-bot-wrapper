@@ -3,7 +3,7 @@ import { Logger } from "../../common/logger";
 import { GetCalories } from "../../services/get.calorie.service";
 
 export const calorieDetection = async ( intent, eventObj ) => {
-    const calorieservice = new CalorieService();
+    const calorieservice = eventObj.container.resolve(CalorieService);
     return new Promise(async (resolve,reject) => {
         try {
             Logger.instance()
@@ -19,12 +19,12 @@ export const calorieDetection = async ( intent, eventObj ) => {
             } else {
                 resolve(response);
 
-                const getCalorieService = new GetCalories();
+                const getCalorieService = eventObj.container.resolve(GetCalories);
                 // eslint-disable-next-line max-len
                 const calorieData = await getCalorieService.getCalorieData(eventObj.body.queryResult.parameters, eventObj.body.queryResult.queryText, payload);
                 console.log("We revieved the calorie data");
                 console.log(calorieData);
-                await calorieservice.postResponseCalorie(payload.userId,payload.source,calorieData.text);
+                await calorieservice.postResponseCalorie(eventObj, payload.userId,payload.source,calorieData.text);
             }
         } catch (error) {
             Logger.instance()

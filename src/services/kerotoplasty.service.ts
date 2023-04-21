@@ -50,18 +50,20 @@ export class kerotoplastyService {
         console.log("our location data is ",locationData);
         const postalAddress = locationData["Postal Addres"];
         const keys = Object.keys(locationData["Postal Addres"]);
+        const address1 = postalAddress[keys[0]].replace(/\s+/g, ' ').trim();
+        const address2 = postalAddress[keys[1]].replace(/\s+/g, ' ').trim();
         switch (intent) {
         case 'hyperCriticalCondition': {
-            message = `Your situation seems hyper-critical.\n Please Visit the nearest care center as soon as possible.\n Your nearest centers are: \n 1. ${postalAddress[keys[0]]}  \n 2. ${postalAddress[keys[1]]} `;
+            message = `Your situation seems hyper-critical.\n Please Visit the nearest care center as soon as possible.\n Your nearest centers are: \n 1. ${address1}  \n 2. ${address2}`;
             break;
         }
         case 'criticalCondition':
         {
-            message = `Your situation seems critical.\n Please visit us at the nearest center on the next available.\n Your nearest centers are: \n 1. ${postalAddress[keys[0]]}  \n 2. ${postalAddress[keys[1]]} `;
+            message = `Your situation seems critical.\n Please visit us at the nearest center on the next available.\n Your nearest centers are: \n 1. ${address1}  \n 2. ${address2} `;
             break;
         }
         case 'normalCondition': {
-            message = `Your situation seems normal.\n Please visit us at our nearest center if there is drop in vision or severe pain in your operated eye.\n Your nearest centers are: \n 1. ${postalAddress[keys[0]]} \n 2. ${postalAddress[keys[1]]} `;
+            message = `Your situation seems normal.\n Please visit us at our nearest center if there is drop in vision or severe pain in your operated eye.\n Your nearest centers are: \n 1. ${address1} \n 2. ${address2} `;
             break;
         }
         }
@@ -107,19 +109,32 @@ export class kerotoplastyService {
         // eslint-disable-next-line max-len
         const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
         const responseUserFeedback = await userFeedbackRepository.findAll({ where: { userId: payload.userId } });
-        if (responseUserFeedback[responseUserFeedback.length - 1].taskID){
-            const taskID = responseUserFeedback[responseUserFeedback.length-1].taskID;
-            await this.clickUpTask.updateTask(taskID,priority,user_details);
-            await this.clickUpTask.taskAttachment(taskID,attachmentPath);
-            await this.clickUpTask.postCommentOnTask(taskID,symptomComment);
+        if (responseUserFeedback[responseUserFeedback.length - 1]){
+            const object = responseUserFeedback[responseUserFeedback.length - 1];
+            console.log("in the first if");
+            if (object.taskID) {
+                console.log("in the 2 if");
+                const taskID = responseUserFeedback[responseUserFeedback.length-1].taskID;
+                await this.clickUpTask.updateTask(taskID,priority,user_details);
+                await this.clickUpTask.taskAttachment(taskID,attachmentPath);
+                await this.clickUpTask.postCommentOnTask(taskID,symptomComment);
+            } 
+            else
+            {
+                const taskID = await this.clickUpTask.createTask(null, responseUserFeedback, topic, user_details, priority);
+                await this.clickUpTask.taskAttachment(taskID, attachmentPath);
+                await this.clickUpTask.postCommentOnTask(taskID, symptomComment);
+                await userFeedbackRepository.create({ userId: payload.userId, taskID: taskID, channel: payload.source, humanHandoff: "false" });
+
+            }           
         }
         else
         {
-            const taskID = await this.clickUpTask.createTask(null, responseUserFeedback,topic,user_details,priority);
-            await this.clickUpTask.taskAttachment(taskID,attachmentPath);
-            await this.clickUpTask.postCommentOnTask(taskID,symptomComment);
-            await userFeedbackRepository.create({userId: payload.userId, taskID: taskID,channel: payload.source,humanHandoff: "false"});
-
+            const taskID = await this.clickUpTask.createTask(null, responseUserFeedback, topic, user_details, priority);
+            await this.clickUpTask.taskAttachment(taskID, attachmentPath);
+            await this.clickUpTask.postCommentOnTask(taskID, symptomComment);
+            console.log("we are Here");
+            await userFeedbackRepository.create({ userId: payload.userId, taskID: taskID, channel: payload.source, humanHandoff: "false" });
         }
 
     }

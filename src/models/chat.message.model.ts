@@ -4,9 +4,9 @@ import { ChatSession } from './chat.session';
 
 @Table(
     {
-    timestamps : true,
-    modelName  : 'ChatMessage',
-    tableName  : 'chat_message'
+        timestamps : true,
+        modelName  : 'ChatMessage',
+        tableName  : 'chat_message'
     }
 )
 export class ChatMessage extends Model implements IchatMessage {
@@ -28,7 +28,7 @@ export class ChatMessage extends Model implements IchatMessage {
         chatSessionID?: number;
 
     @BelongsTo(() => ChatSession)
-    ChatSession: ChatSession;
+        ChatSession: ChatSession;
 
     @Column({
         type : DataType.STRING(256)
@@ -63,7 +63,7 @@ export class ChatMessage extends Model implements IchatMessage {
     @Column({
         type : DataType.STRING(256)
     })
-    messageId: string;
+        messageId: string;
 
     @Column({
         type : DataType.TEXT()
@@ -88,6 +88,21 @@ export class ChatMessage extends Model implements IchatMessage {
     @Column({
         type : DataType.STRING(1024)
     })
-        telegramResponseMessageId : string
+        telegramResponseMessageId : string;
+
+    @Column({
+        type : DataType.DATE
+    })
+        whatsappResponseStatusSentTimestamp : string;
+
+    @Column({
+        type : DataType.DATE
+    })
+        whatsappResponseStatusDeliveredTimestamp : string;
+
+    @Column({
+        type : DataType.DATE
+    })
+        whatsappResponseStatusReadTimestamp : string;
 
 }

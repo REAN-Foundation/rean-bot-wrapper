@@ -3,9 +3,9 @@ import { feedbackmessage } from '../refactor/interface/message.interface';
 
 @Table(
     {
-    timestamps : true,
-    modelName  : 'UserFeedback',
-    tableName  : 'user_feedback'
+        timestamps : true,
+        modelName  : 'UserFeedback',
+        tableName  : 'user_feedback'
     }
 )
 export class UserFeedback extends Model implements feedbackmessage {
