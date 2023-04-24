@@ -1,20 +1,18 @@
-import { autoInjectable,container } from "tsyringe";
+import { Lifecycle, inject, scoped } from "tsyringe";
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { CalorieInfo } from "../models/calorie.info.model";
 import { CalorieDatabase } from "../models/calorie.db.model";
-import { SequelizeClient } from '../connection/sequelizeClient';
 import requestCalorie = require('request');
+import { EntityManagerProvider } from "./entity.manager.provider.service";
 import filesystem = require('fs');
 
-// eslint-disable-next-line max-len
-const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
-
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class GetCalories {
 
+    // eslint-disable-next-line max-len
     constructor(
-        private sequelizeClient?: SequelizeClient) {
-    }
+        @inject(ClientEnvironmentProviderService) private clientEnvironment?: ClientEnvironmentProviderService,
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider) { }
 
     async getCalorieData(req,queryText,payload){
 
@@ -56,8 +54,9 @@ export class GetCalories {
                 user_message : queryText,
             };
 
-            const calorie_user = new CalorieInfo(calorieUser);
-            const calorie_user_saved = await calorie_user.save();
+            // eslint-disable-next-line max-len
+            const calorieInfoRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(CalorieInfo);
+            const calorie_user_saved = await calorieInfoRepository.create(calorieUser);
             const table_id = calorie_user_saved.autoIncrementalID;
 
             for (const foodName of query_result.food){
@@ -190,7 +189,7 @@ export class GetCalories {
             const total_calories = calories_array.reduce((a,b) => a + b);
             
             const text = 'The calorie content for ' +  reply_text.join(',') + '. Your total calorie intake based on the provided food items  and quantity is ' + total_calories + ' kcal (estimated).';
-            const findit = await CalorieInfo.findOne(
+            const findit = await calorieInfoRepository.findOne(
                 {
                     where : {
                         autoIncrementalID : table_id
@@ -234,8 +233,8 @@ export class GetCalories {
     
         async function main() {
     
-            const clientID = clientEnvironmentProviderService.getClientEnvironmentVariable("FS_CLIENT_ID");
-            const clientSecret = clientEnvironmentProviderService.getClientEnvironmentVariable("FS_CLIENT_SECRET");
+            const clientID = this.clientEnvironment.getClientEnvironmentVariable("FS_CLIENT_ID");
+            const clientSecret = this.clientEnvironment.getClientEnvironmentVariable("FS_CLIENT_SECRET");
     
             var options = {
                 method : 'POST',
@@ -335,8 +334,9 @@ export class GetCalories {
                 value      : value,
                 meta_data  : JSON.stringify(serving_data),
             };
-            const calorie_database = new CalorieDatabase(calorieDB);
-            await calorie_database.save();
+            // eslint-disable-next-line max-len
+            const calorieDatabaseRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(CalorieDatabase);
+            await calorieDatabaseRepository.create(calorieDB);
         }
     } 
 }

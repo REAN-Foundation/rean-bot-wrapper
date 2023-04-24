@@ -47,7 +47,6 @@ export class ChangeLanguage{
                 });
 
                 //create a new session
-                // await chatSessionRepository.create({ userPlatformID: userId, preferredLanguage: newLanguageCode, sessionOpen: "true" });
                 const reply = `Language changed to: ${newLanguage}`;
                 const data = {
                     "fulfillmentMessages" : [
