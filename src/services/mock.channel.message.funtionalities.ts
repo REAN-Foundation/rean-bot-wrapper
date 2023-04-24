@@ -2,14 +2,16 @@
 /* eslint-disable max-len */
 import { getMessageFunctionalities } from "../refactor/interface/message.service.functionalities.interface";
 import { Imessage } from '../refactor/interface/message.interface';
-import { autoInjectable } from "tsyringe";
+import { Lifecycle, inject, scoped } from "tsyringe";
 import { EmojiFilter } from './filter.message.for.emoji.service';
 import { Message } from './request.format/whatsapp.message.format';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class MockCHannelMessageFunctionalities implements getMessageFunctionalities {
 
-    constructor(private emojiFilter?: EmojiFilter){}
+    constructor(
+        @inject(EmojiFilter) private emojiFilter?: EmojiFilter
+    ){}
 
     locationMessageFormat(msg: any) {
         throw new Error("Method not implemented.");

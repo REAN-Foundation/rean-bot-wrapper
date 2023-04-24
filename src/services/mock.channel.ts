@@ -12,7 +12,6 @@ import { WhatsappMessageToDialogflow } from './whatsapp.messagetodialogflow';
 import request from 'request';
 import { EntityManagerProvider } from './entity.manager.provider.service';
 
-// @autoInjectable()
 @scoped(Lifecycle.ContainerScoped)
 export class MockMessageService implements platformServiceInterface {
 
