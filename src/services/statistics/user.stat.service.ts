@@ -1,12 +1,15 @@
 import { elasticsearchUtilities } from '../../utils/elasticsearch.utility';
-import { autoInjectable } from 'tsyringe';
+import { Lifecycle, inject, scoped } from 'tsyringe';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class elasticsearchUserstat{
 
-    constructor(private _elasticsearchUtilities?: elasticsearchUtilities,
-        private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+    constructor(
+        @inject(elasticsearchUtilities) private _elasticsearchUtilities?: elasticsearchUtilities,
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
+    ){}
 
     createUserStat = async (req) => {
         req.created_at = new Date();

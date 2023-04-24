@@ -44,5 +44,6 @@ async function keratoplastyNextSteps(intent,eventObj) {
         console.log("STEP 5! Final");
     } catch (error) {
         console.log(error);
+        throw new Error("Keratoplasty next steps error");
     }
 }
