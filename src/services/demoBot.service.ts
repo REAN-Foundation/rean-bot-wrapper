@@ -1,4 +1,4 @@
-import { autoInjectable } from "tsyringe";
+import { Lifecycle, inject, scoped } from "tsyringe";
 import XLSX = require('xlsx');
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 import { platformServiceInterface } from "../refactor/interface/platform.interface";
@@ -6,11 +6,13 @@ import dialogflow = require('@google-cloud/dialogflow');
 import { Iresponse } from "../refactor/interface/message.interface";
 import { commonResponseMessageFormat } from "./common.response.format.object";
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class demoBotService {
 
-    constructor(private clientEnvironment?: ClientEnvironmentProviderService,
-        private _platformMessageService?: platformServiceInterface) {}
+    private _platformMessageService : platformServiceInterface = null;
+
+    // eslint-disable-next-line max-len
+    constructor(@inject(ClientEnvironmentProviderService) private clientEnvironment?: ClientEnvironmentProviderService) { }
 
     async readExcel(path){
         try {
@@ -141,7 +143,7 @@ export class demoBotService {
 
     }
 
-    async postResponseDemo(sessionId: any, client: any, data:any) {
+    async postResponseDemo(eventObj, sessionId: any, client: any, data:any) {
         console.log("Sending demo bot success message");
         const response_format: Iresponse = commonResponseMessageFormat();
         response_format.platform = client;
@@ -149,7 +151,7 @@ export class demoBotService {
         response_format.messageText = data;
         response_format.message_type = "text";
         
-        // this._platformMessageService = container.resolve(client);
+        this._platformMessageService = eventObj.container.resolve(client);
         await this._platformMessageService.SendMediaMessage(response_format,null);
     }
     

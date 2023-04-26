@@ -10,11 +10,12 @@ import { EntityManagerProvider } from "./entity.manager.provider.service";
 export class CustomWelcomeService {
 
     public res;
+    
+    private _platformMessageService :  platformServiceInterface = null;
 
     constructor(
         // eslint-disable-next-line max-len
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
-        private _platformMessageService?: platformServiceInterface,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider){}
 
     async checkSession(userId:any){

@@ -3,15 +3,12 @@ import { platformServiceInterface } from "../refactor/interface/platform.interfa
 import { Iresponse } from "../refactor/interface/message.interface";
 import { commonResponseMessageFormat } from "./common.response.format.object";
 
-// @autoInjectable()
 @scoped(Lifecycle.ContainerScoped)
 export class CalorieService {
 
     public res;
 
-    constructor(
-        private _platformMessageService?: platformServiceInterface
-    ) {}
+    private _platformMessageService : platformServiceInterface = null;
 
     async handleMessageCalorie(sessionId: any, client: any, req: any) {
         console.log('Here in the handle message of food');
@@ -20,7 +17,7 @@ export class CalorieService {
         return responseFromDF;
     }
 
-    async postResponseCalorie(userId: any, client: any, data: any) {
+    async postResponseCalorie(eventObj, userId: any, client: any, data: any) {
         console.log("Sending calorie data to client");
         const response_format: Iresponse = commonResponseMessageFormat();
         response_format.platform = client;
@@ -29,30 +26,28 @@ export class CalorieService {
         response_format.message_type = "text";
         response_format.messageText = data;
         
-        // this._platformMessageService = container.resolve(client);
+        this._platformMessageService = eventObj.container.resolve(client);
         await this._platformMessageService.SendMediaMessage(response_format,null);
     }
 
     async sendCalorieToDF(req){
-        return new Promise(async (resolve)=> {
-            console.log("Start food calorie service...");
-            const params = req.body.queryResult.parameters;
-            console.log(params);
+        console.log("Start food calorie service...");
+        const params = req.body.queryResult.parameters;
+        console.log(params);
 
-            const data = {
-                "fulfillmentMessages" : [
-                    {
-                        "text" : {
-                            "text" : [
-                                "We are fetching your result."
-                            ]
-                        }
+        const data = {
+            "fulfillmentMessages" : [
+                {
+                    "text" : {
+                        "text" : [
+                            "We are fetching your result."
+                        ]
                     }
-                ]
-            };
-            console.log("Message to DF created");
-            resolve(data);
-        });
+                }
+            ]
+        };
+        console.log("Message to DF created");
+        return data;
     }
 
 }

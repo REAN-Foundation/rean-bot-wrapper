@@ -13,7 +13,11 @@ export class ChangeLanguage{
         return new Promise(async(resolve, reject) =>{
             try {
                 console.log("eventobj.body", eventObj.body);
-                const newLanguage = eventObj.body.queryResult.parameters.Language.toLowerCase();
+                let newLanguage = eventObj.body.queryResult.parameters.Language.toLowerCase();
+                if (!eventObj.body.queryResult.parameters.Language) {
+                    newLanguage = eventObj.body.queryResult.queryText.toLowerCase();
+                }
+
                 const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
                 const listOfLanguages = {
                     "hindi"     : "hi",
@@ -43,7 +47,6 @@ export class ChangeLanguage{
                 });
 
                 //create a new session
-                // await chatSessionRepository.create({ userPlatformID: userId, preferredLanguage: newLanguageCode, sessionOpen: "true" });
                 const reply = `Language changed to: ${newLanguage}`;
                 const data = {
                     "fulfillmentMessages" : [

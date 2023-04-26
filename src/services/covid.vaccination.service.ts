@@ -10,50 +10,46 @@ const VaccinationServiceBaseUrl = 'https://cdn-api.co-vin.in/api/v2';
 
 // Get Covid Vaccination Slots by Pincode
 export const getAppointmentsByPin = async (pincode, date) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            Logger.instance().log(`Get vaccination appointments by Pincode: ${pincode}`);
+    try {
+        Logger.instance().log(`Get vaccination appointments by Pincode: ${pincode}`);
 
-            const query_param = `pincode=${pincode}&date=${date}`;
+        const query_param = `pincode=${pincode}&date=${date}`;
 
-            const url = `${VaccinationServiceBaseUrl}/appointment/sessions/public/findByPin?${query_param}`;
-            const options = getRequestOptions('vaccine');
+        const url = `${VaccinationServiceBaseUrl}/appointment/sessions/public/findByPin?${query_param}`;
+        const options = getRequestOptions('vaccine');
 
-            const api_response = await needle('get', url, options);
+        const api_response = await needle('get', url, options);
 
-            // Do any sanitisation here...
+        // Do any sanitisation here...
 
-            resolve({ appointment_sessions: api_response.body });
+        return { appointment_sessions: api_response.body };
 
-        } catch (error) {
-            Logger.instance().log_error(error.message, 500, "Covid Vaccination Service Error!");
-            reject(error.message);
-        }
-    });
+    } catch (error) {
+        Logger.instance().log_error(error.message, 500, "Covid Vaccination Service Error!");
+        throw new Error("Covid Vaccination Service Error");
+    }
 };
 
 // Get Vaccination Slots by District
 export const getAppointmentsByDistrict = async (districtId, date) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            Logger.instance().log(`Get vaccination appointments by District Id: ${districtId}`);
+    try {
+        Logger.instance().log(`Get vaccination appointments by District Id: ${districtId}`);
 
-            const query_param = `district_id=${districtId}&date=${date}`;
+        const query_param = `district_id=${districtId}&date=${date}`;
 
-            const url = `${VaccinationServiceBaseUrl}/appointment/sessions/public/findByDistrict?${query_param}`;
-            const options = getRequestOptions('vaccine');
+        const url = `${VaccinationServiceBaseUrl}/appointment/sessions/public/findByDistrict?${query_param}`;
+        const options = getRequestOptions('vaccine');
 
-            const api_response = await needle('get', url, options);
+        const api_response = await needle('get', url, options);
 
-            // Do any sanitisation here...
+        // Do any sanitisation here...
 
-            resolve({ appointment_sessions: api_response.body });
+        return { appointment_sessions: api_response.body };
 
-        } catch (error) {
-            Logger.instance().log_error(error.message, 500, "Covid Vaccination Service Error!");
-            reject(error.message);
-        }
-    });
+    } catch (error) {
+        Logger.instance().log_error(error.message, 500, "Covid Vaccination Service Error!");
+        throw new Error("Covid Vaccination Service Error");
+    }
 };
 
 export const getAppointments = async(req, res) => {
@@ -244,8 +240,6 @@ export const getAppointments = async(req, res) => {
                 }
             });
 
-            //console.log(dates);
-
             const filterPush = (time, details) => {
                 if (dateBool === true) {
                     dates.days.forEach(thing => {
@@ -389,9 +383,6 @@ export const getAppointments = async(req, res) => {
 
             dateBool = true;
 
-            //console.log('DOESTHISWORKTESTETSTETSTST')
-            //console.log(ret)
-
             available.centers.forEach(center => {
                 center.sessions.forEach(session => {
                     appointment_info = {
@@ -470,13 +461,9 @@ export const getAppointments = async(req, res) => {
                 if (center.sessions.length > 0)
                     center_ret.centers.push(center);
             });
-
-            //console.log(center_ret)
             const dateArray = [];
             center_ret.centers.forEach(center => {
                 center.sessions.forEach(session => {
-
-                    //console.log(session)
                     if (dateArray.includes(session.date) === false)
                         dateArray.push(session.date);
                 });
@@ -520,10 +507,6 @@ export const getAppointments = async(req, res) => {
                 for (let i = 0; i < table.length; i++) {
                     table[i] = new Array(DATELENGTH + 1);
                 }
-
-                //console.log(table.length)
-                //console.log(dateArray)
-                //console.log(table[0].length)
                 for (let i = 1; i < DATELENGTH + 1; i++) {
                     table[0][i] = dateArray[i - 1];
                 }
@@ -570,23 +553,6 @@ export const getAppointments = async(req, res) => {
                     location = location.charAt(0).toUpperCase() + location.substr(1).toLowerCase();
                 }
 
-                // if(params.vac.length > 0)
-                //     params.vac.forEach(vac => {
-                //         vaccineName += vac + " ,";
-                //     });
-                // if(params.fee.length > 0)
-                //     params.fee.forEach(fee => {
-                //         price += fee + " ,";
-                //     });
-                // if(params.dose.length > 0)
-                //     params.dose.forEach(dose => {
-                //         doses += "Dose" + dose + " ,";
-                //     });
-                // if(params.age.length > 0)
-                // params.age.forEach(agee => {
-                //     age += agee + " ,";
-                // });
-
                 filterString += location; // + vaccineName + price + doses +  age;
                 filterString = filterString.substring(0, filterString.length - 1);
 
@@ -601,14 +567,6 @@ export const getAppointments = async(req, res) => {
                     string += '<div style="width:65%;"><p style="font-size:20px; padding-bottom:10px;margin-left: 40px;"><span style="font-size:20px; padding-bottom:10px;">' + filterString + '</span></p></div>';
                     string += '<div style="width:35%;"> <p style="font-size:20px; padding-bottom:10px;"><span style="background-color:#b5f0b5;width: 100px;">Vaccine(s) Available</span> <span style="padding-left:20px">NA = Not Applicable</span>  </p> </div>';
                     string += '</div>';
-
-                    // eslint-disable-next-line max-len
-                    //string += '<span style="float:left; font-size: 20px;"> NA = Not Applicable <span style="float:right; background-color:#b5f0b5; padding: 10px; width: 100px; font-size: 20px;"> Vaccine(s) Available</span> </span>'
-                    // eslint-disable-next-line max-len
-                    //string += '<span style="background-color:#b5f0b5; padding: 10px; width: 100px; font-size: 20px;"> Vaccines(s) Available </span> '
-                    //string += '<span style="font-size: 20px"> <p>NA = Not Applicable</p> </span>'
-                    //string += '<span style="font-size: 20px"> Vaccine(s) Available </span>'
-                    //string += '</div>'
                     string += '<div> </div>';
                     string += '<table border="1" style="border-collapse:collapse; margin: 2px; border:1px solid;">';
                     for (let i = 0; i < tableData.length && i < 10; i++) {
@@ -674,8 +632,6 @@ export const getAppointments = async(req, res) => {
                 }
 
                 agent.context.set('VaccinationAppointmentAvailability-followup', 0, {});
-
-                //console.log(actual_ret);
             }
         }
     }
