@@ -4,6 +4,7 @@ import { GetCalories } from "../../services/get.calorie.service";
 
 export const calorieDetection = async ( intent, eventObj ) => {
     const calorieservice:CalorieService = eventObj.container.resolve(CalorieService);
+    const getCalorieService:GetCalories = eventObj.container.resolve(GetCalories);
     try {
         Logger.instance()
             .log("Calling food info service !!!!");
@@ -16,7 +17,7 @@ export const calorieDetection = async ( intent, eventObj ) => {
         if (eventObj.body.originalDetectIntentRequest.source === "DIALOGFLOW_CONSOLE"){
             return response;
         } else {
-            calorieNextSteps(eventObj, calorieservice, payload);
+            calorieNextSteps(eventObj, calorieservice, getCalorieService, payload);
             return response;
         }
     } catch (error) {
@@ -26,11 +27,10 @@ export const calorieDetection = async ( intent, eventObj ) => {
     }
 };
 
-async function calorieNextSteps(eventObj, calorieservice, payload){
-    const getCalorieService = new GetCalories();
+async function calorieNextSteps(eventObj, calorieservice, getCalorieService, payload){
     // eslint-disable-next-line max-len
     const calorieData = await getCalorieService.getCalorieData(eventObj.body.queryResult.parameters, eventObj.body.queryResult.queryText, payload);
     console.log("We revieved the calorie data");
     console.log(calorieData);
-    await calorieservice.postResponseCalorie(payload.userId,payload.source,calorieData.text);
+    await calorieservice.postResponseCalorie(eventObj, payload.userId, payload.source, calorieData.text);
 }
