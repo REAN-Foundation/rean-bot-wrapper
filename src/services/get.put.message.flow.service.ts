@@ -196,6 +196,7 @@ export class MessageFlow{
             // await this.sequelizeClient.connect();
             const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
             const personrequest = await chatMessageRepository.create(chatMessageObj);
+            await personrequest.save();
             this.chatMessageConnection = personrequest;
             const userId = chatMessageObj.userPlatformID;
             const respChatSession = await chatSessionRepository.findAll({ where: { userPlatformID: userId } });
