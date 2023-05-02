@@ -8,6 +8,7 @@ export const calorieReport = async ( intent,eventObj ) => {
             .log("Calorie report creation");
         
         let res;
+
         const user_data = await getCalorieReport.getCalorieReport(eventObj,res);
 
         return user_data;
