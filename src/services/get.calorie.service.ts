@@ -1,20 +1,18 @@
-import { autoInjectable,container } from "tsyringe";
+import { Lifecycle, inject, scoped } from "tsyringe";
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { CalorieInfo } from "../models/calorie.info.model";
 import { CalorieDatabase } from "../models/calorie.db.model";
-import { SequelizeClient } from '../connection/sequelizeClient';
 import requestCalorie = require('request');
+import { EntityManagerProvider } from "./entity.manager.provider.service";
 import filesystem = require('fs');
 
-// eslint-disable-next-line max-len
-const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
-
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class GetCalories {
 
+    // eslint-disable-next-line max-len
     constructor(
-        private sequelizeClient?: SequelizeClient) {
-    }
+        @inject(ClientEnvironmentProviderService) private clientEnvironment?: ClientEnvironmentProviderService,
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider) {}
 
     async getCalorieData(req,queryText,payload){
 
@@ -38,7 +36,7 @@ export class GetCalories {
             }
 
             // eslint-disable-next-line @typescript-eslint/no-var-requires
-            const access_data = await main();
+            const access_data = await this.main();
             const access_token2 = JSON.stringify(access_data);
             const response_data = JSON.parse(access_token2);
 
@@ -56,8 +54,9 @@ export class GetCalories {
                 user_message : queryText,
             };
 
-            const calorie_user = new CalorieInfo(calorieUser);
-            const calorie_user_saved = await calorie_user.save();
+            // eslint-disable-next-line max-len
+            const calorieInfoRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(CalorieInfo);
+            const calorie_user_saved = await calorieInfoRepository.create(calorieUser);
             const table_id = calorie_user_saved.autoIncrementalID;
 
             for (const foodName of query_result.food){
@@ -65,7 +64,7 @@ export class GetCalories {
                     'name' : foodName.food_name.name,
                 };
                 food_names.push(search_term);
-                const food_search = JSON.parse(JSON.stringify(await mainSearch(access_token,search_term.name)));
+                const food_search = JSON.parse(JSON.stringify(await this.mainSearch(access_token,search_term.name)));
 
                 // For future purpose
                 // if (!filesystem.existsSync(`calorieMetaData/${search_term.name}.json`)){
@@ -79,7 +78,7 @@ export class GetCalories {
                 const food_body = JSON.parse(food_search.body);
                 const food_id = food_body.foods.food[0].food_id;
                 console.log("The food id is" + food_id);
-                const food_details = JSON.parse(JSON.stringify(await mainGetFood(access_token,food_id)));
+                const food_details = JSON.parse(JSON.stringify(await this.mainGetFood(access_token,food_id)));
                 const food = JSON.parse(food_details.body);
                 const servings = food.food.servings;
                 
@@ -104,7 +103,7 @@ export class GetCalories {
                         'data'      : serving_data,
                     };
                     // eslint-disable-next-line max-len
-                    await saveToDB(table_id,search_term.name,food.food.food_name,calories,value,serving_data);
+                    await this.saveToDB(table_id,search_term.name,food.food.food_name,calories,value,serving_data);
                     meta_data.push(temp);
                     const reply = `${search_term.name.toLowerCase()} ${food_description.toLowerCase()} is ${parseInt(calories)} calories`; 
                     reply_text.push(reply);
@@ -131,7 +130,7 @@ export class GetCalories {
                         'data'      : serving_data,
                     };
                     // eslint-disable-next-line max-len
-                    await saveToDB(table_id,search_term.name,food.food.food_name,calories,value,serving_data);
+                    await this.saveToDB(table_id,search_term.name,food.food.food_name,calories,value,serving_data);
                     meta_data.push(temp);
                     const reply = `${search_term.name.toLowerCase()} ${food_description.toLowerCase()} is ${parseInt(calories)} calories`; 
                     reply_text.push(reply);
@@ -139,7 +138,7 @@ export class GetCalories {
                 } else {
                     console.log("Here in else of unit");
                     
-                    const matched_serving = await getUnitData(servings.serving,foodName.unit);
+                    const matched_serving = await this.getUnitData(servings.serving,foodName.unit);
                     let match = {
                         "calories"            : "0",
                         "serving_description" : 'Item not found!',
@@ -178,7 +177,7 @@ export class GetCalories {
                         'data'      : serving_data
                     };
                     // eslint-disable-next-line max-len
-                    await saveToDB(table_id,search_term.name,food.food.food_name,calories,value,serving_data);
+                    await this.saveToDB(table_id,search_term.name,food.food.food_name,calories,value,serving_data);
                     meta_data.push(temp);
                     const reply = `${search_term.name.toLowerCase()} ${match.serving_description} is ${calories} calories`;
                     reply_text.push(reply);
@@ -190,7 +189,7 @@ export class GetCalories {
             const total_calories = calories_array.reduce((a,b) => a + b);
             
             const text = 'The calorie content for ' +  reply_text.join(',') + '. Your total calorie intake based on the provided food items  and quantity is ' + total_calories + ' kcal (estimated).';
-            const findit = await CalorieInfo.findOne(
+            const findit = await calorieInfoRepository.findOne(
                 {
                     where : {
                         autoIncrementalID : table_id
@@ -215,128 +214,128 @@ export class GetCalories {
             console.log(error);
             console.log('Food Info info Listener Error!');
         }
+    }
 
-
-        async function doRequest(url) {
-            return new Promise(function (resolve, reject) {
-                requestCalorie(url, function (error, res, body) {
-                    if (!error && res.statusCode == 200) {
-                        const data = {
-                            'body' : body 
-                        };
-                        resolve(data);
-                    } else {
-                        reject(error);
-                    }
-                });
-            });
-        }
-    
-        async function main() {
-    
-            const clientID = clientEnvironmentProviderService.getClientEnvironmentVariable("FS_CLIENT_ID");
-            const clientSecret = clientEnvironmentProviderService.getClientEnvironmentVariable("FS_CLIENT_SECRET");
-    
-            var options = {
-                method : 'POST',
-                url    : 'https://oauth.fatsecret.com/connect/token',
-                auth   : {
-                    user     : clientID,
-                    password : clientSecret
-                },
-                headers : { 'content-type': 'application/json'},
-                form    : {
-                    'grant_type' : 'client_credentials',
-                    'scope'      : 'basic'
-                },
-                json : true
-            };
-            const  res = await doRequest(options);
-            
-            return res;
-        }
-    
-        async function mainSearch(access_token,search_term) {
-            var method = 'foods.search';
-            var search = search_term;
-            var format = 'json';
-            var max_results = 5;
-            const url = 'https://platform.fatsecret.com/rest/server.api?method=' + method + '&search_expression=' + search + '&format=' + format + '&max_results=' + max_results;
-            
-            var options = {
-                method  : 'POST',
-                url     : url,
-                headers : { 
-                    'content-type'  : 'application/json',
-                    'Authorization' : `Bearer ${access_token}`
-                }
-            };
-            const  res = await doRequest(options);
-            
-            return res;
-        }
-    
-        async function mainGetFood(access_token,food_id) {
-            var method = 'food.get.v2';
-            var format = 'json';
-            const url = 'https://platform.fatsecret.com/rest/server.api?method=' + method + '&food_id=' + food_id + '&format=' + format;
-            
-            var options = {
-                method  : 'POST',
-                url     : url,
-                headers : { 
-                    'content-type'  : 'application/json',
-                    'Authorization' : `Bearer ${access_token}`
-                }
-            };
-            const  res = await doRequest(options);
-            
-            return res;
-        }
-    
-        async function getUnitData(servings,serving_unit){
-            var unit_found = {
-                "calories"            : "0",
-                "serving_description" : 'Item not found!',
-                "number_of_units"     : "1",
-            };
-            var default_serve = {
-                "calories"            : "0",
-                "serving_description" : 'Item not found!',
-                "number_of_units"     : "1",
-            };
-            for (var unit of servings){
-                
-                if (unit['measurement_description'].match(serving_unit)){
-                    unit_found =  unit;
-                    break;
-                } else if (unit['measurement_description'].match('serving')) {
-                    default_serve = unit;
-                    break;
-                } else {
-                    continue;
-                }
+    async mainSearch(access_token,search_term) {
+        var method = 'foods.search';
+        var search = search_term;
+        var format = 'json';
+        var max_results = 5;
+        const url = 'https://platform.fatsecret.com/rest/server.api?method=' + method + '&search_expression=' + search + '&format=' + format + '&max_results=' + max_results;
+        
+        var options = {
+            method  : 'POST',
+            url     : url,
+            headers : { 
+                'content-type'  : 'application/json',
+                'Authorization' : `Bearer ${access_token}`
             }
-            if (unit_found){
-                return unit_found;
-            } else if (default_serve) {
-                return default_serve;
+        };
+        const  res = await this.doRequest(options);
+        
+        return res;
+    }
+
+    async mainGetFood(access_token,food_id) {
+        var method = 'food.get.v2';
+        var format = 'json';
+        const url = 'https://platform.fatsecret.com/rest/server.api?method=' + method + '&food_id=' + food_id + '&format=' + format;
+        
+        var options = {
+            method  : 'POST',
+            url     : url,
+            headers : { 
+                'content-type'  : 'application/json',
+                'Authorization' : `Bearer ${access_token}`
+            }
+        };
+        const  res = await this.doRequest(options);
+        
+        return res;
+    }
+
+    async getUnitData(servings,serving_unit){
+        var unit_found = {
+            "calories"            : "0",
+            "serving_description" : 'Item not found!',
+            "number_of_units"     : "1",
+        };
+        var default_serve = {
+            "calories"            : "0",
+            "serving_description" : 'Item not found!',
+            "number_of_units"     : "1",
+        };
+        for (var unit of servings){
+            
+            if (unit['measurement_description'].match(serving_unit)){
+                unit_found =  unit;
+                break;
+            } else if (unit['measurement_description'].match('serving')) {
+                default_serve = unit;
+                break;
             } else {
-                return unit_found;
+                continue;
             }
         }
-
-        async function saveToDB(table_id,name,food_name,calories,value,serving_data) {
-            const calorieDB = {
-                message_id : table_id,
-                food_name  : name,
-                fs_db_name : food_name,
-                calories   : parseInt(calories),
-                value      : value,
-                meta_data  : JSON.stringify(serving_data),
-            };
-            const calorie_database = new CalorieDatabase(calorieDB);
-            await calorie_database.save();
+        if (unit_found){
+            return unit_found;
+        } else if (default_serve) {
+            return default_serve;
+        } else {
+            return unit_found;
         }
-    } 
+    }
+
+    async saveToDB(table_id,name,food_name,calories,value,serving_data) {
+        const calorieDB = {
+            message_id : table_id,
+            food_name  : name,
+            fs_db_name : food_name,
+            calories   : parseInt(calories),
+            value      : value,
+            meta_data  : JSON.stringify(serving_data),
+        };
+        // eslint-disable-next-line max-len
+        const calorieDatabaseRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(CalorieDatabase);
+        await calorieDatabaseRepository.create(calorieDB);
+    }
+
+    async main() {
+    
+        const clientID = this.clientEnvironment.getClientEnvironmentVariable("FS_CLIENT_ID");
+        const clientSecret = this.clientEnvironment.getClientEnvironmentVariable("FS_CLIENT_SECRET");
+
+        var options = {
+            method : 'POST',
+            url    : 'https://oauth.fatsecret.com/connect/token',
+            auth   : {
+                user     : clientID,
+                password : clientSecret
+            },
+            headers : { 'content-type': 'application/json'},
+            form    : {
+                'grant_type' : 'client_credentials',
+                'scope'      : 'basic'
+            },
+            json : true
+        };
+        const  res = await this.doRequest(options);
+        
+        return res;
+    }
+
+    async doRequest(url) {
+        return new Promise(function (resolve, reject) {
+            requestCalorie(url, function (error, res, body) {
+                if (!error && res.statusCode == 200) {
+                    const data = {
+                        'body' : body 
+                    };
+                    resolve(data);
+                } else {
+                    reject(error);
+                }
+            });
+        });
+    }
 }

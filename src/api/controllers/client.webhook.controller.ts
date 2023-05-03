@@ -107,27 +107,28 @@ export class ClientWebhookController {
             this._clientAuthenticatorService.authenticate(req,res);
             const statuses = req.body.entry[0].changes[0].value.statuses;
             if (statuses) {
+                
                 const date = new Date(parseInt(statuses[0].timestamp) * 1000);
                 if (statuses[0].status === "sent") {
+
                     await chatMessageRepository.update({ whatsappResponseStatusSentTimestamp: date },{ where: { whatsappResponseMessageId: statuses[0].id } })
                         .then(() => { console.log("Sent timestamp entered in database"); });
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', "");
                 }
                 else if (statuses[0].status === "delivered") {
+
                     await chatMessageRepository.update({ whatsappResponseStatusDeliveredTimestamp: date },{ where: { whatsappResponseMessageId: statuses[0].id } })
                         .then(() => { console.log("Delivered timestamp of entered in database"); });
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message delivered successfully!', "");
                 }
-                else if (statuses[0].status === "read") { 
+                else if (statuses[0].status === "read") {
+
                     await chatMessageRepository.update({ whatsappResponseStatusReadTimestamp: date },{ where: { whatsappResponseMessageId: statuses[0].id } })
                         .then(() => { console.log("Read timestamp of entered in database"); });
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message read successfully!', "");
                 }
                 else {
                     this.responseHandler.sendSuccessResponse(res, 200, 'Notification received successfully!', "");
-
-                //deal accordingly
-                // console.log("Check status", statuses[0].status);
                 }
             }
             else {
