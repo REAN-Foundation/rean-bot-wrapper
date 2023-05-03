@@ -12,7 +12,10 @@ export  class EntityManagerProvider{
     }
 
     getEntityManager = async () => {
-        const sequelize =  await this.sequelizeClient.getSequelizeClient(this.clientEnvironmentPrviderService);
+        const clientName = this.clientEnvironmentPrviderService.getClientEnvironmentVariable("NAME");
+        console.log("DB client name: "+ clientName + " schema is: " + this.clientEnvironmentPrviderService.getClientEnvironmentVariable("DATA_BASE_NAME"));
+        // eslint-disable-next-line max-len
+        const sequelize =  await this.sequelizeClient.getSequelizeClient(this.clientEnvironmentPrviderService,clientName);
         return sequelize;
     };
 
