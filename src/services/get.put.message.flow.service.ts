@@ -261,7 +261,7 @@ export class MessageFlow{
             intent         : intent
         };
         const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
-        await chatMessageRepository.create(dfResponseObj);
+        await (await chatMessageRepository.create(dfResponseObj)).save();
     };
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
