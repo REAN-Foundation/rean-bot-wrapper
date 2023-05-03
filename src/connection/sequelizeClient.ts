@@ -49,6 +49,7 @@ export class SequelizeClient {
 
     getSequelizeClient = async(getClientEnvironmentVariable: ClientEnvironmentProviderService):Promise<Sequelize> => {
         const clientName = getClientEnvironmentVariable.getClientEnvironmentVariable("NAME");
+        console.log("DB client name: "+ clientName + " schema is: " + getClientEnvironmentVariable.getClientEnvironmentVariable("DATA_BASE_NAME"));
         if (sequrlizeClients[clientName]) {
             return sequrlizeClients[clientName];
         }

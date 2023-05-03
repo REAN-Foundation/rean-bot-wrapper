@@ -50,6 +50,7 @@ export class ClientWebhookController {
             const status = req.body.statuses;
             if (status) {
                 const date = new Date(parseInt(status[0].timestamp) * 1000);
+                const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
                 if (status[0].status === "sent") {
                     await chatMessageRepository.update({ whatsappResponseStatusSentTimestamp: date },{ where: { whatsappResponseMessageId: status[0].id } });
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message is sent successfully!', "");
@@ -103,11 +104,12 @@ export class ClientWebhookController {
     receiveMessageMetaWhatsapp = async (req, res) => {
         try {
             const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+            console.log(chatMessageRepository.findOne({ where:{ id: 1 } }));
             this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
             this._clientAuthenticatorService.authenticate(req,res);
             const statuses = req.body.entry[0].changes[0].value.statuses;
             if (statuses) {
-                
+                const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
                 const date = new Date(parseInt(statuses[0].timestamp) * 1000);
                 if (statuses[0].status === "sent") {
 
