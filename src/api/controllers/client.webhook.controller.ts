@@ -104,7 +104,7 @@ export class ClientWebhookController {
     receiveMessageMetaWhatsapp = async (req, res) => {
         try {
             const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
-            console.log(chatMessageRepository.findOne({ where:{ id: 1 } }));
+            console.log(await chatMessageRepository.findOne({ where:{ id: 1 } }));
             this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
             this._clientAuthenticatorService.authenticate(req,res);
             const statuses = req.body.entry[0].changes[0].value.statuses;
