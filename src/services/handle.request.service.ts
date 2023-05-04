@@ -7,6 +7,7 @@ import { inject, Lifecycle, scoped } from 'tsyringe';
 import { Imessage } from '../refactor/interface/message.interface';
 import { ChatSession } from '../models/chat.session';
 import { EntityManagerProvider } from './entity.manager.provider.service';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class handleRequestservice{
@@ -15,7 +16,8 @@ export class handleRequestservice{
     constructor(
         @inject(DialogflowResponseService) private DialogflowResponseService?: DialogflowResponseService,
         @inject(translateService) private translateService?: translateService,
-        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider) {
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService) {
     }
 
     async handleUserRequest (message: Imessage, channel: string) {
@@ -47,7 +49,7 @@ export class handleRequestservice{
     }
 
     async processMessage(message_from_dialoglow, platformId){
-        const chatSessionRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatSession);
+        const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
         const languagefromdb = await chatSessionRepository.findAll({
             where : {
                 userPlatformID : platformId,

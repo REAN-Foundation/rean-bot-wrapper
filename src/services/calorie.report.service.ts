@@ -3,12 +3,15 @@ import dfff from '../libs/dialogflow-fulfillment';
 import { CalorieInfo } from "../models/calorie.info.model";
 import sequelize = require("sequelize");
 import { EntityManagerProvider } from "./entity.manager.provider.service";
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class GetCalorieReport {
 
     constructor(
-        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider) {}
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService) {}
 
     async getCalorieReport(req,res) {
         const userId = req.body.originalDetectIntentRequest.payload.userId;
@@ -172,7 +175,8 @@ export class GetCalorieReport {
     }
 
     async getDataForReport(from_date,to_date,sessionId){
-        const calorieInfoRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(CalorieInfo);
+        // eslint-disable-next-line max-len
+        const calorieInfoRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(CalorieInfo);
         const f_date = from_date.getFullYear() + '-' + (from_date.getMonth() + 1) + '-' + from_date.getDate();
         const t_date = to_date.getFullYear() + '-' + (to_date.getMonth() + 1) + '-' + to_date.getDate();
         const data = await calorieInfoRepository.findAll({
@@ -188,7 +192,8 @@ export class GetCalorieReport {
     }
 
     async getDailyDataForReport(sessionId){
-        const calorieInfoRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(CalorieInfo);
+        // eslint-disable-next-line max-len
+        const calorieInfoRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(CalorieInfo);
         const data = await calorieInfoRepository.findAll({
             attributes :[
                 [sequelize.fn('SUM', sequelize.col('user_calories')), 'total_calories'],

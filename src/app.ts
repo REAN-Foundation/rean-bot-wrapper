@@ -101,7 +101,7 @@ export default class Application {
         const whatsapp: platformServiceInterface = container.resolve('whatsapp');
         for (const clientName of this.clientsList) {
             clientEnvironmentProviderService.setClientName(clientName);
-            await sequelizeClient.getSequelizeClient(clientEnvironmentProviderService);
+            await sequelizeClient.getSequelizeClient(clientEnvironmentProviderService,clientName);
             if (clientName === "NSMI"){
                 telegram.setWebhook(clientName);
             } else if (clientName === "UNION"){

@@ -60,7 +60,8 @@ export class TelegramPostResponseFunctionalities {
     };
 
     updateResponseMessageId = async(responseId, userPlatformID) => {
-        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+        // eslint-disable-next-line max-len
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: userPlatformID } });
         const id = respChatMessage[respChatMessage.length - 1].id;
         await chatMessageRepository.update({ telegramResponseMessageId: responseId }, { where: { id: id } } )
