@@ -19,8 +19,9 @@ export class CalorieFeedback {
         try {
             var new_calorie_value = 0;
             const update_info = req.body.queryResult.parameters;
-            const calorieInfoRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(CalorieInfo);
-            const calorieDatabaseRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(CalorieDatabase);
+            const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const calorieInfoRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService,clientName)).getRepository(CalorieInfo);
+            const calorieDatabaseRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService,clientName)).getRepository(CalorieDatabase);
             const message_id = await calorieInfoRepository.findOne(
                 {
                     where : {

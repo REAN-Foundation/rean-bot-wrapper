@@ -46,7 +46,8 @@ export class ClientWebhookController {
     receiveMessage = async (req, res) => {
         console.log("receiveMessage webhook");
         try {
-            const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvProviderService)).getRepository(ChatMessage);
+            const clientName = this.clientEnvProviderService.getClientEnvironmentVariable("NAME");
+            const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvProviderService,clientName)).getRepository(ChatMessage);
             this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
             this._clientAuthenticatorService.authenticate(req,res);
             const status = req.body.statuses;
@@ -104,7 +105,8 @@ export class ClientWebhookController {
 
     receiveMessageMetaWhatsapp = async (req, res) => {
         try {
-            const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvProviderService)).getRepository(ChatMessage);
+            const clientName = this.clientEnvProviderService.getClientEnvironmentVariable("NAME");
+            const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvProviderService,clientName)).getRepository(ChatMessage);
             this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
             this._clientAuthenticatorService.authenticate(req,res);
             const statuses = req.body.entry[0].changes[0].value.statuses;

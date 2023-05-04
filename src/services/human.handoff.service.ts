@@ -37,7 +37,8 @@ export class HumanHandoff {
     async humanHandover(eventObj){
         return new Promise(async(resolve) =>{
             const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
-            const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(UserFeedback);
+            const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService,clientName)).getRepository(UserFeedback);
             const resp = await userFeedbackRepository.findAll({ where: { userId: userId } });
             const objID = resp[resp.length - 1].id;
             await userFeedbackRepository.update({ humanHandoff: "true" }, { where: { id: objID } } )
