@@ -8,13 +8,16 @@ import { AwsS3manager } from './aws.file.upload.service';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import { ChatSession } from '../models/chat.session';
 import { EntityManagerProvider } from './entity.manager.provider.service';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class GoogleTextToSpeech {
 
     constructor(
         @inject(AwsS3manager) private awsS3manager?: AwsS3manager,
-        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService)private clientEnvironmentProviderService?: ClientEnvironmentProviderService
     ) {}
 
     async texttoSpeech(text, id) {
@@ -37,7 +40,7 @@ export class GoogleTextToSpeech {
             };
             const client = new textToSpeech.TextToSpeechClient(gcp);
             // eslint-disable-next-line max-len
-            const chatSessionRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatSession);
+            const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
             const userLanguageTableResponse = await chatSessionRepository.findAll({ where: { userPlatformID: id } });
             const setUserLanguage = userLanguageTableResponse[userLanguageTableResponse.length - 1].preferredLanguage;
 

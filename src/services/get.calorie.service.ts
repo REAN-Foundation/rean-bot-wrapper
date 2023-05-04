@@ -55,7 +55,7 @@ export class GetCalories {
             };
 
             // eslint-disable-next-line max-len
-            const calorieInfoRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(CalorieInfo);
+            const calorieInfoRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironment)).getRepository(CalorieInfo);
             const calorie_user_saved = await calorieInfoRepository.create(calorieUser);
             const table_id = calorie_user_saved.autoIncrementalID;
 
@@ -296,7 +296,7 @@ export class GetCalories {
             meta_data  : JSON.stringify(serving_data),
         };
         // eslint-disable-next-line max-len
-        const calorieDatabaseRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(CalorieDatabase);
+        const calorieDatabaseRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironment)).getRepository(CalorieDatabase);
         await calorieDatabaseRepository.create(calorieDB);
     }
 
