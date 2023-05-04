@@ -175,8 +175,9 @@ export class GetCalorieReport {
     }
 
     async getDataForReport(from_date,to_date,sessionId){
+        const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
         // eslint-disable-next-line max-len
-        const calorieInfoRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(CalorieInfo);
+        const calorieInfoRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService,clientName)).getRepository(CalorieInfo);
         const f_date = from_date.getFullYear() + '-' + (from_date.getMonth() + 1) + '-' + from_date.getDate();
         const t_date = to_date.getFullYear() + '-' + (to_date.getMonth() + 1) + '-' + to_date.getDate();
         const data = await calorieInfoRepository.findAll({
@@ -192,8 +193,9 @@ export class GetCalorieReport {
     }
 
     async getDailyDataForReport(sessionId){
+        const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
         // eslint-disable-next-line max-len
-        const calorieInfoRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(CalorieInfo);
+        const calorieInfoRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService,clientName)).getRepository(CalorieInfo);
         const data = await calorieInfoRepository.findAll({
             attributes :[
                 [sequelize.fn('SUM', sequelize.col('user_calories')), 'total_calories'],

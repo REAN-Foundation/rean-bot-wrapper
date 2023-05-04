@@ -14,8 +14,9 @@ export class WhatsAppOptingOption{
 
     async whatsAppOptingOptions(body, intent) {
         const payload = body.originalDetectIntentRequest.payload;
+        const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
         // eslint-disable-next-line max-len
-        const contactListRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
+        const contactListRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService,clientName)).getRepository(ContactList);
         return new Promise(async(resolve) =>{
             if (intent === "OptOut"){
                 await contactListRepository.update({ optOut: "true" }, { where: { mobileNumber: payload.userId } })
