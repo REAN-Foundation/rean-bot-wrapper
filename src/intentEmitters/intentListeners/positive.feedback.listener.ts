@@ -7,12 +7,8 @@ export const PositiveFeedbackListener = async (intent, eventObj) => {
             .log('Positive Feedback received!!!!!');
         
         let response = null;
-        console.log("eventobj", eventObj.body.originalDetectIntentRequest.payload.source);
-        const channel = eventObj.body.originalDetectIntentRequest.payload.source;
-        const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
-        const feedbackService = new FeedbackService();
-        response = await feedbackService.PositiveFeedback(channel, userId);
-
+        const feedbackService = eventObj.container.resolve(FeedbackService);
+        response = await feedbackService.NegativeFeedback(eventObj);
         console.log('Inside listener: ', response);
 
         if (!response) {
