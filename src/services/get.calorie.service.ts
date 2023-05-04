@@ -53,9 +53,9 @@ export class GetCalories {
                 user_id      : payload.userId,
                 user_message : queryText,
             };
-
+            const clientName = this.clientEnvironment.getClientEnvironmentVariable("NAME");
             // eslint-disable-next-line max-len
-            const calorieInfoRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironment)).getRepository(CalorieInfo);
+            const calorieInfoRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironment,clientName)).getRepository(CalorieInfo);
             const calorie_user_saved = await calorieInfoRepository.create(calorieUser);
             const table_id = calorie_user_saved.autoIncrementalID;
 
@@ -295,8 +295,9 @@ export class GetCalories {
             value      : value,
             meta_data  : JSON.stringify(serving_data),
         };
+        const clientName = this.clientEnvironment.getClientEnvironmentVariable("NAME");
         // eslint-disable-next-line max-len
-        const calorieDatabaseRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironment)).getRepository(CalorieDatabase);
+        const calorieDatabaseRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironment,clientName)).getRepository(CalorieDatabase);
         await calorieDatabaseRepository.create(calorieDB);
     }
 

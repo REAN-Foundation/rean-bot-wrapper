@@ -50,6 +50,7 @@ export class SequelizeClient {
     // eslint-disable-next-line max-len
     getSequelizeClient = async(getClientEnvironmentVariable: ClientEnvironmentProviderService,clientName):Promise<Sequelize> => {
         if (sequrlizeClients[clientName]) {
+            console.log("returning existing client", clientName);
             return sequrlizeClients[clientName];
         }
         else {

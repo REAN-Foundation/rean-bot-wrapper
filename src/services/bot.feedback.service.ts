@@ -19,8 +19,9 @@ export class BotFeedback{
                 console.log("inside");
                 async function testSettimeout(userId){
                     const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
-                    const chatSessionRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatSession);
-                    const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+                    const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+                    const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatSession);
+                    const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
                     const respOfChatSession = await chatSessionRepository.findAll({ where: { userPlatformID: userId } });
                     const timeOfLastMessage = respOfChatSession[respOfChatSession.length - 1].lastMessageDate;
                     const askForFeedback = respOfChatSession[respOfChatSession.length - 1].askForFeedback;
@@ -112,7 +113,9 @@ export class BotFeedback{
                     }
                     
                 }
-                const chatSessionRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatSession);
+                const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
+                const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+                const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatSession);
                 const respOfChatSession = await chatSessionRepository.findAll();
 
                 // console.log("respOfChatSession!!!!!!!!!!!", respOfChatSession);

@@ -56,7 +56,7 @@ export class ClickUpTask{
 
         const response = await needle("post", createTaskUrl, obj, options);
         // eslint-disable-next-line max-len
-        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(UserFeedback);
+        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService,clientName)).getRepository(UserFeedback);
         if (responseUserFeedback[responseUserFeedback.length - 1]){
             const objID = responseUserFeedback[responseUserFeedback.length - 1].dataValues.id;
             await userFeedbackRepository.update({ taskID: response.body.id }, { where: { id: objID } })
