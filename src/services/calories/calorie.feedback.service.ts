@@ -5,20 +5,22 @@ import { CalorieInfo } from '../../models/calorie.info.model';
 import { Op } from 'sequelize';
 import { EntityManagerProvider } from "../entity.manager.provider.service";
 import { Lifecycle, inject, scoped } from 'tsyringe';
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class CalorieFeedback {
 
     constructor (
-        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
     ){}
     
     async updateCalories(req,sessionId){
         try {
             var new_calorie_value = 0;
             const update_info = req.body.queryResult.parameters;
-            const calorieInfoRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(CalorieInfo);
-            const calorieDatabaseRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(CalorieDatabase);
+            const calorieInfoRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(CalorieInfo);
+            const calorieDatabaseRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(CalorieDatabase);
             const message_id = await calorieInfoRepository.findOne(
                 {
                     where : {

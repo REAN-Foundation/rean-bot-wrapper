@@ -19,7 +19,8 @@ export class CustomWelcomeService {
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider){}
 
     async checkSession(userId:any){
-        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+        // eslint-disable-next-line max-len
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         const prevSessions = await chatMessageRepository.findAll({
             where : {
                 userPlatformID : userId,
