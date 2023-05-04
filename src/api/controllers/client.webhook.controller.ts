@@ -18,8 +18,7 @@ export class ClientWebhookController {
 
     constructor(
         @inject(ResponseHandler) private responseHandler?: ResponseHandler,
-        @inject(ErrorHandler) private errorHandler?: ErrorHandler,
-        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
+        @inject(ErrorHandler) private errorHandler?: ErrorHandler
     ) {
 
     }
@@ -47,7 +46,8 @@ export class ClientWebhookController {
         try {
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
             const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-            const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
+            const entityManagerProvider = req.container.resolve(EntityManagerProvider);
+            const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
             this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
             this._clientAuthenticatorService.authenticate(req,res);
             const status = req.body.statuses;
@@ -106,9 +106,10 @@ export class ClientWebhookController {
     receiveMessageMetaWhatsapp = async (req, res) => {
         try {
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
+            const entityManagerProvider = req.container.resolve(EntityManagerProvider);
             const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
             console.log("clientName in webhook", clientName);
-            const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
+            const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
             this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
             this._clientAuthenticatorService.authenticate(req,res);
             const statuses = req.body.entry[0].changes[0].value.statuses;
