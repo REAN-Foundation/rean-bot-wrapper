@@ -47,9 +47,12 @@ export class SequelizeClient {
         return sequelizeClient;
     };
 
-    getSequelizeClient = async(getClientEnvironmentVariable: ClientEnvironmentProviderService):Promise<Sequelize> => {
-        const clientName = getClientEnvironmentVariable.getClientEnvironmentVariable("NAME");
-        console.log("DB client name: "+ clientName + " schema is: " + getClientEnvironmentVariable.getClientEnvironmentVariable("DATA_BASE_NAME"));
+    // eslint-disable-next-line max-len
+    getSequelizeClient = async(getClientEnvironmentVariable: ClientEnvironmentProviderService,clientName):Promise<Sequelize> => {
+        
+        // const clientName = getClientEnvironmentVariable.getClientEnvironmentVariable("NAME");
+        // eslint-disable-next-line max-len
+        // console.log("!!!DB client name: "+ clientName + " schema is: " + getClientEnvironmentVariable.getClientEnvironmentVariable("DATA_BASE_NAME"));
         if (sequrlizeClients[clientName]) {
             return sequrlizeClients[clientName];
         }
