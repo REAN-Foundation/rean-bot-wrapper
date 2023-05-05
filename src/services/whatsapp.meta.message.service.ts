@@ -89,8 +89,7 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
 
                 //improve this DB query
                 if (needleResp.statusCode === 200) {
-                    const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-                    const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
+                    const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
                     const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.sessionId } });
                     const id = respChatMessage[respChatMessage.length - 1].id;
                     await chatMessageRepository.update({ whatsappResponseMessageId: needleResp.body.messages[0].id }, { where: { id: id } } )
