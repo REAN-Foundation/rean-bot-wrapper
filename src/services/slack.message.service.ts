@@ -51,9 +51,8 @@ export class SlackMessageService implements platformServiceInterface {
             // find the parent message(user) and inform the user about reply
             else {
                 console.log("child message");
-                const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
                 // eslint-disable-next-line max-len
-                const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService,clientName)).getRepository(UserFeedback);
+                const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(UserFeedback);
                 const data = await userFeedbackRepository.findOne({ where: { ts: message.event.thread_ts } });
                 const contact = data.userId;
                 const humanHandoff = data.humanHandoff;
@@ -108,9 +107,8 @@ export class SlackMessageService implements platformServiceInterface {
         const topic = response[response.length - 1].dataValues.messageContent;
         this.delayedInitialisation();
         const message = await this.client.chat.postMessage({ channel: this.channelID, text: topic });
-        const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
         // eslint-disable-next-line max-len
-        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService,clientName)).getRepository(UserFeedback);
+        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(UserFeedback);
         await userFeedbackRepository.update({ ts: message.ts }, { where: { id: objID } })
             .then(() => { console.log("updated"); })
             .catch(error => console.log("error on update", error));

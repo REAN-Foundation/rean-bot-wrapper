@@ -41,9 +41,8 @@ export class ChangeLanguage{
                 const newLanguageCode = await this.languageCode(newLanguage,listOfLanguages);
                 
                 //stop the old session
-                const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
                 // eslint-disable-next-line max-len
-                const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService,clientName)).getRepository(ChatSession);
+                const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
                 await chatSessionRepository.update({ preferredLanguage: newLanguageCode }, {
                     where : {
                         userPlatformID : userId

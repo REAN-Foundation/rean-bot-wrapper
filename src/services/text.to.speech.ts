@@ -39,9 +39,8 @@ export class GoogleTextToSpeech {
                 projectId   : GCPCredentials.project_id
             };
             const client = new textToSpeech.TextToSpeechClient(gcp);
-            const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
             // eslint-disable-next-line max-len
-            const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService,clientName)).getRepository(ChatSession);
+            const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
             const userLanguageTableResponse = await chatSessionRepository.findAll({ where: { userPlatformID: id } });
             const setUserLanguage = userLanguageTableResponse[userLanguageTableResponse.length - 1].preferredLanguage;
 
