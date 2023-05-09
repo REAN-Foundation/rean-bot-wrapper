@@ -49,8 +49,7 @@ export class handleRequestservice{
     }
 
     async processMessage(message_from_dialoglow, platformId){
-        const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-        const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService,clientName)).getRepository(ChatSession);
+        const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
         const languagefromdb = await chatSessionRepository.findAll({
             where : {
                 userPlatformID : platformId,

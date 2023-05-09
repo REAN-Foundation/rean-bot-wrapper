@@ -19,9 +19,8 @@ export class BotFeedback{
                 console.log("inside");
                 async function testSettimeout(userId){
                     const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
-                    const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-                    const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatSession);
-                    const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
+                    const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(ChatSession);
+                    const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(ChatMessage);
                     const respOfChatSession = await chatSessionRepository.findAll({ where: { userPlatformID: userId } });
                     const timeOfLastMessage = respOfChatSession[respOfChatSession.length - 1].lastMessageDate;
                     const askForFeedback = respOfChatSession[respOfChatSession.length - 1].askForFeedback;
@@ -114,8 +113,7 @@ export class BotFeedback{
                     
                 }
                 const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
-                const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-                const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatSession);
+                const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(ChatSession);
                 const respOfChatSession = await chatSessionRepository.findAll();
 
                 // console.log("respOfChatSession!!!!!!!!!!!", respOfChatSession);

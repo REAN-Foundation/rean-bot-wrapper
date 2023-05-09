@@ -18,8 +18,7 @@ export class UserLanguage {
     ){}
 
     async setLanguageForSession(messageType, sessionId, message) {
-        const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-        const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService,clientName)).getRepository(ChatSession);
+        const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
         const respChatSession = await chatSessionRepository.findAll({ where: { userPlatformID: sessionId } });
         const autoIncrementalID = respChatSession[respChatSession.length - 1].autoIncrementalID;
         const preferredLanguage = await this.getPreferredLanguageofSession(sessionId);
@@ -70,8 +69,7 @@ export class UserLanguage {
 
     async getPreferredLanguageofSession(sessionId){
         return new Promise<string>(async(resolve) => {
-            const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-            const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService,clientName)).getRepository(ChatSession);
+            const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
             const userLanguageTableResponse = await chatSessionRepository.findAll({ where: { userPlatformID: sessionId } });
             //console.log("userLanguageTableResponse",userLanguageTableResponse);
             try {

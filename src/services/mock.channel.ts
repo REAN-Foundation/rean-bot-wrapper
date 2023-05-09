@@ -114,8 +114,7 @@ export class MockMessageService implements platformServiceInterface {
     }
 
     SendMediaMessage = async (response_format:Iresponse, payload: any) => {
-        const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.sessionId } });
         const lastMessageDate = respChatMessage[respChatMessage.length - 1].createdAt;
         const obj = { timeStamp: lastMessageDate, message: response_format.messageText };

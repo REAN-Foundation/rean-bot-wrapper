@@ -106,9 +106,8 @@ export class kerotoplastyService {
         const priority = set_priority[intent];
         const user_details = await this.getEMRDetails(parameters.medicalRecordNumber, eventObj);
         const topic =  parameters.medicalRecordNumber;
-        const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
         // eslint-disable-next-line max-len
-        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService,clientName)).getRepository(UserFeedback);
+        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(UserFeedback);
         const responseUserFeedback = await userFeedbackRepository.findAll({ where: { userId: payload.userId } });
         if (responseUserFeedback[responseUserFeedback.length - 1]){
             const object = responseUserFeedback[responseUserFeedback.length - 1];
