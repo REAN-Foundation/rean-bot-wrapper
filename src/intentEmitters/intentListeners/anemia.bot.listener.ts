@@ -33,10 +33,10 @@ export const AnemiaBotListener = async (intent, eventObj) => {
         }
         else {
             messageToPlatform = await callAnemiaModel.callAnemiaModel(eventObj.body.queryResult.queryText);
-            if (eventObj.body.originalDetectIntentRequest.payload.completeMessage.platform === "Telegram") {
+            if (eventObj.body.originalDetectIntentRequest.payload.source === "Telegram") {
                 sendMessageToTelegram(messageToPlatform,eventObj);
             }
-            else if (eventObj.body.originalDetectIntentRequest.payload.completeMessage.platform === "Whatsapp") {
+            else if (eventObj.body.originalDetectIntentRequest.payload.source === "whatsapp") {
                 sendMessageToWhatsapp(messageToPlatform,eventObj);
             }
             else {
