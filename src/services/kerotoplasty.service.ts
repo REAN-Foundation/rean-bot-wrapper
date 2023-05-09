@@ -48,11 +48,11 @@ export class kerotoplastyService {
         const locationData = await this.getLocation.getLoctionData(eventObj,intent);
         let message = null;
         console.log("our location data is ",locationData);
-        const postalAddresses = Array.from(locationData).map(obj => obj["Postal Addres"])
-        const address_1 = postalAddresses[0].replace(/\n/g, ', ')
-        const address_2 = postalAddresses[1].replace(/\n/g, ', ')
-        const address_3 = postalAddresses[2].replace(/\n/g, ', ')
-        const address_4 = postalAddresses[3].replace(/\n/g, ', ')
+        const postalAddresses = Array.from(locationData).map(obj => obj["Postal Addres"]);
+        const address_1 = postalAddresses[0].replace(/\n/g, ', ');
+        const address_2 = postalAddresses[1].replace(/\n/g, ', ');
+        const address_3 = postalAddresses[2].replace(/\n/g, ', ');
+        const address_4 = postalAddresses[3].replace(/\n/g, ', ');
         switch (intent) {
         case 'hyperCriticalCondition': {
             message = `Your situation seems hyper-critical.\n Please Visit the nearest care center as soon as possible.\n Your Possible nearest centers are: \n 1. ${address_1}  \n 2. ${address_2} \n 3. ${address_3} \n 4. ${address_4}`;
@@ -70,7 +70,6 @@ export class kerotoplastyService {
         } 
         
         const responseToSend = this.DialogflowServices.making_response(message);
-        console.log(message)
         console.log("Our location data is being sent!!!!");
         return message;
 
