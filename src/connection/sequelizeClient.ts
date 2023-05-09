@@ -47,14 +47,17 @@ export class SequelizeClient {
         return sequelizeClient;
     };
 
-    getSequelizeClient = async(getClientEnvironmentVariable: ClientEnvironmentProviderService):Promise<Sequelize> => {
-        const clientName = getClientEnvironmentVariable.getClientEnvironmentVariable("NAME");
+    // eslint-disable-next-line max-len
+    getSequelizeClient = async(clientEnvironmentVariable: ClientEnvironmentProviderService):Promise<Sequelize> => {
+        const clientName = clientEnvironmentVariable.getClientEnvironmentVariable("NAME");
+        console.log("DB client name: " + clientName);
         if (sequrlizeClients[clientName]) {
+            console.log("returning existing client", clientName);
             return sequrlizeClients[clientName];
         }
         else {
             console.log("New Client Connected", clientName);
-            sequrlizeClients[clientName] = await this.connect(getClientEnvironmentVariable);
+            sequrlizeClients[clientName] = await this.connect(clientEnvironmentVariable);
             return sequrlizeClients[clientName];
         }
     };

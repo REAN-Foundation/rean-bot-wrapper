@@ -31,6 +31,7 @@ export class ClickUpTask{
         let topic:any = null;
         if (postTopic){
             topic = postTopic;
+            
         }
         else {
             topic = rdsData[rdsData.length - 1].dataValues.messageContent;
@@ -55,8 +56,8 @@ export class ClickUpTask{
 
         const response = await needle("post", createTaskUrl, obj, options);
         // eslint-disable-next-line max-len
-        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
-        if (responseUserFeedback){
+        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(UserFeedback);
+        if (responseUserFeedback[responseUserFeedback.length - 1]){
             const objID = responseUserFeedback[responseUserFeedback.length - 1].dataValues.id;
             await userFeedbackRepository.update({ taskID: response.body.id }, { where: { id: objID } })
                 .then(() => { console.log("updated"); })

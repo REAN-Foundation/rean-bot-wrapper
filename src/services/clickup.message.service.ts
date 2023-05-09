@@ -7,13 +7,15 @@ import { UserFeedback } from '../models/user.feedback.model';
 import { scoped, Lifecycle, inject } from 'tsyringe';
 import { SlackClickupCommonFunctions } from './slackAndCkickupSendCustomMessage';
 import { EntityManagerProvider } from './entity.manager.provider.service';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ClickUpMessageService implements platformServiceInterface {
 
     constructor(
         @inject(SlackClickupCommonFunctions) private slackClickupCommonFunctions?: SlackClickupCommonFunctions,
-        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
     ){}
 
     public res;
@@ -43,7 +45,7 @@ export class ClickUpMessageService implements platformServiceInterface {
     SendMediaMessage = async (response_format:Iresponse, payload: any) => {
 
         //call a function that creates csv
-        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.sessionId } });
         const lastMessageDate = respChatMessage[respChatMessage.length - 1].createdAt;
         const obj = { timeStamp: lastMessageDate, message: response_format.messageText };
@@ -89,21 +91,28 @@ export class ClickUpMessageService implements platformServiceInterface {
     }
 
     async eventComment(requestBody,tag) {
-        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
+        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(UserFeedback);
         const data = await userFeedbackRepository.findOne({ where: { taskID: requestBody.task_id } });
         console.log("data", data);
         const filterText = (requestBody.history_items[0].comment.text_content).replace(tag, '');
-        const textToUser = `Our Experts have responded to your query. \nYour Query: ${data.messageContent} \nExpert: ${filterText}`;
+        let textToUser = `Our experts have responded to your query. \nYour Query: ${data.messageContent} \nExpert: ${filterText}`;
+        if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_RESPONSE_MESSAGE")){
+            const message_from_secret = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_RESPONSE_MESSAGE");
+            textToUser = message_from_secret + `\n ${filterText}`;
+        }
         console.log("textToUser", textToUser);
         await this.slackClickupCommonFunctions.sendCustomMessage(data.channel, data.userId, textToUser);
     }
 
     async eventStatusUpdated(requestBody) {
         const contactMail = "example@gmail.com";
-        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
+        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(UserFeedback);
         const data = await userFeedbackRepository.findOne({ where: { taskID: requestBody.task_id } });
         console.log("data", data);
-        const textToUser = `As our expert have provided their insight, we are closing the ticket. If you are still usatisfied with the answer provided, contact us at ${contactMail}`;
+        let textToUser = `As our expert have provided their insight, we are closing the ticket. If you are still unsatisfied with the answer provided, contact us at ${contactMail}`;
+        if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_TICKET_CLOSE_RESPONSE_MESSAGE")){
+            textToUser = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_TICKET_CLOSE_RESPONSE_MESSAGE");
+        }
         console.log("textToUser", textToUser);
         await this.slackClickupCommonFunctions.sendCustomMessage(data.channel, data.userId, textToUser);
     }

@@ -1,16 +1,13 @@
 import { RegisterAllProfileService } from "../../../services/bloodWrrior/register.all.profile.service";
 
-const registerAllProfileService: RegisterAllProfileService = new RegisterAllProfileService();
-
 export const RegisterAllProfileListener = async (intent, eventObj) => {
     try {
+        // eslint-disable-next-line max-len
+        const registerAllProfileService: RegisterAllProfileService = eventObj.container.resolve(RegisterAllProfileService);
         let result = null;
         result = await registerAllProfileService.sendUserMessage(eventObj);
         console.log(result);
-        return Promise.resolve(result.message)
-            .then(async (eventObj) => {
-                await registerAllProfileService.sendUserMessageAfter(eventObj);
-            });
+        return result.message;
 
     } catch (error) {
         console.log(error);

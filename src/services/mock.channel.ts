@@ -11,8 +11,8 @@ import { ChatMessage } from '../models/chat.message.model';
 import { WhatsappMessageToDialogflow } from './whatsapp.messagetodialogflow';
 import request from 'request';
 import { EntityManagerProvider } from './entity.manager.provider.service';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 
-// @autoInjectable()
 @scoped(Lifecycle.ContainerScoped)
 export class MockMessageService implements platformServiceInterface {
 
@@ -22,7 +22,8 @@ export class MockMessageService implements platformServiceInterface {
         @inject( AwsS3manager ) private awsS3manager?: AwsS3manager,
         @inject(MockCHannelMessageFunctionalities) private messageFunctionalitiesmockchannel?: MockCHannelMessageFunctionalities,
         @inject(WhatsappMessageToDialogflow) public whatsappMessageToDialogflow?: WhatsappMessageToDialogflow,
-        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider){}
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
     async handleMessage(requestBody: any, channel: string) {
 
@@ -113,7 +114,7 @@ export class MockMessageService implements platformServiceInterface {
     }
 
     SendMediaMessage = async (response_format:Iresponse, payload: any) => {
-        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.sessionId } });
         const lastMessageDate = respChatMessage[respChatMessage.length - 1].createdAt;
         const obj = { timeStamp: lastMessageDate, message: response_format.messageText };

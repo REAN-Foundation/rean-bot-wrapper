@@ -26,6 +26,7 @@ export class ScheduleDonationService {
                 if (lastDonationDate) {
                     lastDonationDate = new Date(lastDonationDate.split("T")[0]).toDateString();
                 }
+                this.updateVolunteerWithSelectedPhone(eventObj);
                 dffMessage = `Donor Found: \n  Donor Name: ${donor.DisplayName}, \n  Donor Blood Group: ${donor.BloodGroup}, \n  Last Donation Date: ${lastDonationDate}
                     \nClick "Yes" to proceed`;
                 payloadButtons = await whatsappMetaButtonService("Yes","Schedule_Donation_Elligibity","No! Re-enter details","Schedule_Donation");
@@ -42,10 +43,10 @@ export class ScheduleDonationService {
         }
     }
 
-    async ScheduleDonationEligibity (eventObj) {
+    async updateVolunteerWithSelectedPhone (eventObj) {
         try {
             const phoneNumber = eventObj.body.queryResult.parameters.phoneNumber;
-
+            
             //update phone number in volunteer profile
             const volunteer = await this.bloodWarriorCommonService.getVolunteerByPhoneNumber(eventObj);
             const apiURL = `volunteers/${volunteer.UserId}`;

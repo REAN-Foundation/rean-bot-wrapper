@@ -6,7 +6,6 @@ import { RekognitionService } from '../../services/anemia-aws-rekognition-model'
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
 import { container } from 'tsyringe';
 
-
 export const AnemiaBotListener = async (intent, eventObj) => {
     const callAnemiaModel: CallAnemiaModel = eventObj.container.resolve(CallAnemiaModel);
     const rekognitionService: RekognitionService = eventObj.container.resolve(RekognitionService);
@@ -34,11 +33,14 @@ export const AnemiaBotListener = async (intent, eventObj) => {
         }
         else {
             messageToPlatform = await callAnemiaModel.callAnemiaModel(eventObj.body.queryResult.queryText);
-            if (eventObj.body.originalDetectIntentRequest.payload.completeMessage.platform !== "Telegram") {
+            if (eventObj.body.originalDetectIntentRequest.payload.source === "Telegram") {
+                sendMessageToTelegram(messageToPlatform,eventObj);
+            }
+            else if (eventObj.body.originalDetectIntentRequest.payload.source === "whatsapp") {
                 sendMessageToWhatsapp(messageToPlatform,eventObj);
             }
             else {
-                sendMessageToTelegram(messageToPlatform,eventObj);
+                sendMessageToWhatsappMeta(messageToPlatform,eventObj);
             }
         }
 
@@ -49,7 +51,7 @@ export const AnemiaBotListener = async (intent, eventObj) => {
 
 };
 
-const sendMessageToWhatsapp = async(messageToPlatform,eventObj) => {
+const sendMessageToWhatsappMeta = async(messageToPlatform,eventObj) => {
     const needleService: NeedleService = eventObj.container.resolve(NeedleService);
     const endPoint = 'messages';
     const postData = {
@@ -61,7 +63,7 @@ const sendMessageToWhatsapp = async(messageToPlatform,eventObj) => {
             "body" : messageToPlatform
         }
     };
-    await needleService.needleRequestForWhatsapp("post", endPoint, JSON.stringify(postData));
+    await needleService.needleRequestForWhatsappMeta("post", endPoint, JSON.stringify(postData));
 };
 
 const sendMessageToTelegram = async(messageToPlatform,eventObj) => {
@@ -72,4 +74,19 @@ const sendMessageToTelegram = async(messageToPlatform,eventObj) => {
     };
     const endPoint = `sendMessage`;
     await needleService.needleRequestForTelegram("post",endPoint,postData);
+};
+
+const sendMessageToWhatsapp = async(messageToPlatform,eventObj) => {
+    const needleService: NeedleService = eventObj.container.resolve(NeedleService);
+    const endPoint = '/v1/messages';
+    const postdata = {
+        "messaging_product" : "whatsapp",
+        "recipient_type"    : "individual",
+        "to"                : eventObj.body.originalDetectIntentRequest.payload.userId,
+        "type"              : "text",
+        "text"              : {
+            "body" : messageToPlatform
+        }
+    };
+    await needleService.needleRequestForWhatsapp("post", endPoint, JSON.stringify(postdata));
 };

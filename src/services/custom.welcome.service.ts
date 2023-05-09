@@ -10,15 +10,17 @@ import { EntityManagerProvider } from "./entity.manager.provider.service";
 export class CustomWelcomeService {
 
     public res;
+    
+    private _platformMessageService :  platformServiceInterface = null;
 
     constructor(
         // eslint-disable-next-line max-len
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
-        private _platformMessageService?: platformServiceInterface,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider){}
 
     async checkSession(userId:any){
-        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+        // eslint-disable-next-line max-len
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         const prevSessions = await chatMessageRepository.findAll({
             where : {
                 userPlatformID : userId,

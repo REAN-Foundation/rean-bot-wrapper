@@ -1,12 +1,10 @@
 import { GetPatientInfoService } from "../../services/support.app.service";
-import { container } from 'tsyringe';
-const getPatientInfoService: GetPatientInfoService = container.resolve(GetPatientInfoService);
 
 export class AppMedicationListener {
 
     public static handleIntent = async (_intent, eventObj) => {
         try {
-
+            const getPatientInfoService: GetPatientInfoService = eventObj.container.resolve(GetPatientInfoService);
             const response = await getPatientInfoService.addMedicationInfoservice(eventObj);
 
             if (!response) {
