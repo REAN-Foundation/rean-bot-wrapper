@@ -1,18 +1,21 @@
 import { ContactList } from "../models/contact.list";
 import { EntityManagerProvider } from "./entity.manager.provider.service";
 import { scoped, Lifecycle, inject } from "tsyringe";
+import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 
 @scoped(Lifecycle.ContainerScoped)
 export class WhatsAppOptingOption{
 
     constructor(
-        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider) {
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService) {
     }
 
     async whatsAppOptingOptions(body, intent) {
         const payload = body.originalDetectIntentRequest.payload;
         // eslint-disable-next-line max-len
-        const contactListRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ContactList);
+        const contactListRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
         return new Promise(async(resolve) =>{
             if (intent === "OptOut"){
                 await contactListRepository.update({ optOut: "true" }, { where: { mobileNumber: payload.userId } })

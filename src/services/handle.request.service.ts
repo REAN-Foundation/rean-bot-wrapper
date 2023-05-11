@@ -61,7 +61,7 @@ export class handleRequestservice{
     }
 
     async processMessage(message_from_nlp, platformId){
-        const chatSessionRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatSession);
+        const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
         const languagefromdb = await chatSessionRepository.findAll({
             where : {
                 userPlatformID : platformId,

@@ -13,7 +13,8 @@ export class CallAnemiaModel {
     @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider) { }
 
     async callAnemiaModel(imagePathFromDF) {
-        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+        // eslint-disable-next-line max-len
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         const respChatMessage = await chatMessageRepository.findAll({ where: { "messageContent": imagePathFromDF, "direction": "In" } });
         const anemiaModelUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("ANEMIA_MODEL_URL");
         const REQUEST_AUTHENTICATION = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REQUEST_AUTHENTICATION");
