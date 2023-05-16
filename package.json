@@ -53,6 +53,7 @@
     "get-json": "^1.0.1",
     "googleapis": "^71.0.0",
     "helmet": "^4.6.0",
+    "html-pdf": "^3.0.1",
     "https": "^1.0.0",
     "json-bigint": "^1.0.0",
     "jsonwebtoken": "^8.5.1",
