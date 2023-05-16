@@ -78,7 +78,7 @@
     "stream-json": "^1.7.2",
     "tough-cookie": "^2.3.0",
     "tsyringe": "^4.5.0",
-    "twilio": "^3.67.2",
+    "twilio": "^3.84.1",
     "uuid": "^8.3.2",
     "uuid-apikey": "^1.5.3",
     "xlsx": "^0.18.5"
