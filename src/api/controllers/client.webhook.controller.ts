@@ -7,6 +7,7 @@ import { clientAuthenticator } from '../../services/clientAuthenticator/client.a
 import util from 'util';
 import { ChatMessage } from '../../models/chat.message.model';
 import { EntityManagerProvider } from '../../services/entity.manager.provider.service';
+import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ClientWebhookController {
@@ -17,8 +18,7 @@ export class ClientWebhookController {
 
     constructor(
         @inject(ResponseHandler) private responseHandler?: ResponseHandler,
-        @inject(ErrorHandler) private errorHandler?: ErrorHandler,
-        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider
+        @inject(ErrorHandler) private errorHandler?: ErrorHandler
     ) {
 
     }
@@ -44,7 +44,10 @@ export class ClientWebhookController {
     receiveMessage = async (req, res) => {
         console.log("receiveMessage webhook");
         try {
-            const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+            const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
+            const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const entityManagerProvider = req.container.resolve(EntityManagerProvider);
+            const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
             this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
             this._clientAuthenticatorService.authenticate(req,res);
             const status = req.body.statuses;
@@ -102,32 +105,36 @@ export class ClientWebhookController {
 
     receiveMessageMetaWhatsapp = async (req, res) => {
         try {
-            const chatMessageRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatMessage);
+            const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
+            const entityManagerProvider = req.container.resolve(EntityManagerProvider);
+            const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            console.log("clientName in webhook", clientName);
+            const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
             this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
             this._clientAuthenticatorService.authenticate(req,res);
             const statuses = req.body.entry[0].changes[0].value.statuses;
             if (statuses) {
                 const date = new Date(parseInt(statuses[0].timestamp) * 1000);
                 if (statuses[0].status === "sent") {
+
                     await chatMessageRepository.update({ whatsappResponseStatusSentTimestamp: date },{ where: { whatsappResponseMessageId: statuses[0].id } })
                         .then(() => { console.log("Sent timestamp entered in database"); });
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', "");
                 }
                 else if (statuses[0].status === "delivered") {
+
                     await chatMessageRepository.update({ whatsappResponseStatusDeliveredTimestamp: date },{ where: { whatsappResponseMessageId: statuses[0].id } })
                         .then(() => { console.log("Delivered timestamp of entered in database"); });
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message delivered successfully!', "");
                 }
-                else if (statuses[0].status === "read") { 
+                else if (statuses[0].status === "read") {
+
                     await chatMessageRepository.update({ whatsappResponseStatusReadTimestamp: date },{ where: { whatsappResponseMessageId: statuses[0].id } })
                         .then(() => { console.log("Read timestamp of entered in database"); });
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message read successfully!', "");
                 }
                 else {
                     this.responseHandler.sendSuccessResponse(res, 200, 'Notification received successfully!', "");
-
-                //deal accordingly
-                // console.log("Check status", statuses[0].status);
                 }
             }
             else {
