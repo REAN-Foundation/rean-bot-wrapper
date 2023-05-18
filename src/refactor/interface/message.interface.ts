@@ -1,4 +1,5 @@
 import { DialogflowResponseFormat } from "../../services/response.format/dialogflow.response.format";
+import { IserviceResponseFunctionalities } from "../../services/response.format/response.interface";
 
 export interface Imessage{
     name : string;
@@ -85,7 +86,7 @@ export interface contactList {
 
 export interface IprocessedDialogflowResponseFormat{
     processed_message: any;
-    message_from_dialoglow: DialogflowResponseFormat;
+    message_from_nlp: IserviceResponseFunctionalities;
 }
 
 export interface calorieInfo {

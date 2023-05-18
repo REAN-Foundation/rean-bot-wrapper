@@ -8,10 +8,6 @@ export class DialogflowResponseFormat implements IserviceResponseFunctionalities
 
     constructor(private response){}
 
-    // setResponse(response){
-    //     this.response = response;
-    // }
-
     getText() {
         const text = [];
         if (this.response[0].queryResult.fulfillmentMessages[0].platform && this.response[0].queryResult.fulfillmentMessages[0].platform === "TELEGRAM" && this.response[0].queryResult.fulfillmentMessages[0].payload){
