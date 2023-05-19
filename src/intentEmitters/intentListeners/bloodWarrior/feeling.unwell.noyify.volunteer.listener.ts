@@ -17,5 +17,6 @@ export const FeelingUnwellNotifyVolunteer = async (intent, eventObj) => {
     async function notifyVolunteer(patientUserId: any, patientName: any, transfusionDate: string) {
         await feelingUnwellService.notifyVolunteer(eventObj,
             patientUserId, patientName, transfusionDate);
+        console.log(`Patient userId ${patientUserId}`);
     }
 };
