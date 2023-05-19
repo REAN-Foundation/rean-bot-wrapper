@@ -1,11 +1,11 @@
-import { RaiseDonationRequestService } from "../../../services/bloodWrrior/raise.request.service";
+import { RaiseDonationRequestNoService } from "../../../services/bloodWrrior/raise.request.no.service";
 
 export const RaiseRequestNoNotifyVolunteer = async (intent, eventObj) => {
     // eslint-disable-next-line max-len
-    const raiseDonationRequestService: RaiseDonationRequestService = eventObj.container.resolve(RaiseDonationRequestService);
+    const raiseDonationRequestNoService: RaiseDonationRequestNoService = eventObj.container.resolve(RaiseDonationRequestNoService);
     try {
         let response = null;
-        response = await raiseDonationRequestService.sendRejectionMessage(eventObj);
+        response = await raiseDonationRequestNoService.sendRejectionMessage(eventObj);
         const patientUserId = response.patientUserId;
         const patientName = response.name;
         notifyVolunteer(patientUserId, patientName, response.transfusionDate);
@@ -15,7 +15,7 @@ export const RaiseRequestNoNotifyVolunteer = async (intent, eventObj) => {
     }
 
     async function notifyVolunteer(patientUserId: any, patientName: any, transfusionDate: string) {
-        await raiseDonationRequestService.patientRejectionNotifyVolunteer(eventObj,
+        await raiseDonationRequestNoService.patientRejectionNotifyVolunteer(eventObj,
             patientUserId, patientName, transfusionDate);
     }
 };
