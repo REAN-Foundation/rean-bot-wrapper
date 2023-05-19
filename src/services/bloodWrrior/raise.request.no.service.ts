@@ -14,10 +14,10 @@ export class RaiseDonationRequestNoService {
     private _platformMessageService :  platformServiceInterface = null;
 
     constructor (
-        @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,
         @inject(NeedleService) private needleService?: NeedleService,
-        @inject(BloodWarriorCommonService) private bloodWarriorCommonService?: BloodWarriorCommonService,
+        @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,
         @inject(RaiseDonationRequestService) private raiseDonationRequestService?: RaiseDonationRequestService,
+        @inject(BloodWarriorCommonService) private bloodWarriorCommonService?: BloodWarriorCommonService,
     ) {}
 
     async sendRejectionMessage (eventObj) {
@@ -61,6 +61,8 @@ export class RaiseDonationRequestNoService {
                     response.Data.Volunteer.User.Person.Phone);
 
                 const payload = {};
+                payload["languageForSession"] = "en";
+                payload["templateName"] = "patient_fifthday_rejected_volunteer";
                 payload["variables"] = [
                     {
                         type : "text",
@@ -74,23 +76,18 @@ export class RaiseDonationRequestNoService {
                         type : "text",
                         text : transfusionDate
                     }];
-                payload["templateName"] = "patient_fifthday_rejected_volunteer";
-                payload["languageForSession"] = "en";
-
-                const previousIntentPayload = eventObj.body.originalDetectIntentRequest.payload;
-                this._platformMessageService = eventObj.container.resolve(previousIntentPayload.source);
-                const response_format: Iresponse = commonResponseMessageFormat();
-                response_format.platform = previousIntentPayload.source;
-                response_format.sessionId = volunteerPhone;
-                response_format.messageText = null;
-                response_format.message_type = "template";
-                result = await this._platformMessageService.SendMediaMessage(response_format, payload);
+                const intentOldPayload = eventObj.body.originalDetectIntentRequest.payload;
+                this._platformMessageService = eventObj.container.resolve(intentOldPayload.source);
+                const body_response: Iresponse = commonResponseMessageFormat();
+                body_response.message_type = "template";
+                body_response.platform = intentOldPayload.source;
+                body_response.messageText = null;
+                body_response.sessionId = volunteerPhone;
+                result = await this._platformMessageService.SendMediaMessage(body_response, payload);
                 if (result.statusCode === 200 ) {
                     console.log(`Succesfully patient rejection notification send to volunteer. Volunteer Name : ${volunteerName}.`);
                 }
             }
-
-            // Update patient commnication flags (fifth reminder)
             const body = {
                 PatientUserId        : patientUserId,
                 FifthDayReminderFlag : false
