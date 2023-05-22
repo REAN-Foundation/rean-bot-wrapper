@@ -13,10 +13,32 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: write
+
 jobs:
+  
+  Publish-Release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: New Release Publish
+        id: new_publish
+        uses: release-drafter/release-drafter@v5
+        with:
+          publish : true
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
+           
+    outputs:
+      release_id: ${{ steps.new_publish.outputs.id }}
+      release_name: ${{ steps.new_publish.outputs.tag_name }}
+
+
   Deploy-ECS:
+    needs: Publish-Release
     environment: prod
     runs-on: ubuntu-latest
+
 
     steps:
       - name: Checkout
@@ -67,7 +89,7 @@ jobs:
           file: ./Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
-          tags: public.ecr.aws/i9y2d4u3/rean-bot:${{ steps.vars.outputs.branch }}_${{ steps.vars.outputs.sha_short }}
+          tags: public.ecr.aws/i9y2d4u3/rean-bot:${{ needs.Publish-Release.outputs.release_name }}_${{ needs.Publish-Release.outputs.release_id }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
@@ -85,7 +107,7 @@ jobs:
         with:
           task-definition: task-definition.json
           container-name: default
-          image: public.ecr.aws/i9y2d4u3/rean-bot:${{ steps.vars.outputs.branch }}_${{ steps.vars.outputs.sha_short }}
+          image: public.ecr.aws/i9y2d4u3/rean-bot:${{ needs.Publish-Release.outputs.release_name }}_${{ needs.Publish-Release.outputs.release_id }}
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
@@ -116,4 +138,4 @@ jobs:
         with:
           publish : true
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN  }}

@@ -52,7 +52,7 @@ export class SlackMessageService implements platformServiceInterface {
             else {
                 console.log("child message");
                 // eslint-disable-next-line max-len
-                const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
+                const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(UserFeedback);
                 const data = await userFeedbackRepository.findOne({ where: { ts: message.event.thread_ts } });
                 const contact = data.userId;
                 const humanHandoff = data.humanHandoff;
@@ -108,7 +108,7 @@ export class SlackMessageService implements platformServiceInterface {
         this.delayedInitialisation();
         const message = await this.client.chat.postMessage({ channel: this.channelID, text: topic });
         // eslint-disable-next-line max-len
-        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
+        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(UserFeedback);
         await userFeedbackRepository.update({ ts: message.ts }, { where: { id: objID } })
             .then(() => { console.log("updated"); })
             .catch(error => console.log("error on update", error));
