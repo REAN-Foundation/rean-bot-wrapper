@@ -76,13 +76,6 @@ export class FeelingUnwellService {
                 }
             }
 
-            // Update patient commnication flags (fifth reminder)
-            const body = {
-                PatientUserId        : patientUserId,
-                FifthDayReminderFlag : false
-            };
-            await this.bloodWarriorCommonService.updatePatientCommunicationFlags(body);
-
         } catch (error) {
             Logger.instance()
                 .log_error(error.message,500,'Failed to notify volunteers about donor request');

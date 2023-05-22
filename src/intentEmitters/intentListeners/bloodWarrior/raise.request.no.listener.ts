@@ -8,7 +8,8 @@ export const RaiseRequestNoNotifyVolunteer = async (intent, eventObj) => {
         response = await raiseDonationRequestNoService.sendRejectionMessage(eventObj);
         const patientUserId = response.patientUserId;
         const patientName = response.name;
-        notifyVolunteer(patientUserId, patientName, response.transfusionDate);
+        notifyVolunteer(patientUserId, patientName, response.transfusionDate)
+            .then(() => console.log('Started notifying volunteer'));
         return response.message;
     } catch (error) {
         console.log(error);
