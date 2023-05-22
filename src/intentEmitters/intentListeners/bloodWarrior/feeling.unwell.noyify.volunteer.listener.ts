@@ -8,7 +8,7 @@ export const FeelingUnwellNotifyVolunteer = async (intent, eventObj) => {
         response = await feelingUnwellService.sendMeassageToPatient(eventObj);
         const patientUserId = response.patientUserId;
         const patientName = response.name;
-        notifyVolunteer(patientUserId, patientName, response.transfusionDate);
+        await notifyVolunteer(patientUserId, patientName, response.transfusionDate);
         return response.message;
     } catch (error) {
         console.log(error);
@@ -16,9 +16,6 @@ export const FeelingUnwellNotifyVolunteer = async (intent, eventObj) => {
 
     async function notifyVolunteer(patientUserId: any, patientName: any, transfusionDate: string) {
         await feelingUnwellService.notifyVolunteer(eventObj,
-            patientUserId, patientName, transfusionDate)
-            .then((result) => {
-                console.log(`result is ${result}`);
-            });
+            patientUserId, patientName, transfusionDate);
     }
 };
