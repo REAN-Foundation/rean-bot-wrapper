@@ -55,6 +55,8 @@ import { SelectBloodGroupListener } from './intentListeners/bloodWarrior/select.
 import { DonateBloodListener } from './intentListeners/bloodWarrior/donate.blood.listener';
 import { ScheduleOneTimeTakeValuesListener } from './intentListeners/bloodWarrior/schedule.one.time.take.values.listener';
 import { RegisterAllProfileListener } from './intentListeners/bloodWarrior/register.all.profile.listener';
+import { RaiseRequestNoNotifyVolunteer } from './intentListeners/bloodWarrior/raise.request.no.listener';
+import { FeelingUnwellNotifyVolunteer } from './intentListeners/bloodWarrior/feeling.unwell.noyify.volunteer.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -161,6 +163,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('normalCondition', kerotoplastyLocationListener);
         IntentEmitter.registerListener('Menu', BloodWarriorMenu);
         IntentEmitter.registerListener('Raise_Request_Yes', RaiseBloodDonationRequest);
+        IntentEmitter.registerListener('Raise_Request_No', RaiseRequestNoNotifyVolunteer);
         IntentEmitter.registerListener('BloodWarrior_Volunteer', BloodWarriorVolunteer);
         IntentEmitter.registerListener('BloodBridgeStatus', BloodBridgeStatusListener);
         IntentEmitter.registerListener('Checklist_Yes_Date', ChecklistDateValidation);
@@ -186,6 +189,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('Blood_OneTime_Take_Values', ScheduleOneTimeTakeValuesListener);
         IntentEmitter.registerListener('Send_OneTimeDonor', SelectBloodGroupListener);
         IntentEmitter.registerListener('Register_Volunteer', RegisterAllProfileListener);
+        IntentEmitter.registerListener('Feeling_Unwell', FeelingUnwellNotifyVolunteer);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
