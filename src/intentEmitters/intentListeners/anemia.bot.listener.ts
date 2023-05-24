@@ -4,7 +4,8 @@ import { CallAnemiaModel } from '../../services/call.anemia.model';
 import { NeedleService } from '../../services/needle.service';
 import { RekognitionService } from '../../services/anemia-aws-rekognition-model';
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
-import { container } from 'tsyringe';
+
+// import { container } from 'tsyringe';
 
 export const AnemiaBotListener = async (intent, eventObj) => {
     const callAnemiaModel: CallAnemiaModel = eventObj.container.resolve(CallAnemiaModel);
@@ -43,7 +44,7 @@ export const AnemiaBotListener = async (intent, eventObj) => {
                 sendMessageToWhatsappMeta(messageToPlatform,eventObj);
             }
             else {
-                console.log(`Channel ${eventObj.body.originalDetectIntentRequest.payload.source} service doesnot exist`)
+                console.log(`Channel ${eventObj.body.originalDetectIntentRequest.payload.source} service doesnot exist`);
             }
         }
 
