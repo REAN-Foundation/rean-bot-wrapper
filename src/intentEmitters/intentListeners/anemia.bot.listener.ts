@@ -33,14 +33,17 @@ export const AnemiaBotListener = async (intent, eventObj) => {
         }
         else {
             messageToPlatform = await callAnemiaModel.callAnemiaModel(eventObj.body.queryResult.queryText);
-            if (eventObj.body.originalDetectIntentRequest.payload.source === "Telegram") {
+            if ((eventObj.body.originalDetectIntentRequest.payload.source).toLowerCase() === "telegram") {
                 sendMessageToTelegram(messageToPlatform,eventObj);
             }
-            else if (eventObj.body.originalDetectIntentRequest.payload.source === "whatsapp") {
+            else if ((eventObj.body.originalDetectIntentRequest.payload.source).toLowerCase() === "whatsapp") {
                 sendMessageToWhatsapp(messageToPlatform,eventObj);
             }
-            else {
+            else if ((eventObj.body.originalDetectIntentRequest.payload.source).toLowerCase() === "whatsappmeta") {
                 sendMessageToWhatsappMeta(messageToPlatform,eventObj);
+            }
+            else {
+                console.log(`Channel ${eventObj.body.originalDetectIntentRequest.payload.source} service doesnot exist`)
             }
         }
 
