@@ -45,10 +45,17 @@ export class kerotoplastyService {
     };
 
     async conditionSpecificResponse(intent,eventObj){
-        const locationData = await this.getLocation.getLoctionData(eventObj,intent);
+        const setSeverityGrade = {
+            'hyperCriticalCondition' : 3,
+            'criticalCondition'      : 2,
+            'normalCondition'        : 1
+        };
+        const severityGrade = setSeverityGrade[intent];
+        console.log("SEVERITY GRADE IS",severityGrade);
+        const locationData = await this.getLocation.getLoctionData(eventObj,severityGrade);
         let message = null;
         console.log("our location data is ",locationData);
-        const postalAddresses = Array.from(locationData).map(obj => obj["Postal Addres"]);
+        const postalAddresses = Array.from(locationData).map(obj => obj["Postal_Address"]);
         const address_1 = postalAddresses[0].replace(/\n/g, ', ');
         const address_2 = postalAddresses[1].replace(/\n/g, ', ');
         const address_3 = postalAddresses[2].replace(/\n/g, ', ');

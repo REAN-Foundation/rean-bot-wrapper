@@ -6,6 +6,7 @@ import { platformServiceInterface } from '../../refactor/interface/platform.inte
 import { Iresponse } from '../../refactor/interface/message.interface';
 import { commonResponseMessageFormat } from '../common.response.format.object';
 import { templateButtonService } from '../whatsappmeta.button.service';
+import { BloodWarriorCommonService } from './common.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class RaiseDonationRequestService {
@@ -14,7 +15,8 @@ export class RaiseDonationRequestService {
 
     constructor (
         @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,
-        @inject(NeedleService) private needleService?: NeedleService
+        @inject(NeedleService) private needleService?: NeedleService,
+        @inject(BloodWarriorCommonService) private bloodWarriorCommonService?: BloodWarriorCommonService
     ) {}
 
     async sendUserMessage (eventObj) {
@@ -198,12 +200,19 @@ export class RaiseDonationRequestService {
                 }
             }
 
+            // Update patient commnication flags (fifth reminder)
+            const body = {
+                PatientUserId        : patientUserId,
+                FifthDayReminderFlag : false
+            };
+            await this.bloodWarriorCommonService.updatePatientCommunicationFlags(body);
+
         } catch (error) {
             Logger.instance()
                 .log_error(error.message,500,'Failed to notify volunteers about donor request');
         }
     }
-
+    
     public async createDonationRecord (obj: any) {
         try {
             let result = null;
