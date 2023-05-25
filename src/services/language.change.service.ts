@@ -1,12 +1,15 @@
 import { inject, Lifecycle, scoped } from "tsyringe";
 import { ChatSession } from "../models/chat.session";
 import { EntityManagerProvider } from "./entity.manager.provider.service";
+import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 
 @scoped(Lifecycle.ContainerScoped)
 export class ChangeLanguage{
 
     constructor(
-        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider) {
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService) {
     }
 
     async askForLanguage(eventObj) {
@@ -39,7 +42,7 @@ export class ChangeLanguage{
                 
                 //stop the old session
                 // eslint-disable-next-line max-len
-                const chatSessionRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(ChatSession);
+                const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
                 await chatSessionRepository.update({ preferredLanguage: newLanguageCode }, {
                     where : {
                         userPlatformID : userId
@@ -47,7 +50,6 @@ export class ChangeLanguage{
                 });
 
                 //create a new session
-                // await chatSessionRepository.create({ userPlatformID: userId, preferredLanguage: newLanguageCode, sessionOpen: "true" });
                 const reply = `Language changed to: ${newLanguage}`;
                 const data = {
                     "fulfillmentMessages" : [

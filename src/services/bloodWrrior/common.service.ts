@@ -119,4 +119,17 @@ export class BloodWarriorCommonService {
                 .log_error(error.message,500,'Failed to calculate day difference');
         }
     }
+
+    async updatePatientCommunicationFlags (obj: any) {
+        try {
+            const apiURL = `clinical/donation-communication`;
+            await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
+            console.log(`Succesfully updated donation communication flags.`);
+
+        } catch (error) {
+            Logger.instance()
+                .log_error(error.message,500,'Failed to updated donation communication flags.');
+        }
+    }
+
 }

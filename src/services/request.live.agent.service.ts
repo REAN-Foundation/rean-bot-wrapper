@@ -38,7 +38,7 @@ export class LiveAgent{
             }
             else {
                 // eslint-disable-next-line max-len
-                const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
+                const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(UserFeedback);
                 const feedBackInfo = await userFeedbackRepository.create({ userId: payload.userId, messageContent: message, channel: payload.source, humanHandoff: "true", feedbackType: "null", ts: "" });
                 const reply = "Our experts will connect with you shortly";
                 const data = {

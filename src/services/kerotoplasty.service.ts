@@ -45,31 +45,39 @@ export class kerotoplastyService {
     };
 
     async conditionSpecificResponse(intent,eventObj){
-        const locationData = await this.getLocation.getLoctionData(eventObj);
+        const setSeverityGrade = {
+            'hyperCriticalCondition' : 3,
+            'criticalCondition'      : 2,
+            'normalCondition'        : 1
+        };
+        const severityGrade = setSeverityGrade[intent];
+        console.log("SEVERITY GRADE IS",severityGrade);
+        const locationData = await this.getLocation.getLoctionData(eventObj,severityGrade);
         let message = null;
         console.log("our location data is ",locationData);
-        const postalAddress = locationData["Postal Addres"];
-        const keys = Object.keys(locationData["Postal Addres"]);
-        const address1 = postalAddress[keys[0]].replace(/\s+/g, ' ').trim();
-        const address2 = postalAddress[keys[1]].replace(/\s+/g, ' ').trim();
+        const postalAddresses = Array.from(locationData).map(obj => obj["Postal_Address"]);
+        const address_1 = postalAddresses[0].replace(/\n/g, ', ');
+        const address_2 = postalAddresses[1].replace(/\n/g, ', ');
+        const address_3 = postalAddresses[2].replace(/\n/g, ', ');
+        const address_4 = postalAddresses[3].replace(/\n/g, ', ');
         switch (intent) {
         case 'hyperCriticalCondition': {
-            message = `Your situation seems hyper-critical.\n Please Visit the nearest care center as soon as possible.\n Your nearest centers are: \n 1. ${address1}  \n 2. ${address2}`;
+            message = `Your situation seems hyper-critical.\n Please Visit the nearest care center as soon as possible.\n Your Possible nearest centers are: \n 1. ${address_1}  \n 2. ${address_2} \n 3. ${address_3} \n 4. ${address_4}`;
             break;
         }
         case 'criticalCondition':
         {
-            message = `Your situation seems critical.\n Please visit us at the nearest center on the next available.\n Your nearest centers are: \n 1. ${address1}  \n 2. ${address2} `;
+            message = `Your situation seems critical.\n Please visit us at the nearest center on the next available.\n Your Possible nearest centers are: \n 1. ${address_1}  \n 2. ${address_2}\n 3. ${address_3} \n 4. ${address_4}`;
             break;
         }
         case 'normalCondition': {
-            message = `Your situation seems normal.\n Please visit us at our nearest center if there is drop in vision or severe pain in your operated eye.\n Your nearest centers are: \n 1. ${address1} \n 2. ${address2} `;
+            message = `Your situation seems normal.\n Please visit us at our nearest center if there is drop in vision or severe pain in your operated eye.\n Your Possible nearest centers are: \n 1. ${address_1}  \n 2. ${address_2}\n 3. ${address_3} \n 4. ${address_4}`;
             break;
         }
-        }
+        } 
         
-        // const responseToSend = this.DialogflowServices.making_response(message);
-        // console.log("Our location data is being sent!!!!");
+        const responseToSend = this.DialogflowServices.making_response(message);
+        console.log("Our location data is being sent!!!!");
         return message;
 
     }
@@ -107,7 +115,7 @@ export class kerotoplastyService {
         const user_details = await this.getEMRDetails(parameters.medicalRecordNumber, eventObj);
         const topic =  parameters.medicalRecordNumber;
         // eslint-disable-next-line max-len
-        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager()).getRepository(UserFeedback);
+        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(UserFeedback);
         const responseUserFeedback = await userFeedbackRepository.findAll({ where: { userId: payload.userId } });
         if (responseUserFeedback[responseUserFeedback.length - 1]){
             const object = responseUserFeedback[responseUserFeedback.length - 1];

@@ -3,44 +3,41 @@ import { Logger } from '../../common/logger';
 import { CustomWelcomeService } from '../../services/custom.welcome.service';
 
 export const CustomWelcomeIntent = async (intent, eventObj) => {
-    return new Promise(async (resolve, reject) => {
+    try {
+        Logger.instance()
+            .log('Custom Welcome Intent!!!!!');
 
-        try {
-            Logger.instance()
-                .log('Custom Welcome Intent!!!!!');
+        let response = null;
+        const WelcomeService = eventObj.container.resolve(CustomWelcomeService);
 
-            let response = null;
-            const WelcomeService = eventObj.container.resolve(CustomWelcomeService);
+        const payload = eventObj.body.originalDetectIntentRequest.payload;
+        const toCheckSession = await WelcomeService.checkSession(payload.userId);
+        const imageUrl = await WelcomeService.getImageUrl();
 
-            const payload = eventObj.body.originalDetectIntentRequest.payload;
-            const toCheckSession = await WelcomeService.checkSession(payload.userId);
-            const imageUrl = await WelcomeService.getImageUrl();
-
-            if (toCheckSession) {
-                response = {
-                    "followupEventInput" : {
-                        "name"         : "DefaultWelcomeIntent",
-                        "languageCode" : "en-US"
-                    }
-                };
-                if (imageUrl) {
-                    await WelcomeService.postResponseCustom(payload.userId,payload.source,imageUrl);
+        if (toCheckSession) {
+            response = {
+                "followupEventInput" : {
+                    "name"         : "DefaultWelcomeIntent",
+                    "languageCode" : "en-US"
                 }
-            } else {
-                response = {
-                    "followupEventInput" : {
-                        "name"         : "customlanguage",
-                        "languageCode" : "en-US"
-                    }
-                };
+            };
+            if (imageUrl) {
+                await WelcomeService.postResponseCustom(payload.userId,payload.source,imageUrl);
             }
-
-            resolve(response);
-
-        } catch (error) {
-            Logger.instance()
-                .log_error(error.message, 500, 'Custom Welcome Intent Error!');
-            reject(error.message);
+        } else {
+            response = {
+                "followupEventInput" : {
+                    "name"         : "customlanguage",
+                    "languageCode" : "en-US"
+                }
+            };
         }
-    });
+
+        return response;
+
+    } catch (error) {
+        Logger.instance()
+            .log_error(error.message, 500, 'Custom Welcome Intent Error!');
+        throw new Error("Custom welcome listener error");
+    }
 };

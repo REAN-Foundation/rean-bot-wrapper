@@ -10,8 +10,9 @@ export class GetLocation{
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
     ) { }
 
-    async getLoctionData(eventObj){
+    async getLoctionData(eventObj,severityGrade){
         let  userLocation = null;
+
         if (eventObj.body.queryResult.parameters.Location.latlong){
             userLocation = eventObj.body.queryResult.parameters.Location.latlong; 
         }
@@ -33,7 +34,8 @@ export class GetLocation{
                 headers : headers,
             };
             const obj = {
-                location : userLocation
+                location : userLocation,
+                severity : severityGrade
             };
             const response = await needle("post",url, obj,options);
             if (response.statusCode === 200){
