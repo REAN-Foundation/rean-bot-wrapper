@@ -116,13 +116,11 @@ export class ClientWebhookController {
             if (statuses) {
                 const date = new Date(parseInt(statuses[0].timestamp) * 1000);
                 if (statuses[0].status === "sent") {
-
                     await chatMessageRepository.update({ whatsappResponseStatusSentTimestamp: date },{ where: { whatsappResponseMessageId: statuses[0].id } })
                         .then(() => { console.log("Sent timestamp entered in database"); });
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', "");
                 }
                 else if (statuses[0].status === "delivered") {
-
                     await chatMessageRepository.update({ whatsappResponseStatusDeliveredTimestamp: date },{ where: { whatsappResponseMessageId: statuses[0].id } })
                         .then(() => { console.log("Delivered timestamp of entered in database"); });
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message delivered successfully!', "");

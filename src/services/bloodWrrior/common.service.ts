@@ -132,4 +132,9 @@ export class BloodWarriorCommonService {
         }
     }
 
+        } catch (error) {
+            Logger.instance()
+                .log_error(error.message,500,'Failed to calculate day difference');
+        }
+    }
 }
