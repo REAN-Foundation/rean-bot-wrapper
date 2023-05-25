@@ -21,13 +21,14 @@ jobs:
   Publish-Release:
     runs-on: ubuntu-latest
     steps:
+    
       - name: New Release Publish
         id: new_publish
         uses: release-drafter/release-drafter@v5
         with:
           publish : true
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
            
     outputs:
       release_id: ${{ steps.new_publish.outputs.id }}
