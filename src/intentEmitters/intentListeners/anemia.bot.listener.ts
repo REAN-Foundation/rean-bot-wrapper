@@ -4,7 +4,8 @@ import { CallAnemiaModel } from '../../services/call.anemia.model';
 import { NeedleService } from '../../services/needle.service';
 import { RekognitionService } from '../../services/anemia-aws-rekognition-model';
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
-import { container } from 'tsyringe';
+
+// import { container } from 'tsyringe';
 
 export const AnemiaBotListener = async (intent, eventObj) => {
     const callAnemiaModel: CallAnemiaModel = eventObj.container.resolve(CallAnemiaModel);
@@ -33,14 +34,17 @@ export const AnemiaBotListener = async (intent, eventObj) => {
         }
         else {
             messageToPlatform = await callAnemiaModel.callAnemiaModel(eventObj.body.queryResult.queryText);
-            if (eventObj.body.originalDetectIntentRequest.payload.source === "Telegram") {
+            if ((eventObj.body.originalDetectIntentRequest.payload.source).toLowerCase() === "telegram") {
                 sendMessageToTelegram(messageToPlatform,eventObj);
             }
-            else if (eventObj.body.originalDetectIntentRequest.payload.source === "whatsapp") {
+            else if ((eventObj.body.originalDetectIntentRequest.payload.source).toLowerCase() === "whatsapp") {
                 sendMessageToWhatsapp(messageToPlatform,eventObj);
             }
-            else {
+            else if ((eventObj.body.originalDetectIntentRequest.payload.source).toLowerCase() === "whatsappmeta") {
                 sendMessageToWhatsappMeta(messageToPlatform,eventObj);
+            }
+            else {
+                console.log(`Channel ${eventObj.body.originalDetectIntentRequest.payload.source} service doesnot exist`);
             }
         }
 
