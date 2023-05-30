@@ -29,7 +29,7 @@ async function demoBotNextTask(eventObj, payload, DemoBotService){
     const create_bot = await DemoBotService.createIntent(excel_data, payload.userId);
 
     if (create_bot){
-        await DemoBotService.postResponseDemo(payload.userId,payload.source, "Bot is ready to use");
+        await DemoBotService.postResponseDemo(eventObj,payload.userId,payload.source, "Bot is ready to use");
     } else {
         throw new Error("Failed creating demo bot questions");
     }
