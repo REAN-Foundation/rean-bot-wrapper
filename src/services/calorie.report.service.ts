@@ -181,7 +181,7 @@ export class GetCalorieReport {
         const t_date = to_date.getFullYear() + '-' + (to_date.getMonth() + 1) + '-' + to_date.getDate();
         const data = await calorieInfoRepository.findAll({
             attributes : [
-                [sequelize.fn('SUM', sequelize.col('user_calories')), 'total_calories']
+                [sequelize.fn('SUM', sequelize.col('calories')), 'total_calories']
             ],
             where : sequelize.literal(`user_id = ${sessionId} AND record_date >= '${f_date} 00:00:00' AND record_date < '${t_date} 00:00:00'`)
         });
@@ -196,7 +196,7 @@ export class GetCalorieReport {
         const calorieInfoRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(CalorieInfo);
         const data = await calorieInfoRepository.findAll({
             attributes :[
-                [sequelize.fn('SUM', sequelize.col('user_calories')), 'total_calories'],
+                [sequelize.fn('SUM', sequelize.col('calories')), 'total_calories'],
                 [sequelize.fn('DAYOFWEEK',sequelize.col('record_date')),'daynumber'],
                 [sequelize.fn('WEEKOFYEAR',sequelize.col('record_date')),'weeknumber'],
                 'meal_type',
