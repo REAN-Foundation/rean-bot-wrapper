@@ -56,9 +56,9 @@ export class snehaMessagePlatformService implements platformServiceInterface{
 
     postResponse (message, response: IprocessedDialogflowResponseFormat ){
         const snehaSupport_Id = message.platformId;
-        const image = response.message_from_dialoglow.getImageObject();
+        const image = response.message_from_nlp.getImageObject();
         const messageType = image.url ? "image" : "text";
-        const intent = response.message_from_dialoglow.getIntent();
+        const intent = response.message_from_nlp.getIntent();
 
         const responseMessage = { name: null,platform: "Sneha_Support",chat_message_id: null,direction: "Out",message_type: messageType,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: snehaSupport_Id, messageText: response.processed_message[0] };
         return responseMessage;
