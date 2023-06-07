@@ -18,7 +18,7 @@
   "author": "Kiran Kharade",
   "license": "ISC",
   "dependencies": {
-    "@aws-sdk/client-comprehendmedical": "^3.13.0",
+    "@aws-sdk/client-comprehendmedical": "^3.347.1",
     "@google-cloud/dialogflow": "^4.4.0",
     "@google-cloud/speech": "^4.9.0",
     "@google-cloud/text-to-speech": "^3.4.0",
