@@ -1,5 +1,4 @@
 import { Sequelize } from 'sequelize-typescript';
-import { UserFeedback } from '../models/user.feedback.model';
 import { autoInjectable, singleton } from 'tsyringe';
 import { ChatMessage } from '../models/chat.message.model';
 import { ChatSession } from '../models/chat.session';
@@ -28,9 +27,9 @@ export class SequelizeClient {
         
         if (clientEnvironmentProviderService.getClientEnvironmentVariable('NAME') === "CALORIE_BOT") {
             // eslint-disable-next-line max-len
-            sequelizeClient.addModels([ChatMessage, UserFeedback, ChatSession, ContactList, CalorieInfo, CalorieDatabase]);
+            sequelizeClient.addModels([ChatMessage, ChatSession, ContactList, CalorieInfo, CalorieDatabase]);
         } else {
-            sequelizeClient.addModels([ChatMessage, UserFeedback, ChatSession, ContactList]);
+            sequelizeClient.addModels([ChatMessage, ChatSession, ContactList]);
         }
 
         await sequelizeClient.authenticate()

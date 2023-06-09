@@ -1,4 +1,3 @@
-import { DialogflowResponseFormat } from "../../services/response.format/dialogflow.response.format";
 import { IserviceResponseFunctionalities } from "../../services/response.format/response.interface";
 
 export interface Imessage{
@@ -13,9 +12,8 @@ export interface Imessage{
     latlong : any;
     replyPath : string;
     intent  : string;
-    whatsappResponseMessageId : string;
+    responseMessageID : string;
     contextId : string;
-    telegramResponseMessageId : string
 
 }
 
@@ -58,11 +56,14 @@ export interface IchatMessage {
     imageContent: string;
     imageUrl: string;
     messageId: string;
-    whatsappResponseMessageId : string;
-    telegramResponseMessageId : string
+    responseMessageID: string;
     whatsappResponseStatusReadTimestamp : Date;
     whatsappResponseStatusSentTimestamp : Date;
     whatsappResponseStatusDeliveredTimestamp : Date;
+    supportchannelName : string;
+    supportChannelTaskID: string;
+    humanHandoff: string;
+    feedbackType: string;
 
 }
 

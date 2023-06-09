@@ -43,20 +43,19 @@ export class MockCHannelMessageFunctionalities implements getMessageFunctionalit
 
     inputMessageFormat (messageObj){
         const messagetoDialogflow: Imessage = {
-            name                      : null,
-            platform                  : "Whatsapp",
-            chat_message_id           : null,
-            direction                 : "In",
-            messageBody               : null,
-            imageUrl                  : null,
-            platformId                : null,
-            replyPath                 : null,
-            latlong                   : null,
-            type                      : "text",
-            intent                    : null,
-            whatsappResponseMessageId : null,
-            contextId                 : null,
-            telegramResponseMessageId : null
+            name              : null,
+            platform          : messageObj.getChannel(),
+            chat_message_id   : null,
+            direction         : "In",
+            messageBody       : null,
+            imageUrl          : null,
+            platformId        : null,
+            replyPath         : null,
+            latlong           : null,
+            type              : "text",
+            intent            : null,
+            responseMessageID : null,
+            contextId         : null,
         };
         messagetoDialogflow.chat_message_id = messageObj.getChatId();
         return messagetoDialogflow;
