@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import { feedbackInterface } from './feedback.interface';
-import { container, inject, Lifecycle, scoped } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { SlackMessageService } from '../slack.message.service';
 import { ChatMessage } from '../../models/chat.message.model';
 import { HumanHandoff } from '../../services/human.handoff.service';
@@ -167,6 +167,6 @@ export class FeedbackService implements feedbackInterface {
         else {
             await this.slackMessageService.postMessage(responseChatMessage,topic);
         }
-    } 
+    };
 
 }

@@ -17,7 +17,6 @@ export class LiveAgent{
 
     async requestLiveAgent(body) {
         const payload = body.originalDetectIntentRequest.payload;
-        const message = body.queryResult.queryText;
         return new Promise(async(resolve) =>{
             if (await humanHandoff.checkTime() === "false") {
                 const startHHhour = parseFloat(this.clientEnvironmentProviderService.getClientEnvironmentVariable("HH_START_HOUR_LOCAL"));
@@ -40,8 +39,8 @@ export class LiveAgent{
                 
                 // eslint-disable-next-line max-len
                 const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-                const chatMessageObject = await chatMessageRepository.findOne({order: [['createdAt', 'DESC']], limit:1});
-                const feedBackInfo = await chatMessageRepository.update({ humanHandoff: "true" }, {where:{"id": chatMessageObject.id}});
+                const chatMessageObject = await chatMessageRepository.findOne({ order: [['createdAt', 'DESC']], limit: 1 });
+                const feedBackInfo = await chatMessageRepository.update({ humanHandoff: "true" }, { where: { "id": chatMessageObject.id } });
                 console.log("feedBackInfo",feedBackInfo);
                 const reply = "Our experts will connect with you shortly";
                 const data = {

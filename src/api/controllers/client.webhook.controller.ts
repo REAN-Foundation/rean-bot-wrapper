@@ -125,7 +125,7 @@ export class ClientWebhookController {
                         .then(() => { console.log("Delivered timestamp of entered in database"); });
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message delivered successfully!', "");
                 }
-                else if (statuses[0].status === "read") { 
+                else if (statuses[0].status === "read") {
                     await chatMessageRepository.update({ whatsappResponseStatusReadTimestamp: date },{ where: { responseMessageID: statuses[0].id } })
                         .then(() => { console.log("Read timestamp of entered in database"); });
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message read successfully!', "");

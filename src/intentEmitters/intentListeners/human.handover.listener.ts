@@ -1,4 +1,3 @@
-import { container } from 'tsyringe';
 import { Logger } from '../../common/logger';
 import { HumanHandoff } from '../../services/human.handoff.service';
 

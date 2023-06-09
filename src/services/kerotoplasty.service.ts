@@ -74,8 +74,9 @@ export class kerotoplastyService {
             message = `Your situation seems normal.\n Please visit us at our nearest center if there is drop in vision or severe pain in your operated eye.\n Your Possible nearest centers are: \n 1. ${address_1}  \n 2. ${address_2}\n 3. ${address_3} \n 4. ${address_4}`;
             break;
         }
-        } 
+        }
         
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const responseToSend = this.DialogflowServices.making_response(message);
         console.log("Our location data is being sent!!!!");
         return message;

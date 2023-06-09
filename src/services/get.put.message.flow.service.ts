@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 /* eslint-disable linebreak-style */
-import { Imessage, Iresponse, IchatMessage } from '../refactor/interface/message.interface';
+import { Imessage, Iresponse } from '../refactor/interface/message.interface';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { handleRequestservice } from './handle.request.service';
@@ -41,10 +41,6 @@ export class MessageFlow{
         
         const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         const resp = await chatMessageRepository.findAll({ where: { userPlatformID: chatMessageObj.userPlatformID } });
-        // if (resp.length === 0) {
-        //     this.processMessage(messagetoDialogflow, channel, platformMessageService);
-        // }
-        // else {
         const humanHandoff = resp[resp.length - 1].humanHandoff;
         const ts = resp[resp.length - 1].supportChannelTaskID;
         if (humanHandoff === "true" ){
@@ -57,7 +53,6 @@ export class MessageFlow{
         else {
             this.processMessage(messagetoDialogflow, channel, platformMessageService);
         }
-        // }
         
     }
 

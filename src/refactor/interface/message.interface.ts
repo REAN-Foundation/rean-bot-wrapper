@@ -1,4 +1,3 @@
-import { DialogflowResponseFormat } from "../../services/response.format/dialogflow.response.format";
 import { IserviceResponseFunctionalities } from "../../services/response.format/response.interface";
 
 export interface Imessage{

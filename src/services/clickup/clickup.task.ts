@@ -89,7 +89,7 @@ export class ClickUpTask{
         }
         catch (error){
             console.log(error);
-        }  
+        }
     }
 
     async postCommentOnTask(taskID,comment){
