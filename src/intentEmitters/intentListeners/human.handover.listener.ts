@@ -2,8 +2,6 @@ import { container } from 'tsyringe';
 import { Logger } from '../../common/logger';
 import { HumanHandoff } from '../../services/human.handoff.service';
 
-const humanHandoff: HumanHandoff = container.resolve(HumanHandoff);
-
 export const HumanHandoverListener = async (intent, eventObj) => {
     try {
         Logger.instance()
@@ -13,6 +11,7 @@ export const HumanHandoverListener = async (intent, eventObj) => {
         let response = null;
 
         // res = 5;
+        const humanHandoff: HumanHandoff = eventObj.container.resolve(HumanHandoff);
         response = await humanHandoff.humanHandover(eventObj);
 
         console.log('Inside listener: ', response);

@@ -8,7 +8,7 @@ export const PositiveFeedbackListener = async (intent, eventObj) => {
         
         let response = null;
         const feedbackService = eventObj.container.resolve(FeedbackService);
-        response = await feedbackService.NegativeFeedback(eventObj);
+        response = await feedbackService.PositiveFeedback(eventObj);
         console.log('Inside listener: ', response);
 
         if (!response) {
