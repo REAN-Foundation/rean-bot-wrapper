@@ -19,7 +19,7 @@ export class NeedleService {
         if (!accessToken) {
             accessToken = null;
         }
-        const options = this.getHeaders.getHeaders(accessToken);
+        const options = await this.getHeaders.getHeaders(accessToken);
         const apiUrl = ReanBackendBaseUrl + url;
         let response = null;
         if (method === "get") {
