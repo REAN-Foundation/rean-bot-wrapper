@@ -2,7 +2,7 @@ import { Logger } from '../common/logger';
 import * as cron from 'node-cron';
 import * as CronSchedules from '../assets/seed.data/cron.schedules.json';
 import { Loader } from './loader';
-import {databackup} from '../services/scheduleDataBackup.service'
+import {databackup} from '../services/scheduleDataBackup.service';
 
 export class Scheduler {
 
@@ -35,12 +35,12 @@ export class Scheduler {
     };
 
     private scheduleDataBackup = () => {
-        for(const clientName in Scheduler.envSchedules){
+        for (const clientName in Scheduler.envSchedules){
             cron.schedule(Scheduler.envSchedules[clientName]['scheduleDataBackup'], () => {
                 (async () => {
                     Logger.instance().log(`Running scheducled jobs: DataBackup in S3 ${clientName}`);
                     var databackupobj = new databackup();
-                    await databackupobj.main(clientName)
+                    await databackupobj.main(clientName);
 
                     // var service = Loader.container.resolve(FileResourceService);
                     // await service.cleanupTempFiles();
