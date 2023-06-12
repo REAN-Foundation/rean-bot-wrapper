@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 /* eslint-disable linebreak-style */
-import { Imessage, Iresponse, IchatMessage } from '../refactor/interface/message.interface';
+import { Imessage, Iresponse } from '../refactor/interface/message.interface';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { handleRequestservice } from './handle.request.service';
@@ -8,7 +8,6 @@ import { delay, inject, Lifecycle, scoped } from 'tsyringe';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { ChatMessage } from '../models/chat.message.model';
 import { GoogleTextToSpeech } from './text.to.speech';
-import { UserFeedback } from '../models/user.feedback.model';
 import { SlackMessageService } from "./slack.message.service";
 import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
@@ -39,24 +38,20 @@ export class MessageFlow{
 
         //initialising MySQL DB tables
         const chatMessageObj = await this.engageMySQL(messagetoDialogflow);
-        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(UserFeedback);
-        const resp = await userFeedbackRepository.findAll({ where: { userId: chatMessageObj.userPlatformID } });
-        if (resp.length === 0) {
-            this.processMessage(messagetoDialogflow, channel, platformMessageService);
+        
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+        const resp = await chatMessageRepository.findAll({ where: { userPlatformID: chatMessageObj.userPlatformID } });
+        const humanHandoff = resp[resp.length - 1].humanHandoff;
+        const ts = resp[resp.length - 1].supportChannelTaskID;
+        if (humanHandoff === "true" ){
+            this.slackMessageService.delayedInitialisation();
+            const client = this.slackMessageService.client;
+            const channelID = this.slackMessageService.channelID;
+            await client.chat.postMessage({ channel: channelID, text: chatMessageObj.messageContent, thread_ts: ts });
+                
         }
         else {
-            const humanHandoff = resp[resp.length - 1].humanHandoff;
-            const ts = resp[resp.length - 1].ts;
-            if (humanHandoff === "true" ){
-                this.slackMessageService.delayedInitialisation();
-                const client = this.slackMessageService.client;
-                const channelID = this.slackMessageService.channelID;
-                await client.chat.postMessage({ channel: channelID, text: chatMessageObj.messageContent, thread_ts: ts });
-                
-            }
-            else {
-                this.processMessage(messagetoDialogflow, channel, platformMessageService);
-            }
+            this.processMessage(messagetoDialogflow, channel, platformMessageService);
         }
         
     }
@@ -72,17 +67,17 @@ export class MessageFlow{
         //save the response data to DB
         await this.saveResponseDataToUser(response_format,processedResponse);
 
-        const intent = processedResponse.message_from_dialoglow.getIntent();
+        const intent = processedResponse.message_from_nlp.getIntent();
         await this.saveIntent(intent,response_format.sessionId);
 
-        const payload = processedResponse.message_from_dialoglow.getPayload();
-        if (processedResponse.message_from_dialoglow.getText()) {
+        const payload = processedResponse.message_from_nlp.getPayload();
+        if (processedResponse.message_from_nlp.getText()) {
             let message_to_platform = null;
 
             await this.replyInAudio(messagetoDialogflow, response_format);
             message_to_platform = await platformMessageService.SendMediaMessage(response_format,payload);
 
-            if (!processedResponse.message_from_dialoglow.getText()) {
+            if (!processedResponse.message_from_nlp.getText()) {
                 console.log('An error occurred while sending messages!');
             }
             return message_to_platform;
@@ -164,84 +159,84 @@ export class MessageFlow{
     }
 
     async engageMySQL(messagetoDialogflow: Imessage) {
-        return new Promise<IchatMessage>(async(resolve) =>{
-            const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
-            const chatSessionModel = await chatSessionRepository.findOne({ where: { userPlatformID: messagetoDialogflow.platformId } });
-            console.log("chatSessionModel", chatSessionModel);
-            let chatSessionId = null;
-            if (chatSessionModel) {
-                chatSessionId = chatSessionModel.autoIncrementalID;
-            }
-            const chatMessageObj = {
-                chatSessionID                            : chatSessionId,
-                name                                     : messagetoDialogflow.name,
-                platform                                 : messagetoDialogflow.platform,
-                direction                                : messagetoDialogflow.direction,
-                messageType                              : messagetoDialogflow.type,
-                messageContent                           : messagetoDialogflow.messageBody,
-                messageId                                : messagetoDialogflow.chat_message_id,
-                imageContent                             : null,
-                imageUrl                                 : messagetoDialogflow.imageUrl,
-                userPlatformID                           : messagetoDialogflow.platformId,
-                intent                                   : null,
-                whatsappResponseMessageId                : null,
-                contextId                                : messagetoDialogflow.contextId,
-                telegramResponseMessageId                : null,
-                whatsappResponseStatusSentTimestamp      : null,
-                whatsappResponseStatusDeliveredTimestamp : null,
-                whatsappResponseStatusReadTimestamp      : null
-            };
+        const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
+        const chatSessionModel = await chatSessionRepository.findOne({ where: { userPlatformID: messagetoDialogflow.platformId } });
+        console.log("chatSessionModel", chatSessionModel);
+        let chatSessionId = null;
+        if (chatSessionModel) {
+            chatSessionId = chatSessionModel.autoIncrementalID;
+        }
+        const chatMessageObj = {
+            chatSessionID                            : chatSessionId,
+            name                                     : messagetoDialogflow.name,
+            platform                                 : messagetoDialogflow.platform,
+            direction                                : messagetoDialogflow.direction,
+            messageType                              : messagetoDialogflow.type,
+            messageContent                           : messagetoDialogflow.messageBody,
+            messageId                                : messagetoDialogflow.chat_message_id,
+            imageContent                             : null,
+            imageUrl                                 : messagetoDialogflow.imageUrl,
+            userPlatformID                           : messagetoDialogflow.platformId,
+            intent                                   : null,
+            responseMessageID                        : messagetoDialogflow.responseMessageID,
+            contextId                                : messagetoDialogflow.contextId,
+            whatsappResponseStatusSentTimestamp      : null,
+            whatsappResponseStatusDeliveredTimestamp : null,
+            whatsappResponseStatusReadTimestamp      : null,
+            supportchannelName                       : null,
+            supportChannelTaskID                     : null,
+            humanHandoff                             : null,
+            feedbackType                             : null
+        };
 
-            // await this.sequelizeClient.connect();
-            const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-            const personrequest = await chatMessageRepository.create(chatMessageObj);
-            await personrequest.save();
-            this.chatMessageConnection = personrequest;
-            const userId = chatMessageObj.userPlatformID;
-            const respChatSession = await chatSessionRepository.findAll({ where: { userPlatformID: userId } });
-            const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: userId } });
-            const lastMessageDate = respChatMessage[respChatMessage.length - 1].createdAt;
+        // await this.sequelizeClient.connect();
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+        const personrequest = await chatMessageRepository.create(chatMessageObj);
+        this.chatMessageConnection = personrequest;
+        const userId = chatMessageObj.userPlatformID;
+        const respChatSession = await chatSessionRepository.findAll({ where: { userPlatformID: userId } });
+        const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: userId } });
+        const lastMessageDate = respChatMessage[respChatMessage.length - 1].createdAt;
 
-            //check if user is new, if new then make a new entry in table contact list
-            const contactListRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
-            const respContactList = await contactListRepository.findAll({ where: { mobileNumber: userId } });
+        //check if user is new, if new then make a new entry in table contact list
+        const contactListRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
+        const respContactList = await contactListRepository.findAll({ where: { mobileNumber: userId } });
 
-            // console.log("respContactList!!!", respContactList);
-            if (respContactList.length === 0) {
-                await contactListRepository.create({
-                    mobileNumber : messagetoDialogflow.platformId,
-                    username     : messagetoDialogflow.name,
-                    platform     : messagetoDialogflow.platform,
-                    optOut       : "false" });
+        // console.log("respContactList!!!", respContactList);
+        if (respContactList.length === 0) {
+            await contactListRepository.create({
+                mobileNumber : messagetoDialogflow.platformId,
+                username     : messagetoDialogflow.name,
+                platform     : messagetoDialogflow.platform,
+                optOut       : "false" });
                     
-                // console.log("newContactlistEntry", newContactlistEntry);
-                // await newContactlistEntry.save();
-            }
+            // console.log("newContactlistEntry", newContactlistEntry);
+            // await newContactlistEntry.save();
+        }
 
-            //start or continue a session
-            if (respChatSession.length === 0 || respChatSession[respChatSession.length - 1].sessionOpen === "false") {
+        //start or continue a session
+        if (respChatSession.length === 0 || respChatSession[respChatSession.length - 1].sessionOpen === "false") {
 
-                // console.log("starting a new session");
-                await chatSessionRepository.create({ userPlatformID  : messagetoDialogflow.platformId,
-                    platform        : messagetoDialogflow.platform, sessionOpen     : "true",
-                    lastMessageDate : lastMessageDate, askForFeedback  : "flase" });
+            // console.log("starting a new session");
+            await chatSessionRepository.create({ userPlatformID  : messagetoDialogflow.platformId,
+                platform        : messagetoDialogflow.platform, sessionOpen     : "true",
+                lastMessageDate : lastMessageDate, askForFeedback  : "flase" });
 
-                // console.log("newChatsession", newChatsession);
-                // await newChatsession.save();
-            }
-            else {
-                const autoIncrementalID = respChatSession[respChatSession.length - 1].autoIncrementalID;
-                await chatSessionRepository.update({ lastMessageDate: lastMessageDate }, { where: { autoIncrementalID: autoIncrementalID } } )
-                    .then(() => { console.log("updated lastMessageDate"); })
-                    .catch(error => console.log("error on update", error));
-            }
-            resolve(chatMessageObj);
-        });
+            // console.log("newChatsession", newChatsession);
+            // await newChatsession.save();
+        }
+        else {
+            const autoIncrementalID = respChatSession[respChatSession.length - 1].autoIncrementalID;
+            await chatSessionRepository.update({ lastMessageDate: lastMessageDate }, { where: { autoIncrementalID: autoIncrementalID } } )
+                .then(() => { console.log("updated lastMessageDate"); })
+                .catch(error => console.log("error on update", error));
+        }
+        return chatMessageObj;
         
     }
 
     saveResponseDataToUser = async(response_format,processedResponse) => {
-        const intent = processedResponse.message_from_dialoglow.getIntent();
+        const intent = processedResponse.message_from_nlp.getIntent();
         const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
         const chatSessionModel = await chatSessionRepository.findOne({ where: { userPlatformID: response_format.sessionId } });
         let chatSessionId = null;

@@ -1,5 +1,4 @@
 import { Sequelize } from 'sequelize-typescript';
-import { UserFeedback } from '../models/user.feedback.model';
 import { autoInjectable, singleton } from 'tsyringe';
 import { ChatMessage } from '../models/chat.message.model';
 import { ChatSession } from '../models/chat.session';
@@ -13,6 +12,7 @@ const sequrlizeClients = new Map<string, Sequelize>();
 export class SequelizeClient {
 
     public connect = async(clientEnvironmentProviderService) => {
+
         if(clientEnvironmentProviderService.getClientEnvironmentVariable("DATA_BASE_NAME")){
             const dbName = clientEnvironmentProviderService.getClientEnvironmentVariable("DATA_BASE_NAME");
             const dbPassword = clientEnvironmentProviderService.getClientEnvironmentVariable("DB_PASSWORD");
@@ -32,6 +32,7 @@ export class SequelizeClient {
             } else {
                 sequelizeClient.addModels([ChatMessage, UserFeedback, ChatSession, ContactList]);
             }
+
 
             await sequelizeClient.authenticate()
                 .then(async () => {
