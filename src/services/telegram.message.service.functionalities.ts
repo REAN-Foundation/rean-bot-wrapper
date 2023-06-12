@@ -98,20 +98,19 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
 
     inputMessageFormat (messageObj: Message){
         const messagetoDialogflow: Imessage = {
-            name                      : messageObj.getUsername(),
-            platform                  : "Telegram",
-            chat_message_id           : messageObj.getChatId(),
-            direction                 : "In",
-            messageBody               : null,
-            imageUrl                  : null,
-            platformId                : messageObj.getUserId(),
-            replyPath                 : null,
-            latlong                   : null,
-            type                      : "text",
-            intent                    : null,
-            whatsappResponseMessageId : null,
-            contextId                 : messageObj.getContextId(),
-            telegramResponseMessageId : null
+            name              : messageObj.getUsername(),
+            platform          : "Telegram",
+            chat_message_id   : messageObj.getChatId(),
+            direction         : "In",
+            messageBody       : null,
+            imageUrl          : null,
+            platformId        : messageObj.getUserId(),
+            replyPath         : null,
+            latlong           : null,
+            type              : "text",
+            intent            : null,
+            responseMessageID : null,
+            contextId         : messageObj.getContextId(),
         };
         return messagetoDialogflow;
     }
