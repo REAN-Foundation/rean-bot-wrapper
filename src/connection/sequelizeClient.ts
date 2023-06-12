@@ -47,7 +47,7 @@ export class SequelizeClient {
             return sequelizeClient;
         }
         else {
-            console.log("No DB to connect")
+            console.log("No DB to connect");
         }
         
     };
