@@ -37,6 +37,7 @@
     "bluebird": "^3.7.2",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
+    "cron": "^2.3.0",
     "date-and-time": "^1.0.1",
     "dialogflow-fulfillment": "git+https://github.com/REAN-Foundation/dialogflow-fulfillment-nodejs.git",
     "dotenv": "^8.2.0",

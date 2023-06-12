@@ -3,6 +3,8 @@ import { container, DependencyContainer } from 'tsyringe';
 import { Authenticator } from '../auth/authenticator';
 import { Injector } from './injector';
 import { Logger } from '../common/logger';
+import { Scheduler } from './scheduler';
+
 
 export class Loader {
 
@@ -10,8 +12,14 @@ export class Loader {
 
     private static _container: DependencyContainer = container;
 
+    private static _scheduler: Scheduler = Scheduler.instance();
+
     public static get authenticator() {
         return Loader._authenticator;
+    }
+
+    public static get scheduler() {
+        return Loader._scheduler;
     }
 
     public static get container() {

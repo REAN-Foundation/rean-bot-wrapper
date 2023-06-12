@@ -102,23 +102,11 @@ export default class Application {
         for (const clientName of this.clientsList) {
             clientEnvironmentProviderService.setClientName(clientName);
             await sequelizeClient.getSequelizeClient(clientEnvironmentProviderService);
-            if (clientName === "NSMI"){
+            if (clientName === "NSMI" || clientName === "UNION" || clientName === "DEMO_BOT" || clientName === "CALORIE_BOT") {
                 telegram.setWebhook(clientName);
-            } else if (clientName === "UNION"){
-                telegram.setWebhook(clientName);
-            } else if (clientName === "DEMO_BOT"){
-                telegram.setWebhook(clientName);
-            } else if (clientName === "CALORIE_BOT"){
-                telegram.setWebhook(clientName);
-            }
-            
-            // this condition will be removed after container task definition is updated
-            else if (clientName === "ANEMIA"){
-                console.log("Anemia is not a separate client anymore");
-            } else if (clientName === "SNEHA") {
+            } else if (clientName === "ANEMIA"||clientName === "SNEHA"||clientName==="PENPLUS") {
                 console.log("Does not require setting up webhook");
-            }
-            else {
+            } else {
                 telegram.setWebhook(clientName);
                 whatsapp.setWebhook(clientName);
             }
@@ -150,6 +138,9 @@ export default class Application {
 
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             await this.setWebhooksForClients();
+
+            //Set-up cron jobs
+            await Loader.scheduler.schedule();
 
             //Start listening
             await this.listen();

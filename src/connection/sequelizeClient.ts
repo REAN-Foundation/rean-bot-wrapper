@@ -13,38 +13,43 @@ const sequrlizeClients = new Map<string, Sequelize>();
 export class SequelizeClient {
 
     public connect = async(clientEnvironmentProviderService) => {
-        
-        const dbName = clientEnvironmentProviderService.getClientEnvironmentVariable("DATA_BASE_NAME");
-        const dbPassword = clientEnvironmentProviderService.getClientEnvironmentVariable("DB_PASSWORD");
-        const dbUser = clientEnvironmentProviderService.getClientEnvironmentVariable("DB_USER_NAME");
-        const dbHost = clientEnvironmentProviderService.getClientEnvironmentVariable("DB_HOST");
-        const sequelizeClient = new Sequelize(dbName, dbUser, dbPassword, {
-            host           : dbHost,
-            dialect        : 'mysql',
-            port           : 3306,
-            logging        : false,
-            repositoryMode : true
-        });
-        
-        if (clientEnvironmentProviderService.getClientEnvironmentVariable('NAME') === "CALORIE_BOT") {
-            // eslint-disable-next-line max-len
-            sequelizeClient.addModels([ChatMessage, UserFeedback, ChatSession, ContactList, CalorieInfo, CalorieDatabase]);
-        } else {
-            sequelizeClient.addModels([ChatMessage, UserFeedback, ChatSession, ContactList]);
-        }
+        if(clientEnvironmentProviderService.getClientEnvironmentVariable("DATA_BASE_NAME")){
+            const dbName = clientEnvironmentProviderService.getClientEnvironmentVariable("DATA_BASE_NAME");
+            const dbPassword = clientEnvironmentProviderService.getClientEnvironmentVariable("DB_PASSWORD");
+            const dbUser = clientEnvironmentProviderService.getClientEnvironmentVariable("DB_USER_NAME");
+            const dbHost = clientEnvironmentProviderService.getClientEnvironmentVariable("DB_HOST");
+            const sequelizeClient = new Sequelize(dbName, dbUser, dbPassword, {
+                host           : dbHost,
+                dialect        : 'mysql',
+                port           : 3306,
+                logging        : false,
+                repositoryMode : true
+            });
+            
+            if (clientEnvironmentProviderService.getClientEnvironmentVariable('NAME') === "CALORIE_BOT") {
+                // eslint-disable-next-line max-len
+                sequelizeClient.addModels([ChatMessage, UserFeedback, ChatSession, ContactList, CalorieInfo, CalorieDatabase]);
+            } else {
+                sequelizeClient.addModels([ChatMessage, UserFeedback, ChatSession, ContactList]);
+            }
 
-        await sequelizeClient.authenticate()
-            .then(async () => {
-                try {
-                    console.log("MySQL DB connected");
-                }
-                catch (error) {
-                    console.log("err", error);
-                }
-            })
-            .catch(error => console.log("DB connection failed", error));
-        await sequelizeClient.sync({ alter: false });
-        return sequelizeClient;
+            await sequelizeClient.authenticate()
+                .then(async () => {
+                    try {
+                        console.log("MySQL DB connected");
+                    }
+                    catch (error) {
+                        console.log("err", error);
+                    }
+                })
+                .catch(error => console.log("DB connection failed", error));
+            await sequelizeClient.sync({ alter: false });
+            return sequelizeClient;
+        }
+        else{
+            console.log("No DB to connect")
+        }
+        
     };
 
     // eslint-disable-next-line max-len
@@ -57,8 +62,8 @@ export class SequelizeClient {
         }
         else {
             console.log("New Client Connected", clientName);
-            sequrlizeClients[clientName] = await this.connect(clientEnvironmentVariable);
-            return sequrlizeClients[clientName];
+                sequrlizeClients[clientName] = await this.connect(clientEnvironmentVariable);
+                return sequrlizeClients[clientName];
         }
     };
     
