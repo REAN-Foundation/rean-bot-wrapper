@@ -83,8 +83,13 @@ export class ChatMessage extends Model implements IchatMessage {
     @Column({
         type : DataType.STRING(1024)
     })
-        responseMessageID: string;
-    
+        whatsappResponseMessageId: string;
+        
+    @Column({
+        type : DataType.STRING(1024)
+    })
+        telegramResponseMessageId : string;
+
     @Column({
         type : DataType.DATE
     })
@@ -99,25 +104,5 @@ export class ChatMessage extends Model implements IchatMessage {
         type : DataType.DATE
     })
         whatsappResponseStatusReadTimestamp : Date;
-    
-    @Column({
-        type : DataType.STRING
-    })
-        supportchannelName : string;
-
-    @Column({
-        type : DataType.STRING
-    })
-        supportChannelTaskID : string;
-    
-    @Column({
-        type : DataType.BOOLEAN
-    })
-        humanHandoff : string;
-
-    @Column({
-        type : DataType.STRING
-    })
-        feedbackType: string;
 
 }

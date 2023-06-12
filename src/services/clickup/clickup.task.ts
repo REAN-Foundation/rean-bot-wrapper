@@ -2,12 +2,13 @@ import needle from 'needle';
 import { getRequestOptions } from '../../utils/helper';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 import { inject, Lifecycle, scoped } from 'tsyringe';
+import { UserFeedback } from '../../models/user.feedback.model';
 import FormData from 'form-data';
 import fs from 'fs';
 import axios from 'axios';
 import crypto from 'crypto';
 import { EntityManagerProvider } from '../entity.manager.provider.service';
-import { ChatMessage } from '../../models/chat.message.model';
+import { integer } from 'aws-sdk/clients/cloudfront';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ClickUpTask{
@@ -19,7 +20,7 @@ export class ClickUpTask{
     @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider) { }
 
     // eslint-disable-next-line max-len
-    async createTask(responseChatMessage,postTopic:string = null, description:string = null, priority = null){
+    async createTask(rdsData,responseUserFeedback,postTopic:string = null, description:string = null, priority = null){
         const listID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_LIST_ID");
         const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
         const createTaskUrl = `https://api.clickup.com/api/v2/list/${listID}/task`;
@@ -33,7 +34,7 @@ export class ClickUpTask{
             
         }
         else {
-            topic = responseChatMessage[responseChatMessage.length - 1].dataValues.messageContent;
+            topic = rdsData[rdsData.length - 1].dataValues.messageContent;
         }
         const obj = {
             "name"                 : topic,
@@ -55,10 +56,13 @@ export class ClickUpTask{
 
         const response = await needle("post", createTaskUrl, obj, options);
         // eslint-disable-next-line max-len
-        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-        if (responseChatMessage[responseChatMessage.length - 1]){
-            const objID = responseChatMessage[responseChatMessage.length - 1].dataValues.id;
-            await chatMessageRepository.update({ supportChannelTaskID: response.body.id }, { where: { id: objID } })
+        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(UserFeedback);
+        if (responseUserFeedback[responseUserFeedback.length - 1]){
+            const objID = responseUserFeedback[responseUserFeedback.length - 1].dataValues.id;
+            await userFeedbackRepository.update({ taskID: response.body.id }, { where: { id: objID } })
+                .then(() => { console.log("updated"); })
+                .catch(error => console.log("error on update", error));
+            await userFeedbackRepository.update({ messageContent: topic }, { where: { id: objID } })
                 .then(() => { console.log("updated"); })
                 .catch(error => console.log("error on update", error));
             return response.body.id;
@@ -89,7 +93,7 @@ export class ClickUpTask{
         }
         catch (error){
             console.log(error);
-        }
+        }  
     }
 
     async postCommentOnTask(taskID,comment){

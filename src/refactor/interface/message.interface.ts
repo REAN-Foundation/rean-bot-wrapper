@@ -1,4 +1,4 @@
-import { IserviceResponseFunctionalities } from "../../services/response.format/response.interface";
+import { DialogflowResponseFormat } from "../../services/response.format/dialogflow.response.format";
 
 export interface Imessage{
     name : string;
@@ -12,8 +12,9 @@ export interface Imessage{
     latlong : any;
     replyPath : string;
     intent  : string;
-    responseMessageID : string;
+    whatsappResponseMessageId : string;
     contextId : string;
+    telegramResponseMessageId : string
 
 }
 
@@ -56,14 +57,11 @@ export interface IchatMessage {
     imageContent: string;
     imageUrl: string;
     messageId: string;
-    responseMessageID: string;
+    whatsappResponseMessageId : string;
+    telegramResponseMessageId : string
     whatsappResponseStatusReadTimestamp : Date;
     whatsappResponseStatusSentTimestamp : Date;
     whatsappResponseStatusDeliveredTimestamp : Date;
-    supportchannelName : string;
-    supportChannelTaskID: string;
-    humanHandoff: string;
-    feedbackType: string;
 
 }
 
@@ -87,7 +85,7 @@ export interface contactList {
 
 export interface IprocessedDialogflowResponseFormat{
     processed_message: any;
-    message_from_nlp: IserviceResponseFunctionalities;
+    message_from_dialoglow: DialogflowResponseFormat;
 }
 
 export interface calorieInfo {

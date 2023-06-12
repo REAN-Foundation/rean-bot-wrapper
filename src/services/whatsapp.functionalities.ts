@@ -42,7 +42,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         }
         messagetoDialogflow.messageBody = reaction.emoji;
         messagetoDialogflow.type = 'reaction';
-        messagetoDialogflow.contextId = reaction.messageId;
+        messagetoDialogflow.whatsappResponseMessageId = reaction.messageId;
         return messagetoDialogflow;
     }
 
@@ -210,19 +210,20 @@ export class MessageFunctionalities implements getMessageFunctionalities {
 
     inputMessageFormat (messageObj){
         const messagetoDialogflow: Imessage = {
-            name              : null,
-            platform          : messageObj.getChannel(),
-            chat_message_id   : messageObj.getChatId(),
-            direction         : "In",
-            messageBody       : null,
-            imageUrl          : null,
-            platformId        : null,
-            replyPath         : null,
-            latlong           : null,
-            type              : "text",
-            intent            : null,
-            responseMessageID : null,
-            contextId         : messageObj.getContextId()
+            name                      : null,
+            platform                  : "Whatsapp",
+            chat_message_id           : messageObj.getChatId(),
+            direction                 : "In",
+            messageBody               : null,
+            imageUrl                  : null,
+            platformId                : null,
+            replyPath                 : null,
+            latlong                   : null,
+            type                      : "text",
+            intent                    : null,
+            whatsappResponseMessageId : null,
+            contextId                 : messageObj.getContextId(),
+            telegramResponseMessageId : null
         };
         return messagetoDialogflow;
     }

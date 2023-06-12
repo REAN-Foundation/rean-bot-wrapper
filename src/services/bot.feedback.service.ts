@@ -63,7 +63,8 @@ export class BotFeedback{
                                     })
                                     .catch(error => console.log("error", error));
                             }
-                            else if (platform === "whatsapp"){
+                            else if (platform === "Whatsapp"){
+                                console.log("Whatsapp");
                                 const postData = {
                                     'recipient_type' : 'individual',
                                     'to'             : userId.toString(),
@@ -87,7 +88,7 @@ export class BotFeedback{
                                         .then(() => { console.log("updated askFeedback"); })
                                         .catch(error => console.log("error on update", error));
                                     await chatMessageRepository.create({
-                                        platform       : "whatsapp",
+                                        platform       : "Whatsapp",
                                         direction      : "Out",
                                         messageType    : "text",
                                         messageContent : message,
