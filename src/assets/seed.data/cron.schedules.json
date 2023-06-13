@@ -12,7 +12,7 @@
     "UAT":{
     },
 
-    "PRODUCTION":{
+    "PROD":{
         "PENPLUS":{
             "scheduleDataBackup": "0 0 * * * "
         }
