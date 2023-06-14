@@ -22,7 +22,7 @@ export class RegistrationService {
         @inject(NeedleService) private needleService?: NeedleService,
     ) {}
 
-    async registrationService (eventObj) {
+    async registrationService (eventObj): Promise<any> {
         return new Promise<any>(async (resolve) => {
             try {
                 const name : string = eventObj.body.queryResult.parameters.Name.name;
