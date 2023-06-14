@@ -23,7 +23,7 @@ export class RegistrationService {
     ) {}
 
     async registrationService (eventObj): Promise<any> {
-        return new Promise<any>(async (resolve):Promise<any> => {
+        return new Promise<any>(async (resolve : any):Promise<any> => {
             try {
                 const name : string = eventObj.body.queryResult.parameters.Name.name;
                 const lmp : string = eventObj.body.queryResult.parameters.LMP;
