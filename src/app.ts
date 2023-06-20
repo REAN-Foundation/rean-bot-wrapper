@@ -102,15 +102,21 @@ export default class Application {
         for (const clientName of this.clientsList) {
             console.log(clientName);
             clientEnvironmentProviderService.setClientName(clientName);
-            await sequelizeClient.getSequelizeClient(clientEnvironmentProviderService);
-            if (clientName === "NSMI" || clientName === "UNION" || clientName === "DEMO_BOT" || clientName === "CALORIE_BOT") {
+            sequelizeClient.getSequelizeClient(clientEnvironmentProviderService);
+            console.log("klnklmkmkmkmklml;m;lml;l;ml;ml;m;", clientEnvironmentProviderService.getClientName())
+            console.log(clientEnvironmentProviderService.getClientEnvironmentVariable('TELEGRAM_BOT_TOKEN'));
+            if (clientEnvironmentProviderService.getClientEnvironmentVariable('TELEGRAM_BOT_TOKEN')) {
                 telegram.setWebhook(clientName);
-            } else if (clientName === "ANEMIA"||clientName === "SNEHA"||clientName==="PENPLUS") {
-                console.log("Does not require setting up webhook");
+                console.log("Telegram webhook is set");
+            } else {
+                console.log("Telegram webhook need not to be set");
+            }
+            
+            if (clientEnvironmentProviderService.getClientEnvironmentVariable('WHATSAPP_LIVE_API_KEY')||clientEnvironmentProviderService.getClientEnvironmentVariable('META_API_TOKEN')) {
+                whatsapp.setWebhook(clientName);
             }
             else {
-                telegram.setWebhook(clientName);
-                whatsapp.setWebhook(clientName);
+                console.log("whatsapp webhook need not to be set");
             }
 
         }

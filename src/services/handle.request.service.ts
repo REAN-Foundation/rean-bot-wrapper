@@ -37,10 +37,12 @@ export class handleRequestservice{
         else {
             // eslint-disable-next-line max-len
             message_from_nlp = await this.DialogflowResponseService.getDialogflowMessage(translate_message.message, channel, message.intent,message);
-            if (message_from_nlp.getIntent() === "Default Fallback Intent"){
+            if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("OPENAI_API_KEY")){
+                if (message_from_nlp.getIntent() === "Default Fallback Intent"){
                 message_from_nlp = await this.openAIResponseService.getOpenaiMessage(translate_message.message);
-            }
+            } }
             console.log("message_from_nlp",message_from_nlp);
+
         }
 
         // this.getTranslatedResponse(message_from_dialoglow, translate_message.languageForSession);
