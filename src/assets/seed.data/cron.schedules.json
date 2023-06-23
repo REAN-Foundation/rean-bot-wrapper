@@ -1,8 +1,5 @@
 { 
     "LOCAL":{
-        "PENPLUS":{
-            "scheduleDataBackup": "*/1 * * * *"
-        }
 
     },
 

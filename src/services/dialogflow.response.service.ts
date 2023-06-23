@@ -14,6 +14,16 @@ export class DialogflowResponseService {
 
     constructor(@inject(ClientEnvironmentProviderService) private clientEnvironment?: ClientEnvironmentProviderService) { }
 
+    async getDialogflowLanguage(){
+        if (this.clientEnvironment.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE")){
+            return this.clientEnvironment.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+        }
+        else {
+            return "en-US";
+        }
+
+    }
+
     getDialogflowMessage = async (message: string, platform: string = null, intent: string = null, completeMessage:Imessage = null ) => {
         try {
             
@@ -21,7 +31,8 @@ export class DialogflowResponseService {
             if (env_name === "UNION"){
                 dialogflow = dialogflowv2;
             }
-            const dialogflow_language = "en-US";
+            const dialogflow_language = await this.getDialogflowLanguage();
+            
             const userId: string = completeMessage.platformId === null ? v4() : completeMessage.platformId;
             const location = completeMessage.latlong === null ? v4() : completeMessage.latlong;
 
