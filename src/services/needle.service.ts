@@ -57,7 +57,7 @@ export class NeedleService {
         return phoneNumber;
     }
 
-    async needleRequestForWhatsappMeta(method: string, endPoint:string, obj?){
+    async needleRequestForWhatsappMeta(method: string, endPoint:string, postDataMeta?){
         const whatsappHost = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
         const options = getRequestOptions();
         const whatsappToken = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
@@ -66,14 +66,25 @@ export class NeedleService {
         const whatsappPhoneNumberID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_PHONE_NUMBER_ID");
         const url = `/v14.0/${whatsappPhoneNumberID}/${endPoint}`;
         const whatsappaApi = whatsappHost + url;
+        const file = "https://d3uqieugp2i3ic.cloudfront.net/temp/1687502888363.png";
+        // const postDataMeta = {
+        //     "messaging_product" : "whatsapp",
+        //     "recipient_type"    : "individual",
+        //     "to"                : "919381134397",
+        //     "type"              : "image",
+        //     "image"             : {
+        //         "link" : file
+        //     }
+        // };
         let response = null;
         if (method === "get") {
             response = await needle(method, whatsappaApi, options);
     
         } else {
-            response = await needle(method, whatsappaApi, obj, options);
+            // console.log(JSON.stringify(postDataMeta));
+            response = await needle(method, whatsappaApi, postDataMeta, options);
         }
-    
+        console.log("The response is: ", response.body);
         if (response.statusCode === 200 || response.statusCode === 201) {
             console.log('Whatsapp Api is successfull');
         } else {
@@ -91,11 +102,17 @@ export class NeedleService {
         const telegramApi = telegramHost + url;
         console.log("The telegram URL is:"+ telegramApi);
         let response = null;
-        if (method === "get") {
-            response = await needle(method, telegramApi, options);
-    
-        } else {
-            response = await needle(method, telegramApi, obj, options);
+        try {
+            if (method === "get") {
+                response = await needle(method, telegramApi, options);
+        
+            } else {
+                console.log('The body of the request is' + JSON.stringify(obj));
+                response = await needle(method, telegramApi, obj, options);
+            }
+            console.log("The response is: ", response.body);
+        } catch (error) {
+            console.log("The error is: ", error);
         }
     
         if (response.statusCode === 200 || response.statusCode === 201) {
