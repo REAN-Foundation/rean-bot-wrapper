@@ -66,29 +66,18 @@ export class NeedleService {
         const whatsappPhoneNumberID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_PHONE_NUMBER_ID");
         const url = `/v14.0/${whatsappPhoneNumberID}/${endPoint}`;
         const whatsappaApi = whatsappHost + url;
-        const file = "https://d3uqieugp2i3ic.cloudfront.net/temp/1687502888363.png";
-        // const postDataMeta = {
-        //     "messaging_product" : "whatsapp",
-        //     "recipient_type"    : "individual",
-        //     "to"                : "919381134397",
-        //     "type"              : "image",
-        //     "image"             : {
-        //         "link" : file
-        //     }
-        // };
         let response = null;
         if (method === "get") {
             response = await needle(method, whatsappaApi, options);
     
         } else {
-            // console.log(JSON.stringify(postDataMeta));
             response = await needle(method, whatsappaApi, postDataMeta, options);
         }
         console.log("The response is: ", response.body);
         if (response.statusCode === 200 || response.statusCode === 201) {
             console.log('Whatsapp Api is successfull');
         } else {
-            throw new Error("Failed");
+            throw new Error("Needle Request for Whatsapp MetaFailed");
         }
     
         return response.body;
