@@ -40,7 +40,7 @@ export const calorieReport = async ( intent, eventObj ) => {
             const postDataMeta = {
                 "messaging_product" : "whatsapp",
                 "recipient_type"    : "individual",
-                "to"                : "919381134397",
+                "to"                : payload.userId,
                 "type"              : "image",
                 "image"             : {
                     "link" : file_url

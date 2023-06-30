@@ -134,7 +134,7 @@ export class demoBotService {
                 intent : intent,
             };
 
-            await this.sleep(1500);
+            await this.sleep(4000);
             const [response] = await intentsClient.createIntent(createIntentRequest);
             console.log(`Intent ${response.name} created`);
         }
