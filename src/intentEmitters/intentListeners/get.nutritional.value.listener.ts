@@ -33,7 +33,7 @@ export const GetNutritionalValue = async (intent, eventObj) => {
         await sendMessageToTelegram(summaryOfNutritionalValue,eventObj);
         openAiTextReplyToJson.list_of_food.forEach(async element => {
             const calorieInfoObj = {
-                user_id           : payload.completeMessage.userPlatformId,
+                user_id           : payload.completeMessage.platformId,
                 user_message      : message,
                 fs_message        : summaryOfNutritionalValue,
                 units             : element.quantity,
