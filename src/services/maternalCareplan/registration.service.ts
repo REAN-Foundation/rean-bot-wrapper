@@ -8,6 +8,7 @@ import { GetPatientInfoService } from '../support.app.service';
 import { commonResponseMessageFormat } from '../common.response.format.object';
 import { Iresponse } from '../../refactor/interface/message.interface';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
+import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class RegistrationService {
@@ -23,69 +24,79 @@ export class RegistrationService {
     ) {}
 
     async registrationService (eventObj): Promise<any> {
-        return new Promise<any>(async (resolve) => {
-            try {
-                const name : string = eventObj.body.queryResult.parameters.Name.name;
-                const lmp : string = eventObj.body.queryResult.parameters.LMP;
-                const birthdate : string = eventObj.body.queryResult.parameters.Birthdate;
+        try {
+            const name : string = eventObj.body.queryResult.parameters.Name.name;
+            const lmp : string = eventObj.body.queryResult.parameters.LMP;
+            const birthdate : string = eventObj.body.queryResult.parameters.Birthdate;
     
-                const phoneNumber = await this.needleService.getPhoneNumber(eventObj);
+            const phoneNumber = await this.needleService.getPhoneNumber(eventObj);
             
-                const options = await this.getHeaders.getHeaders();
-                const ReanBackendBaseUrl =
+            const options = await this.getHeaders.getHeaders();
+            const ReanBackendBaseUrl =
                 this.clientEnvironmentProviderService.getClientEnvironmentVariable('REAN_APP_BACKEND_BASE_URL');
-                const patientRegisterUrl = `${ReanBackendBaseUrl}patients`;
+            const patientRegisterUrl = `${ReanBackendBaseUrl}patients`;
 
-                const patientDomainModel = {
-                    Phone     : phoneNumber,
-                    Password  : "REAN@DMC",
-                    FirstName : name.split(" ")[0],
-                    LastName  : name.split(" ")[1],
-                    Gender    : "Female",
-                    BirthDate : birthdate.split("T")[0]
-                };
+            const patientDomainModel = {
+                Phone     : phoneNumber,
+                Password  : "REAN@DMC",
+                FirstName : name.split(" ")[0],
+                LastName  : name.split(" ")[1],
+                Gender    : "Female",
+                BirthDate : birthdate.split("T")[0]
+            };
     
-                let patientUserId = null;
-                const registrationResponse = await needle('post', patientRegisterUrl, patientDomainModel, options);
-                if (registrationResponse.statusCode === 409) {
-                    const result: any = await this.getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
-                    patientUserId = result.message[0].UserId;
-                    const dffMessage = `Hi ${name}, Your phone number already registered with us.`;
-                    resolve( { fulfillmentMessages: [{ text: { text: [dffMessage] } }]  });
+            const patientUserId = null;
+
+            const body : QueueDoaminModel =  {
+                Intent : "RegistrationDMC",
+                Body   : {
+                    PatientUserId : patientUserId,
+                    Name          : name,
+                    LMP           : lmp,
+                    EventObj      : eventObj
+                }
+            };
+
+            const registrationResponse = await needle('post', patientRegisterUrl, patientDomainModel, options);
+            if (registrationResponse.statusCode === 409) {
+                const result: any = await this.getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
+                body.Body.PatientUserId = result.message[0].UserId;
+                const dffMessage = `Hi ${name}, \nYour phone number already registered with us.`;
+                FireAndForgetService.enqueue(body);
+                return { fulfillmentMessages: [{ text: { text: [dffMessage] } }]  };
     
-                } else if (registrationResponse.statusCode === 201) {
-                    patientUserId = registrationResponse.body.Data.Patient.UserId;
-                    const registrationMessage = `Hi ${name}, Your Last Mensuration Period(LMP) date is ${new Date(lmp.split("T")[0]).toDateString()}.\nYou will get periodic notifications based on your LMP.`;
-                    resolve( { fulfillmentMessages: [{ text: { text: [registrationMessage] } }]  });
-                    Logger.instance().log(`Registration of ${name} with rean care service is complete.`);
-                    
-                }
-
-                //Checking for enrollemnt history
-                const communicationSearchUrl = `clinical/donation-communication/search?patientUserId=${patientUserId}`;
-                const communicationResponse = await this.needleService.needleRequestForREAN("get", communicationSearchUrl);
-
-                let msg = null;
-                if (communicationResponse.Data.DonationCommunication.Items.length !== 0) {
-                    const remindersFlag = communicationResponse.Data.DonationCommunication.Items[0].IsRemindersLoaded;
-                    if (remindersFlag === false) {
-                        msg = `Welcome! ${name}, you have successfully subscribed to the REAN Maternity care plan.`;
-                        await this.enrollPatient(lmp, patientUserId, name, msg, eventObj);
-                    } else {
-                        msg = `You have already enrolled in REAN DMC Maternity care plan. If you wish to enroll again please contact to REAN support.`;
-                        await this.sendMessage(msg, eventObj);
-                    }
-                } else {
-                    msg = `Welcome! ${name}, you have successfully subscribed to the REAN Maternity care plan.`;
-                    await this.enrollPatient(lmp, patientUserId, name, msg, eventObj);
-                }
-
-            } catch (error) {
-                Logger.instance()
-                    .log_error(error.message,500,'Maternity careplan registration service error');
+            } else if (registrationResponse.statusCode === 201) {
+                body.Body.PatientUserId = registrationResponse.body.Data.Patient.UserId;
+                const registrationMessage = `Hi ${name}, \nYour Last Mensuration Period(LMP) date is ${new Date(lmp.split("T")[0]).toDateString()}.\nYou will get periodic notifications based on your LMP.`;
+                FireAndForgetService.enqueue(body);
+                return { fulfillmentMessages: [{ text: { text: [registrationMessage] } }]  };
             }
 
-        });
+        } catch (error) {
+            Logger.instance()
+                .log_error(error.message,500,'Maternity careplan registration service error');
+        }  
+
+    }
+
+    public async enrollPatientService(patientUserId: any, name: string, lmp: string, eventObj: any) {
+        const communicationSearchUrl = `clinical/donation-communication/search?patientUserId=${patientUserId}`;
+        const communicationResponse = await this.needleService.needleRequestForREAN("get", communicationSearchUrl);
+
+        let msg = null;
+        if (communicationResponse.Data.DonationCommunication.Items.length !== 0) {
+            const remindersFlag = communicationResponse.Data.DonationCommunication.Items[0].IsRemindersLoaded;
+            if (remindersFlag === false) {
+                msg = `Welcome! ${name}, you have successfully subscribed to the REAN Maternity care plan and will get periodic notifications on your due dates.`;
+                await this.enrollPatient(lmp, patientUserId, name, msg, eventObj);
+            } else {
+                msg = `You have already enrolled in REAN DMC Maternity care plan. If you wish to enroll again please contact to REAN support.`;
+                await this.sendMessage(msg, eventObj);
+            }
+        } else {
+            msg = `Welcome! ${name}, you have successfully subscribed to the REAN Maternity care plan and will get periodic notifications on your due dates.`;
+            await this.enrollPatient(lmp, patientUserId, name, msg, eventObj);
+        }
     }
 
     async enrollPatient(lmp: string, patientUserId: any, name: string, msg: string, eventObj) {
