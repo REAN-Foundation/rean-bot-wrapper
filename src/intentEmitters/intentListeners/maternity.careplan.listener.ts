@@ -1,5 +1,4 @@
 import { RegistrationService } from "../../services/maternalCareplan/registration.service";
-import { EnrollService } from "../../services/maternalCareplan/enroll.service";
 
 export class MaternityCareplanListener {
 
