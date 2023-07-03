@@ -19,7 +19,7 @@ export class NeedleService {
         if (!accessToken) {
             accessToken = null;
         }
-        const options = this.getHeaders.getHeaders(accessToken);
+        const options = await this.getHeaders.getHeaders(accessToken);
         const apiUrl = ReanBackendBaseUrl + url;
         let response = null;
         if (method === "get") {
@@ -57,7 +57,7 @@ export class NeedleService {
         return phoneNumber;
     }
 
-    async needleRequestForWhatsappMeta(method: string, endPoint:string, obj?){
+    async needleRequestForWhatsappMeta(method: string, endPoint:string, postDataMeta?){
         const whatsappHost = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
         const options = getRequestOptions();
         const whatsappToken = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
@@ -71,13 +71,13 @@ export class NeedleService {
             response = await needle(method, whatsappaApi, options);
     
         } else {
-            response = await needle(method, whatsappaApi, obj, options);
+            response = await needle(method, whatsappaApi, postDataMeta, options);
         }
-    
+        console.log("The response is: ", response.body);
         if (response.statusCode === 200 || response.statusCode === 201) {
             console.log('Whatsapp Api is successfull');
         } else {
-            throw new Error("Failed");
+            throw new Error("Needle Request for Whatsapp MetaFailed");
         }
     
         return response.body;
@@ -91,11 +91,17 @@ export class NeedleService {
         const telegramApi = telegramHost + url;
         console.log("The telegram URL is:"+ telegramApi);
         let response = null;
-        if (method === "get") {
-            response = await needle(method, telegramApi, options);
-    
-        } else {
-            response = await needle(method, telegramApi, obj, options);
+        try {
+            if (method === "get") {
+                response = await needle(method, telegramApi, options);
+        
+            } else {
+                console.log('The body of the request is' + JSON.stringify(obj));
+                response = await needle(method, telegramApi, obj, options);
+            }
+            console.log("The response is: ", response.body);
+        } catch (error) {
+            console.log("The error is: ", error);
         }
     
         if (response.statusCode === 200 || response.statusCode === 201) {

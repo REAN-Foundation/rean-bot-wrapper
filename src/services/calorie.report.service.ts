@@ -4,10 +4,11 @@ import { CalorieInfo } from "../models/calorie.info.model";
 import sequelize = require("sequelize");
 import { EntityManagerProvider } from "./entity.manager.provider.service";
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { createHTMLTable } from './report.creation.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class GetCalorieReport {
-
+    
     constructor(
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         // eslint-disable-next-line max-len
@@ -24,8 +25,9 @@ export class GetCalorieReport {
         console.log("TESTING");
         const intentMap = new Map();
         console.log('Hello');
-        intentMap.set('calorie.report.creation', (agent) => this.createTable(agent,userId));
-        return await agent.handleRequest(intentMap);
+        // intentMap.set('calorie.report.creation', (agent) => this.createTable(agent,userId));
+        // return await agent.handleRequest(intentMap);
+        return await this.createTable(agent,userId);
     }
 
     async createTable(agent,userId) {
@@ -121,29 +123,8 @@ export class GetCalorieReport {
     
         string += '<div align="right" style="width:100%"> <p><span style="font-size:15px; padding-right:10px; padding-top:-15px;">N/A = Not Available</span></p></div>';
         string += '<div style="width:100%; padding-bottom:10px;">';
-    
-        string += '<table style="width:100%; border:1px solid; padding-bottom:10px;">';
-            
-        for ( let i=0; i < table.length; i++){
-            string += '<tr>';
-            for (let j = 0; j < table[0].length; j++){
-                if (i===0 || j === 0){
-                    string += '<td style="background-color:#cbc3e3; padding-left:2px;">';
-                    string += '<span style="font-size: 20px;">';
-                    if (!table[i][j]){
-                        string += '<b>' + '' + '</b>';
-                    } else {
-                        string += '<b>' + table[i][j] + '</b>';
-                    }
-                    string += '</span></td>';
-                } else {
-                    string += '<td>';
-                    string += table[i][j];
-                    string += '</td>';
-                }
-            }
-        }
-        string += '</table></div>';
+        
+        string += createHTMLTable(table);
     
         string += '<div style="width:100%; padding-top:10px;">';
         string += '<table style="width:100%; border:1px solid; padding-top:10px;">';
@@ -172,6 +153,7 @@ export class GetCalorieReport {
     
         agent.add(new dfff.Payload(agent.TELEGRAM, payload, { sendAsMessage: true, rawPayload: true }));
         agent.add("Your calorie report.");
+        return string;
     }
 
     async getDataForReport(from_date,to_date,sessionId){
