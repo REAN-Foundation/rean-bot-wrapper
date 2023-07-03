@@ -100,27 +100,22 @@ export default class Application {
         const telegram: platformServiceInterface = container.resolve('telegram');
         const whatsapp: platformServiceInterface = container.resolve('whatsapp');
         for (const clientName of this.clientsList) {
+            console.log(clientName);
             clientEnvironmentProviderService.setClientName(clientName);
-            await sequelizeClient.getSequelizeClient(clientEnvironmentProviderService);
-            if (clientName === "NSMI"){
+            sequelizeClient.getSequelizeClient(clientEnvironmentProviderService);
+            console.log(clientEnvironmentProviderService.getClientEnvironmentVariable('TELEGRAM_BOT_TOKEN'));
+            if (clientEnvironmentProviderService.getClientEnvironmentVariable('TELEGRAM_BOT_TOKEN')) {
                 telegram.setWebhook(clientName);
-            } else if (clientName === "UNION"){
-                telegram.setWebhook(clientName);
-            } else if (clientName === "DEMO_BOT"){
-                telegram.setWebhook(clientName);
-            } else if (clientName === "CALORIE_BOT"){
-                telegram.setWebhook(clientName);
+                console.log("Telegram webhook is set");
+            } else {
+                console.log("Telegram webhook need not to be set");
             }
             
-            // this condition will be removed after container task definition is updated
-            else if (clientName === "ANEMIA"){
-                console.log("Anemia is not a separate client anymore");
-            } else if (clientName === "SNEHA") {
-                console.log("Does not require setting up webhook");
+            if (clientEnvironmentProviderService.getClientEnvironmentVariable('WHATSAPP_LIVE_API_KEY') || clientEnvironmentProviderService.getClientEnvironmentVariable('META_API_TOKEN')) {
+                whatsapp.setWebhook(clientName);
             }
             else {
-                telegram.setWebhook(clientName);
-                whatsapp.setWebhook(clientName);
+                console.log("whatsapp webhook need not to be set");
             }
 
         }
@@ -150,6 +145,8 @@ export default class Application {
 
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             await this.setWebhooksForClients();
+
+            await Loader.scheduler.schedule();
 
             //Start listening
             await this.listen();

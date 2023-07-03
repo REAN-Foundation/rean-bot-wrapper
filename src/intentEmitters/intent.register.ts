@@ -57,6 +57,8 @@ import { ScheduleOneTimeTakeValuesListener } from './intentListeners/bloodWarrio
 import { RegisterAllProfileListener } from './intentListeners/bloodWarrior/register.all.profile.listener';
 import { RaiseRequestNoNotifyVolunteer } from './intentListeners/bloodWarrior/raise.request.no.listener';
 import { FeelingUnwellNotifyVolunteer } from './intentListeners/bloodWarrior/feeling.unwell.noyify.volunteer.listener';
+import { OpenAiListener } from './intentListeners/openAi.listener';
+import { GetNutritionalValue } from './intentListeners/get.nutritional.value.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -108,6 +110,10 @@ export class IntentRegister {
         IntentEmitter.registerListener('foodItemsDetails', calorieDetection);
         IntentEmitter.registerListener('calorie.report.creation', calorieReport);
         IntentEmitter.registerListener('CalorieNegativeFeedback - yes', CalorieUpdate);
+
+        //hybrid model
+        IntentEmitter.registerListener('testing-hybrid',OpenAiListener);
+        IntentEmitter.registerListener('get_nutritional_values',GetNutritionalValue);
 
         //Intents for Post Operative Eye Care Symptom tracking
         IntentEmitter.registerListener('userDetails', eyeSymptomAssessment);
