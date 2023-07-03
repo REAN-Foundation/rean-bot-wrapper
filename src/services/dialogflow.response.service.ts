@@ -15,8 +15,8 @@ export class DialogflowResponseService {
     constructor(@inject(ClientEnvironmentProviderService) private clientEnvironment?: ClientEnvironmentProviderService) { }
 
     async getDialogflowLanguage(){
-        if (this.clientEnvironment.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE")){
-            return this.clientEnvironment.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+        if (this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_DEFAULT_LANGUAGE_CODE")){
+            return this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_DEFAULT_LANGUAGE_CODE");
         }
         else {
             return "en-US";
