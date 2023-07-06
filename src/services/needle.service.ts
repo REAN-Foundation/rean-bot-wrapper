@@ -1,13 +1,12 @@
 
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { container, inject, Lifecycle, scoped } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import needle from "needle";
 import { GetHeaders } from './biometrics/get.headers';
 import { getRequestOptions } from '../utils/helper';
 import { EntityManagerProvider } from './entity.manager.provider.service';
 import { ChatSession } from '../models/chat.session';
 import { ChatMessage } from '../models/chat.message.model';
-import { Iresponse } from '../refactor/interface/message.interface';
 
 @scoped(Lifecycle.ContainerScoped)
 export class NeedleService {
@@ -96,7 +95,7 @@ export class NeedleService {
         const telegramBotToken = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN");
         const url = `/bot${telegramBotToken}/${endPoint}`;
         const telegramApi = telegramHost + url;
-        console.log("The telegram URL is:"+ telegramApi);
+        console.log("The telegram URL is:" + telegramApi);
         let response = null;
         try {
             if (method === "get") {
@@ -141,10 +140,10 @@ export class NeedleService {
     saveResponsetoDB = async(responseObject) => {
         // eslint-disable-next-line max-len
         const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
-        const chatSessionModel = await chatSessionRepository.findOne({ 
+        const chatSessionModel = await chatSessionRepository.findOne({
             where : {
-                userPlatformID : responseObject.chat_id 
-            } 
+                userPlatformID : responseObject.chat_id
+            }
         });
         let chatSessionId = null;
         if (chatSessionModel) {
@@ -161,10 +160,11 @@ export class NeedleService {
             userPlatformID : responseObject.userPlatformID,
             intent         : responseObject.intent
         };
+        // eslint-disable-next-line max-len
         const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         await (await chatMessageRepository.create(dfResponseObj)).save();
 
-    }
+    };
 
     createResponseObject = async(channel: string, payload?) => {
         const responseObject = {
@@ -180,5 +180,6 @@ export class NeedleService {
             chat_id        : payload.completeMessage.chat_message_id,
         };
         return responseObject;
-    }
+    };
+
 }
