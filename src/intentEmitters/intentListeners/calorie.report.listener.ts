@@ -36,6 +36,12 @@ export const calorieReport = async ( intent, eventObj ) => {
         const file_url = await awss3Manager.uploadFileToS3(file_upload, bucket_name, cloud_front_path);
         const channel = payload.source.toLowerCase();
 
+        payload.completeMessage.imageUrl = file_url;
+        payload.completeMessage.messageType = 'image';
+        payload.completeMessage.messageBody = null;
+        payload.completeMessage.intent = 'calorie.report.send';
+        console.log("Printing the payload here", payload);
+
         if (channel === 'whatsappmeta' || channel === 'whatsapp'){
             const postDataMeta = {
                 "messaging_product" : "whatsapp",
@@ -47,13 +53,13 @@ export const calorieReport = async ( intent, eventObj ) => {
                 }
             };
             const endPoint = 'messages';
-            await needleService.needleRequestForWhatsappMeta("post", endPoint, postDataMeta);
+            await needleService.needleRequestForWhatsappMeta("post", endPoint, postDataMeta, payload);
         } else {
             const postData = {
                 chat_id : eventObj.body.originalDetectIntentRequest.payload.userId,
                 photo   : encodeURI(file_url),
             };
-            await needleService.needleRequestForTelegram("post", "sendPhoto", postData);
+            await needleService.needleRequestForTelegram("post", "sendPhoto", postData, payload);
         }
     }
 };

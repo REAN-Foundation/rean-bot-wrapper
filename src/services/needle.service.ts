@@ -4,6 +4,10 @@ import { container, inject, Lifecycle, scoped } from 'tsyringe';
 import needle from "needle";
 import { GetHeaders } from './biometrics/get.headers';
 import { getRequestOptions } from '../utils/helper';
+import { EntityManagerProvider } from './entity.manager.provider.service';
+import { ChatSession } from '../models/chat.session';
+import { ChatMessage } from '../models/chat.message.model';
+import { Iresponse } from '../refactor/interface/message.interface';
 
 @scoped(Lifecycle.ContainerScoped)
 export class NeedleService {
@@ -11,7 +15,8 @@ export class NeedleService {
     constructor(
         // eslint-disable-next-line max-len
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
-        @inject(GetHeaders) private getHeaders?: GetHeaders
+        @inject(GetHeaders) private getHeaders?: GetHeaders,
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider
     ) {}
 
     async needleRequestForREAN (method: string, url:string, accessToken?, obj?) {
@@ -57,7 +62,7 @@ export class NeedleService {
         return phoneNumber;
     }
 
-    async needleRequestForWhatsappMeta(method: string, endPoint:string, postDataMeta?){
+    async needleRequestForWhatsappMeta(method: string, endPoint:string, postDataMeta?, payload?){
         const whatsappHost = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
         const options = getRequestOptions();
         const whatsappToken = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
@@ -75,6 +80,8 @@ export class NeedleService {
         }
         console.log("The response is: ", response.body);
         if (response.statusCode === 200 || response.statusCode === 201) {
+            const responseObject = await this.createResponseObject('whatsappMeta', payload);
+            await this.saveResponsetoDB(responseObject);
             console.log('Whatsapp Api is successfull');
         } else {
             throw new Error("Needle Request for Whatsapp MetaFailed");
@@ -83,7 +90,7 @@ export class NeedleService {
         return response.body;
     }
 
-    async needleRequestForTelegram(method: string, endPoint:string, obj?){
+    async needleRequestForTelegram(method: string, endPoint:string, obj?, payload?){
         const telegramHost = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_HOST");
         const options = getRequestOptions();
         const telegramBotToken = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN");
@@ -105,6 +112,8 @@ export class NeedleService {
         }
     
         if (response.statusCode === 200 || response.statusCode === 201) {
+            const responseObject = await this.createResponseObject('Telegram', payload);
+            await this.saveResponsetoDB(responseObject);
             console.log('Telegram Api is successfull');
         } else {
             throw new Error("Failed");
@@ -129,4 +138,47 @@ export class NeedleService {
         });
     }
 
+    saveResponsetoDB = async(responseObject) => {
+        // eslint-disable-next-line max-len
+        const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
+        const chatSessionModel = await chatSessionRepository.findOne({ 
+            where : {
+                userPlatformID : responseObject.chat_id 
+            } 
+        });
+        let chatSessionId = null;
+        if (chatSessionModel) {
+            chatSessionId = chatSessionModel.autoIncrementalID;
+        }
+        const dfResponseObj = {
+            chatSessionID  : chatSessionId,
+            platform       : responseObject.platform,
+            direction      : responseObject.direction,
+            messageType    : responseObject.messageType,
+            messageContent : responseObject.messageContent,
+            imageContent   : responseObject.imageContent,
+            imageUrl       : responseObject.imageUrl,
+            userPlatformID : responseObject.userPlatformID,
+            intent         : responseObject.intent
+        };
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+        await (await chatMessageRepository.create(dfResponseObj)).save();
+
+    }
+
+    createResponseObject = async(channel: string, payload?) => {
+        const responseObject = {
+            chatSessionID  : null,
+            platform       : channel,
+            direction      : 'Out',
+            messageType    : payload.completeMessage.type,
+            messageContent : payload.completeMessage.messageBody,
+            imageContent   : null,
+            imageUrl       : payload.completeMessage.imageUrl,
+            userPlatformID : payload.completeMessage.platformId,
+            intent         : payload.completeMessage.intent,
+            chat_id        : payload.completeMessage.chat_message_id,
+        };
+        return responseObject;
+    }
 }

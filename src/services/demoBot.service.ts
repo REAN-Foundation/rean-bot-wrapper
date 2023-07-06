@@ -26,13 +26,16 @@ export class demoBotService {
                 const sheet_name = sheet_name_list[y];
                 var worksheet = workbook.Sheets[sheet_name];
                 var headers = {};
-
+                headers['Category'] = 'Category';
                 for (const z in worksheet ) {
                     if (z[0] === '!') continue;
 
                     var col = z.substring(0,1);
+                    console.log("Column is", col);
                     var row = parseInt(z.substring(1));
+                    console.log("Row is", row);
                     var value = worksheet[z].v;
+                    console.log("Value is", value);
 
                     if (row === 1) {
                         headers[col] = value;
@@ -41,11 +44,14 @@ export class demoBotService {
 
                     if (!data[row]) data[row] = {};
                     data[row][headers[col]] = value;
+                    data[row][headers['Category']] = sheet_name;
                 }
 
                 data.shift();
                 data.shift();
             }
+            console.log("The excel data is");
+            console.log(data);
             return data;
         } catch (error) {
             console.log(error);
@@ -98,6 +104,7 @@ export class demoBotService {
             const trainingPhrases = [];
 
             const df_resp = messages.Response;
+            const category = messages.Category;
             delete messages.Response;
             for (const phrase in messages) {
 
@@ -121,7 +128,7 @@ export class demoBotService {
                 text : messageText,
             };
 
-            const displayName = `FAQ_${count}`;
+            const displayName = `${category}_FAQ_${count}`;
 
             const intent = {
                 displayName     : displayName,
@@ -134,7 +141,7 @@ export class demoBotService {
                 intent : intent,
             };
 
-            await this.sleep(4000);
+            await this.sleep(2500);
             const [response] = await intentsClient.createIntent(createIntentRequest);
             console.log(`Intent ${response.name} created`);
         }

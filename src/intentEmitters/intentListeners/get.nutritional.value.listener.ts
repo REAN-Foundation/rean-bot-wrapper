@@ -13,7 +13,12 @@ const sendMessageToTelegram = async(messageToPlatform,eventObj) => {
     };
     console.log("postData Telegam", postData);
     const endPoint = `sendMessage`;
-    return await needleService.needleRequestForTelegram("post",endPoint,postData);
+
+    const payload = eventObj.body.originalDetectIntentRequest.payload;
+    payload.completeMessage.messageType = 'text';
+    payload.completeMessage.messageBody = messageToPlatform;
+    payload.completeMessage.intent = 'nutritional.value.send';
+    return await needleService.needleRequestForTelegram("post",endPoint,postData, payload);
 };
 
 export const GetNutritionalValue = async (intent, eventObj) => {
