@@ -155,7 +155,9 @@ export class IntentRegister {
         IntentEmitter.registerListener('HowYouFeel - worse - custom - worse', AppSymptomListener.handleIntent);
         IntentEmitter.registerListener('Medication.Add.InApp', AppMedicationListener.handleIntent);
         IntentEmitter.registerListener('Registration', MaternityCareplanListener.handleIntent );
-        IntentEmitter.registerListener('RegistrationAgree', MaternityCareplanListener.handleEnrollIntent );
+        
+        //IntentEmitter.registerListener('RegistrationAgree', MaternityCareplanListener.handleEnrollIntent );
+
         IntentEmitter.registerListener('Welcome.BloodWarrior', BloodWarriorWelcome);
         IntentEmitter.registerListener('BloodWarrior_Patient', BloodWarriorPatient);
         IntentEmitter.registerListener('BloodWarrior_Donor', BloodWarriorDonor);

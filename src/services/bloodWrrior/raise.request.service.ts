@@ -61,6 +61,7 @@ export class RaiseDonationRequestService {
                         continue;
                     }
                     const donorName = donor.DonorName;
+                    const bloodUnit = donor.QuantityRequired;
                     const donorPhone = this.convertPhoneNoReanToWhatsappMeta(donor.DonorPhone);
                     let lastDonationDate = donor.LastDonationDate ?? null;
                     if (lastDonationDate !== null) {
@@ -69,7 +70,7 @@ export class RaiseDonationRequestService {
                     const object = {
                         PatientUserId     : donor.PatientUserId,
                         NetworkId         : donor.id,
-                        RequestedQuantity : 1,
+                        RequestedQuantity : bloodUnit,
                         RequestedDate     : new Date().toISOString()
                             .split('T')[0]
                     };
@@ -85,7 +86,7 @@ export class RaiseDonationRequestService {
                         },
                         {
                             type : "text",
-                            text : "blood"
+                            text : `${bloodUnit} unit blood`
                         },
                         {
                             type : "text",
@@ -166,7 +167,7 @@ export class RaiseDonationRequestService {
                     },
                     {
                         type : "text",
-                        text : "blood"
+                        text : `${bloodBridge.QuantityRequired} unit blood`
                     },
                     {
                         type : "text",
