@@ -18,7 +18,13 @@ async function keratoplastyNextSteps(intent,eventObj) {
         const kerotoplastyServiceObj: kerotoplastyService = eventObj.container.resolve(kerotoplastyService);
         const needleService: NeedleService = eventObj.container.resolve(NeedleService);
 
+
         const location_response = await kerotoplastyServiceObj.conditionSpecificResponse(intent,eventObj);
+
+        const payload = eventObj.body.originalDetectIntentRequest.payload;
+        payload.completeMessage.messageType = 'text';
+        payload.completeMessage.messageBody = location_response;
+        payload.completeMessage.intent = 'nearest.location.send';
         if (channel === "whatsappMeta") {
             const endPoint = 'messages';
             const postData = {
@@ -30,13 +36,13 @@ async function keratoplastyNextSteps(intent,eventObj) {
                     "body" : location_response
                 }
             };
-            await needleService.needleRequestForWhatsappMeta("post", endPoint, JSON.stringify(postData));
+            await needleService.needleRequestForWhatsappMeta("post", endPoint, JSON.stringify(postData), payload);
         } else if (channel === "telegram") {
             const postData = {
                 chat_id : eventObj.body.originalDetectIntentRequest.payload.userId,
                 text    : location_response
             };
-            await needleService.needleRequestForTelegram("post", "sendMessage", postData);
+            await needleService.needleRequestForTelegram("post", "sendMessage", postData, payload);
         } else {
             throw new Error("Invalid Channel");
         }

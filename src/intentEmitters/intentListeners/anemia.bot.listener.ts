@@ -67,7 +67,11 @@ const sendMessageToWhatsappMeta = async(messageToPlatform,eventObj) => {
             "body" : messageToPlatform
         }
     };
-    await needleService.needleRequestForWhatsappMeta("post", endPoint, JSON.stringify(postData));
+    const payload = eventObj.body.originalDetectIntentRequest.payload;
+    payload.completeMessage.messageType = 'text';
+    payload.completeMessage.messageBody = messageToPlatform;
+    payload.completeMessage.intent = 'nearest.location.send';
+    await needleService.needleRequestForWhatsappMeta("post", endPoint, JSON.stringify(postData), payload);
 };
 
 const sendMessageToTelegram = async(messageToPlatform,eventObj) => {

@@ -10,7 +10,8 @@ const sendMessageToTelegram = async(messageToPlatform,eventObj) => {
     };
     console.log("postData Telegam", postData);
     const endPoint = `sendMessage`;
-    await needleService.needleRequestForTelegram("post",endPoint,postData);
+    const payload = eventObj.body.originalDetectIntentRequest.payload;
+    await needleService.needleRequestForTelegram("post", endPoint, postData, payload);
 };
 
 export const OpenAiListener = async (intent, eventObj) => {
