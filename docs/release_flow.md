@@ -24,11 +24,11 @@
 
 We are using GitFlow Branching [here](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow).
 
-* ```main``` : The main branch serves as the stable and production-ready branch, where all the changes from release branches are merged and tested before deployment.
-* ```develop``` : The develop branch, where all the changes from feature branches are merged 
-* ```feature/*``` : The feature branch, individual features or enhancements are developed on separate branches, allowing for isolated development and easy collaboration before merging.
-* ```release/*``` : The release branch is a branch used for allowing isolated testing and preparation of the release before merging it into the main branch.
-* ```hotfix/*``` : The hotfix branch, hotfixes for critical issues are handled separately by creating dedicated branches and merging them directly into the main branch.
+* ```main```: The main branch serves as the stable and production-ready branch, where all the changes from release branches are merged and tested before deployment.
+* ```develop```: The develop branch, where all the changes from feature branches are merged 
+* ``` feature/*```: The feature branch, individual features, or enhancements are developed on separate branches, allowing for isolated development and easy collaboration before merging.
+* ```release/*```: The release branch is a branch used for allowing isolated testing and preparation of the release before merging it into the main branch.
+* ```hotfix/*```: The hotfix branch, hotfixes for critical issues are handled separately by creating dedicated branches and merging them directly into the main branch.
 
 ## Develop to Main Branch Workflow
 
@@ -38,13 +38,13 @@ The diagram below explains the end-to-end process and stages for promoting the c
 
 ### Develop Branch Workflow
 
-1. Developer will create a Feature branch, create a Pull Request to develop branch which will trigger PR-ci-cd workflow.
-2. After the Pull request merge into develop branch which will Trigger DEV-ci-cd workflow.
+1. Developer will create a Feature branch, and create a Pull Request to develop the branch which will trigger the PR-ci-cd workflow.
+2. After the Pull request merges into develop branch it will Trigger the DEV-ci-cd workflow.
 
 ### Main branch Workflow
 
-1. Developer will create a Release branch, create a Pull Request to main branch which will trigger UAT-ci-cd workflow.
-2. After the Pull request merge into main branch which will trigger PROD-ci-cd workflow.
+1. Developer will create a Release branch, and create a Pull Request to the main branch which will trigger the UAT-ci-cd workflow.
+2. After the Pull request merges into the main branch it will trigger the PROD-ci-cd workflow.
  
 # Release Workflows 
  
