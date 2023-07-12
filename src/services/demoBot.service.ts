@@ -142,7 +142,8 @@ export class demoBotService {
                 console.log(`Intent - ${displayName} - ${response.name} created`);
             }
         }
-        
+
+        console.log("All intents created");
         return true;
 
     }
