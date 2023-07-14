@@ -19,14 +19,14 @@ export class demoBotService {
             var workbook = XLSX.readFile(path);
             var sheet_name_list = workbook.SheetNames;
             console.log("Here in trying to read the excel");
-
-            var data = [];
+            var total_data = [];
 
             for (let y = 0; y < sheet_name_list.length; y++) {
+                var data = [];
                 const sheet_name = sheet_name_list[y];
                 var worksheet = workbook.Sheets[sheet_name];
                 var headers = {};
-
+                headers['Category'] = 'Category';
                 for (const z in worksheet ) {
                     if (z[0] === '!') continue;
 
@@ -41,12 +41,14 @@ export class demoBotService {
 
                     if (!data[row]) data[row] = {};
                     data[row][headers[col]] = value;
+                    data[row][headers['Category']] = sheet_name;
                 }
 
                 data.shift();
                 data.shift();
+                total_data.push(data);
             }
-            return data;
+            return total_data;
         } catch (error) {
             console.log(error);
             console.log('Error reading excel file');
@@ -89,56 +91,59 @@ export class demoBotService {
             await intentsClient.batchDeleteIntents({ parent: projectAgentPath, intents: intents });
         }
 
-        var count = 0;
-
         // Create the intents in the dialogflow
-        for (const messages of excelData){
-            count++;
+        for (const excelSheet of excelData){
+            var count = 0;
+            for (const messages of excelSheet){
+                count++;
 
-            const trainingPhrases = [];
+                const trainingPhrases = [];
 
-            const df_resp = messages.Response;
-            delete messages.Response;
-            for (const phrase in messages) {
+                const df_resp = messages.Response;
+                const category = messages.Category;
+                delete messages.Response;
+                for (const phrase in messages) {
 
-                const part = {
-                    text : messages[phrase]
-                };
-    
-                const trainingPhrase = {
-                    type  : 'EXAMPLE',
-                    parts : [part],
-                };
-    
-                trainingPhrases.push(trainingPhrase);
-            }
-
-            const messageText = {
-                text : [df_resp],
-            };
-
-            const message = {
-                text : messageText,
-            };
-
-            const displayName = `FAQ_${count}`;
-
-            const intent = {
-                displayName     : displayName,
-                trainingPhrases : trainingPhrases,
-                messages        : [message]
-            };
-
-            const createIntentRequest = {
-                parent : projectAgentPath,
-                intent : intent,
-            };
-
-            await this.sleep(4000);
-            const [response] = await intentsClient.createIntent(createIntentRequest);
-            console.log(`Intent ${response.name} created`);
-        }
+                    const part = {
+                        text : messages[phrase]
+                    };
         
+                    const trainingPhrase = {
+                        type  : 'EXAMPLE',
+                        parts : [part],
+                    };
+        
+                    trainingPhrases.push(trainingPhrase);
+                }
+
+                const messageText = {
+                    text : [df_resp],
+                };
+
+                const message = {
+                    text : messageText,
+                };
+
+                const displayName = `${category}_FAQ_${count}`;
+
+                const intent = {
+                    displayName     : displayName,
+                    trainingPhrases : trainingPhrases,
+                    messages        : [message]
+                };
+
+                const createIntentRequest = {
+                    parent : projectAgentPath,
+                    intent : intent,
+                };
+
+                await this.sleep(2500);
+                const [response] = await intentsClient.createIntent(createIntentRequest);
+                console.log(`Intent - ${displayName} - ${response.name} created`);
+            }
+        }
+
+        console.log("All intents created");
         return true;
 
     }

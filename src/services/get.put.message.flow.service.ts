@@ -148,6 +148,10 @@ export class MessageFlow{
             intent         : response_format.intent
         };
 
+        if (msg.type === "template") {
+            chatMessageObj.intent = payload["templateName"];
+        }
+
         const ChatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         const person = ChatMessageRepository.create(chatMessageObj);
         console.log(`DB response ${person}`);
