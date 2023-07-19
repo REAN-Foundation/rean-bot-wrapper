@@ -6,6 +6,7 @@ import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.servi
 import { commonResponseMessageFormat } from '../common.response.format.object';
 import { Iresponse } from '../../refactor/interface/message.interface';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
+import { sendApiButtonService } from '../whatsappmeta.button.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class CreateReminderService {
@@ -59,7 +60,7 @@ export class CreateReminderService {
 
     async sendReminder (body, eventObj) {
         try {
-            const message = `Hi ${body.PersonName}, \n\nThis is a medication reminder to take your *${body.MedicineName}*, on ${body.DayName} at ${body.Time}. \nIt's essential to follow your prescribed dosage and schedule for optimal health and treatment effectiveness. Take care and stay healthy!
+            const message = `Hi ${body.PersonName}, \n\nHave you taken your *${body.MedicineName}*, on this ${body.DayName} at ${body.Time}? \nIt's essential to follow your prescribed dosage and schedule for optimal health and treatment effectiveness. Take care and stay healthy!
             \nRegards\nREAN Foundation`;
 
             // const payload = {};
@@ -78,15 +79,16 @@ export class CreateReminderService {
             // payload["templateName"] = "need_blood_notify_volunteer";
             // payload["languageForSession"] = "en";
             await FireAndForgetService.delay(4000);
+            const payload = await sendApiButtonService(["Yes, I took", "M_Medication_Reminder_Yes", "No, I haven't taken", "M_Medication_Reminder_No"]);
             const previousPayload = eventObj.body.originalDetectIntentRequest.payload;
             const response_format: Iresponse = commonResponseMessageFormat();
             response_format.platform = previousPayload.source;
             response_format.sessionId = body.PersonPhoneNumber;
             response_format.messageText = message;
-            response_format.message_type = "text";
+            response_format.message_type = "interactivebuttons";
 
             this._platformMessageService = eventObj.container.resolve(previousPayload.source);
-            await this._platformMessageService.SendMediaMessage(response_format, null);
+            await this._platformMessageService.SendMediaMessage(response_format, payload);
             
         } catch (error) {
             Logger.instance()
