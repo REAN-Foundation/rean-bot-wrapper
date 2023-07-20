@@ -36,7 +36,8 @@ export class ChangeLanguage{
                     "assamese"  : "as",
                     "odia"      : "or",
                     "french"    : "fr",
-                    "spanish"   : "es"
+                    "spanish"   : "es",
+                    "swahili"   : "sw"
                 };
                 const newLanguageCode = await this.languageCode(newLanguage,listOfLanguages);
                 
