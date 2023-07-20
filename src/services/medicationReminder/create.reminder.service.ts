@@ -25,7 +25,7 @@ export class CreateReminderService {
             const medicineName : string = eventObj.body.queryResult.outputContexts[0].parameters.medicineName;
             const time = eventObj.body.queryResult.outputContexts[0].parameters["time.original"];
             const dayName : string = eventObj.body.queryResult.outputContexts[0].parameters.dayName;
-            const dffMessage = `Welcome ${personName}! \nI have successfully scheduled your medication reminder for *${medicineName}* every ${dayName} at ${time}.
+            const dffMessage = `Hello ${personName}! \nI have successfully scheduled your medication reminder for *${medicineName}* every ${dayName} at ${time}.
             You will receive the reminder at the specified time. If you have any further questions or need assistance in the future, feel free to ask.
             \nTake care and stay healthy!`;
 
@@ -79,7 +79,7 @@ export class CreateReminderService {
             // payload["templateName"] = "need_blood_notify_volunteer";
             // payload["languageForSession"] = "en";
             await FireAndForgetService.delay(4000);
-            const payload = await sendApiButtonService(["Yes, I took", "M_Medication_Reminder_Yes", "No, I haven't taken", "M_Medication_Reminder_No"]);
+            const payload = await sendApiButtonService(["Yes, I have taken", "M_Medication_Reminder_Yes", "No, I haven't taken", "M_Medication_Reminder_No"]);
             const previousPayload = eventObj.body.originalDetectIntentRequest.payload;
             const response_format: Iresponse = commonResponseMessageFormat();
             response_format.platform = previousPayload.source;
