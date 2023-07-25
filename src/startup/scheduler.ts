@@ -34,6 +34,7 @@ export class Scheduler {
             }
         });
     };
+
     private scheduleDataBackup = () => {
         for (const clientName in Scheduler.envSchedules){
             cron.schedule(Scheduler.envSchedules[clientName]['scheduleDataBackup'], () => {
@@ -49,6 +50,5 @@ export class Scheduler {
         }
 
     };
-
 
 }
