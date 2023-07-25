@@ -3,9 +3,9 @@ import { calorieInfo } from '../refactor/interface/message.interface';
 import { CalorieDatabase } from './calorie.db.model';
 
 @Table({
-        timestamps : true,
-        modelName  : 'CalorieInfo',
-        tableName  : 'calorie_info'
+    timestamps : true,
+    modelName  : 'CalorieInfo',
+    tableName  : 'calorie_info'
 })
 
 export class CalorieInfo extends Model implements calorieInfo {
@@ -83,4 +83,5 @@ export class CalorieInfo extends Model implements calorieInfo {
 
     @HasMany(() => CalorieDatabase)
     CalorieDatabase: CalorieDatabase[];
+
 }
