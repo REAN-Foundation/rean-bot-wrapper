@@ -24,7 +24,7 @@ export class CalorieDatabase extends Model implements calorieDatabase {
         message_id: number;
 
     @BelongsTo(() => CalorieInfo)
-    CalorieInfo: CalorieInfo;
+        CalorieInfo: CalorieInfo;
 
     @Index
     @Column({
