@@ -22,7 +22,7 @@ export class CalorieInfo extends Model implements calorieInfo {
         type : DataType.STRING,
         allowNull : true
     })
-        user_id: string
+        user_id: string;
 
     @Index
     @Column({
