@@ -91,10 +91,30 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
                 if (needleResp.statusCode === 200) {
                     const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
                     const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.sessionId } });
-                    const id = respChatMessage[respChatMessage.length - 1].id;
-                    await chatMessageRepository.update({ whatsappResponseMessageId: needleResp.body.messages[0].id }, { where: { id: id } } )
-                        .then(() => { console.log("updated"); })
-                        .catch(error => console.log("error on update", error));
+                    if (respChatMessage.length > 0) {
+                        const id = respChatMessage[respChatMessage.length - 1].id;
+                        await chatMessageRepository.update({ responseMessageID: needleResp.body.messages[0].id }, { where: { id: id } } )
+                            .then(() => { console.log("updated"); })
+                            .catch(error => console.log("error on update", error));
+
+                        //Added else for those who haven't send any message on bot(blood warrior)
+                    } else {
+                        const chatMessageObj = {
+                            chatSessionID     : response_format.chat_message_id,
+                            responseMessageID : needleResp.body.messages[0].id,
+                            platform          : response_format.platform,
+                            direction         : response_format.direction,
+                            messageType       : response_format.message_type,
+                            messageContent    : response_format.messageText,
+                            imageContent      : response_format.messageBody,
+                            imageUrl          : response_format.messageImageUrl,
+                            userPlatformID    : response_format.sessionId,
+                            intent            : payload.templateName
+                        };
+                        await chatMessageRepository.create(chatMessageObj)
+                            .then(() => { console.log("created"); })
+                            .catch(error => console.log("error on create chatMessage entry", error));
+                    }
                     return needleResp;
                 }
             }

@@ -1,9 +1,9 @@
 /* eslint-disable max-len */
-import { UserFeedback } from "../models/user.feedback.model";
 import { delay, inject, Lifecycle, scoped } from "tsyringe";
 import { SlackMessageService } from "./slack.message.service";
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 import { EntityManagerProvider } from "./entity.manager.provider.service";
+import { ChatMessage } from "../models/chat.message.model";
 
 @scoped(Lifecycle.ContainerScoped)
 export class HumanHandoff {
@@ -37,10 +37,10 @@ export class HumanHandoff {
     async humanHandover(eventObj){
         return new Promise(async(resolve) =>{
             const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
-            const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(UserFeedback);
-            const resp = await userFeedbackRepository.findAll({ where: { userId: userId } });
+            const chatMessageRepository = (await (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage));
+            const resp = await chatMessageRepository.findAll({ where: { userPlatformID: userId } });
             const objID = resp[resp.length - 1].id;
-            await userFeedbackRepository.update({ humanHandoff: "true" }, { where: { id: objID } } )
+            await chatMessageRepository.update({ humanHandoff: "true" }, { where: { id: objID } } )
                 .then(() => { console.log("updated"); })
                 .catch(error => console.log("error on update", error));
             const reply = "Our expert will connect to you soon";
@@ -56,7 +56,7 @@ export class HumanHandoff {
                 ]
             };
             resolve(data);
-            const ts = resp[resp.length - 1].ts;
+            const ts = resp[resp.length - 1].supportChannelTaskID;
             
             // console.log("ts", ts);
             await this.slackMessageService.delayedInitialisation();

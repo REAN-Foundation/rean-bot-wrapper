@@ -3,7 +3,6 @@
 import { Iresponse, Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { ChatMessage } from '../models/chat.message.model';
-import { UserFeedback } from '../models/user.feedback.model';
 import { scoped, Lifecycle, inject } from 'tsyringe';
 import { SlackClickupCommonFunctions } from './slackAndCkickupSendCustomMessage';
 import { EntityManagerProvider } from './entity.manager.provider.service';
@@ -91,8 +90,8 @@ export class ClickUpMessageService implements platformServiceInterface {
     }
 
     async eventComment(requestBody,tag) {
-        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(UserFeedback);
-        const data = await userFeedbackRepository.findOne({ where: { taskID: requestBody.task_id } });
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+        const data = await chatMessageRepository.findOne({ where: { supportChannelTaskID: requestBody.task_id } });
         console.log("data", data);
         const filterText = (requestBody.history_items[0].comment.text_content).replace(tag, '');
         let textToUser = `Our experts have responded to your query. \nYour Query: ${data.messageContent} \nExpert: ${filterText}`;
@@ -101,20 +100,20 @@ export class ClickUpMessageService implements platformServiceInterface {
             textToUser = message_from_secret + `\n ${filterText}`;
         }
         console.log("textToUser", textToUser);
-        await this.slackClickupCommonFunctions.sendCustomMessage(data.channel, data.userId, textToUser);
+        await this.slackClickupCommonFunctions.sendCustomMessage(data.platform, data.userPlatformID, textToUser);
     }
 
     async eventStatusUpdated(requestBody) {
         const contactMail = "example@gmail.com";
-        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(UserFeedback);
-        const data = await userFeedbackRepository.findOne({ where: { taskID: requestBody.task_id } });
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+        const data = await chatMessageRepository.findOne({ where: { supportChannelTaskID: requestBody.task_id } });
         console.log("data", data);
         let textToUser = `As our expert have provided their insight, we are closing the ticket. If you are still unsatisfied with the answer provided, contact us at ${contactMail}`;
         if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_TICKET_CLOSE_RESPONSE_MESSAGE")){
             textToUser = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_TICKET_CLOSE_RESPONSE_MESSAGE");
         }
         console.log("textToUser", textToUser);
-        await this.slackClickupCommonFunctions.sendCustomMessage(data.channel, data.userId, textToUser);
+        await this.slackClickupCommonFunctions.sendCustomMessage(data.platform, data.userPlatformID, textToUser);
     }
 
 }

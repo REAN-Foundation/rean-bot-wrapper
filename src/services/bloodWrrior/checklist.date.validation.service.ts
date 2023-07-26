@@ -30,12 +30,13 @@ export class ChecklistDateValidationService {
                 let donationDate = requestBody.Data.DonationRecord.Items[0].DonationDetails.NextDonationDate;
                 const volunteerUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.VolunteerUserId;
                 const patientUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.PatientUserId;
+                const requestedQuantity = requestBody.Data.DonationRecord.Items[0].DonationDetails.QuantityRequired;
                 let dffMessage = "";
                 if (transfusionDate.split("T")[0] === donationDate.split("T")[0]) {
                     dffMessage = `Date Validation Success. \nHere are your donation details.`;
 
                     const stringDonationDate = new Date(donationDate.split("T")[0]).toDateString();
-                    const message = ` *Donor Name:* ${donor.DisplayName}, \n *Blood Group:* ${donor.BloodGroup}, \n *Donation Date:* ${stringDonationDate}`;
+                    const message = ` *Donor Name:* ${donor.DisplayName}, \n *Blood Group:* ${donor.BloodGroup}, \n *Required Quantity:* ${requestedQuantity} unit, \n *Donation Date:* ${stringDonationDate}`;
 
                     resolve( { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage + '\n' + message] } }] } });
 

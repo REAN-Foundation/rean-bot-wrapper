@@ -1,4 +1,5 @@
-import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, Index, ForeignKey, BelongsTo } from 'sequelize-typescript';
+/* eslint-disable indent */
+import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, AllowNull, Index, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { calorieDatabase } from '../refactor/interface/message.interface';
 import { CalorieInfo } from './calorie.info.model';
 
@@ -24,7 +25,7 @@ export class CalorieDatabase extends Model implements calorieDatabase {
         message_id: number;
 
     @BelongsTo(() => CalorieInfo)
-        CalorieInfo: CalorieInfo;
+    CalorieInfo: CalorieInfo;
 
     @Index
     @Column({
@@ -54,5 +55,4 @@ export class CalorieDatabase extends Model implements calorieDatabase {
         allowNull : true
     })
         meta_data: string;
-        
 }

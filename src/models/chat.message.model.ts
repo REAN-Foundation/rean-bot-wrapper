@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { IchatMessage } from '../refactor/interface/message.interface';
 import { ChatSession } from './chat.session';
@@ -83,13 +84,8 @@ export class ChatMessage extends Model implements IchatMessage {
     @Column({
         type : DataType.STRING(1024)
     })
-        whatsappResponseMessageId: string;
-        
-    @Column({
-        type : DataType.STRING(1024)
-    })
-        telegramResponseMessageId : string;
-
+        responseMessageID: string;
+    
     @Column({
         type : DataType.DATE
     })
@@ -104,5 +100,25 @@ export class ChatMessage extends Model implements IchatMessage {
         type : DataType.DATE
     })
         whatsappResponseStatusReadTimestamp : Date;
+    
+    @Column({
+        type : DataType.STRING
+    })
+        supportchannelName : string;
+
+    @Column({
+        type : DataType.STRING
+    })
+        supportChannelTaskID : string;
+    
+    @Column({
+        type : DataType.BOOLEAN
+    })
+        humanHandoff : string;
+
+    @Column({
+        type : DataType.STRING
+    })
+        feedbackType: string;
 
 }

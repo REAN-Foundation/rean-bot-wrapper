@@ -17,20 +17,19 @@ export class RHGMessageToDialogflow{
                 if (rhgRequestBodyObj.isText() === true) {
                     const message = rhgRequestBodyObj.getMessage();
                     messagetoDialogflow = {
-                        name                      : null,
-                        platform                  : "Rean_Support",
-                        chat_message_id           : null,
-                        direction                 : "In",
-                        messageBody               : message,
-                        imageUrl                  : null,
-                        platformId                : phoneNumber,
-                        replyPath                 : phoneNumber,
-                        latlong                   : null,
-                        type                      : 'text' ,
-                        intent                    : null,
-                        whatsappResponseMessageId : null,
-                        contextId                 : null,
-                        telegramResponseMessageId : null
+                        name              : null,
+                        platform          : "Rean_Support",
+                        chat_message_id   : null,
+                        direction         : "In",
+                        messageBody       : message,
+                        imageUrl          : null,
+                        platformId        : phoneNumber,
+                        replyPath         : phoneNumber,
+                        latlong           : null,
+                        type              : 'text' ,
+                        intent            : null,
+                        responseMessageID : null,
+                        contextId         : null
                     };
                 }
             }

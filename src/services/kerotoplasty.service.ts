@@ -4,9 +4,9 @@ import { inject, Lifecycle, scoped } from "tsyringe";
 import { ClickUpTask } from "./clickup/clickup.task";
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import path from 'path';
-import { UserFeedback } from "../models/user.feedback.model";
 import needle from 'needle';
 import { EntityManagerProvider } from "./entity.manager.provider.service";
+import { ChatMessage } from "../models/chat.message.model";
 
 @scoped(Lifecycle.ContainerScoped)
 export class kerotoplastyService {
@@ -74,8 +74,9 @@ export class kerotoplastyService {
             message = `Your situation seems normal.\n Please visit us at our nearest center if there is drop in vision or severe pain in your operated eye.\n Your Possible nearest centers are: \n 1. ${address_1}  \n 2. ${address_2}\n 3. ${address_3} \n 4. ${address_4}`;
             break;
         }
-        } 
+        }
         
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const responseToSend = this.DialogflowServices.making_response(message);
         console.log("Our location data is being sent!!!!");
         return message;
@@ -115,34 +116,32 @@ export class kerotoplastyService {
         const user_details = await this.getEMRDetails(parameters.medicalRecordNumber, eventObj);
         const topic =  parameters.medicalRecordNumber;
         // eslint-disable-next-line max-len
-        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(UserFeedback);
-        const responseUserFeedback = await userFeedbackRepository.findAll({ where: { userId: payload.userId } });
-        if (responseUserFeedback[responseUserFeedback.length - 1]){
-            const object = responseUserFeedback[responseUserFeedback.length - 1];
-            console.log("in the first if");
-            if (object.taskID) {
-                console.log("in the 2 if");
-                const taskID = responseUserFeedback[responseUserFeedback.length-1].taskID;
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+        const responseChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: payload.userId } });
+        if (responseChatMessage[responseChatMessage.length - 1]){
+            // eslint-disable-next-line max-len
+            if (responseChatMessage.some((checkArray) => checkArray.supportChannelTaskID !== null && checkArray.supportChannelTaskID !== undefined)) {
+                const taskID = responseChatMessage[responseChatMessage.length - 1].supportChannelTaskID;
                 await this.clickUpTask.updateTask(taskID,priority,user_details);
                 await this.clickUpTask.taskAttachment(taskID,attachmentPath);
                 await this.clickUpTask.postCommentOnTask(taskID,symptomComment);
-            } 
+            }
             else
             {
-                const taskID = await this.clickUpTask.createTask(null, responseUserFeedback, topic, user_details, priority);
+                const taskID = await this.clickUpTask.createTask(responseChatMessage, topic, user_details, priority);
                 await this.clickUpTask.taskAttachment(taskID, attachmentPath);
                 await this.clickUpTask.postCommentOnTask(taskID, symptomComment);
-                await userFeedbackRepository.create({ userId: payload.userId, taskID: taskID, channel: payload.source, humanHandoff: "false" });
+                await chatMessageRepository.update({ supportChannelTaskID: taskID, humanHandoff: "false" }, { where: { id: responseChatMessage[responseChatMessage.length - 1].id } });
 
-            }           
+            }
         }
         else
         {
-            const taskID = await this.clickUpTask.createTask(null, responseUserFeedback, topic, user_details, priority);
+            const taskID = await this.clickUpTask.createTask(responseChatMessage, topic, user_details, priority);
             await this.clickUpTask.taskAttachment(taskID, attachmentPath);
             await this.clickUpTask.postCommentOnTask(taskID, symptomComment);
             console.log("we are Here");
-            await userFeedbackRepository.create({ userId: payload.userId, taskID: taskID, channel: payload.source, humanHandoff: "false" });
+            await chatMessageRepository.update({ supportChannelTaskID: taskID, humanHandoff: "false" }, { where: { id: responseChatMessage[responseChatMessage.length - 1].id } });
         }
 
     }

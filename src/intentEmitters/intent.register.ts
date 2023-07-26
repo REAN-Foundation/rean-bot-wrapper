@@ -57,6 +57,11 @@ import { ScheduleOneTimeTakeValuesListener } from './intentListeners/bloodWarrio
 import { RegisterAllProfileListener } from './intentListeners/bloodWarrior/register.all.profile.listener';
 import { RaiseRequestNoNotifyVolunteer } from './intentListeners/bloodWarrior/raise.request.no.listener';
 import { FeelingUnwellNotifyVolunteer } from './intentListeners/bloodWarrior/feeling.unwell.noyify.volunteer.listener';
+import { OpenAiListener } from './intentListeners/openAi.listener';
+import { GetNutritionalValue } from './intentListeners/get.nutritional.value.listener';
+import { NeedBloodListener } from './intentListeners/bloodWarrior/need.blood.listener';
+import { NeedBloodPatientYesListener } from './intentListeners/bloodWarrior/need.blood.patient.yes.listener';
+import { CreateReminderListener } from './intentListeners/medicationReminder/create.reminder.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -109,6 +114,10 @@ export class IntentRegister {
         IntentEmitter.registerListener('calorie.report.creation', calorieReport);
         IntentEmitter.registerListener('CalorieNegativeFeedback - yes', CalorieUpdate);
 
+        //hybrid model
+        IntentEmitter.registerListener('testing-hybrid',OpenAiListener);
+        IntentEmitter.registerListener('get_nutritional_values',GetNutritionalValue);
+
         //Intents for Post Operative Eye Care Symptom tracking
         IntentEmitter.registerListener('userDetails', eyeSymptomAssessment);
         IntentEmitter.registerListener('DifficultLookingatLight',eyeSymptomAssessment);
@@ -149,7 +158,9 @@ export class IntentRegister {
         IntentEmitter.registerListener('HowYouFeel - worse - custom - worse', AppSymptomListener.handleIntent);
         IntentEmitter.registerListener('Medication.Add.InApp', AppMedicationListener.handleIntent);
         IntentEmitter.registerListener('Registration', MaternityCareplanListener.handleIntent );
-        IntentEmitter.registerListener('RegistrationAgree', MaternityCareplanListener.handleEnrollIntent );
+        
+        //IntentEmitter.registerListener('RegistrationAgree', MaternityCareplanListener.handleEnrollIntent );
+
         IntentEmitter.registerListener('Welcome.BloodWarrior', BloodWarriorWelcome);
         IntentEmitter.registerListener('BloodWarrior_Patient', BloodWarriorPatient);
         IntentEmitter.registerListener('BloodWarrior_Donor', BloodWarriorDonor);
@@ -190,6 +201,9 @@ export class IntentRegister {
         IntentEmitter.registerListener('Send_OneTimeDonor', SelectBloodGroupListener);
         IntentEmitter.registerListener('Register_Volunteer', RegisterAllProfileListener);
         IntentEmitter.registerListener('Feeling_Unwell', FeelingUnwellNotifyVolunteer);
+        IntentEmitter.registerListener('Need_Blood', NeedBloodListener);
+        IntentEmitter.registerListener('NeedBlood_Patient_Confirm_Yes', NeedBloodPatientYesListener);
+        IntentEmitter.registerListener('M_Medication_Data_Yes', CreateReminderListener);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);

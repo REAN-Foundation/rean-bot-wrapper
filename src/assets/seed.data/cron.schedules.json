@@ -1,0 +1,17 @@
+{ 
+    "LOCAL":{
+
+    },
+
+    "DEVELOPMENT":{
+    },
+
+    "UAT":{
+    },
+
+    "PROD":{
+        "PENPLUS":{
+            "scheduleDataBackup": "0 0 * * * "
+        }
+    }
+}

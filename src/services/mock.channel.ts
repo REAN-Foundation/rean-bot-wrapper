@@ -158,10 +158,10 @@ export class MockMessageService implements platformServiceInterface {
         const mock_input_message = message.messageBody;
         const mock_user_name = message.name;
         const mock_chat_message_id = message.chat_message_id;
-        const image = processedResponse.message_from_dialoglow.getImageObject();
-        const pasrseMode = processedResponse.message_from_dialoglow.getParseMode();
-        const payload = processedResponse.message_from_dialoglow.getPayload();
-        const intent = processedResponse.message_from_dialoglow.getIntent();
+        const image = processedResponse.message_from_nlp.getImageObject();
+        const pasrseMode = processedResponse.message_from_nlp.getParseMode();
+        const payload = processedResponse.message_from_nlp.getPayload();
+        const intent = processedResponse.message_from_nlp.getIntent();
 
         if (processedResponse) {
             if (image && image.url) {

@@ -28,6 +28,16 @@ export class translateService{
 
     private translateGlossaryId: string;
 
+    async getDialogflowLanguage(){
+        if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("DIALOGFLOW_DEFAULT_LANGUAGE_CODE")){
+            return this.clientEnvironmentProviderService.getClientEnvironmentVariable("DIALOGFLOW_DEFAULT_LANGUAGE_CODE");
+        }
+        else {
+            return "en";
+        }
+
+    }
+
     detectLanguage = async (message:string) => {
 
         //this is a temp solution for detecting the "hindi" and "Hindi" as english as Google translate detects it as Filipino
@@ -46,6 +56,7 @@ export class translateService{
     };
 
     translateMessage = async (messageType, message:string, sessionId) => {
+        const defultLanguage = await this.getDialogflowLanguage();
         const translate = new v2.Translate(this.obj);
         const languageForSession = await this.userLanguage.setLanguageForSession(messageType, sessionId, message);
         console.log("languageForSession", languageForSession);
@@ -54,12 +65,12 @@ export class translateService{
         //     console.log({ message, detected_language });
         //     return { message, detected_language };
         // }
-        if (languageForSession !== 'en') {
-            const target = 'en';
+        if (languageForSession !== defultLanguage) {
+            const target = defultLanguage;
             const [translation] = await translate.translate(message, target);
             message = translation;
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            dialogflow_language = "en-US";
+            dialogflow_language = defultLanguage;
         }
 
         console.log("exited the translate msg");
@@ -98,6 +109,7 @@ export class translateService{
     };
 
     detectUsersLanguage = async ( phoneNumber: string) => {
+        const defultLanguage = await this.getDialogflowLanguage();
         try {
             let languageForSession = await this.userLanguage.getPreferredLanguageofSession(phoneNumber);
             console.log("languageForSession before", languageForSession);
@@ -108,16 +120,17 @@ export class translateService{
 
         } catch (e) {
             console.log("catch translate", e);
-            return "en";
+            return defultLanguage;
         }
     };
 
     translateResponse = async (responseMessage: string[], detected_language: string) => {
         console.log(`entered the translateResponse of translateService JJJJJJJJJJJ`);
+        const defultLanguage = await this.getDialogflowLanguage();
         const translate = new v2.Translate(this.obj);
         this.translateGlossaryId = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TRANSLATE_GLOSSARY");
         try {
-            if (detected_language !== 'en') {
+            if (detected_language !== defultLanguage) {
                 if (this.translateGlossaryId) {
                     this.translated_message = await this.translateTextWithGlossary(responseMessage[0], detected_language, translate); 
                 } else {

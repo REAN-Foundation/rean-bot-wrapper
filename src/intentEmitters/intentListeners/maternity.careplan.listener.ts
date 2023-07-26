@@ -1,5 +1,4 @@
 import { RegistrationService } from "../../services/maternalCareplan/registration.service";
-import { EnrollService } from "../../services/maternalCareplan/enroll.service";
 
 export class MaternityCareplanListener {
 
@@ -7,36 +6,40 @@ export class MaternityCareplanListener {
         const _registrationService:  RegistrationService = eventObj.container.resolve(RegistrationService);
         try {
 
-            const response = await _registrationService.registrationService(eventObj);
+            const response  = await _registrationService.registrationService(eventObj);
 
             if (!response) {
                 throw new Error('Maternity careplan registration service error!');
-                
+
             }
-            
-            return response.message;
+
+            return response;
         } catch (error) {
             throw new Error(`Handle maternity careplan intent ${error}`);
         }
 
     };
 
-    public static handleEnrollIntent = async (_intent, eventObj) => {
-        const _enrollService:  EnrollService = eventObj.container.resolve(EnrollService);
-        try {
+    // public static handleEnrollIntent = async (_intent, eventObj) => {
+    //     const _enrollService:  EnrollService = eventObj.container.resolve(EnrollService);
+    //     try {
 
-            const response = await _enrollService.enrollService(eventObj);
+    //         const response = await _enrollService.enrollService(eventObj);
 
-            if (!response) {
-                throw new Error('Maternity careplan enrollment service error!');
+    //         if (!response) {
+    //             throw new Error('Maternity careplan enrollment service error!');
                 
-            }
+    //         }
             
-            return response.message;
-        } catch (error) {
-            throw new Error(`Handle maternity careplan enrollment intent error: ${error}`);
-        }
+    //         return response.message;
+    //     } catch (error) {
+    //         throw new Error(`Handle maternity careplan enrollment intent error: ${error}`);
+    //     }
 
-    };
+    // };
 
+}
+
+export interface Response {
+    message: any;
 }

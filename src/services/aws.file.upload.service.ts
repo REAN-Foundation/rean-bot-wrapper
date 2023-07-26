@@ -141,21 +141,31 @@ export class AwsS3manager{
         
     };
 
-    async uploadFileToS3 (filePath) {
+    async uploadFileToS3 (
+        filePath, 
+        bucket_name : string = process.env.BUCKET_NAME, 
+        cloudFrontPath : string = process.env.CLOUD_FRONT_PATH) {
+
+        console.log('File path is:' + filePath + ' Bucket Name is:' + bucket_name + ' Cloud front path name is' + cloudFrontPath);
+
         const responseCredentials: any = await this.getCrossAccountCredentials();
-        const BucketName = process.env.BUCKET_NAME;
-        const cloudFrontPath = process.env.CLOUD_FRONT_PATH;
+        const BucketName = bucket_name;
         const cloudFrontPathSplit = cloudFrontPath.split("/");
         const s3 = new AWS.S3(responseCredentials);
         try {
             this.readFileAndReturnAwsUploadParams(filePath, cloudFrontPathSplit, BucketName);
-            s3.upload(this.params, function (err) {
+            await s3.upload(this.params, function (err) {
                 if (err) {
                     console.log(err);
                 }
-            });
-            const location = process.env.CLOUD_FRONT_PATH + this.fileName;
-            return (await this.signedUrls.getSignedUrl(location));
+            }).promise();
+            const location = cloudFrontPath + this.fileName;
+            if (BucketName != process.env.BUCKET_NAME){
+                return location;
+            } else {
+                const signedUrl = await this.signedUrls.getSignedUrl(location);
+                return signedUrl;
+            }
         } catch (err) {
             console.error(err);
         }

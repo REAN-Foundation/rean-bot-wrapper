@@ -54,15 +54,15 @@ export class ClientWebhookController {
             if (status) {
                 const date = new Date(parseInt(status[0].timestamp) * 1000);
                 if (status[0].status === "sent") {
-                    await chatMessageRepository.update({ whatsappResponseStatusSentTimestamp: date },{ where: { whatsappResponseMessageId: status[0].id } });
+                    await chatMessageRepository.update({ whatsappResponseStatusSentTimestamp: date },{ where: { responseMessageID: status[0].id } });
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message is sent successfully!', "");
                 }
                 else if (status[0].status === "delivered") {
-                    await chatMessageRepository.update({ whatsappResponseStatusDeliveredTimestamp: date },{ where: { whatsappResponseMessageId: status[0].id } });
+                    await chatMessageRepository.update({ whatsappResponseStatusDeliveredTimestamp: date },{ where: { responseMessageID: status[0].id } });
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message is delivered successfully!', "");
                 }
                 else if (status[0].status === "read") {
-                    await chatMessageRepository.update({ whatsappResponseStatusReadTimestamp: date },{ where: { whatsappResponseMessageId: status[0].id } });
+                    await chatMessageRepository.update({ whatsappResponseStatusReadTimestamp: date },{ where: { responseMessageID: status[0].id } });
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message is read successfully!', "");
                 }
                 else {
@@ -116,18 +116,17 @@ export class ClientWebhookController {
             if (statuses) {
                 const date = new Date(parseInt(statuses[0].timestamp) * 1000);
                 if (statuses[0].status === "sent") {
-                    await chatMessageRepository.update({ whatsappResponseStatusSentTimestamp: date },{ where: { whatsappResponseMessageId: statuses[0].id } })
+                    await chatMessageRepository.update({ whatsappResponseStatusSentTimestamp: date },{ where: { responseMessageID: statuses[0].id } })
                         .then(() => { console.log("Sent timestamp entered in database"); });
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', "");
                 }
                 else if (statuses[0].status === "delivered") {
-                    await chatMessageRepository.update({ whatsappResponseStatusDeliveredTimestamp: date },{ where: { whatsappResponseMessageId: statuses[0].id } })
+                    await chatMessageRepository.update({ whatsappResponseStatusDeliveredTimestamp: date },{ where: { responseMessageID: statuses[0].id } })
                         .then(() => { console.log("Delivered timestamp of entered in database"); });
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message delivered successfully!', "");
                 }
                 else if (statuses[0].status === "read") {
-
-                    await chatMessageRepository.update({ whatsappResponseStatusReadTimestamp: date },{ where: { whatsappResponseMessageId: statuses[0].id } })
+                    await chatMessageRepository.update({ whatsappResponseStatusReadTimestamp: date },{ where: { responseMessageID: statuses[0].id } })
                         .then(() => { console.log("Read timestamp of entered in database"); });
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message read successfully!', "");
                 }

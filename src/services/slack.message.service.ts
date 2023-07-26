@@ -4,10 +4,10 @@ import { platformServiceInterface } from '../refactor/interface/platform.interfa
 import { Imessage, Iresponse } from '../refactor/interface/message.interface';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import { ResponseHandler } from '../utils/response.handler';
-import { UserFeedback } from '../models/user.feedback.model';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { SlackClickupCommonFunctions } from './slackAndCkickupSendCustomMessage';
 import { EntityManagerProvider } from './entity.manager.provider.service';
+import { ChatMessage } from '../models/chat.message.model';
 
 @scoped(Lifecycle.ContainerScoped)
 export class SlackMessageService implements platformServiceInterface {
@@ -52,11 +52,12 @@ export class SlackMessageService implements platformServiceInterface {
             else {
                 console.log("child message");
                 // eslint-disable-next-line max-len
-                const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(UserFeedback);
-                const data = await userFeedbackRepository.findOne({ where: { ts: message.event.thread_ts } });
-                const contact = data.userId;
+                const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+                // eslint-disable-next-line max-len
+                const data = await chatMessageRepository.findOne({ where: { supportChannelTaskID: message.event.thread_ts } });
+                const contact = data.userPlatformID;
                 const humanHandoff = data.humanHandoff;
-                const channel = data.channel;
+                const channel = data.platform;
                 if (humanHandoff === "true"){
                     console.log("child message HH On");
                     
@@ -65,7 +66,7 @@ export class SlackMessageService implements platformServiceInterface {
 
                         //This text from support will update the humanHandOff attribute to false at the end of the chat
                         if (message.event.text === "Exit" || message.event.text === "exit"){
-                            await userFeedbackRepository.update({ humanHandoff: "false" }, { where: { id: data.id } } )
+                            await chatMessageRepository.update({ humanHandoff: "false" }, { where: { id: data.id } } )
                                 .then(() => { console.log("updated"); })
                                 .catch(error => console.log("error on update", error));
 
@@ -102,14 +103,17 @@ export class SlackMessageService implements platformServiceInterface {
         return message;
     }
 
-    async postMessage(response) {
-        const objID = response[response.length - 1].dataValues.id;
-        const topic = response[response.length - 1].dataValues.messageContent;
-        this.delayedInitialisation();
-        const message = await this.client.chat.postMessage({ channel: this.channelID, text: topic });
+    async postMessage(response, topic = null) {
+        let messageContent = response[response.length - 1].dataValues.messageContent;
+        messageContent = (topic !== null) ? topic : messageContent;
         // eslint-disable-next-line max-len
-        const userFeedbackRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(UserFeedback);
-        await userFeedbackRepository.update({ ts: message.ts }, { where: { id: objID } })
+        const objID = (topic !== null) ? response[response.length - 2].dataValues.id : response[response.length - 1].dataValues.id;
+        
+        this.delayedInitialisation();
+        const message = await this.client.chat.postMessage({ channel: this.channelID, text: messageContent });
+        // eslint-disable-next-line max-len
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+        await chatMessageRepository.update({ supportChannelTaskID: message.ts }, { where: { id: objID } })
             .then(() => { console.log("updated"); })
             .catch(error => console.log("error on update", error));
     }
