@@ -1,6 +1,8 @@
 import * as asyncLib from 'async';
 import { Lifecycle, scoped, inject } from 'tsyringe';
 import { RegistrationService } from './maternalCareplan/registration.service';
+import { NeedBloodService } from './bloodWrrior/need.blood.service';
+import { CreateReminderService } from './medicationReminder/create.reminder.service';
 
 export interface QueueDoaminModel {
     Intent : string;
@@ -35,6 +37,8 @@ export class FireAndForgetService {
         });
     };
 
+    public static delay = ms => new Promise(res => setTimeout(res, ms));
+
     //#region Private static methods
 
     private static queueTask = async(model: QueueDoaminModel) => {
@@ -44,6 +48,18 @@ export class FireAndForgetService {
             const _registrationService:  RegistrationService = eventObj.container.resolve(RegistrationService);
             await _registrationService.enrollPatientService(model.Body.PatientUserId,
                 model.Body.Name,model.Body.LMP, eventObj );
+            console.log(`Fire and Forget Domain Model: ${model}`);
+        }
+        if (model.Intent === "NeedBlood_Patient_Confirm_Yes") {
+            const eventObj = model.Body.EventObj;
+            const _needBloodService:  NeedBloodService = eventObj.container.resolve(NeedBloodService);
+            await _needBloodService.needBloodNotifyVolunteer(model.Body, eventObj );
+            console.log(`Fire and Forget Domain Model: ${model}`);
+        }
+        if (model.Intent === "M_Medication_Data_Yes") {
+            const eventObj = model.Body.EventObj;
+            const _createReminderService:  CreateReminderService = eventObj.container.resolve(CreateReminderService);
+            await _createReminderService.sendReminder(model.Body, eventObj );
             console.log(`Fire and Forget Domain Model: ${model}`);
         }
     };

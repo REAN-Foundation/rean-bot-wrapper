@@ -59,6 +59,9 @@ import { RaiseRequestNoNotifyVolunteer } from './intentListeners/bloodWarrior/ra
 import { FeelingUnwellNotifyVolunteer } from './intentListeners/bloodWarrior/feeling.unwell.noyify.volunteer.listener';
 import { OpenAiListener } from './intentListeners/openAi.listener';
 import { GetNutritionalValue } from './intentListeners/get.nutritional.value.listener';
+import { NeedBloodListener } from './intentListeners/bloodWarrior/need.blood.listener';
+import { NeedBloodPatientYesListener } from './intentListeners/bloodWarrior/need.blood.patient.yes.listener';
+import { CreateReminderListener } from './intentListeners/medicationReminder/create.reminder.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -198,6 +201,9 @@ export class IntentRegister {
         IntentEmitter.registerListener('Send_OneTimeDonor', SelectBloodGroupListener);
         IntentEmitter.registerListener('Register_Volunteer', RegisterAllProfileListener);
         IntentEmitter.registerListener('Feeling_Unwell', FeelingUnwellNotifyVolunteer);
+        IntentEmitter.registerListener('Need_Blood', NeedBloodListener);
+        IntentEmitter.registerListener('NeedBlood_Patient_Confirm_Yes', NeedBloodPatientYesListener);
+        IntentEmitter.registerListener('M_Medication_Data_Yes', CreateReminderListener);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
