@@ -91,8 +91,8 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
 
                 //improve this DB query
                 if (needleResp.statusCode === 200) {
-
-                    if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_Service")) {
+                    console.log(`QA_SERVICE Flag: ${this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE")}`);
+                    if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE")) {
                         console.log("Providing QA service through clickUp");
                         await this.logsQAService.logMesssages(response_format);
                     }
