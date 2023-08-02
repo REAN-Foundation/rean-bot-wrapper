@@ -33,7 +33,7 @@ import { BloodWarriorPatient } from './intentListeners/bloodWarrior/patient.list
 import { BloodWarriorDonor } from './intentListeners/bloodWarrior/donor.listener';
 import { BloodWarriorNewUser } from './intentListeners/bloodWarrior/new.userlistener';
 import { BloodWarriorPatientEnroll } from './intentListeners/bloodWarrior/patient.enroll.listener';
-import { ChangeTransfusionDate } from './intentListeners/bloodWarrior/change.tf.date.listener';
+import { ChangeTransfusionDate, GiveTransfusionDate } from './intentListeners/bloodWarrior/change.tf.date.listener';
 import { kerotoplastyConditionIdentificationListener} from './intentListeners/kerotoplasty.bot.condition.Identification.listener';
 import { kerotoplastyLocationListener } from './intentListeners/kerotoplasty.find.nearest.location.listener';
 import { BloodWarriorMenu } from './intentListeners/bloodWarrior/menu.listener';
@@ -204,6 +204,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('Need_Blood', NeedBloodListener);
         IntentEmitter.registerListener('NeedBlood_Patient_Confirm_Yes', NeedBloodPatientYesListener);
         IntentEmitter.registerListener('M_Medication_Data_Yes', CreateReminderListener);
+        IntentEmitter.registerListener('Get_Transfusion_Date', GiveTransfusionDate);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
