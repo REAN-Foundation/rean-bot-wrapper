@@ -53,7 +53,6 @@ export class DialogflowResponseService {
                 projectIdFinal = this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_PROJECT_ID_REAN_APP");
 
             } else {
-                console.log("Entered the else of Dialogflow..............");
                 const dfBotGCPCredentials = JSON.parse(this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS"));
                 const GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
                 const dialogflowApplicationCredentialsobj = dfBotGCPCredentials ? dfBotGCPCredentials : GCPCredentials;
