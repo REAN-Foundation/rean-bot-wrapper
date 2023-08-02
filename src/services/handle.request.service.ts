@@ -45,7 +45,7 @@ export class handleRequestservice{
             if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("OPENAI_API_KEY")){
                 if (message_from_nlp.getIntent() === "Default Fallback Intent"){
                     message_from_nlp = await this.openAIResponseService.getOpenaiMessage(translate_message.message);
-                } 
+                }
             }
             console.log("message_from_nlp",message_from_nlp);
 

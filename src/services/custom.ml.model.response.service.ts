@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 import needle from "needle";
 import { scoped, Lifecycle } from "tsyringe";
@@ -15,7 +16,7 @@ export class CustomMLModelResponseService{
 
     getCustomModelResponse = async(message: string, platform: string = null, completeMessage:Imessage = null) =>{
         const customModelUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CUSTOM_ML_MODEL_URL");
-        const obj = { "Question": message};
+        const obj = { "Question": message };
         const options = getRequestOptions();
         
         // send authorisation once enabled for the custom model
@@ -28,9 +29,10 @@ export class CustomMLModelResponseService{
         const customModelResponseFormat = new CustomModelResponseFormat(callCustomModel);
         const text = customModelResponseFormat.getText();
         return customModelResponseFormat;
+
         // const response = await this.dialogflowResponseService.getDialogflowMessage(text.answer, platform, text.intent, completeMessage);
         // return response;
 
-    }
+    };
 
 }
