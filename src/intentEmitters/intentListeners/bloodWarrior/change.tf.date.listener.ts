@@ -13,3 +13,17 @@ export const ChangeTransfusionDate = async (intent, eventObj) => {
         console.log(error);
     }
 };
+
+export const GiveTransfusionDate = async (intent, eventObj) => {
+    // eslint-disable-next-line max-len
+    const changeTransfusionDateService: ChangeTransfusionDateService = eventObj.container.resolve(ChangeTransfusionDateService);
+    try {
+        let result = null;
+        result = await changeTransfusionDateService.GiveTransfusionDate(eventObj);
+        console.log(result);
+        return result.message;
+
+    } catch (error) {
+        console.log(error);
+    }
+};

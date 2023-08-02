@@ -3,6 +3,7 @@ import { Lifecycle, scoped, inject } from 'tsyringe';
 import { RegistrationService } from './maternalCareplan/registration.service';
 import { NeedBloodService } from './bloodWrrior/need.blood.service';
 import { CreateReminderService } from './medicationReminder/create.reminder.service';
+import { EnrollPatientService } from './bloodWrrior/enroll.service';
 
 export interface QueueDoaminModel {
     Intent : string;
@@ -60,6 +61,13 @@ export class FireAndForgetService {
             const eventObj = model.Body.EventObj;
             const _createReminderService:  CreateReminderService = eventObj.container.resolve(CreateReminderService);
             await _createReminderService.sendReminder(model.Body, eventObj );
+            console.log(`Fire and Forget Domain Model: ${model}`);
+        }
+        if (model.Intent === "Change_TF_Date_Load_Reminders") {
+            const eventObj = model.Body.EventObj;
+            const _enrollPatientService:  EnrollPatientService = eventObj.container.resolve(EnrollPatientService);
+            await _enrollPatientService.enrollPatientService(eventObj );
+
             console.log(`Fire and Forget Domain Model: ${model}`);
         }
     };
