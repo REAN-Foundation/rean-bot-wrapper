@@ -10,7 +10,7 @@ export class CustomModelResponseFormat implements IserviceResponseFunctionalitie
     getText() {
 
         //get text. improve this method after deciding a json format for custom ML model response
-        return [this.response.body.answer];
+        return [this.response.body.answer? this.response.body.answer: "Server seems to be busy. Please try in few seconds"];
     }
 
     getImageObject() {
