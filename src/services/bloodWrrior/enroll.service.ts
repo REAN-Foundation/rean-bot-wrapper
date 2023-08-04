@@ -44,7 +44,7 @@ export class EnrollPatientService {
                 if (resp.statusCode !== 201) {
                     throw new Error('Failed to get response from ReanCare service API.');
                 }
-                const enrollmentId = resp.body.Data.Enrollment.EnrollmentId;
+                const enrollmentId = resp.body.Data.Enrollment.id;
                 Logger.instance().log(`Enrollment id of user is: ${enrollmentId}`);
 
                 const apiURL = `patients/${patientUserId}`;

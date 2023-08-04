@@ -13,6 +13,7 @@ import { CommonWhatsappService } from './whatsapp.common.service';
 import { Iresponse } from '../refactor/interface/message.interface';
 import { WhatsappPostResponseFunctionalities } from './whatsapp.post.response.functionalities';
 import { EntityManagerProvider } from './entity.manager.provider.service';
+import { LogsQAService } from './logs.for.qa';
 
 @scoped(Lifecycle.ContainerScoped)
 export class WhatsappMetaMessageService extends CommonWhatsappService {
@@ -24,7 +25,8 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(WhatsappMessageToDialogflow) whatsappMessageToDialogflow?: WhatsappMessageToDialogflow,
         @inject(WhatsappPostResponseFunctionalities) private whatsappPostResponseFunctionalities?: WhatsappPostResponseFunctionalities,
-        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider){
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
+        @inject(LogsQAService) private logsQAService?: LogsQAService,){
         super(messageFlow, awsS3manager, whatsappMessageToDialogflow);
     }
 
@@ -89,6 +91,11 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
 
                 //improve this DB query
                 if (needleResp.statusCode === 200) {
+                    console.log(`QA_SERVICE Flag: ${this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE")}`);
+                    if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE")) {
+                        console.log("Providing QA service through clickUp");
+                        await this.logsQAService.logMesssages(response_format);
+                    }
                     const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
                     const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.sessionId } });
                     if (respChatMessage.length > 0) {
