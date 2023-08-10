@@ -14,6 +14,7 @@ import { clientAuthenticator } from './clientAuthenticator/client.authenticator.
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { TelegramMessageToDialogflow } from './telegram.messagetodialogflow';
 import { TelegramPostResponseFunctionalities } from './telegram.post.response.functionalities';
+import { LogsQAService } from './logs.for.qa';
 
 @scoped(Lifecycle.ContainerScoped)
 export class TelegramMessageService implements platformServiceInterface{
@@ -28,7 +29,8 @@ export class TelegramMessageService implements platformServiceInterface{
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(TelegramMessageToDialogflow) private telegramMessageToDialogflow?: TelegramMessageToDialogflow,
         @inject(TelegramPostResponseFunctionalities) private telegramPostResponseFunctionalities?: TelegramPostResponseFunctionalities,
-        @inject("telegram.authenticator") private clientAuthenticator?: clientAuthenticator) {
+        @inject("telegram.authenticator") private clientAuthenticator?: clientAuthenticator,
+        @inject(LogsQAService) private logsQAService?: LogsQAService) {
         this._telegram = new TelegramBot(this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
         this.init();
     }
@@ -132,6 +134,13 @@ export class TelegramMessageService implements platformServiceInterface{
         if (type) {
             const classmethod = `send${type}Response`;
             const telegram = new TelegramBot(this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
+            console.log(`QA_SERVICE Flag: ${this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE")}`);
+            if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE")) {
+                if (response_format.name !== "ReanCare") {
+                    console.log("Providing QA service through clickUp");
+                    await this.logsQAService.logMesssages(response_format);
+                }
+            }
             return await this.telegramPostResponseFunctionalities[classmethod](response_format,telegram);
         }
     };
