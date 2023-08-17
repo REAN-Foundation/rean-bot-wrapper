@@ -79,8 +79,11 @@ export class ClickUpMessageService implements platformServiceInterface {
         else if (requestBody.event === "taskStatusUpdated") {
             const status = requestBody.history_items[0].after.status;
             console.log("status after", status);
+            const qAServiceFlag = this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE") ?? false;
             if (status === "complete"){
-                this.eventStatusUpdated(requestBody);
+                if (qAServiceFlag === false) {
+                    this.eventStatusUpdated(requestBody);
+                }
             }
         }
         else {
@@ -94,7 +97,12 @@ export class ClickUpMessageService implements platformServiceInterface {
         const data = await chatMessageRepository.findOne({ where: { supportChannelTaskID: requestBody.task_id } });
         console.log("data", data);
         const filterText = (requestBody.history_items[0].comment.text_content).replace(tag, '');
-        let textToUser = `Our experts have responded to your query. \nYour Query: ${data.messageContent} \nExpert: ${filterText}`;
+        let textToUser = null;
+        if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE")) {
+            textToUser = `Our experts have responded to your query. \nExpert: ${filterText}`;
+        } else {
+            textToUser = `Our experts have responded to your query. \nYour Query: ${data.messageContent} \nExpert: ${filterText}`;
+        }
         if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_RESPONSE_MESSAGE")){
             const message_from_secret = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_RESPONSE_MESSAGE");
             textToUser = message_from_secret + `\n ${filterText}`;
