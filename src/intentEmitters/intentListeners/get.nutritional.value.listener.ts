@@ -1,6 +1,6 @@
 
 import { Logger } from '../../common/logger';
-import { NutritionalValue } from '../../services/get.nutritional.value.service'
+import { NutritionalValue } from '../../services/get.nutritional.value.service';
 
 export const GetNutritionalValue = async (intent, eventObj) => {
     try {
