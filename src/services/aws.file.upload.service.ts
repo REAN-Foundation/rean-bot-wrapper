@@ -67,24 +67,33 @@ export class AwsS3manager{
 
     }
 
-    async uploadFile (filePath) {
-        return new Promise<string>( async (resolve, reject) => { 
-            const fileLocation = await this.uploadFileToS3(filePath);
-            // const signedUrl = await this.signedUrls.getSignedUrl(fileLocation);
+    async uploadFile (filePath, bucket_name : string = process.env.BUCKET_NAME,
+        cloudFrontPath : string = process.env.CLOUD_FRONT_PATH,newFilename = null) {
+        return new Promise<string>( async (resolve, reject) => {
+            const fileLocation = await this.uploadFileToS3(filePath,bucket_name,cloudFrontPath,newFilename);
             resolve(fileLocation);
         });
     }
 
-    readFileAndReturnAwsUploadParams =  (filePath, cloudFrontPathSplit, BucketName) => {
+    readFileAndReturnAwsUploadParams =  (filePath, cloudFrontPathSplit, BucketName,newFilename = null) => {
         const fileContent = fs.readFileSync(filePath);
-        var filename = filePath.replace(/^.*[\\/]/, '');
-        this.fileName = filename;
-        const extension = path.parse(filename).ext;
+        if (newFilename === null)
+        {
+            var filename = filePath.replace(/^.*[\\/]/, '');
+            this.fileName = filename;
+            
+        }
+        else {
+            this.fileName = newFilename;
+        }
+        console.log(this.fileName);
+
+        const extension = path.parse(this.fileName).ext;
 
         // Setting up S3 upload parameters
         const params = {
             Bucket        : BucketName,
-            Key           : cloudFrontPathSplit[3] + '/' + filename , // File name you want to save as in S3
+            Key           : cloudFrontPathSplit[3] + '/' + this.fileName , // File name you want to save as in S3
             Body          : fileContent,
             'ContentType' : 'image/jpeg'
         };
@@ -143,8 +152,8 @@ export class AwsS3manager{
 
     async uploadFileToS3 (
         filePath, 
-        bucket_name : string = process.env.BUCKET_NAME, 
-        cloudFrontPath : string = process.env.CLOUD_FRONT_PATH) {
+        bucket_name : string = process.env.BUCKET_NAME,
+        cloudFrontPath : string = process.env.CLOUD_FRONT_PATH,newFilename = null) {
 
         console.log('File path is:' + filePath + ' Bucket Name is:' + bucket_name + ' Cloud front path name is' + cloudFrontPath);
 
@@ -153,7 +162,7 @@ export class AwsS3manager{
         const cloudFrontPathSplit = cloudFrontPath.split("/");
         const s3 = new AWS.S3(responseCredentials);
         try {
-            this.readFileAndReturnAwsUploadParams(filePath, cloudFrontPathSplit, BucketName);
+            this.readFileAndReturnAwsUploadParams(filePath, cloudFrontPathSplit, BucketName,newFilename);
             await s3.upload(this.params, function (err) {
                 if (err) {
                     console.log(err);
