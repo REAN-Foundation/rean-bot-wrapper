@@ -62,6 +62,7 @@ import { GetNutritionalValue } from './intentListeners/get.nutritional.value.lis
 import { NeedBloodListener } from './intentListeners/bloodWarrior/need.blood.listener';
 import { NeedBloodPatientYesListener } from './intentListeners/bloodWarrior/need.blood.patient.yes.listener';
 import { CreateReminderListener } from './intentListeners/medicationReminder/create.reminder.listener';
+import { eyeImageQualityCheckListener } from './intentListeners/eye.image.quality.check.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -205,6 +206,8 @@ export class IntentRegister {
         IntentEmitter.registerListener('NeedBlood_Patient_Confirm_Yes', NeedBloodPatientYesListener);
         IntentEmitter.registerListener('M_Medication_Data_Yes', CreateReminderListener);
         IntentEmitter.registerListener('Get_Transfusion_Date', GiveTransfusionDate);
+
+        IntentEmitter.registerListener('ImageQualityCheck', eyeImageQualityCheckListener);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
