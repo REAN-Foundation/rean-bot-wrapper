@@ -16,7 +16,6 @@ import { Message } from './request.format/telegram.message.format';
 import axios from 'axios';
 import * as url from 'url';
 
-
 @scoped(Lifecycle.ContainerScoped)
 export class TelegramMessageServiceFunctionalities implements getMessageFunctionalities{
 
@@ -149,8 +148,8 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         return response.body;
     }
 
-
     async  downloadTelegramMedia(fileUrl: string, media: string): Promise<string> {
+        
         try {
             const response = await axios.get(fileUrl, { responseType: 'stream' });
     
