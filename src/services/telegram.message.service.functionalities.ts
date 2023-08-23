@@ -146,10 +146,10 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         const response = await needle('get', telegramMediaPath + '?file_id=' + fileid, options);
         console.log("data GetTelegramMedia", response.body);
         return response.body;
-    }
+    };
 
     async  downloadTelegramMedia(fileUrl: string, media: string): Promise<string> {
-        
+
         try {
             const response = await axios.get(fileUrl, { responseType: 'stream' });
     
