@@ -43,7 +43,13 @@ export class CallEyeImageQualityCheckModel {
         let message = null;
         if (response.statusCode === 200) {
             console.log("got results successfully");
-            message = response.body.message;
+            if (response.body.result)
+            {
+                message = "It is a Good Quality image as "+ response.body.message +"\n Do you agree with the response?";
+            }
+            else {
+                message = "It is a Bad Quality image as "+ response.body.message + "\n Do you agree with the response?";
+            }
         }
         else 
         {
