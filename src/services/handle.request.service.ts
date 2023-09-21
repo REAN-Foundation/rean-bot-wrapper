@@ -37,7 +37,7 @@ export class handleRequestservice{
             message_from_nlp = await this.openAIResponseService.getOpenaiMessage(translate_message.message);
         }
         else if (nlpService && nlpService === "custom_ml_model"){
-            message_from_nlp = await this.customMLModelResponseService.getCustomModelResponse(message.messageBody, channel, message);
+            message_from_nlp = await this.customMLModelResponseService.getCustomModelResponse(translate_message.message, channel, message);
         }
         else {
             // eslint-disable-next-line max-len
