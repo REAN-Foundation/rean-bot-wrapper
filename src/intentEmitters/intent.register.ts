@@ -63,6 +63,7 @@ import { NeedBloodListener } from './intentListeners/bloodWarrior/need.blood.lis
 import { NeedBloodPatientYesListener } from './intentListeners/bloodWarrior/need.blood.patient.yes.listener';
 import { CreateReminderListener } from './intentListeners/medicationReminder/create.reminder.listener';
 import { eyeImageQualityCheckListener } from './intentListeners/eye.image.quality.check.listener';
+import { RegistrationPerMinuteMsgListener } from './intentListeners/maternity.careplan/regstration.per.minute.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -206,6 +207,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('NeedBlood_Patient_Confirm_Yes', NeedBloodPatientYesListener);
         IntentEmitter.registerListener('M_Medication_Data_Yes', CreateReminderListener);
         IntentEmitter.registerListener('Get_Transfusion_Date', GiveTransfusionDate);
+        IntentEmitter.registerListener('Registration_PerMinMsg', RegistrationPerMinuteMsgListener);
 
         IntentEmitter.registerListener('ImageQualityCheck', eyeImageQualityCheckListener);
 
