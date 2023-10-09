@@ -4,6 +4,7 @@ import { RegistrationService } from './maternalCareplan/registration.service';
 import { NeedBloodService } from './bloodWrrior/need.blood.service';
 import { CreateReminderService } from './medicationReminder/create.reminder.service';
 import { EnrollPatientService } from './bloodWrrior/enroll.service';
+import { RegistrationPerMinMsgService } from './maternalCareplan/registration.per.minute.sercice';
 
 export interface QueueDoaminModel {
     Intent : string;
@@ -68,6 +69,13 @@ export class FireAndForgetService {
             const _enrollPatientService:  EnrollPatientService = eventObj.container.resolve(EnrollPatientService);
             await _enrollPatientService.enrollPatientService(eventObj );
 
+            console.log(`Fire and Forget Domain Model: ${model}`);
+        }
+        if (model.Intent === "Registration_PerMinMsg") {
+            const eventObj = model.Body.EventObj;
+            const registrationPerMinMsgService:  RegistrationPerMinMsgService =
+                eventObj.container.resolve(RegistrationPerMinMsgService);
+            await registrationPerMinMsgService.collectMessage(eventObj);
             console.log(`Fire and Forget Domain Model: ${model}`);
         }
     };
