@@ -49,21 +49,11 @@ export class TelegramMessageService implements platformServiceInterface{
 
     init(){
         this._telegram.on('message', async msg => {
-            const generatorTelegramMessage = await this.telegramMessageToDialogflow.messageToDialogflow(msg);
-            let done = false;
-            const telegramMessages = [];
-            let telegramMessagetoDialogflow: Imessage;
-            while (done === false) {
-                const nextgeneratorObj = generatorTelegramMessage.next();
-                telegramMessagetoDialogflow = (await nextgeneratorObj).value;
-                done = (await nextgeneratorObj).done;
-                telegramMessages.push(telegramMessagetoDialogflow);
-            }
-            for (telegramMessagetoDialogflow of telegramMessages){
-                if (telegramMessagetoDialogflow) {
-                    await this.messageFlow.checkTheFlow(telegramMessagetoDialogflow, "telegram", this);
-                }
-            }
+            await this.actionOnTelegramEvent(msg);
+        });
+
+        this._telegram.on('callback_query', async (callbackQuery) => {
+            await this.actionOnTelegramEvent(callbackQuery);
         });
     }
 
@@ -85,6 +75,7 @@ export class TelegramMessageService implements platformServiceInterface{
         const image = processedResponse.message_from_nlp.getImageObject();
         const pasrseMode = processedResponse.message_from_nlp.getParseMode();
         const intent = processedResponse.message_from_nlp.getIntent();
+        const payload = processedResponse.message_from_nlp.getPayload();
 
         if (image && image.url) {
             reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",intent: intent,messageBody: image.url, messageImageUrl: image.url , messageImageCaption: image.caption, sessionId: telegram_id, messageText: processedResponse.processed_message[0] };
@@ -104,9 +95,17 @@ export class TelegramMessageService implements platformServiceInterface{
                 reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "text",intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[1] };
             }
         } else {
-            reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "text",intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[0] };
+            let message_type = "text";
+            if (payload !== null){
+                message_type = payload.fields.messagetype.stringValue;
+                if (message_type === "interactive-buttons") {
+                    message_type = "inline_keyboard";
+                }
+            }
+            reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: message_type,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[0] };
         }
         return reaponse_message;
+        
     };
 
     createFinalMessageFromHumanhandOver(requestBody) {
@@ -128,7 +127,7 @@ export class TelegramMessageService implements platformServiceInterface{
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    SendMediaMessage = async (response_format:Iresponse, payload = null) => {
+    SendMediaMessage = async (response_format:Iresponse, payload:any) => {
         
         const type = response_format.message_type;
         if (type) {
@@ -141,8 +140,26 @@ export class TelegramMessageService implements platformServiceInterface{
                     await this.logsQAService.logMesssages(response_format);
                 }
             }
-            return await this.telegramPostResponseFunctionalities[classmethod](response_format,telegram);
+            return await this.telegramPostResponseFunctionalities[classmethod](response_format,telegram,payload);
         }
     };
+
+    actionOnTelegramEvent = async(requestBody) =>{
+        const generatorTelegramMessage = await this.telegramMessageToDialogflow.messageToDialogflow(requestBody);
+        let done = false;
+        const telegramMessages = [];
+        let telegramMessagetoDialogflow: Imessage;
+        while (done === false) {
+            const nextgeneratorObj = generatorTelegramMessage.next();
+            telegramMessagetoDialogflow = (await nextgeneratorObj).value;
+            done = (await nextgeneratorObj).done;
+            telegramMessages.push(telegramMessagetoDialogflow);
+        }
+        for (telegramMessagetoDialogflow of telegramMessages){
+            if (telegramMessagetoDialogflow) {
+                await this.messageFlow.checkTheFlow(telegramMessagetoDialogflow, "telegram", this);
+            }
+        }
+    }
 
 }
