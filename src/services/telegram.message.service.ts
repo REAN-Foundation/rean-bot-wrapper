@@ -160,6 +160,6 @@ export class TelegramMessageService implements platformServiceInterface{
                 await this.messageFlow.checkTheFlow(telegramMessagetoDialogflow, "telegram", this);
             }
         }
-    }
+    };
 
 }

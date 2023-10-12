@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable init-declarations */
 import { ChatMessage } from "../models/chat.message.model";
 import { Iresponse } from "../refactor/interface/message.interface";
@@ -128,6 +129,6 @@ export class TelegramPostResponseFunctionalities {
         });
         await this.updateResponseMessageId(responseId,response_format.sessionId);
         return telegramResponseData;
-    }
+    };
 
 }
