@@ -9,7 +9,6 @@ import { GenerateCertificateYesService } from './bloodWrrior/generate.certificat
 import { GeneralReminderService } from './reminder/general.reminder.service';
 import { RegistrationPerMinMsgService } from './maternalCareplan/registration.per.minute.sercice';
 import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
-import { RegistrationPerMinMsgService } from './maternalCareplan/registration.per.minute.sercice';
 
 export interface QueueDoaminModel {
     Intent : string;

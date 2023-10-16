@@ -72,7 +72,6 @@ import { DmcAssessmentAnswerYesListener } from './intentListeners/maternity.care
 import { RegistrationPerMinuteMsgListener } from './intentListeners/maternity.careplan/regstration.per.minute.listener';
 import { DmcAssessmentAnswerNoListener } from './intentListeners/maternity.careplan/answer.no.listener';
 import { eyeImageQualityCheckListener } from './intentListeners/eye.image.quality.check.listener';
-import { RegistrationPerMinuteMsgListener } from './intentListeners/maternity.careplan/regstration.per.minute.listener';
 
 /*
  * Init function (being called during application bootstrap)
