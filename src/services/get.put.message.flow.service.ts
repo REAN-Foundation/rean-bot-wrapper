@@ -12,9 +12,11 @@ import { SlackMessageService } from "./slack.message.service";
 import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
 import { translateService } from './translate.service';
-import { templateButtonService } from './whatsappmeta.button.service';
+import { sendApiButtonService, templateButtonService } from './whatsappmeta.button.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { EntityManagerProvider } from './entity.manager.provider.service';
+import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
+import { AssessmentSessionLogs } from '../models/assessment.session.model';
 
 @scoped(Lifecycle.ContainerScoped)
 export class MessageFlow{
@@ -27,7 +29,8 @@ export class MessageFlow{
         @inject(translateService) private translate?: translateService,
         @inject(GoogleTextToSpeech) private googleTextToSpeech?: GoogleTextToSpeech,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
-        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider) {
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
+        @inject(ServeAssessmentService) private serveAssessmentService?: ServeAssessmentService,) {
     }
 
     async checkTheFlow(messagetoDialogflow, channel: string, platformMessageService: platformServiceInterface){
@@ -100,7 +103,9 @@ export class MessageFlow{
     }
 
     async send_manual_msg (msg,platformMessageService: platformServiceInterface) {
-        const payload = {};
+        let payload = {};
+        let messageType = "";
+        let assessmentSession = null;
         if (msg.type === "template") {
             payload["templateName"] = msg.templateName;
             if (msg.agentName !== 'postman') {
@@ -121,9 +126,21 @@ export class MessageFlow{
                     payload["languageForSession"] = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
                 }
             }
-        } else {
+        }
+        else if (msg.type === "text") {
             const translatedMessage = await this.translate.translatePushNotifications( msg.message, msg.userId);
             msg.message = translatedMessage;
+        }
+        else if (msg.type === "interactivebuttons") {
+            payload = await sendApiButtonService(msg.payload);
+        }
+        else if (msg.type === "reancareAssessment") {
+            messageType = msg.type;
+            msg.type = 'template';
+            const { metaPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment(msg, msg.payload);
+            assessmentSession = assessmentSessionLogs;
+            payload = metaPayload;
+            console.log(`assessment record ${JSON.stringify(payload)}`);
         }
         
         if (msg.message.ButtonsIds != null) {
@@ -148,6 +165,10 @@ export class MessageFlow{
             intent         : response_format.intent
         };
 
+        if (msg.type === "template") {
+            chatMessageObj.intent = payload["templateName"];
+        }
+
         const ChatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         const person = ChatMessageRepository.create(chatMessageObj);
         console.log(`DB response ${person}`);
@@ -155,6 +176,12 @@ export class MessageFlow{
         let message_to_platform = null;
         // eslint-disable-next-line max-len
         message_to_platform = await platformMessageService.SendMediaMessage(response_format, payload);
+
+        if (messageType === "reancareAssessment") {
+            assessmentSession.userMessageId = message_to_platform.body.messages[0].id;
+            const AssessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
+            await AssessmentSessionRepo.create(assessmentSession);
+        }
         return message_to_platform;
     }
 
@@ -284,5 +311,15 @@ export class MessageFlow{
             console.log(error);
         }
     }
+
+    // async serveReancareAssessment(message :any, payload: any){
+    //     try {
+    //         const {message } = await this.serveAssessmentService.startAssessment(msg, msg.payload);
+
+    //         return { message, payload };
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // }
 
 }

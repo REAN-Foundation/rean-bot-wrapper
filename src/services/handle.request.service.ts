@@ -10,6 +10,7 @@ import { EntityManagerProvider } from './entity.manager.provider.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { OpenAIResponseService } from './openai.response.service';
 import { IserviceResponseFunctionalities } from "./response.format/response.interface";
+import { CustomMLModelResponseService } from './custom.ml.model.response.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class handleRequestservice{
@@ -20,7 +21,8 @@ export class handleRequestservice{
         @inject(translateService) private translateService?: translateService,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
-        @inject(OpenAIResponseService) private openAIResponseService?: OpenAIResponseService) {
+        @inject(OpenAIResponseService) private openAIResponseService?: OpenAIResponseService,
+        @inject(CustomMLModelResponseService)private customMLModelResponseService?: CustomMLModelResponseService) {
     }
 
     async handleUserRequest (message: Imessage, channel: string) {
@@ -31,16 +33,24 @@ export class handleRequestservice{
 
         let message_from_nlp:IserviceResponseFunctionalities = null;
         const nlpService = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_SERVICE");
+        const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
         if (nlpService && nlpService === "openai"){
-            message_from_nlp = await this.openAIResponseService.getOpenaiMessage(translate_message.message);
+            message_from_nlp = await this.openAIResponseService.getOpenaiMessage(clientName, translate_message.message);
+        }
+        else if (nlpService && nlpService === "custom_ml_model"){
+            let message_to_ml_model = translate_message.message;
+            if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_TRANSLATE_SERVICE")){
+                message_to_ml_model = message.messageBody;
+            }
+            message_from_nlp = await this.customMLModelResponseService.getCustomModelResponse(message_to_ml_model, channel, message);
         }
         else {
             // eslint-disable-next-line max-len
             message_from_nlp = await this.DialogflowResponseService.getDialogflowMessage(translate_message.message, channel, message.intent,message);
             if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("OPENAI_API_KEY")){
                 if (message_from_nlp.getIntent() === "Default Fallback Intent"){
-                    message_from_nlp = await this.openAIResponseService.getOpenaiMessage(translate_message.message);
-                } 
+                    message_from_nlp = await this.openAIResponseService.getOpenaiMessage(clientName, translate_message.message);
+                }
             }
             console.log("message_from_nlp",message_from_nlp);
 

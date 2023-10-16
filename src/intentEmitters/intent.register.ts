@@ -33,7 +33,7 @@ import { BloodWarriorPatient } from './intentListeners/bloodWarrior/patient.list
 import { BloodWarriorDonor } from './intentListeners/bloodWarrior/donor.listener';
 import { BloodWarriorNewUser } from './intentListeners/bloodWarrior/new.userlistener';
 import { BloodWarriorPatientEnroll } from './intentListeners/bloodWarrior/patient.enroll.listener';
-import { ChangeTransfusionDate } from './intentListeners/bloodWarrior/change.tf.date.listener';
+import { ChangeTransfusionDate, GiveTransfusionDate } from './intentListeners/bloodWarrior/change.tf.date.listener';
 import { kerotoplastyConditionIdentificationListener} from './intentListeners/kerotoplasty.bot.condition.Identification.listener';
 import { kerotoplastyLocationListener } from './intentListeners/kerotoplasty.find.nearest.location.listener';
 import { BloodWarriorMenu } from './intentListeners/bloodWarrior/menu.listener';
@@ -59,6 +59,19 @@ import { RaiseRequestNoNotifyVolunteer } from './intentListeners/bloodWarrior/ra
 import { FeelingUnwellNotifyVolunteer } from './intentListeners/bloodWarrior/feeling.unwell.noyify.volunteer.listener';
 import { OpenAiListener } from './intentListeners/openAi.listener';
 import { GetNutritionalValue } from './intentListeners/get.nutritional.value.listener';
+import { NeedBloodListener } from './intentListeners/bloodWarrior/need.blood.listener';
+import { NeedBloodPatientYesListener } from './intentListeners/bloodWarrior/need.blood.patient.yes.listener';
+import { CreateReminderListener } from './intentListeners/medicationReminder/create.reminder.listener';
+import { GenerateCertificateListener } from './intentListeners/bloodWarrior/generate.certificate.flow.listener';
+import { GenerateCertificateYesListener } from './intentListeners/bloodWarrior/generate.certificate.yes.listener';
+import { GenerateCertificateConfirmYesListener } from './intentListeners/bloodWarrior/generate.certificate.confirm.yes.listener';
+import { GeneralReminderListener } from './intentListeners/medicationReminder/general.reminder.listener';
+import { MedicationReminderListener } from './intentListeners/medicationReminder/medication.reminder.listener';
+import { ReminderAskTimeListener } from './intentListeners/medicationReminder/reminder.ask.time.listener';
+import { DmcAssessmentAnswerYesListener } from './intentListeners/maternity.careplan/answer.yes.listener';
+import { RegistrationPerMinuteMsgListener } from './intentListeners/maternity.careplan/regstration.per.minute.listener';
+import { DmcAssessmentAnswerNoListener } from './intentListeners/maternity.careplan/answer.no.listener';
+import { eyeImageQualityCheckListener } from './intentListeners/eye.image.quality.check.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -198,6 +211,21 @@ export class IntentRegister {
         IntentEmitter.registerListener('Send_OneTimeDonor', SelectBloodGroupListener);
         IntentEmitter.registerListener('Register_Volunteer', RegisterAllProfileListener);
         IntentEmitter.registerListener('Feeling_Unwell', FeelingUnwellNotifyVolunteer);
+        IntentEmitter.registerListener('Need_Blood', NeedBloodListener);
+        IntentEmitter.registerListener('NeedBlood_Patient_Confirm_Yes', NeedBloodPatientYesListener);
+        IntentEmitter.registerListener('M_Medication_Data_Demo_Yes', CreateReminderListener);
+        IntentEmitter.registerListener('Get_Transfusion_Date', GiveTransfusionDate);
+        IntentEmitter.registerListener('Generate_Certificate', GenerateCertificateListener);
+        IntentEmitter.registerListener('Generate_Certificate_Yes', GenerateCertificateYesListener);
+        IntentEmitter.registerListener('Generate_Certificate_Confirm_Yes', GenerateCertificateConfirmYesListener);
+        IntentEmitter.registerListener('M_Medication_Data', MedicationReminderListener);
+        IntentEmitter.registerListener('General_Reminder', GeneralReminderListener);
+        IntentEmitter.registerListener('Reminder_Ask_Time', ReminderAskTimeListener);
+        IntentEmitter.registerListener('Dmc_Yes', DmcAssessmentAnswerYesListener);
+        IntentEmitter.registerListener('Dmc_No', DmcAssessmentAnswerNoListener);
+        IntentEmitter.registerListener('Registration_PerMinMsg', RegistrationPerMinuteMsgListener);
+        IntentEmitter.registerListener('Registration_PerMinMsg', RegistrationPerMinuteMsgListener);
+        IntentEmitter.registerListener('ImageQualityCheck', eyeImageQualityCheckListener);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
