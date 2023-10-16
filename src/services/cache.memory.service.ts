@@ -3,7 +3,7 @@ export class CacheMemory {
     static CacheData : { [key: string]: any } = {};
 
     constructor() {
-        CacheMemory.CacheData;
+        CacheMemory.CacheData = {};
     }
 
     static async get(key: string) : Promise<any> {
