@@ -27,8 +27,19 @@ export class AnswerYesMsgService {
 
     private getRandomYesMessage() {
         const messages = ["It sounds good.", "That's great to hear!", "You're doing great!", "You're awesome!", "Keep up the good work!"];
-        const randomIndex = Math.floor(Math.random() * messages.length);
+        const randomIndex = this.generateRandomNumber(messages.length);
         return messages[randomIndex];
+    }
+
+    public generateRandomNumber(maxNumber: number) {
+        const now = new Date();
+        const seed = now.getTime();
+        const min = 0;
+        const max = maxNumber - 1; // 10 + 1 (to include 10)
+          
+        // Use the seed to generate a random number
+        const random = (seed % (max - min)) + min;
+        return random;
     }
 
 }

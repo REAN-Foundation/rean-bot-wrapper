@@ -1,9 +1,14 @@
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import { FireAndForgetService, QueueDoaminModel } from '../../fire.and.forget.service';
 import { Logger } from '../../../common/logger';
+import { AnswerYesMsgService } from './answer.yes.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class AnswerNoMsgService {
+
+    constructor(
+        @inject(AnswerYesMsgService) private answerYesMsgService?: AnswerYesMsgService,
+    ){}
 
     async replyNoService (eventObj ): Promise<any> {
         try {
@@ -27,7 +32,7 @@ export class AnswerNoMsgService {
 
     private getRandomNoMessage() {
         const messages = ["Thank you for your response.", "Thank you for your feedback.", "Your response has been recorded" ];
-        const randomIndex = Math.floor(Math.random() * messages.length);
+        const randomIndex = this.answerYesMsgService.generateRandomNumber(messages.length);
         return messages[randomIndex];
     }
 
