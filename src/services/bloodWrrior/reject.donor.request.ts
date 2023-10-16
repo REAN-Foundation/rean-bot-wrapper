@@ -6,6 +6,7 @@ import { inject, Lifecycle, scoped } from 'tsyringe';
 import { RaiseDonationRequestService } from './raise.request.service';
 import { Iresponse } from '../../refactor/interface/message.interface';
 import { commonResponseMessageFormat } from '../common.response.format.object';
+import { sendApiButtonService } from '../whatsappmeta.button.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class RejectDonorRequestService {
@@ -27,6 +28,7 @@ export class RejectDonorRequestService {
                 const apiURL = `clinical/donation-record/search?donorUserId=${donor.UserId}`;
                 const requestBody = await this.needleService.needleRequestForREAN("get", apiURL);
                 const donationRecordId = requestBody.Data.DonationRecord.Items[0].id;
+                const donationRecord = requestBody.Data.DonationRecord.Items[0];
                 let volunteerUserId = null;
                 let patientUserId = null;
                 if (donor.DonorType === 'One time') {
@@ -47,6 +49,12 @@ export class RejectDonorRequestService {
                 };
                 await this.bloodWarriorCommonService.updateDonationRecord(donationRecordId, obj);
 
+                //update donation  with rejection
+                const obj1 = {
+                    LastDonationDate : new Date().toISOString()
+                };
+                await this.makeDonorInEligible(donationRecord.NetworkId, obj1);
+
                 //message send to volunteer
                 let patientName = 'patient';
                 if (patientUserId !== null) {
@@ -58,18 +66,25 @@ export class RejectDonorRequestService {
                         this.raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(volunteer.User.Person.Phone);
                 const message = `Hi ${volunteer.User.Person.DisplayName},\n\n${donor.DisplayName} has rejected or ineligible to donate for ${patientName}.
             \n\nPlease contact other eligible donors or raise a request.`;
+                const buttons = await sendApiButtonService(["Schedule a Donation", "Schedule_Donation", "Take One Time Donors", "Emergency_Donation"]);
                 const response_format: Iresponse = commonResponseMessageFormat();
                 response_format.platform = payload.source;
                 response_format.sessionId = volunteerPhone;
                 response_format.messageText = message;
-                response_format.message_type = "text";
-                await this._platformMessageService.SendMediaMessage(response_format, null);
+                response_format.message_type = "interactivebuttons";
+                await this._platformMessageService.SendMediaMessage(response_format, buttons);
 
             } catch (error) {
                 Logger.instance()
                     .log_error(error.message,500,'Reject donation request service error');
             }
         });
+    };
+
+    public makeDonorInEligible = async (networkId, obj) => {
+        const apiURL = `clinical/patient-donors/${networkId}`;
+        await this.needleService.needleRequestForREAN("put", apiURL, null, obj);
+        console.log(`Succesfully make donor non eligible with network id ${networkId}.`);
     };
 
 }

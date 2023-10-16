@@ -6,6 +6,7 @@ import { ContactList } from '../models/contact.list';
 import { ClientEnvironmentProviderService } from '../services/set.client/client.environment.provider.service';
 import { CalorieInfo } from '../models/calorie.info.model';
 import { CalorieDatabase } from '../models/calorie.db.model';
+import { AssessmentSessionLogs } from '../models/assessment.session.model';
 const sequrlizeClients = new Map<string, Sequelize>();
 @autoInjectable()
 @singleton()
@@ -29,7 +30,7 @@ export class SequelizeClient {
                 // eslint-disable-next-line max-len
                 sequelizeClient.addModels([ChatMessage, ChatSession, ContactList, CalorieInfo, CalorieDatabase]);
             } else {
-                sequelizeClient.addModels([ChatMessage, ChatSession, ContactList]);
+                sequelizeClient.addModels([ChatMessage, ChatSession, ContactList, AssessmentSessionLogs]);
             }
     
             await sequelizeClient.authenticate()
