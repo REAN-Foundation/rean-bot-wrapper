@@ -71,6 +71,8 @@ import { ReminderAskTimeListener } from './intentListeners/medicationReminder/re
 import { DmcAssessmentAnswerYesListener } from './intentListeners/maternity.careplan/answer.yes.listener';
 import { RegistrationPerMinuteMsgListener } from './intentListeners/maternity.careplan/regstration.per.minute.listener';
 import { DmcAssessmentAnswerNoListener } from './intentListeners/maternity.careplan/answer.no.listener';
+import { eyeImageQualityCheckListener } from './intentListeners/eye.image.quality.check.listener';
+import { RegistrationPerMinuteMsgListener } from './intentListeners/maternity.careplan/regstration.per.minute.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -223,6 +225,8 @@ export class IntentRegister {
         IntentEmitter.registerListener('Dmc_Yes', DmcAssessmentAnswerYesListener);
         IntentEmitter.registerListener('Dmc_No', DmcAssessmentAnswerNoListener);
         IntentEmitter.registerListener('Registration_PerMinMsg', RegistrationPerMinuteMsgListener);
+        IntentEmitter.registerListener('Registration_PerMinMsg', RegistrationPerMinuteMsgListener);
+        IntentEmitter.registerListener('ImageQualityCheck', eyeImageQualityCheckListener);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
