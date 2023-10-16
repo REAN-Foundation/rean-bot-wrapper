@@ -5,7 +5,7 @@ import { assessmentSessionLogs } from '../refactor/interface/message.interface';
     timestamps : true,
     modelName  : 'AssessmentSessionLogs',
     tableName  : 'assessment_session_logs',
-    })
+})
 export class AssessmentSessionLogs extends Model implements assessmentSessionLogs {
     
     @AutoIncrement
@@ -21,7 +21,7 @@ export class AssessmentSessionLogs extends Model implements assessmentSessionLog
         userPlatformId: string;
 
     @Column({
-    type : DataType.STRING
+        type : DataType.STRING
     })
         patientUserId: string;
 

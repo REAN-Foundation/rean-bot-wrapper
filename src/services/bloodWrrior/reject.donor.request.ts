@@ -85,6 +85,6 @@ export class RejectDonorRequestService {
         const apiURL = `clinical/patient-donors/${networkId}`;
         await this.needleService.needleRequestForREAN("put", apiURL, null, obj);
         console.log(`Succesfully make donor non eligible with network id ${networkId}.`);
-    }
+    };
 
 }
