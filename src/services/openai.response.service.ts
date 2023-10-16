@@ -11,23 +11,25 @@ import { EntityManagerProvider } from './entity.manager.provider.service';
 import { ChatMessage } from '../models/chat.message.model';
 
 @scoped(Lifecycle.ContainerScoped)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class OpenAIResponseService {
 
     constructor(@inject(ClientEnvironmentProviderService) private clientEnvironment?: ClientEnvironmentProviderService,
     @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider) { }
 
-    getOpenaiMessage = async (message: string) => {
+    getOpenaiMessage = async (key: string, message: string) => {
         try {
-            const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironment)).getRepository(ChatMessage);
-            const chatMessageResponse = (await chatMessageRepository.findAll({
-                order  : [ [ 'createdAt', 'DESC' ] ],
-                offset : 1,
-                limit  : 2
-            }));
             const configuration = new Configuration({
                 apiKey : this.clientEnvironment.getClientEnvironmentVariable("OPENAI_API_KEY"),
             });
             const openai = new OpenAIApi(configuration);
+
+            // const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironment)).getRepository(ChatMessage);
+            // const chatMessageResponse = (await chatMessageRepository.findAll({
+            //     order  : [ [ 'createdAt', 'DESC' ] ],
+            //     offset : 1,
+            //     limit  : 2
+            // }));
 
             // const completion = await openai.createChatCompletion({
             //     model    : "gpt-3.5-turbo",
@@ -38,7 +40,27 @@ export class OpenAIResponseService {
             // });
             
             //currently this implementation is for nutrition bot. To make it general, move the nutrtion bot specific prompt to its service
-            const createCompletion = await openai.createCompletion({
+            const prompt = this.getPrompt(key, message);
+            if (prompt == null) {
+                return null;
+            }
+            const createCompletion = await openai.createCompletion(prompt);
+
+            console.log(createCompletion.data.choices[0].text);
+            const response = new OpenAIResponseFormat(createCompletion);
+            return response;
+            
+        }
+        catch (e) {
+            console.log(e);
+        }
+
+    };
+
+    getPrompt = (key: string, message: string) => {
+        var prompt = null;
+        if (key === "CALORIE_BOT") {
+            prompt = {
                 model  : "text-davinci-003",
                 prompt : `${message} Provide the calorie and nutritional report in json. The json format should be:{
                     "list_of_food": [{
@@ -66,17 +88,27 @@ export class OpenAIResponseService {
                 top_p             : 1.0,
                 frequency_penalty : 0.0,
                 presence_penalty  : 0.0,
-            });
-
-            console.log(createCompletion.data.choices[0].text);
-            const response = new OpenAIResponseFormat(createCompletion);
-            return response;
-            
+            };
+        } else if (key === "BLOOD_WARRIORS") {
+            prompt = {
+                model  : "text-davinci-003",
+                prompt : `${message} Provide the reminders details in json. The json format should be:
+                { "TaskName": 
+                  "TaskType": "medication" or "exercise" or "other" 
+                  "Frequency": "Daily" or "Monthly" or "Weekly" or "Once" or "Hourly" or "Quarterly" or "Yearly"
+                  "DayName": "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+                  "StartDateTime": 
+                  "MedicineName":
+                } If date time is not found in phrase then, give "StartDateTime" as todays date do not give past dates and convert it into date into indian time zone time format javascript.`,
+                temperature       : 0,
+                max_tokens        : 1000,
+                top_p             : 1.0,
+                frequency_penalty : 0.0,
+                presence_penalty  : 0.0,
+            };
         }
-        catch (e) {
-            console.log(e);
-        }
+        return prompt;
 
-    };
+    }
 
 }

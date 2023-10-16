@@ -33,7 +33,10 @@ export class ScheduleDonationTakeValuesService {
     
                 //We need to iterate here if i want to send reminders to all donors having same blood bridge
                 if (result.Data.PatientDonors.Items.length > 0) {
-                    const patientDonors = result.Data.PatientDonors.Items[0];
+
+                    const patientDonorsList = result.Data.PatientDonors.Items;
+                    const selectedPatientDonor =  patientDonorsList.filter(x => x.DonorPhone.includes(phoneNumber));
+                    const patientDonors = selectedPatientDonor[0];
                     let lastDonationDate = patientDonors.LastDonationDate ?? null;
                     if (lastDonationDate) {
                         lastDonationDate = new Date(lastDonationDate.split("T")[0]).toDateString();
@@ -53,7 +56,7 @@ export class ScheduleDonationTakeValuesService {
                     dffMessage = `Congratulations! \nThe donation has been successfully scheduled.`;
                     const commonMessage = `
                 Donor name: ${patientDonors.DonorName},
-                Blood Group: ${patientDonors.BloodGroup},
+                Blood Group: ${patientDonors.Donor.BloodGroup},
                 Date: ${new Date(donation_Date.split("T")[0]).toDateString()},
                 Donation Type: ${patientDonors.DonorType},
                 Patient name: ${patient.User.Person.DisplayName},
@@ -102,7 +105,7 @@ export class ScheduleDonationTakeValuesService {
                     response_format.platform = previousPayload.source;
                     response_format.sessionId = patientPhone;
                     response_format.messageText = heading + dffMessage + commonMessage;
-                    response_format.message_type = "template";
+                    response_format.message_type = "text";
                     const previousIntentPayload = eventObj.body.originalDetectIntentRequest.payload;
                     this._platformMessageService = eventObj.container.resolve(previousIntentPayload.source);
                     await this._platformMessageService.SendMediaMessage(response_format, payload);
