@@ -21,22 +21,24 @@ export class ChecklistDateValidationService {
     checklistDateValidationService = async (eventObj) => {
         return new Promise(async (resolve) => {
             try {
-                const transfusionDate = eventObj.body.queryResult.parameters.date;
+                let transfusionDate = eventObj.body.queryResult.parameters.date;
                 let donor = null;
                 donor = await this.bloodWarriorCommonService.getDonorByPhoneNumber(eventObj);
 
                 const apiURL = `clinical/donation-record/search?donorUserId=${donor.UserId}`;
                 const requestBody = await this.needleService.needleRequestForREAN("get", apiURL);
-                let donationDate = requestBody.Data.DonationRecord.Items[0].DonationDetails.NextDonationDate;
+                const donationDate = requestBody.Data.DonationRecord.Items[0].DonationDetails.NextDonationDate;
                 const volunteerUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.VolunteerUserId;
                 const patientUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.PatientUserId;
                 const requestedQuantity = requestBody.Data.DonationRecord.Items[0].DonationDetails.QuantityRequired;
                 let dffMessage = "";
-                if (transfusionDate.split("T")[0] === donationDate.split("T")[0]) {
+                // eslint-disable-next-line max-len
+                const daydifference = await this.bloodWarriorCommonService.differenceBetweenTwoDates(new Date(donationDate), new Date(transfusionDate));
+                if (daydifference >= 0 && daydifference < 5) {
                     dffMessage = `Date Validation Success. \nHere are your donation details.`;
 
-                    const stringDonationDate = new Date(donationDate.split("T")[0]).toDateString();
-                    const message = ` *Donor Name:* ${donor.DisplayName}, \n *Blood Group:* ${donor.BloodGroup}, \n *Required Quantity:* ${requestedQuantity} unit, \n *Donation Date:* ${stringDonationDate}`;
+                    const stringTransfusionDate = new Date(transfusionDate.split("T")[0]).toDateString();
+                    const message = ` *Donor Name:* ${donor.DisplayName}, \n *Blood Group:* ${donor.BloodGroup}, \n *Required Quantity:* ${requestedQuantity} unit, \n *Donation Date:* ${stringTransfusionDate}`;
 
                     resolve( { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage + '\n' + message] } }] } });
 
@@ -45,12 +47,12 @@ export class ChecklistDateValidationService {
                     const heading = `Here are the details of the confirmed donor`;
 
                     //Fetch donation reminders for donors
-                    if (donationDate) {
-                        donationDate = new Date(donationDate.split("T")[0]);
+                    if (transfusionDate) {
+                        transfusionDate = new Date(transfusionDate.split("T")[0]);
                         
                         //donationDate.setDate(donationDate.getDate() - 1);
                     }
-                    await this.bloodWarriorCommonService.fetchDonorDonationReminders(donor.UserId, donationDate);
+                    await this.bloodWarriorCommonService.fetchDonorDonationReminders(donor.UserId, transfusionDate);
 
                     //message send to patient
                     const patient = await this.bloodWarriorCommonService.getPatientPhoneByUserId(patientUserId);

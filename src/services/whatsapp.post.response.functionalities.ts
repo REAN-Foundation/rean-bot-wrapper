@@ -9,7 +9,7 @@ import { inject, Lifecycle, scoped } from "tsyringe";
 @scoped(Lifecycle.ContainerScoped)
 export class WhatsappPostResponseFunctionalities{
 
-    constructor ( 
+    constructor (
         @inject(HandleMessagetypePayload) private handleMessagetypePayload?: HandleMessagetypePayload,
         @inject(UserLanguage) private userLanguage?: UserLanguage,
         @inject(translateService) private _translateService?: translateService
@@ -153,6 +153,21 @@ export class WhatsappPostResponseFunctionalities{
             payload.buttonIds ? payload.buttonIds[0] : null,
             payload.buttonIds ? payload.buttonIds[1] : null]
         };
+
+        if (payload.headers) {
+            const headersLink = payload.headers.link;
+            postDataMeta["template"].components.push({
+                "type"       : "header",
+                "parameters" : [
+                    {
+                        "type"     : "document",
+                        "document" : {
+                            "link" : "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+                        }
+                    }
+                ]
+            });
+        }
         postDataMeta.type = "template";
         return postDataMeta;
     };
@@ -203,6 +218,7 @@ export class WhatsappPostResponseFunctionalities{
                 message = payload.fields.title.stringValue;
             }
             else {
+
                 //
             }
         }
