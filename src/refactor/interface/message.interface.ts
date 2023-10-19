@@ -111,3 +111,15 @@ export interface calorieDatabase {
     value: number;
     meta_data: string;
 }
+
+export interface assessmentSessionLogs{
+    autoIncrementalID?: number;
+    patientUserId: string;
+    assessmentTemplateId: string;
+    assesmentId: string;
+    assesmentNodeId: string;
+    userResponseType: string;
+    userResponse: string;
+    userResponseTime: Date;
+    userMessageId: string;
+}

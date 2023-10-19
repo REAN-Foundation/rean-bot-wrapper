@@ -33,8 +33,9 @@ export class handleRequestservice{
 
         let message_from_nlp:IserviceResponseFunctionalities = null;
         const nlpService = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_SERVICE");
+        const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
         if (nlpService && nlpService === "openai"){
-            message_from_nlp = await this.openAIResponseService.getOpenaiMessage(translate_message.message);
+            message_from_nlp = await this.openAIResponseService.getOpenaiMessage(clientName, translate_message.message);
         }
         else if (nlpService && nlpService === "custom_ml_model"){
             let message_to_ml_model = translate_message.message;
@@ -48,7 +49,7 @@ export class handleRequestservice{
             message_from_nlp = await this.DialogflowResponseService.getDialogflowMessage(translate_message.message, channel, message.intent,message);
             if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("OPENAI_API_KEY")){
                 if (message_from_nlp.getIntent() === "Default Fallback Intent"){
-                    message_from_nlp = await this.openAIResponseService.getOpenaiMessage(translate_message.message);
+                    message_from_nlp = await this.openAIResponseService.getOpenaiMessage(clientName, translate_message.message);
                 }
             }
             console.log("message_from_nlp",message_from_nlp);
