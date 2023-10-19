@@ -8,7 +8,12 @@ export class Message implements ItelegramMessageEntities {
     private reqBody;
 
     getUserId() {
-        return this.reqBody.chat.id.toString();
+        if (this.isReplyMarkup()){
+            return this.reqBody.message.chat.id.toString();
+        }
+        else {
+            return this.reqBody.chat.id.toString();
+        }
     }
 
     getUsername() {
@@ -16,11 +21,14 @@ export class Message implements ItelegramMessageEntities {
     }
 
     getChatId() {
+        if (this.isReplyMarkup()){
+            return this.reqBody.message.message_id;
+        }
         return this.reqBody.message_id;
     }
 
     getType() {
-        const currentListOfTypes = ["text","location","photo","voice","document"];
+        const currentListOfTypes = ["text","location","photo","voice","document","inline_keyboard"];
         let type;
         for (const ele of currentListOfTypes) {
             if (this.isType(ele)){
@@ -36,13 +44,32 @@ export class Message implements ItelegramMessageEntities {
         if (this.reqBody[type]){
             return true;
         }
+        else if (this.isReplyMarkup()){
+            if (this.reqBody.message.reply_markup[type]){
+                return true;
+            }
+        }
         else {
             return false;
         }
     }
 
     getText() {
-        return this.reqBody.text;
+        if (this.isReplyMarkup()){
+            const callback_button_data:string = this.reqBody.data;
+            const inline_keyboard_array:any = this.reqBody.message.reply_markup.inline_keyboard;
+            for (const list_of_buttons of inline_keyboard_array){
+                for (const obj of list_of_buttons){
+                    if (obj['callback_data'] === callback_button_data){
+                        return obj['text'];
+                    }
+                }
+            }
+            return this.reqBody.message.text;
+        }
+        else {
+            return this.reqBody.text;
+        }
     }
 
     getContextId() {
@@ -72,6 +99,14 @@ export class Message implements ItelegramMessageEntities {
 
     getdocumentFileId() {
         return (this.reqBody.document.file_id);
+    }
+
+    isReplyMarkup() {
+        if ("message" in this.reqBody){
+            if ("reply_markup" in this.reqBody.message){
+                return true;
+            }
+        }
     }
     
 }
