@@ -35,6 +35,16 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         return messageToDialogflow;
     }
 
+    async inline_keyboardMessageFormat(messageObj: Message) {
+        const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(messageObj.getText());
+        const messageToDialogflow = this.inputMessageFormat(messageObj);
+        messageToDialogflow.messageBody = messageObj.getText();
+        if (emojiFilteredMessage === "NegativeFeedback"){
+            messageToDialogflow.intent = "NegativeFeedback";
+        }
+        return messageToDialogflow;
+    }
+
     async voiceMessageFormat(messageObj: Message) {
         let response: any = {};
         response = await this.GetTelegramMedia(messageObj.getVoiceFileId());
