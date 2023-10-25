@@ -10,7 +10,14 @@ export class CustomModelResponseFormat implements IserviceResponseFunctionalitie
     getText() {
 
         //get text. improve this method after deciding a json format for custom ML model response
-        return [this.response.body.answer? this.response.body.answer: "Server seems to be busy. Please try in few seconds"];
+        if (this.response.body && this.response.body.answer) {
+            return [this.response.body.answer];
+        } else {
+
+            // Handle the case where there is an error in the response body
+            const errorMessage = ["I am currently unable to process your request. You can try the following options: \n 1.Rephrase the question and resend it. \n 2.Attempt again in a few seconds as the server might be busy. \n 3.If neither of the above options works, please contact our support.\nI apologize for any inconvenience."];
+            return errorMessage;
+        }
     }
 
     getImageObject() {
@@ -22,7 +29,15 @@ export class CustomModelResponseFormat implements IserviceResponseFunctionalitie
     getIntent(){
 
         //get intent
-        return null;
+        let intent;
+        if (this.response.body && this.response.body.source_of_info){
+            intent = this.response.body.intent + '|' + this.response.body.source_of_info;
+        } else if (this.response.body && !this.response.body.source_of_info){
+            intent = this.response.body.intent;
+        } else {
+            intent = "Failed Intent";
+        }
+        return intent;
     }
 
     getPayload() {
