@@ -16,7 +16,8 @@ export class FeedbackService implements feedbackInterface {
     constructor(
         @inject(SlackMessageService) private slackMessageService?: SlackMessageService,
         @inject(ClickUpTask) private clickuptask?: ClickUpTask,
-        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
     ){}
 
     async NegativeFeedback(eventObj) {
@@ -24,6 +25,7 @@ export class FeedbackService implements feedbackInterface {
             try {
                 const humanHandoff: HumanHandoff = eventObj.container.resolve(HumanHandoff);
                 const clientEnvironmentProviderService = eventObj.container.resolve(ClientEnvironmentProviderService);
+                const messageContent = eventObj.body.originalDetectIntentRequest.payload.completeMessage.messageBody;
                 const payload = eventObj.body.originalDetectIntentRequest.payload;
                 const userId = payload.userId;
                 const client_name = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
@@ -55,16 +57,17 @@ export class FeedbackService implements feedbackInterface {
                         ]
                     };
                     resolve(data);
-                } else {
+                } 
+                else {
                     // eslint-disable-next-line init-declarations
                     const preferredSupportChannel = clientEnvironmentProviderService.getClientEnvironmentVariable("SUPPORT_CHANNEL");
                     if (payload.contextId){
                         responseChatMessage = await chatMessageRepository.findAll({ where: { responseMessageID: payload.contextId } });
-                        await this.supportChannel(preferredSupportChannel,responseChatMessage);
+                        await this.supportChannel(preferredSupportChannel,responseChatMessage, messageContent);
                     }
                     else {
                         const topic = responseChatMessage[responseChatMessage.length - 2].messageContent;
-                        await this.supportChannel(preferredSupportChannel,responseChatMessage,topic);
+                        await this.supportChannel(preferredSupportChannel,responseChatMessage,messageContent,topic);
                     }
                     if (await humanHandoff.checkTime() === "false"){
                         const reply = "We have recorded your feedback. Our experts will get back to you on this issue";
@@ -155,10 +158,10 @@ export class FeedbackService implements feedbackInterface {
 
     }
 
-    supportChannel = async(preferredSupportChannel, responseChatMessage, topic = null) => {
+    supportChannel = async(preferredSupportChannel, responseChatMessage, messageContent, topic = null) => {
         if (preferredSupportChannel === "ClickUp"){
-            const clickUpResponseTaskID:any = await this.clickuptask.createTask(responseChatMessage,topic,null);
-            const messageContent = responseChatMessage[responseChatMessage.length - 1].messageContent;
+            const listID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_FEEDBACK_LIST_ID");
+            const clickUpResponseTaskID:any = await this.clickuptask.createTask(responseChatMessage,topic,null,null, listID);
             if (messageContent.length > 5){
                 const comment = messageContent;
                 this.clickuptask.postCommentOnTask(clickUpResponseTaskID,comment);
