@@ -19,7 +19,7 @@ export class TelegramPostResponseFunctionalities {
         let responseId = 0;
         let telegramReswponseData;
         const message = this.sanitizeMessage(response_format.messageText);
-        telegram.sendMessage(response_format.sessionId, message, { parse_mode: 'HTML' }).then(async function (data) {
+        await telegram.sendMessage(response_format.sessionId, message, { parse_mode: 'HTML' }).then(async function (data) {
             responseId = data.message_id;
             telegramReswponseData = data;
         });
@@ -64,7 +64,7 @@ export class TelegramPostResponseFunctionalities {
         const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: userPlatformID } });
         const id = respChatMessage[respChatMessage.length - 1].id;
-        await chatMessageRepository.update({ telegramResponseMessageId: responseId }, { where: { id: id } } )
+        await chatMessageRepository.update({ responseMessageID: responseId }, { where: { id: id } } )
             .then(() => { console.log("updated telegram respomse id"); })
             .catch(error => console.log("error on update", error));
     };
