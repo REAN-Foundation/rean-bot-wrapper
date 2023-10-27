@@ -25,7 +25,7 @@ export class CustomMLModelResponseService{
         options.headers["Content-Type"] = `application/json`;
 
         //call the model
-        const callCustomModel = await needle("post",customModelUrl,obj,options);
+        const callCustomModel = await needle("post",customModelUrl,JSON.stringify(obj),options);
         const customModelResponseFormat = new CustomModelResponseFormat(callCustomModel);
         const text = customModelResponseFormat.getText();
         return customModelResponseFormat;
