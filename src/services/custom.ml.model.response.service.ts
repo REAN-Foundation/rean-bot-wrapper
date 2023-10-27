@@ -17,15 +17,20 @@ export class CustomMLModelResponseService{
     getCustomModelResponse = async(message: string, platform: string = null, completeMessage:Imessage = null) =>{
         const customModelUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CUSTOM_ML_MODEL_URL");
         const obj = { "userID": completeMessage.platformId,"Question": message };
-        const options = getRequestOptions();
         
         // send authorisation once enabled for the custom model
         // const requestAuthentication = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REQUEST_AUTHENTICATION");
         // options.headers["Authorization"] = `Bearer ${requestAuthentication}`;
-        options.headers["Content-Type"] = `application/json`;
+        var headers = {
+            'Content-Type' : 'application/json',
+            accept         : 'application/json'
+        };
+        const options = {
+            headers : headers,
+        };
 
         //call the model
-        const callCustomModel = await needle("post",customModelUrl,JSON.stringify(obj),options);
+        const callCustomModel = await needle("post",customModelUrl,obj,options);
         const customModelResponseFormat = new CustomModelResponseFormat(callCustomModel);
         const text = customModelResponseFormat.getText();
         return customModelResponseFormat;
