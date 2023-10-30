@@ -24,7 +24,7 @@
     "@google-cloud/text-to-speech": "^3.4.0",
     "@google-cloud/translate": "^6.3.0",
     "@slack/events-api": "^3.0.1",
-    "@slack/web-api": "^6.4.0",
+    "@slack/web-api": "^6.9.1",
     "@types/bcryptjs": "^2.4.2",
     "@types/sequelize": "^4.28.9",
     "actions-on-google": "^2.5",
