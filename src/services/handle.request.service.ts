@@ -43,6 +43,10 @@ export class handleRequestservice{
             message_from_nlp = await this.openAIResponseService.getOpenaiMessage(clientName, translate_message.message);
         }
         else if (nlpService && nlpService === "custom_ml_model"){
+            if (message.contextId) {
+                const tag = "Feedback";
+                await this.FeedbackService.recordFeedback(message.messageBody,ContextID,tag);
+            }
             let message_to_ml_model = translate_message.message;
             
             if (message.contextId) {
