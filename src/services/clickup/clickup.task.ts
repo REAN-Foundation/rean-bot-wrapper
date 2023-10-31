@@ -19,9 +19,14 @@ export class ClickUpTask{
     @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider) { }
 
     // eslint-disable-next-line max-len
-    async createTask(responseChatMessage,postTopic:string = null, description:string = null, priority = null){
-        const listID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_LIST_ID");
-        const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+    async createTask(responseChatMessage, postTopic:string = null, description:string = null, priority = null, ClickupListID = null,tag = null){
+        let listID = null;
+        if (ClickupListID){
+            listID = ClickupListID;
+        }
+        else {
+            listID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_LIST_ID");
+        }
         const createTaskUrl = `https://api.clickup.com/api/v2/list/${listID}/task`;
         const options = getRequestOptions();
         const CLICKUP_AUTHENTICATION = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
@@ -44,7 +49,7 @@ export class ClickUpTask{
             "start_date_time"      : false,
             "notify_all"           : true,
             "parent"               : null,
-            "tags"                 : [clientName],
+            "tags"                 : [tag],
             "links_to"             : null,
             "markdown_description" : description
         };
