@@ -33,8 +33,6 @@ export class AppointmentReminderService {
             if (date.date_time) {
                 date = date.date_time;
             }
-
-            // extract patient data and set to catch memory
             let patientUserId = null;
             const apiURL = `patients/byPhone?phone=${encodeURIComponent(this.convertPhoneNumber(personPhoneNumber))}`;
             const result = await this.needleService.needleRequestForREAN("get", apiURL);
