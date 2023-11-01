@@ -38,7 +38,6 @@ export class handleRequestservice{
         let message_from_nlp:IserviceResponseFunctionalities = null;
         const nlpService = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_SERVICE");
         const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-
         if (nlpService && nlpService === "openai"){
             message_from_nlp = await this.openAIResponseService.getOpenaiMessage(clientName, translate_message.message);
         }
