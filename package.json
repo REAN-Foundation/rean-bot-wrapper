@@ -66,6 +66,7 @@
     "node-telegram-bot-api": "^0.54.0",
     "openai": "3.2.1",
     "pb-util": "^1.0.3",
+    "pdfkit": "^0.13.0",
     "reflect-metadata": "^0.1.13",
     "sequelize": "^6.29.3",
     "sequelize-cli": "^5.0.0",

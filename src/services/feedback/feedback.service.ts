@@ -11,7 +11,7 @@ import { ClickUpTask } from '../clickup/clickup.task';
 import { EntityManagerProvider } from '../entity.manager.provider.service';
 
 @scoped(Lifecycle.ContainerScoped)
-export class FeedbackService implements feedbackInterface {
+export  class FeedbackService implements feedbackInterface {
 
     constructor(
         @inject(SlackMessageService) private slackMessageService?: SlackMessageService,
@@ -19,6 +19,15 @@ export class FeedbackService implements feedbackInterface {
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
     ){}
+
+    async recordFeedback(message,contextID,tag)
+    {
+        if ( this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_SERVICE") === "custom_ml_model"){
+            const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+            const responseChatMessage = await chatMessageRepository.findAll({ where: { responseMessageID: contextID } });
+            await this.supportChannel("ClickUp", responseChatMessage, message,null, tag);
+        }
+    }
 
     async NegativeFeedback(eventObj) {
         return new Promise(async(resolve, reject) =>{
@@ -119,6 +128,7 @@ export class FeedbackService implements feedbackInterface {
                 }
                 
             }
+                
             catch (error) {
                 console.log(error, 500, "Negative Feedback Service Error!");
                 reject(error.message);
@@ -158,18 +168,19 @@ export class FeedbackService implements feedbackInterface {
 
     }
 
-    supportChannel = async(preferredSupportChannel, responseChatMessage, messageContent, topic = null) => {
+    supportChannel = async(preferredSupportChannel, responseChatMessage, messageContent, topic = null,tag = null) => {
         if (preferredSupportChannel === "ClickUp"){
-            const listID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_FEEDBACK_LIST_ID");
-            const clickUpResponseTaskID:any = await this.clickuptask.createTask(responseChatMessage,topic,null,null, listID);
+            const listID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_ISSUES_LIST_ID");
+            const clickUpResponseTaskID:any = await this.clickuptask.createTask(responseChatMessage,topic,null,null, listID,tag);
             if (messageContent.length > 5){
                 const comment = messageContent;
-                this.clickuptask.postCommentOnTask(clickUpResponseTaskID,comment);
+                await this.clickuptask.postCommentOnTask(clickUpResponseTaskID,comment);
             }
         }
         else {
             await this.slackMessageService.postMessage(responseChatMessage,topic);
         }
     };
+
 
 }

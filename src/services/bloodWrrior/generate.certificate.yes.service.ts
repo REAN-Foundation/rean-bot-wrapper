@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
 import { scoped, Lifecycle, inject } from 'tsyringe';
+import path from 'path';
 import { Logger } from '../../common/logger';
 import { NeedleService } from '../needle.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
@@ -9,6 +10,8 @@ import { Iresponse } from '../../refactor/interface/message.interface';
 import { commonResponseMessageFormat } from '../common.response.format.object';
 import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
 import { DateStringFormat, DurationType, TimeHelper } from '../../common/time.helper';
+import { AwsS3manager } from '../aws.file.upload.service';
+import { generatePdfCertificate } from './generate.pdf.certificate';
 
 @scoped(Lifecycle.ContainerScoped)
 export class GenerateCertificateYesService {
@@ -19,6 +22,7 @@ export class GenerateCertificateYesService {
         @inject(BloodWarriorCommonService) private bloodWarriorCommonService?: BloodWarriorCommonService,
         @inject(RaiseDonationRequestService) private raiseDonationRequestService?: RaiseDonationRequestService,
         @inject(NeedleService) private needleService?: NeedleService,
+        @inject(AwsS3manager) private awsS3manager?: AwsS3manager,
     ) {}
 
     async sendUserMessage (eventObj) {
@@ -28,9 +32,11 @@ export class GenerateCertificateYesService {
 
             //load a reminder for volunteer
 
-            const apiURL = `clinical/donation-communication/search?selectedVolunteerUserId=${volunteer.UserId}`;
+            //const apiURL = `clinical/donation-communication/search?selectedVolunteerUserId=${volunteer.UserId}`;
+            const apiURL = `clinical/donation-communication/search?volunteerUserId=${volunteer.UserId}`;
             const requestBody = await this.needleService.needleRequestForREAN("get", apiURL);
-            const donorUserId = requestBody.Data.DonationCommunication.Items[0].AcceptedDonorUserId;
+            //const donorUserId = requestBody.Data.DonationCommunication.Items[0].AcceptedDonorUserId;
+            const donorUserId = requestBody.Data.DonationCommunication.Items[0].DonorUserId;
             const donor = await this.bloodWarriorCommonService.getDonorPhoneByUserId(donorUserId);
             const dffMessage = `Thank you for your confirmation, ${volunteer.DisplayName}. \nA certificate of recognition is generated and sent to ${donor.User.Person.DisplayName}`;
 
@@ -72,6 +78,12 @@ export class GenerateCertificateYesService {
             await this._platformMessageService.SendMediaMessage(response_format, null);
 
             //Certificate message to donor
+
+            const filePath = await generatePdfCertificate(body.Donor.User.Person.DisplayName, body.Donor.LastDonationDate );
+            const bucket_name = process.env.TEMP_BUCKET_NAME;
+            const cloud_front_path = process.env.TEMP_CLOUD_FRONT_PATH;
+            const file_url = await this.awsS3manager.uploadFileToS3(filePath, bucket_name, cloud_front_path);
+            console.log(`file location of BW ${file_url}`);
             const certificateMessage = `CERTIFICATE IS SENT AFTER BW VOLUNTEER CONFIRMS DONATION
             \nDONATION IS ALSO TRACKED AUTOMATICALLY AFTER BW VOLUNTEER CONFIRMS
             \nELIGIBLE DATE = ${nextDonationDate}
