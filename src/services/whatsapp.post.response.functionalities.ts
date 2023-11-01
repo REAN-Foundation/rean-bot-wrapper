@@ -218,6 +218,7 @@ export class WhatsappPostResponseFunctionalities{
                 message = payload.fields.title.stringValue;
             }
             else {
+
                 //
             }
         }
