@@ -37,68 +37,6 @@ export class MedicationReminderService {
 
             const medicineName : string = eventObj.body.queryResult.outputContexts[1].parameters.medicineName;
 
-            // const time = eventObj.body.queryResult.outputContexts[0].parameters["time.original"];
-            // const dayName : string = eventObj.body.queryResult.outputContexts[0].parameters.dayName;
-
-            // const dffMessage = `Hello ${personName}! \nI have successfully scheduled your 
-            // medication reminder for *${medicineName}* every ${dayName} at ${time}.
-            // You will receive the reminder at the specified time. If you have any further 
-            // questions or need assistance in the future, feel free to ask.
-            // \nTake care and stay healthy!`;
-
-            // const url = null;
-            // let apiURL = null;
-            // let obj = {};
-            // const hookUrl = "${reanBotBaseUrl}${client}/whatsappMeta/${urlToken}/send";
-            
-            // if (eventName === 'medication') {
-            //     apiURL = ``;
-            //     console.log("trigerring the medication reminder event");
-            //     return await this.dialoflowMessageFormattingService.triggerIntent("M_Medication_Data",eventObj);
-            // } else if (frequency === "once"){
-            //     apiURL = `reminders/one-time`;
-            //     obj = {
-            //         "UserId"           : `${patientUserId}`,
-            //         "Name"             : `${eventName}`,
-            //         "WhenDate"         : `${whenDay}`,
-            //         "WhenTime"         : `${whenTime}`,
-            //         "HookUrl"          : `${hookUrl}`,
-            //         "NotificationType" : "WhatsApp",
-            //         "RawContent"       : ""
-            //     };
-            // } else if (frequency === "daily"){
-            //     apiURL = `reminders/repeat-every-day`;
-            //     obj = {
-            //         "UserId"               : `${patientUserId}`,
-            //         "Name"                 : `${eventName}`,
-            //         "WhenDate"             : `${whenDay}`,
-            //         "WhenTime"             : `${whenTime}`,
-            //         "HookUrl"              : `${hookUrl}`,
-            //         "NotificationType"     : "WhatsApp",
-            //         "EndAfterNRepetitions" : 5,
-            //         "RawContent"           : ""
-            //     };
-            // } else if (frequency === "every"){
-            //     apiURL = `reminders/repeat-after-every-n`;
-            //     obj = {
-            //         "UserId"               : `${patientUserId}`,
-            //         "Name"                 : `${eventName}`,
-            //         "WhenDate"             : `${whenDay}`,
-            //         "WhenTime"             : `${whenTime}`,
-            //         "HookUrl"              : `${hookUrl}`,
-            //         "EndAfterNRepetitions" : 5,
-            //         "RepeatList"           : [
-            //             dayName
-            //         ],
-            //         "NotificationType" : "WhatsApp",
-
-            //         "RawContent" : ""
-            //     };
-            // }
-            //Logger.instance().log(`object for reminders ${JSON.stringify(obj)}`);
-
-            //await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
-
             const dffMessage = `Thank you for providing the name. To confirm, you would like a medication reminder for *${medicineName}* every ${dayName} at ${time}, correct?`;
             console.log(dffMessage);
             

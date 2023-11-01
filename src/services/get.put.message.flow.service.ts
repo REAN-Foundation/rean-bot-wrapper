@@ -113,7 +113,7 @@ export class MessageFlow{
             }
             payload["variables"] = msg.message.Variables;
             payload["languageForSession"] = "en";
-            if (msg.provider === "REAN") {
+            if (msg.provider !== "REAN_BW") {
                 const languageForSession = await this.translate.detectUsersLanguage( msg.userId);
                 if (msg.agentName !== 'postman') {
                     msg.message.Variables = JSON.parse(msg.message.Variables);
@@ -128,8 +128,14 @@ export class MessageFlow{
             }
         }
         else if (msg.type === "text") {
-            const translatedMessage = await this.translate.translatePushNotifications( msg.message, msg.userId);
-            msg.message = translatedMessage;
+            
+            //const translatedMessage = await this.translate.translatePushNotifications( msg.message, msg.userId);
+            const languageForSession = await this.translate.detectUsersLanguage( msg.userId);
+            if (msg.agentName !== 'postman') {
+                msg.message = JSON.parse(msg.message);
+            }
+            msg.message = msg.message[`${languageForSession}`];
+            msg.message = await msg.message.replace("PatientName", msg.payload.PersonName ?? "");
         }
         else if (msg.type === "interactivebuttons") {
             payload = await sendApiButtonService(msg.payload);

@@ -20,13 +20,13 @@ export class CreateReminderService {
 
     async createReminder (eventObj) {
         try {
-            const name : string = eventObj.body.originalDetectIntentRequest.payload.userName;
-            const phoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
-            const medicine : string = eventObj.body.queryResult.outputContexts[0].parameters.medicineName;
+            const patientName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
+            const patientUserId : string = eventObj.body.originalDetectIntentRequest.payload.userId;
+            const medicationName : string = eventObj.body.queryResult.outputContexts[0].parameters.medicineName;
             const time = eventObj.body.queryResult.outputContexts[0].parameters["time.original"];
             const dayName : string = eventObj.body.queryResult.outputContexts[0].parameters.dayName;
-            const dffMessage = `Hello ${name}! \nI have successfully scheduled your medication reminder for *${medicine}* every ${dayName} at ${time}.
-            You will receive the reminder at the specified time. If you have any further questions or need assistance in the future, feel free to ask.
+            const dffMessage = `Hello ${patientName}! \nI have successfully scheduled your medication reminder for *${medicationName}* every ${dayName} at ${time}.
+            You will receive the reminder at the specified time.
             \nTake care and stay healthy!`;
 
             const data = {
@@ -41,9 +41,9 @@ export class CreateReminderService {
             const body : QueueDoaminModel =  {
                 Intent : "M_Medication_Data_Yes",
                 Body   : {
-                    PersonName        : name,
-                    PersonPhoneNumber : phoneNumber,
-                    MedicineName      : medicine,
+                    PersonName        : patientName,
+                    PersonPhoneNumber : patientUserId,
+                    MedicineName      : medicationName,
                     Time              : time,
                     DayName           : dayName,
                     EventObj          : eventObj
@@ -60,8 +60,9 @@ export class CreateReminderService {
 
     async sendReminder (body, eventObj) {
         try {
-            const message = `Hi ${body.PersonName}, \n\nHave you taken your *${body.MedicineName}*, on this ${body.DayName} at ${body.Time}? \nIt's essential to follow your prescribed dosage and schedule for optimal health and treatment effectiveness. Take care and stay healthy!
+            const message = `Hello ${body.PersonName}, \n\nHave you taken your *${body.MedicineName}*, on this ${body.DayName} at ${body.Time}? \nIt's essential to follow your prescribed dosage and schedule for optimal health and treatment effectiveness. Take care and stay healthy!
             \nRegards\nREAN Foundation`;
+
             await FireAndForgetService.delay(4000);
             const payload = await sendApiButtonService(["Yes, I have taken", "M_Medication_Reminder_Yes", "No, I haven't taken", "M_Medication_Reminder_No"]);
             const previousPayload = eventObj.body.originalDetectIntentRequest.payload;
