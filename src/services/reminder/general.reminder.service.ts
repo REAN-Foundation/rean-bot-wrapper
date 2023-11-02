@@ -41,7 +41,7 @@ export class GeneralReminderService {
 
             //const time : string = eventObj.body.queryResult.parameters.time[0];
             const timeString = eventObj.body.queryResult.outputContexts[0].parameters["time.original"];
-            const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = "REMINDERS";
 
             const openAiResponse: any = await this.openAIResponseService.getOpenaiMessage(clientName, message);
             let jsonFormat = openAiResponse;
@@ -117,23 +117,23 @@ export class GeneralReminderService {
         personPhoneNumber?, dayName? ) {
         try {
             let apiURL = null;
+            const channel = eventObj.body.originalDetectIntentRequest.payload.source;
             const hookUrl = "https://api.weatherstack.com/current?access_key=93fdf8204559b90ec79466809edb7aad&query=Pune";
             if (frequency === "Once"){
                 apiURL = `reminders/one-time`;
                 const rawData = this.getTemplateData(jsonFormat);
 
-                const obj = this.getCommonReminderBody(patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
+                const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
                 await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
 
                 const data = await this.getFulfillmentMsg(jsonFormat, frequency, whenTime);
-                this.sendDemoReminder(personName, personPhoneNumber, whenTime, dayName, jsonFormat, eventObj);
                 return data;
 
             } else if (frequency === "Daily"){
                 apiURL = `reminders/repeat-every-day`;
 
                 const rawData = this.getTemplateData(jsonFormat);
-                const obj = this.getCommonReminderBody(patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
+                const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
                 obj.EndAfterNRepetitions = 5;
                 obj.ReminderType = ReminderType.RepeatEveryDay;
                 await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
@@ -145,7 +145,7 @@ export class GeneralReminderService {
                 apiURL = `reminders/repeat-every-week-on-days`;
 
                 const rawData = this.getTemplateData(jsonFormat);
-                const obj = this.getCommonReminderBody(patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
+                const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
                 obj.ReminderType = ReminderType.RepeatEveryWeekday;
                 obj.EndAfterNRepetitions = 5;
                 obj.RepeatList = [ dayName ];
@@ -159,7 +159,7 @@ export class GeneralReminderService {
                 apiURL = `reminders/repeat-every-hour`;
 
                 const rawData = this.getTemplateData(jsonFormat);
-                const obj = this.getCommonReminderBody(patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
+                const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
                 obj.ReminderType = ReminderType.RepeatEveryHour;
                 obj.EndAfterNRepetitions = 5;
                 obj.StartDate = whenDay;
@@ -173,7 +173,7 @@ export class GeneralReminderService {
                 apiURL = `reminders/repeat-after-every-n`;
 
                 const rawData = this.getTemplateData(jsonFormat);
-                const obj = this.getCommonReminderBody(patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
+                const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
                 obj.ReminderType = ReminderType.RepeatAfterEveryN;
                 obj.EndAfterNRepetitions = 5;
                 obj.StartDate = whenDay;
@@ -189,7 +189,7 @@ export class GeneralReminderService {
                 apiURL = `repeat-every-quarter-on`;
 
                 const rawData = this.getTemplateData(jsonFormat);
-                const obj = this.getCommonReminderBody(patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
+                const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
                 obj.ReminderType = ReminderType.RepeatEveryQuarterOn;
                 obj.EndAfterNRepetitions = 5;
                 obj.StartDate = whenDay;
@@ -206,9 +206,18 @@ export class GeneralReminderService {
         }
     }
 
-    private getTemplateData(jsonFormat: any) {
+    public getReminderType( channel: string) {
+        const channelType = {
+            "whatsappMeta" : NotificationType.WhatsApp,
+            "telegram"     : NotificationType.Telegram,
+        };
+        return channelType[channel] ?? NotificationType.WhatsApp;
+    }
+
+    private getTemplateData(jsonFormat: any ) {
+        const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
         return {
-            TemplateName : "reminder_template_1",
+            TemplateName : "appointment_msg",
             Variables    : {
                 en : [{
                     "type" : "text",
@@ -216,14 +225,11 @@ export class GeneralReminderService {
                 },
                 {
                     "type" : "text",
-                    "text" : "have fever,"
-                },
-                {
-                    "type" : "text",
-                    "text" : "or start shaking"
+                    "text" : "08:00 AM"
                 }]
             },
-            ButtonIds : ["button_1", "button_2"]
+            ButtonIds  : ["button_1", "button_2"],
+            ClientName : clientName
         };
     }
 
@@ -254,7 +260,8 @@ export class GeneralReminderService {
         return data;
     }
 
-    private getCommonReminderBody(patientUserId: string, taskName: string, whenDay: any, whenTime: any, hookUrl: string, rawContent: any) {
+    private getCommonReminderBody(channel: string, patientUserId: string, taskName: string, whenDay: any, whenTime: any, hookUrl: string, rawContent: any) {
+
         const obj: ReminderDomainModel = {
             "UserId"           : `${patientUserId}`,
             "ReminderType"     : ReminderType.OneTime,
@@ -262,7 +269,7 @@ export class GeneralReminderService {
             "WhenDate"         : `${whenDay}`,
             "WhenTime"         : `${whenTime}`,
             "HookUrl"          : `${hookUrl}`,
-            "NotificationType" : NotificationType.WhatsApp,
+            "NotificationType" : this.getReminderType(channel),
             "RawContent"       : JSON.stringify(rawContent)
         };
         return obj;
@@ -291,11 +298,7 @@ export class GeneralReminderService {
 
     async sendReminder (body, eventObj) {
         try {
-            const message = `Dear ${body.PersonName},
-
-            I hope this message finds you well. I wanted to remind you about the upcoming event *${body.TaskName}* that is scheduled at *${body.Time}*. 
-            Your prompt attention to this reminder is greatly appreciated. \nTake care and see you soon!
-            \nRegards\nREAN Foundation`;
+            const message = `Dear ${body.PersonName}, \nYou have an ${body.TaskName} scheduled at ${body.Time}.`;
 
             // const payload = {};
 
@@ -330,12 +333,10 @@ export class GeneralReminderService {
     }
 
     async extarctTimeFromTimeStamp(timeStamp ) {
-        const now = new Date(timeStamp); // Create a Date object representing the current date and time
-        const hours = String(now.getHours()).padStart(2, '0'); // Extract hours and format it with leading zero if necessary
-        const minutes = String(now.getMinutes()).padStart(2, '0'); // Extract minutes and format it with leading zero if necessary
-        const seconds = String(now.getSeconds()).padStart(2, '0'); // Extract seconds and format it with leading zero if necessary
 
-        return `${hours}:${minutes}:${seconds}`; // Create the HH:MM:SS format string
+        const time = timeStamp.split("T")[1];
+        const subtime = time.split(":", 2);
+        return `${subtime[0]}:${subtime[1]}:00`; // Create the HH:MM:SS format string
     }
 
 }

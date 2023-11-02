@@ -89,23 +89,26 @@ export class OpenAIResponseService {
                 frequency_penalty : 0.0,
                 presence_penalty  : 0.0,
             };
-        } else if (key === "BLOOD_WARRIORS") {
+        } else if (key === "REMINDERS") { // change the name to where you wanted to create reminders in bot
             prompt = {
                 model  : "text-davinci-003",
-                prompt : `${message} Provide the reminders details in json. The json format should be:
+                prompt : `${message} Provide the reminders details in json. Do not give older year date. The json format should be:
                 { "TaskName": 
                   "TaskType": "medication" or "exercise" or "other" 
                   "Frequency": "Daily" or "Monthly" or "Weekly" or "Once" or "Hourly" or "Quarterly" or "Yearly"
                   "DayName": "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
-                  "StartDateTime": 
+                  "StartDateTime": Take current year by default
                   "MedicineName":
-                } If date time is not found in phrase then, give "StartDateTime" as todays date do not give past dates and convert it into date into indian time zone time format javascript.`,
+                } If you are unable to find any information, fill the JSON value with 'NA'. Please do not assume other information.`,
                 temperature       : 0,
                 max_tokens        : 1000,
                 top_p             : 1.0,
                 frequency_penalty : 0.0,
                 presence_penalty  : 0.0,
             };
+
+            //If date time is not found in phrase then, give "StartDateTime" as todays date.
+            //Do not give past dates and convert it into date time javascript format.
         }
         return prompt;
 
