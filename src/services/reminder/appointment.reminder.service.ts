@@ -33,21 +33,9 @@ export class AppointmentReminderService {
             if (date.date_time) {
                 date = date.date_time;
             }
-            let patientUserId = null;
-            const apiURL = `patients/byPhone?phone=${encodeURIComponent(this.convertPhoneNumber(personPhoneNumber))}`;
-            const result = await this.needleService.needleRequestForREAN("get", apiURL);
-            if (result.Data.Patients.Items.length === 0) {
-                const obj = {
-                    Phone     : this.convertPhoneNumber(personPhoneNumber),
-                    Password  : "Test@123",
-                    FirstName : personName
-                };
-                const apiURL = `patients`;
-                const response = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
-                patientUserId = response.Data.Patient.UserId;
-            } else {
-                patientUserId = result.Data.Patients.Items[0].UserId;
-            }
+
+            const channel = eventObj.body.originalDetectIntentRequest.payload.source;
+            const patientUserId = await this.getPatientUserId(channel, personPhoneNumber, personName);
 
             const { whenDay, whenTime } = await this.generalReminderService.extractWhenDateTime(date);
             console.log(`date and time ${event} ${whenDay} ${whenTime}`);
@@ -60,6 +48,7 @@ export class AppointmentReminderService {
             };
             
             await this.generalReminderService.createCommonReminders(eventObj, "Once", jsonFormat, patientUserId, whenDay, whenTime, personName, personPhoneNumber, null );
+            await this.generalReminderService.createCommonReminders(eventObj, "Once", jsonFormat, patientUserId, whenDay, "07:00:00", personName, personPhoneNumber, null );
 
             const data = {
                 "fulfillmentMessages" : [
@@ -77,6 +66,44 @@ export class AppointmentReminderService {
         }
     }
 
+    public async getPatientUserId(channel: any, personPhoneNumber: string, personName: string) {
+        let patientUserId = null;
+        if (channel === "telegram") {
+            const apiURL = `patients/search?userName=${personPhoneNumber}`;
+            const result = await this.needleService.needleRequestForREAN("get", apiURL);
+            if (result.Data.Patients.Items.length === 0) {
+                const obj = {
+                    Phone          : `+91-${this.generateRandomPhoneNumber()}`,
+                    Password       : "Test@123",
+                    FirstName      : personName,
+                    UserName       : personPhoneNumber,
+                    TelegramChatId : personPhoneNumber
+                };
+                const apiURL = `patients`;
+                const response = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
+                patientUserId = response.Data.Patient.UserId;
+            } else {
+                patientUserId = result.Data.Patients.Items[0].UserId;
+            }
+        } else if (channel === "whatsappMeta") {
+            const apiURL = `patients/byPhone?phone=${encodeURIComponent(this.convertPhoneNumber(personPhoneNumber))}`;
+            const result = await this.needleService.needleRequestForREAN("get", apiURL);
+            if (result.Data.Patients.Items.length === 0) {
+                const obj = {
+                    Phone     : this.convertPhoneNumber(personPhoneNumber),
+                    Password  : "Test@123",
+                    FirstName : personName
+                };
+                const apiURL = `patients`;
+                const response = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
+                patientUserId = response.Data.Patient.UserId;
+            } else {
+                patientUserId = result.Data.Patients.Items[0].UserId;
+            }
+        }
+        return patientUserId;
+    }
+
     convertPhoneNumber(phoneNumber: string): boolean {
 
         let completeNumber = null;
@@ -84,13 +111,35 @@ export class AppointmentReminderService {
             const contryCode = phoneNumber.slice(0, 2);
             const number = phoneNumber.slice(2, 12);
             completeNumber = `+${contryCode}-${number}`;
-        } 
+        }
         else if (phoneNumber.length === 11) {
             const contryCode = phoneNumber.slice(0, 1);
             const number = phoneNumber.slice(1, 11);
             completeNumber = `+${contryCode}-${number}`;
         }
         return completeNumber;
+    }
+
+    generateRandomPhoneNumber(): string {
+        function getRandomInt(min: number, max: number): number {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+            
+        function generateRandomNumber(length: number): string {
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += getRandomInt(0, 9).toString();
+            }
+            return result;
+        }
+            
+        const areaCode = generateRandomNumber(3); // Generate a 3-digit area code
+        const prefix = generateRandomNumber(3);   // Generate a 3-digit prefix
+        const lineNumber = generateRandomNumber(4); // Generate a 4-digit line number
+            
+        // Format the phone number as (XXX) XXX-XXXX
+        const formattedPhoneNumber = `${areaCode}${prefix}${lineNumber}`;
+        return formattedPhoneNumber;
     }
 
 }
