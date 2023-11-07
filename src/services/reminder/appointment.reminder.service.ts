@@ -121,25 +121,10 @@ export class AppointmentReminderService {
     }
 
     generateRandomPhoneNumber(): string {
-        function getRandomInt(min: number, max: number): number {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        }
-            
-        function generateRandomNumber(length: number): string {
-            let result = '';
-            for (let i = 0; i < length; i++) {
-                result += getRandomInt(0, 9).toString();
-            }
-            return result;
-        }
-            
-        const areaCode = generateRandomNumber(3); // Generate a 3-digit area code
-        const prefix = generateRandomNumber(3);   // Generate a 3-digit prefix
-        const lineNumber = generateRandomNumber(4); // Generate a 4-digit line number
-            
-        // Format the phone number as (XXX) XXX-XXXX
-        const formattedPhoneNumber = `${areaCode}${prefix}${lineNumber}`;
-        return formattedPhoneNumber;
+        const now = new Date();
+        const seed = now.getTime();
+        const nu = Math.floor((seed % 10000000000));
+        return `${nu}`;
     }
 
 }
