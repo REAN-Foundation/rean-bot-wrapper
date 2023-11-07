@@ -123,8 +123,8 @@ export class AppointmentReminderService {
     generateRandomPhoneNumber(): string {
         const now = new Date();
         const seed = now.getTime();
-        const nu = Math.floor((seed % 10000000000));
-        return `${nu}`;
+        const number = Math.floor((seed % 10000000000));
+        return `${number}`;
     }
 
 }
