@@ -5,6 +5,8 @@ import { platformServiceInterface } from '../refactor/interface/platform.interfa
 import { MessageFlow } from './get.put.message.flow.service';
 import { ResponseHandler } from '../utils/response.handler';
 import { RHGMessageToDialogflow } from './rhg.message.to.dialogflow';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { LogsQAService } from './logs.for.qa';
 
 @scoped(Lifecycle.ContainerScoped)
 export class platformMessageService implements platformServiceInterface{
@@ -15,6 +17,8 @@ export class platformMessageService implements platformServiceInterface{
 
     constructor(@inject(MessageFlow) private messageFlow?: MessageFlow,
         @inject(ResponseHandler) private responseHandler?: ResponseHandler,
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(LogsQAService) private logsQAService?: LogsQAService,
         @inject(RHGMessageToDialogflow) private rhgMessageToDialogflow?: RHGMessageToDialogflow
     ) {
 
@@ -63,6 +67,12 @@ export class platformMessageService implements platformServiceInterface{
         const intent = response.message_from_nlp.getIntent();
 
         const reaponse_message = { name: null,platform: "Rean_Support",chat_message_id: null,direction: "Out",message_type: message_type,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: reansupport_Id, messageText: response.processed_message[0] };
+        if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE")) {
+            if (reaponse_message.name !== "ReanCare") {
+                console.log("Providing QA service through clickUp");
+                this.logsQAService.logMesssages(reaponse_message);
+            }
+        }
         return reaponse_message;
 
     }
