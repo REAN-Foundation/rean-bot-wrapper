@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, AllowNull, Index, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { calorieDatabase } from '../refactor/interface/message.interface';
 import { CalorieInfo } from './calorie.info.model';
