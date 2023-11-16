@@ -35,16 +35,24 @@ export class LogsQAService {
         if (responseChatMessage.length > 1){
             supportChannelTaskID = responseChatMessage[responseChatMessage.length - 2].supportChannelTaskID;
         }
-        let taskId = await this.postingOnClickup(`Client : ` + messageContentIn, supportChannelTaskID, responseChatMessage);
+
+        let userName = null;
+        if (responseChatMessage[responseChatMessage.length - 1].name){
+            userName = responseChatMessage[responseChatMessage.length - 1].name;
+        } else {
+            userName = response_format.sessionId;
+        }
+
+        let taskId = await this.postingOnClickup(`Client : ` + messageContentIn, supportChannelTaskID, responseChatMessage, userName);
 
         const messageContentOut = response_format.messageText;
-        taskId = await this.postingOnClickup(`Bot : ` + messageContentOut + `\nIntent Name : ${response_format.intent}`, taskId, responseChatMessage);
+        taskId = await this.postingOnClickup(`Bot : ` + messageContentOut + `\nIntent Name : ${response_format.intent}`, taskId, responseChatMessage, userName);
 
         await chatMessageRepository.update({ supportChannelTaskID: taskId, humanHandoff: "false" }, { where: { id: responseChatMessage[responseChatMessage.length - 1].id } });
 
     }
 
-    async postingOnClickup(comment, supportChannelTaskID, responseChatMessage){
+    async postingOnClickup(comment, supportChannelTaskID, responseChatMessage, userName){
 
         if (supportChannelTaskID){
             // eslint-disable-next-line max-len
@@ -58,7 +66,7 @@ export class LogsQAService {
         }
         else
         {
-            const userName = responseChatMessage[responseChatMessage.length - 1].name;
+            // const userName = responseChatMessage[responseChatMessage.length - 1].name;
             const taskID = await this.clickUpTask.createTask(responseChatMessage, userName, null, null);
             await this.clickUpTask.postCommentOnTask(taskID,comment);
 

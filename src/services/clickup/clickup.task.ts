@@ -19,7 +19,7 @@ export class ClickUpTask{
     @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider) { }
 
     // eslint-disable-next-line max-len
-    async createTask(responseChatMessage, postTopic:string = null, description:string = null, priority = null, ClickupListID = null,tag = null){
+    async createTask(responseChatMessage, postTopic:string = null, description:string = null, priority = null, ClickupListID = null,tag = ''){
         let listID = null;
         if (ClickupListID){
             listID = ClickupListID;
