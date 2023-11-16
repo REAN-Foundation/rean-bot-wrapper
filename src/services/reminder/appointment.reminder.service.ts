@@ -6,6 +6,7 @@ import { platformServiceInterface } from '../../refactor/interface/platform.inte
 import { GetPatientInfoService } from '../support.app.service';
 import { CacheMemory } from '../cache.memory.service';
 import { GeneralReminderService } from './general.reminder.service';
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class AppointmentReminderService {
@@ -13,9 +14,9 @@ export class AppointmentReminderService {
     private _platformMessageService :  platformServiceInterface = null;
 
     constructor(
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(NeedleService) private needleService?: NeedleService,
-        @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,
-        @inject(dialoflowMessageFormatting) private dialoflowMessageFormattingService?: dialoflowMessageFormatting,
         @inject(GeneralReminderService) private generalReminderService?: GeneralReminderService,
 
     ){}
@@ -73,11 +74,13 @@ export class AppointmentReminderService {
             const result = await this.needleService.needleRequestForREAN("get", apiURL);
             if (result.Data.Patients.Items.length === 0) {
                 const obj = {
-                    Phone          : `+91-${this.generateRandomPhoneNumber()}`,
-                    Password       : "Test@123",
-                    FirstName      : personName,
-                    UserName       : personPhoneNumber,
-                    TelegramChatId : personPhoneNumber
+                    Phone           : `+91-${this.generateRandomPhoneNumber()}`,
+                    Password        : "Test@123",
+                    FirstName       : personName,
+                    UserName        : personPhoneNumber,
+                    TelegramChatId  : personPhoneNumber,
+                    DefaultTimeZone : this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
+                    CurrentTimeZone : this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE")
                 };
                 const apiURL = `patients`;
                 const response = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
@@ -90,9 +93,11 @@ export class AppointmentReminderService {
             const result = await this.needleService.needleRequestForREAN("get", apiURL);
             if (result.Data.Patients.Items.length === 0) {
                 const obj = {
-                    Phone     : this.convertPhoneNumber(personPhoneNumber),
-                    Password  : "Test@123",
-                    FirstName : personName
+                    Phone           : this.convertPhoneNumber(personPhoneNumber),
+                    Password        : "Test@123",
+                    FirstName       : personName,
+                    DefaultTimeZone : this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
+                    CurrentTimeZone : this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE")
                 };
                 const apiURL = `patients`;
                 const response = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
