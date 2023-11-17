@@ -215,7 +215,7 @@ export class GeneralReminderService {
     }
 
     private getTemplateData(jsonFormat: any ) {
-        const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
+        const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
         return {
             TemplateName : "appointment_msg",
             Variables    : {

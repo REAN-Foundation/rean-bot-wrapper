@@ -22,11 +22,9 @@ export  class FeedbackService implements feedbackInterface {
 
     async recordFeedback(message,contextID,tag)
     {
-        if ( this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_SERVICE") === "custom_ml_model"){
-            const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-            const responseChatMessage = await chatMessageRepository.findAll({ where: { responseMessageID: contextID } });
-            await this.supportChannel("ClickUp", responseChatMessage, message,null, tag);
-        }
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+        const responseChatMessage = await chatMessageRepository.findAll({ where: { responseMessageID: contextID } });
+        await this.supportChannel("ClickUp", responseChatMessage, message,null, tag);
     }
 
     async NegativeFeedback(eventObj) {

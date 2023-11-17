@@ -6,6 +6,7 @@ import { platformServiceInterface } from '../../refactor/interface/platform.inte
 import { GetPatientInfoService } from '../support.app.service';
 import { CacheMemory } from '../cache.memory.service';
 import { GeneralReminderService } from './general.reminder.service';
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class AppointmentReminderService {
@@ -13,9 +14,9 @@ export class AppointmentReminderService {
     private _platformMessageService :  platformServiceInterface = null;
 
     constructor(
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(NeedleService) private needleService?: NeedleService,
-        @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,
-        @inject(dialoflowMessageFormatting) private dialoflowMessageFormattingService?: dialoflowMessageFormatting,
         @inject(GeneralReminderService) private generalReminderService?: GeneralReminderService,
 
     ){}
@@ -33,21 +34,9 @@ export class AppointmentReminderService {
             if (date.date_time) {
                 date = date.date_time;
             }
-            let patientUserId = null;
-            const apiURL = `patients/byPhone?phone=${encodeURIComponent(this.convertPhoneNumber(personPhoneNumber))}`;
-            const result = await this.needleService.needleRequestForREAN("get", apiURL);
-            if (result.Data.Patients.Items.length === 0) {
-                const obj = {
-                    Phone     : this.convertPhoneNumber(personPhoneNumber),
-                    Password  : "Test@123",
-                    FirstName : personName
-                };
-                const apiURL = `patients`;
-                const response = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
-                patientUserId = response.Data.Patient.UserId;
-            } else {
-                patientUserId = result.Data.Patients.Items[0].UserId;
-            }
+
+            const channel = eventObj.body.originalDetectIntentRequest.payload.source;
+            const patientUserId = await this.getPatientUserId(channel, personPhoneNumber, personName);
 
             const { whenDay, whenTime } = await this.generalReminderService.extractWhenDateTime(date);
             console.log(`date and time ${event} ${whenDay} ${whenTime}`);
@@ -77,6 +66,48 @@ export class AppointmentReminderService {
         }
     }
 
+    public async getPatientUserId(channel: any, personPhoneNumber: string, personName: string) {
+        let patientUserId = null;
+        if (channel === "telegram") {
+            const apiURL = `patients/search?userName=${personPhoneNumber}`;
+            const result = await this.needleService.needleRequestForREAN("get", apiURL);
+            if (result.Data.Patients.Items.length === 0) {
+                const obj = {
+                    Phone           : `+91-${this.generateRandomPhoneNumber()}`,
+                    Password        : "Test@123",
+                    FirstName       : personName,
+                    UserName        : personPhoneNumber,
+                    TelegramChatId  : personPhoneNumber,
+                    DefaultTimeZone : this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
+                    CurrentTimeZone : this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE")
+                };
+                const apiURL = `patients`;
+                const response = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
+                patientUserId = response.Data.Patient.UserId;
+            } else {
+                patientUserId = result.Data.Patients.Items[0].UserId;
+            }
+        } else if (channel === "whatsappMeta") {
+            const apiURL = `patients/byPhone?phone=${encodeURIComponent(this.convertPhoneNumber(personPhoneNumber))}`;
+            const result = await this.needleService.needleRequestForREAN("get", apiURL);
+            if (result.Data.Patients.Items.length === 0) {
+                const obj = {
+                    Phone           : this.convertPhoneNumber(personPhoneNumber),
+                    Password        : "Test@123",
+                    FirstName       : personName,
+                    DefaultTimeZone : this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
+                    CurrentTimeZone : this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE")
+                };
+                const apiURL = `patients`;
+                const response = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
+                patientUserId = response.Data.Patient.UserId;
+            } else {
+                patientUserId = result.Data.Patients.Items[0].UserId;
+            }
+        }
+        return patientUserId;
+    }
+
     convertPhoneNumber(phoneNumber: string): boolean {
 
         let completeNumber = null;
@@ -84,13 +115,20 @@ export class AppointmentReminderService {
             const contryCode = phoneNumber.slice(0, 2);
             const number = phoneNumber.slice(2, 12);
             completeNumber = `+${contryCode}-${number}`;
-        } 
+        }
         else if (phoneNumber.length === 11) {
             const contryCode = phoneNumber.slice(0, 1);
             const number = phoneNumber.slice(1, 11);
             completeNumber = `+${contryCode}-${number}`;
         }
         return completeNumber;
+    }
+
+    generateRandomPhoneNumber(): string {
+        const now = new Date();
+        const seed = now.getTime();
+        const number = Math.floor((seed % 10000000000));
+        return `${number}`;
     }
 
 }
