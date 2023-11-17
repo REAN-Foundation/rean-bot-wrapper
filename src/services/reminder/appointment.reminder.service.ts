@@ -49,7 +49,6 @@ export class AppointmentReminderService {
             };
             
             await this.generalReminderService.createCommonReminders(eventObj, "Once", jsonFormat, patientUserId, whenDay, whenTime, personName, personPhoneNumber, null );
-            await this.generalReminderService.createCommonReminders(eventObj, "Once", jsonFormat, patientUserId, whenDay, "07:00:00", personName, personPhoneNumber, null );
 
             const data = {
                 "fulfillmentMessages" : [
