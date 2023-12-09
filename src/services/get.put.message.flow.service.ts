@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 /* eslint-disable linebreak-style */
-import { Imessage, Iresponse } from '../refactor/interface/message.interface';
+import { Imessage, Iresponse, ILlmrouterInput } from '../refactor/interface/message.interface';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { handleRequestservice } from './handle.request.service';
@@ -17,6 +17,7 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 import { EntityManagerProvider } from './entity.manager.provider.service';
 import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
 import { AssessmentSessionLogs } from '../models/assessment.session.model';
+import { DecisionRouter } from './langchain/decision.router.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class MessageFlow{
@@ -30,7 +31,8 @@ export class MessageFlow{
         @inject(GoogleTextToSpeech) private googleTextToSpeech?: GoogleTextToSpeech,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
-        @inject(ServeAssessmentService) private serveAssessmentService?: ServeAssessmentService,) {
+        @inject(ServeAssessmentService) private serveAssessmentService?: ServeAssessmentService,
+        @inject(DecisionRouter) private decisionRouter?: DecisionRouter) {
     }
 
     async checkTheFlow(messagetoDialogflow, channel: string, platformMessageService: platformServiceInterface){
@@ -57,6 +59,12 @@ export class MessageFlow{
             this.processMessage(messagetoDialogflow, channel, platformMessageService);
         }
         
+    }
+
+    async checkTheFlowRouter(messageToLlmRouter: ILlmrouterInput, channel: string, platformMessageService: platformServiceInterface){
+        console.log(messageToLlmRouter.messageBody);
+        const tags = await this.decisionRouter.makeDecision(messageToLlmRouter.messageBody);
+        console.log(tags);
     }
 
     async processMessage(messagetoDialogflow: Imessage, channel: string ,platformMessageService: platformServiceInterface) {
