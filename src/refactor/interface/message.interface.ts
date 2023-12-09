@@ -123,3 +123,7 @@ export interface assessmentSessionLogs{
     userResponseTime: Date;
     userMessageId: string;
 }
+
+export interface ILlmrouterInput{
+    messageBody?: string;
+}
