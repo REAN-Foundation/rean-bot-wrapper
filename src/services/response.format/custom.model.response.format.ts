@@ -21,9 +21,9 @@ export class CustomModelResponseFormat implements IserviceResponseFunctionalitie
     }
 
     getImageObject() {
-
-        //get image
-        return null;
+        const image = { url: "",caption: "" };
+        console.log("no image");
+        return image;
     }
 
     getIntent(){
@@ -41,14 +41,13 @@ export class CustomModelResponseFormat implements IserviceResponseFunctionalitie
     }
 
     getPayload() {
-
-        //get payload
-        return null;
+        const payload = null;
+        return payload;
     }
 
     getParseMode(){
-
-        //get parse mode
+        const parse_mode = null;
+        return parse_mode;
     }
 
 }
