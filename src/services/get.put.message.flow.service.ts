@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 /* eslint-disable linebreak-style */
-import { Imessage, Iresponse, ILlmrouterInput } from '../refactor/interface/message.interface';
+import { Imessage, Iresponse, OutgoingMessage } from '../refactor/interface/message.interface';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { handleRequestservice } from './handle.request.service';
@@ -61,10 +61,15 @@ export class MessageFlow{
         
     }
 
-    async checkTheFlowRouter(messageToLlmRouter: ILlmrouterInput, channel: string, platformMessageService: platformServiceInterface){
+    async checkTheFlowRouter(messageToLlmRouter: Imessage, channel: string, platformMessageService: platformServiceInterface){
         console.log(messageToLlmRouter.messageBody);
-        const tags = await this.decisionRouter.makeDecision(messageToLlmRouter.messageBody);
-        console.log(tags);
+        const outgoingMessage: OutgoingMessage = await this.decisionRouter.getDecision(messageToLlmRouter, channel);
+        console.log(outgoingMessage);
+        // const checkForFeedback = await this.decisionRouter.checkFeedback(messageToLlmRouter, channel);
+
+
+        // const processedResponse = await this.handleRequestservice.handleUserRequestForRouting(messageToLlmRouter, channel, tags);
+        // console.log(processedResponse);
     }
 
     async processMessage(messagetoDialogflow: Imessage, channel: string ,platformMessageService: platformServiceInterface) {

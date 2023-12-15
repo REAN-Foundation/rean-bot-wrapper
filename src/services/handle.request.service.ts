@@ -13,6 +13,8 @@ import { IserviceResponseFunctionalities } from "./response.format/response.inte
 import { CustomMLModelResponseService } from './custom.ml.model.response.service';
 import { EmojiFilter } from './filter.message.for.emoji.service';
 import { FeedbackService } from "./feedback/feedback.service";
+import { OutgoingMessage } from '../refactor/interface/message.interface';
+
 @scoped(Lifecycle.ContainerScoped)
 export class handleRequestservice{
 
@@ -109,6 +111,49 @@ export class handleRequestservice{
             console.log("customTranslations", customTranslations);
             return customTranslations;
         }
+    }
+
+    async handleUserRequestForRouting(outgoingMessage: OutgoingMessage) {
+        const UserPlatformID = message.platformId;
+        const ContextID = message.contextId;
+        let message_from_nlp:IserviceResponseFunctionalities = null;
+
+        //get the translated message
+        const translate_message = await this.translateService.translateMessage(message.type, message.messageBody, UserPlatformID);
+        console.log("Here in handling the request after routing");
+        console.log(tags[0]);
+        console.log(typeof(tags));
+        switch (tags[0]) {
+        case "faq's" : {
+            let message_to_ml_model = translate_message.message;
+            
+            if (message.contextId) {
+                const tag = "Feedback";
+                await this.FeedbackService.recordFeedback(message.messageBody,ContextID,tag);
+                message_to_ml_model = "I have send the Feedback";
+            }
+            
+            else if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_TRANSLATE_SERVICE")){
+                message_to_ml_model = message.messageBody;
+            }
+
+            message_from_nlp = await this.customMLModelResponseService.getCustomModelResponse(message_to_ml_model, channel, message);
+            break;
+        }
+        case "assessments": {
+            console.log('Here in assessment route of LLM');
+            break;
+        }
+        case "reminders": {
+            console.log('Here in reminder route of LLM');
+            break;
+        }
+        case "other": {
+            console.log('Here in other route of LLM');
+        }
+        }
+        const processed_message = await this.processMessage(message_from_nlp, UserPlatformID);
+        return { processed_message, message_from_nlp };
     }
 
 }
