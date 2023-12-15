@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import { PromptTemplate } from "langchain/prompts";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { CommaSeparatedListOutputParser } from "langchain/schema/output_parser";
