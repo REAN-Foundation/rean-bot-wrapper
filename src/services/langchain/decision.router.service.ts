@@ -119,13 +119,7 @@ export class DecisionRouter {
         const assessmentInProgress = lastBotMessage.messageFlag;
         this.assessmentFlag = ( assessmentInProgress === 'assessment' ) ? true : false;
 
-        if (this.assessmentFlag) {
-            
-            // implement the logic here for checking if last question was assessment.
-        } else {
-
-            // Implement LLM router handler here
-        }
+        // Implement further logic for checking if assessment.
 
         return this.assessmentFlag;
 
