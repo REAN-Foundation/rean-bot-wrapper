@@ -62,14 +62,38 @@ export class MessageFlow{
     }
 
     async checkTheFlowRouter(messageToLlmRouter: Imessage, channel: string, platformMessageService: platformServiceInterface){
-        console.log(messageToLlmRouter.messageBody);
-        const outgoingMessage: OutgoingMessage = await this.decisionRouter.getDecision(messageToLlmRouter, channel);
-        console.log(outgoingMessage);
-        // const checkForFeedback = await this.decisionRouter.checkFeedback(messageToLlmRouter, channel);
-
-
-        // const processedResponse = await this.handleRequestservice.handleUserRequestForRouting(messageToLlmRouter, channel, tags);
-        // console.log(processedResponse);
+        try {
+            const chatMessageObj = await this.engageMySQL(messageToLlmRouter);
+            console.log(messageToLlmRouter.messageBody);
+            const outgoingMessage: OutgoingMessage = await this.decisionRouter.getDecision(messageToLlmRouter, channel);
+            console.log(outgoingMessage);
+            const processedResponse = await this.handleRequestservice.handleUserRequestForRouting(outgoingMessage);
+            console.log(processedResponse);
+    
+            const response_format: Iresponse = await platformMessageService.postResponse(messageToLlmRouter, processedResponse);
+    
+            await this.saveResponseDataToUser(response_format, processedResponse);
+    
+            const intent = processedResponse.message_from_nlp.getIntent();
+            await this.saveIntent(intent, response_format.sessionId);
+    
+            const payload = processedResponse.message_from_nlp.getPayload();
+            if (processedResponse.message_from_nlp.getText()){
+                let message_to_platform = null;
+    
+                await this.replyInAudio(messageToLlmRouter, response_format);
+                message_to_platform = await platformMessageService.SendMediaMessage(response_format, payload);
+    
+                if (!processedResponse.message_from_nlp.getText()) {
+                    console.log('An error occured while sending message');
+                }
+                return message_to_platform;
+            } else {
+                console.log('An error occured while sending message');
+            }
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     async processMessage(messagetoDialogflow: Imessage, channel: string ,platformMessageService: platformServiceInterface) {

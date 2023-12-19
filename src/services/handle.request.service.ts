@@ -23,7 +23,7 @@ export class handleRequestservice{
         @inject(DialogflowResponseService) private DialogflowResponseService?: DialogflowResponseService,
         @inject(translateService) private translateService?: translateService,
         @inject(EmojiFilter) private emojiFilter?: EmojiFilter,
-        @inject(FeedbackService) private FeedbackService?: FeedbackService,
+        @inject(FeedbackService) private feedbackService?: FeedbackService,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(OpenAIResponseService) private openAIResponseService?: OpenAIResponseService,
@@ -50,7 +50,7 @@ export class handleRequestservice{
             
             if (message.contextId) {
                 const tag = "Feedback";
-                await this.FeedbackService.recordFeedback(message.messageBody,ContextID,tag);
+                await this.feedbackService.recordFeedback(message.messageBody,ContextID,tag);
                 message_to_ml_model = "I have send the Feedback";
             }
             
@@ -114,46 +114,46 @@ export class handleRequestservice{
     }
 
     async handleUserRequestForRouting(outgoingMessage: OutgoingMessage) {
-        const UserPlatformID = message.platformId;
-        const ContextID = message.contextId;
-        let message_from_nlp:IserviceResponseFunctionalities = null;
-
-        //get the translated message
-        const translate_message = await this.translateService.translateMessage(message.type, message.messageBody, UserPlatformID);
-        console.log("Here in handling the request after routing");
-        console.log(tags[0]);
-        console.log(typeof(tags));
-        switch (tags[0]) {
-        case "faq's" : {
-            let message_to_ml_model = translate_message.message;
-            
-            if (message.contextId) {
+        const metaData = outgoingMessage.MetaData;
+        const messageHandler = outgoingMessage.PrimaryMessageHandler;
+        let message_from_nlp: IserviceResponseFunctionalities = null;
+        let processed_message = '';
+        switch (messageHandler) {
+        
+        case 'NLP': {
+            message_from_nlp = await this.DialogflowResponseService.getDialogflowMessage(metaData.messageBody, metaData.platform, metaData.intent, metaData);
+            break;
+        }
+        case 'QnA': {
+            message_from_nlp = await this.customMLModelResponseService.getCustomModelResponse(metaData.messageBody, metaData.platform, metaData);
+            break;
+        }
+        case 'Assessments': {
+            break;
+        }
+        case 'Feedback': {
+            let message_to_ml_model;
+            if (metaData.contextId){
                 const tag = "Feedback";
-                await this.FeedbackService.recordFeedback(message.messageBody,ContextID,tag);
-                message_to_ml_model = "I have send the Feedback";
+                await this.feedbackService.recordFeedback(outgoingMessage.Feedback.FeedbackContent,metaData.contextId,tag);
+                message_to_ml_model = "I have sent feedback";
+                message_from_nlp = await this.customMLModelResponseService.getCustomModelResponse(message_to_ml_model, metaData.platform, metaData);
+            } else {
+                message_to_ml_model = outgoingMessage.Feedback.FeedbackContent;
+                message_from_nlp = await this.DialogflowResponseService.getDialogflowMessage(message_to_ml_model, metaData.platform, metaData.intent, metaData);
             }
-            
-            else if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_TRANSLATE_SERVICE")){
-                message_to_ml_model = message.messageBody;
-            }
+            break;
+        }
+        case 'Custom': {
+            break;
+        }
+        case 'Unhandled': {
+            break;
+        }
+        }
+        processed_message = await this.processMessage(message_from_nlp, metaData.platformId);
 
-            message_from_nlp = await this.customMLModelResponseService.getCustomModelResponse(message_to_ml_model, channel, message);
-            break;
-        }
-        case "assessments": {
-            console.log('Here in assessment route of LLM');
-            break;
-        }
-        case "reminders": {
-            console.log('Here in reminder route of LLM');
-            break;
-        }
-        case "other": {
-            console.log('Here in other route of LLM');
-        }
-        }
-        const processed_message = await this.processMessage(message_from_nlp, UserPlatformID);
-        return { processed_message, message_from_nlp };
+        return {message_from_nlp, processed_message};
     }
 
 }

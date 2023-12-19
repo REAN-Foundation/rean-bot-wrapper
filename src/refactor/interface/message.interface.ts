@@ -165,6 +165,7 @@ export interface QnADetails {
 
 export interface OutgoingMessage {
     PrimaryMessageHandler: MessageHandlerType;
+    MetaData             : Imessage;
     Intent              ?: IntentDetails;
     Assessment          ?: AssessmentDetails;
     Feedback            ?: Feedback;

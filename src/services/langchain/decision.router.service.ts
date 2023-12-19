@@ -26,7 +26,22 @@ export class DecisionRouter {
     ){
         this.outgoingMessage = {
             PrimaryMessageHandler : MessageHandlerType.Unhandled,
-            Intent                : {
+            MetaData              : {
+                name              : "",
+                platform          : "",
+                platformId        : "",
+                chat_message_id   : "",
+                direction         : "",
+                type              : "",
+                messageBody       : "",
+                imageUrl          : "",
+                latlong           : "",
+                replyPath         : "",
+                intent            : "",
+                responseMessageID : "",
+                contextId         : ""
+            },
+            Intent : {
                 NLPProvider : NlpProviderType.LLM,
                 IntentName  : ''
             },
@@ -61,8 +76,6 @@ export class DecisionRouter {
         let feedbackType = '';
         let feedback = '';
         if (messageBody.contextId){
-            const tag = "Feedback";
-            this.feedbackService.recordFeedback(messageBody.messageBody,messageBody.contextId,tag);
             this.feedbackFlag = true;
             feedbackType = UserFeedbackType.General;
             feedback = messageBody.messageBody;
@@ -156,7 +169,8 @@ export class DecisionRouter {
             console.log(dfResponse[key]);
             if (dfResponse[key]!== null){
                 const confidence = dfResponse[key].queryResult.intentDetectionConfidence;
-                if (confidence > 0.85) {
+                const intent = dfResponse[key].queryResult.intent.displayName;
+                if (confidence > 0.85 && intent !== "Default Fallback Intent") {
                     this.intentFlag = true;
                 }
             }
@@ -221,22 +235,23 @@ export class DecisionRouter {
     async getDecision(messageBody: Imessage, channel: string){
         try {
             const resultFeedback = await this.checkFeedback(messageBody, channel);
+            this.outgoingMessage.MetaData = messageBody;
             if (!resultFeedback.feedbackFlag){
                 const resultAssessment = await this.checkAssessment(messageBody, channel);
                 if (!resultAssessment){
                     const resultIntent = await this.checkDFIntent(messageBody);
-                    if (!resultIntent){
+                    if (!this.intentFlag){
                         console.log("All functions returned false");
+                        this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.QnA;
+                        return this.outgoingMessage;
+                    } else {
+                        console.log('At least one function returned true');
                         this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.NLP;
                         this.outgoingMessage.Intent = {
                             NLPProvider : NlpProviderType.Dialogflow,
                             IntentName  : resultIntent.queryResult.intent.displayName,
                             Confidence  : resultIntent.queryResult.intentDetectionConfidence
                         };
-                        return this.outgoingMessage;
-                    } else {
-                        console.log('At least one function returned true');
-                        this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.QnA;
                         return this.outgoingMessage;
                     }
                 } else {
@@ -251,7 +266,7 @@ export class DecisionRouter {
                 }
             } else {
                 console.log('Skipping assessment and intent due to feedback returning true');
-                
+
                 // this.outgoingMessage.Feedback.FeedbackType = resultFeedback.feedbackType;
                 this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.Feedback;
                 this.outgoingMessage.Feedback = {
