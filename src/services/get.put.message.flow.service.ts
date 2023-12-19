@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 /* eslint-disable linebreak-style */
-import { Imessage, Iresponse, ILlmrouterInput } from '../refactor/interface/message.interface';
+import { Imessage, Iresponse, OutgoingMessage } from '../refactor/interface/message.interface';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { handleRequestservice } from './handle.request.service';
@@ -61,10 +61,39 @@ export class MessageFlow{
         
     }
 
-    async checkTheFlowRouter(messageToLlmRouter: ILlmrouterInput, channel: string, platformMessageService: platformServiceInterface){
-        console.log(messageToLlmRouter.messageBody);
-        const tags = await this.decisionRouter.makeDecision(messageToLlmRouter.messageBody);
-        console.log(tags);
+    async checkTheFlowRouter(messageToLlmRouter: Imessage, channel: string, platformMessageService: platformServiceInterface){
+        try {
+            const chatMessageObj = await this.engageMySQL(messageToLlmRouter);
+            console.log(messageToLlmRouter.messageBody);
+            const outgoingMessage: OutgoingMessage = await this.decisionRouter.getDecision(messageToLlmRouter, channel);
+            console.log(outgoingMessage);
+            const processedResponse = await this.handleRequestservice.handleUserRequestForRouting(outgoingMessage);
+            console.log(processedResponse);
+    
+            const response_format: Iresponse = await platformMessageService.postResponse(messageToLlmRouter, processedResponse);
+    
+            await this.saveResponseDataToUser(response_format, processedResponse);
+    
+            const intent = processedResponse.message_from_nlp.getIntent();
+            await this.saveIntent(intent, response_format.sessionId);
+    
+            const payload = processedResponse.message_from_nlp.getPayload();
+            if (processedResponse.message_from_nlp.getText()){
+                let message_to_platform = null;
+    
+                await this.replyInAudio(messageToLlmRouter, response_format);
+                message_to_platform = await platformMessageService.SendMediaMessage(response_format, payload);
+    
+                if (!processedResponse.message_from_nlp.getText()) {
+                    console.log('An error occured while sending message');
+                }
+                return message_to_platform;
+            } else {
+                console.log('An error occured while sending message');
+            }
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     async processMessage(messagetoDialogflow: Imessage, channel: string ,platformMessageService: platformServiceInterface) {

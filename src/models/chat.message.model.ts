@@ -121,4 +121,9 @@ export class ChatMessage extends Model implements IchatMessage {
     })
         feedbackType: string;
 
+    @Column({
+        type : DataType.STRING
+    })
+        messageFlag: string
+
 }
