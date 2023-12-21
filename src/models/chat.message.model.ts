@@ -124,6 +124,6 @@ export class ChatMessage extends Model implements IchatMessage {
     @Column({
         type : DataType.STRING
     })
-        messageFlag: string
+        messageFlag: string;
 
 }
