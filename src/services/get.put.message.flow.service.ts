@@ -17,6 +17,8 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 import { EntityManagerProvider } from './entity.manager.provider.service';
 import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
 import { AssessmentSessionLogs } from '../models/assessment.session.model';
+import { Helper } from '../common/helper';
+import needle from "needle";
 
 @scoped(Lifecycle.ContainerScoped)
 export class MessageFlow{
@@ -190,6 +192,18 @@ export class MessageFlow{
             assessmentSession.userMessageId = message_to_platform.body.messages[0].id;
             const AssessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
             await AssessmentSessionRepo.create(assessmentSession);
+        }
+        if (msg.provider === "REAN_BOT" && message_to_platform.statusCode === 200) {
+            const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
+            const todayDate = new Date().toISOString().split('T')[0];
+            const phoneNumber = Helper.formatPhoneForDocProcessor(msg.userId);
+            const apiUrl = `${docProcessBaseURL}tests/gmu/appointment-status/${phoneNumber}/days/${todayDate}`;
+            const obj = {
+                "WhatsApp_message_id" : message_to_platform.body.messages[0].id,
+                "Patient_replied"     : "Not replied"
+            };
+            await needle("put", apiUrl, obj);
+
         }
         return message_to_platform;
     }

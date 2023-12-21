@@ -25,7 +25,7 @@ export class AnswerYesMsgService {
 
     }
 
-    private getRandomYesMessage() {
+    public getRandomYesMessage() {
         const messages = ["It sounds good.", "That's great to hear!", "You're doing great!", "You're awesome!", "Keep up the good work!"];
         const randomIndex = this.generateRandomNumber(messages.length);
         return messages[randomIndex];

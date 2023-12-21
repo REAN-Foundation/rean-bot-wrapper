@@ -74,6 +74,7 @@ import { DmcAssessmentAnswerNoListener } from './intentListeners/maternity.carep
 import { eyeImageQualityCheckListener } from './intentListeners/eye.image.quality.check.listener';
 import { AppointmentReminderListener } from './intentListeners/medicationReminder/appointment.reminder.listener';
 import { ReminderRegistrationListener } from './intentListeners/medicationReminder/reminder.registration.listener';
+import { NoBabyMovementListener } from './intentListeners/commonAssessment/no.baby.movement.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -221,6 +222,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('Generate_Certificate_Yes', GenerateCertificateYesListener);
         IntentEmitter.registerListener('Generate_Certificate_Confirm_Yes', GenerateCertificateConfirmYesListener);
         IntentEmitter.registerListener('M_Medication_Data', MedicationReminderListener);
+        IntentEmitter.registerListener('M_Medication_Data_Yes', MedicationReminderListener);
         IntentEmitter.registerListener('General_Reminder', GeneralReminderListener);
         IntentEmitter.registerListener('Reminder_Ask_Time', ReminderAskTimeListener);
         IntentEmitter.registerListener('Dmc_Yes', DmcAssessmentAnswerYesListener);
@@ -230,6 +232,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('ImageQualityCheck', eyeImageQualityCheckListener);
         IntentEmitter.registerListener('Appointment_Reminder', AppointmentReminderListener);
         IntentEmitter.registerListener('Reminder_Registration', ReminderRegistrationListener);
+        IntentEmitter.registerListener('NoBabyMovement', NoBabyMovementListener);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);

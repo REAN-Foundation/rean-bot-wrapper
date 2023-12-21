@@ -391,4 +391,13 @@ export class Helper {
         return possiblePhoneNumbers;
     };
 
+    public static formatPhoneForDocProcessor(phoneNumber: string): string {
+
+        // Extract the country code and remaining digits
+        const remainingDigits = phoneNumber.substring(phoneNumber.length - 10);
+        const countryCode = phoneNumber.replace(remainingDigits, "");
+        const formattedNumber = `${countryCode}-${remainingDigits}`;
+        return formattedNumber;
+    }
+
 }
