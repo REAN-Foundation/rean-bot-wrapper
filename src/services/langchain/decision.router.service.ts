@@ -60,8 +60,7 @@ export class DecisionRouter {
             
         };
     }
-
-
+    
     public model = new ChatOpenAI({ temperature: 0, modelName: "gpt-3.5-turbo" });
 
     public feedbackFlag = false;
@@ -103,7 +102,7 @@ export class DecisionRouter {
         const chatSessionRepository = (
             await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         const lastBotMessage = await chatSessionRepository.findOne({
-            where : { 
+            where : {
                 userPlatformId : messageBody.platformId,
                 platform       : channel
             },
@@ -161,7 +160,7 @@ export class DecisionRouter {
 
         for (const key in dfResponse){
             console.log(dfResponse[key]);
-            if (dfResponse[key]!== null){
+            if (dfResponse[key] !== null){
                 const confidence = dfResponse[key].queryResult.intentDetectionConfidence;
                 const intent = dfResponse[key].queryResult.intent.displayName;
                 if (confidence > 0.85 && intent !== "Default Fallback Intent") {
@@ -285,4 +284,5 @@ export class DecisionRouter {
             return "en-US";
         }
     }
+
 }

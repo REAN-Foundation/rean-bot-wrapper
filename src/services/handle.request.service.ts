@@ -153,7 +153,7 @@ export class handleRequestservice{
         }
         processed_message = await this.processMessage(message_from_nlp, metaData.platformId);
 
-        return {message_from_nlp, processed_message};
+        return { message_from_nlp, processed_message };
     }
 
 }
