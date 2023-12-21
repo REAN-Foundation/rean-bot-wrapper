@@ -13,6 +13,8 @@ import { IserviceResponseFunctionalities } from "./response.format/response.inte
 import { CustomMLModelResponseService } from './custom.ml.model.response.service';
 import { EmojiFilter } from './filter.message.for.emoji.service';
 import { FeedbackService } from "./feedback/feedback.service";
+import { OutgoingMessage } from '../refactor/interface/message.interface';
+
 @scoped(Lifecycle.ContainerScoped)
 export class handleRequestservice{
 
@@ -21,7 +23,7 @@ export class handleRequestservice{
         @inject(DialogflowResponseService) private DialogflowResponseService?: DialogflowResponseService,
         @inject(translateService) private translateService?: translateService,
         @inject(EmojiFilter) private emojiFilter?: EmojiFilter,
-        @inject(FeedbackService) private FeedbackService?: FeedbackService,
+        @inject(FeedbackService) private feedbackService?: FeedbackService,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(OpenAIResponseService) private openAIResponseService?: OpenAIResponseService,
@@ -48,7 +50,7 @@ export class handleRequestservice{
             
             if (message.contextId) {
                 const tag = "Feedback";
-                await this.FeedbackService.recordFeedback(message.messageBody,ContextID,tag);
+                await this.feedbackService.recordFeedback(message.messageBody,ContextID,tag);
                 message_to_ml_model = "I have send the Feedback";
             }
             
@@ -109,6 +111,49 @@ export class handleRequestservice{
             console.log("customTranslations", customTranslations);
             return customTranslations;
         }
+    }
+
+    async handleUserRequestForRouting(outgoingMessage: OutgoingMessage) {
+        const metaData = outgoingMessage.MetaData;
+        const messageHandler = outgoingMessage.PrimaryMessageHandler;
+        let message_from_nlp: IserviceResponseFunctionalities = null;
+        let processed_message = '';
+        switch (messageHandler) {
+        
+        case 'NLP': {
+            message_from_nlp = await this.DialogflowResponseService.getDialogflowMessage(metaData.messageBody, metaData.platform, metaData.intent, metaData);
+            break;
+        }
+        case 'QnA': {
+            message_from_nlp = await this.customMLModelResponseService.getCustomModelResponse(metaData.messageBody, metaData.platform, metaData);
+            break;
+        }
+        case 'Assessments': {
+            break;
+        }
+        case 'Feedback': {
+            let message_to_ml_model;
+            if (metaData.contextId){
+                const tag = "Feedback";
+                await this.feedbackService.recordFeedback(outgoingMessage.Feedback.FeedbackContent,metaData.contextId,tag);
+                message_to_ml_model = "I have sent feedback";
+                message_from_nlp = await this.customMLModelResponseService.getCustomModelResponse(message_to_ml_model, metaData.platform, metaData);
+            } else {
+                message_to_ml_model = outgoingMessage.Feedback.FeedbackContent;
+                message_from_nlp = await this.DialogflowResponseService.getDialogflowMessage(message_to_ml_model, metaData.platform, metaData.intent, metaData);
+            }
+            break;
+        }
+        case 'Custom': {
+            break;
+        }
+        case 'Unhandled': {
+            break;
+        }
+        }
+        processed_message = await this.processMessage(message_from_nlp, metaData.platformId);
+
+        return { message_from_nlp, processed_message };
     }
 
 }

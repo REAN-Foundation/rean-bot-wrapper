@@ -8,6 +8,7 @@ import util from 'util';
 import { ChatMessage } from '../../models/chat.message.model';
 import { EntityManagerProvider } from '../../services/entity.manager.provider.service';
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
+import { DecisionRouter } from '../../services/langchain/decision.router.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ClientWebhookController {

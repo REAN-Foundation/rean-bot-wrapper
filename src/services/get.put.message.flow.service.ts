@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 /* eslint-disable linebreak-style */
-import { Imessage, Iresponse } from '../refactor/interface/message.interface';
+import { Imessage, Iresponse, OutgoingMessage } from '../refactor/interface/message.interface';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { handleRequestservice } from './handle.request.service';
@@ -17,6 +17,7 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 import { EntityManagerProvider } from './entity.manager.provider.service';
 import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
 import { AssessmentSessionLogs } from '../models/assessment.session.model';
+import { DecisionRouter } from './langchain/decision.router.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class MessageFlow{
@@ -30,7 +31,8 @@ export class MessageFlow{
         @inject(GoogleTextToSpeech) private googleTextToSpeech?: GoogleTextToSpeech,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
-        @inject(ServeAssessmentService) private serveAssessmentService?: ServeAssessmentService,) {
+        @inject(ServeAssessmentService) private serveAssessmentService?: ServeAssessmentService,
+        @inject(DecisionRouter) private decisionRouter?: DecisionRouter) {
     }
 
     async checkTheFlow(messagetoDialogflow, channel: string, platformMessageService: platformServiceInterface){
@@ -57,6 +59,60 @@ export class MessageFlow{
             this.processMessage(messagetoDialogflow, channel, platformMessageService);
         }
         
+    }
+
+    async checkTheFlowRouter(messageToLlmRouter: Imessage, channel: string, platformMessageService: platformServiceInterface){
+        try {
+            const preprocessedOutgoingMessage = await this.preprocessOutgoingMessage(messageToLlmRouter);
+
+            console.log("The message is being set to make the decision");
+            const outgoingMessage: OutgoingMessage = await this.decisionRouter.getDecision(preprocessedOutgoingMessage.message, channel);
+            console.log("The outgoing message is being handled in routing");
+            const processedResponse = await this.handleRequestservice.handleUserRequestForRouting(outgoingMessage);
+            const response = await this.processOutgoingMessage(messageToLlmRouter, channel, platformMessageService, processedResponse);
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async preprocessOutgoingMessage(message: Imessage){
+        try {
+            const chatMessageObj = await this.engageMySQL(message);
+            const translate_message = await this.translate.translateMessage(message.type, message.messageBody, message.platformId);
+            message.messageBody = translate_message.message;
+            return {message, translate_message};
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async processOutgoingMessage(messageToLlmRouter: Imessage, channel: string, platformMessageService: platformServiceInterface, processedResponse){
+        try {
+            const response_format: Iresponse = await platformMessageService.postResponse(messageToLlmRouter, processedResponse);
+    
+            await this.saveResponseDataToUser(response_format, processedResponse);
+    
+            const intent = processedResponse.message_from_nlp.getIntent();
+            await this.saveIntent(intent, response_format.sessionId);
+    
+            const payload = processedResponse.message_from_nlp.getPayload();
+            if (processedResponse.message_from_nlp.getText()){
+                let message_to_platform = null;
+    
+                await this.replyInAudio(messageToLlmRouter, response_format);
+                message_to_platform = await platformMessageService.SendMediaMessage(response_format, payload);
+    
+                if (!processedResponse.message_from_nlp.getText()) {
+                    console.log('An error occured while sending message');
+                }
+                return message_to_platform;
+            } else {
+                console.log('An error occured while sending message');
+            }
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     async processMessage(messagetoDialogflow: Imessage, channel: string ,platformMessageService: platformServiceInterface) {
