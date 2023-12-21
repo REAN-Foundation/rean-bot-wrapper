@@ -63,13 +63,32 @@ export class MessageFlow{
 
     async checkTheFlowRouter(messageToLlmRouter: Imessage, channel: string, platformMessageService: platformServiceInterface){
         try {
-            const chatMessageObj = await this.engageMySQL(messageToLlmRouter);
-            console.log(messageToLlmRouter.messageBody);
-            const outgoingMessage: OutgoingMessage = await this.decisionRouter.getDecision(messageToLlmRouter, channel);
-            console.log(outgoingMessage);
+            const preprocessedOutgoingMessage = await this.preprocessOutgoingMessage(messageToLlmRouter);
+
+            console.log("The message is being set to make the decision");
+            const outgoingMessage: OutgoingMessage = await this.decisionRouter.getDecision(preprocessedOutgoingMessage.message, channel);
+            console.log("The outgoing message is being handled in routing");
             const processedResponse = await this.handleRequestservice.handleUserRequestForRouting(outgoingMessage);
-            console.log(processedResponse);
-    
+            const response = await this.processOutgoingMessage(messageToLlmRouter, channel, platformMessageService, processedResponse);
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async preprocessOutgoingMessage(message: Imessage){
+        try {
+            const chatMessageObj = await this.engageMySQL(message);
+            const translate_message = await this.translate.translateMessage(message.type, message.messageBody, message.platformId);
+            message.messageBody = translate_message.message;
+            return {message, translate_message};
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async processOutgoingMessage(messageToLlmRouter: Imessage, channel: string, platformMessageService: platformServiceInterface, processedResponse){
+        try {
             const response_format: Iresponse = await platformMessageService.postResponse(messageToLlmRouter, processedResponse);
     
             await this.saveResponseDataToUser(response_format, processedResponse);
