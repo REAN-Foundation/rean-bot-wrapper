@@ -121,7 +121,9 @@ export class handleRequestservice{
         switch (messageHandler) {
         
         case 'NLP': {
-            message_from_nlp = await this.DialogflowResponseService.getDialogflowMessage(metaData.messageBody, metaData.platform, metaData.intent, metaData);
+            message_from_nlp = outgoingMessage.Intent.IntentContent;
+            
+            // message_from_nlp = await this.DialogflowResponseService.getDialogflowMessage(metaData.messageBody, metaData.platform, metaData.intent, metaData);
             break;
         }
         case 'QnA': {
