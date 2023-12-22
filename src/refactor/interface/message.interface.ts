@@ -129,6 +129,7 @@ export interface IntentDetails {
     NLPProvider : NlpProviderType;
     IntentName  : string;
     Confidence ?: number;
+    IntentContent ?: any;
 }
 
 export interface AssessmentDetails {

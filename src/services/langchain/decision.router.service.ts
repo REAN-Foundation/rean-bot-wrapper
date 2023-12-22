@@ -12,6 +12,7 @@ const dialogflow = require('@google-cloud/dialogflow');
 import { v4 } from "uuid";
 import { MessageHandlerType, NlpProviderType, UserFeedbackType, ChannelType } from "../../refactor/messageTypes/message.types";
 import { EmojiFilter } from "../filter.message.for.emoji.service";
+import { DialogflowResponseService } from '../dialogflow.response.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class DecisionRouter {
@@ -19,6 +20,7 @@ export class DecisionRouter {
     outgoingMessage!: OutgoingMessage;
 
     constructor(
+        @inject(DialogflowResponseService) private dialogflowResponseService?: DialogflowResponseService,
         @inject(FeedbackService) private feedbackService?: FeedbackService,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
@@ -60,7 +62,7 @@ export class DecisionRouter {
             
         };
     }
-    
+
     public model = new ChatOpenAI({ temperature: 0, modelName: "gpt-3.5-turbo" });
 
     public feedbackFlag = false;
@@ -128,47 +130,48 @@ export class DecisionRouter {
     async checkDFIntent(messageBody: Imessage){
 
         // Get matching intents with score for dialogflow
-        const userId = messageBody.platformId === null ? v4() : messageBody.platformId;
-        let options = {};
-        const dfGCPCredentials = JSON.parse(this.clientEnvironmentProviderService.getClientEnvironmentVariable('DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS'));
-        const GCPCredenctials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
-        const dfAppCredentialsObj = dfGCPCredentials ? dfGCPCredentials : GCPCredenctials;
+        // const userId = messageBody.platformId === null ? v4() : messageBody.platformId;
+        // let options = {};
+        // const dfGCPCredentials = JSON.parse(this.clientEnvironmentProviderService.getClientEnvironmentVariable('DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS'));
+        // const GCPCredenctials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+        // const dfAppCredentialsObj = dfGCPCredentials ? dfGCPCredentials : GCPCredenctials;
 
-        options = {
-            credentials : {
-                client_email : dfAppCredentialsObj.client_email,
-                private_key  : dfAppCredentialsObj.private_key,
-            },
-            projectId : dfAppCredentialsObj.project_id
-        };
-        const projectIdFinal = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DIALOGFLOW_PROJECT_ID");
+        // options = {
+        //     credentials : {
+        //         client_email : dfAppCredentialsObj.client_email,
+        //         private_key  : dfAppCredentialsObj.private_key,
+        //     },
+        //     projectId : dfAppCredentialsObj.project_id
+        // };
+        // const projectIdFinal = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DIALOGFLOW_PROJECT_ID");
 
-        const sessionClient = new dialogflow.SessionsClient(options);
-        const sessionPath = sessionClient.projectAgentSessionPath(projectIdFinal, userId);
-        const dialogflowLanguage = await this.getDialogflowLanguage();
-        const requestBody = {
-            session    : sessionPath,
-            queryInput : {
-                text : {
-                    text         : messageBody.messageBody,
-                    languageCode : dialogflowLanguage
-                }
-            }
-        };
+        // const sessionClient = new dialogflow.SessionsClient(options);
+        // const sessionPath = sessionClient.projectAgentSessionPath(projectIdFinal, userId);
+        // const dialogflowLanguage = await this.getDialogflowLanguage();
+        // const requestBody = {
+        //     session    : sessionPath,
+        //     queryInput : {
+        //         text : {
+        //             text         : messageBody.messageBody,
+        //             languageCode : dialogflowLanguage
+        //         }
+        //     }
+        // };
 
-        const dfResponse = await sessionClient.detectIntent(requestBody);
-
-        for (const key in dfResponse){
-            console.log(dfResponse[key]);
-            if (dfResponse[key] !== null){
-                const confidence = dfResponse[key].queryResult.intentDetectionConfidence;
-                const intent = dfResponse[key].queryResult.intent.displayName;
+        // const dfResponse = await sessionClient.detectIntent(requestBody);
+        const dfResponse = await this.dialogflowResponseService.getDialogflowMessage(messageBody.messageBody, messageBody.platform, messageBody.intent, messageBody);
+        const responses = dfResponse.getResponses();
+        for (const key in responses){
+            console.log(responses[key]);
+            if (responses[key] !== null){
+                const confidence = responses[key].queryResult.intentDetectionConfidence;
+                const intent = responses[key].queryResult.intent.displayName;
                 if (confidence > 0.85 && intent !== "Default Fallback Intent") {
                     this.intentFlag = true;
                 }
             }
         }
-        return dfResponse[0];
+        return dfResponse;
     }
 
     async makeDecision(userQuery: string) {
@@ -241,9 +244,10 @@ export class DecisionRouter {
                         console.log('At least one function returned true');
                         this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.NLP;
                         this.outgoingMessage.Intent = {
-                            NLPProvider : NlpProviderType.Dialogflow,
-                            IntentName  : resultIntent.queryResult.intent.displayName,
-                            Confidence  : resultIntent.queryResult.intentDetectionConfidence
+                            NLPProvider   : NlpProviderType.Dialogflow,
+                            IntentName    : resultIntent.getIntent(),
+                            Confidence    : resultIntent.getConfidenceScore(),
+                            IntentContent : resultIntent
                         };
                         return this.outgoingMessage;
                     }

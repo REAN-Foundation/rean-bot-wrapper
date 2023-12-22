@@ -77,4 +77,18 @@ export class DialogflowResponseFormat implements IserviceResponseFunctionalities
         return parse_mode;
     }
 
+    getConfidenceScore(){
+        let confidenceScore = null;
+        if (this.response[0].queryResult.intentDetectionConfidence){
+            confidenceScore = this.response[0].queryResult.intentDetectionConfidence;
+        } else {
+            confidenceScore = 0;
+        }
+        return confidenceScore;
+    }
+
+    getResponses(){
+        return this.response;
+    }
+
 }
