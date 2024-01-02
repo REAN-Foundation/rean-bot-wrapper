@@ -32,7 +32,7 @@ export class CommonWhatsappService implements platformServiceInterface {
         }
         for (whatsappMessagetoDialogflow of whatsappMessages){
             if (whatsappMessagetoDialogflow) {
-                await this.messageFlow.checkTheFlow(whatsappMessagetoDialogflow, channel, this);
+                await this.messageFlow.checkTheFlowRouter(whatsappMessagetoDialogflow, channel, this);
             }
         }
     

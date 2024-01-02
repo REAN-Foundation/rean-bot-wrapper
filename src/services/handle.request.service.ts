@@ -14,7 +14,9 @@ import { CustomMLModelResponseService } from './custom.ml.model.response.service
 import { EmojiFilter } from './filter.message.for.emoji.service';
 import { FeedbackService } from "./feedback/feedback.service";
 import { OutgoingMessage } from '../refactor/interface/message.interface';
-
+import { ChatMessage } from '../models/chat.message.model';
+import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
+import { CacheMemory } from './cache.memory.service';
 @scoped(Lifecycle.ContainerScoped)
 export class handleRequestservice{
 
@@ -27,7 +29,8 @@ export class handleRequestservice{
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(OpenAIResponseService) private openAIResponseService?: OpenAIResponseService,
-        @inject(CustomMLModelResponseService)private customMLModelResponseService?: CustomMLModelResponseService) {
+        @inject(CustomMLModelResponseService)private customMLModelResponseService?: CustomMLModelResponseService,
+        @inject(ServeAssessmentService)private serveAssessmentService?: ServeAssessmentService) {
     }
 
     async handleUserRequest (message: Imessage, channel: string) {
@@ -40,6 +43,10 @@ export class handleRequestservice{
         let message_from_nlp:IserviceResponseFunctionalities = null;
         const nlpService = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_SERVICE");
         const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+        const response = await chatMessageRepository.findAll({ limit: 1, where: { userPlatformId: message.platformId }, order: [['createdAt', 'DESC']] });
+        const messageFlag = response[response.length - 1].messageFlag;
 
         if (nlpService && nlpService === "openai"){
             message_from_nlp = await this.openAIResponseService.getOpenaiMessage(clientName, translate_message.message);
@@ -60,6 +67,10 @@ export class handleRequestservice{
 
             message_from_nlp = await this.customMLModelResponseService.getCustomModelResponse(message_to_ml_model, channel, message);
             
+        } else if (messageFlag === "awaitingAssessmentRequest") {
+            // call here answer assessment api
+            const contextMessageId = response[response.length - 1].responseMessageID;
+            console.log("call here answer assessment api");
         }
 
         else {
@@ -113,7 +124,7 @@ export class handleRequestservice{
         }
     }
 
-    async handleUserRequestForRouting(outgoingMessage: OutgoingMessage) {
+    async handleUserRequestForRouting(outgoingMessage: OutgoingMessage, eventObj: any) {
         const metaData = outgoingMessage.MetaData;
         const messageHandler = outgoingMessage.PrimaryMessageHandler;
         let message_from_nlp: IserviceResponseFunctionalities = null;
@@ -131,11 +142,15 @@ export class handleRequestservice{
             break;
         }
         case 'Assessments': {
+            const key = `${metaData.platformId}:Assessment`;
+            const userMessageId = await CacheMemory.get(key);
+            await this.serveAssessmentService.answerQuestion(eventObj, metaData.platformId, metaData.messageBody, userMessageId, metaData.platform, true);
             break;
         }
         case 'Feedback': {
             let message_to_ml_model;
-            if (metaData.contextId){
+
+            if (metaData.contextId && !metaData.intent){
                 const tag = "Feedback";
                 await this.feedbackService.recordFeedback(outgoingMessage.Feedback.FeedbackContent,metaData.contextId,tag);
                 message_to_ml_model = "I have sent feedback";
