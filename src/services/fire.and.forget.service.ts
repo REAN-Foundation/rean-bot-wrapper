@@ -105,8 +105,12 @@ export class FireAndForgetService {
             const eventObj = model.Body.EventObj;
             const serveAssessmentService:  ServeAssessmentService = eventObj.container.resolve(ServeAssessmentService);
             const messageContextId = eventObj.body.originalDetectIntentRequest.payload.contextId;
+            const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
+            const userResponse = eventObj.body.queryResult.intent.displayName;
+            const channel = eventObj.body.originalDetectIntentRequest.payload.source;
             await FireAndForgetService.delay(2000);
-            await serveAssessmentService.answerQuestion(eventObj, messageContextId);
+            await serveAssessmentService.answerQuestion(eventObj, userId, userResponse,
+                messageContextId, channel, false);
             console.log(`Fire and Forget Domain Model: ${model}`);
         }
         if (model.Intent === "Registration_PerMinMsg") {

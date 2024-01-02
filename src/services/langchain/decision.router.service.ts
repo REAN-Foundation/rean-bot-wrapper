@@ -101,24 +101,25 @@ export class DecisionRouter {
     async checkAssessment(messageBody: Imessage, channel: string){
 
         // Check if message is part of assessment
-        const chatSessionRepository = (
+        const chatMessageRepository = (
             await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-        const lastBotMessage = await chatSessionRepository.findOne({
+        const botMessages = await chatMessageRepository.findAll({
             where : {
                 userPlatformId : messageBody.platformId,
                 platform       : channel
             },
-            order : [ [ 'createdAt', 'DESC' ] ]
-        });
-        const lastMessage = await chatSessionRepository.findOne({
-            where : {
-                userPlatformId : messageBody.platformId,
-                platform       : channel
-            },
-            order : [ [ 'createdAt', 'DESC'] ]
+            order : [ [ 'createdAt', 'ASC' ] ]
         });
 
-        const assessmentInProgress = lastBotMessage.messageFlag;
+        // const lastMessage = await chatMessageRepository.findOne({
+        //     where : {
+        //         userPlatformId : messageBody.platformId,
+        //         platform       : channel
+        //     },
+        //     order : [ [ 'createdAt', 'DESC'] ]
+        // });
+
+        const assessmentInProgress = botMessages[botMessages.length - 3].messageFlag;
         this.assessmentFlag = ( assessmentInProgress === 'assessment' ) ? true : false;
 
         // Implement further logic for checking if assessment.

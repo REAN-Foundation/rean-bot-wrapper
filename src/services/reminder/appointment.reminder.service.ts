@@ -68,7 +68,7 @@ export class AppointmentReminderService {
 
     public async getPatientUserId(channel: any, personPhoneNumber: string, personName: string) {
         let patientUserId = null;
-        if (channel === "telegram") {
+        if (channel === "telegram" || channel === "Telegram") {
             const apiURL = `patients/search?userName=${personPhoneNumber}`;
             const result = await this.needleService.needleRequestForREAN("get", apiURL);
             if (result.Data.Patients.Items.length === 0) {

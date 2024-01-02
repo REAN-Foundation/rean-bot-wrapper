@@ -6,7 +6,7 @@ import { assessmentSessionLogs } from '../refactor/interface/message.interface';
     timestamps : true,
     modelName  : 'AssessmentSessionLogs',
     tableName  : 'assessment_session_logs',
-})
+    })
 export class AssessmentSessionLogs extends Model implements assessmentSessionLogs {
     
     @AutoIncrement

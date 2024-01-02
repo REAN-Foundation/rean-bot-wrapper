@@ -68,7 +68,7 @@ export class MessageFlow{
             console.log("The message is being set to make the decision");
             const outgoingMessage: OutgoingMessage = await this.decisionRouter.getDecision(preprocessedOutgoingMessage.message, channel);
             console.log("The outgoing message is being handled in routing");
-            const processedResponse = await this.handleRequestservice.handleUserRequestForRouting(outgoingMessage);
+            const processedResponse = await this.handleRequestservice.handleUserRequestForRouting(outgoingMessage, platformMessageService);
             const response = await this.processOutgoingMessage(messageToLlmRouter, channel, platformMessageService, processedResponse);
             return response;
         } catch (error) {
