@@ -13,6 +13,7 @@ import { AppointmentReminderService } from '../reminder/appointment.reminder.ser
 import { ServeAssessmentService } from '../maternalCareplan/serveAssessment/serveAssessment.service';
 import { CacheMemory } from '../cache.memory.service';
 import { ChatMessage } from '../../models/chat.message.model';
+import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class NoBabyMovementAssessmentService {
@@ -29,71 +30,34 @@ export class NoBabyMovementAssessmentService {
     
     async createAssessment (eventObj, assessmentCode) {
         try {
-            let channel = eventObj.body.originalDetectIntentRequest.payload.source;
+            const channel = eventObj.body.originalDetectIntentRequest.payload.source;
             const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
             const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
             const patientUserId = await this.appointmentReminderService.getPatientUserId(channel, personPhoneNumber, personName);
 
             // const assessmentId = userTask.Action.Assessment.id;
             const apiURL = `clinical/assessment-templates/search?displayCode=${assessmentCode}`;
-            let requestBody = await this.needleService.needleRequestForREAN("get", apiURL );
+            const requestBody = await this.needleService.needleRequestForREAN("get", apiURL );
 
             //let assessmentSessionLogs = null;
             if (requestBody.Data.AssessmentTemplateRecords.Items.length !== 0) {
-                const assessmentTemplate = requestBody.Data.AssessmentTemplateRecords.Items[0];
-                const apiURL = `clinical/assessments`;
-                const obj = {
-                    "PatientUserId"        : patientUserId,
-                    "Title"                : "A new assessment",
-                    "AssessmentTemplateId" : assessmentTemplate.id,
-                    "ScheduledDate"        : new Date().toISOString()
-                        .split('T')[0]
+                const assessmentTemplateId = requestBody.Data.AssessmentTemplateRecords.Items[0].id;
+                const body : QueueDoaminModel =  {
+                    Intent : "StartAssessment",
+                    Body   : {
+                        EventObj             : eventObj,
+                        PatientUserId        : patientUserId,
+                        PersonPhoneNumber    : personPhoneNumber,
+                        AssessmentTemplateId : assessmentTemplateId,
+                        Channel              : channel
+                    }
                 };
-                requestBody = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
-                if (requestBody.Data.Assessment) {
-                    const msg = { userId: personPhoneNumber, channel: channel };
-                    const assessment = JSON.stringify(requestBody.Data.Assessment);
-                    const { metaPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment( msg, assessment);
+                FireAndForgetService.enqueue(body);
+                const message = "We are starting an assessment for you please answer few of our questions.";
+                return this.getFullfillmentObj(message);
 
-                    const payload = eventObj.body.originalDetectIntentRequest.payload;
-                    channel = payload.source;
-                    let messageType = "template";
-                    if (channel === "telegram" || channel === "Telegram") {
-                        messageType = "text";
-                        channel = "telegram";
-                    }
-
-                    this._platformMessageService = eventObj.container.resolve(channel);
-                    const response_format: Iresponse = commonResponseMessageFormat();
-                    response_format.platform = payload.source;
-                    response_format.sessionId = personPhoneNumber;
-                    response_format.messageText = metaPayload["messageText"];
-                    response_format.message_type = messageType;
-                    const message_to_platform = await this._platformMessageService.SendMediaMessage(response_format, metaPayload);
-
-                    const key = `${personPhoneNumber}:Assessment`;
-
-                    if (channel === "telegram" || channel === "Telegram") {
-                        assessmentSessionLogs.userMessageId = message_to_platform.message_id;
-                    } else {
-                        assessmentSessionLogs.userMessageId = message_to_platform.body.messages[0].id;
-                    }
-                    await CacheMemory.set(key, assessmentSessionLogs.userMessageId);
-
-                    const AssessmentSession = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
-                    await AssessmentSession.create(assessmentSessionLogs);
-
-                    if (assessmentSessionLogs.userResponseType === "Text" ) {
-                        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-                        await this.serveAssessmentService.updateMessageFlag(personPhoneNumber, chatMessageRepository);
-                    }
-
-                    const message = "We are starting a symptom assessment for you please answer few of our questions.";
-                    return this.getFullfillmentObj(message);
-
-                }
             } else {
-                const message = "Sorry for the inconvenience, could not find the no baby assessment template.";
+                const message = `Sorry for the inconvenience, could not find the assessment template with code ${assessmentCode}.`;
                 return this.getFullfillmentObj(message);
             }
         } catch (error) {
@@ -115,4 +79,53 @@ export class NoBabyMovementAssessmentService {
         return object;
     }
 
+    public async startAssessmentAndUpdateDb (eventObj, patientUserId: string, personPhoneNumber: string, assessmentTemplateId: string, channel: string)  {
+        const apiURL = `clinical/assessments`;
+        const obj = {
+            "PatientUserId"        : patientUserId,
+            "Title"                : "A new assessment",
+            "AssessmentTemplateId" : assessmentTemplateId,
+            "ScheduledDate"        : new Date().toISOString()
+                .split('T')[0]
+        };
+        const requestBody1 = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
+        if (requestBody1.Data.Assessment) {
+            const msg = { userId: personPhoneNumber, channel: channel };
+            const assessment = JSON.stringify(requestBody1.Data.Assessment);
+            const { metaPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment( msg, assessment);
+
+            const payload = eventObj.body.originalDetectIntentRequest.payload;
+            channel = payload.source;
+            let messageType = "template";
+            if (channel === "telegram" || channel === "Telegram") {
+                messageType = "text";
+                channel = "telegram";
+            }
+
+            this._platformMessageService = eventObj.container.resolve(channel);
+            const response_format: Iresponse = commonResponseMessageFormat();
+            response_format.platform = payload.source;
+            response_format.sessionId = personPhoneNumber;
+            response_format.messageText = metaPayload["messageText"];
+            response_format.message_type = messageType;
+            const message_to_platform = await this._platformMessageService.SendMediaMessage(response_format, metaPayload);
+
+            const key = `${personPhoneNumber}:Assessment`;
+
+            if (channel === "telegram" || channel === "Telegram") {
+                assessmentSessionLogs.userMessageId = message_to_platform.message_id;
+            } else {
+                assessmentSessionLogs.userMessageId = message_to_platform.body.messages[0].id;
+            }
+            await CacheMemory.set(key, assessmentSessionLogs.userMessageId);
+
+            const AssessmentSession = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
+            await AssessmentSession.create(assessmentSessionLogs);
+
+            if (assessmentSessionLogs.userResponseType === "Text" ) {
+                const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+                await this.serveAssessmentService.updateMessageFlag(personPhoneNumber, chatMessageRepository);
+            }
+        }
+    }
 }

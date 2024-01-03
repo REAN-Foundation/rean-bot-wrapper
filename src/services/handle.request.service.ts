@@ -144,7 +144,7 @@ export class handleRequestservice{
         case 'Assessments': {
             const key = `${metaData.platformId}:Assessment`;
             const userMessageId = await CacheMemory.get(key);
-            await this.serveAssessmentService.answerQuestion(eventObj, metaData.platformId, metaData.messageBody, userMessageId, metaData.platform, true);
+            this.serveAssessmentService.answerQuestion(eventObj, metaData.platformId, metaData.messageBody, userMessageId, metaData.platform, true);
             break;
         }
         case 'Feedback': {
