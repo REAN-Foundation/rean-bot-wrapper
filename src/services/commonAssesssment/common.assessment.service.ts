@@ -12,6 +12,7 @@ import { platformServiceInterface } from '../../refactor/interface/platform.inte
 import { AppointmentReminderService } from '../reminder/appointment.reminder.service';
 import { ServeAssessmentService } from '../maternalCareplan/serveAssessment/serveAssessment.service';
 import { CacheMemory } from '../cache.memory.service';
+import { ChatMessage } from '../../models/chat.message.model';
 
 @scoped(Lifecycle.ContainerScoped)
 export class NoBabyMovementAssessmentService {
@@ -83,7 +84,8 @@ export class NoBabyMovementAssessmentService {
                     await AssessmentSession.create(assessmentSessionLogs);
 
                     if (assessmentSessionLogs.userResponseType === "Text" ) {
-                        await this.serveAssessmentService.updateMessageFlag(personPhoneNumber);
+                        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+                        await this.serveAssessmentService.updateMessageFlag(personPhoneNumber, chatMessageRepository);
                     }
 
                     const message = "We are starting a symptom assessment for you please answer few of our questions.";
