@@ -137,12 +137,12 @@ export class ServeAssessmentService {
                 response = await this._platformMessageService.SendMediaMessage(response_format, payload);
             }
 
-            const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
-            const chatSessionModel = await chatSessionRepository.findOne({ where: { userPlatformID: response_format.sessionId } });
-            let chatSessionId = null;
-            if (chatSessionModel) {
-                chatSessionId = chatSessionModel.autoIncrementalID;
-            }
+            // const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
+            // const chatSessionModel = await chatSessionRepository.findOne({ where: { userPlatformID: response_format.sessionId } });
+            // let chatSessionId = null;
+            // if (chatSessionModel) {
+            //     chatSessionId = chatSessionModel.autoIncrementalID;
+            // }
 
             let messageId = null;
             if (channel === "telegram" || channel === "Telegram") {
@@ -151,7 +151,7 @@ export class ServeAssessmentService {
                 messageId = response.body.messages[0].id;
             }
             const chatMessageObj = {
-                chatSessionID  : chatSessionId,
+                chatSessionID  : null,
                 platform       : channel,
                 direction      : "Out",
                 messageType    : response_format.message_type,
@@ -160,8 +160,8 @@ export class ServeAssessmentService {
                 intent         : "assessmentQuestion",
                 messageId      : messageId,
             };
-            const ChatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-            await ChatMessageRepository.create(chatMessageObj);
+            const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+            await chatMessageRepository.create(chatMessageObj);
 
             if (requestBody.Data.AnswerResponse.Next) {
 
@@ -182,7 +182,7 @@ export class ServeAssessmentService {
                 const key = `${assessmentSession.userPlatformId}:Assessment`;
                 await CacheMemory.set(key, assessmentSessionLogs.userMessageId);
                 if (assessmentSessionLogs.userResponseType === "Text" ) {
-                    await this.updateMessageFlag(userId);
+                    await this.updateMessageFlag(userId, chatMessageRepository);
                 }
             }
 
@@ -200,8 +200,7 @@ export class ServeAssessmentService {
         return message[intentName] ?? intentName;
     }
 
-    public async updateMessageFlag( userId ) {
-        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+    public async updateMessageFlag( userId, chatMessageRepository ) {
         const response = await chatMessageRepository.findAll(
             { limit: 1, where: { userPlatformId: userId, direction: "In" }, order: [['createdAt', 'DESC']] });
         await chatMessageRepository.update({ messageFlag: "assessment" },
