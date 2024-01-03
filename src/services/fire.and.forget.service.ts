@@ -9,6 +9,7 @@ import { GenerateCertificateYesService } from './bloodWrrior/generate.certificat
 import { GeneralReminderService } from './reminder/general.reminder.service';
 import { RegistrationPerMinMsgService } from './maternalCareplan/registration.per.minute.sercice';
 import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
+import { NoBabyMovementAssessmentService } from './commonAssesssment/common.assessment.service';
 
 export interface QueueDoaminModel {
     Intent : string;
@@ -118,6 +119,15 @@ export class FireAndForgetService {
             const registrationPerMinMsgService:  RegistrationPerMinMsgService =
                 eventObj.container.resolve(RegistrationPerMinMsgService);
             await registrationPerMinMsgService.collectMessage(eventObj);
+            console.log(`Fire and Forget Domain Model: ${model}`);
+        }
+        if (model.Intent === "StartAssessment") {
+            const eventObj = model.Body.EventObj;
+            await FireAndForgetService.delay(2000);
+            const assessmentService:  NoBabyMovementAssessmentService =
+                eventObj.container.resolve(NoBabyMovementAssessmentService);
+            await assessmentService.startAssessmentAndUpdateDb(eventObj, model.Body.PatientUserId, 
+                model.Body.PersonPhoneNumber , model.Body.AssessmentTemplateId , model.Body.Channel);
             console.log(`Fire and Forget Domain Model: ${model}`);
         }
     };
