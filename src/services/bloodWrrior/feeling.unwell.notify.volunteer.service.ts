@@ -58,6 +58,25 @@ export class FeelingUnwellService {
 
                 const volunteerName = response.Data.Volunteer.User.Person.DisplayName;
                 let volunteerPhone = response.Data.Volunteer.User.Person.Phone;
+
+                //Template message formation
+                const payload = {};
+                payload["variables"] = [
+                    {
+                        type : "text",
+                        text : volunteerName
+                    },
+                    {
+                        type : "text",
+                        text : patientName
+                    },
+                    {
+                        type : "text",
+                        text : transfusionDate
+                    }
+                ];
+                payload["templateName"] = "feeling_unwell_notify_volunteer";
+                payload["languageForSession"] = "en";
                 
                 const msg = `Hi ${volunteerName}, \n${patientName} is not feeling well and has a transfusion date on ${transfusionDate}. Could you please follow up with them? \nRegards \nTeam Blood Warriors`;
                 const previousPayload = eventObj.body.originalDetectIntentRequest.payload;
@@ -66,11 +85,11 @@ export class FeelingUnwellService {
                 response_format.platform = previousPayload.source;
                 response_format.sessionId = volunteerPhone;
                 response_format.messageText = msg;
-                response_format.message_type = "text";
+                response_format.message_type = "template";
 
                 const previousIntentPayload = eventObj.body.originalDetectIntentRequest.payload;
                 this._platformMessageService = eventObj.container.resolve(previousIntentPayload.source);
-                await this._platformMessageService.SendMediaMessage(response_format, null);
+                await this._platformMessageService.SendMediaMessage(response_format, payload);
                 if (result.statusCode === 200 ) {
                     console.log(`Succesfully patient unwell health notification send to volunteer. Volunteer Name : ${volunteerName}.`);
                 }
