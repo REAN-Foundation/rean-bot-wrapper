@@ -9,6 +9,7 @@ import { GenerateCertificateYesService } from './bloodWrrior/generate.certificat
 import { GeneralReminderService } from './reminder/general.reminder.service';
 import { RegistrationPerMinMsgService } from './maternalCareplan/registration.per.minute.sercice';
 import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
+import { ChecklistDateValidationService } from './bloodWrrior/checklist.date.validation.service';
 
 export interface QueueDoaminModel {
     Intent : string;
@@ -114,6 +115,15 @@ export class FireAndForgetService {
             const registrationPerMinMsgService:  RegistrationPerMinMsgService =
                 eventObj.container.resolve(RegistrationPerMinMsgService);
             await registrationPerMinMsgService.collectMessage(eventObj);
+            console.log(`Fire and Forget Domain Model: ${model}`);
+        }
+        if (model.Intent === "Checklist_Yes_Date") {
+            const eventObj = model.Body.EventObj;
+            const checklistDateValidationService:  ChecklistDateValidationService =
+                eventObj.container.resolve(ChecklistDateValidationService);
+            await checklistDateValidationService.sendConfirmationMessage(eventObj, model.Body.TransfusionDate,
+                model.Body.Donor, model.Body.RequestedQuantity, model.Body.StringTransfusionDate,
+                model.Body.PatientUserId, model.Body.VolunteerUserId);
             console.log(`Fire and Forget Domain Model: ${model}`);
         }
     };
