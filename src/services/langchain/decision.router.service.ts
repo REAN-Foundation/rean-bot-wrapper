@@ -13,6 +13,7 @@ import { v4 } from "uuid";
 import { MessageHandlerType, NlpProviderType, UserFeedbackType, ChannelType } from "../../refactor/messageTypes/message.types";
 import { EmojiFilter } from "../filter.message.for.emoji.service";
 import { DialogflowResponseService } from '../dialogflow.response.service';
+import { CacheMemory } from "../cache.memory.service";
 
 @scoped(Lifecycle.ContainerScoped)
 export class DecisionRouter {
@@ -101,15 +102,15 @@ export class DecisionRouter {
     async checkAssessment(messageBody: Imessage, channel: string){
 
         // Check if message is part of assessment
-        const chatMessageRepository = (
-            await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-        const botMessages = await chatMessageRepository.findAll({
-            where : {
-                userPlatformId : messageBody.platformId,
-                platform       : channel
-            },
-            order : [ [ 'createdAt', 'ASC' ] ]
-        });
+        // const chatMessageRepository = (
+        //     await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+        // const botMessages = await chatMessageRepository.findAll({
+        //     where : {
+        //         userPlatformId : messageBody.platformId,
+        //         platform       : channel
+        //     },
+        //     order : [ [ 'createdAt', 'ASC' ] ]
+        // });
 
         // const lastMessage = await chatMessageRepository.findOne({
         //     where : {
@@ -119,8 +120,15 @@ export class DecisionRouter {
         //     order : [ [ 'createdAt', 'DESC'] ]
         // });
 
-        const assessmentInProgress = botMessages[botMessages.length - 3].messageFlag;
-        this.assessmentFlag = ( assessmentInProgress === 'assessment' ) ? true : false;
+        const key = `${messageBody.platformId}:NextQuestionFlag`;
+        const nextQuestionFlag = await CacheMemory.get(key);
+        if (nextQuestionFlag) {
+            if (nextQuestionFlag === true) {
+                this.assessmentFlag = true;
+                await CacheMemory.set(key, false);
+            }
+        }
+        //const assessmentInProgress = botMessages[botMessages.length - 3].messageFlag
 
         // Implement further logic for checking if assessment.
 

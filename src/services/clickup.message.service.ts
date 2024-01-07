@@ -17,6 +17,10 @@ export class ClickUpMessageService implements platformServiceInterface {
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
     ){}
 
+    getMessageIdFromResponse(responseBody: any) {
+        throw new Error('Method not implemented.');
+    }
+
     public res;
 
     async handleMessage(requestBody: any) {

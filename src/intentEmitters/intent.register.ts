@@ -232,6 +232,8 @@ export class IntentRegister {
         IntentEmitter.registerListener('Appointment_Reminder', AppointmentReminderListener);
         IntentEmitter.registerListener('Reminder_Registration', ReminderRegistrationListener);
         IntentEmitter.registerListener('NoBabyMovement', CommonAssessmentListener);
+        IntentEmitter.registerListener('AssessmentRegistration', CommonAssessmentListener);
+        IntentEmitter.registerListener('AssessmentBloodPressure', CommonAssessmentListener);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);

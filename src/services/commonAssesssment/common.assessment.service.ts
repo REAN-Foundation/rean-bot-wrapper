@@ -110,13 +110,8 @@ export class NoBabyMovementAssessmentService {
             response_format.message_type = messageType;
             const message_to_platform = await this._platformMessageService.SendMediaMessage(response_format, metaPayload);
 
+            assessmentSessionLogs.userMessageId = await this._platformMessageService.getMessageIdFromResponse(message_to_platform);
             const key = `${personPhoneNumber}:Assessment`;
-
-            if (channel === "telegram" || channel === "Telegram") {
-                assessmentSessionLogs.userMessageId = message_to_platform.message_id;
-            } else {
-                assessmentSessionLogs.userMessageId = message_to_platform.body.messages[0].id;
-            }
             await CacheMemory.set(key, assessmentSessionLogs.userMessageId);
 
             const AssessmentSession = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
@@ -124,7 +119,7 @@ export class NoBabyMovementAssessmentService {
 
             if (assessmentSessionLogs.userResponseType === "Text" ) {
                 const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-                await this.serveAssessmentService.updateMessageFlag(personPhoneNumber, chatMessageRepository);
+                await this.serveAssessmentService.updateMessageFlag(personPhoneNumber, assessmentSessionLogs.userMessageId, chatMessageRepository);
             }
         }
     }

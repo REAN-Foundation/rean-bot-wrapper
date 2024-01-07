@@ -126,7 +126,7 @@ export class FireAndForgetService {
             await FireAndForgetService.delay(2000);
             const assessmentService:  NoBabyMovementAssessmentService =
                 eventObj.container.resolve(NoBabyMovementAssessmentService);
-            await assessmentService.startAssessmentAndUpdateDb(eventObj, model.Body.PatientUserId, 
+            await assessmentService.startAssessmentAndUpdateDb(eventObj, model.Body.PatientUserId,
                 model.Body.PersonPhoneNumber , model.Body.AssessmentTemplateId , model.Body.Channel);
             console.log(`Fire and Forget Domain Model: ${model}`);
         }

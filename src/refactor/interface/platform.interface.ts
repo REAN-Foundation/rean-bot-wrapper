@@ -11,4 +11,6 @@ export interface platformServiceInterface{
     set res(res);
     createFinalMessageFromHumanhandOver(requestBody:any);
 
+    getMessageIdFromResponse(responseBody:any)
+
 }

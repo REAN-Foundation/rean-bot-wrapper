@@ -13,6 +13,7 @@ import { platformServiceInterface } from '../../../refactor/interface/platform.i
 import { ChatMessage } from '../../../models/chat.message.model';
 import { CacheMemory } from '../../../services/cache.memory.service';
 import { ChatSession } from '../../../models/chat.session';
+import { CustomModelResponseFormat } from '../../../services/response.format/custom.model.response.format';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ServeAssessmentService {
@@ -69,6 +70,9 @@ export class ServeAssessmentService {
                     userResponseTime     : null,
                     userMessageId        : null,
                 };
+
+                const key = `${message.userId}:NextQuestionFlag`;
+                CacheMemory.set(key, true);
             }
             return { metaPayload, assessmentSessionLogs };
         } catch (error) {
@@ -77,11 +81,12 @@ export class ServeAssessmentService {
         }
     }
 
-    async answerQuestion (eventObj: any, userId: string, userResponse: string, userContextMessageId: string, channel: string, doSend: boolean ) {
+    answerQuestion = async (eventObj, userId: string, userResponse: string, userContextMessageId: string, channel: string, doSend: boolean ) => {
         // eslint-disable-next-line max-len
         try {
 
             const AssessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
+            const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
             const assessmentSession = await AssessmentSessionRepo.findOne({ where: { "userMessageId": userContextMessageId } });
             const apiURL = `clinical/assessments/${assessmentSession.assesmentId}/questions/${assessmentSession.assesmentNodeId}/answer`;
             const userAnswer = await this.getAnswerFromIntent(userResponse);
@@ -95,7 +100,7 @@ export class ServeAssessmentService {
             };
 
             // refactor separate it out from here give URL and obj according to that.
-            let message = "";
+            let message: any = "";
             const requestBody = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
             let payload = null;
             let messageType = 'text';
@@ -105,6 +110,7 @@ export class ServeAssessmentService {
             if (requestBody.Data.AnswerResponse.Next) {
                 const questionRawData = JSON.parse(requestBody.Data.AnswerResponse.Next.RawData);
                 message = questionData.Description;
+                console.log("    inside next////// question block");
 
                 const buttonArray = [];
                 if (questionData.ExpectedResponseType === "Single Choice Selection") {
@@ -118,52 +124,6 @@ export class ServeAssessmentService {
                     payload = await sendApiButtonService(buttonArray);
                     messageType = 'interactivebuttons';
                 }
-            }
-            else {
-                message = `The assessment has been completed.`;
-            }
-            const response_format: Iresponse = commonResponseMessageFormat();
-            response_format.sessionId = assessmentSession.userPlatformId;
-            response_format.messageText = message;
-            response_format.message_type = messageType;
-            let response = null;
-            if (doSend) {
-                response = await eventObj.SendMediaMessage(response_format, payload);
-            } else {
-                if (channel === "telegram" || channel === "Telegram") {
-                    channel = "telegram";
-                }
-                this._platformMessageService = eventObj.container.resolve(channel);
-                response = await this._platformMessageService.SendMediaMessage(response_format, payload);
-            }
-
-            // const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
-            // const chatSessionModel = await chatSessionRepository.findOne({ where: { userPlatformID: response_format.sessionId } });
-            // let chatSessionId = null;
-            // if (chatSessionModel) {
-            //     chatSessionId = chatSessionModel.autoIncrementalID;
-            // }
-
-            let messageId = null;
-            if (channel === "telegram" || channel === "Telegram") {
-                messageId = response.message_id;
-            } else {
-                messageId = response.body.messages[0].id;
-            }
-            const chatMessageObj = {
-                chatSessionID  : null,
-                platform       : channel,
-                direction      : "Out",
-                messageType    : response_format.message_type,
-                messageContent : response_format.messageText,
-                userPlatformID : response_format.sessionId,
-                intent         : "assessmentQuestion",
-                messageId      : messageId,
-            };
-            const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-            await chatMessageRepository.create(chatMessageObj);
-
-            if (requestBody.Data.AnswerResponse.Next) {
 
                 //save entry into DB
                 const assessmentSessionLogs = {
@@ -175,20 +135,72 @@ export class ServeAssessmentService {
                     userResponseType     : questionData.ExpectedResponseType,
                     userResponse         : null,
                     userResponseTime     : null,
-                    userMessageId        : messageId,
+                    userMessageId        : null,
                 };
                 await AssessmentSessionRepo.create(assessmentSessionLogs);
+                const key = `${assessmentSession.userPlatformId}:NextQuestionFlag`;
+                CacheMemory.set(key, true);
+            }
+            else {
+                message = "The assessment has been completed.";
+                console.log("    inside complete////// question block");
 
-                const key = `${assessmentSession.userPlatformId}:Assessment`;
-                await CacheMemory.set(key, assessmentSessionLogs.userMessageId);
-                if (assessmentSessionLogs.userResponseType === "Text" ) {
-                    await this.updateMessageFlag(userId, chatMessageRepository);
+            }
+            const response_format: Iresponse = commonResponseMessageFormat();
+            response_format.sessionId = assessmentSession.userPlatformId;
+            response_format.messageText = message;
+            response_format.message_type = messageType;
+            let response = null;
+            if (doSend) {
+                console.log("    sending message from handle request");
+                const response = { body: { answer: message } };
+                const customModelResponseFormat = new CustomModelResponseFormat(response);
+                message = customModelResponseFormat;
+                return message;
+
+                // response = await eventObj.SendMediaMessage(response_format, payload);
+            } else {
+                if (channel === "telegram" || channel === "Telegram") {
+                    channel = "telegram";
+                }
+                console.log("    sending message from fulllfillment request");
+                this._platformMessageService = eventObj.container.resolve(channel);
+                response = await this._platformMessageService.SendMediaMessage(response_format, payload);
+                const messageId = await this._platformMessageService.getMessageIdFromResponse(response);
+                const chatMessageObj = {
+                    chatSessionID  : null,
+                    platform       : channel,
+                    direction      : "Out",
+                    messageType    : response_format.message_type,
+                    messageContent : response_format.messageText,
+                    userPlatformID : response_format.sessionId,
+                    intent         : "assessmentQuestion",
+                    messageId      : messageId,
+                };
+                await chatMessageRepository.create(chatMessageObj);
+                console.log("    saved the question into DB");
+
+                if (requestBody.Data.AnswerResponse.Next) {
+                    await this.updateDBChatSessionWithMessageId(userId, messageId, chatMessageRepository, AssessmentSessionRepo);
                 }
             }
 
         } catch (error) {
             Logger.instance()
                 .log_error(error.message,500,'Answer assessment and get another question service error.');
+        }
+    }
+
+    public async updateDBChatSessionWithMessageId( userId: string, messageId: any, chatMessageRepository, AssessmentSessionRepo) {
+        const assessmentSession = await AssessmentSessionRepo.findOne({ where: { "userPlatformId": userId }, order: [['createdAt', 'DESC']] });
+        assessmentSession.userMessageId = messageId;
+        await assessmentSession.save();
+
+        const key = `${assessmentSession.userPlatformId}:Assessment`;
+        await CacheMemory.set(key, messageId);
+        if (assessmentSession.userResponseType === "Text") {
+            await this.updateMessageFlag(userId, messageId, chatMessageRepository);
+            console.log("    updated the message flag to assessment");
         }
     }
 
@@ -200,11 +212,11 @@ export class ServeAssessmentService {
         return message[intentName] ?? intentName;
     }
 
-    public async updateMessageFlag( userId, chatMessageRepository ) {
-        const response = await chatMessageRepository.findAll(
-            { limit: 1, where: { userPlatformId: userId, direction: "In" }, order: [['createdAt', 'DESC']] });
-        await chatMessageRepository.update({ messageFlag: "assessment" },
-            { where: { id: response[response.length - 1].id } });
+    public async updateMessageFlag( userId, messageId, chatMessageRepository ) {
+        const response = await chatMessageRepository.findOne( { where: { userPlatformId: userId, responseMessageID: messageId }, order: [['createdAt', 'DESC']] });
+        if (response) {
+            await chatMessageRepository.update({ messageFlag: "assessment" }, { where: { id: response.id } });
+        }
     }
 
 }
