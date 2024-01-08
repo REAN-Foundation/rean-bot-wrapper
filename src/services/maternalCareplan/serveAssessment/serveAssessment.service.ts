@@ -189,7 +189,7 @@ export class ServeAssessmentService {
             Logger.instance()
                 .log_error(error.message,500,'Answer assessment and get another question service error.');
         }
-    }
+    };
 
     public async updateDBChatSessionWithMessageId( userId: string, messageId: any, chatMessageRepository, AssessmentSessionRepo) {
         const assessmentSession = await AssessmentSessionRepo.findOne({ where: { "userPlatformId": userId }, order: [['createdAt', 'DESC']] });
