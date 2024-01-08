@@ -35,6 +35,10 @@ export class TelegramMessageService implements platformServiceInterface{
         this.init();
     }
 
+    getMessageIdFromResponse(response: any) {
+        return response.message_id;
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     handleMessage(msg, channel: string){
         this._telegram.processUpdate(msg);

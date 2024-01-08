@@ -25,6 +25,10 @@ export class MockMessageService implements platformServiceInterface {
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
+    getMessageIdFromResponse(responseBody: any) {
+        throw new Error('Method not implemented.');
+    }
+
     async handleMessage(requestBody: any, channel: string) {
 
         const generatorMockMessage = this.whatsappMessageToDialogflow.messageToDialogflow(requestBody);

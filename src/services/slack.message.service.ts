@@ -30,6 +30,10 @@ export class SlackMessageService implements platformServiceInterface {
         @inject(SlackClickupCommonFunctions) private slackClickupCommonFunctions?: SlackClickupCommonFunctions,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider) {}
 
+    getMessageIdFromResponse(responseBody: any) {
+        throw new Error('Method not implemented.');
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async handleMessage(message, client) {
         console.log("slack handle message", message);

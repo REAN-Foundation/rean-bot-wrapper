@@ -18,6 +18,7 @@ import { EntityManagerProvider } from './entity.manager.provider.service';
 import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
 import { AssessmentSessionLogs } from '../models/assessment.session.model';
 import { DecisionRouter } from './langchain/decision.router.service';
+import { CacheMemory } from './cache.memory.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class MessageFlow{
@@ -70,6 +71,16 @@ export class MessageFlow{
             console.log("The outgoing message is being handled in routing");
             const processedResponse = await this.handleRequestservice.handleUserRequestForRouting(outgoingMessage, platformMessageService);
             const response = await this.processOutgoingMessage(messageToLlmRouter, channel, platformMessageService, processedResponse);
+
+            // Update the DB using message Id
+            const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+            const assessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
+            const messageId = platformMessageService.getMessageIdFromResponse(response);
+            const key = `${messageToLlmRouter.platformId}:NextQuestionFlag`;
+            const nextQuestionFlag = await CacheMemory.get(key);
+            if (nextQuestionFlag === true) {
+                await this.serveAssessmentService.updateDBChatSessionWithMessageId(messageToLlmRouter.platformId, messageId, chatMessageRepository, assessmentSessionRepo);
+            }
             return response;
         } catch (error) {
             console.log(error);

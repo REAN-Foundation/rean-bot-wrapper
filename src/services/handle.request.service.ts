@@ -17,6 +17,7 @@ import { OutgoingMessage } from '../refactor/interface/message.interface';
 import { ChatMessage } from '../models/chat.message.model';
 import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
 import { CacheMemory } from './cache.memory.service';
+import { platformServiceInterface } from '../refactor/interface/platform.interface';
 @scoped(Lifecycle.ContainerScoped)
 export class handleRequestservice{
 
@@ -67,13 +68,7 @@ export class handleRequestservice{
 
             message_from_nlp = await this.customMLModelResponseService.getCustomModelResponse(message_to_ml_model, channel, message);
             
-        } else if (messageFlag === "awaitingAssessmentRequest") {
-            // call here answer assessment api
-            const contextMessageId = response[response.length - 1].responseMessageID;
-            console.log("call here answer assessment api");
-        }
-
-        else {
+        } else {
             // eslint-disable-next-line max-len
             message_from_nlp = await this.DialogflowResponseService.getDialogflowMessage(translate_message.message, channel, message.intent,message);
             if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("OPENAI_API_KEY")){
@@ -124,10 +119,11 @@ export class handleRequestservice{
         }
     }
 
-    async handleUserRequestForRouting(outgoingMessage: OutgoingMessage, eventObj: any) {
+    async handleUserRequestForRouting(outgoingMessage: OutgoingMessage, eventObj: platformServiceInterface) {
         const metaData = outgoingMessage.MetaData;
         const messageHandler = outgoingMessage.PrimaryMessageHandler;
         let message_from_nlp: IserviceResponseFunctionalities = null;
+        //let message_from_nlp = null;
         let processed_message = '';
         switch (messageHandler) {
         
@@ -144,7 +140,7 @@ export class handleRequestservice{
         case 'Assessments': {
             const key = `${metaData.platformId}:Assessment`;
             const userMessageId = await CacheMemory.get(key);
-            this.serveAssessmentService.answerQuestion(eventObj, metaData.platformId, metaData.messageBody, userMessageId, metaData.platform, true);
+            message_from_nlp = await this.serveAssessmentService.answerQuestion(eventObj, metaData.platformId, metaData.messageBody, userMessageId, metaData.platform, true);
             break;
         }
         case 'Feedback': {

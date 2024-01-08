@@ -18,7 +18,9 @@ export const CommonAssessmentListener = async (intent, eventObj) => {
 
 export const getAssessmentDisplayCode = (intentName) => {
     const message = {
-        "NoBabyMovement" : "AssessmentNoBaby", //AssessmentNoBaby
+        "NoBabyMovement"          : "AssessmentNoBaby",
+        "AssessmentBloodPressure" : "AssessmentBloodPressure",
+        "AssessmentRegistration"  : "AssessmentRegistration",
     };
     return message[intentName] ?? "";
 };
