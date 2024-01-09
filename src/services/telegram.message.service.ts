@@ -157,7 +157,7 @@ export class TelegramMessageService implements platformServiceInterface{
         }
         for (telegramMessagetoDialogflow of telegramMessages){
             if (telegramMessagetoDialogflow) {
-                await this.messageFlow.checkTheFlow(telegramMessagetoDialogflow, "telegram", this);
+                await this.messageFlow.checkTheFlowRouter(telegramMessagetoDialogflow, "telegram", this);
             }
         }
     };

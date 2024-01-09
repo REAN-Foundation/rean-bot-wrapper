@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, HasMany } from 'sequelize-typescript';
 import { chatSession } from '../refactor/interface/message.interface';
 import { ChatMessage } from './chat.message.model';
