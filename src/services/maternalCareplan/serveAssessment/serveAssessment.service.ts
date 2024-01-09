@@ -107,7 +107,7 @@ export class ServeAssessmentService {
             const questionData = requestBody.Data.AnswerResponse.Next;
 
             //Next question send or complete the assessment
-            if (requestBody.Data.AnswerResponse.Next) {
+            if (requestBody.Data.AnswerResponse.Next !== null) {
                 const questionRawData = JSON.parse(requestBody.Data.AnswerResponse.Next.RawData);
                 message = questionData.Description;
                 console.log("    inside next////// question block");
@@ -140,18 +140,13 @@ export class ServeAssessmentService {
                 await AssessmentSessionRepo.create(assessmentSessionLogs);
                 const key = `${assessmentSession.userPlatformId}:NextQuestionFlag`;
                 CacheMemory.set(key, true);
-            }
-            else {
+            } else {
                 message = "The assessment has been completed.";
                 console.log("    inside complete////// question block");
-
             }
-            const response_format: Iresponse = commonResponseMessageFormat();
-            response_format.sessionId = assessmentSession.userPlatformId;
-            response_format.messageText = message;
-            response_format.message_type = messageType;
-            let response = null;
-            if (doSend) {
+
+            let messageId = null;
+            if (doSend === true) {
                 console.log("    sending message from handle request");
                 const response = { body: { answer: message } };
                 const customModelResponseFormat = new CustomModelResponseFormat(response);
@@ -165,8 +160,12 @@ export class ServeAssessmentService {
                 }
                 console.log("    sending message from fulllfillment request");
                 this._platformMessageService = eventObj.container.resolve(channel);
-                response = await this._platformMessageService.SendMediaMessage(response_format, payload);
-                const messageId = await this._platformMessageService.getMessageIdFromResponse(response);
+                const response_format: Iresponse = commonResponseMessageFormat();
+                response_format.sessionId = assessmentSession.userPlatformId;
+                response_format.messageText = message;
+                response_format.message_type = messageType;
+                const response = await this._platformMessageService.SendMediaMessage(response_format, payload);
+                messageId = await this._platformMessageService.getMessageIdFromResponse(response);
                 const chatMessageObj = {
                     chatSessionID  : null,
                     platform       : channel,
