@@ -227,7 +227,6 @@ export class IntentRegister {
         IntentEmitter.registerListener('Dmc_Yes', DmcAssessmentAnswerYesListener);
         IntentEmitter.registerListener('Dmc_No', DmcAssessmentAnswerNoListener);
         IntentEmitter.registerListener('Registration_PerMinMsg', RegistrationPerMinuteMsgListener);
-        IntentEmitter.registerListener('Registration_PerMinMsg', RegistrationPerMinuteMsgListener);
         IntentEmitter.registerListener('ImageQualityCheck', eyeImageQualityCheckListener);
         IntentEmitter.registerListener('Appointment_Reminder', AppointmentReminderListener);
         IntentEmitter.registerListener('Reminder_Registration', ReminderRegistrationListener);
