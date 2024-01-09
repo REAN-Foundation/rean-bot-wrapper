@@ -150,8 +150,7 @@ export class ServeAssessmentService {
                 console.log("    sending message from handle request");
                 const response = { body: { answer: message } };
                 const customModelResponseFormat = new CustomModelResponseFormat(response);
-                message = customModelResponseFormat;
-                return message;
+                return customModelResponseFormat;
 
                 // response = await eventObj.SendMediaMessage(response_format, payload);
             } else {
