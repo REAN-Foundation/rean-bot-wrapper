@@ -202,7 +202,7 @@ export class GeneralReminderService {
             }
         } catch (error) {
             Logger.instance()
-                .log_error(error.message,500,'Register patient with blood warrior messaging service error');
+                .log_error(error.message,500,'create general reminder service error');
         }
     }
 
@@ -210,6 +210,7 @@ export class GeneralReminderService {
         const channelType = {
             "whatsappMeta" : NotificationType.WhatsApp,
             "telegram"     : NotificationType.Telegram,
+            "Telegram"     : NotificationType.Telegram,
         };
         return channelType[channel] ?? NotificationType.WhatsApp;
     }
@@ -217,18 +218,26 @@ export class GeneralReminderService {
     private getTemplateData(jsonFormat: any ) {
         const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
         return {
-            TemplateName : "appointment_msg",
+            TemplateName : "appointment_rem_question",
             Variables    : {
                 en : [{
+                    "type" : "text",
+                    "text" : "Patient_name"
+                },
+                {
                     "type" : "text",
                     "text" : jsonFormat.TaskName
                 },
                 {
                     "type" : "text",
-                    "text" : "08:00 AM"
+                    "text" : jsonFormat.WhenTime
+                },
+                {
+                    "type" : "text",
+                    "text" : "attend"
                 }]
             },
-            ButtonIds  : ["button_1", "button_2"],
+            ButtonIds  : [ "App_Reminder_Yes", "App_Reminder_No"],
             ClientName : clientName
         };
     }
