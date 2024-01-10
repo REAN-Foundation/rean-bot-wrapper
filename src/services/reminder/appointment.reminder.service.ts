@@ -45,7 +45,8 @@ export class AppointmentReminderService {
                 TaskName      : event,
                 TaskType      : "other",
                 Frequency     : "Once",
-                DayName       : null
+                DayName       : null,
+                WhenTime      : whenTime,
             };
             
             await this.generalReminderService.createCommonReminders(eventObj, "Once", jsonFormat, patientUserId, whenDay, whenTime, personName, personPhoneNumber, null );

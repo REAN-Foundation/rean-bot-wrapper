@@ -19,6 +19,8 @@ import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serve
 import { AssessmentSessionLogs } from '../models/assessment.session.model';
 import { DecisionRouter } from './langchain/decision.router.service';
 import { CacheMemory } from './cache.memory.service';
+import { Helper } from '../common/helper';
+import needle from "needle";
 
 @scoped(Lifecycle.ContainerScoped)
 export class MessageFlow{
@@ -183,7 +185,9 @@ export class MessageFlow{
             if (msg.provider !== "REAN_BW") {
                 const languageForSession = await this.translate.detectUsersLanguage( msg.userId);
                 if (msg.agentName !== 'postman') {
-                    msg.message.Variables = JSON.parse(msg.message.Variables);
+                    if (typeof msg.message.Variables === "string") {
+                        msg.message.Variables = JSON.parse(msg.message.Variables);
+                    }
                 }
                 if (msg.message.Variables[`${languageForSession}`]) {
                     payload["variables"] = msg.message.Variables[`${languageForSession}`];
@@ -257,6 +261,19 @@ export class MessageFlow{
             assessmentSession.userMessageId = message_to_platform.body.messages[0].id;
             const AssessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
             await AssessmentSessionRepo.create(assessmentSession);
+        }
+        if (msg.provider === "REAN_BOT" && message_to_platform.statusCode === 200) {
+            const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
+            let todayDate = new Date().toISOString().split('T')[0];
+            todayDate = Helper.removeLeadingZerosFromDay(todayDate);
+            const phoneNumber = Helper.formatPhoneForDocProcessor(msg.userId);
+            const apiUrl = `${docProcessBaseURL}tests/gmu/appointment-status/${phoneNumber}/days/${todayDate}`;
+            const obj = {
+                "WhatsApp_message_id" : message_to_platform.body.messages[0].id,
+                "Patient_replied"     : "Not replied"
+            };
+            await needle("put", apiUrl, obj);
+
         }
         return message_to_platform;
     }

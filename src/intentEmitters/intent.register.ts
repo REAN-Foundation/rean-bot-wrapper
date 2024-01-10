@@ -72,7 +72,7 @@ import { DmcAssessmentAnswerYesListener } from './intentListeners/maternity.care
 import { RegistrationPerMinuteMsgListener } from './intentListeners/maternity.careplan/regstration.per.minute.listener';
 import { DmcAssessmentAnswerNoListener } from './intentListeners/maternity.careplan/answer.no.listener';
 import { eyeImageQualityCheckListener } from './intentListeners/eye.image.quality.check.listener';
-import { AppointmentReminderListener } from './intentListeners/medicationReminder/appointment.reminder.listener';
+import { AppointmentReminderListener, AppointmentReminderReplyListener } from './intentListeners/medicationReminder/appointment.reminder.listener';
 import { ReminderRegistrationListener } from './intentListeners/medicationReminder/reminder.registration.listener';
 import { CommonAssessmentListener } from './intentListeners/commonAssessment/common.assessment.listener';
 
@@ -222,6 +222,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('Generate_Certificate_Yes', GenerateCertificateYesListener);
         IntentEmitter.registerListener('Generate_Certificate_Confirm_Yes', GenerateCertificateConfirmYesListener);
         IntentEmitter.registerListener('M_Medication_Data', MedicationReminderListener);
+        IntentEmitter.registerListener('M_Medication_Data_Yes', MedicationReminderListener);
         IntentEmitter.registerListener('General_Reminder', GeneralReminderListener);
         IntentEmitter.registerListener('Reminder_Ask_Time', ReminderAskTimeListener);
         IntentEmitter.registerListener('Dmc_Yes', DmcAssessmentAnswerYesListener);
@@ -233,6 +234,8 @@ export class IntentRegister {
         IntentEmitter.registerListener('NoBabyMovement', CommonAssessmentListener);
         IntentEmitter.registerListener('AssessmentRegistration', CommonAssessmentListener);
         IntentEmitter.registerListener('AssessmentBloodPressure', CommonAssessmentListener);
+        IntentEmitter.registerListener('Reminder_Reply_Yes', AppointmentReminderReplyListener);
+        IntentEmitter.registerListener('Reminder_Reply_No', AppointmentReminderReplyListener);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
