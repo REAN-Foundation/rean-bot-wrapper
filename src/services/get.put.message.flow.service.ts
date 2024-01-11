@@ -94,7 +94,7 @@ export class MessageFlow{
             const chatMessageObj = await this.engageMySQL(message);
             const translate_message = await this.translate.translateMessage(message.type, message.messageBody, message.platformId);
             message.messageBody = translate_message.message;
-            return {message, translate_message};
+            return { message, translate_message };
         } catch (error) {
             console.log(error);
         }
@@ -264,15 +264,22 @@ export class MessageFlow{
         }
         if (msg.provider === "REAN_BOT" && message_to_platform.statusCode === 200) {
             const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
-            let todayDate = new Date().toISOString().split('T')[0];
+            let todayDate = new Date().toISOString()
+                .split('T')[0];
             todayDate = Helper.removeLeadingZerosFromDay(todayDate);
+            const messageId = await platformMessageService.getMessageIdFromResponse(message_to_platform);
             const phoneNumber = Helper.formatPhoneForDocProcessor(msg.userId);
-            const apiUrl = `${docProcessBaseURL}tests/gmu/appointment-status/${phoneNumber}/days/${todayDate}`;
+            const apiUrl = `${docProcessBaseURL}appointment-schedules/gmu/appointment-status/${phoneNumber}/days/${todayDate}`;
+            const headers = { headers : {
+                'Content-Type' : 'application/json',
+                Accept         : 'application/json',
+            }
+            };
             const obj = {
-                "WhatsApp_message_id" : message_to_platform.body.messages[0].id,
+                "WhatsApp_message_id" : messageId,
                 "Patient_replied"     : "Not replied"
             };
-            await needle("put", apiUrl, obj);
+            await needle("put", apiUrl, obj, headers);
 
         }
         return message_to_platform;

@@ -21,27 +21,37 @@ export class AppointmentUserReplyService {
     async sendUserResponse (eventObj) {
         try {
             let msg = "";
-            const intentName = eventObj.queryResult ? eventObj.queryResult.intent.displayName : null;
+            const intentName = eventObj.body.queryResult ? eventObj.body.queryResult.intent.displayName : null;
             const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
             const phoneNumber = Helper.formatPhoneForDocProcessor(personPhoneNumber);
             const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
-            let todayDate = new Date().toISOString().split('T')[0];
+            let todayDate = new Date().toISOString()
+                .split('T')[0];
             todayDate = Helper.removeLeadingZerosFromDay(todayDate);
 
             const getUrl = `${docProcessBaseURL}appointment-schedules/gmu/appointment-status/${phoneNumber}/days/${todayDate}`;
             const respnse =  await needle("get", getUrl);
-            const previousMessageID =  respnse.body[0]["WhatsApp message id"];
-            if (previousMessageID === "" ) {
-                const apiUrl = `${docProcessBaseURL}appointment-schedules/gmu/appointment-status/${phoneNumber}/days/${todayDate}`;
-                const obj = {
-                    "WhatsApp_message_id" : previousMessageID,
-                    "Patient_replied"     : intentName === "Reminder_Reply_Yes" ? "Yes" : " No"
-                };
-                await needle("put", apiUrl, obj);
-                console.log(`Object in reply service ${obj}`);
-                msg = intentName === "Reminder_Reply_Yes" ? this.answerYesMsgService.getRandomYesMessage() : "Thank you for your feedback.";
-            } else {
+            if (respnse.body.message){
                 msg = "Sorry, to inform you the appointment has been passed.";
+            } else {
+                const previousMessageID =  respnse.body[0]["WhatsApp message id"];
+                const userReply = intentName === "Reminder_Reply_Yes" ? "Yes" : "No";
+                if (previousMessageID !== "" ) {
+
+                    const res = await needle("put",
+                        getUrl,
+                        { WhatsApp_message_id: previousMessageID, Patient_replied: userReply },
+                        { headers : {
+                            'Content-Type' : 'application/json',
+                            Accept         : 'application/json',
+                        },
+                        },
+                    );
+                    console.log(`Object in reply service ${JSON.stringify(res.body,null, 4)}`);
+                    msg = intentName === "Reminder_Reply_Yes" ? this.answerYesMsgService.getRandomYesMessage() : "Thank you for your feedback.";
+                } else {
+                    msg = "Sorry, to inform you the appointment has been passed.";
+                }
             }
             return { fulfillmentMessages: [{ text: { text: [msg] } }]  };
 
