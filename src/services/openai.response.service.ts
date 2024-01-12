@@ -5,6 +5,8 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 
 const { Configuration, OpenAIApi } = require("openai");
 
+import OpenAI from 'openai';
+
 // import { Configuration, OpenAIApi } from "openai";
 import { OpenAIResponseFormat } from './response.format/openai.response.format';
 import { EntityManagerProvider } from './entity.manager.provider.service';
@@ -19,10 +21,15 @@ export class OpenAIResponseService {
 
     getOpenaiMessage = async (key: string, message: string) => {
         try {
-            const configuration = new Configuration({
-                apiKey : this.clientEnvironment.getClientEnvironmentVariable("OPENAI_API_KEY"),
+
+            // const configuration = new Configuration({
+            //     apiKey : this.clientEnvironment.getClientEnvironmentVariable("OPENAI_API_KEY"),
+            // });
+            // const openai = new OpenAIApi(configuration);
+
+            const openai = new OpenAI({
+                apiKey : process.env.OPENAI_API_KEY // This is also the default, can be omitted
             });
-            const openai = new OpenAIApi(configuration);
 
             // const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironment)).getRepository(ChatMessage);
             // const chatMessageResponse = (await chatMessageRepository.findAll({
@@ -44,9 +51,16 @@ export class OpenAIResponseService {
             if (prompt == null) {
                 return null;
             }
-            const createCompletion = await openai.createCompletion(prompt);
 
-            console.log(createCompletion.data.choices[0].text);
+            //const createCompletion = await openai.chat.completions.create(prompt);
+            const createCompletion = await openai.chat.completions.create(prompt);
+
+            //     messages : [{ role: 'user', content: prompt }],
+            //     model    : 'gpt-3.5-turbo',
+            // });
+
+            //console.log(createCompletion.choices[0].text);
+            console.log(createCompletion.choices[0]?.message?.content);
             const response = new OpenAIResponseFormat(createCompletion);
             return response;
             
@@ -61,8 +75,7 @@ export class OpenAIResponseService {
         var prompt = null;
         if (key === "CALORIE_BOT") {
             prompt = {
-                model  : "text-davinci-003",
-                prompt : `${message} Provide the calorie and nutritional report in json. The json format should be:{
+                messages : [{ role    : 'user', content : `${message} Provide the calorie and nutritional report in json. The json format should be:{
                     "list_of_food": [{
                         "food":
                         "quantity":
@@ -82,7 +95,8 @@ export class OpenAIResponseService {
                     "total_protein_intaket":
                     "total_fibre_intake":
                     "summary":
-                }. In the json, attach a summary of the nutritional report.`,
+                }. In the json, attach a summary of the nutritional report.`, }],
+                model             : "gpt-3.5-turbo",
                 temperature       : 0,
                 max_tokens        : 1000,
                 top_p             : 1.0,
@@ -91,15 +105,15 @@ export class OpenAIResponseService {
             };
         } else if (key === "REMINDERS") { // change the name to where you wanted to create reminders in bot
             prompt = {
-                model  : "text-davinci-003",
-                prompt : `${message} Provide the reminders details in json. Do not give older year date. The json format should be:
+                model    : "gpt-3.5-turbo",
+                messages : [{ role    : 'user', content : `${message} Provide the reminders details in json. Do not give older year date. The json format should be:
                 { "TaskName": 
                   "TaskType": "medication" or "exercise" or "other" 
                   "Frequency": "Daily" or "Monthly" or "Weekly" or "Once" or "Hourly" or "Quarterly" or "Yearly"
                   "DayName": "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
                   "StartDateTime": Take current year by default
                   "MedicineName": NA, if not available
-                } If you are unable to find any information, fill the JSON value with 'NA'. Please do not assume other information.`,
+                } If you are unable to find any information, fill the JSON value with 'NA'. Please do not assume other information.`, }],
                 temperature       : 0,
                 max_tokens        : 1000,
                 top_p             : 1.0,
