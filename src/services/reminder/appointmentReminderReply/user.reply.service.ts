@@ -33,7 +33,7 @@ export class AppointmentUserReplyService {
             const getUrl = `${docProcessBaseURL}appointment-schedules/gmu/appointment-status/${phoneNumber}/days/${todayDate}`;
             const respnse =  await needle("get", getUrl);
             if (respnse.body.message){
-                msg = "Sorry, to inform you the appointment passed.";
+                msg = "Sorry to inform you the appointment passed.";
             } else {
                 const userReply = intentName === "Reminder_Reply_Yes" ? "Yes" : "No";
                 const res = await needle("put",
