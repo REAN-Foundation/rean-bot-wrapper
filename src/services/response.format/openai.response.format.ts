@@ -9,8 +9,8 @@ export class OpenAIResponseFormat implements IserviceResponseFunctionalities{
 
     getText() {
         const text = [];
-        if (this.response.data.choices[0].text){
-            text[0] = this.response.data.choices[0].text;
+        if (this.response.choices[0]?.message?.content){
+            text[0] = this.response.choices[0]?.message?.content;
         }
         else {
             text[0] = "Sorry, something went wrong. Let me consult an expert and get back to you.";
