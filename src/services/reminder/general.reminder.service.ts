@@ -44,8 +44,8 @@ export class GeneralReminderService {
             const clientName = "REMINDERS";
 
             const openAiResponse: any = await this.openAIResponseService.getOpenaiMessage(clientName, message);
-            let jsonFormat = openAiResponse;
-            jsonFormat = JSON.parse(jsonFormat.response.data.choices[0].text);
+            let jsonFormat = null;
+            jsonFormat = JSON.parse(openAiResponse.getText());
             const phoneNumber = await this.needleService.getPhoneNumber(eventObj);
 
             // extract patient data and set to catch memory
@@ -237,7 +237,7 @@ export class GeneralReminderService {
                     "text" : "attend"
                 }]
             },
-            ButtonIds  : [ "App_Reminder_Yes", "App_Reminder_No"],
+            ButtonsIds : [ "App_Reminder_Yes", "App_Reminder_No"],
             ClientName : clientName
         };
     }
