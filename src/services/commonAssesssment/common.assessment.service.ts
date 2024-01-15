@@ -9,11 +9,11 @@ import { AssessmentSessionLogs } from '../../models/assessment.session.model';
 import { EntityManagerProvider } from '../entity.manager.provider.service';
 import { commonResponseMessageFormat } from '../common.response.format.object';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { AppointmentReminderService } from '../reminder/appointment.reminder.service';
 import { ServeAssessmentService } from '../maternalCareplan/serveAssessment/serveAssessment.service';
 import { CacheMemory } from '../cache.memory.service';
 import { ChatMessage } from '../../models/chat.message.model';
 import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
+import { GetPatientInfoService } from '../support.app.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class NoBabyMovementAssessmentService {
@@ -22,7 +22,7 @@ export class NoBabyMovementAssessmentService {
 
     constructor(
         @inject(NeedleService) private needleService?: NeedleService,
-        @inject(AppointmentReminderService) private appointmentReminderService?: AppointmentReminderService,
+        @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,
         @inject(ServeAssessmentService) private serveAssessmentService?: ServeAssessmentService,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
@@ -33,7 +33,8 @@ export class NoBabyMovementAssessmentService {
             const channel = eventObj.body.originalDetectIntentRequest.payload.source;
             const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
             const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
-            const patientUserId = await this.appointmentReminderService.getPatientUserId(channel, personPhoneNumber, personName);
+            const patientUserId = await this.getPatientInfoService.getPatientUserId(channel,
+                personPhoneNumber, personName);
 
             // const assessmentId = userTask.Action.Assessment.id;
             const apiURL = `clinical/assessment-templates/search?displayCode=${assessmentCode}`;

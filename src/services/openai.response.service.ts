@@ -108,7 +108,7 @@ export class OpenAIResponseService {
                 model    : "gpt-3.5-turbo",
                 messages : [{ role    : 'user', content : `${message} Provide the reminders details in json. Do not give older year date. The json format should be:
                 { "TaskName": 
-                  "TaskType": "medication" or "exercise" or "other" 
+                  "TaskType": "medication" or "exercise" or "appointment" or "other" 
                   "Frequency": "Daily" or "Monthly" or "Weekly" or "Once" or "Hourly" or "Quarterly" or "Yearly"
                   "DayName": "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
                   "StartDateTime": Take current year by default

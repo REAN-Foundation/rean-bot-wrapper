@@ -15,6 +15,7 @@ import { ClientEnvironmentProviderService } from '../set.client/client.environme
 import { CacheMemory } from '../cache.memory.service';
 import { NotificationType, ReminderDomainModel, ReminderType, RepeatAfterEveryNUnit } from '../../domain.types/reminder/reminder.domain.model';
 import dayjs from 'dayjs';
+import { AppointmentReminderService } from './appointment.reminder.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class GeneralReminderService {
@@ -38,6 +39,7 @@ export class GeneralReminderService {
             const eventName : string = eventObj.body.queryResult.parameters.event;
             let frequency : string = eventObj.body.queryResult.parameters.frequency;
             const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
+            const channel = eventObj.body.originalDetectIntentRequest.payload.source;
 
             //const time : string = eventObj.body.queryResult.parameters.time[0];
             const timeString = eventObj.body.queryResult.outputContexts[0].parameters["time.original"];
@@ -49,8 +51,8 @@ export class GeneralReminderService {
             const phoneNumber = await this.needleService.getPhoneNumber(eventObj);
 
             // extract patient data and set to catch memory
-            const result: any = await this.getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
-            const patientUserId = result.message[0].UserId;
+            const patientUserId = await this.getPatientInfoService.getPatientUserId(channel,
+                personPhoneNumber, personName);
             jsonFormat.PatientUserId = patientUserId;
             await CacheMemory.set(phoneNumber, jsonFormat);
 
@@ -58,14 +60,15 @@ export class GeneralReminderService {
             let time = null;
             if (!Array.isArray(jsonFormat)) {
                 if (this.isTimestampValid(jsonFormat.StartDateTime)) {
-                    time = new Date(jsonFormat.StartDateTime);
-                    const timeDifference = TimeHelper.dayDiff(new Date(), time);
-                    if (timeDifference > 0) {
+                    time = jsonFormat.StartDateTime;
+                    const timeDifference = TimeHelper.dayDiff(new Date(jsonFormat.StartDateTime), new Date());
+                    if (timeDifference < 0) {
                         return await this.dialoflowMessageFormattingService.triggerIntent("Reminder_Ask_Time",eventObj);
                     }
                     console.log(time);
                 
                 } else if (this.attachTimeToToday(jsonFormat.StartDateTime) != null) {
+                    // esme time string wala dena hai
                     time = this.attachTimeToToday(jsonFormat.StartDateTime);
                     console.log(time);
                 } else if (!time) {
@@ -74,7 +77,7 @@ export class GeneralReminderService {
                 }
 
             }
-            console.log(`Json message format ${jsonFormat.TaskName}, ${jsonFormat.TaskType}, ${jsonFormat.StartDateTime}`);
+            console.log(`Json reminder message format ${jsonFormat.TaskName}, ${jsonFormat.TaskType}, ${jsonFormat.StartDateTime}`);
             frequency = jsonFormat.Frequency;
             dayName = jsonFormat.DayName;
 
@@ -83,8 +86,8 @@ export class GeneralReminderService {
             // extract whentime and whenday from schedule timestamp
             const { whenDay, whenTime } = await this.extractWhenDateTime(time);
             
-            if (jsonFormat.TaskType === 'Medication') {
-                console.log("trigerring the medication reminder event");
+            if (jsonFormat.TaskType === 'medication' || jsonFormat.TaskType === 'appointment') {
+                console.log(`trigerring the ${jsonFormat.TaskType} reminder event`);
                 return await this.dialoflowMessageFormattingService.triggerIntent("M_Medication_Data",eventObj);
 
             } else {
@@ -217,6 +220,7 @@ export class GeneralReminderService {
 
     private getTemplateData(jsonFormat: any ) {
         const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+        const fourthVariable = jsonFormat.TaskType === 'medication' ? 'take' : 'attend';
         return {
             TemplateName : "appointment_rem_question",
             Variables    : {
@@ -234,7 +238,7 @@ export class GeneralReminderService {
                 },
                 {
                     "type" : "text",
-                    "text" : "attend"
+                    "text" : fourthVariable
                 }]
             },
             ButtonsIds : [ "App_Reminder_Yes", "App_Reminder_No"],

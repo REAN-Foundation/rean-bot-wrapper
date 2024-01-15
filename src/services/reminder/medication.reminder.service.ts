@@ -22,38 +22,40 @@ export class MedicationReminderService {
 
     async createReminder (eventObj) {
         try {
-            const dayName : string = eventObj.body.queryResult.outputContexts[0].parameters.dayName;
+            // const dayName : string = eventObj.body.queryResult.outputContexts[0].parameters.dayName;
             const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
-            const eventName : string = eventObj.body.queryResult.outputContexts[0].parameters.event;
-            const partOfDay : string = eventObj.body.queryResult.outputContexts[0].parameters.part_of_day;
             const phoneNumber : any = await this.needleService.getPhoneNumber(eventObj);
             const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
-            const time : string = eventObj.body.queryResult.outputContexts[0].parameters.time;
-            const timeString : string = eventObj.body.queryResult.outputContexts[0].parameters["time.original"];
 
-            // const result: any = await this.getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
-            // const patientUserId = result.message[0].UserId;
-            // const name = result.message[0].DisplayName;
-            // console.log(dayName,personPhoneNumber, eventName ,frequency, time);
-            // const whenDay = await TimeHelper.getDateString(new Date(time), DateStringFormat.YYYY_MM_DD);
-            // const whenTime = new Date(time).toISOString()
-            //     .split('T')[1];
-
-            const medicineName : string = eventObj.body.queryResult.outputContexts[1].parameters.medicineName;
+            // const medicineName : string = eventObj.body.queryResult.parameters.medicineName;
             const jsonFormat = await CacheMemory.get(phoneNumber);
-            jsonFormat.StartDateTime = time;
-            const { whenDay, whenTime } = await this.generalReminderService.extractWhenDateTime(time);
-
-            const dffMessage = `Thank you for providing the name. To confirm, you would like a medication reminder for *${medicineName}* at ${timeString}, correct?`;
-            console.log(dffMessage);
             
-            const payloadButtons = await whatsappMetaButtonService("Yes","M_Medication_Data_Yes","No","M_Medication_Data_No");
+            const { whenDay, whenTime } =
+                await this.generalReminderService.extractWhenDateTime(jsonFormat.StartDateTime);
+
+            // const dffMessage = `Thank you for providing the name.
+            // To confirm, you would like a medication reminder for *${medicineName}* at ${timeString}, correct?`;
+
+            let dffMessage = null;
+            if (jsonFormat.TaskType === 'medication') {
+                dffMessage = `Your medication 💊 reminder has been successfully set, and you will receive a notification at the scheduled time.`;
+            } else if (jsonFormat.TaskType === 'appointment') {
+                dffMessage = `Your ${jsonFormat.TaskType} reminder has been successfully set, and you will receive a notification at the scheduled time.`;
+            } else {
+                dffMessage = `Your reminder has been successfully set, and you will receive a notification at the scheduled time.`;
+            }
+            console.log(dffMessage);
+            if (jsonFormat.TimeString) {
+                const msg = `Thank you for providing the time: ${jsonFormat.TimeString}. `;
+                dffMessage = msg + dffMessage;
+            }
+
+            // await whatsappMetaButtonService("Yes","M_Medication_Data_Yes","No","M_Medication_Data_No");
             const data = {
                 "fulfillmentMessages" : [
                     {
                         "text" : { "text": [dffMessage] }
                     },
-                    payloadButtons
                 ]
             };
             await this.generalReminderService.createCommonReminders(eventObj, "Once", jsonFormat,

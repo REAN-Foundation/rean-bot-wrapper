@@ -15,6 +15,7 @@ export class ReminderRegistrationService {
     constructor(
         @inject(AppointmentReminderService) private appointmentReminderService?: AppointmentReminderService,
         @inject(NeedleService) private needleService?: NeedleService,
+        @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,
     ){}
 
     async setUserTimeZone (eventObj) {
@@ -25,8 +26,8 @@ export class ReminderRegistrationService {
             let dffMessage = null;
             const channel = eventObj.body.originalDetectIntentRequest.payload.source;
 
-            const patientUserId = await this.appointmentReminderService.getPatientUserId(channel,
-                personPhoneNumber, personName );
+            const patientUserId = await this.getPatientInfoService.getPatientUserId(channel,
+                personPhoneNumber, personName);
 
             const cityLookup = cityTimezones.lookupViaCity(cityName);
             let timeOffset = "+05:30";

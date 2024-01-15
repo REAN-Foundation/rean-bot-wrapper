@@ -77,10 +77,10 @@ export class MessageFlow{
             // Update the DB using message Id
             const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
             const assessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
-            const messageId = platformMessageService.getMessageIdFromResponse(response);
             const key = `${messageToLlmRouter.platformId}:NextQuestionFlag`;
             const nextQuestionFlag = await CacheMemory.get(key);
             if (nextQuestionFlag === true) {
+                const messageId = platformMessageService.getMessageIdFromResponse(response);
                 await this.serveAssessmentService.updateDBChatSessionWithMessageId(messageToLlmRouter.platformId, messageId, chatMessageRepository, assessmentSessionRepo);
             }
             return response;

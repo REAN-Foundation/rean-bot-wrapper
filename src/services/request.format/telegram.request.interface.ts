@@ -6,4 +6,5 @@ export interface ItelegramMessageEntities {
     getLocation()
     getVoiceFileId()
     getPhotoFileId()
+    getInLineKeyBoardReplyButton()
 }
