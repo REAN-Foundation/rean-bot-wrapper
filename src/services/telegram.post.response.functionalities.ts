@@ -123,7 +123,7 @@ export class TelegramPostResponseFunctionalities {
             reply_markup : JSON.stringify(keyboard)
         };
 
-        telegram.sendMessage(response_format.sessionId, message, opts).then(async function (data) {
+        await telegram.sendMessage(response_format.sessionId, message, opts).then(async function (data) {
             responseId = data.message_id;
             telegramResponseData = data;
         });

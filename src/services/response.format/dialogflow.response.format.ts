@@ -91,4 +91,11 @@ export class DialogflowResponseFormat implements IserviceResponseFunctionalities
         return this.response;
     }
 
+    updateConfidenceScore(){
+        if (this.response[0].queryResult.allRequiredParamsPresent === false) {
+            this.response[0].queryResult.intentDetectionConfidence = 1;
+        }
+    }
+
+
 }

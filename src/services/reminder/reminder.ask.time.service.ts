@@ -22,15 +22,20 @@ export class ReminderAskTimeService {
 
     async createReminder (eventObj) {
         try {
-            const message : string = eventObj.body.queryResult.queryText;
-            const time = eventObj.body.queryResult.parameters.time;
+
+            // const message : string = eventObj.body.queryResult.queryText;
+            let time = eventObj.body.queryResult.parameters.time;
             const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
             const timeString = eventObj.body.queryResult.outputContexts[0].parameters["time.original"];
             const phoneNumber : any = await this.needleService.getPhoneNumber(eventObj);
             const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
 
+            if (time.date_time) {
+                time = time.date_time;
+            }
             const jsonFormat = await CacheMemory.get(phoneNumber);
             jsonFormat.StartDateTime = time;
+            jsonFormat.TimeString = timeString;
 
             // if (!Array.isArray(jsonFormat)) {
 
@@ -41,7 +46,7 @@ export class ReminderAskTimeService {
             // extract whentime and whenday from schedule timestamp
             const { whenDay, whenTime } = await this.generalReminderService.extractWhenDateTime(time);
             
-            if (jsonFormat.TaskType === 'Medication') {
+            if (jsonFormat.TaskType === 'medication' || jsonFormat.TaskType === 'appointment') {
                 console.log("trigerring the medication reminder intent");
                 return await this.dialoflowMessageFormattingService.triggerIntent("M_Medication_Data",eventObj);
 

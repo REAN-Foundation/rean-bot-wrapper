@@ -108,5 +108,21 @@ export class Message implements ItelegramMessageEntities {
             }
         }
     }
+
+    getInLineKeyBoardReplyButton() {
+        const inLineKeyBoardReplyButton = {
+            title : null,
+            id    : this.reqBody.data
+        };
+        const inline_keyboard_array:any = this.reqBody.message.reply_markup.inline_keyboard;
+        for (const list_of_buttons of inline_keyboard_array){
+            for (const obj of list_of_buttons){
+                if (obj['callback_data'] === this.reqBody.data){
+                    inLineKeyBoardReplyButton.title = obj['text'];
+                }
+            }
+        }
+        return inLineKeyBoardReplyButton;
+    }
     
 }

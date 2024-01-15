@@ -99,7 +99,7 @@ export class DecisionRouter {
         return feedbackObj;
     }
 
-    async checkAssessment(messageBody: Imessage, channel: string){
+    async checkAssessment(messageBody: Imessage, channel: string) {
 
         // Check if message is part of assessment
         // const chatMessageRepository = (
@@ -175,7 +175,7 @@ export class DecisionRouter {
             if (responses[key] !== null){
                 const confidence = responses[key].queryResult.intentDetectionConfidence;
                 const intent = responses[key].queryResult.intent.displayName;
-                if (confidence > 0.85 && intent !== "Default Fallback Intent") {
+                if (confidence > 0.75 && intent !== "Default Fallback Intent") {
                     this.intentFlag = true;
                 }
             }
