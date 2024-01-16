@@ -76,6 +76,9 @@ export class Message implements ItelegramMessageEntities {
         if (this.reqBody.reply_to_message) {
             return this.reqBody.reply_to_message.message_id;
         }
+        if (this.reqBody.reply_markup) {
+            return this.reqBody.message_id;
+        }
         else {
             return null;
         }

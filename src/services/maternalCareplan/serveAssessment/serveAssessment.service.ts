@@ -14,6 +14,7 @@ import { ChatMessage } from '../../../models/chat.message.model';
 import { CacheMemory } from '../../../services/cache.memory.service';
 import { ChatSession } from '../../../models/chat.session';
 import { CustomModelResponseFormat } from '../../../services/response.format/custom.model.response.format';
+import { sendTelegramButtonService } from '../../../services/telegram.button.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ServeAssessmentService {
@@ -121,8 +122,13 @@ export class ServeAssessmentService {
                         buttonArray.push( optionsNameArray[i].Text, buttonId);
                         i = i + 1;
                     }
-                    payload = await sendApiButtonService(buttonArray);
-                    messageType = 'interactivebuttons';
+                    if (channel === 'whatsappMeta') {
+                        payload = await sendApiButtonService(buttonArray);
+                        messageType = 'interactivebuttons';
+                    } else {
+                        payload = await sendTelegramButtonService(buttonArray);
+                        messageType = 'inline_keyboard';
+                    }
                 }
 
                 //save entry into DB
@@ -148,7 +154,7 @@ export class ServeAssessmentService {
             let messageId = null;
             if (doSend === true) {
                 console.log("    sending message from handle request");
-                const response = { body: { answer: message } };
+                const response = { body: { answer: message }, payload: payload };
                 const customModelResponseFormat = new CustomModelResponseFormat(response);
                 return customModelResponseFormat;
 
