@@ -6,6 +6,7 @@ import { platformServiceInterface } from '../../refactor/interface/platform.inte
 import { GetPatientInfoService } from '../support.app.service';
 import { CacheMemory } from '../cache.memory.service';
 import { GeneralReminderService } from './general.reminder.service';
+import { OpenAIResponseService } from '../openai.response.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ReminderAskTimeService {
@@ -14,9 +15,9 @@ export class ReminderAskTimeService {
 
     constructor(
         @inject(NeedleService) private needleService?: NeedleService,
-        @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,
         @inject(dialoflowMessageFormatting) private dialoflowMessageFormattingService?: dialoflowMessageFormatting,
         @inject(GeneralReminderService) private generalReminderService?: GeneralReminderService,
+        @inject(OpenAIResponseService) private openAIResponseService?: OpenAIResponseService,
 
     ){}
 
@@ -29,9 +30,16 @@ export class ReminderAskTimeService {
             const timeString = eventObj.body.queryResult.outputContexts[0].parameters["time.original"];
             const phoneNumber : any = await this.needleService.getPhoneNumber(eventObj);
             const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
+            const message : string = eventObj.body.queryResult.queryText;
 
             if (time.date_time) {
                 time = time.date_time;
+            }
+            const clientName = "REMINDERS_ASK_TIME";
+            const openAiResponse: any = await this.openAIResponseService.getOpenaiMessage(clientName, message);
+            time = JSON.parse(openAiResponse.getText());
+            if (time.DateTime) {
+                time = time.DateTime;
             }
             const jsonFormat = await CacheMemory.get(phoneNumber);
             jsonFormat.StartDateTime = time;

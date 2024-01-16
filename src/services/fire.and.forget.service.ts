@@ -109,7 +109,7 @@ export class FireAndForgetService {
             const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
             const userResponse = eventObj.body.queryResult.intent.displayName;
             const channel = eventObj.body.originalDetectIntentRequest.payload.source;
-            await FireAndForgetService.delay(2000);
+            await FireAndForgetService.delay(1000);
             await serveAssessmentService.answerQuestion(eventObj, userId, userResponse,
                 messageContextId, channel, false);
             console.log(`Fire and Forget Domain Model: ${model}`);
