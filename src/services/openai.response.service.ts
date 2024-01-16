@@ -103,7 +103,7 @@ export class OpenAIResponseService {
                 frequency_penalty : 0.0,
                 presence_penalty  : 0.0,
             };
-        } else if (key === "REMINDERS") { // change the name to where you wanted to create reminders in bot
+        } else if (key === "REMINDERS") {
             prompt = {
                 model    : "gpt-3.5-turbo",
                 messages : [{ role    : 'user', content : `${message} Provide the reminders details in json. Do not give older year date. The json format should be:
@@ -123,6 +123,17 @@ export class OpenAIResponseService {
 
             //If date time is not found in phrase then, give "StartDateTime" as todays date.
             //Do not give past dates and convert it into date time javascript format.
+        } else if (key === "REMINDERS_ASK_TIME") {
+            prompt = {
+                model    : "gpt-3.5-turbo",
+                messages : [{ role    : 'user', content : `${message} Provide date time into iso format in json. The json format should be:
+                { DateTime: }`, }],
+                temperature       : 0,
+                max_tokens        : 1000,
+                top_p             : 1.0,
+                frequency_penalty : 0.0,
+                presence_penalty  : 0.0,
+            };
         }
         return prompt;
 
