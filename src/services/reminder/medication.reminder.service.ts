@@ -7,6 +7,7 @@ import { whatsappMetaButtonService } from '../whatsappmeta.button.service';
 import { GetPatientInfoService } from '../support.app.service';
 import { GeneralReminderService } from './general.reminder.service';
 import { CacheMemory } from '../cache.memory.service';
+import { TimeHelper } from '../../common/time.helper';
 
 @scoped(Lifecycle.ContainerScoped)
 export class MedicationReminderService {
@@ -32,6 +33,7 @@ export class MedicationReminderService {
             
             const { whenDay, whenTime } =
                 await this.generalReminderService.extractWhenDateTime(jsonFormat.StartDateTime);
+            jsonFormat.WhenTime = TimeHelper.formatTimeTo_AM_PM(whenTime);
 
             // const dffMessage = `Thank you for providing the name.
             // To confirm, you would like a medication reminder for *${medicineName}* at ${timeString}, correct?`;
@@ -51,6 +53,12 @@ export class MedicationReminderService {
             }
 
             // await whatsappMetaButtonService("Yes","M_Medication_Data_Yes","No","M_Medication_Data_No");
+
+            const response = await this.generalReminderService.createCommonReminders(eventObj, "Once", jsonFormat,
+                jsonFormat.PatientUserId, whenDay, whenTime, personName, personPhoneNumber, jsonFormat.DayName );
+            if (response.Status === 'failure') {
+                dffMessage = `Sorry for the inconvenience. I could not create the reminder due to ${response.Message}`;
+            }
             const data = {
                 "fulfillmentMessages" : [
                     {
@@ -58,8 +66,6 @@ export class MedicationReminderService {
                     },
                 ]
             };
-            await this.generalReminderService.createCommonReminders(eventObj, "Once", jsonFormat,
-                jsonFormat.PatientUserId, whenDay, whenTime, personName, personPhoneNumber, jsonFormat.DayName );
             return await { sendDff: true, message: data };
 
         } catch (error) {

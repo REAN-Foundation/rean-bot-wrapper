@@ -21,6 +21,7 @@ import { DecisionRouter } from './langchain/decision.router.service';
 import { CacheMemory } from './cache.memory.service';
 import { Helper } from '../common/helper';
 import needle from "needle";
+import { sendTelegramButtonService } from './telegram.button.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class MessageFlow{
@@ -74,12 +75,12 @@ export class MessageFlow{
             const processedResponse = await this.handleRequestservice.handleUserRequestForRouting(outgoingMessage, platformMessageService);
             const response = await this.processOutgoingMessage(messageToLlmRouter, channel, platformMessageService, processedResponse);
 
-            // Update the DB using message Id
+            // Update the DB using message Id only if outgoing meesage is related with assessment
             const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
             const assessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
             const key = `${messageToLlmRouter.platformId}:NextQuestionFlag`;
             const nextQuestionFlag = await CacheMemory.get(key);
-            if (nextQuestionFlag === true) {
+            if (nextQuestionFlag === true && outgoingMessage.PrimaryMessageHandler === "Assessments") {
                 const messageId = platformMessageService.getMessageIdFromResponse(response);
                 await this.serveAssessmentService.updateDBChatSessionWithMessageId(messageToLlmRouter.platformId, messageId, chatMessageRepository, assessmentSessionRepo);
             }
@@ -221,6 +222,9 @@ export class MessageFlow{
             assessmentSession = assessmentSessionLogs;
             payload = metaPayload;
             console.log(`assessment record ${JSON.stringify(payload)}`);
+        }
+        else if (msg.type === "inline_keyboard") {
+            payload = await sendTelegramButtonService([ "Yes",msg.payload[0], "No", msg.payload[1]]);
         }
         
         if (msg.message.ButtonsIds != null) {

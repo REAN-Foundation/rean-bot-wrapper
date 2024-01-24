@@ -68,6 +68,7 @@ export class GeneralReminderService {
                     console.log(time);
                 
                 } else if (this.attachTimeToToday(jsonFormat.StartDateTime) != null) {
+
                     // esme time string wala dena hai
                     time = this.attachTimeToToday(jsonFormat.StartDateTime);
                     console.log(time);
@@ -124,12 +125,12 @@ export class GeneralReminderService {
             const hookUrl = "https://api.weatherstack.com/current?access_key=93fdf8204559b90ec79466809edb7aad&query=Pune";
             if (frequency === "Once"){
                 apiURL = `reminders/one-time`;
-                const rawData = this.getTemplateData(jsonFormat);
+                const rawData = this.getTemplateData(jsonFormat, personName);
 
                 const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
-                await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
+                const data = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
 
-                const data = await this.getFulfillmentMsg(jsonFormat, frequency, whenTime);
+                // const data = await this.getFulfillmentMsg(jsonFormat, frequency, whenTime);
                 return data;
 
             } else if (frequency === "Daily"){
@@ -218,7 +219,7 @@ export class GeneralReminderService {
         return channelType[channel] ?? NotificationType.WhatsApp;
     }
 
-    private getTemplateData(jsonFormat: any ) {
+    private getTemplateData(jsonFormat: any, personName? ) {
         const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
         const fourthVariable = jsonFormat.TaskType === 'medication' ? 'take' : 'attend';
         return {
@@ -241,8 +242,9 @@ export class GeneralReminderService {
                     "text" : fourthVariable
                 }]
             },
-            ButtonsIds : [ "App_Reminder_Yes", "App_Reminder_No"],
-            ClientName : clientName
+            ButtonsIds  : [ "App_Reminder_Yes", "App_Reminder_No"],
+            ClientName  : clientName,
+            TextMessage : `Hi ${personName}, \nYou have ${jsonFormat.TaskName} scheduled at ${jsonFormat.WhenTime}. Will you be able to ${fourthVariable}?`
         };
     }
 
