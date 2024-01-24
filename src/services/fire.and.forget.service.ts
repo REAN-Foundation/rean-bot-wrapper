@@ -105,10 +105,15 @@ export class FireAndForgetService {
         if (model.Intent === "Dmc_Yes" || model.Intent === "Dmc_No") {
             const eventObj = model.Body.EventObj;
             const serveAssessmentService:  ServeAssessmentService = eventObj.container.resolve(ServeAssessmentService);
-            const messageContextId = eventObj.body.originalDetectIntentRequest.payload.contextId;
+            const channel = eventObj.body.originalDetectIntentRequest.payload.source;
+            let messageContextId = null;
+            if (channel === "telegram" || channel === "Telegram") {
+                messageContextId = eventObj.body.originalDetectIntentRequest.payload.completeMessage.chat_message_id;
+            } else {
+                messageContextId = eventObj.body.originalDetectIntentRequest.payload.contextId;
+            }
             const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
             const userResponse = eventObj.body.queryResult.intent.displayName;
-            const channel = eventObj.body.originalDetectIntentRequest.payload.source;
             await FireAndForgetService.delay(1000);
             await serveAssessmentService.answerQuestion(eventObj, userId, userResponse,
                 messageContextId, channel, false);

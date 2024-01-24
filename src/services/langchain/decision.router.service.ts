@@ -77,7 +77,7 @@ export class DecisionRouter {
         // Check if message is feedback or not
         let feedbackType = '';
         let feedback = '';
-        if (messageBody.contextId){
+        if (messageBody.contextId || messageBody.intent !== null ){
             this.feedbackFlag = true;
             feedbackType = UserFeedbackType.General;
             feedback = messageBody.messageBody;

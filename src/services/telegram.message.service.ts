@@ -119,7 +119,7 @@ export class TelegramMessageService implements platformServiceInterface{
             chat_message_id     : null,
             direction           : "Out",
             input_message       : null,
-            message_type        : "text",
+            message_type        : requestBody.type ?? "text",
             intent              : null,
             messageBody         : null,
             messageImageUrl     : null,
