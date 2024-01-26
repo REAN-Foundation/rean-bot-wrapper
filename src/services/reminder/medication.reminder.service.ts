@@ -23,13 +23,20 @@ export class MedicationReminderService {
 
     async createReminder (eventObj) {
         try {
-            // const dayName : string = eventObj.body.queryResult.outputContexts[0].parameters.dayName;
+
             const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
             const phoneNumber : any = await this.needleService.getPhoneNumber(eventObj);
             const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
 
             // const medicineName : string = eventObj.body.queryResult.parameters.medicineName;
             const jsonFormat = await CacheMemory.get(phoneNumber);
+            let dffMessage = null;
+
+            const timeDifference = TimeHelper.dayDiff(new Date(jsonFormat.StartDateTime), new Date());
+            if (timeDifference < 0) {
+                dffMessage = "Sorry for the inconvenience. Reminders cannot be served in the past!";
+                return { sendDff: true, message: this.dialogflowFullfillmentBody(dffMessage) };
+            }
             
             const { whenDay, whenTime } =
                 await this.generalReminderService.extractWhenDateTime(jsonFormat.StartDateTime);
@@ -38,7 +45,6 @@ export class MedicationReminderService {
             // const dffMessage = `Thank you for providing the name.
             // To confirm, you would like a medication reminder for *${medicineName}* at ${timeString}, correct?`;
 
-            let dffMessage = null;
             if (jsonFormat.TaskType === 'medication') {
                 dffMessage = `Your medication 💊 reminder has been successfully set, and you will receive a notification at the scheduled time.`;
             } else if (jsonFormat.TaskType === 'appointment') {
@@ -59,19 +65,22 @@ export class MedicationReminderService {
             if (response.Status === 'failure') {
                 dffMessage = `Sorry for the inconvenience. I could not create the reminder due to ${response.Message}`;
             }
-            const data = {
-                "fulfillmentMessages" : [
-                    {
-                        "text" : { "text": [dffMessage] }
-                    },
-                ]
-            };
-            return await { sendDff: true, message: data };
+            return await { sendDff: true, message: this.dialogflowFullfillmentBody(dffMessage) };
 
         } catch (error) {
             Logger.instance()
-                .log_error(error.message,500,'Send success reminder creation error');
+                .log_error(error.message,500,'Medication reminder service error');
         }
+    }
+
+    public dialogflowFullfillmentBody(dffMessage: any) {
+        return {
+            "fulfillmentMessages" : [
+                {
+                    "text" : { "text": [dffMessage] }
+                },
+            ]
+        };
     }
 
 }

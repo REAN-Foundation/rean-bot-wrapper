@@ -69,12 +69,6 @@ export class FireAndForgetService {
             await _createReminderService.sendReminder(model.Body, eventObj );
             console.log(`Fire and Forget Domain Model: ${model}`);
         }
-        if (model.Intent === "General_Reminder") {
-            const eventObj = model.Body.EventObj;
-            const _generalReminderService:  GeneralReminderService = eventObj.container.resolve(GeneralReminderService);
-            await _generalReminderService.sendReminder(model.Body, eventObj );
-            console.log(`Fire and Forget Domain Model: ${model}`);
-        }
         if (model.Intent === "Change_TF_Date_Load_Reminders") {
             const eventObj = model.Body.EventObj;
             const _enrollPatientService:  EnrollPatientService = eventObj.container.resolve(EnrollPatientService);
