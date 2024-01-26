@@ -52,7 +52,7 @@ export class AppointmentUserReplyService {
 
         } catch (error) {
             Logger.instance()
-                .log_error(error.message,500,'Send success reminder creation error');
+                .log_error(error.message,500,'User reply on appointment service error');
         }
     }
 

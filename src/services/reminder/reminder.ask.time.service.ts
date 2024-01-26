@@ -7,6 +7,7 @@ import { GetPatientInfoService } from '../support.app.service';
 import { CacheMemory } from '../cache.memory.service';
 import { GeneralReminderService } from './general.reminder.service';
 import { OpenAIResponseService } from '../openai.response.service';
+import { DurationType, TimeHelper } from '../../common/time.helper';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ReminderAskTimeService {
@@ -32,22 +33,18 @@ export class ReminderAskTimeService {
             const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
             const message : string = eventObj.body.queryResult.queryText;
 
-            if (time.date_time) {
-                time = time.date_time;
-            }
             const clientName = "REMINDERS_ASK_TIME";
             const openAiResponse: any = await this.openAIResponseService.getOpenaiMessage(clientName, message);
             time = JSON.parse(openAiResponse.getText());
             if (time.DateTime) {
                 time = time.DateTime;
             }
+            time = await this.generalReminderService.updateReminderTimeWithMessage(message, time);
+
             const jsonFormat = await CacheMemory.get(phoneNumber);
             jsonFormat.StartDateTime = time;
             jsonFormat.TimeString = timeString;
-
-            // if (!Array.isArray(jsonFormat)) {
-
-            // }
+            await CacheMemory.set(phoneNumber, jsonFormat);
             console.log(`Json message format ${jsonFormat.TaskName}, ${jsonFormat.TaskType}, ${jsonFormat.StartDateTime}`);
             const frequency = jsonFormat.Frequency;
 
@@ -65,8 +62,7 @@ export class ReminderAskTimeService {
 
         } catch (error) {
             Logger.instance()
-                .log_error(error.message,500,'Send success reminder creation error');
+                .log_error(error.message,500,'Ask time reminder service error');
         }
     }
-
 }

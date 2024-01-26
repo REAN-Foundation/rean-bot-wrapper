@@ -9,7 +9,7 @@ import { Iresponse } from '../../refactor/interface/message.interface';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { sendApiButtonService } from '../whatsappmeta.button.service';
 import { GetPatientInfoService } from '../support.app.service';
-import { DateStringFormat, TimeHelper } from '../../common/time.helper';
+import { DateStringFormat, DurationType, TimeHelper } from '../../common/time.helper';
 import { OpenAIResponseService } from '../openai.response.service';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 import { CacheMemory } from '../cache.memory.service';
@@ -41,7 +41,7 @@ export class GeneralReminderService {
             const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
             const channel = eventObj.body.originalDetectIntentRequest.payload.source;
 
-            //const time : string = eventObj.body.queryResult.parameters.time[0];
+            const dialogflowTime : string = eventObj.body.queryResult.parameters.time[0];
             const timeString = eventObj.body.queryResult.outputContexts[0].parameters["time.original"];
             const clientName = "REMINDERS";
 
@@ -59,19 +59,20 @@ export class GeneralReminderService {
             //check is it array
             let time = null;
             if (!Array.isArray(jsonFormat)) {
-                if (this.isTimestampValid(jsonFormat.StartDateTime)) {
+                if (this.isTimestampValid(jsonFormat.StartDateTime) && !dialogflowTime) {
                     time = jsonFormat.StartDateTime;
                     const timeDifference = TimeHelper.dayDiff(new Date(jsonFormat.StartDateTime), new Date());
                     if (timeDifference < 0) {
+                        console.log(`triggering Reminder_Ask_Time intent`);
                         return await this.dialoflowMessageFormattingService.triggerIntent("Reminder_Ask_Time",eventObj);
                     }
                     console.log(time);
                 
-                } else if (this.attachTimeToToday(jsonFormat.StartDateTime) != null) {
-
-                    // esme time string wala dena hai
-                    time = this.attachTimeToToday(jsonFormat.StartDateTime);
+                } else if (this.isTimestampValid(jsonFormat.StartDateTime) && dialogflowTime) {
+                    time = await this.updateReminderTimeWithMessage(message, jsonFormat.StartDateTime);
+                    jsonFormat.StartDateTime = time;
                     console.log(time);
+
                 } else if (!time) {
                     console.log(`triggering Reminder_Ask_Time intent`);
                     return await this.dialoflowMessageFormattingService.triggerIntent("Reminder_Ask_Time",eventObj);
@@ -81,8 +82,6 @@ export class GeneralReminderService {
             console.log(`Json reminder message format ${jsonFormat.TaskName}, ${jsonFormat.TaskType}, ${jsonFormat.StartDateTime}`);
             frequency = jsonFormat.Frequency;
             dayName = jsonFormat.DayName;
-
-            //const name = result.message[0].DisplayName;
 
             // extract whentime and whenday from schedule timestamp
             const { whenDay, whenTime } = await this.extractWhenDateTime(time);
@@ -100,7 +99,7 @@ export class GeneralReminderService {
 
         } catch (error) {
             Logger.instance()
-                .log_error(error.message,500,'Send success reminder creation error');
+                .log_error(error.message,500,'Send success general reminder creation error');
         }
     }
 
@@ -290,20 +289,6 @@ export class GeneralReminderService {
         return obj;
     }
 
-    attachTimeToToday(time: string): Date | null {
-
-        // Split the provided time into hours, minutes, and seconds
-        const [hours, minutes, seconds] = time.split(':').map(Number);
-        if (minutes == null || hours == null) {
-            return null;
-        }
-        const today = new Date();
-        today.setHours(hours);
-        today.setMinutes(minutes);
-        today.setSeconds(seconds);
-        return today;
-    }
-
     isTimestampValid(timestamp: string): boolean {
         const date = new Date(timestamp);
 
@@ -311,47 +296,33 @@ export class GeneralReminderService {
         return !isNaN(date.getTime()) && date.toString() !== "Invalid Date";
     }
 
-    async sendReminder (body, eventObj) {
-        try {
-            const message = `Dear ${body.PersonName}, \nYou have an ${body.TaskName} scheduled at ${body.Time}.`;
-
-            // const payload = {};
-
-            // payload["buttonIds"] = await templateButtonService(["Schedule_Donation","NeedBlood_Patient_ByMistake"]);
-
-            // payload["variables"] = [
-            //     {
-            //         type : "text",
-            //         text : body.VolunteerName
-            //     },
-            //     {
-            //         type : "text",
-            //         text : body.PatientName
-            //     }];
-            // payload["templateName"] = "need_blood_notify_volunteer";
-            // payload["languageForSession"] = "en";
-            await FireAndForgetService.delay(4000);
-            const previousPayload = eventObj.body.originalDetectIntentRequest.payload;
-            const response_format: Iresponse = commonResponseMessageFormat();
-            response_format.platform = previousPayload.source;
-            response_format.sessionId = body.PersonPhoneNumber;
-            response_format.messageText = message;
-            response_format.message_type = "text";
-
-            this._platformMessageService = eventObj.container.resolve(previousPayload.source);
-            await this._platformMessageService.SendMediaMessage(response_format, null);
-            
-        } catch (error) {
-            Logger.instance()
-                .log_error(error.message,500,'Register patient with blood warrior messaging service error');
-        }
-    }
-
     async extarctTimeFromTimeStamp(timeStamp ) {
 
         const time = timeStamp.split("T")[1];
         const subtime = time.split(":", 2);
         return `${subtime[0]}:${subtime[1]}:00`; // Create the HH:MM:SS format string
+    }
+
+    async updateReminderTimeWithMessage(message: string, time: any) {
+        const messageLowerCase = message.toLowerCase();
+        const timeDifference = TimeHelper.dayDiff(new Date(time), new Date());
+        if (timeDifference < 0) {
+            let currentDate = null;
+            const userTime = time.split('T')[1];
+            if (messageLowerCase.includes('tomorrow') || messageLowerCase.includes('tomorow')) {
+                currentDate = TimeHelper.addDuration(new Date(), 1, DurationType.Day);
+            } else if (messageLowerCase.includes('day after tomorrow') || messageLowerCase.includes('next tomorrow')) {
+                currentDate = TimeHelper.addDuration(new Date(), 2, DurationType.Day);
+            } else {
+                currentDate = new Date();
+            }
+            let formattedDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1)
+                .toString()
+                .padStart(2, '0')}-${currentDate.getDate().toString()}`;
+            formattedDate = formattedDate + `T${userTime}`;
+            time = formattedDate;
+        }
+        return time;
     }
 
 }
