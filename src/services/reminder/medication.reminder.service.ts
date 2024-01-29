@@ -32,11 +32,11 @@ export class MedicationReminderService {
             const jsonFormat = await CacheMemory.get(phoneNumber);
             let dffMessage = null;
 
-            const timeDifference = TimeHelper.dayDiff(new Date(jsonFormat.StartDateTime), new Date());
-            if (timeDifference < 0) {
-                dffMessage = "Sorry for the inconvenience. Reminders cannot be served in the past!";
-                return { sendDff: true, message: this.dialogflowFullfillmentBody(dffMessage) };
-            }
+            // const timeDifference = TimeHelper.dayDiff(new Date(jsonFormat.StartDateTime), new Date());
+            // if (timeDifference < 0) {
+            //     dffMessage = "Sorry for the inconvenience. Reminders cannot be served in the past!";
+            //     return { sendDff: true, message: this.dialogflowFullfillmentBody(dffMessage) };
+            // }
             
             const { whenDay, whenTime } =
                 await this.generalReminderService.extractWhenDateTime(jsonFormat.StartDateTime);
