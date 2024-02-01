@@ -94,6 +94,14 @@ export class DialogflowResponseFormat implements IserviceResponseFunctionalities
     updateConfidenceScore(){
         if (this.response[0].queryResult.allRequiredParamsPresent === false) {
             this.response[0].queryResult.intentDetectionConfidence = 1;
+        } else {
+
+            // Check if the parameters JSON object is empty
+            const paramsOblect = this.response[0].queryResult.parameters.fields;
+            const isEmpty: boolean = Object.keys(paramsOblect).length === 0;
+            if (!isEmpty) {
+                this.response[0].queryResult.intentDetectionConfidence = 1;
+            }
         }
     }
 
