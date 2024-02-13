@@ -6,6 +6,7 @@ import { container, inject, Lifecycle, scoped } from 'tsyringe';
 import { RaiseDonationRequestService } from './raise.request.service';
 import { Iresponse } from '../../refactor/interface/message.interface';
 import { commonResponseMessageFormat } from '../common.response.format.object';
+import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ChecklistDateValidationService {
@@ -19,70 +20,108 @@ export class ChecklistDateValidationService {
     ) {}
 
     checklistDateValidationService = async (eventObj) => {
-        return new Promise(async (resolve) => {
-            try {
-                let transfusionDate = eventObj.body.queryResult.parameters.date;
-                let donor = null;
-                donor = await this.bloodWarriorCommonService.getDonorByPhoneNumber(eventObj);
+        try {
+            const transfusionDate = eventObj.body.queryResult.parameters.date;
+            let donor = null;
+            donor = await this.bloodWarriorCommonService.getDonorByPhoneNumber(eventObj);
 
-                const apiURL = `clinical/donation-record/search?donorUserId=${donor.UserId}`;
-                const requestBody = await this.needleService.needleRequestForREAN("get", apiURL);
-                const donationDate = requestBody.Data.DonationRecord.Items[0].DonationDetails.NextDonationDate;
-                const volunteerUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.VolunteerUserId;
-                const patientUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.PatientUserId;
-                const requestedQuantity = requestBody.Data.DonationRecord.Items[0].DonationDetails.QuantityRequired;
-                let dffMessage = "";
-                // eslint-disable-next-line max-len
-                const daydifference = await this.bloodWarriorCommonService.differenceBetweenTwoDates(new Date(donationDate), new Date(transfusionDate));
-                if (daydifference >= 0 && daydifference < 5) {
-                    dffMessage = `Date Validation Success. \nHere are your donation details.`;
+            const apiURL = `clinical/donation-record/search?donorUserId=${donor.UserId}`;
+            const requestBody = await this.needleService.needleRequestForREAN("get", apiURL);
+            const donationDate = requestBody.Data.DonationRecord.Items[0].DonationDetails.NextDonationDate;
+            const volunteerUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.VolunteerUserId;
+            const patientUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.PatientUserId;
+            const requestedQuantity = requestBody.Data.DonationRecord.Items[0].DonationDetails.QuantityRequired;
+            let dffMessage = "";
+            // eslint-disable-next-line max-len
+            const daydifference = await this.bloodWarriorCommonService.differenceBetweenTwoDates(new Date(donationDate), new Date(transfusionDate));
+            if (daydifference >= 0 && daydifference < 5) {
+                dffMessage = `Date Validation Success. \nHere are your donation details.`;
 
-                    const stringTransfusionDate = new Date(transfusionDate.split("T")[0]).toDateString();
-                    const message = ` *Donor Name:* ${donor.DisplayName}, \n *Blood Group:* ${donor.BloodGroup}, \n *Required Quantity:* ${requestedQuantity} unit, \n *Donation Date:* ${stringTransfusionDate}`;
+                const stringTransfusionDate = new Date(transfusionDate.split("T")[0]).toDateString();
+                const message = ` *Donor Name:* ${donor.DisplayName}, \n *Blood Group:* ${donor.BloodGroup}, \n *Required Quantity:* ${requestedQuantity} unit, \n *Donation Date:* ${stringTransfusionDate}`;
 
-                    resolve( { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage + '\n' + message] } }] } });
-
-                    const payload = eventObj.body.originalDetectIntentRequest.payload;
-                    this._platformMessageService = eventObj.container.resolve(payload.source);
-                    const heading = `Here are the details of the confirmed donor`;
-
-                    //Fetch donation reminders for donors
-                    if (transfusionDate) {
-                        transfusionDate = new Date(transfusionDate.split("T")[0]);
-                        
-                        //donationDate.setDate(donationDate.getDate() - 1);
+                const body : QueueDoaminModel =  {
+                    Intent : "Checklist_Yes_Date",
+                    Body   : {
+                        EventObj              : eventObj,
+                        TransfusionDate       : transfusionDate,
+                        Donor                 : donor,
+                        RequestedQuantity     : requestedQuantity,
+                        StringTransfusionDate : stringTransfusionDate,
+                        PatientUserId         : patientUserId,
+                        VolunteerUserId       : volunteerUserId
                     }
-                    await this.bloodWarriorCommonService.fetchDonorDonationReminders(donor.UserId, transfusionDate);
+                };
+                FireAndForgetService.enqueue(body);
+                return { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage + '\n' + message] } }] } };
 
-                    //message send to patient
-                    const patient = await this.bloodWarriorCommonService.getPatientPhoneByUserId(patientUserId);
-                    const patientPhone =
-                        this.raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(patient.User.Person.Phone);
-                    const response_format: Iresponse = commonResponseMessageFormat();
-                    response_format.platform = payload.source;
-                    response_format.sessionId = patientPhone;
-                    response_format.messageText = heading + `\n` + message;
-                    response_format.message_type = "text";
-                    await this._platformMessageService.SendMediaMessage(response_format, null);
-
-                    //message send to volunteer
-                    const volunteer = await this.bloodWarriorCommonService.getVolunteerPhoneByUserId(volunteerUserId);
-                    const volunteerPhone =
-                        this.raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(volunteer.User.Person.Phone);
-                    response_format.sessionId = volunteerPhone;
-                    response_format.messageText = heading + `\n` + message;
-                    response_format.message_type = "text";
-                    await this._platformMessageService.SendMediaMessage(response_format, null);
-                } else {
-                    dffMessage = "The donation date you entered is not correct please try again.";
-                    resolve( { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } });
-                }
-
-            } catch (error) {
-                Logger.instance()
-                    .log_error(error.message,500,'Register patient with blood warrior messaging service error');
+            } else {
+                dffMessage = "The donation date you entered is not correct please try again.";
+                return { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } };
             }
-        });
+
+        } catch (error) {
+            Logger.instance()
+                .log_error(error.message,500,'Register patient with blood warrior messaging service error');
+        }
     };
+
+    public async sendConfirmationMessage(eventObj: any, transfusionDate: any, donor: any,requestedQuantity: any,
+        stringTransfusionDate: string, patientUserId: any, volunteerUserId: any) {
+        const intentPayload = eventObj.body.originalDetectIntentRequest.payload;
+        this._platformMessageService = eventObj.container.resolve(intentPayload.source);
+        const heading = `Here are the details of the confirmed donor`;
+
+        //Fetch donation reminders for donors
+        if (transfusionDate) {
+            transfusionDate = new Date(transfusionDate.split("T")[0]);
+
+            //donationDate.setDate(donationDate.getDate() - 1);
+        }
+        await this.bloodWarriorCommonService.fetchDonorDonationReminders(donor.UserId, transfusionDate);
+
+        //Template message formation
+        const payload = {};
+        payload["variables"] = [
+            {
+                type : "text",
+                text : donor.DisplayName
+            },
+            {
+                type : "text",
+                text : donor.BloodGroup
+            },
+            {
+                type : "text",
+                text : requestedQuantity
+            },
+            {
+                type : "text",
+                text : stringTransfusionDate
+            }
+        ];
+        payload["templateName"] = "donor_confirmation_msg";
+        payload["languageForSession"] = "en";
+
+        //message send to patient
+        const patient = await this.bloodWarriorCommonService.getPatientPhoneByUserId(patientUserId);
+        const patientPhone =
+            this.raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(patient.User.Person.Phone);
+        const response_format: Iresponse = commonResponseMessageFormat();
+        response_format.platform = intentPayload.source;
+        response_format.sessionId = patientPhone;
+        response_format.messageText = heading;
+        response_format.message_type = "template";
+        await this._platformMessageService.SendMediaMessage(response_format, payload);
+
+        //message send to volunteer
+        const volunteer = await this.bloodWarriorCommonService.getVolunteerPhoneByUserId(volunteerUserId);
+        const volunteerPhone =
+            this.raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(volunteer.User.Person.Phone);
+        response_format.sessionId = volunteerPhone;
+        response_format.messageText = heading;
+        response_format.message_type = "template";
+        await this._platformMessageService.SendMediaMessage(response_format, payload);
+    }
 
 }
