@@ -220,7 +220,7 @@ export class GeneralReminderService {
 
     private getTemplateData(jsonFormat: any, personName? ) {
         const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-        const fourthVariable = jsonFormat.TaskType === 'medication' ? 'take' : 'attend';
+        const fourthVariable = jsonFormat.TaskType === 'medication' ? 'take your medicine' : 'attend your appointment';
         return {
             TemplateName : "appointment_rem_question",
             Variables    : {
