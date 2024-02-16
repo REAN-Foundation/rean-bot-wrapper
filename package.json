@@ -59,7 +59,7 @@
     "https": "^1.0.0",
     "json-bigint": "^1.0.0",
     "jsonwebtoken": "^9.0.0",
-    "langchain": "^0.0.203",
+    "langchain": "^0.1.7",
     "lodash": "^4.17.20",
     "luxon": "^3.4.3",
     "mysql2": "^3.6.5",
