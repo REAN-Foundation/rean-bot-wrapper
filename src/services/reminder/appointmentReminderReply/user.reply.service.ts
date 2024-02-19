@@ -46,7 +46,7 @@ export class AppointmentUserReplyService {
                     },
                 );
                 console.log(`Object in reply service ${JSON.stringify(res.body,null, 4)}`);
-                msg = intentName === "Reminder_Reply_Yes" ? this.answerYesMsgService.getRandomYesMessage() : "Thank you for your feedback.";
+                msg = intentName === "Reminder_Reply_Yes" ? "Thank you for the confirmation." : "Thank you for your feedback.";
             }
             return { fulfillmentMessages: [{ text: { text: [msg] } }]  };
 
