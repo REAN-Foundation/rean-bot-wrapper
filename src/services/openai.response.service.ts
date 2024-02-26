@@ -111,7 +111,7 @@ export class OpenAIResponseService {
                   "TaskType": "medication" or "exercise" or "appointment" or "other" 
                   "Frequency": "Daily" or "Monthly" or "Weekly" or "Once" or "Hourly" or "Quarterly" or "Yearly"
                   "DayName": "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
-                  "StartDateTime": Take current year by default
+                  "StartDateTime": iso format date time
                   "MedicineName": NA, if not available
                 } If you are unable to find any information, fill the JSON value with 'NA'. Please do not assume other information.`, }],
                 temperature       : 0,
