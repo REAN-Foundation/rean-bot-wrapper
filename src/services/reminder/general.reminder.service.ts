@@ -54,6 +54,7 @@ export class GeneralReminderService {
             const patientUserId = await this.getPatientInfoService.getPatientUserId(channel,
                 personPhoneNumber, personName);
             jsonFormat.PatientUserId = patientUserId;
+            jsonFormat.TaskName = `${eventName} reminder`;
             await CacheMemory.set(phoneNumber, jsonFormat);
 
             //check is it array
