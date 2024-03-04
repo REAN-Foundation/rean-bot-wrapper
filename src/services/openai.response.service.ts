@@ -107,7 +107,7 @@ export class OpenAIResponseService {
             prompt = {
                 model    : "gpt-3.5-turbo",
                 messages : [{ role    : 'user', content : `${message} Provide the reminders details in json. Do not give older year date. The json format should be:
-                { "TaskName": Take task name given in the message or "TaskType" and Please don't assume dentist unless it is given in prompt.
+                { "TaskName": 
                   "TaskType": "medication" or "exercise" or "appointment" or "other" 
                   "Frequency": "Daily" or "Monthly" or "Weekly" or "Once" or "Hourly" or "Quarterly" or "Yearly"
                   "DayName": "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
