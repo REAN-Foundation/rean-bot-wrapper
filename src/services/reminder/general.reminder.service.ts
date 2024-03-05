@@ -4,8 +4,6 @@ import { Logger } from '../../common/logger';
 import { NeedleService } from '../needle.service';
 import { dialoflowMessageFormatting } from '../Dialogflow.service';
 import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
-import { commonResponseMessageFormat } from '../common.response.format.object';
-import { Iresponse } from '../../refactor/interface/message.interface';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { sendApiButtonService } from '../whatsappmeta.button.service';
 import { GetPatientInfoService } from '../support.app.service';
@@ -14,8 +12,6 @@ import { OpenAIResponseService } from '../openai.response.service';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 import { CacheMemory } from '../cache.memory.service';
 import { NotificationType, ReminderBody, ReminderDomainModel, ReminderType, RepeatAfterEveryNUnit } from '../../domain.types/reminder/reminder.domain.model';
-import dayjs from 'dayjs';
-import { AppointmentReminderService } from './appointment.reminder.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class GeneralReminderService {
@@ -41,15 +37,18 @@ export class GeneralReminderService {
             const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
             const channel = eventObj.body.originalDetectIntentRequest.payload.source;
 
-            const dialogflowDateTime = eventObj.body.queryResult.parameters.dateTime;
+            let date = eventObj.body.queryResult.parameters.date;
+            let time = eventObj.body.queryResult.parameters.time;
             let dffMessage = "";
+            date = date.split("T")[0];
+            time = time.split("T")[1];
 
             const jsonFormat: ReminderBody = {
                 TaskName      : `${eventName} reminder`,
                 TaskType      : eventName,
                 Frequency     : frequency !== "" ? frequency : "Once" ,
                 DayName       : dayName,
-                StartDateTime : dialogflowDateTime.date_time,
+                StartDateTime : `${date}T${time}`,
                 MedicineName  : null,
                 PatientUserId : null,
             };
@@ -76,7 +75,7 @@ export class GeneralReminderService {
                 const response = await this.createCommonReminders(eventObj, jsonFormat.Frequency, jsonFormat, patientUserId, whenDay, whenTime, personName,
                     personPhoneNumber, dayName );
                 if (response.Status === 'failure') {
-                    dffMessage = `Sorry for the inconvenience. I could not create the reminder due to ${response.Message}`;
+                    dffMessage = `Sorry for the inconvenience. The reminder couldn't be set because the provided date and time cannot be in the past.`;
                 } else {
                     dffMessage = `Your ${jsonFormat.TaskType} reminder has been successfully set, and you will receive a notification at the scheduled time.`;
                 }
