@@ -27,6 +27,7 @@ export class MedicationReminderService {
             const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
             const phoneNumber : any = await this.needleService.getPhoneNumber(eventObj);
             const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
+            const frequency = eventObj.body.queryResult.parameters.frequency;
 
             // const medicineName : string = eventObj.body.queryResult.parameters.medicineName;
             const jsonFormat = await CacheMemory.get(phoneNumber);
@@ -47,10 +48,6 @@ export class MedicationReminderService {
 
             if (jsonFormat.TaskType === 'medication') {
                 dffMessage = `Your medication 💊 reminder has been successfully set, and you will receive a notification at the scheduled time.`;
-            } else if (jsonFormat.TaskType === 'appointment') {
-                dffMessage = `Your ${jsonFormat.TaskType} reminder has been successfully set, and you will receive a notification at the scheduled time.`;
-            } else {
-                dffMessage = `Your reminder has been successfully set, and you will receive a notification at the scheduled time.`;
             }
             console.log(dffMessage);
             if (jsonFormat.TimeString) {
@@ -60,7 +57,7 @@ export class MedicationReminderService {
 
             // await whatsappMetaButtonService("Yes","M_Medication_Data_Yes","No","M_Medication_Data_No");
 
-            const response = await this.generalReminderService.createCommonReminders(eventObj, "Once", jsonFormat,
+            const response = await this.generalReminderService.createCommonReminders(eventObj, frequency, jsonFormat,
                 jsonFormat.PatientUserId, whenDay, whenTime, personName, personPhoneNumber, jsonFormat.DayName );
             if (response.Status === 'failure') {
                 dffMessage = `Sorry for the inconvenience. I could not create the reminder due to ${response.Message}`;

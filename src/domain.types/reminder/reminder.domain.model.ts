@@ -111,3 +111,13 @@ export const NotificationTypeList: NotificationType [] = [
     NotificationType.Telegram,
     NotificationType.Slack,
 ];
+
+export interface ReminderBody {
+    TaskName      : string;
+    TaskType      : string;
+    Frequency     : string;
+    DayName       : string;
+    StartDateTime : string;
+    MedicineName  : string;
+    PatientUserId : string;
+  }

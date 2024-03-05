@@ -13,7 +13,7 @@ import { DateStringFormat, DurationType, TimeHelper } from '../../common/time.he
 import { OpenAIResponseService } from '../openai.response.service';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 import { CacheMemory } from '../cache.memory.service';
-import { NotificationType, ReminderDomainModel, ReminderType, RepeatAfterEveryNUnit } from '../../domain.types/reminder/reminder.domain.model';
+import { NotificationType, ReminderBody, ReminderDomainModel, ReminderType, RepeatAfterEveryNUnit } from '../../domain.types/reminder/reminder.domain.model';
 import dayjs from 'dayjs';
 import { AppointmentReminderService } from './appointment.reminder.service';
 
@@ -33,21 +33,28 @@ export class GeneralReminderService {
 
     async createReminder (eventObj) {
         try {
-            let dayName : string = eventObj.body.queryResult.parameters.dayName;
+            const dayName : string = eventObj.body.queryResult.parameters.dayName;
             const message : string = eventObj.body.queryResult.queryText;
             const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
             const eventName : string = eventObj.body.queryResult.parameters.event;
-            let frequency : string = eventObj.body.queryResult.parameters.frequency;
+            const frequency : string = eventObj.body.queryResult.parameters.frequency;
             const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
             const channel = eventObj.body.originalDetectIntentRequest.payload.source;
 
-            const dialogflowTime : string = eventObj.body.queryResult.parameters.time[0];
-            const timeString = eventObj.body.queryResult.outputContexts[0].parameters["time.original"];
-            const clientName = "REMINDERS";
+            const dialogflowDateTime = eventObj.body.queryResult.parameters.dateTime;
+            let dffMessage = "";
 
-            const openAiResponse: any = await this.openAIResponseService.getOpenaiMessage(clientName, message);
-            let jsonFormat = null;
-            jsonFormat = JSON.parse(openAiResponse.getText());
+            const jsonFormat: ReminderBody = {
+                TaskName      : `${eventName} reminder`,
+                TaskType      : eventName,
+                Frequency     : frequency !== "" ? frequency : "Once" ,
+                DayName       : dayName,
+                StartDateTime : dialogflowDateTime.date_time,
+                MedicineName  : null,
+                PatientUserId : null,
+            };
+
+            // jsonFormat = JSON.parse(openAiResponse.getText());
             const phoneNumber = await this.needleService.getPhoneNumber(eventObj);
 
             // extract patient data and set to catch memory
@@ -55,48 +62,34 @@ export class GeneralReminderService {
                 personPhoneNumber, personName);
             jsonFormat.PatientUserId = patientUserId;
             jsonFormat.TaskName = `${eventName} reminder`;
+            console.log(jsonFormat);
             await CacheMemory.set(phoneNumber, jsonFormat);
 
-            //check is it array
-            let time = null;
-            if (!Array.isArray(jsonFormat)) {
-                if (this.isTimestampValid(jsonFormat.StartDateTime) && !dialogflowTime) {
-                    time = jsonFormat.StartDateTime;
-                    const timeDifference = TimeHelper.dayDiff(new Date(jsonFormat.StartDateTime), new Date());
-                    if (timeDifference < 0) {
-                        console.log(`triggering Reminder_Ask_Time intent`);
-                        return await this.dialoflowMessageFormattingService.triggerIntent("Reminder_Ask_Time",eventObj);
-                    }
-                    console.log(time);
-                
-                } else if (this.isTimestampValid(jsonFormat.StartDateTime) && dialogflowTime) {
-                    time = await this.updateReminderTimeWithMessage(message, jsonFormat.StartDateTime);
-                    jsonFormat.StartDateTime = time;
-                    console.log(time);
-
-                } else if (!time) {
-                    console.log(`triggering Reminder_Ask_Time intent`);
-                    return await this.dialoflowMessageFormattingService.triggerIntent("Reminder_Ask_Time",eventObj);
-                }
-
-            }
-            console.log(`Json reminder message format ${jsonFormat.TaskName}, ${jsonFormat.TaskType}, ${jsonFormat.StartDateTime}`);
-            frequency = jsonFormat.Frequency;
-            dayName = jsonFormat.DayName;
-
             // extract whentime and whenday from schedule timestamp
-            const { whenDay, whenTime } = await this.extractWhenDateTime(time);
+            const { whenDay, whenTime } = await this.extractWhenDateTime(jsonFormat.StartDateTime);
             
-            if (jsonFormat.TaskType === 'medication' || jsonFormat.TaskType === 'appointment') {
+            if (jsonFormat.TaskType === 'medication') {
                 console.log(`trigerring the ${jsonFormat.TaskType} reminder event`);
                 return await this.dialoflowMessageFormattingService.triggerIntent("M_Medication_Data",eventObj);
 
             } else {
-                await this.createCommonReminders(eventObj, frequency, jsonFormat, patientUserId, whenDay, whenTime, personName,
+                const response = await this.createCommonReminders(eventObj, jsonFormat.Frequency, jsonFormat, patientUserId, whenDay, whenTime, personName,
                     personPhoneNumber, dayName );
+                if (response.Status === 'failure') {
+                    dffMessage = `Sorry for the inconvenience. I could not create the reminder due to ${response.Message}`;
+                } else {
+                    dffMessage = `Your ${jsonFormat.TaskType} reminder has been successfully set, and you will receive a notification at the scheduled time.`;
+                }
             }
+            const data = {
+                "fulfillmentMessages" : [
+                    {
+                        "text" : { "text": [dffMessage] }
+                    }
+                ]
+            };
 
-            //return { sendDff: true, message: data };
+            return data ;
 
         } catch (error) {
             Logger.instance()
@@ -138,12 +131,11 @@ export class GeneralReminderService {
 
                 const rawData = this.getTemplateData(jsonFormat);
                 const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
-                obj.EndAfterNRepetitions = 5;
+                obj.EndAfterNRepetitions = 10;
                 obj.ReminderType = ReminderType.RepeatEveryDay;
-                await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
+                obj.StartDate = whenDay;
+                const data = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
 
-                const data = await this.getFulfillmentMsg(jsonFormat, frequency, whenTime);
-                this.sendDemoReminder(personName, personPhoneNumber, whenTime, dayName, jsonFormat, eventObj);
                 return data;
             } else if (frequency === "Weekly"){
                 apiURL = `reminders/repeat-every-week-on-days`;
