@@ -120,4 +120,6 @@ export interface ReminderBody {
     StartDateTime : string;
     MedicineName  : string;
     PatientUserId : string;
+    TimeString   ?: string;
+    DateString   ?: string;
   }

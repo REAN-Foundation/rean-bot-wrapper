@@ -39,6 +39,8 @@ export class GeneralReminderService {
 
             let date = eventObj.body.queryResult.parameters.date;
             let time = eventObj.body.queryResult.parameters.time;
+            const timeString = eventObj.body.queryResult.outputContexts[0].parameters["time.original"];
+            const dateString  = new Date(date).toDateString();
             let dffMessage = "";
             date = date.split("T")[0];
             time = time.split("T")[1];
@@ -51,9 +53,10 @@ export class GeneralReminderService {
                 StartDateTime : `${date}T${time}`,
                 MedicineName  : null,
                 PatientUserId : null,
+                DateString    : dateString,
+                TimeString    : timeString,
             };
 
-            // jsonFormat = JSON.parse(openAiResponse.getText());
             const phoneNumber = await this.needleService.getPhoneNumber(eventObj);
 
             // extract patient data and set to catch memory
@@ -77,7 +80,7 @@ export class GeneralReminderService {
                 if (response.Status === 'failure') {
                     dffMessage = `Sorry for the inconvenience. The reminder couldn't be set because the provided date and time cannot be in the past.`;
                 } else {
-                    dffMessage = `Your ${jsonFormat.TaskType} reminder has been successfully set, and you will receive a notification at the scheduled time.`;
+                    dffMessage = `Your ${jsonFormat.TaskType} reminder has been successfully set, and you will receive a notification at ${timeString} on ${dateString}.`;
                 }
             }
             const data = {
