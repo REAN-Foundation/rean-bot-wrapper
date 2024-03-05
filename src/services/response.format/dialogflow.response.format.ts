@@ -4,6 +4,7 @@ import { IserviceResponseFunctionalities } from "./response.interface";
 import { EntityManagerProvider } from "../entity.manager.provider.service";
 import { ClientEnvironmentProviderService } from "../set.client/client.environment.provider.service";
 import { ChatMessage } from "../../models/chat.message.model";
+import { Logger } from "../../common/logger";
 
 @autoInjectable()
 @scoped(Lifecycle.ContainerScoped)
@@ -97,12 +98,20 @@ export class DialogflowResponseFormat implements IserviceResponseFunctionalities
     }
 
     async updateConfidenceScore(userPlatformId){
-        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-        const resp = await chatMessageRepository.findAll({ where: { userPlatformID: userPlatformId } });
-        const previousIntent = resp[resp.length - 2].intent;
-        const currentIntentName = await this.response[0].queryResult && this.response[0].queryResult.intent ? this.response[0].queryResult.intent.displayName : '';
-        if (previousIntent === currentIntentName) {
-            this.response[0].queryResult.intentDetectionConfidence = 1;
+        try {
+            const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+            const resp = await chatMessageRepository.findAll({ where: { userPlatformID: userPlatformId } });
+            if (resp.length > 2){
+                const previousIntent = resp[resp.length - 2].intent;
+                const currentIntentName = await this.response[0].queryResult && this.response[0].queryResult.intent ? this.response[0].queryResult.intent.displayName : '';
+                if (previousIntent === currentIntentName) {
+                    this.response[0].queryResult.intentDetectionConfidence = 1;
+                }
+            }
+
+        } catch (error) {
+            Logger.instance()
+                .log_error(error.message,500,'Update DF intent confidence service error');
         }
     }
 
