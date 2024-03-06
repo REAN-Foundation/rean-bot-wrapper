@@ -131,30 +131,7 @@ export class ClientWebhookController {
                 this._platformMessageService.res = res;
                 const consentActivation =  this.clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_ACTIVATION");
                 if (consentActivation){
-                    const consentRepository =
-                    (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ConsentInfo);
-
-                    const [userId, consentReply, languageCode] = await this.getUserIdAndLanguagecode(req,"telegram");
-    
-                    const firstTimeUser = await this.checkFirstTimeUser(req,userId);
-                    let consentRequired = true;
-                    if (firstTimeUser || consentReply === "consent_no"){
-                        consentRequired = true;
-                    }
-                    else {
-                        consentRequired = await this.checkConsentRequired(req,userId);
-                    }
-                    if (firstTimeUser && consentReply !== "consent_yes"){
-                        this.consentService.handleConsentRequest(req,userId,consentReply,languageCode,consentRepository,res,"inline_keyboard");
-                    }
-                    else {
-                        if (consentRequired && consentReply !== "consent_yes"){
-                            this.consentService.handleConsentRequest(req,userId,consentReply,languageCode,consentRepository,res,"inline_keyboard");
-                        }
-                        else {
-                            this._platformMessageService.handleMessage(req.body, req.params.channel);
-                        }
-                    }
+                    await this.handleConsentMessage(req, res,req.body,"inline_keyboard","telegram");
                 }
                 else {
                     this._platformMessageService.handleMessage(req.body, req.params.channel);
@@ -169,36 +146,60 @@ export class ClientWebhookController {
         }
     };
 
-    async getUserIdAndLanguagecode(req,channel)
+    private async handleConsentMessage(req: any, res: any, handleReqVariable,buttonKeyName,channel) {
+        const consentRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ConsentInfo);
+        const [userId, consentReply, languageCode] = await this.getUserIdAndLanguagecode(handleReqVariable, channel);
+        const firstTimeUser = await this.checkFirstTimeUser(req, userId);
+        let consentRequired = true;
+        if (firstTimeUser || consentReply === "consent_no") {
+            consentRequired = true;
+        }
+        else {
+            consentRequired = await this.checkConsentRequired(req, userId);
+        }
+        if (firstTimeUser && consentReply !== "consent_yes") {
+            this.consentService.handleConsentRequest(req, userId, consentReply, languageCode, consentRepository, res,buttonKeyName);
+        }
+        else {
+            if (consentRequired && consentReply !== "consent_yes") {
+                this.consentService.handleConsentRequest(req, userId, consentReply, languageCode, consentRepository, res, buttonKeyName);
+            }
+            else {
+                this._platformMessageService.handleMessage(handleReqVariable, req.params.channel);
+            }
+        }
+    }
+
+    async getUserIdAndLanguagecode(reqBody,channel)
     {
         let userId = null;
         let consentReply  = null;
         let languageCode = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
         if (channel === "whatsappMeta"){
-            if (req.messages[0].type === 'interactive'){
-                consentReply = req.messages[0].interactive.button_reply.id;
+            if (reqBody.messages[0].type === 'interactive'){
+                consentReply = reqBody.messages[0].interactive.button_reply.id;
                 languageCode = consentReply.split("-")[1];
                 if (!languageCode){
                     languageCode = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
                 }
-                userId = req.messages[0].from;
+                userId = reqBody.messages[0].from;
             }
             else {
-                userId = req.messages[0].from;
+                userId = reqBody.messages[0].from;
     
             }
         }
         else {
-            if (req.body.callback_query){
-                consentReply = req.body.callback_query.data;
+            if (reqBody.callback_query){
+                consentReply = reqBody.callback_query.data;
                 languageCode = consentReply.split("-")[1];
                 if (!languageCode){
                     languageCode = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
                 }
-                userId = req.body.callback_query.message.chat.id;
+                userId = reqBody.callback_query.message.chat.id;
             }
             else {
-                userId = req.body.message.chat.id;
+                userId = reqBody.message.chat.id;
     
             }
         }
@@ -241,28 +242,7 @@ export class ClientWebhookController {
                 this._platformMessageService = req.container.resolve(req.params.channel);
                 const consentActivation =  this.clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_ACTIVATION");
                 if (consentActivation){
-                    const consentRepository =
-                    (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ConsentInfo);
-                    const [userId, consentReply, languageCode] = await this.getUserIdAndLanguagecode(req.body.entry[0].changes[0].value,"whatsappMeta");
-                    const firstTimeUser = await this.checkFirstTimeUser(req,userId);
-                    let consentRequired = true;
-                    if (firstTimeUser || consentReply === "consent_no"){
-                        consentRequired = true;
-                    }
-                    else {
-                        consentRequired = await this.checkConsentRequired(req,userId);
-                    }
-                    if (firstTimeUser && consentReply !== "consent_yes"){
-                        this.consentService.handleConsentRequest(req,userId,consentReply,languageCode,consentRepository,res,"interactivebuttons");
-                    }
-                    else {
-                        if (consentRequired && consentReply !== "consent_yes"){
-                            this.consentService.handleConsentRequest(req,userId,consentReply,languageCode,consentRepository,res,"interactivebuttons");
-                        }
-                        else {
-                            this._platformMessageService.handleMessage(req.body.entry[0].changes[0].value, req.params.channel);
-                        }
-                    }
+                    await this.handleConsentMessage(req, res,req.body.entry[0].changes[0].value, "interactivebuttons", "whatsappMeta");
                 }
                 else {
                     this._platformMessageService.handleMessage(req.body.entry[0].changes[0].value, req.params.channel);
