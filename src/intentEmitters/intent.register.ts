@@ -75,7 +75,7 @@ import { eyeImageQualityCheckListener } from './intentListeners/eye.image.qualit
 import { AppointmentReminderListener, AppointmentReminderReplyListener } from './intentListeners/medicationReminder/appointment.reminder.listener';
 import { ReminderRegistrationListener } from './intentListeners/medicationReminder/reminder.registration.listener';
 import { CommonAssessmentListener } from './intentListeners/commonAssessment/common.assessment.listener';
-
+import {ConsentYesListner} from './intentListeners/consentListners/consent.yes.listner';
 /*
  * Init function (being called during application bootstrap)
  * This is the place to register any new intent and corresponding listeners
@@ -239,6 +239,7 @@ export class IntentRegister {
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
+        IntentEmitter.registerListener('consent_yes',ConsentYesListner.handleIntent);
 
         // Intent fulfillement - Success listener
         // TODO: Pending implementation

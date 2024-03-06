@@ -85,7 +85,7 @@ export class ClickUpMessageService implements platformServiceInterface {
             console.log("status after", status);
             const qAServiceFlag = this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE") ?? false;
             if (status === "complete"){
-                if (qAServiceFlag === false) {
+                if (qAServiceFlag ) {
                     this.eventStatusUpdated(requestBody);
                 }
             }

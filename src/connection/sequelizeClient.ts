@@ -7,6 +7,8 @@ import { ClientEnvironmentProviderService } from '../services/set.client/client.
 import { CalorieInfo } from '../models/calorie.info.model';
 import { CalorieDatabase } from '../models/calorie.db.model';
 import { AssessmentSessionLogs } from '../models/assessment.session.model';
+import { ConsentInfo } from '../models/consent.info.model';
+import {UserConsent} from '../models/user.consent.model';
 const sequrlizeClients = new Map<string, Sequelize>();
 @autoInjectable()
 @singleton()
@@ -28,9 +30,9 @@ export class SequelizeClient {
             
             if (clientEnvironmentProviderService.getClientEnvironmentVariable('NAME') === "CALORIE_BOT") {
                 // eslint-disable-next-line max-len
-                sequelizeClient.addModels([ChatMessage, ChatSession, ContactList, CalorieInfo, CalorieDatabase]);
+                sequelizeClient.addModels([ChatMessage, ChatSession, ContactList, CalorieInfo, CalorieDatabase,ConsentInfo,UserConsent]);
             } else {
-                sequelizeClient.addModels([ChatMessage, ChatSession, ContactList, AssessmentSessionLogs]);
+                sequelizeClient.addModels([ChatMessage, ChatSession, ContactList, AssessmentSessionLogs,ConsentInfo,UserConsent]);
             }
     
             await sequelizeClient.authenticate()
