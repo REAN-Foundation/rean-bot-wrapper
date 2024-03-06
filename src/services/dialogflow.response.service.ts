@@ -104,7 +104,7 @@ export class DialogflowResponseService {
                 responses = await sessionClient.detectIntent(request);
             }
             const dialogflowResponseFormatObj = new DialogflowResponseFormat(responses);
-            dialogflowResponseFormatObj.updateConfidenceScore();
+            await dialogflowResponseFormatObj.updateConfidenceScore(completeMessage.platformId);
             const intentfromDF = dialogflowResponseFormatObj.getIntent();
             if (intent) {
                 console.log(`  Intent: ${intentfromDF}`);

@@ -4,8 +4,6 @@ import { Logger } from '../../common/logger';
 import { NeedleService } from '../needle.service';
 import { dialoflowMessageFormatting } from '../Dialogflow.service';
 import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
-import { commonResponseMessageFormat } from '../common.response.format.object';
-import { Iresponse } from '../../refactor/interface/message.interface';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { sendApiButtonService } from '../whatsappmeta.button.service';
 import { GetPatientInfoService } from '../support.app.service';
@@ -13,9 +11,7 @@ import { DateStringFormat, DurationType, TimeHelper } from '../../common/time.he
 import { OpenAIResponseService } from '../openai.response.service';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 import { CacheMemory } from '../cache.memory.service';
-import { NotificationType, ReminderDomainModel, ReminderType, RepeatAfterEveryNUnit } from '../../domain.types/reminder/reminder.domain.model';
-import dayjs from 'dayjs';
-import { AppointmentReminderService } from './appointment.reminder.service';
+import { NotificationType, ReminderBody, ReminderDomainModel, ReminderType, RepeatAfterEveryNUnit } from '../../domain.types/reminder/reminder.domain.model';
 
 @scoped(Lifecycle.ContainerScoped)
 export class GeneralReminderService {
@@ -33,69 +29,69 @@ export class GeneralReminderService {
 
     async createReminder (eventObj) {
         try {
-            let dayName : string = eventObj.body.queryResult.parameters.dayName;
+            const dayName : string = eventObj.body.queryResult.parameters.dayName;
             const message : string = eventObj.body.queryResult.queryText;
             const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
             const eventName : string = eventObj.body.queryResult.parameters.event;
-            let frequency : string = eventObj.body.queryResult.parameters.frequency;
+            const frequency : string = eventObj.body.queryResult.parameters.frequency;
             const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
             const channel = eventObj.body.originalDetectIntentRequest.payload.source;
 
-            const dialogflowTime : string = eventObj.body.queryResult.parameters.time[0];
+            let date = eventObj.body.queryResult.parameters.date;
+            let time = eventObj.body.queryResult.parameters.time;
             const timeString = eventObj.body.queryResult.outputContexts[0].parameters["time.original"];
-            const clientName = "REMINDERS";
+            const dateString  = new Date(date).toDateString();
+            let dffMessage = "";
+            date = date.split("T")[0];
+            time = time.split("T")[1];
 
-            const openAiResponse: any = await this.openAIResponseService.getOpenaiMessage(clientName, message);
-            let jsonFormat = null;
-            jsonFormat = JSON.parse(openAiResponse.getText());
+            const jsonFormat: ReminderBody = {
+                TaskName      : `${eventName} reminder`,
+                TaskType      : eventName,
+                Frequency     : frequency !== "" ? frequency : "Once" ,
+                DayName       : dayName,
+                StartDateTime : `${date}T${time}`,
+                MedicineName  : null,
+                PatientUserId : null,
+                DateString    : dateString,
+                TimeString    : timeString,
+            };
+
             const phoneNumber = await this.needleService.getPhoneNumber(eventObj);
 
             // extract patient data and set to catch memory
             const patientUserId = await this.getPatientInfoService.getPatientUserId(channel,
                 personPhoneNumber, personName);
             jsonFormat.PatientUserId = patientUserId;
+            jsonFormat.TaskName = `${eventName} reminder`;
+            console.log(jsonFormat);
             await CacheMemory.set(phoneNumber, jsonFormat);
 
-            //check is it array
-            let time = null;
-            if (!Array.isArray(jsonFormat)) {
-                if (this.isTimestampValid(jsonFormat.StartDateTime) && !dialogflowTime) {
-                    time = jsonFormat.StartDateTime;
-                    const timeDifference = TimeHelper.dayDiff(new Date(jsonFormat.StartDateTime), new Date());
-                    if (timeDifference < 0) {
-                        console.log(`triggering Reminder_Ask_Time intent`);
-                        return await this.dialoflowMessageFormattingService.triggerIntent("Reminder_Ask_Time",eventObj);
-                    }
-                    console.log(time);
-                
-                } else if (this.isTimestampValid(jsonFormat.StartDateTime) && dialogflowTime) {
-                    time = await this.updateReminderTimeWithMessage(message, jsonFormat.StartDateTime);
-                    jsonFormat.StartDateTime = time;
-                    console.log(time);
-
-                } else if (!time) {
-                    console.log(`triggering Reminder_Ask_Time intent`);
-                    return await this.dialoflowMessageFormattingService.triggerIntent("Reminder_Ask_Time",eventObj);
-                }
-
-            }
-            console.log(`Json reminder message format ${jsonFormat.TaskName}, ${jsonFormat.TaskType}, ${jsonFormat.StartDateTime}`);
-            frequency = jsonFormat.Frequency;
-            dayName = jsonFormat.DayName;
-
             // extract whentime and whenday from schedule timestamp
-            const { whenDay, whenTime } = await this.extractWhenDateTime(time);
+            const { whenDay, whenTime } = await this.extractWhenDateTime(jsonFormat.StartDateTime);
             
-            if (jsonFormat.TaskType === 'medication' || jsonFormat.TaskType === 'appointment') {
+            if (jsonFormat.TaskType === 'medication') {
                 console.log(`trigerring the ${jsonFormat.TaskType} reminder event`);
                 return await this.dialoflowMessageFormattingService.triggerIntent("M_Medication_Data",eventObj);
 
             } else {
-                await this.createCommonReminders(eventObj, frequency, jsonFormat, patientUserId, whenDay, whenTime, personName,
+                const response = await this.createCommonReminders(eventObj, jsonFormat.Frequency, jsonFormat, patientUserId, whenDay, whenTime, personName,
                     personPhoneNumber, dayName );
+                if (response.Status === 'failure') {
+                    dffMessage = `Sorry for the inconvenience. The reminder couldn't be set because the provided date and time cannot be in the past.`;
+                } else {
+                    dffMessage = `Your ${jsonFormat.TaskType} reminder has been successfully set, and you will receive a notification at ${timeString} on ${dateString}.`;
+                }
             }
+            const data = {
+                "fulfillmentMessages" : [
+                    {
+                        "text" : { "text": [dffMessage] }
+                    }
+                ]
+            };
 
-            //return { sendDff: true, message: data };
+            return data ;
 
         } catch (error) {
             Logger.instance()
@@ -135,33 +131,29 @@ export class GeneralReminderService {
             } else if (frequency === "Daily"){
                 apiURL = `reminders/repeat-every-day`;
 
-                const rawData = this.getTemplateData(jsonFormat);
+                const rawData = this.getTemplateData(jsonFormat, personName);
                 const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
-                obj.EndAfterNRepetitions = 5;
+                obj.EndAfterNRepetitions = 10;
                 obj.ReminderType = ReminderType.RepeatEveryDay;
-                await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
+                obj.StartDate = whenDay;
+                const data = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
 
-                const data = await this.getFulfillmentMsg(jsonFormat, frequency, whenTime);
-                this.sendDemoReminder(personName, personPhoneNumber, whenTime, dayName, jsonFormat, eventObj);
                 return data;
             } else if (frequency === "Weekly"){
                 apiURL = `reminders/repeat-every-week-on-days`;
 
-                const rawData = this.getTemplateData(jsonFormat);
+                const rawData = this.getTemplateData(jsonFormat, personName);
                 const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
                 obj.ReminderType = ReminderType.RepeatEveryWeekday;
                 obj.EndAfterNRepetitions = 5;
                 obj.RepeatList = [ dayName ];
-                await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
-
-                const data = await this.getFulfillmentMsg(jsonFormat, frequency, whenTime);
-                this.sendDemoReminder(personName, personPhoneNumber, whenTime, dayName, jsonFormat, eventObj);
+                const data = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
 
                 return data;
             } else if (frequency === "Hourly"){
                 apiURL = `reminders/repeat-every-hour`;
 
-                const rawData = this.getTemplateData(jsonFormat);
+                const rawData = this.getTemplateData(jsonFormat, personName);
                 const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
                 obj.ReminderType = ReminderType.RepeatEveryHour;
                 obj.EndAfterNRepetitions = 5;
@@ -175,7 +167,7 @@ export class GeneralReminderService {
             } else if (frequency === "Yearly"){
                 apiURL = `reminders/repeat-after-every-n`;
 
-                const rawData = this.getTemplateData(jsonFormat);
+                const rawData = this.getTemplateData(jsonFormat, personName);
                 const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
                 obj.ReminderType = ReminderType.RepeatAfterEveryN;
                 obj.EndAfterNRepetitions = 5;
@@ -191,7 +183,7 @@ export class GeneralReminderService {
             } else if (frequency === "Quarterly"){
                 apiURL = `repeat-every-quarter-on`;
 
-                const rawData = this.getTemplateData(jsonFormat);
+                const rawData = this.getTemplateData(jsonFormat, personName);
                 const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
                 obj.ReminderType = ReminderType.RepeatEveryQuarterOn;
                 obj.EndAfterNRepetitions = 5;
@@ -234,7 +226,7 @@ export class GeneralReminderService {
                 },
                 {
                     "type" : "text",
-                    "text" : jsonFormat.WhenTime
+                    "text" : jsonFormat.TimeString
                 },
                 {
                     "type" : "text",
@@ -243,7 +235,7 @@ export class GeneralReminderService {
             },
             ButtonsIds  : [ "App_Reminder_Yes", "App_Reminder_No"],
             ClientName  : clientName,
-            TextMessage : `Hi ${personName}, \nYou have ${jsonFormat.TaskName} scheduled at ${jsonFormat.WhenTime}. Will you be able to ${fourthVariable}?`
+            TextMessage : `Hi ${personName}, \nYou have ${jsonFormat.TaskName} scheduled at ${jsonFormat.TimeString}. Will you be able to ${fourthVariable}?`
         };
     }
 

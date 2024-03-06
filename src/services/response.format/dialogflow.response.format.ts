@@ -1,12 +1,18 @@
 /* eslint-disable max-len */
-import { autoInjectable, Lifecycle, scoped } from "tsyringe";
+import { autoInjectable, inject, Lifecycle, scoped } from "tsyringe";
 import { IserviceResponseFunctionalities } from "./response.interface";
+import { EntityManagerProvider } from "../entity.manager.provider.service";
+import { ClientEnvironmentProviderService } from "../set.client/client.environment.provider.service";
+import { ChatMessage } from "../../models/chat.message.model";
+import { Logger } from "../../common/logger";
 
 @autoInjectable()
 @scoped(Lifecycle.ContainerScoped)
 export class DialogflowResponseFormat implements IserviceResponseFunctionalities{
 
-    constructor(private response){}
+    constructor(private response,
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,){}
 
     // setResponse(response){
     //     this.response = response;
@@ -91,19 +97,22 @@ export class DialogflowResponseFormat implements IserviceResponseFunctionalities
         return this.response;
     }
 
-    updateConfidenceScore(){
-        if (this.response[0].queryResult.allRequiredParamsPresent === false) {
-            this.response[0].queryResult.intentDetectionConfidence = 1;
-        } else {
-
-            // Check if the parameters JSON object is empty
-            const paramsOblect = this.response[0].queryResult.parameters.fields;
-            const isEmpty: boolean = Object.keys(paramsOblect).length === 0;
-            if (!isEmpty) {
-                this.response[0].queryResult.intentDetectionConfidence = 1;
+    async updateConfidenceScore(userPlatformId){
+        try {
+            const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+            const resp = await chatMessageRepository.findAll({ where: { userPlatformID: userPlatformId } });
+            if (resp.length > 2){
+                const previousIntent = resp[resp.length - 2].intent;
+                const currentIntentName = await this.response[0].queryResult && this.response[0].queryResult.intent ? this.response[0].queryResult.intent.displayName : '';
+                if (previousIntent === currentIntentName) {
+                    this.response[0].queryResult.intentDetectionConfidence = 1;
+                }
             }
+
+        } catch (error) {
+            Logger.instance()
+                .log_error(error.message,500,'Update DF intent confidence service error');
         }
     }
-
 
 }
