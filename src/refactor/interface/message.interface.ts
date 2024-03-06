@@ -45,6 +45,12 @@ export interface feedbackmessage{
     ts : string;
 }
 
+export interface IuserConsent{
+consentId?: number;
+userPlatformID:string;
+consentGiven: string;
+}
+
 export interface IchatMessage {
     chatSessionID?: number,
     name: string,
@@ -123,6 +129,14 @@ export interface assessmentSessionLogs{
     userResponse: string;
     userResponseTime: Date;
     userMessageId: string;
+}
+
+export interface consentInfo{
+    autoIncrementalID?: number;
+    Language:string;
+    LanguageCode:string;
+    MessageContent:string;
+    WebsiteURL:string;
 }
 
 export interface IntentDetails {

@@ -64,10 +64,14 @@ export class TelegramPostResponseFunctionalities {
         // eslint-disable-next-line max-len
         const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: userPlatformID } });
-        const id = respChatMessage[respChatMessage.length - 1].id;
-        await chatMessageRepository.update({ responseMessageID: responseId }, { where: { id: id } } )
-            .then(() => { console.log("updated telegram respomse id"); })
-            .catch(error => console.log("error on update", error));
+        if (respChatMessage.length > 0 )
+        {
+            const id = respChatMessage[respChatMessage.length - 1].id;
+            await chatMessageRepository.update({ responseMessageID: responseId }, { where: { id: id } } )
+                .then(() => { console.log("updated telegram respomse id"); })
+                .catch(error => console.log("error on update", error));
+        }
+
     };
 
     sanitizeMessage = (message) => {

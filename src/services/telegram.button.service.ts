@@ -1,5 +1,24 @@
 
 export const sendTelegramButtonService = async (buttons) => {
+    const objects = [];
+    for (let i = 0; i < buttons.length; i += 2) {
+        const buttonObject = {
+            structValue : {
+                fields : {
+                    text : {
+                        stringValue : buttons[i],
+                        kind: "stringValue",
+                    },
+                    callback_data : {
+                        stringValue : buttons[i + 1],
+                        kind : "stringValue",
+                    },
+                },
+            },
+            kind : "structValue",
+        };
+        objects.push(buttonObject);
+    }
     const payload =  {
         fields : {
             messagetype : {
@@ -11,38 +30,7 @@ export const sendTelegramButtonService = async (buttons) => {
                     values : [
                         {
                             listValue : {
-                                values : [
-                                    {
-                                        structValue : {
-                                            fields : {
-                                                text : {
-                                                    stringValue : buttons[0],
-                                                    kind        : "stringValue",
-                                                },
-                                                callback_data : {
-                                                    stringValue : buttons[1],
-                                                    kind        : "stringValue",
-                                                },
-                                            },
-                                        },
-                                        kind : "structValue",
-                                    },
-                                    {
-                                        structValue : {
-                                            fields : {
-                                                callback_data : {
-                                                    stringValue : buttons[3],
-                                                    kind        : "stringValue",
-                                                },
-                                                text : {
-                                                    stringValue : buttons[2],
-                                                    kind        : "stringValue",
-                                                },
-                                            },
-                                        },
-                                        kind : "structValue",
-                                    },
-                                ],
+                                values : objects,
                             },
                             kind : "listValue",
                         }
@@ -56,3 +44,4 @@ export const sendTelegramButtonService = async (buttons) => {
     return payload;
 
 };
+
