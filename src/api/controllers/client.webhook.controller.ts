@@ -152,12 +152,12 @@ export class ClientWebhookController {
                             this.consentService.handleConsentRequest(req,userId,consentReply,languageCode,consentRepository,res,"inline_keyboard");
                         }
                         else {
-                            const response = this._platformMessageService.handleMessage(req.body, req.params.channel);
+                            this._platformMessageService.handleMessage(req.body, req.params.channel);
                         }
                     }
                 }
                 else {
-                    const response = this._platformMessageService.handleMessage(req.body, req.params.channel);
+                    this._platformMessageService.handleMessage(req.body, req.params.channel);
                 }
                 
             }
@@ -260,12 +260,12 @@ export class ClientWebhookController {
                             this.consentService.handleConsentRequest(req,userId,consentReply,languageCode,consentRepository,res,"interactivebuttons");
                         }
                         else {
-                            const response = this._platformMessageService.handleMessage(req.body.entry[0].changes[0].value, req.params.channel);
+                            this._platformMessageService.handleMessage(req.body.entry[0].changes[0].value, req.params.channel);
                         }
                     }
                 }
                 else {
-                    const response = this._platformMessageService.handleMessage(req.body.entry[0].changes[0].value, req.params.channel);
+                    this._platformMessageService.handleMessage(req.body.entry[0].changes[0].value, req.params.channel);
                 }
                 
             }
