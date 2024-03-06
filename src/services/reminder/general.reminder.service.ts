@@ -131,7 +131,7 @@ export class GeneralReminderService {
             } else if (frequency === "Daily"){
                 apiURL = `reminders/repeat-every-day`;
 
-                const rawData = this.getTemplateData(jsonFormat);
+                const rawData = this.getTemplateData(jsonFormat, personName);
                 const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
                 obj.EndAfterNRepetitions = 10;
                 obj.ReminderType = ReminderType.RepeatEveryDay;
@@ -142,21 +142,18 @@ export class GeneralReminderService {
             } else if (frequency === "Weekly"){
                 apiURL = `reminders/repeat-every-week-on-days`;
 
-                const rawData = this.getTemplateData(jsonFormat);
+                const rawData = this.getTemplateData(jsonFormat, personName);
                 const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
                 obj.ReminderType = ReminderType.RepeatEveryWeekday;
                 obj.EndAfterNRepetitions = 5;
                 obj.RepeatList = [ dayName ];
-                await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
-
-                const data = await this.getFulfillmentMsg(jsonFormat, frequency, whenTime);
-                this.sendDemoReminder(personName, personPhoneNumber, whenTime, dayName, jsonFormat, eventObj);
+                const data = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
 
                 return data;
             } else if (frequency === "Hourly"){
                 apiURL = `reminders/repeat-every-hour`;
 
-                const rawData = this.getTemplateData(jsonFormat);
+                const rawData = this.getTemplateData(jsonFormat, personName);
                 const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
                 obj.ReminderType = ReminderType.RepeatEveryHour;
                 obj.EndAfterNRepetitions = 5;
@@ -170,7 +167,7 @@ export class GeneralReminderService {
             } else if (frequency === "Yearly"){
                 apiURL = `reminders/repeat-after-every-n`;
 
-                const rawData = this.getTemplateData(jsonFormat);
+                const rawData = this.getTemplateData(jsonFormat, personName);
                 const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
                 obj.ReminderType = ReminderType.RepeatAfterEveryN;
                 obj.EndAfterNRepetitions = 5;
@@ -186,7 +183,7 @@ export class GeneralReminderService {
             } else if (frequency === "Quarterly"){
                 apiURL = `repeat-every-quarter-on`;
 
-                const rawData = this.getTemplateData(jsonFormat);
+                const rawData = this.getTemplateData(jsonFormat, personName);
                 const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
                 obj.ReminderType = ReminderType.RepeatEveryQuarterOn;
                 obj.EndAfterNRepetitions = 5;
@@ -229,7 +226,7 @@ export class GeneralReminderService {
                 },
                 {
                     "type" : "text",
-                    "text" : jsonFormat.WhenTime
+                    "text" : jsonFormat.TimeString
                 },
                 {
                     "type" : "text",
@@ -238,7 +235,7 @@ export class GeneralReminderService {
             },
             ButtonsIds  : [ "App_Reminder_Yes", "App_Reminder_No"],
             ClientName  : clientName,
-            TextMessage : `Hi ${personName}, \nYou have ${jsonFormat.TaskName} scheduled at ${jsonFormat.WhenTime}. Will you be able to ${fourthVariable}?`
+            TextMessage : `Hi ${personName}, \nYou have ${jsonFormat.TaskName} scheduled at ${jsonFormat.TimeString}. Will you be able to ${fourthVariable}?`
         };
     }
 
