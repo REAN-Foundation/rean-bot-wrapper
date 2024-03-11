@@ -42,6 +42,7 @@ export class ServeAssessmentService {
                 const questionNode = requestBody.Data.Next;
                 const questionData = JSON.parse(requestBody.Data.Next.RawData);
                 metaPayload["messageText"] = requestBody.Data.Next.Description;
+                metaPayload["channel"] = userTask.Channel;
 
                 // Extract variables
                 metaPayload["templateName"] = questionData.TemplateName;
