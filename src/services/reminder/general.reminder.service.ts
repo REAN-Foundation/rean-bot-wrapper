@@ -80,11 +80,7 @@ export class GeneralReminderService {
                 if (response.Status === 'failure') {
                     dffMessage = `Sorry for the inconvenience. The reminder couldn't be set because the provided date and time cannot be in the past.`;
                 } else {
-                    if (jsonFormat.TaskType === 'medication') {
-                        dffMessage = `Your medication 💊 reminder has been successfully set, and you will receive a notification at ${timeString} on ${dateString}.`;
-                    } else {
-                        dffMessage = `Your ${jsonFormat.TaskType} reminder has been successfully set, and you will receive a notification at ${timeString} on ${dateString}.`;
-                    }
+                    dffMessage = this.getUserResponse(jsonFormat, dffMessage, timeString, dateString);
                 }
             }
             const data = {
@@ -122,95 +118,52 @@ export class GeneralReminderService {
             let apiURL = null;
             const channel = eventObj.body.originalDetectIntentRequest.payload.source;
             const hookUrl = "https://api.weatherstack.com/current?access_key=93fdf8204559b90ec79466809edb7aad&query=Pune";
+            const rawData = this.getTemplateData(jsonFormat, personName);
+            const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
             if (frequency === "Once" || frequency === ""){
                 apiURL = `reminders/one-time`;
-                const rawData = this.getTemplateData(jsonFormat, personName);
-
-                const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
-                const data = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
-
-                // const data = await this.getFulfillmentMsg(jsonFormat, frequency, whenTime);
-                return data;
 
             } else if (frequency === "Daily"){
                 apiURL = `reminders/repeat-every-day`;
-
-                const rawData = this.getTemplateData(jsonFormat, personName);
-                const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
                 obj.EndAfterNRepetitions = 10;
                 obj.ReminderType = ReminderType.RepeatEveryDay;
-                obj.StartDate = whenDay;
-                const data = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
 
-                return data;
             } else if (frequency === "Weekly"){
                 apiURL = `reminders/repeat-every-week-on-days`;
-
-                const rawData = this.getTemplateData(jsonFormat, personName);
-                const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
                 obj.ReminderType = ReminderType.RepeatEveryWeekday;
                 obj.EndAfterNRepetitions = 5;
                 obj.RepeatList = [ dayName ];
-                const data = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
 
-                return data;
             } else if (frequency === "Hourly"){
                 apiURL = `reminders/repeat-every-hour`;
-
-                const rawData = this.getTemplateData(jsonFormat, personName);
-                const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
                 obj.ReminderType = ReminderType.RepeatEveryHour;
                 obj.EndAfterNRepetitions = 5;
-                obj.StartDate = whenDay;
-                const data = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
-
-                return data;
+                
             } else if (frequency === "Yearly"){
                 apiURL = `reminders/repeat-after-every-n`;
-
-                const rawData = this.getTemplateData(jsonFormat, personName);
-                const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
                 obj.ReminderType = ReminderType.RepeatAfterEveryN;
                 obj.EndAfterNRepetitions = 3;
-                obj.StartDate = whenDay;
                 obj.RepeatAfterEvery = 1;
                 obj.RepeatAfterEveryNUnit = RepeatAfterEveryNUnit.Year;
-                const data = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
-
-                return data;
                 
             } else if (frequency === "Quarterly"){
                 apiURL = `reminders/repeat-every-quarter-on`;
-
-                const rawData = this.getTemplateData(jsonFormat, personName);
-                const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
                 obj.ReminderType = ReminderType.RepeatEveryQuarterOn;
                 obj.EndAfterNRepetitions = 5;
-                obj.StartDate = whenDay;
-                const data = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
-
-                return data;
+                
             } else if (frequency === "WeekDays"){
                 apiURL = `reminders/repeat-every-weekday`;
-
-                const rawData = this.getTemplateData(jsonFormat, personName);
-                const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
                 obj.EndAfterNRepetitions = 5;
-                obj.StartDate = whenDay;
-                const data = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
-
-                return data;
+                
             } else if (frequency === "Monthly"){
                 apiURL = `reminders/repeat-every-month-on`;
+                obj.EndAfterNRepetitions = 4;
+                
+            }
+            obj.StartDate = whenDay;
+            const data = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
+            return data;
 
-                const rawData = this.getTemplateData(jsonFormat, personName);
-                const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
-                obj.EndAfterNRepetitions = 5;
-                obj.StartDate = whenDay;
-                const data = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
-
-                return data;
-            } 
         } catch (error) {
             Logger.instance()
                 .log_error(error.message,500,'create general reminder service error');
@@ -332,6 +285,15 @@ export class GeneralReminderService {
             time = formattedDate;
         }
         return time;
+    }
+
+    private getUserResponse(jsonFormat: ReminderBody, dffMessage: string, timeString: any, dateString: string) {
+        if (jsonFormat.TaskType === 'medication') {
+            dffMessage = `Your medication 💊 reminder has been successfully set, and you will receive a notification at ${timeString} on ${dateString}.`;
+        } else {
+            dffMessage = `Your ${jsonFormat.TaskType} reminder has been successfully set, and you will receive a notification at ${timeString} on ${dateString}.`;
+        }
+        return dffMessage;
     }
 
 }
