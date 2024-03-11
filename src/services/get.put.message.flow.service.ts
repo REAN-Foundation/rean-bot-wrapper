@@ -216,14 +216,22 @@ export class MessageFlow{
             payload = await sendApiButtonService(msg.payload);
         }
         else if (msg.type === "reancareAssessment") {
-            messageType = msg.type;
-            msg.type = 'template';
+
+            // make compatible for telegram also.
             const { metaPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment(msg, msg.payload);
+            if (metaPayload["channel"] === 'whatsappMeta') {
+                messageType = msg.type;
+                msg.type = 'template';
+                payload = metaPayload;
+            } else if (metaPayload["channel"] === 'telegram' || metaPayload["channel"] === 'Telegram') {
+                msg.message = metaPayload["messageText"];
+                msg.type = 'inline_keyboard';
+                msg["payload"] = [ "Dmc_Yes", "Dmc_No" ];
+            }
             assessmentSession = assessmentSessionLogs;
-            payload = metaPayload;
             console.log(`assessment record ${JSON.stringify(payload)}`);
         }
-        else if (msg.type === "inline_keyboard") {
+        if (msg.type === "inline_keyboard") {
             payload = await sendTelegramButtonService([ "Yes",msg.payload[0], "No", msg.payload[1]]);
         }
         
