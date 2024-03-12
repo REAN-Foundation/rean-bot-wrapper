@@ -97,7 +97,7 @@ export class ConsentService {
                 buttonArray.push(`consent_changeLanguge-${consent.dataValues.LanguageCode}`);
             });
             console.log(buttonArray);
-            const message = await this.translate.translatestring("Select Your Preffered", languageCode);
+            const message = await this.translate.translatestring("Please, select your preferred language", languageCode);
             const messageType = buttonmessageType;
             if (req.params.channel === "whatsappMeta"){
                 payload = await sendApiButtonService(buttonArray);
