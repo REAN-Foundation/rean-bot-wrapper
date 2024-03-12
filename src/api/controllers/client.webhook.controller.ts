@@ -77,11 +77,13 @@ export class ClientWebhookController {
         const userConsentRepository =
         (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(UserConsent);
         const consentStatus = await userConsentRepository.findOne({ where: { userPlatformID: userId } });
-        if (consentStatus.dataValues.consentGiven === 'true'){
-            consentRequired = false;
-        }
-        else {
-            consentRequired = true;
+        if ( consentStatus){
+            if (consentStatus.dataValues.consentGiven === 'true'){
+                consentRequired = false;
+            }
+            else {
+                consentRequired = true;
+            }
         }
         return consentRequired;
     }
