@@ -148,9 +148,10 @@ export class handleRequestservice{
             let message_to_ml_model;
 
             if (metaData.contextId && !metaData.intent){
-                const tag = "Feedback";
+                let tag = "null";
+                tag = (metaData.type === "reaction") ? "reaction" : "Feedback";
                 await this.feedbackService.recordFeedback(outgoingMessage.Feedback.FeedbackContent,metaData.contextId,tag);
-                message_to_ml_model = "I have sent feedback";
+                message_to_ml_model = "I have sent feedback to your message tell me that : we have achnowlwged your feedback out team of experts will come back to you";
                 message_from_nlp = await this.customMLModelResponseService.getCustomModelResponse(message_to_ml_model, metaData.platform, metaData);
             } else {
                 message_to_ml_model = outgoingMessage.Feedback.FeedbackContent;
