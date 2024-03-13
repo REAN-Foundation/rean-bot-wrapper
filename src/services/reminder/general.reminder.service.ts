@@ -130,14 +130,15 @@ export class GeneralReminderService {
 
             } else if (frequency === "Weekly"){
                 apiURL = `reminders/repeat-every-week-on-days`;
+                dayName = TimeHelper.getWeekday(new Date(jsonFormat.StartDateTime), false);
                 obj.ReminderType = ReminderType.RepeatEveryWeekday;
-                obj.EndAfterNRepetitions = 5;
+                obj.EndAfterNRepetitions = 12;
                 obj.RepeatList = [ dayName ];
 
             } else if (frequency === "Hourly"){
                 apiURL = `reminders/repeat-every-hour`;
                 obj.ReminderType = ReminderType.RepeatEveryHour;
-                obj.EndAfterNRepetitions = 5;
+                obj.EndAfterNRepetitions = 10;
                 
             } else if (frequency === "Yearly"){
                 apiURL = `reminders/repeat-after-every-n`;
@@ -153,11 +154,11 @@ export class GeneralReminderService {
                 
             } else if (frequency === "WeekDays"){
                 apiURL = `reminders/repeat-every-weekday`;
-                obj.EndAfterNRepetitions = 5;
+                obj.EndAfterNRepetitions = 8;
                 
             } else if (frequency === "Monthly"){
                 apiURL = `reminders/repeat-every-month-on`;
-                obj.EndAfterNRepetitions = 4;
+                obj.EndAfterNRepetitions = 6;
                 
             }
             obj.StartDate = whenDay;
