@@ -35,9 +35,8 @@ export class ClickUpTask{
         let topic:any = null;
         if (postTopic){
             topic = postTopic;
-            
         }
-        else {
+        else if (responseChatMessage.length>=1){
             topic = responseChatMessage[responseChatMessage.length - 1].dataValues.messageContent;
         }
         const obj = {
