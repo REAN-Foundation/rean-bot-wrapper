@@ -132,7 +132,7 @@ export class ClientWebhookController {
                 this._platformMessageService = req.container.resolve(req.params.channel);
                 this._platformMessageService.res = res;
                 const consentActivation =  this.clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_ACTIVATION");
-                if (consentActivation){
+                if (consentActivation && req.params.channel === "telegram"){
                     await this.handleConsentMessage(req, res,req.body,"inline_keyboard",req.params.channel);
                 }
                 else {
@@ -243,7 +243,7 @@ export class ClientWebhookController {
                 }
                 this._platformMessageService = req.container.resolve(req.params.channel);
                 const consentActivation =  this.clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_ACTIVATION");
-                if (consentActivation){
+                if (consentActivation &&  req.params.channel === "whatsappMeta"){
                     await this.handleConsentMessage(req, res,req.body.entry[0].changes[0].value, "interactivebuttons", req.params.channel);
                 }
                 else {
