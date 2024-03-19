@@ -10,7 +10,7 @@ import { CacheMemory } from '../cache.memory.service';
 import { TimeHelper } from '../../common/time.helper';
 
 @scoped(Lifecycle.ContainerScoped)
-export class MedicationReminderService {
+export class ReminderFrequencyService {
 
     private _platformMessageService :  platformServiceInterface = null;
 
@@ -21,13 +21,15 @@ export class MedicationReminderService {
 
     ){}
 
-    async createReminder (eventObj) {
+    async createReminder (eventObj: any, frequency: string) {
         try {
 
             const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
             const phoneNumber : any = await this.needleService.getPhoneNumber(eventObj);
             const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
-            const frequency = eventObj.body.queryResult.parameters.frequency;
+
+            const dayNames = eventObj.body.queryResult.parameters.dayNames;
+            console.log(`dayNames ${dayNames}`);
 
             // const medicineName : string = eventObj.body.queryResult.parameters.medicineName;
             const jsonFormat = await CacheMemory.get(phoneNumber);
@@ -42,12 +44,16 @@ export class MedicationReminderService {
             const { whenDay, whenTime } =
                 await this.generalReminderService.extractWhenDateTime(jsonFormat.StartDateTime);
             jsonFormat.WhenTime = TimeHelper.formatTimeTo_AM_PM(whenTime);
+            let preposition = "on";
+            if (frequency !== "Once" && frequency !== "") {
+                preposition = "from";
+            }
 
             // const dffMessage = `Thank you for providing the name.
             // To confirm, you would like a medication reminder for *${medicineName}* at ${timeString}, correct?`;
 
             if (jsonFormat.TaskType === 'medication') {
-                dffMessage = `Your medication 💊 reminder has been successfully set, and you will receive a notification at ${jsonFormat.TimeString} on ${jsonFormat.DateString}.`;
+                dffMessage = `Your medication 💊 reminder has been successfully set, and you will receive a ${this.generalReminderService.getfrequencyTerm(frequency)} notification at ${jsonFormat.TimeString} ${preposition} ${jsonFormat.DateString}.`;
             }
             console.log(dffMessage);
 

@@ -520,4 +520,26 @@ export class TimeHelper {
         return (hour % 12 || 12) + ":" + minute + (hour < 12 ? " AM" : " PM");
     }
 
+    static localTimeConverter (timeString, timezoneOffset) {
+        const offset = TimeHelper.getTimezoneOffsets(timezoneOffset, DurationType.Minute);
+        const localDateTime = TimeHelper.addDuration(new Date(timeString), offset, DurationType.Minute);
+        console.log(`local date time ${localDateTime}`);
+        console.log(`local date time string ${localDateTime.toString()}`);
+        return localDateTime; 
+    }
+
+    static convertGMTToLocal(gmtDate, timeOffset) {
+        const gmtDateTime = new Date(Date.parse(gmtDate));
+        const offset = TimeHelper.getTimezoneOffsets(timeOffset, DurationType.Minute);
+        const localDateTime = new Date(gmtDateTime.getTime() - (offset) * 60000);
+        const year = localDateTime.getFullYear();
+        const month = (localDateTime.getMonth() + 1).toString().padStart(2, '0');
+        const day = localDateTime.getDate().toString().padStart(2, '0');
+        const hours = localDateTime.getHours().toString().padStart(2, '0');
+        const minutes = localDateTime.getMinutes().toString().padStart(2, '0');
+        const seconds = localDateTime.getSeconds().toString().padStart(2, '0');
+        const localDateTimeString = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
+        return localDateTimeString;
+    }
+
 }
