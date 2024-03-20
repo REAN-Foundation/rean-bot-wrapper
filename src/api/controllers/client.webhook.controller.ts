@@ -132,6 +132,8 @@ export class ClientWebhookController {
                 this._platformMessageService = req.container.resolve(req.params.channel);
                 this._platformMessageService.res = res;
                 const consentActivation =  this.clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_ACTIVATION");
+                console.log("Consent feature is ", consentActivation);
+                console.log(typeof consentActivation);
                 if (consentActivation && req.params.channel === "telegram"){
                     console.log("Processing the consent message for telegram");
                     await this.handleConsentMessage(req, res,req.body,"inline_keyboard",req.params.channel);
