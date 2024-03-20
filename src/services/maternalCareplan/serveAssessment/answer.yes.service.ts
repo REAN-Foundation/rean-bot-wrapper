@@ -1,9 +1,19 @@
+/* eslint-disable max-len */
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import { FireAndForgetService, QueueDoaminModel } from '../../fire.and.forget.service';
 import { Logger } from '../../../common/logger';
+import * as AssessmetUserResponses from './assessment.user.replies.json';
+import { ClientEnvironmentProviderService } from '../../../services/set.client/client.environment.provider.service';
+import { EntityManagerProvider } from '../../../services/entity.manager.provider.service';
+import { ChatMessage } from '../../../models/chat.message.model';
 
 @scoped(Lifecycle.ContainerScoped)
 export class AnswerYesMsgService {
+
+    constructor(
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
+    ){}
 
     async replyYesService (eventObj ): Promise<any> {
         try {
@@ -14,15 +24,44 @@ export class AnswerYesMsgService {
                 }
             };
 
-            const msg = this.getRandomYesMessage();
+            let message = null;
+            message = await this.getUserResponse(eventObj, message);
+            if (message === null) {
+                message = this.getRandomYesMessage();
+            }
             FireAndForgetService.enqueue(body);
-            return { fulfillmentMessages: [{ text: { text: [msg] } }]  };
+            return { fulfillmentMessages: [{ text: { text: [message] } }]  };
 
         } catch (error) {
             Logger.instance()
                 .log_error(error.message,500,'Maternity careplan registration service error');
         }
 
+    }
+
+    public async getUserResponse(eventObj: any, message: string ) {
+        const intentName = eventObj.body.queryResult ? eventObj.body.queryResult.intent.displayName : null;
+        const channel = eventObj.body.originalDetectIntentRequest.payload.source;
+        let chatMessageId = null;
+        if (channel === "telegram" || channel === "Telegram") {
+            chatMessageId = eventObj.body.originalDetectIntentRequest.payload.completeMessage.chat_message_id;
+        } else {
+            chatMessageId = eventObj.body.originalDetectIntentRequest.payload.contextId;
+        }
+        const userResponses = AssessmetUserResponses['default'];
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+        const assessmentSession = await chatMessageRepository.findOne({ where: { "responseMessageID": chatMessageId } });
+        const previousMessage = assessmentSession.messageContent ? assessmentSession.messageContent : "";
+        for (const msg of userResponses) {
+            if (msg.Messege === previousMessage) {
+                if (intentName === "Dmc_Yes") {
+                    message = msg.ReplyYesText;
+                } else {
+                    message = msg.ReplyNoText;
+                }
+            }
+        }
+        return message;
     }
 
     public getRandomYesMessage() {
