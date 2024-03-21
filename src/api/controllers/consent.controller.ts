@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { ResponseHandler } from '../../utils/response.handler';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
@@ -58,6 +59,7 @@ export class consentController {
             const clientName =await  clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
             console.log(clientName);
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
+            // eslint-disable-next-line max-len
             const consentRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ConsentInfo);
             const consentFindResult =
                 await consentRepository.findAll();
