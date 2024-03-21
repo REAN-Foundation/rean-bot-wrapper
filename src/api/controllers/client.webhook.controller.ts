@@ -132,7 +132,10 @@ export class ClientWebhookController {
                 this._platformMessageService = req.container.resolve(req.params.channel);
                 this._platformMessageService.res = res;
                 const consentActivation =  this.clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_ACTIVATION");
+                console.log("Consent feature is ", consentActivation);
+                console.log(typeof consentActivation);
                 if (consentActivation && req.params.channel === "telegram"){
+                    console.log("Processing the consent message for telegram");
                     await this.handleConsentMessage(req, res,req.body,"inline_keyboard",req.params.channel);
                 }
                 else {
@@ -149,10 +152,12 @@ export class ClientWebhookController {
     };
 
     private async handleConsentMessage(req: any, res: any, handleReqVariable,buttonKeyName,channel) {
+        console.log("Here in handle consent Message");
         const consentRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ConsentInfo);
         const [userId, consentReply, languageCode] = await this.getUserIdAndLanguagecode(handleReqVariable, channel);
         const firstTimeUser = await this.checkFirstTimeUser(req, userId);
         let consentRequired = true;
+        console.log("Handling the consent message flow ", userId, consentReply, languageCode, firstTimeUser);
         if (firstTimeUser || consentReply === "consent_no") {
             consentRequired = true;
         }
@@ -244,6 +249,7 @@ export class ClientWebhookController {
                 this._platformMessageService = req.container.resolve(req.params.channel);
                 const consentActivation =  this.clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_ACTIVATION");
                 if (consentActivation &&  req.params.channel === "whatsappMeta"){
+                    console.log("Processing the consent message for whatsapp");
                     await this.handleConsentMessage(req, res,req.body.entry[0].changes[0].value, "interactivebuttons", req.params.channel);
                 }
                 else {
