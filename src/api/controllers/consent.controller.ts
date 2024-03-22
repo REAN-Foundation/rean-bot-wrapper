@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { ResponseHandler } from '../../utils/response.handler';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
@@ -22,8 +23,11 @@ export class consentController {
 
     recordConsentinfo = async(req, res)=>{
         try {
-            const consentRepository =
-                (await this.entityManagerProvider.getEntityManager(this.clientEnvironment)).getRepository(ConsentInfo);
+            const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
+            const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            console.log(clientName);
+            const entityManagerProvider = req.container.resolve(EntityManagerProvider);
+            const consentRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ConsentInfo);
             const consentFindResult =
                 await consentRepository.findOne({ where: { LanguageCode: req.body.languageCode } });
             if (consentFindResult){
@@ -51,8 +55,12 @@ export class consentController {
 
     readConsentinfo = async(req, res)=>{
         try {
-            const consentRepository =
-                (await this.entityManagerProvider.getEntityManager(this.clientEnvironment)).getRepository(ConsentInfo);
+            const clientEnvironmentProviderService = await req.container.resolve(ClientEnvironmentProviderService);
+            const clientName =await  clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            console.log(clientName);
+            const entityManagerProvider = req.container.resolve(EntityManagerProvider);
+            // eslint-disable-next-line max-len
+            const consentRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ConsentInfo);
             const consentFindResult =
                 await consentRepository.findAll();
             if (consentFindResult.length > 0){
@@ -77,8 +85,11 @@ export class consentController {
                 this.responseHandler.sendSuccessResponse(res, 200, 'Insufficient Information', "");
             }
             else {
-                const consentRepository =
-                (await this.entityManagerProvider.getEntityManager(this.clientEnvironment)).getRepository(ConsentInfo);
+                const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
+                const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+                console.log(clientName);
+                const entityManagerProvider = req.container.resolve(EntityManagerProvider);
+                const consentRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ConsentInfo);
                 const consentFindResult =
                 await consentRepository.findOne({ where: { LanguageCode: req.body.languageCode } });
                 if (consentFindResult !== null){
@@ -112,8 +123,11 @@ export class consentController {
 
     deleteConsentinfo = async(req, res)=>{
         try {
-            const consentRepository =
-                (await this.entityManagerProvider.getEntityManager(this.clientEnvironment)).getRepository(ConsentInfo);
+            const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
+            const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            console.log(clientName);
+            const entityManagerProvider = req.container.resolve(EntityManagerProvider);
+            const consentRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ConsentInfo);
             const consentFindResult =
                 await consentRepository.destroy({ where: { LanguageCode: req.body.languageCode } });
             if (consentFindResult){
