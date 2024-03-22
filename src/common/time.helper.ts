@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import weekday from 'dayjs/plugin/weekday';
 import { Logger } from './logger';
+import moment from 'moment-timezone';
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -528,8 +529,8 @@ export class TimeHelper {
         return localDateTime; 
     }
 
-    static convertGMTToLocal(gmtDate, timeOffset) {
-        const gmtDateTime = new Date(Date.parse(gmtDate));
+    static convertGMTToLocal(date, time, timeOffset) {
+        const gmtDateTime = new Date(Date.parse(date));
         const offset = TimeHelper.getTimezoneOffsets(timeOffset, DurationType.Minute);
         const localDateTime = new Date(gmtDateTime.getTime() - (offset) * 60000);
         const year = localDateTime.getFullYear();
@@ -538,8 +539,19 @@ export class TimeHelper {
         const hours = localDateTime.getHours().toString().padStart(2, '0');
         const minutes = localDateTime.getMinutes().toString().padStart(2, '0');
         const seconds = localDateTime.getSeconds().toString().padStart(2, '0');
-        const localDateTimeString = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
+        const localDateTimeString = `${year}-${month}-${day}T${time[0]}:${time[1]}:${time[2]}`;
         return localDateTimeString;
+    }
+
+    static getUserTimeZone(timeZoneOffset) {
+        if (timeZoneOffset != null) {
+            const offset = TimeHelper.getTimezoneOffsets(timeZoneOffset, DurationType.Minute);
+            const timezone = moment.tz.names().find(tz => {
+                return moment().tz(tz).utcOffset() === offset * -1;
+            });
+            return timezone;
+        }
+        return null;
     }
 
 }

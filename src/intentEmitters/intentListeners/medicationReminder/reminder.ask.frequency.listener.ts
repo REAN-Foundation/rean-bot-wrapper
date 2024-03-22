@@ -16,6 +16,20 @@ export const ReminderFrequencyListener = async (intent, eventObj) => {
     }
 };
 
+export const SendFrequencyButtonsListener = async (intent, eventObj) => {
+    // eslint-disable-next-line max-len
+    const reminderAskFrequency: ReminderFrequencyService = eventObj.container.resolve(ReminderFrequencyService);
+    try {
+        let result = null;
+        result = await reminderAskFrequency.sendFrequencyButtons(eventObj);
+        console.log(result);
+        return result;
+
+    } catch (error) {
+        console.log(error);
+    }
+};
+
 const getFrequencyFromIntentName = (IntentName) => {
     const message = {
         "Reminder_Frequency_Once"   : "Once",
