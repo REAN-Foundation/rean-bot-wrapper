@@ -76,6 +76,7 @@ import { AppointmentReminderListener, AppointmentReminderReplyListener } from '.
 import { ReminderRegistrationListener } from './intentListeners/medicationReminder/reminder.registration.listener';
 import { CommonAssessmentListener } from './intentListeners/commonAssessment/common.assessment.listener';
 import {ConsentYesListner} from './intentListeners/consentListners/consent.yes.listner';
+import { DeleteReminderListener } from './intentListeners/medicationReminder/delete.reminder.listener';
 /*
  * Init function (being called during application bootstrap)
  * This is the place to register any new intent and corresponding listeners
@@ -238,6 +239,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('Reminder_Frequency_Daily', ReminderFrequencyListener);
         IntentEmitter.registerListener('Reminder_Frequency_Weekly', ReminderFrequencyListener);
         IntentEmitter.registerListener('Reminder_Ask_Frequency', SendFrequencyButtonsListener);
+        IntentEmitter.registerListener('Reminder_Delete', DeleteReminderListener);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);

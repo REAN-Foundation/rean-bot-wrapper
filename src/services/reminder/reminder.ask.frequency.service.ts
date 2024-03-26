@@ -87,8 +87,8 @@ export class ReminderFrequencyService {
             const sessionId : string = eventObj.body.originalDetectIntentRequest.payload.userId;
             let messageType = "";
             let payload = null;
-            const channelName = eventObj.body.originalDetectIntentRequest.payload.source;
-            const buttonArray = ["Once At Given Time", "Reminder_Frequency_Once" ,"Daily","Reminder_Frequency_Daily", "Weekly","Reminder_Frequency_Weekly"];
+            let channelName = eventObj.body.originalDetectIntentRequest.payload.source;
+            const buttonArray = ["Once At Given Time", "Reminder_Frequency_Once" ,"Once Daily","Reminder_Frequency_Daily", "Weekly","Reminder_Frequency_Weekly"];
             if (channelName === 'whatsappMeta') {
                 payload = await sendApiButtonService(buttonArray);
                 messageType = 'interactivebuttons';
@@ -96,6 +96,10 @@ export class ReminderFrequencyService {
                 payload = await sendTelegramButtonService(buttonArray);
                 messageType = 'inline_keyboard';
             }
+            if (channelName === "telegram" || channelName === "Telegram") {
+                channelName = "telegram";
+            }
+            payload["typeOfButton"] = "vertical";
             
             this._platformMessageService = eventObj.container.resolve(channelName);
             const response_format: Iresponse = commonResponseMessageFormat();
@@ -104,6 +108,7 @@ export class ReminderFrequencyService {
             response_format.message_type = messageType;
 
             await this._platformMessageService.SendMediaMessage(response_format, payload);
+            return null;
 
         } catch (error) {
             Logger.instance()
