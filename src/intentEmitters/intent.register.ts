@@ -2,7 +2,7 @@ import { Logger } from '../common/logger';
 import { IntentEmitter } from './intent.emitter';
 
 // Register All listener handlers
-import { getVaccinationAppointments, secondListener } from './intentListeners/vaccination.listener';
+// import { getVaccinationAppointments, secondListener } from './intentListeners/vaccination.listener';
 import { getCovidInfo1s, getCovidResources1s } from './intentListeners/covid.listener';
 import { handleIntentFufillmentError } from './intentListeners/fallback.listener';
 import { getSymptomAssessment } from './intentListeners/symptom.listener';
@@ -12,7 +12,7 @@ import { getRiskAssessmentFollowup } from './intentListeners/risk.assessment.fol
 import { getMedicationInfo } from './intentListeners/support.app.listener';
 import { AppSupportListener } from './intentListeners/app.support.listener';
 import { AppSymptomListener } from './intentListeners/app.symptom.listener';
-import { getGenericpedia, getGenericpediaChemist } from './intentListeners/genericpedia.listener';
+// import { getGenericpedia, getGenericpediaChemist } from './intentListeners/genericpedia.listener';
 import { AnemiaBotListener } from './intentListeners/anemia.bot.listener';
 import { NegativeFeedbackListener } from './intentListeners/negative.feedabck.listener';
 import { PositiveFeedbackListener } from './intentListeners/positive.feedback.listener';
@@ -23,7 +23,7 @@ import { HumanHandoverListener } from './intentListeners/human.handover.listener
 import { RequestLiveAgent } from './intentListeners/request.live.agent.listener';
 import { createDemoBot } from './intentListeners/create.demo.bot.listener';
 import { calorieDetection } from './intentListeners/calorie.detection.listener';
-import { calorieReport } from './intentListeners/calorie.report.listener';
+// import { calorieReport } from './intentListeners/calorie.report.listener';
 import { CalorieUpdate } from './intentListeners/calorie.update.listener';
 import { WhatsAppTemplateOpting } from './intentListeners/whatsapp.tempalte.opting.listener';
 import { eyeSymptomAssessment } from './intentListeners/eye.symptom.assesment.listener';
@@ -87,8 +87,8 @@ export class IntentRegister {
 
     register(){
         Logger.instance().log("Begin registering Intents...");
-        IntentEmitter.registerListener('Vaccination.AppointmentAvailability', getVaccinationAppointments);
-        IntentEmitter.registerListener('vaccination:appointments', secondListener);
+        // IntentEmitter.registerListener('Vaccination.AppointmentAvailability', getVaccinationAppointments);
+        // IntentEmitter.registerListener('vaccination:appointments', secondListener);
 
         IntentEmitter.registerListener('covid-info', getCovidInfo1s);
 
@@ -125,7 +125,7 @@ export class IntentRegister {
 
         //Intents for calorie information
         IntentEmitter.registerListener('foodItemsDetails', calorieDetection);
-        IntentEmitter.registerListener('calorie.report.creation', calorieReport);
+        // IntentEmitter.registerListener('calorie.report.creation', calorieReport);
         IntentEmitter.registerListener('CalorieNegativeFeedback - yes', CalorieUpdate);
 
         //hybrid model
@@ -148,8 +148,8 @@ export class IntentRegister {
         IntentEmitter.registerListener('liver', getRiskAssessmentFollowup);
         IntentEmitter.registerListener('lungs', getRiskAssessmentFollowup);
         IntentEmitter.registerListener('pregnancy', getRiskAssessmentFollowup);
-        IntentEmitter.registerListener('genericpedia', getGenericpedia);
-        IntentEmitter.registerListener('genericpedia location', getGenericpediaChemist);
+        // IntentEmitter.registerListener('genericpedia', getGenericpedia);
+        // IntentEmitter.registerListener('genericpedia location', getGenericpediaChemist);
 
         IntentEmitter.registerListener('SupportApp.GetMedication', getMedicationInfo);
         IntentEmitter.registerListener('BloodGlucose.update', AppSupportListener.handleIntent);
