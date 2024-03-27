@@ -134,6 +134,9 @@ export class OpenAIResponseService {
                 frequency_penalty : 0.0,
                 presence_penalty  : 0.0,
             };
+
+            //If date time is not found in phrase then, give "StartDateTime" as todays date.
+            //Do not give past dates and convert it into date time javascript format.
         }
         return prompt;
 
