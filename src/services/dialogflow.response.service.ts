@@ -8,11 +8,16 @@ let dialogflow = require('@google-cloud/dialogflow');
 const dialogflowv2 = require('@google-cloud/dialogflow').v2beta1;
 const { struct } = require('pb-util');
 import { DialogflowResponseFormat } from './response.format/dialogflow.response.format';
+import { NeedleService } from './needle.service';
+import { GetPatientInfoService } from './support.app.service';
+import { TimeHelper } from '../common/time.helper';
 
 @scoped(Lifecycle.ContainerScoped)
 export class DialogflowResponseService {
 
-    constructor(@inject(ClientEnvironmentProviderService) private clientEnvironment?: ClientEnvironmentProviderService) { }
+    constructor(@inject(ClientEnvironmentProviderService) private clientEnvironment?: ClientEnvironmentProviderService,
+                @inject(NeedleService) private needleService?: NeedleService,
+                @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,) { }
 
     async getDialogflowLanguage(){
         if (this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_DEFAULT_LANGUAGE_CODE")){
@@ -66,6 +71,9 @@ export class DialogflowResponseService {
                 projectIdFinal = this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_PROJECT_ID");
 
             }
+
+            const timeZoneOffset = await this.getUserTimeZoneOffset(completeMessage);
+            const timezoneName = TimeHelper.getUserTimeZone(timeZoneOffset);
             sessionClient = new dialogflow.SessionsClient(options);
             sessionPath = sessionClient.projectAgentSessionPath(projectIdFinal, userId);
             console.log("Message to be sent to DF: ", message);
@@ -78,7 +86,8 @@ export class DialogflowResponseService {
                     },
                 },
                 queryParams : {
-                    payload : struct.encode({ source: platform, userId: userId, userName: completeMessage.name,location: location, contextId: completeMessage.contextId, completeMessage: completeMessage })
+                    payload  : struct.encode({ source: platform, userId: userId, userName: completeMessage.name,location: location, contextId: completeMessage.contextId, completeMessage: completeMessage }),
+                    timeZone : timezoneName
                 },
             };
             let request_intent = null;
@@ -92,7 +101,8 @@ export class DialogflowResponseService {
                         },
                     },
                     queryParams : {
-                        payload : struct.encode({ source: platform, userId: userId, userName: completeMessage.name,location: location, contextId: completeMessage.contextId, completeMessage: completeMessage })
+                        payload  : struct.encode({ source: platform, userId: userId, userName: completeMessage.name,location: location, contextId: completeMessage.contextId, completeMessage: completeMessage }),
+                        timeZone : timezoneName
                     },
                 };
             }
@@ -104,6 +114,7 @@ export class DialogflowResponseService {
                 responses = await sessionClient.detectIntent(request);
             }
             const dialogflowResponseFormatObj = new DialogflowResponseFormat(responses);
+            await dialogflowResponseFormatObj.updateConfidenceScore(completeMessage.platformId);
             const intentfromDF = dialogflowResponseFormatObj.getIntent();
             if (intent) {
                 console.log(`  Intent: ${intentfromDF}`);
@@ -118,5 +129,32 @@ export class DialogflowResponseService {
         }
 
     };
+
+    async getUserTimeZoneOffset(completeMessage:Imessage){
+        let patientUserId = null;
+        let result = null;
+        if (completeMessage.platform === "telegram" || completeMessage.platform === "Telegram") {
+            const apiURL = `patients/search?userName=${completeMessage.platformId}`;
+            result = await this.needleService.needleRequestForREAN("get", apiURL);
+
+        } else if (completeMessage.platform === "whatsappMeta") {
+            const apiURL = `patients/byPhone?phone=${encodeURIComponent(this.getPatientInfoService.convertPhoneNumber(completeMessage.platformId))}`;
+            result = await this.needleService.needleRequestForREAN("get", apiURL);
+        }
+        if (result.Data) {
+            if (result.Data.Patients.Items.length === 0) {
+                return null;
+            } else {
+                patientUserId = result.Data.Patients.Items[0].UserId;
+            }
+        }
+        if (patientUserId !== null) {
+            const getPatientUrl = `patients/${patientUserId}`;
+            const res = await this.needleService.needleRequestForREAN('get', getPatientUrl);
+            const userTimeZone = res.Data.Patient.User.CurrentTimeZone;
+            return userTimeZone;
+        }
+        return null;
+    }
 
 }

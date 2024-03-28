@@ -32,7 +32,7 @@ export class CommonWhatsappService implements platformServiceInterface {
         }
         for (whatsappMessagetoDialogflow of whatsappMessages){
             if (whatsappMessagetoDialogflow) {
-                await this.messageFlow.checkTheFlow(whatsappMessagetoDialogflow, channel, this);
+                await this.messageFlow.checkTheFlowRouter(whatsappMessagetoDialogflow, channel, this);
             }
         }
     
@@ -120,6 +120,10 @@ export class CommonWhatsappService implements platformServiceInterface {
             messageText         : requestBody.message[0]
         };
         return response_message;
+    }
+
+    getMessageIdFromResponse(response: any) {
+        return response.body.messages[0].id;
     }
     
 }

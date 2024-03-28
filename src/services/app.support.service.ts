@@ -24,6 +24,10 @@ export class platformMessageService implements platformServiceInterface{
 
     }
 
+    getMessageIdFromResponse(responseBody: any) {
+        throw new Error('Method not implemented.');
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     setWebhook(client: any) {
         throw new Error('Method not implemented.');

@@ -54,7 +54,7 @@ export class CreateReminderService {
 
         } catch (error) {
             Logger.instance()
-                .log_error(error.message,500,'Send success reminder creation error');
+                .log_error(error.message,500,'Ask question medication reminder error');
         }
     }
 
@@ -77,7 +77,7 @@ export class CreateReminderService {
             
         } catch (error) {
             Logger.instance()
-                .log_error(error.message,500,'Register patient with blood warrior messaging service error');
+                .log_error(error.message,500,'Ask question medication reminder service error');
         }
     }
 

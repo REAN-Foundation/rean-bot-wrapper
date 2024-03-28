@@ -19,7 +19,11 @@ export class AnswerNoMsgService {
                 }
             };
 
-            const message = this.getRandomNoMessage();
+            let message = null;
+            message = await this.answerYesMsgService.getUserResponse(eventObj, message);
+            if (message === null) {
+                message = this.getRandomNoMessage();
+            }
             FireAndForgetService.enqueue(body);
             return { fulfillmentMessages: [{ text: { text: [message] } }]  };
 

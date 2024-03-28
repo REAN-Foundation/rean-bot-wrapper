@@ -26,30 +26,34 @@ export class LogsQAService {
     async logMesssages(response_format ){
 
         //eslint-disable-next-line max-len
-        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+        const chatMessageRepository = await (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
 
         const responseChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.sessionId, direction: 'In' } });
-
-        const messageContentIn = responseChatMessage[responseChatMessage.length - 1].messageContent;
         let supportChannelTaskID = null;
-        if (responseChatMessage.length > 1){
-            supportChannelTaskID = responseChatMessage[responseChatMessage.length - 2].supportChannelTaskID;
-        }
-
+        let messageContentIn = "firstmessage";
         let userName = null;
-        if (responseChatMessage[responseChatMessage.length - 1].name){
-            userName = responseChatMessage[responseChatMessage.length - 1].name;
-        } else {
-            userName = response_format.sessionId;
+        if ( responseChatMessage.length >= 1){
+            messageContentIn = responseChatMessage[responseChatMessage.length - 1].messageContent;
+            if ( responseChatMessage.length > 1){
+                supportChannelTaskID = responseChatMessage[responseChatMessage.length - 2].supportChannelTaskID;
+            }
+            if (responseChatMessage[responseChatMessage.length - 1].name){
+                userName = responseChatMessage[responseChatMessage.length - 1].name;
+            } else {
+                userName = response_format.sessionId;
+            }
+            let taskId = await this.postingOnClickup(`Client : ` + messageContentIn, supportChannelTaskID, responseChatMessage, userName);
+            const messageContentOut = response_format.messageText;
+            taskId = await this.postingOnClickup(`Bot : ` + messageContentOut + `\nIntent Name : ${response_format.intent}`, taskId, responseChatMessage, userName);
+            await chatMessageRepository.update({ supportChannelTaskID: taskId, humanHandoff: "false" }, { where: { id: responseChatMessage[responseChatMessage.length - 1].id } });
+            await this.postingOnClickup(`Bot : ${messageContentOut}\nIntent Name : ${response_format.intent}`, taskId, responseChatMessage, userName)
+                .then(taskId => {
+                    return chatMessageRepository.update(
+                        { supportChannelTaskID: taskId, humanHandoff: "false" },
+                        { where: { id: responseChatMessage[responseChatMessage.length - 1].id } }  );
+                });
+            console.log("support channel Id is updated");
         }
-
-        let taskId = await this.postingOnClickup(`Client : ` + messageContentIn, supportChannelTaskID, responseChatMessage, userName);
-
-        const messageContentOut = response_format.messageText;
-        taskId = await this.postingOnClickup(`Bot : ` + messageContentOut + `\nIntent Name : ${response_format.intent}`, taskId, responseChatMessage, userName);
-
-        await chatMessageRepository.update({ supportChannelTaskID: taskId, humanHandoff: "false" }, { where: { id: responseChatMessage[responseChatMessage.length - 1].id } });
-
     }
 
     async postingOnClickup(comment, supportChannelTaskID, responseChatMessage, userName){

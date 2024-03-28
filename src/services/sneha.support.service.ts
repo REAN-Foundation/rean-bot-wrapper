@@ -18,6 +18,10 @@ export class snehaMessagePlatformService implements platformServiceInterface{
 
     }
 
+    getMessageIdFromResponse(responseBody: any) {
+        throw new Error('Method not implemented.');
+    }
+
     setWebhook(client: any) {
         console.log("Method not implemented.");
     }

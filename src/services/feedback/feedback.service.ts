@@ -74,10 +74,10 @@ export  class FeedbackService implements feedbackInterface {
                     }
                     else {
                         const topic = responseChatMessage[responseChatMessage.length - 2].messageContent;
-                        await this.supportChannel(preferredSupportChannel,responseChatMessage,messageContent,topic);
+                        await this.supportChannel(preferredSupportChannel,responseChatMessage,messageContent,topic,"Negative Feedback");
                     }
                     if (await humanHandoff.checkTime() === "false"){
-                        const reply = "We have recorded your feedback. Our experts will get back to you on this issue";
+                        const reply = "We're genuinely sorry to hear that you weren't satisfied with the assistance provided by our chatbot. Your feedback is invaluable in helping us improve our services. our team of experts will provide you with a satisfactory resolution as quickly as possible.";
                         const data = {
                             "fulfillmentMessages" : [
                                 {
@@ -169,11 +169,11 @@ export  class FeedbackService implements feedbackInterface {
     supportChannel = async(preferredSupportChannel, responseChatMessage, messageContent, topic = null,tag = null) => {
         if (preferredSupportChannel === "ClickUp"){
             const listID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_ISSUES_LIST_ID");
+            const chatMessageRepository = await (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
             const clickUpResponseTaskID:any = await this.clickuptask.createTask(responseChatMessage,topic,null,null, listID,tag);
-            if (messageContent.length > 5){
-                const comment = messageContent;
-                await this.clickuptask.postCommentOnTask(clickUpResponseTaskID,comment);
-            }
+            const comment = messageContent;
+            await this.clickuptask.postCommentOnTask(clickUpResponseTaskID,comment);
+        
         }
         else {
             await this.slackMessageService.postMessage(responseChatMessage,topic);

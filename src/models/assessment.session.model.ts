@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from 'sequelize-typescript';
 import { assessmentSessionLogs } from '../refactor/interface/message.interface';
 
@@ -5,7 +6,7 @@ import { assessmentSessionLogs } from '../refactor/interface/message.interface';
     timestamps : true,
     modelName  : 'AssessmentSessionLogs',
     tableName  : 'assessment_session_logs',
-})
+    })
 export class AssessmentSessionLogs extends Model implements assessmentSessionLogs {
     
     @AutoIncrement

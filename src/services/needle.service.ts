@@ -36,7 +36,7 @@ export class NeedleService {
         if (response.statusCode === 200 || response.statusCode === 201) {
             console.log('Reancare Api is successfull');
         } else {
-            throw new Error("Failed to get response from Reancare API.");
+            console.log("Failed to get response from Reancare API.");
         }
     
         return response.body;

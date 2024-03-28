@@ -77,6 +77,9 @@ export class RegistrationPerMinMsgService {
     async sendMessage(this: any, msg: string, greet: string, eventObj) {
         const response_format: Iresponse = commonResponseMessageFormat();
         const payload = eventObj.body.originalDetectIntentRequest.payload;
+        if (payload.source === "telegram" || payload.source === "Telegram") {
+            payload.source = "telegram";
+        }
         this._platformMessageService = eventObj.container.resolve(payload.source);
         const name : string = eventObj.body.originalDetectIntentRequest.payload.userName;
         const b = eventObj.body.session;

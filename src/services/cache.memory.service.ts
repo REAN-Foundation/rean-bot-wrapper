@@ -11,6 +11,10 @@ export class CacheMemory {
             console.log(`Cache hit for key: ${key}`);
             return this.CacheData[key];
         } else {
+            console.log(`Cache not available for the key: ${key}`);
+
+            //then call the rean care Api. UserTaks to get the assessment history.
+
             console.log(`Cache miss for key: ${key}`);
             return null;
         }

@@ -35,6 +35,10 @@ export class TelegramMessageService implements platformServiceInterface{
         this.init();
     }
 
+    getMessageIdFromResponse(response: any) {
+        return response.message_id;
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     handleMessage(msg, channel: string){
         this._telegram.processUpdate(msg);
@@ -115,7 +119,7 @@ export class TelegramMessageService implements platformServiceInterface{
             chat_message_id     : null,
             direction           : "Out",
             input_message       : null,
-            message_type        : "text",
+            message_type        : requestBody.type ?? "text",
             intent              : null,
             messageBody         : null,
             messageImageUrl     : null,
@@ -157,7 +161,7 @@ export class TelegramMessageService implements platformServiceInterface{
         }
         for (telegramMessagetoDialogflow of telegramMessages){
             if (telegramMessagetoDialogflow) {
-                await this.messageFlow.checkTheFlow(telegramMessagetoDialogflow, "telegram", this);
+                await this.messageFlow.checkTheFlowRouter(telegramMessagetoDialogflow, "telegram", this);
             }
         }
     };
