@@ -10,6 +10,7 @@ import { GeneralReminderService } from './reminder/general.reminder.service';
 import { RegistrationPerMinMsgService } from './maternalCareplan/registration.per.minute.sercice';
 import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
 import { ChecklistDateValidationService } from './bloodWrrior/checklist.date.validation.service';
+import { NoBabyMovementAssessmentService } from './commonAssesssment/common.assessment.service';
 
 export interface QueueDoaminModel {
     Intent : string;
@@ -69,12 +70,6 @@ export class FireAndForgetService {
             await _createReminderService.sendReminder(model.Body, eventObj );
             console.log(`Fire and Forget Domain Model: ${model}`);
         }
-        if (model.Intent === "General_Reminder") {
-            const eventObj = model.Body.EventObj;
-            const _generalReminderService:  GeneralReminderService = eventObj.container.resolve(GeneralReminderService);
-            await _generalReminderService.sendReminder(model.Body, eventObj );
-            console.log(`Fire and Forget Domain Model: ${model}`);
-        }
         if (model.Intent === "Change_TF_Date_Load_Reminders") {
             const eventObj = model.Body.EventObj;
             const _enrollPatientService:  EnrollPatientService = eventObj.container.resolve(EnrollPatientService);
@@ -105,9 +100,18 @@ export class FireAndForgetService {
         if (model.Intent === "Dmc_Yes" || model.Intent === "Dmc_No") {
             const eventObj = model.Body.EventObj;
             const serveAssessmentService:  ServeAssessmentService = eventObj.container.resolve(ServeAssessmentService);
-            const messageContextId = eventObj.body.originalDetectIntentRequest.payload.contextId;
-            await FireAndForgetService.delay(2000);
-            await serveAssessmentService.answerQuestion(eventObj, messageContextId);
+            const channel = eventObj.body.originalDetectIntentRequest.payload.source;
+            let messageContextId = null;
+            if (channel === "telegram" || channel === "Telegram") {
+                messageContextId = eventObj.body.originalDetectIntentRequest.payload.completeMessage.chat_message_id;
+            } else {
+                messageContextId = eventObj.body.originalDetectIntentRequest.payload.contextId;
+            }
+            const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
+            const userResponse = eventObj.body.queryResult.intent.displayName;
+            await FireAndForgetService.delay(1000);
+            await serveAssessmentService.answerQuestion(eventObj, userId, userResponse,
+                messageContextId, channel, false);
             console.log(`Fire and Forget Domain Model: ${model}`);
         }
         if (model.Intent === "Registration_PerMinMsg") {
@@ -124,6 +128,15 @@ export class FireAndForgetService {
             await checklistDateValidationService.sendConfirmationMessage(eventObj, model.Body.TransfusionDate,
                 model.Body.Donor, model.Body.RequestedQuantity, model.Body.StringTransfusionDate,
                 model.Body.PatientUserId, model.Body.VolunteerUserId);
+            console.log(`Fire and Forget Domain Model: ${model}`);
+        }
+        if (model.Intent === "StartAssessment") {
+            const eventObj = model.Body.EventObj;
+            await FireAndForgetService.delay(2000);
+            const assessmentService:  NoBabyMovementAssessmentService =
+                eventObj.container.resolve(NoBabyMovementAssessmentService);
+            await assessmentService.startAssessmentAndUpdateDb(eventObj, model.Body.PatientUserId,
+                model.Body.PersonPhoneNumber , model.Body.AssessmentTemplateId , model.Body.Channel);
             console.log(`Fire and Forget Domain Model: ${model}`);
         }
     };

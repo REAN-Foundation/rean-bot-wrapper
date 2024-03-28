@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 /* eslint-disable linebreak-style */
-import { Imessage, Iresponse } from '../refactor/interface/message.interface';
+import { Imessage, Iresponse, OutgoingMessage } from '../refactor/interface/message.interface';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { handleRequestservice } from './handle.request.service';
@@ -17,6 +17,11 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 import { EntityManagerProvider } from './entity.manager.provider.service';
 import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
 import { AssessmentSessionLogs } from '../models/assessment.session.model';
+import { DecisionRouter } from './langchain/decision.router.service';
+import { CacheMemory } from './cache.memory.service';
+import { Helper } from '../common/helper';
+import needle from "needle";
+import { sendTelegramButtonService } from './telegram.button.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class MessageFlow{
@@ -30,7 +35,8 @@ export class MessageFlow{
         @inject(GoogleTextToSpeech) private googleTextToSpeech?: GoogleTextToSpeech,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
-        @inject(ServeAssessmentService) private serveAssessmentService?: ServeAssessmentService,) {
+        @inject(ServeAssessmentService) private serveAssessmentService?: ServeAssessmentService,
+        @inject(DecisionRouter) private decisionRouter?: DecisionRouter) {
     }
 
     async checkTheFlow(messagetoDialogflow, channel: string, platformMessageService: platformServiceInterface){
@@ -57,6 +63,70 @@ export class MessageFlow{
             this.processMessage(messagetoDialogflow, channel, platformMessageService);
         }
         
+    }
+
+    async checkTheFlowRouter(messageToLlmRouter: Imessage, channel: string, platformMessageService: platformServiceInterface){
+        try {
+            const preprocessedOutgoingMessage = await this.preprocessOutgoingMessage(messageToLlmRouter);
+
+            console.log("The message is being set to make the decision");
+            const outgoingMessage: OutgoingMessage = await this.decisionRouter.getDecision(preprocessedOutgoingMessage.message, channel);
+            console.log("The outgoing message is being handled in routing");
+            const processedResponse = await this.handleRequestservice.handleUserRequestForRouting(outgoingMessage, platformMessageService);
+            const response = await this.processOutgoingMessage(messageToLlmRouter, channel, platformMessageService, processedResponse);
+
+            // Update the DB using message Id only if outgoing meesage is related with assessment
+            const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+            const assessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
+            const key = `${messageToLlmRouter.platformId}:NextQuestionFlag`;
+            const nextQuestionFlag = await CacheMemory.get(key);
+            if (nextQuestionFlag === true && outgoingMessage.PrimaryMessageHandler === "Assessments") {
+                const messageId = platformMessageService.getMessageIdFromResponse(response);
+                await this.serveAssessmentService.updateDBChatSessionWithMessageId(messageToLlmRouter.platformId, messageId, chatMessageRepository, assessmentSessionRepo);
+            }
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async preprocessOutgoingMessage(message: Imessage){
+        try {
+            const chatMessageObj = await this.engageMySQL(message);
+            const translate_message = await this.translate.translateMessage(message.type, message.messageBody, message.platformId);
+            message.messageBody = translate_message.message;
+            return { message, translate_message };
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async processOutgoingMessage(messageToLlmRouter: Imessage, channel: string, platformMessageService: platformServiceInterface, processedResponse){
+        try {
+            const response_format: Iresponse = await platformMessageService.postResponse(messageToLlmRouter, processedResponse);
+    
+            await this.saveResponseDataToUser(response_format, processedResponse);
+    
+            const intent = processedResponse.message_from_nlp.getIntent();
+            await this.saveIntent(intent, response_format.sessionId);
+    
+            const payload = processedResponse.message_from_nlp.getPayload();
+            if (processedResponse.message_from_nlp.getText()){
+                let message_to_platform = null;
+    
+                await this.replyInAudio(messageToLlmRouter, response_format);
+                message_to_platform = await platformMessageService.SendMediaMessage(response_format, payload);
+    
+                if (!processedResponse.message_from_nlp.getText()) {
+                    console.log('An error occured while sending message');
+                }
+                return message_to_platform;
+            } else {
+                console.log('An error occured while sending message');
+            }
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     async processMessage(messagetoDialogflow: Imessage, channel: string ,platformMessageService: platformServiceInterface) {
@@ -116,7 +186,9 @@ export class MessageFlow{
             if (msg.provider !== "REAN_BW") {
                 const languageForSession = await this.translate.detectUsersLanguage( msg.userId);
                 if (msg.agentName !== 'postman') {
-                    msg.message.Variables = JSON.parse(msg.message.Variables);
+                    if (typeof msg.message.Variables === "string") {
+                        msg.message.Variables = JSON.parse(msg.message.Variables);
+                    }
                 }
                 if (msg.message.Variables[`${languageForSession}`]) {
                     payload["variables"] = msg.message.Variables[`${languageForSession}`];
@@ -144,12 +216,23 @@ export class MessageFlow{
             payload = await sendApiButtonService(msg.payload);
         }
         else if (msg.type === "reancareAssessment") {
-            messageType = msg.type;
-            msg.type = 'template';
+
+            // make compatible for telegram also.
             const { metaPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment(msg, msg.payload);
+            if (metaPayload["channel"] === 'whatsappMeta') {
+                messageType = msg.type;
+                msg.type = 'template';
+                payload = metaPayload;
+            } else if (metaPayload["channel"] === 'telegram' || metaPayload["channel"] === 'Telegram') {
+                msg.message = metaPayload["messageText"];
+                msg.type = 'inline_keyboard';
+                msg["payload"] = [ "Dmc_Yes", "Dmc_No" ];
+            }
             assessmentSession = assessmentSessionLogs;
-            payload = metaPayload;
             console.log(`assessment record ${JSON.stringify(payload)}`);
+        }
+        if (msg.type === "inline_keyboard") {
+            payload = await sendTelegramButtonService([ "Yes",msg.payload[0], "No", msg.payload[1]]);
         }
         
         if (msg.message.ButtonsIds != null) {
@@ -190,6 +273,26 @@ export class MessageFlow{
             assessmentSession.userMessageId = message_to_platform.body.messages[0].id;
             const AssessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
             await AssessmentSessionRepo.create(assessmentSession);
+        }
+        if (msg.provider === "REAN_BOT" && message_to_platform.statusCode === 200) {
+            const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
+            let todayDate = new Date().toISOString()
+                .split('T')[0];
+            todayDate = Helper.removeLeadingZerosFromDay(todayDate);
+            const messageId = await platformMessageService.getMessageIdFromResponse(message_to_platform);
+            const phoneNumber = Helper.formatPhoneForDocProcessor(msg.userId);
+            const apiUrl = `${docProcessBaseURL}appointment-schedules/gmu/appointment-status/${phoneNumber}/days/${todayDate}`;
+            const headers = { headers : {
+                'Content-Type' : 'application/json',
+                Accept         : 'application/json',
+            }
+            };
+            const obj = {
+                "WhatsApp_message_id" : messageId,
+                "Patient_replied"     : "Not replied"
+            };
+            await needle("put", apiUrl, obj, headers);
+
         }
         return message_to_platform;
     }

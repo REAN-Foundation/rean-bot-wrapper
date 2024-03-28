@@ -39,6 +39,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(messageObj.getText());
         const messageToDialogflow = this.inputMessageFormat(messageObj);
         messageToDialogflow.messageBody = messageObj.getText();
+        messageToDialogflow.intent = messageObj.getInLineKeyBoardReplyButton().id;
         if (emojiFilteredMessage === "NegativeFeedback"){
             messageToDialogflow.intent = "NegativeFeedback";
         }

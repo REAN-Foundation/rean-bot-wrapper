@@ -64,10 +64,14 @@ export class TelegramPostResponseFunctionalities {
         // eslint-disable-next-line max-len
         const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: userPlatformID } });
-        const id = respChatMessage[respChatMessage.length - 1].id;
-        await chatMessageRepository.update({ responseMessageID: responseId }, { where: { id: id } } )
-            .then(() => { console.log("updated telegram respomse id"); })
-            .catch(error => console.log("error on update", error));
+        if (respChatMessage.length > 0 )
+        {
+            const id = respChatMessage[respChatMessage.length - 1].id;
+            await chatMessageRepository.update({ responseMessageID: responseId }, { where: { id: id } } )
+                .then(() => { console.log("updated telegram respomse id"); })
+                .catch(error => console.log("error on update", error));
+        }
+
     };
 
     sanitizeMessage = (message) => {
@@ -112,10 +116,29 @@ export class TelegramPostResponseFunctionalities {
         }
         console.log('listOfVerticalKeyboard',listOfButtons);
 
+        const listOfVerticalKeyboard = [];
+        for (const ele of listOfButtonsFromPayload) {
+            const listOfVerticalKeyboardFromPayload = ele.listValue.values;
+            for (const ele_v of listOfVerticalKeyboardFromPayload) {
+                const tempButton =
+                {
+                    text          : ele_v.structValue.fields.text.stringValue,
+                    callback_data : ele_v.structValue.fields.callback_data.stringValue
+                };
+                
+                listOfVerticalKeyboard.push([tempButton]);
+            }
+        }
+
         const keyboard = {
             inline_keyboard : listOfButtons
         };
+
+        if (payload["typeOfButton"] && payload.typeOfButton === "vertical" ) {
+            keyboard.inline_keyboard = listOfVerticalKeyboard;
+        }
         const keyboard1 = payload.fields.buttons.listValue.values;
+
         console.log(keyboard);
         console.log(keyboard1);
     
@@ -123,7 +146,7 @@ export class TelegramPostResponseFunctionalities {
             reply_markup : JSON.stringify(keyboard)
         };
 
-        telegram.sendMessage(response_format.sessionId, message, opts).then(async function (data) {
+        await telegram.sendMessage(response_format.sessionId, message, opts).then(async function (data) {
             responseId = data.message_id;
             telegramResponseData = data;
         });

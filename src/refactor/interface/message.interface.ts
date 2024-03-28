@@ -1,4 +1,5 @@
 import { IserviceResponseFunctionalities } from "../../services/response.format/response.interface";
+import { MessageHandlerType, NlpProviderType, UserFeedbackType, ChannelType } from "../messageTypes/message.types";
 
 export interface Imessage{
     name : string;
@@ -42,6 +43,12 @@ export interface feedbackmessage{
     messageContent : string;
     channel : string;
     ts : string;
+}
+
+export interface IuserConsent{
+consentId?: number;
+userPlatformID:string;
+consentGiven: string;
 }
 
 export interface IchatMessage {
@@ -122,4 +129,60 @@ export interface assessmentSessionLogs{
     userResponse: string;
     userResponseTime: Date;
     userMessageId: string;
+}
+
+export interface consentInfo{
+    autoIncrementalID?: number;
+    Language:string;
+    LanguageCode:string;
+    MessageContent:string;
+    WebsiteURL:string;
+}
+
+export interface IntentDetails {
+    NLPProvider : NlpProviderType;
+    IntentName  : string;
+    Confidence ?: number;
+    IntentContent ?: any;
+}
+
+export interface AssessmentDetails {
+    AssessmentId    : string;
+    AssessmentName  : string;
+    TemplateId      : string;
+    CurrentNodeId  ?: string;
+    Question       ?: string;
+    Hint           ?: string;
+    UserResponse   ?: string | number | boolean | unknown;
+}
+
+export interface Feedback {
+    FeedbackContent ?: string;
+    FeedbackType    ?: UserFeedbackType;
+    SupportHandler  ?: SupportChannel;
+}
+
+export interface MessageChannelDetails {
+    Channel     : ChannelType;
+    ChannelUserId ?: string;
+    ChannelMessageId ?: string;
+    ChannelResponseMessageId ?: string;
+}
+
+export interface SupportChannel extends MessageChannelDetails {
+    SupportTaskId: string;
+}
+
+export interface QnADetails {
+    NLPProvider     : NlpProviderType;
+    UserQuery       : string;
+}
+
+export interface OutgoingMessage {
+    PrimaryMessageHandler: MessageHandlerType;
+    MetaData             : Imessage;
+    Intent              ?: IntentDetails;
+    Assessment          ?: AssessmentDetails;
+    Feedback            ?: Feedback;
+    QnA                 ?: QnADetails;
 }

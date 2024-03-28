@@ -391,4 +391,20 @@ export class Helper {
         return possiblePhoneNumbers;
     };
 
+    public static formatPhoneForDocProcessor(phoneNumber: string): string {
+
+        // Extract the country code and remaining digits
+        const remainingDigits = phoneNumber.substring(phoneNumber.length - 10);
+        const countryCode = phoneNumber.replace(remainingDigits, "");
+        const formattedNumber = `${countryCode}-${remainingDigits}`;
+        return formattedNumber;
+    }
+
+    public static removeLeadingZerosFromDay(dateString: string): string {
+        const [year, month, day] = dateString.split('-');
+        const formattedDay = parseInt(day).toString(); // Remove leading zeros
+    
+        return `${year}-${month}-${formattedDay}`;
+    }
+
 }
