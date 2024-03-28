@@ -176,6 +176,10 @@ export class MessageFlow{
         let payload = {};
         let messageType = "";
         let assessmentSession = null;
+        const contactList = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
+        const personContactList = await contactList.findOne({ where: { mobileNumber: msg.userId } });
+        const personName = personContactList.username;
+
         if (msg.type === "template") {
             payload["templateName"] = msg.templateName;
             if (msg.agentName !== 'postman') {
@@ -201,16 +205,9 @@ export class MessageFlow{
         }
         else if (msg.type === "text") {
             
-            //const translatedMessage = await this.translate.translatePushNotifications( msg.message, msg.userId);
-            const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-            if (clientName === "KENYA_MATERNAL") {
-                const languageForSession = await this.translate.detectUsersLanguage( msg.userId);
-                if (msg.agentName !== 'postman') {
-                    msg.message = JSON.parse(msg.message);
-                }
-                msg.message = msg.message[`${languageForSession}`];
-                msg.message = await msg.message.replace("PatientName", msg.payload.PersonName ?? "");
-            }
+            msg.message = await msg.message.replace("PatientName", msg.payload.PersonName ?? personName);
+            msg.message = await this.translate.translatePushNotifications( msg.message, msg.userId);
+            msg.message = msg.message[0];
         }
         else if (msg.type === "interactivebuttons") {
             payload = await sendApiButtonService(msg.payload);
