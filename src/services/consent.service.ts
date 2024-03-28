@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import { UserConsent } from '../models/user.consent.model';
 import { Logger } from '../common/logger';
@@ -13,6 +14,7 @@ import { sendApiButtonService } from './whatsappmeta.button.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ConsentService {
+    
     private _platformMessageService?: platformServiceInterface;
 
     constructor(
@@ -22,11 +24,12 @@ export class ConsentService {
         @inject(translateService) private translate?: translateService,
     ){}
 
-    async handleConsentYesreply(userId): Promise<any> {
+    async handleConsentYesreply(userId,eventObj): Promise<any> {
         try {
             const userID = userId;
+            const clientEnvironmentProviderService = eventObj.container.resolve(ClientEnvironmentProviderService);
             const userConsentRepository =
-            (await this.entityManagerProvider.getEntityManager(this.clientEnvironment)).getRepository(UserConsent);
+            (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(UserConsent);
             const consentStatus =
             await userConsentRepository.findOne({ where: { userPlatformID: userId } });
             if (consentStatus){
@@ -45,10 +48,14 @@ export class ConsentService {
         }
     }
 
-    async handleConsentNoreply(userId): Promise<any> {
+    async handleConsentNoreply(userId,req): Promise<any> {
         try {
-            const userConsentRepository =
-            (await this.entityManagerProvider.getEntityManager(this.clientEnvironment)).getRepository(UserConsent);
+            const clientEnvironmentProviderService = await req.container.resolve(ClientEnvironmentProviderService);
+            const clientName = await  clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            console.log(clientName);
+            const entityManagerProvider = req.container.resolve(EntityManagerProvider);
+            const userConsentRepository = 
+            (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(UserConsent);
             const consentStatus =
             await userConsentRepository.findOne({ where: { userPlatformID: userId } });
             if (consentStatus){
@@ -71,19 +78,24 @@ export class ConsentService {
     }
 
     async handleConsentRequest(req,userId,consentReply,languageCode,consentRepository,res,buttonmessageType){
+        const clientEnvironmentProviderService = await req.container.resolve(ClientEnvironmentProviderService);
+        const clientName = await  clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+        console.log(clientName);
+        const entityManagerProvider = req.container.resolve(EntityManagerProvider);
+        
         this._platformMessageService = req.container.resolve(req.params.channel);
         this._platformMessageService.res = res;
         let payload = null;
         if (consentReply === "consent_no"){
             console.log("No Consent is Given");
-            const userConsentRepository =
-            (await this.entityManagerProvider.getEntityManager(this.clientEnvironment )).getRepository(UserConsent);
+            const userConsentRepository = 
+            (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(UserConsent);
             const consentStatus =
             await userConsentRepository.findOne({ where: { userPlatformID: userId } });
             if (consentStatus){
                 await consentStatus.update({ consentGiven: "false" });
             }
-            const message =  this.clientEnvironment.getClientEnvironmentVariable("CONSENT_NO_MESSAGE");
+            const message =  clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_NO_MESSAGE");
             const messageType = "text";
             this.customConsent(req, this._platformMessageService, message, messageType, userId , payload);
         }

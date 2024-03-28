@@ -66,7 +66,7 @@ import { GenerateCertificateListener } from './intentListeners/bloodWarrior/gene
 import { GenerateCertificateYesListener } from './intentListeners/bloodWarrior/generate.certificate.yes.listener';
 import { GenerateCertificateConfirmYesListener } from './intentListeners/bloodWarrior/generate.certificate.confirm.yes.listener';
 import { GeneralReminderListener } from './intentListeners/medicationReminder/general.reminder.listener';
-import { MedicationReminderListener } from './intentListeners/medicationReminder/medication.reminder.listener';
+import { ReminderFrequencyListener, SendFrequencyButtonsListener } from './intentListeners/medicationReminder/reminder.ask.frequency.listener';
 import { ReminderAskTimeListener } from './intentListeners/medicationReminder/reminder.ask.time.listener';
 import { DmcAssessmentAnswerYesListener } from './intentListeners/maternity.careplan/answer.yes.listener';
 import { RegistrationPerMinuteMsgListener } from './intentListeners/maternity.careplan/regstration.per.minute.listener';
@@ -76,6 +76,7 @@ import { AppointmentReminderListener, AppointmentReminderReplyListener } from '.
 import { ReminderRegistrationListener } from './intentListeners/medicationReminder/reminder.registration.listener';
 import { CommonAssessmentListener } from './intentListeners/commonAssessment/common.assessment.listener';
 import {ConsentYesListner} from './intentListeners/consentListners/consent.yes.listner';
+import { DeleteReminderListener } from './intentListeners/medicationReminder/delete.reminder.listener';
 /*
  * Init function (being called during application bootstrap)
  * This is the place to register any new intent and corresponding listeners
@@ -221,8 +222,6 @@ export class IntentRegister {
         IntentEmitter.registerListener('Generate_Certificate', GenerateCertificateListener);
         IntentEmitter.registerListener('Generate_Certificate_Yes', GenerateCertificateYesListener);
         IntentEmitter.registerListener('Generate_Certificate_Confirm_Yes', GenerateCertificateConfirmYesListener);
-        IntentEmitter.registerListener('M_Medication_Data', MedicationReminderListener);
-        IntentEmitter.registerListener('M_Medication_Data_Yes', MedicationReminderListener);
         IntentEmitter.registerListener('General_Reminder', GeneralReminderListener);
         IntentEmitter.registerListener('Reminder_Ask_Time', ReminderAskTimeListener);
         IntentEmitter.registerListener('Dmc_Yes', DmcAssessmentAnswerYesListener);
@@ -236,6 +235,11 @@ export class IntentRegister {
         IntentEmitter.registerListener('AssessmentBloodPressure', CommonAssessmentListener);
         IntentEmitter.registerListener('Reminder_Reply_Yes', AppointmentReminderReplyListener);
         IntentEmitter.registerListener('Reminder_Reply_No', AppointmentReminderReplyListener);
+        IntentEmitter.registerListener('Reminder_Frequency_Once', ReminderFrequencyListener);
+        IntentEmitter.registerListener('Reminder_Frequency_Daily', ReminderFrequencyListener);
+        IntentEmitter.registerListener('Reminder_Frequency_Weekly', ReminderFrequencyListener);
+        IntentEmitter.registerListener('Reminder_Ask_Frequency', SendFrequencyButtonsListener);
+        IntentEmitter.registerListener('Reminder_Delete', DeleteReminderListener);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
