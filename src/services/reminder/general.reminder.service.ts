@@ -12,6 +12,7 @@ import { OpenAIResponseService } from '../openai.response.service';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 import { CacheMemory } from '../cache.memory.service';
 import { NotificationType, ReminderBody, ReminderDomainModel, ReminderType, RepeatAfterEveryNUnit } from '../../domain.types/reminder/reminder.domain.model';
+import { DATE } from 'sequelize';
 
 @scoped(Lifecycle.ContainerScoped)
 export class GeneralReminderService {
@@ -44,13 +45,17 @@ export class GeneralReminderService {
             let dffMessage = "";
             date = date.split("T")[0];
             time = time.split("T")[1];
+            time = time.split(":");
+            const updateTime = `${time[0]}:${time[1]}:00`;
+
+            //const updatedate = `${date}T${new Date().getHours}`;
 
             const jsonFormat: ReminderBody = {
                 TaskName      : `${eventName} reminder`,
                 TaskType      : eventName,
                 Frequency     : frequency,
                 DayName       : dayName,
-                StartDateTime : `${date}T${time}`,
+                StartDateTime : `${date}T${updateTime}`,
                 MedicineName  : null,
                 PatientUserId : null,
                 DateString    : dateString,
@@ -64,6 +69,11 @@ export class GeneralReminderService {
                 personPhoneNumber, personName);
             jsonFormat.PatientUserId = patientUserId;
             jsonFormat.TaskName = `${eventName} reminder`;
+
+            // const getPatientUrl = `patients/${patientUserId}`;
+            // const res = await this.needleService.needleRequestForREAN('get', getPatientUrl);
+            // const userTimeZone = res.Data.Patient.User.CurrentTimeZone;
+            //jsonFormat.StartDateTime = TimeHelper.convertGMTToLocal(date, time, userTimeZone);
             console.log(jsonFormat);
             await CacheMemory.set(phoneNumber, jsonFormat);
 
@@ -72,10 +82,10 @@ export class GeneralReminderService {
             
             if (jsonFormat.TaskType === 'medication' && frequency === "" ) {
                 console.log(`trigerring the ${jsonFormat.TaskType} reminder event`);
-                return await this.dialoflowMessageFormattingService.triggerIntent("M_Medication_Data",eventObj);
+                return await this.dialoflowMessageFormattingService.triggerIntent("Reminder_Ask_Frequency",eventObj);
 
             } else {
-                const response = await this.createCommonReminders(eventObj, jsonFormat.Frequency, jsonFormat, patientUserId, whenDay, whenTime, personName,
+                const response = await this.createCommonReminders(eventObj, jsonFormat.Frequency, jsonFormat, patientUserId, date, updateTime, personName,
                     personPhoneNumber, dayName );
                 if (response.Status === 'failure') {
                     dffMessage = `Sorry for the inconvenience. The reminder couldn't be set because the provided date and time cannot be in the past.`;
@@ -130,10 +140,12 @@ export class GeneralReminderService {
 
             } else if (frequency === "Weekly"){
                 apiURL = `reminders/repeat-every-week-on-days`;
-                dayName = TimeHelper.getWeekday(new Date(jsonFormat.StartDateTime), false);
+                if (dayName === '') {
+                    dayName = [TimeHelper.getWeekday(new Date(jsonFormat.StartDateTime), false)];
+                }
                 obj.ReminderType = ReminderType.RepeatEveryWeekday;
                 obj.EndAfterNRepetitions = 12;
-                obj.RepeatList = [ dayName ];
+                obj.RepeatList = dayName;
 
             } else if (frequency === "Hourly"){
                 apiURL = `reminders/repeat-every-hour`;
@@ -289,12 +301,26 @@ export class GeneralReminderService {
     }
 
     private getUserResponse(jsonFormat: ReminderBody, dffMessage: string, timeString: any, dateString: string) {
+        let preposition = "on";
+        if (jsonFormat.Frequency === "Daily") {
+            preposition = "from";
+        }
         if (jsonFormat.TaskType === 'medication') {
-            dffMessage = `Your medication 💊 reminder has been successfully set, and you will receive a notification at ${timeString} on ${dateString}.`;
+            dffMessage = `Your medication 💊 reminder has been successfully set, and you will receive a ${this.getfrequencyTerm(jsonFormat.Frequency)} notification at ${timeString} ${preposition} ${dateString}.`;
         } else {
-            dffMessage = `Your ${jsonFormat.TaskType} reminder has been successfully set, and you will receive a notification at ${timeString} on ${dateString}.`;
+            dffMessage = `Your ${jsonFormat.TaskType} reminder has been successfully set, and you will receive a ${this.getfrequencyTerm(jsonFormat.Frequency)} notification at ${timeString} ${preposition} ${dateString}.`;
         }
         return dffMessage;
     }
+
+    public getfrequencyTerm = (frequency) => {
+        const message = {
+            "Once"    : "",
+            "Daily"   : "daily",
+            "Weekly"  : "weekly",
+            "Monthly" : "monthly"
+        };
+        return message[frequency] ?? "";
+    };
 
 }

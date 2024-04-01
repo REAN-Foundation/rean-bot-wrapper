@@ -116,10 +116,29 @@ export class TelegramPostResponseFunctionalities {
         }
         console.log('listOfVerticalKeyboard',listOfButtons);
 
+        const listOfVerticalKeyboard = [];
+        for (const ele of listOfButtonsFromPayload) {
+            const listOfVerticalKeyboardFromPayload = ele.listValue.values;
+            for (const ele_v of listOfVerticalKeyboardFromPayload) {
+                const tempButton =
+                {
+                    text          : ele_v.structValue.fields.text.stringValue,
+                    callback_data : ele_v.structValue.fields.callback_data.stringValue
+                };
+                
+                listOfVerticalKeyboard.push([tempButton]);
+            }
+        }
+
         const keyboard = {
             inline_keyboard : listOfButtons
         };
+
+        if (payload["typeOfButton"] && payload.typeOfButton === "vertical" ) {
+            keyboard.inline_keyboard = listOfVerticalKeyboard;
+        }
         const keyboard1 = payload.fields.buttons.listValue.values;
+
         console.log(keyboard);
         console.log(keyboard1);
     
