@@ -142,8 +142,10 @@ export class DialogflowResponseService {
             result = await this.needleService.needleRequestForREAN("get", apiURL);
         }
         else{
+
             //handle if any other plateform
         }
+        
         if (result.Data) {
             if (result.Data.Patients.Items.length === 0) {
                 return null;
