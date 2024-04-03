@@ -15,7 +15,7 @@ export class CustomMLModelResponseService{
         private dialogflowResponseService?:DialogflowResponseService){}
 
     getCustomModelResponse = async(message: string, platform: string = null, completeMessage:Imessage = null) =>{
-        console.log("Inside the custom model response service")
+        console.log("Inside the custom model response service");
         const customModelUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CUSTOM_ML_MODEL_URL");
         console.log(customModelUrl);
         const obj = { "userID": completeMessage.platformId,"user_query": message };
