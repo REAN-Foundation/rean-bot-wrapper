@@ -137,10 +137,15 @@ export class DialogflowResponseService {
             const apiURL = `patients/search?userName=${completeMessage.platformId}`;
             result = await this.needleService.needleRequestForREAN("get", apiURL);
 
-        } else if (completeMessage.platform === "whatsappMeta") {
+        } else if (completeMessage.platform === "whatsappMeta" || completeMessage.platform === "whatsapp") {
             const apiURL = `patients/byPhone?phone=${encodeURIComponent(this.getPatientInfoService.convertPhoneNumber(completeMessage.platformId))}`;
             result = await this.needleService.needleRequestForREAN("get", apiURL);
         }
+        else {
+
+            //handle if any other plateform
+        }
+
         if (result) {
             if (result.Data.Patients.Items.length === 0) {
                 return null;

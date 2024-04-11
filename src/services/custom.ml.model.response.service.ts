@@ -15,7 +15,9 @@ export class CustomMLModelResponseService{
         private dialogflowResponseService?:DialogflowResponseService){}
 
     getCustomModelResponse = async(message: string, platform: string = null, completeMessage:Imessage = null) =>{
+        console.log("Inside the custom model response service");
         const customModelUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CUSTOM_ML_MODEL_URL");
+        console.log(customModelUrl);
         const obj = { "userID": completeMessage.platformId,"user_query": message };
         
         // send authorisation once enabled for the custom model
@@ -33,6 +35,7 @@ export class CustomMLModelResponseService{
         const callCustomModel = await needle("post",customModelUrl,obj,options);
         const customModelResponseFormat = new CustomModelResponseFormat(callCustomModel);
         const text = customModelResponseFormat.getText();
+        console.log(customModelResponseFormat);
         return customModelResponseFormat;
 
         // const response = await this.dialogflowResponseService.getDialogflowMessage(text.answer, platform, text.intent, completeMessage);
