@@ -141,7 +141,7 @@ export class DialogflowResponseService {
             const apiURL = `patients/byPhone?phone=${encodeURIComponent(this.getPatientInfoService.convertPhoneNumber(completeMessage.platformId))}`;
             result = await this.needleService.needleRequestForREAN("get", apiURL);
         }
-        if (result.Data) {
+        if (result) {
             if (result.Data.Patients.Items.length === 0) {
                 return null;
             } else {
