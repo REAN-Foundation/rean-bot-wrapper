@@ -11,6 +11,7 @@ import { RegistrationPerMinMsgService } from './maternalCareplan/registration.pe
 import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
 import { ChecklistDateValidationService } from './bloodWrrior/checklist.date.validation.service';
 import { NoBabyMovementAssessmentService } from './commonAssesssment/common.assessment.service';
+import { CincinnatiPerMinMsgService } from './maternalCareplan/cincannati.demo';
 
 export interface QueueDoaminModel {
     Intent : string;
@@ -119,6 +120,13 @@ export class FireAndForgetService {
             const registrationPerMinMsgService:  RegistrationPerMinMsgService =
                 eventObj.container.resolve(RegistrationPerMinMsgService);
             await registrationPerMinMsgService.collectMessage(eventObj);
+            console.log(`Fire and Forget Domain Model: ${model}`);
+        }
+        if (model.Intent === "cincinnati_PerMinMsg") {
+            const eventObj = model.Body.EventObj;
+            const cincinnatiPerMinMsgService:  CincinnatiPerMinMsgService =
+                eventObj.container.resolve(CincinnatiPerMinMsgService);
+            await cincinnatiPerMinMsgService.collectMessage(eventObj);
             console.log(`Fire and Forget Domain Model: ${model}`);
         }
         if (model.Intent === "Checklist_Yes_Date") {
