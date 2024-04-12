@@ -1,0 +1,15 @@
+[{
+    "Sequence": 1,
+    "Message": "Does the mitral valve appear thickened based on this ultrasound image? Refer Image: https://d3uqieugp2i3ic.cloudfront.net/temp/Cincinnati_Data/cincinnati_1.png",
+    "ButtonArray":["Yes","MessageYes1","No","MessageNo1"]
+},
+{
+    "Sequence": 2,
+    "Message": "Based on this ultrasound image in the five-chamber view, is the aortic valve visualized clearly? Image link : https://d3uqieugp2i3ic.cloudfront.net/temp/Cincinnati_Data/cincinnati_2.jpg",
+    "ButtonArray":["Yes","MessageYes2","No","MessageNo2"]
+},
+{
+    "Sequence": 3,
+    "Message": " Does this ultrasound image show a significant pericardial effusion (fluid around the heart)? Image Link : https://d3uqieugp2i3ic.cloudfront.net/temp/Cincinnati_Data/cincinnati_3.jpg",
+    "ButtonArray":["Yes","MessageYes3","No","MessageNo3"]
+}]
