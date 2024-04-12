@@ -83,5 +83,5 @@ export class CalorieInfo extends Model implements calorieInfo {
         record_date: Date;
 
     @HasMany(() => CalorieDatabase)
-        CalorieDatabase: CalorieDatabase[];
+    CalorieDatabase: CalorieDatabase[];
 }

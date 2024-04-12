@@ -146,7 +146,7 @@ export class DialogflowResponseService {
             //handle if any other plateform
         }
 
-        if (result.Data) {
+        if (result) {
             if (result.Data.Patients.Items.length === 0) {
                 return null;
             } else {
