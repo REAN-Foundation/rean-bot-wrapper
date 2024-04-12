@@ -65,12 +65,9 @@ export class CincinnatiPerMinMsgService {
             payload.source = "telegram";
         }
         this._platformMessageService = eventObj.container.resolve(payload.source);
-        const name : string = eventObj.body.originalDetectIntentRequest.payload.userName;
-        const b = eventObj.body.session;
-        const patientPhoneNumber = b.split("/", 5)[4];
-        console.log(`user id in registration flow ${patientPhoneNumber}`);
+        const name : string = payload.userName;
         response_format.platform = payload.source;
-        response_format.sessionId = patientPhoneNumber;
+        response_format.sessionId = payload.userId;
         response_format.messageText = `Hi ` + `${name},` + `\n` + msg.Message;
         response_format.message_type = "inline_keyboard";
         const buttonPayload = await sendTelegramButtonService(msg.ButtonArray);
