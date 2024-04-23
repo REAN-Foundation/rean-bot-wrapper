@@ -80,7 +80,7 @@ export class TelegramMessageService implements platformServiceInterface{
         const pasrseMode = processedResponse.message_from_nlp.getParseMode();
         const intent = processedResponse.message_from_nlp.getIntent();
         const payload = processedResponse.message_from_nlp.getPayload();
-        const similarDoc = processedResponse.message_from_nlp.getSimilarDoc()
+        const similarDoc = processedResponse.message_from_nlp.getSimilarDoc();
 
         if (image && image.url) {
             reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",intent: intent,messageBody: image.url, messageImageUrl: image.url , messageImageCaption: image.caption, sessionId: telegram_id, messageText: processedResponse.processed_message[0], similarDoc: similarDoc };

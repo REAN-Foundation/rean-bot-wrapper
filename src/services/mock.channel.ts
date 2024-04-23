@@ -17,7 +17,9 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 export class MockMessageService implements platformServiceInterface {
 
     public res;
+
     private req;
+
     constructor(@inject(delay(() => MessageFlow)) public messageFlow,
         @inject( AwsS3manager ) private awsS3manager?: AwsS3manager,
         @inject(MockCHannelMessageFunctionalities) private messageFunctionalitiesmockchannel?: MockCHannelMessageFunctionalities,
@@ -47,7 +49,7 @@ export class MockMessageService implements platformServiceInterface {
             if (mockMessagetoDialogflow) {
                 mockMessagetoDialogflow.platform = 'MockChannel';
                 const response = await this.messageFlow.checkTheFlowRouter(mockMessagetoDialogflow, channel, this);
-                return response
+                return response;
             }
         }
 
@@ -123,12 +125,12 @@ export class MockMessageService implements platformServiceInterface {
         const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.sessionId } });
         const lastMessageDate = respChatMessage[respChatMessage.length - 1].createdAt;
         const obj = { timeStamp: lastMessageDate, message: response_format.messageText };
-        if(this.req.test_method === "RAGAS"){
-           return {
-                "answer": response_format.messageText,
-                "intent": response_format.intent,
-                "similar_docs": response_format.similarDoc
-            }
+        if (this.req.test_method === "RAGAS") {
+            return {
+                "answer" : response_format.messageText,
+                "intent" : response_format.intent,
+                "similar_docs" : response_format.similarDoc
+            };
         }
         else {
             const mockUri = "http://127.0.0.1:80/listener";
@@ -176,7 +178,7 @@ export class MockMessageService implements platformServiceInterface {
         const pasrseMode = processedResponse.message_from_nlp.getParseMode();
         const payload = processedResponse.message_from_nlp.getPayload();
         const intent = processedResponse.message_from_nlp.getIntent();
-        const similarDoc = processedResponse.message_from_nlp.getSimilarDoc()
+        const similarDoc = processedResponse.message_from_nlp.getSimilarDoc();
 
         if (processedResponse) {
             if (image && image.url) {

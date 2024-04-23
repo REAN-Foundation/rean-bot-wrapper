@@ -71,7 +71,7 @@ export class CommonWhatsappService implements platformServiceInterface {
 
         if (processedResponse) {
             if (image && image.url) {
-                reaponse_message = { name: user_name, platform: platform, chat_message_id: chat_message_id, direction: "Out", message_type: "image", intent: intent, messageBody: image.url, messageImageUrl: image.url, messageImageCaption: image.caption, sessionId: whatsapp_id, input_message: input_message, messageText: image.caption, similarDoc: similar_doc};
+                reaponse_message = { name: user_name, platform: platform, chat_message_id: chat_message_id, direction: "Out", message_type: "image", intent: intent, messageBody: image.url, messageImageUrl: image.url, messageImageCaption: image.caption, sessionId: whatsapp_id, input_message: input_message, messageText: image.caption, similarDoc: similar_doc };
             }
             else if (processedResponse.processed_message.length > 1) {
                 if (pasrseMode && pasrseMode === 'HTML') {

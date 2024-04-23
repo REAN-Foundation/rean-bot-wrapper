@@ -116,8 +116,9 @@ export class DialogflowResponseFormat implements IserviceResponseFunctionalities
     }
 
     getSimilarDoc() {
+
         //no similar doc in dialogflow
-        return null
+        return null;
     }
 
 }
