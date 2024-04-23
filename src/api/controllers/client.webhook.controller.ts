@@ -4,7 +4,6 @@ import { ErrorHandler } from '../../utils/error.handler';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { scoped, Lifecycle, inject } from 'tsyringe';
 import { clientAuthenticator } from '../../services/clientAuthenticator/client.authenticator.interface';
-import util from 'util';
 import { ChatMessage } from '../../models/chat.message.model';
 import { EntityManagerProvider } from '../../services/entity.manager.provider.service';
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
@@ -12,7 +11,7 @@ import { ContactList } from '../../models/contact.list';
 import { ConsentInfo } from '../../models/consent.info.model';
 import { translateService } from '../../services/translate.service';
 import { UserConsent } from '../../models/user.consent.model';
-import {ConsentService} from '../../services/consent.service';
+import { ConsentService } from '../../services/consent.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ClientWebhookController {
@@ -138,7 +137,8 @@ export class ClientWebhookController {
                     console.log("Processing the consent message for telegram");
                     await this.handleConsentMessage(req, res,req.body,"inline_keyboard",req.params.channel);
                 }
-                else if(req.params.channel === "mockChannel"){
+                else if (req.params.channel === "mockChannel"){
+                    
                     //this condition is for test automations using mockchannel
                     const response = await this._platformMessageService.handleMessage(req.body, req.params.channel);
                     return res.status(200).send(response);
