@@ -80,9 +80,10 @@ export class TelegramMessageService implements platformServiceInterface{
         const pasrseMode = processedResponse.message_from_nlp.getParseMode();
         const intent = processedResponse.message_from_nlp.getIntent();
         const payload = processedResponse.message_from_nlp.getPayload();
+        const similarDoc = processedResponse.message_from_nlp.getSimilarDoc()
 
         if (image && image.url) {
-            reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",intent: intent,messageBody: image.url, messageImageUrl: image.url , messageImageCaption: image.caption, sessionId: telegram_id, messageText: processedResponse.processed_message[0] };
+            reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",intent: intent,messageBody: image.url, messageImageUrl: image.url , messageImageCaption: image.caption, sessionId: telegram_id, messageText: processedResponse.processed_message[0], similarDoc: similarDoc };
         }
         else if (processedResponse.processed_message.length > 1) {
 
@@ -91,12 +92,12 @@ export class TelegramMessageService implements platformServiceInterface{
                 const uploadImageName = await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
                 const vaacinationImageFile = await this.awsS3manager.uploadFile(uploadImageName);
                 if (vaacinationImageFile) {
-                    reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",intent: intent,messageBody: String(vaacinationImageFile), messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[1] };
+                    reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",intent: intent,messageBody: String(vaacinationImageFile), messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[1], similarDoc: similarDoc };
                 }
             }
             else {
-                reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "text",intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[0] };
-                reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "text",intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[1] };
+                reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "text",intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[0], similarDoc: similarDoc };
+                reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "text",intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[1], similarDoc: similarDoc };
             }
         } else {
             let message_type = "text";
@@ -106,7 +107,7 @@ export class TelegramMessageService implements platformServiceInterface{
                     message_type = "inline_keyboard";
                 }
             }
-            reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: message_type,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[0] };
+            reaponse_message = { name: name,platform: "Telegram",chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: message_type,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[0], similarDoc: similarDoc };
         }
         return reaponse_message;
         
@@ -125,7 +126,8 @@ export class TelegramMessageService implements platformServiceInterface{
             messageImageUrl     : null,
             messageImageCaption : null,
             sessionId           : requestBody.userId,
-            messageText         : requestBody.message
+            messageText         : requestBody.message,
+            similarDoc          : null
         };
         return response_message;
     }

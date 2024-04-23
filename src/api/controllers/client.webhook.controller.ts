@@ -125,7 +125,7 @@ export class ClientWebhookController {
                 this.sendSuccessMessage(chatMessageRepository,res,statuses);
             }
             else {
-                const validChannels = ["REAN_SUPPORT", "slack", "SNEHA_SUPPORT"];
+                const validChannels = ["REAN_SUPPORT", "slack", "SNEHA_SUPPORT", "mockChannel"];
                 if (!validChannels.includes(req.params.channel)) {
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
                 }
@@ -137,6 +137,11 @@ export class ClientWebhookController {
                 if (consentActivation && req.params.channel === "telegram"){
                     console.log("Processing the consent message for telegram");
                     await this.handleConsentMessage(req, res,req.body,"inline_keyboard",req.params.channel);
+                }
+                else if(req.params.channel === "mockChannel"){
+                    //this condition is for test automations using mockchannel
+                    const response = await this._platformMessageService.handleMessage(req.body, req.params.channel);
+                    return res.status(200).send(response);
                 }
                 else {
                     this._platformMessageService.handleMessage(req.body, req.params.channel);

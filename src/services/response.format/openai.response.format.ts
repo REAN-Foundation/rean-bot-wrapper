@@ -39,4 +39,9 @@ export class OpenAIResponseFormat implements IserviceResponseFunctionalities{
         return parse_mode;
     }
 
+    getSimilarDoc(){
+        //not implemented
+        return null;
+    }
+
 }
