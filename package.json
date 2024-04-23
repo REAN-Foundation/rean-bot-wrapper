@@ -62,7 +62,7 @@
     "lodash": "^4.17.20",
     "luxon": "^3.4.3",
     "moment-timezone": "^0.5.45",
-    "mysql2": "^3.6.5",
+    "mysql2": "^3.9.7",
     "needle": "^2.9.1",
     "node-cron": "^2.0.3",
     "node-html-to-image": "^4.0.0",
