@@ -67,10 +67,11 @@ export class CommonWhatsappService implements platformServiceInterface {
         const pasrseMode = processedResponse.message_from_nlp.getParseMode();
         const payload = processedResponse.message_from_nlp.getPayload();
         const intent = processedResponse.message_from_nlp.getIntent();
+        const similar_doc = processedResponse.message_from_nlp.getSimilarDoc();
 
         if (processedResponse) {
             if (image && image.url) {
-                reaponse_message = { name: user_name, platform: platform, chat_message_id: chat_message_id, direction: "Out", message_type: "image", intent: intent, messageBody: image.url, messageImageUrl: image.url, messageImageCaption: image.caption, sessionId: whatsapp_id, input_message: input_message, messageText: image.caption };
+                reaponse_message = { name: user_name, platform: platform, chat_message_id: chat_message_id, direction: "Out", message_type: "image", intent: intent, messageBody: image.url, messageImageUrl: image.url, messageImageCaption: image.caption, sessionId: whatsapp_id, input_message: input_message, messageText: image.caption, similarDoc: similar_doc };
             }
             else if (processedResponse.processed_message.length > 1) {
                 if (pasrseMode && pasrseMode === 'HTML') {
@@ -78,12 +79,12 @@ export class CommonWhatsappService implements platformServiceInterface {
                     const uploadImageName = await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
                     const vaacinationImageFile = await this.awsS3manager.uploadFile(uploadImageName);
                     if (vaacinationImageFile) {
-                        reaponse_message = { name: user_name, platform: platform, chat_message_id: chat_message_id, direction: "Out", message_type: "image", intent: intent, messageBody: String(vaacinationImageFile), messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[1] };
+                        reaponse_message = { name: user_name, platform: platform, chat_message_id: chat_message_id, direction: "Out", message_type: "image", intent: intent, messageBody: String(vaacinationImageFile), messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[1], similarDoc: similar_doc };
                     }
                 }
                 else {
-                    reaponse_message = { name: user_name, platform: platform, chat_message_id: chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[0] };
-                    reaponse_message = { name: user_name, platform: platform, chat_message_id: chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[1] };
+                    reaponse_message = { name: user_name, platform: platform, chat_message_id: chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[0], similarDoc: similar_doc };
+                    reaponse_message = { name: user_name, platform: platform, chat_message_id: chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[1], similarDoc: similar_doc };
                 }
             }
             else {
@@ -98,7 +99,7 @@ export class CommonWhatsappService implements platformServiceInterface {
                     }
                 }
                 
-                reaponse_message = { name: user_name, platform: platform, chat_message_id: chat_message_id, direction: "Out", message_type: message_type, intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[0] };
+                reaponse_message = { name: user_name, platform: platform, chat_message_id: chat_message_id, direction: "Out", message_type: message_type, intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[0], similarDoc: similar_doc };
             }
         }
         return reaponse_message;
@@ -117,7 +118,8 @@ export class CommonWhatsappService implements platformServiceInterface {
             messageImageUrl     : null,
             messageImageCaption : null,
             sessionId           : requestBody.userId,
-            messageText         : requestBody.message[0]
+            messageText         : requestBody.message[0],
+            similarDoc          : null
         };
         return response_message;
     }
