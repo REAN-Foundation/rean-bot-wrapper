@@ -1,3 +1,4 @@
+/* eslint-disable valid-typeof */
 import * as fs from 'fs';
 import child_process from 'child_process';
 import { InputValidationError } from './input.validation.error';
@@ -6,6 +7,7 @@ import { generate } from 'generate-password';
 import { hashSync, compareSync, genSaltSync } from 'bcryptjs';
 import * as crypto from 'crypto';
 import express from 'express';
+import mime = require('mime-types');
 
 export class Helper {
 
@@ -237,14 +239,14 @@ export class Helper {
     };
 
     static checkStr(val: any) {
-        if (typeof val === null || typeof val === undefined || typeof val !== 'string') {
+        if (val === null || typeof val === 'undefined' || typeof val !== 'string') {
             return null;
         }
         return val;
     }
 
     static isStr(val: any): boolean {
-        if (typeof val === null || typeof val === undefined || typeof val !== 'string') {
+        if (val === null || typeof val === 'undefined' || typeof val !== 'string') {
             return false;
         }
         return true;
@@ -406,5 +408,13 @@ export class Helper {
     
         return `${year}-${month}-${formattedDay}`;
     }
+
+    public static getMimeType = (pathOrExtension: string) => {
+        var mimeType = mime.lookup(pathOrExtension);
+        if (!mimeType) {
+            mimeType = 'text/plain';
+        }
+        return mimeType;
+    };
 
 }

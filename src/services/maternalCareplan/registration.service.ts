@@ -37,12 +37,13 @@ export class RegistrationService {
             const patientRegisterUrl = `${ReanBackendBaseUrl}patients`;
 
             const patientDomainModel = {
-                Phone     : phoneNumber,
-                Password  : "REAN@DMC",
-                FirstName : name.split(" ")[0],
-                LastName  : name.split(" ")[1],
-                Gender    : "Female",
-                BirthDate : birthdate.split("T")[0]
+                Phone      : phoneNumber,
+                Password   : "REAN@DMC",
+                FirstName  : name.split(" ")[0],
+                LastName   : name.split(" ")[1],
+                Gender     : "Female",
+                BirthDate  : birthdate.split("T")[0],
+                TenantCode : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
             };
     
             const patientUserId = null;
@@ -75,7 +76,7 @@ export class RegistrationService {
         } catch (error) {
             Logger.instance()
                 .log_error(error.message,500,'Maternity careplan registration service error');
-        }  
+        }
 
     }
 

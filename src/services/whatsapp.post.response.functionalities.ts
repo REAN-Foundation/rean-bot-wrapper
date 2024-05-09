@@ -162,7 +162,7 @@ export class WhatsappPostResponseFunctionalities{
                     {
                         "type"     : "document",
                         "document" : {
-                            "link" : "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+                            "link" : headersLink
                         }
                     }
                 ]
