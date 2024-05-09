@@ -239,14 +239,14 @@ export class Helper {
     };
 
     static checkStr(val: any) {
-        if (val === null || typeof val === undefined || typeof val !== 'string') {
+        if (val === null || typeof val === 'undefined' || typeof val !== 'string') {
             return null;
         }
         return val;
     }
 
     static isStr(val: any): boolean {
-        if (val === null || typeof val === undefined || typeof val !== 'string') {
+        if (val === null || typeof val === 'undefined' || typeof val !== 'string') {
             return false;
         }
         return true;
