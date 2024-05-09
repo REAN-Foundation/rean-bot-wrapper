@@ -4,6 +4,7 @@ import { NeedleService } from '../needle.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { Iresponse } from '../../refactor/interface/message.interface';
 import { commonResponseMessageFormat } from '../common.response.format.object';
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class RegisterAllProfileService {
@@ -11,7 +12,8 @@ export class RegisterAllProfileService {
     private _platformMessageService : platformServiceInterface = null;
 
     constructor(
-        @inject(NeedleService) private needleService?: NeedleService
+        @inject(NeedleService) private needleService?: NeedleService,
+        @inject(ClientEnvironmentProviderService) private clientEnvProviderService?: ClientEnvironmentProviderService,
     ) {}
 
     async sendUserMessage (eventObj) {
@@ -36,13 +38,14 @@ export class RegisterAllProfileService {
 
             if (body.Profile === "Patient") {
                 const obj = {
-                    Phone     : `+91-${body.PatientPhone}`,
-                    Password  : body.Password,
-                    Email     : body.PatientEmail,
-                    Gender    : body.PatientGender,
-                    FirstName : body.PatientFirstName,
-                    LastName  : body.PatientLastName,
-                    BirthDate : new Date(body.PatientBirthDate).toISOString()
+                    Phone      : `+91-${body.PatientPhone}`,
+                    Password   : body.Password,
+                    Email      : body.PatientEmail,
+                    Gender     : body.PatientGender,
+                    FirstName  : body.PatientFirstName,
+                    LastName   : body.PatientLastName,
+                    TenantCode : this.clientEnvProviderService.getClientEnvironmentVariable("NAME"),
+                    BirthDate  : new Date(body.PatientBirthDate).toISOString()
                         .split('T')[0],
                     BloodGroup           : body.PatientBloodGroup,
                     BloodTransfusionDate : new Date(body.BloodTransfusionDate).toISOString()
@@ -159,7 +162,7 @@ export class RegisterAllProfileService {
                 const donorPhone = body.BridgeDonorPhone;
                 const volunteerPhone = body.BridgeVolunteerPhone;
 
-                const URL = `patients/search?phone=${patientPhone}`;
+                const URL = `patients/byPhone?phone=${patientPhone}`;
                 const response = await this.needleService.needleRequestForREAN("get", URL);
                 if (response.Data.Patients.Items.length > 0) {
                     patientUserId = response.Data.Patients.Items[0].UserId;
