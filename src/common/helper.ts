@@ -1,3 +1,4 @@
+/* eslint-disable valid-typeof */
 import * as fs from 'fs';
 import child_process from 'child_process';
 import { InputValidationError } from './input.validation.error';
@@ -238,14 +239,14 @@ export class Helper {
     };
 
     static checkStr(val: any) {
-        if (typeof val === undefined || typeof val !== 'string') {
+        if (val === null || typeof val === undefined || typeof val !== 'string') {
             return null;
         }
         return val;
     }
 
     static isStr(val: any): boolean {
-        if (typeof val === undefined || typeof val !== 'string') {
+        if (val === null || typeof val === undefined || typeof val !== 'string') {
             return false;
         }
         return true;
