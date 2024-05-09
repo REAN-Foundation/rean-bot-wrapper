@@ -1,12 +1,11 @@
 import * as asyncLib from 'async';
-import { Lifecycle, scoped, inject } from 'tsyringe';
+import { Lifecycle, scoped } from 'tsyringe';
 import { RegistrationService } from './maternalCareplan/registration.service';
 import { NeedBloodService } from './bloodWrrior/need.blood.service';
 import { CreateReminderService } from './reminder/create.reminder.service';
 import { EnrollPatientService } from './bloodWrrior/enroll.service';
 import { GenerateCertificateService } from './bloodWrrior/generate.certificate.flow.service';
 import { GenerateCertificateYesService } from './bloodWrrior/generate.certificate.yes.service';
-import { GeneralReminderService } from './reminder/general.reminder.service';
 import { RegistrationPerMinMsgService } from './maternalCareplan/registration.per.minute.sercice';
 import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
 import { ChecklistDateValidationService } from './bloodWrrior/checklist.date.validation.service';

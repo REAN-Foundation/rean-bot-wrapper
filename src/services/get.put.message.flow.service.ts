@@ -92,7 +92,8 @@ export class MessageFlow{
 
     async preprocessOutgoingMessage(message: Imessage){
         try {
-            const chatMessageObj = await this.engageMySQL(message);
+            
+            // const chatMessageObj = await this.engageMySQL(message);
             const translate_message = await this.translate.translateMessage(message.type, message.messageBody, message.platformId);
             message.messageBody = translate_message.message;
             return { message, translate_message };

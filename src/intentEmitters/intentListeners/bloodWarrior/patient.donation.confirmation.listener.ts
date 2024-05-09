@@ -1,4 +1,4 @@
-import { scoped, Lifecycle, inject } from 'tsyringe';
+import { scoped, Lifecycle } from 'tsyringe';
 import { Logger } from '../../../common/logger';
 import { dialoflowMessageFormatting } from '../../../services/Dialogflow.service';
 
@@ -14,7 +14,7 @@ export class PatientDonationConfirmationListener {
             Logger.instance()
                 .log_error(error.message,500,'Trigger intent yes error');
         }
-    }
+    };
 
     public static noReply = async (intentName, eventObj) => {
         try {
@@ -25,5 +25,5 @@ export class PatientDonationConfirmationListener {
             Logger.instance()
                 .log_error(error.message,500,'Trigger intent no error');
         }
-    }
+    };
 }

@@ -2,7 +2,7 @@ import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../common/logger';
 import { NeedleService } from '../needle.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { sendApiButtonService, templateButtonService } from '../whatsappmeta.button.service';
+import { templateButtonService } from '../whatsappmeta.button.service';
 import { RaiseDonationRequestService } from './raise.request.service';
 import { BloodWarriorCommonService } from './common.service';
 import { Iresponse } from '../../refactor/interface/message.interface';

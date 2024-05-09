@@ -1,6 +1,5 @@
 /* eslint-disable max-len */
 import { scoped, Lifecycle, inject } from 'tsyringe';
-import path from 'path';
 import { Logger } from '../../common/logger';
 import { NeedleService } from '../needle.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';

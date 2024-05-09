@@ -70,7 +70,7 @@ export class AwsS3manager{
 
     async uploadFile (filePath, bucket_name : string = process.env.BUCKET_NAME,
         cloudFrontPath : string = process.env.CLOUD_FRONT_PATH,newFilename = null) {
-        return new Promise<string>( async (resolve, reject) => {
+        return new Promise<string>( async (resolve) => {
             const fileLocation = await this.uploadFileToS3(filePath,bucket_name,cloudFrontPath,newFilename);
             resolve(fileLocation);
         });
