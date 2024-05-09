@@ -50,4 +50,13 @@ export class CustomModelResponseFormat implements IserviceResponseFunctionalitie
         return parse_mode;
     }
 
+    getSimilarDoc(){
+
+        if (this.response.body && this.response.body.similar_docs) {
+            return [this.response.body.similar_docs];
+        } else {
+            return null;
+        }
+    }
+
 }

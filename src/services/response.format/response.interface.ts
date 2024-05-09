@@ -15,5 +15,6 @@ export interface IserviceResponseFunctionalities {
     getIntent()
     getPayload()
     getParseMode()
+    getSimilarDoc()
 
 }
