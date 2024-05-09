@@ -319,6 +319,11 @@ export class GetPatientInfoService{
             const number = phoneNumber.slice(1, 11);
             completeNumber = `+${contryCode}-${number}`;
         }
+        else if (phoneNumber.length === 13) {
+            const contryCode = phoneNumber.slice(0, 3);
+            const number = phoneNumber.slice(3, 13);
+            completeNumber = `+${contryCode}-${number}`;
+        }
         return completeNumber;
     }
 
