@@ -29,10 +29,10 @@ export class BloodWarriorWelcomeService {
 
     public getEvent(roleId) {
         const message = {
-            2  : "BloodWarrior_Patient",
-            11 : "BloodWarrior_Donor",
+            3  : "BloodWarrior_Patient",
+            12 : "BloodWarrior_Donor",
             1  : "BloodWarrior_Admin",
-            12 : "BloodWarrior_Volunteer"
+            13 : "BloodWarrior_Volunteer"
         };
         return message[roleId] ?? "New_User";
     }

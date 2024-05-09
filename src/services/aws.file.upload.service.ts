@@ -5,6 +5,7 @@ import path from 'path';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import { SignedUrls } from './signed.urls.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { Helper } from '../common/helper';
 
 @scoped(Lifecycle.ContainerScoped)
 export class AwsS3manager{
@@ -92,23 +93,13 @@ export class AwsS3manager{
 
         // Setting up S3 upload parameters
         const params = {
-            Bucket        : BucketName,
-            Key           : cloudFrontPathSplit[3] + '/' + this.fileName , // File name you want to save as in S3
-            Body          : fileContent,
-            'ContentType' : 'image/jpeg'
+            Bucket      : BucketName,
+            Key         : cloudFrontPathSplit[3] + '/' + this.fileName , // File name you want to save as in S3
+            Body        : fileContent,
+            ContentType : Helper.getMimeType(extension),
         };
-        if (extension === '.ogg' || extension === '.mp3' || extension === '.oga'){
-            console.log("Detected as an Audio file");
-            params.ContentType = 'audio/ogg';
-            if (extension === ".mp3" ){
-                params.ContentType = 'audio/mpeg';
-                this.params = params;
-            }
-            this.params = params;
-        } else {
-            this.params = params;
-        }
-
+        this.params = params;
+        
         // fs.stat(filePath, function (err) {
         //     try {
         //         if (err === null) {
@@ -151,7 +142,7 @@ export class AwsS3manager{
     };
 
     async uploadFileToS3 (
-        filePath, 
+        filePath,
         bucket_name : string = process.env.BUCKET_NAME,
         cloudFrontPath : string = process.env.CLOUD_FRONT_PATH,newFilename = null) {
 
@@ -232,4 +223,5 @@ export class AwsS3manager{
         });
 
     }
+
 }

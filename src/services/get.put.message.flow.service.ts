@@ -178,6 +178,8 @@ export class MessageFlow{
         let assessmentSession = null;
         const contactList = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
         const personContactList = await contactList.findOne({ where: { mobileNumber: msg.userId } });
+        
+        //Add a check if user not found dont check
         const personName = personContactList.username;
 
         if (msg.type === "template") {

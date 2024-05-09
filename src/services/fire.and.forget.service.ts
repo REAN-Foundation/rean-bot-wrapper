@@ -12,6 +12,7 @@ import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serve
 import { ChecklistDateValidationService } from './bloodWrrior/checklist.date.validation.service';
 import { NoBabyMovementAssessmentService } from './commonAssesssment/common.assessment.service';
 import { CincinnatiPerMinMsgService } from './maternalCareplan/cincannati.demo';
+import { AcceptDonationRequestService } from './bloodWrrior/accept.donation.request.service';
 
 export interface QueueDoaminModel {
     Intent : string;
@@ -145,6 +146,13 @@ export class FireAndForgetService {
                 eventObj.container.resolve(NoBabyMovementAssessmentService);
             await assessmentService.startAssessmentAndUpdateDb(eventObj, model.Body.PatientUserId,
                 model.Body.PersonPhoneNumber , model.Body.AssessmentTemplateId , model.Body.Channel);
+            console.log(`Fire and Forget Domain Model: ${model}`);
+        }
+        if (model.Intent === "Update_Accept_Donation_Flags") {
+            const eventObj = model.Body.EventObj;
+            const acceptDonationService:  AcceptDonationRequestService =
+                eventObj.container.resolve(AcceptDonationRequestService);
+            await acceptDonationService.updateCommunicationDetails(model.Body);
             console.log(`Fire and Forget Domain Model: ${model}`);
         }
     };

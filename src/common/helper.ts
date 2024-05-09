@@ -6,6 +6,7 @@ import { generate } from 'generate-password';
 import { hashSync, compareSync, genSaltSync } from 'bcryptjs';
 import * as crypto from 'crypto';
 import express from 'express';
+import mime = require('mime-types');
 
 export class Helper {
 
@@ -406,5 +407,13 @@ export class Helper {
     
         return `${year}-${month}-${formattedDay}`;
     }
+
+    public static getMimeType = (pathOrExtension: string) => {
+        var mimeType = mime.lookup(pathOrExtension);
+        if (!mimeType) {
+            mimeType = 'text/plain';
+        }
+        return mimeType;
+    };
 
 }
