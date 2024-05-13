@@ -108,8 +108,8 @@ export class MessageFlow{
     
             await this.saveResponseDataToUser(response_format, processedResponse);
     
-            // const intent = processedResponse.message_from_nlp.getIntent();
-            // await this.saveIntent(intent, response_format.sessionId);
+            const intent = processedResponse.message_from_nlp.getIntent();
+            await this.saveIntent(intent, response_format.sessionId);
     
             const payload = processedResponse.message_from_nlp.getPayload();
             if (processedResponse.message_from_nlp.getText()){
