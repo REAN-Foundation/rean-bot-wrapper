@@ -93,7 +93,7 @@ export class MessageFlow{
     async preprocessOutgoingMessage(message: Imessage){
         try {
             
-            // const chatMessageObj = await this.engageMySQL(message);
+            await this.engageMySQL(message);
             const translate_message = await this.translate.translateMessage(message.type, message.messageBody, message.platformId);
             message.messageBody = translate_message.message;
             return { message, translate_message };
@@ -108,8 +108,8 @@ export class MessageFlow{
     
             await this.saveResponseDataToUser(response_format, processedResponse);
     
-            const intent = processedResponse.message_from_nlp.getIntent();
-            await this.saveIntent(intent, response_format.sessionId);
+            // const intent = processedResponse.message_from_nlp.getIntent();
+            // await this.saveIntent(intent, response_format.sessionId);
     
             const payload = processedResponse.message_from_nlp.getPayload();
             if (processedResponse.message_from_nlp.getText()){
