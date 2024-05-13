@@ -134,7 +134,7 @@ export class DialogflowResponseService {
         let patientUserId = null;
         let result = null;
         if (completeMessage.platform === "telegram" || completeMessage.platform === "Telegram") {
-            const apiURL = `patients/search?userName=${completeMessage.platformId}`;
+            const apiURL = `patients/byPhone?userName=${completeMessage.platformId}`;
             result = await this.needleService.needleRequestForREAN("get", apiURL);
 
         } else if (completeMessage.platform === "whatsappMeta") {

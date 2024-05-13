@@ -51,7 +51,7 @@ export class SelectBloodGroupService {
                     }
 
                     let patient = null;
-                    const patientURL = `patients/search?name=dummy_patient`;
+                    const patientURL = `patients/byPhone?name=dummy_patient`;
                     const result = await this.needleService.needleRequestForREAN("get", patientURL);
                     if (result.Data.Patients.Items.length > 0) {
                         patient = result.Data.Patients.Items[0];

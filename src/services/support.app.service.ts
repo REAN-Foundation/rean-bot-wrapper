@@ -258,7 +258,7 @@ export class GetPatientInfoService{
     public async getPatientUserId(channel: any, personPhoneNumber: string, personName: string) {
         let patientUserId = null;
         if (channel === "telegram" || channel === "Telegram") {
-            const apiURL = `patients/search?userName=${personPhoneNumber}`;
+            const apiURL = `patients/byPhone?userName=${personPhoneNumber}`;
             const result = await this.needleService.needleRequestForREAN("get", apiURL);
             if (result.Data.Patients.Items.length === 0) {
                 const obj = {
@@ -268,7 +268,8 @@ export class GetPatientInfoService{
                     UserName        : personPhoneNumber,
                     TelegramChatId  : personPhoneNumber,
                     DefaultTimeZone : this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
-                    CurrentTimeZone : this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE")
+                    CurrentTimeZone : this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
+                    TenantCode      : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
                 };
                 const apiURL = `patients`;
                 const response = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
@@ -285,7 +286,8 @@ export class GetPatientInfoService{
                     Password        : "Test@123",
                     FirstName       : personName,
                     DefaultTimeZone : this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
-                    CurrentTimeZone : this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE")
+                    CurrentTimeZone : this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
+                    TenantCode      : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
                 };
                 const apiURL = `patients`;
                 const response = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
@@ -315,6 +317,11 @@ export class GetPatientInfoService{
         else if (phoneNumber.length === 11) {
             const contryCode = phoneNumber.slice(0, 1);
             const number = phoneNumber.slice(1, 11);
+            completeNumber = `+${contryCode}-${number}`;
+        }
+        else if (phoneNumber.length === 13) {
+            const contryCode = phoneNumber.slice(0, 3);
+            const number = phoneNumber.slice(3, 13);
             completeNumber = `+${contryCode}-${number}`;
         }
         return completeNumber;
