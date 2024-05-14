@@ -13,7 +13,8 @@ export const commonResponseMessageFormat = () => {
         messageImageUrl     : null,
         messageImageCaption : null,
         sessionId           : null,
-        messageText         : null
+        messageText         : null,
+        similarDoc          : null
     };
     return response_message;
 };

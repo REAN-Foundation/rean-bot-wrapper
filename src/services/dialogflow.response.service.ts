@@ -134,18 +134,13 @@ export class DialogflowResponseService {
         let patientUserId = null;
         let result = null;
         if (completeMessage.platform === "telegram" || completeMessage.platform === "Telegram") {
-            const apiURL = `patients/search?userName=${completeMessage.platformId}`;
+            const apiURL = `patients/byPhone?userName=${completeMessage.platformId}`;
             result = await this.needleService.needleRequestForREAN("get", apiURL);
 
-        } else if (completeMessage.platform === "whatsappMeta" || completeMessage.platform === "whatsapp") {
+        } else if (completeMessage.platform === "whatsappMeta") {
             const apiURL = `patients/byPhone?phone=${encodeURIComponent(this.getPatientInfoService.convertPhoneNumber(completeMessage.platformId))}`;
             result = await this.needleService.needleRequestForREAN("get", apiURL);
         }
-        else {
-
-            //handle if any other plateform
-        }
-
         if (result) {
             if (result.Data.Patients.Items.length === 0) {
                 return null;

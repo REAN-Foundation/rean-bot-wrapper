@@ -92,7 +92,8 @@ export class MessageFlow{
 
     async preprocessOutgoingMessage(message: Imessage){
         try {
-            const chatMessageObj = await this.engageMySQL(message);
+            
+            await this.engageMySQL(message);
             const translate_message = await this.translate.translateMessage(message.type, message.messageBody, message.platformId);
             message.messageBody = translate_message.message;
             return { message, translate_message };
@@ -178,6 +179,8 @@ export class MessageFlow{
         let assessmentSession = null;
         const contactList = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
         const personContactList = await contactList.findOne({ where: { mobileNumber: msg.userId } });
+        
+        //Add a check if user not found dont check
         const personName = personContactList.username;
 
         if (msg.type === "template") {

@@ -1,16 +1,17 @@
 import * as asyncLib from 'async';
-import { Lifecycle, scoped, inject } from 'tsyringe';
+import { Lifecycle, scoped } from 'tsyringe';
 import { RegistrationService } from './maternalCareplan/registration.service';
 import { NeedBloodService } from './bloodWrrior/need.blood.service';
 import { CreateReminderService } from './reminder/create.reminder.service';
 import { EnrollPatientService } from './bloodWrrior/enroll.service';
 import { GenerateCertificateService } from './bloodWrrior/generate.certificate.flow.service';
 import { GenerateCertificateYesService } from './bloodWrrior/generate.certificate.yes.service';
-import { GeneralReminderService } from './reminder/general.reminder.service';
 import { RegistrationPerMinMsgService } from './maternalCareplan/registration.per.minute.sercice';
 import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
 import { ChecklistDateValidationService } from './bloodWrrior/checklist.date.validation.service';
 import { NoBabyMovementAssessmentService } from './commonAssesssment/common.assessment.service';
+import { CincinnatiPerMinMsgService } from './maternalCareplan/cincannati.demo';
+import { AcceptDonationRequestService } from './bloodWrrior/accept.donation.request.service';
 
 export interface QueueDoaminModel {
     Intent : string;
@@ -121,6 +122,13 @@ export class FireAndForgetService {
             await registrationPerMinMsgService.collectMessage(eventObj);
             console.log(`Fire and Forget Domain Model: ${model}`);
         }
+        if (model.Intent === "cincinnati_PerMinMsg") {
+            const eventObj = model.Body.EventObj;
+            const cincinnatiPerMinMsgService:  CincinnatiPerMinMsgService =
+                eventObj.container.resolve(CincinnatiPerMinMsgService);
+            await cincinnatiPerMinMsgService.collectMessage(eventObj);
+            console.log(`Fire and Forget Domain Model: ${model}`);
+        }
         if (model.Intent === "Checklist_Yes_Date") {
             const eventObj = model.Body.EventObj;
             const checklistDateValidationService:  ChecklistDateValidationService =
@@ -137,6 +145,13 @@ export class FireAndForgetService {
                 eventObj.container.resolve(NoBabyMovementAssessmentService);
             await assessmentService.startAssessmentAndUpdateDb(eventObj, model.Body.PatientUserId,
                 model.Body.PersonPhoneNumber , model.Body.AssessmentTemplateId , model.Body.Channel);
+            console.log(`Fire and Forget Domain Model: ${model}`);
+        }
+        if (model.Intent === "Update_Accept_Donation_Flags") {
+            const eventObj = model.Body.EventObj;
+            const acceptDonationService:  AcceptDonationRequestService =
+                eventObj.container.resolve(AcceptDonationRequestService);
+            await acceptDonationService.updateCommunicationDetails(model.Body);
             console.log(`Fire and Forget Domain Model: ${model}`);
         }
     };

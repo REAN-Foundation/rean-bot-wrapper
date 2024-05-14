@@ -77,6 +77,8 @@ import { ReminderRegistrationListener } from './intentListeners/medicationRemind
 import { CommonAssessmentListener } from './intentListeners/commonAssessment/common.assessment.listener';
 import {ConsentYesListner} from './intentListeners/consentListners/consent.yes.listner';
 import { DeleteReminderListener } from './intentListeners/medicationReminder/delete.reminder.listener';
+import { CincinnatiPerMinuteMsgListener } from './intentListeners/maternity.careplan/cincinnati.per.minute.listener copy';
+import { PatientDonationConfirmationListener } from './intentListeners/bloodWarrior/patient.donation.confirmation.listener';
 /*
  * Init function (being called during application bootstrap)
  * This is the place to register any new intent and corresponding listeners
@@ -240,10 +242,13 @@ export class IntentRegister {
         IntentEmitter.registerListener('Reminder_Frequency_Weekly', ReminderFrequencyListener);
         IntentEmitter.registerListener('Reminder_Ask_Frequency', SendFrequencyButtonsListener);
         IntentEmitter.registerListener('Reminder_Delete', DeleteReminderListener);
+        IntentEmitter.registerListener('PatientDonationConfirmationYes', PatientDonationConfirmationListener.yesReply);
+        IntentEmitter.registerListener('PatientDonationConfirmationNo', PatientDonationConfirmationListener.noReply);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
         IntentEmitter.registerListener('consent_yes',ConsentYesListner.handleIntent);
+        IntentEmitter.registerListener('Cincinnati_PerMinMsg', CincinnatiPerMinuteMsgListener);
 
         // Intent fulfillement - Success listener
         // TODO: Pending implementation

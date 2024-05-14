@@ -31,6 +31,7 @@ export interface Iresponse{
     intent: string;
     messageImageUrl: string;
     messageImageCaption: string;
+    similarDoc : string;
 }
 
 export interface handlerequest{
