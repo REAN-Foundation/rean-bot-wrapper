@@ -1,10 +1,6 @@
-import { GetHeaders } from '../../services/biometrics/get.headers';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import needle from 'needle';
 import { Logger } from '../../common/logger';
-import { NeedleService } from '../needle.service';
-import { GetPatientInfoService } from '../support.app.service';
 import { commonResponseMessageFormat } from '../common.response.format.object';
 import { Iresponse } from '../../refactor/interface/message.interface';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
