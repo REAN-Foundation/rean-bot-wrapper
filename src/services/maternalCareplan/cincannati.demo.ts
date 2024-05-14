@@ -1,3 +1,5 @@
+
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import { Logger } from '../../common/logger';
@@ -44,6 +46,7 @@ export class CincinnatiPerMinMsgService {
     async collectMessage(eventObj) {
         const cincinnatiMessages = CincinnatiMessages['default'];
         const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
+        console.log(userId);
         await this.timer(1000);
         const sequenceMsg = cincinnatiMessages.sort((a, b) => a.Sequence - b.Sequence);
         for (const msg of sequenceMsg) {
