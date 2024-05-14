@@ -271,7 +271,6 @@ export class ClientWebhookController {
         }
         catch (error) {
             console.log("in error", error);
-
             this.errorHandler.handle_controller_error(error, res, req);
         }
     };

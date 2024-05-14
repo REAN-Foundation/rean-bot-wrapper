@@ -34,7 +34,6 @@ export class GenerateCertificateYesService {
             //const apiURL = `clinical/donation-communication/search?selectedVolunteerUserId=${volunteer.UserId}`;
             const apiURL = `clinical/donation-communication/search?volunteerUserId=${volunteer.UserId}`;
             const requestBody = await this.needleService.needleRequestForREAN("get", apiURL);
-
             //const donorUserId = requestBody.Data.DonationCommunication.Items[0].AcceptedDonorUserId;
             const donorUserId = requestBody.Data.DonationCommunication.Items[0].DonorUserId;
             const donor = await this.bloodWarriorCommonService.getDonorPhoneByUserId(donorUserId);
