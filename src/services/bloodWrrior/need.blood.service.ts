@@ -39,10 +39,10 @@ export class NeedBloodService {
 
     public getEvent(roleId) {
         const message = {
-            2  : "NeedBlood_Patient_Confirm",
-            11 : "NeedBlood_Donor",
-            1  : "BloodWarrior_Admin",
-            12 : "Donation_Request"
+            "Patient"      : "NeedBlood_Patient_Confirm",
+            "Donor"        : "NeedBlood_Donor",
+            "System admin" : "BloodWarrior_Admin",
+            "Volunteer"    : "Donation_Request"
         };
         return message[roleId] ?? "New_User";
     }

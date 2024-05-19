@@ -9,6 +9,7 @@ import { Iresponse } from '../../refactor/interface/message.interface';
 import { commonResponseMessageFormat } from '../common.response.format.object';
 import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
 import { TimeHelper } from '../../common/time.helper';
+import { CacheMemory } from '../cache.memory.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class GenerateCertificateService {
@@ -28,17 +29,21 @@ export class GenerateCertificateService {
 
             const apiURL = `clinical/donation-record/search?donorUserId=${donor.UserId}`;
             const requestBody = await this.needleService.needleRequestForREAN("get", apiURL);
-            const donationRecord = requestBody.Data.DonationRecord.Items[0];
+            const donationRecord = requestBody.Data.Donation.Items[0];
 
             // if (donor.DonorType === 'One time') {
-            //     volunteerUserId = requestBody.Data.DonationRecord.Items[0].VolunteerOfEmergencyDonor;
+            //     volunteerUserId = requestBody.Data.Donation.Items[0].VolunteerOfEmergencyDonor;
             // } else {
-            const volunteerUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.VolunteerUserId;
-            const patientUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.PatientUserId;
+            const volunteerUserId = requestBody.Data.Donation.Items[0].DonationDetails.VolunteerUserId;
+            const patientUserId = requestBody.Data.Donation.Items[0].DonationDetails.PatientUserId;
     
             // }
             const dffMessage = `Thank you for confirming. You are a real life Super Hero helping save lives. \nRegards \nTeam Blood Warriors`;
 
+            //Set donation record to cache memory
+            const key = `${volunteerUserId}:DonationRecord`;
+            CacheMemory.set(key, donationRecord);
+               
             //Inform volunteer to generate certificate
             const body : QueueDoaminModel =  {
                 Intent : "Generate_Certificate_Inform_Volunteer",
@@ -70,7 +75,7 @@ export class GenerateCertificateService {
             const volunteerPhone =
                         this.raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(volunteer.User.Person.Phone);
             const donationDate =
-                await TimeHelper.formatDateToLocal_YYYY_MM_DD(new Date(body.DonationRecord.DonorAcceptedDate));
+                await TimeHelper.formatDateToLocal_YYYY_MM_DD(new Date(body.DonationRecord.DonationDate));
             const message = `Hey ${volunteer.User.Person.DisplayName},
             ${body.Donor.DisplayName} has confirmed that he/she has donated for ${patient.User.Person.DisplayName} on ${donationDate}. Please re-confirm:`;
 
@@ -105,13 +110,10 @@ export class GenerateCertificateService {
             response_format.message_type = "template";
             await this._platformMessageService.SendMediaMessage(response_format, templatePayload);
 
-            // Update donor last donation date
-            const apiURL = `donors/${body.PatientUserId}`;
+            // Update donor last donation date of donor
+            const apiURL = `donors/${body.Donor.UserId}`;
             const obj = {
-                Provider  : "REAN_BW",
-                PlanName  : "Patient donation confirmation message",
-                PlanCode  : "Patient-Donation-Confirmation",
-                StartDate : new Date().toISOString().split('T')[0]
+                LastDonationDate : donationDate
             };
             await this.needleService.needleRequestForREAN("put", apiURL, null, obj);
 

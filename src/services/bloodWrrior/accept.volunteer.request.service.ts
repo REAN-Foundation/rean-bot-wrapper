@@ -27,12 +27,12 @@ export class AcceptVolunteerRequestService {
 
                 const apiURL = `clinical/donation-record/search?donorUserId=${donor.UserId}`;
                 const requestBody = await this.needleService.needleRequestForREAN("get", apiURL);
-                const donationRecordId = requestBody.Data.DonationRecord.Items[0].id;
+                const donationRecordId = requestBody.Data.Donation.Items[0].id;
                 let volunteerUserId = null;
                 if (donor.DonorType === 'One time') {
-                    volunteerUserId = requestBody.Data.DonationRecord.Items[0].VolunteerOfEmergencyDonor;
+                    volunteerUserId = requestBody.Data.Donation.Items[0].VolunteerOfEmergencyDonor;
                 } else {
-                    volunteerUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.VolunteerUserId;
+                    volunteerUserId = requestBody.Data.Donation.Items[0].DonationDetails.VolunteerUserId;
                 }
                 const dffMessage = `Thank you for accepting the request. We are in the process of scheduling a donation. \nRegards \nTeam Blood Warriors`;
                 resolve( { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } });

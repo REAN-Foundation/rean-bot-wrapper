@@ -27,10 +27,10 @@ export class ChecklistDateValidationService {
 
             const apiURL = `clinical/donation-record/search?donorUserId=${donor.UserId}`;
             const requestBody = await this.needleService.needleRequestForREAN("get", apiURL);
-            const donationDate = requestBody.Data.DonationRecord.Items[0].DonationDetails.NextDonationDate;
-            const volunteerUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.VolunteerUserId;
-            const patientUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.PatientUserId;
-            const requestedQuantity = requestBody.Data.DonationRecord.Items[0].DonationDetails.QuantityRequired;
+            const donationDate = requestBody.Data.Donation.Items[0].DonationDetails.NextDonationDate;
+            const volunteerUserId = requestBody.Data.Donation.Items[0].DonationDetails.VolunteerUserId;
+            const patientUserId = requestBody.Data.Donation.Items[0].DonationDetails.PatientUserId;
+            const requestedQuantity = requestBody.Data.Donation.Items[0].DonationDetails.QuantityRequired;
             let dffMessage = "";
             // eslint-disable-next-line max-len
             const daydifference = await this.bloodWarriorCommonService.differenceBetweenTwoDates(new Date(donationDate), new Date(transfusionDate));
@@ -38,7 +38,7 @@ export class ChecklistDateValidationService {
                 dffMessage = `Date Validation Success. \nHere are your donation details.`;
 
                 const stringTransfusionDate = new Date(transfusionDate.split("T")[0]).toDateString();
-                const message = ` *Donor Name:* ${donor.DisplayName}, \n *Blood Group:* ${donor.BloodGroup}, \n *Required Quantity:* ${requestedQuantity} unit, \n *Donation Date:* ${stringTransfusionDate}`;
+                const userMessage = ` *Donor Name:* ${donor.DisplayName}, \n *Blood Group:* ${donor.BloodGroup}, \n *Required Quantity:* ${requestedQuantity} unit, \n *Donation Date:* ${stringTransfusionDate}`;
 
                 const body : QueueDoaminModel =  {
                     Intent : "Checklist_Yes_Date",
@@ -49,25 +49,26 @@ export class ChecklistDateValidationService {
                         RequestedQuantity     : requestedQuantity,
                         StringTransfusionDate : stringTransfusionDate,
                         PatientUserId         : patientUserId,
-                        VolunteerUserId       : volunteerUserId
+                        VolunteerUserId       : volunteerUserId,
+                        DonationRecord        : requestBody.Data.Donation.Items[0]
                     }
                 };
                 FireAndForgetService.enqueue(body);
-                return { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage + '\n' + message] } }] } };
+                dffMessage = dffMessage + '\n' + userMessage;
 
             } else {
                 dffMessage = "The donation date you entered is not correct please try again.";
-                return { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } };
             }
+            return { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } };
 
         } catch (error) {
             Logger.instance()
-                .log_error(error.message,500,'Register patient with blood warrior messaging service error');
+                .log_error(error.message,500,'Checklist date validation by donor service error');
         }
     };
 
     public async sendConfirmationMessage(eventObj: any, transfusionDate: any, donor: any,requestedQuantity: any,
-        stringTransfusionDate: string, patientUserId: any, volunteerUserId: any) {
+        stringTransfusionDate: string, patientUserId: any, volunteerUserId: any, body ) {
         const intentPayload = eventObj.body.originalDetectIntentRequest.payload;
         this._platformMessageService = eventObj.container.resolve(intentPayload.source);
         const heading = `Here are the details of the confirmed donor`;
@@ -102,6 +103,13 @@ export class ChecklistDateValidationService {
         ];
         payload["templateName"] = "donor_confirmation_msg";
         payload["languageForSession"] = "en";
+
+        //update donation communication with donor, volunteer userIds
+        const bodyObj = {
+            DonationDate : stringTransfusionDate,
+            DonationType : "Blood bridge"
+        };
+        await this.bloodWarriorCommonService.updateDonationRecord( body.DonationRecord.id, bodyObj);
 
         //message send to patient
         const patient = await this.bloodWarriorCommonService.getPatientPhoneByUserId(patientUserId);
