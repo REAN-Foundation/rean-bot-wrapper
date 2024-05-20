@@ -2,7 +2,7 @@ import { GetPatientInfoService } from '../support.app.service';
 import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../common/logger';
 import { NeedleService } from '../needle.service';
-import { templateButtonService, whatsappMetaButtonService } from '../whatsappmeta.button.service';
+import { templateButtonService } from '../whatsappmeta.button.service';
 import { dialoflowMessageFormatting } from '../Dialogflow.service';
 import { BloodWarriorWelcomeService } from './welcome.service';
 import { RaiseDonationRequestService } from './raise.request.service';

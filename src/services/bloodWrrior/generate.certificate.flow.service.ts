@@ -102,7 +102,6 @@ export class GenerateCertificateService {
             templatePayload["templateName"] = "generate_certificate_notify_volunteer";
             templatePayload["languageForSession"] = "en";
 
-
             const response_format: Iresponse = commonResponseMessageFormat();
             response_format.platform = payload.source;
             response_format.sessionId = volunteerPhone;

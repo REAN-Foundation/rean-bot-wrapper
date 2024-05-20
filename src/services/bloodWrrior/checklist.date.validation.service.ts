@@ -2,7 +2,7 @@ import { Logger } from '../../common/logger';
 import { NeedleService } from '../needle.service';
 import { BloodWarriorCommonService } from './common.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { container, inject, Lifecycle, scoped } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { RaiseDonationRequestService } from './raise.request.service';
 import { Iresponse } from '../../refactor/interface/message.interface';
 import { commonResponseMessageFormat } from '../common.response.format.object';
