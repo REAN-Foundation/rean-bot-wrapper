@@ -135,7 +135,7 @@ export class FireAndForgetService {
                 eventObj.container.resolve(ChecklistDateValidationService);
             await checklistDateValidationService.sendConfirmationMessage(eventObj, model.Body.TransfusionDate,
                 model.Body.Donor, model.Body.RequestedQuantity, model.Body.StringTransfusionDate,
-                model.Body.PatientUserId, model.Body.VolunteerUserId);
+                model.Body.PatientUserId, model.Body.VolunteerUserId, model.Body);
             console.log(`Fire and Forget Domain Model: ${model}`);
         }
         if (model.Intent === "StartAssessment") {

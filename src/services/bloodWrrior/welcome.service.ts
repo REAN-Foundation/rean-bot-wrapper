@@ -29,10 +29,10 @@ export class BloodWarriorWelcomeService {
 
     public getEvent(roleId) {
         const message = {
-            3  : "BloodWarrior_Patient",
-            12 : "BloodWarrior_Donor",
-            1  : "BloodWarrior_Admin",
-            13 : "BloodWarrior_Volunteer"
+            "Patient"      : "BloodWarrior_Patient",
+            "Donor"        : "BloodWarrior_Donor",
+            "System admin" : "BloodWarrior_Admin",
+            "Volunteer"    : "BloodWarrior_Volunteer"
         };
         return message[roleId] ?? "New_User";
     }
@@ -43,7 +43,7 @@ export class BloodWarriorWelcomeService {
         const requestBody = await this.needleService.needleRequestForREAN("get", apiURL);
         let roleId = 0;
         if (requestBody.Data.Persons !== null) {
-            roleId = requestBody.Data.Persons.Roles[0].RoleId;
+            roleId = requestBody.Data.Persons.Roles[0].RoleName;
         }
         return roleId;
     }

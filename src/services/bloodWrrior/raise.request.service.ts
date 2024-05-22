@@ -219,7 +219,7 @@ export class RaiseDonationRequestService {
             let result = null;
             const apiURL = `clinical/donation-record`;
             result = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
-            console.log(`Succesfully added donation record and Id is ${result.Data.DonationRecord.id}`);
+            console.log(`Succesfully added donation record and Id is ${result.Data.Donation.id}`);
 
         } catch (error) {
             Logger.instance()
