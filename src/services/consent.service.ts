@@ -73,7 +73,7 @@ export class ConsentService {
         response_format.messageText = message;
         response_format.message_type = messageType;
 
-        const response = _platformMessageService.SendMediaMessage(response_format, payload );
+        _platformMessageService.SendMediaMessage(response_format, payload );
 
     }
 
