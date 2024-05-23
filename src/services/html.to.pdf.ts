@@ -8,7 +8,7 @@ async function htmlToPDF(){
         format : 'Letter'
     };
 
-    pdf.create(example, options).toFile('./pdf/test.pdf', (err, res) => {
+    pdf.create(example, options).toFile('./pdf/test.pdf', (err) => {
         if (err) {
             console.log(err);
         }

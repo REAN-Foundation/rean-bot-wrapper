@@ -31,7 +31,7 @@ export class DeleteReminderService {
             } else {
                 for (const reminder of reminderArray) {
                     const apiURL = `reminders/${reminder.id}`;
-                    const responseBody = await this.needleService.needleRequestForREAN("delete", apiURL, null, null);
+                    await this.needleService.needleRequestForREAN("delete", apiURL, null, null);
                 }
                 message = "You're welcome! All reminders have been successfully deleted. If you need any further assistance, feel free to ask!";
             }

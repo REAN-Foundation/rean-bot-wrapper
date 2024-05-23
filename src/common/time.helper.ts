@@ -529,20 +529,6 @@ export class TimeHelper {
         return localDateTime; 
     }
 
-    static convertGMTToLocal(date, time, timeOffset) {
-        const gmtDateTime = new Date(Date.parse(date));
-        const offset = TimeHelper.getTimezoneOffsets(timeOffset, DurationType.Minute);
-        const localDateTime = new Date(gmtDateTime.getTime() - (offset) * 60000);
-        const year = localDateTime.getFullYear();
-        const month = (localDateTime.getMonth() + 1).toString().padStart(2, '0');
-        const day = localDateTime.getDate().toString().padStart(2, '0');
-        const hours = localDateTime.getHours().toString().padStart(2, '0');
-        const minutes = localDateTime.getMinutes().toString().padStart(2, '0');
-        const seconds = localDateTime.getSeconds().toString().padStart(2, '0');
-        const localDateTimeString = `${year}-${month}-${day}T${time[0]}:${time[1]}:${time[2]}`;
-        return localDateTimeString;
-    }
-
     static getUserTimeZone(timeZoneOffset) {
         if (timeZoneOffset != null) {
             const offset = TimeHelper.getTimezoneOffsets(timeZoneOffset, DurationType.Minute);

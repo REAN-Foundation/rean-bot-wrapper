@@ -21,10 +21,6 @@ export class MedicationReminderService {
     async createReminder (eventObj) {
         try {
             const dayName : string = eventObj.body.queryResult.outputContexts[0].parameters.dayName;
-            const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
-            const eventName : string = eventObj.body.queryResult.outputContexts[0].parameters.event;
-            const frequency : string = eventObj.body.queryResult.outputContexts[0].parameters.frequency;
-            const partOfDay : string = eventObj.body.queryResult.outputContexts[0].parameters.part_of_day;
             const time : string = eventObj.body.queryResult.outputContexts[0].parameters.time[0];
 
             // const result: any = await this.getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);

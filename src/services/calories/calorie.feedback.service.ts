@@ -1,5 +1,4 @@
 /* eslint-disable max-len */
-import { exit } from 'process';
 import { CalorieDatabase } from '../../models/calorie.db.model';
 import { CalorieInfo } from '../../models/calorie.info.model';
 import { Op } from 'sequelize';
@@ -131,7 +130,7 @@ export class CalorieFeedback {
 
                 // eslint-disable-next-line max-len
                 new_calorie_value = message_id.user_calories - (updated_item.calories * updated_item.value) + (update_info.updatedCalories * updated_item.value);
-                const update_calories = await calorieInfoRepository.findOne({
+                await calorieInfoRepository.findOne({
                     where : {
                         negative_feedback : 1,
                         user_id           : sessionId
@@ -141,7 +140,7 @@ export class CalorieFeedback {
                 }).then( function (record) {
                     return record.update({
                         user_calories    : new_calorie_value,
-                        calories_updated :1
+                        calories_updated : 1
                     });
                 });
             }

@@ -47,7 +47,7 @@ export class handleRequestservice{
 
         const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         const response = await chatMessageRepository.findAll({ limit: 1, where: { userPlatformId: message.platformId }, order: [['createdAt', 'DESC']] });
-        const messageFlag = response[response.length - 1].messageFlag;
+        response[response.length - 1].messageFlag;
 
         if (nlpService && nlpService === "openai"){
             message_from_nlp = await this.openAIResponseService.getOpenaiMessage(clientName, translate_message.message);
