@@ -14,7 +14,6 @@ import { CustomMLModelResponseService } from './custom.ml.model.response.service
 import { EmojiFilter } from './filter.message.for.emoji.service';
 import { FeedbackService } from "./feedback/feedback.service";
 import { OutgoingMessage } from '../refactor/interface/message.interface';
-import { ChatMessage } from '../models/chat.message.model';
 import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
 import { CacheMemory } from './cache.memory.service';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
@@ -44,10 +43,6 @@ export class handleRequestservice{
         let message_from_nlp:IserviceResponseFunctionalities = null;
         const nlpService = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_SERVICE");
         const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-
-        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-        const response = await chatMessageRepository.findAll({ limit: 1, where: { userPlatformId: message.platformId }, order: [['createdAt', 'DESC']] });
-        const messageFlag = response[response.length - 1].messageFlag;
 
         if (nlpService && nlpService === "openai"){
             message_from_nlp = await this.openAIResponseService.getOpenaiMessage(clientName, translate_message.message);
@@ -123,6 +118,7 @@ export class handleRequestservice{
         const metaData = outgoingMessage.MetaData;
         const messageHandler = outgoingMessage.PrimaryMessageHandler;
         let message_from_nlp: IserviceResponseFunctionalities = null;
+        
         //let message_from_nlp = null;
         let processed_message = '';
         switch (messageHandler) {

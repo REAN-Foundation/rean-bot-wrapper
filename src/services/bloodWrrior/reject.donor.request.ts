@@ -27,15 +27,15 @@ export class RejectDonorRequestService {
 
                 const apiURL = `clinical/donation-record/search?donorUserId=${donor.UserId}`;
                 const requestBody = await this.needleService.needleRequestForREAN("get", apiURL);
-                const donationRecordId = requestBody.Data.DonationRecord.Items[0].id;
-                const donationRecord = requestBody.Data.DonationRecord.Items[0];
+                const donationRecordId = requestBody.Data.Donation.Items[0].id;
+                const donationRecord = requestBody.Data.Donation.Items[0];
                 let volunteerUserId = null;
                 let patientUserId = null;
                 if (donor.DonorType === 'One time') {
-                    volunteerUserId = requestBody.Data.DonationRecord.Items[0].VolunteerOfEmergencyDonor;
+                    volunteerUserId = requestBody.Data.Donation.Items[0].VolunteerOfEmergencyDonor;
                 } else {
-                    volunteerUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.VolunteerUserId;
-                    patientUserId = requestBody.Data.DonationRecord.Items[0].DonationDetails.PatientUserId;
+                    volunteerUserId = requestBody.Data.Donation.Items[0].DonationDetails.VolunteerUserId;
+                    patientUserId = requestBody.Data.Donation.Items[0].DonationDetails.PatientUserId;
                 }
                 const dffMessage = `Sorry to know this. We will contact you later.`;
                 resolve( { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } });

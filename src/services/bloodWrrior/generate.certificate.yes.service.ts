@@ -11,6 +11,7 @@ import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.servi
 import { DateStringFormat, DurationType, TimeHelper } from '../../common/time.helper';
 import { AwsS3manager } from '../aws.file.upload.service';
 import { generatePdfCertificate } from './generate.pdf.certificate';
+import { CacheMemory } from '../cache.memory.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class GenerateCertificateYesService {
@@ -29,13 +30,20 @@ export class GenerateCertificateYesService {
             let volunteer = null;
             volunteer = await this.bloodWarriorCommonService.getVolunteerByPhoneNumber(eventObj);
 
-            //load a reminder for volunteer
+            const key = `${volunteer.UserId}:DonationRecord`;
+            const donationRecord = await CacheMemory.get(key);
+            let donorUserId = null;
+            let patientUserId = null;
 
-            //const apiURL = `clinical/donation-communication/search?selectedVolunteerUserId=${volunteer.UserId}`;
-            const apiURL = `clinical/donation-communication/search?volunteerUserId=${volunteer.UserId}`;
-            const requestBody = await this.needleService.needleRequestForREAN("get", apiURL);
-            //const donorUserId = requestBody.Data.DonationCommunication.Items[0].AcceptedDonorUserId;
-            const donorUserId = requestBody.Data.DonationCommunication.Items[0].DonorUserId;
+            if (donationRecord != null) {
+                donorUserId = donationRecord.DonationDetails.DonorUserId;
+                patientUserId = donationRecord.PatientUserId;
+            } else {
+                const apiURL = `clinical/donation-communication/search?volunteerUserId=${volunteer.UserId}`;
+                const requestBody = await this.needleService.needleRequestForREAN("get", apiURL);
+                donorUserId = requestBody.Data.DonationCommunication.Items[0].DonorUserId;
+                patientUserId = requestBody.Data.DonationCommunication.Items[0].PatientUserId;
+            }
             const donor = await this.bloodWarriorCommonService.getDonorPhoneByUserId(donorUserId);
             const dffMessage = `Thank you for your confirmation, ${volunteer.DisplayName}. \nA certificate of recognition is generated and sent to ${donor.User.Person.DisplayName}`;
 
@@ -43,12 +51,11 @@ export class GenerateCertificateYesService {
             const body : QueueDoaminModel =  {
                 Intent : "Generate_Certificate_Yes",
                 Body   : {
-                    EventObj         : eventObj,
-                    PatientUserId    : requestBody.Data.DonationCommunication.Items[0].PatientUserId,
-                    DonationRecordId : requestBody.Data.DonationCommunication.Items[0].DonationRecordId,
-                    VolunteerName    : volunteer.DisplayName,
-                    VolunteerUserId  : volunteer.UserId,
-                    Donor            : donor
+                    EventObj        : eventObj,
+                    PatientUserId   : patientUserId,
+                    VolunteerName   : volunteer.DisplayName,
+                    VolunteerUserId : volunteer.UserId,
+                    Donor           : donor
                 }
             };
             FireAndForgetService.enqueue(body);
@@ -108,18 +115,18 @@ export class GenerateCertificateYesService {
                 PlanCode  : "Patient-Donation-Confirmation",
                 StartDate : reminderDate.toISOString().split('T')[0]
             };
-            await this.needleService.needleRequestForREAN("put", apiURL, null, obj);
+            await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
 
             //load volunteer reminder to ask whether donation has completed or not
             const enrollURL = `care-plans/patients/${body.VolunteerUserId}/enroll`;
             obj.PlanCode = "Volunteer-Donation-Confirmation";
             obj.PlanName = "Volunteer donation confirmation";
-            await this.needleService.needleRequestForREAN("put", enrollURL, null, obj);
+            await this.needleService.needleRequestForREAN("post", enrollURL, null, obj);
 
             //message send to patient
             const patient = await this.bloodWarriorCommonService.getPatientPhoneByUserId(body.PatientUserId);
             const patientPhone =
-                this.raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(patient.User.Person.Phone);
+                await this.raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(patient.User.Person.Phone);
             const patientMessage = `Dear ${patient.User.Person.DisplayName},
             Donation by ${body.Donor.User.Person.DisplayName} is successfully complete. You can now book your transfusion.`;
 

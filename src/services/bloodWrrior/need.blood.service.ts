@@ -2,7 +2,7 @@ import { GetPatientInfoService } from '../support.app.service';
 import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../common/logger';
 import { NeedleService } from '../needle.service';
-import { templateButtonService, whatsappMetaButtonService } from '../whatsappmeta.button.service';
+import { templateButtonService } from '../whatsappmeta.button.service';
 import { dialoflowMessageFormatting } from '../Dialogflow.service';
 import { BloodWarriorWelcomeService } from './welcome.service';
 import { RaiseDonationRequestService } from './raise.request.service';
@@ -39,10 +39,10 @@ export class NeedBloodService {
 
     public getEvent(roleId) {
         const message = {
-            2  : "NeedBlood_Patient_Confirm",
-            11 : "NeedBlood_Donor",
-            1  : "BloodWarrior_Admin",
-            12 : "Donation_Request"
+            "Patient"      : "NeedBlood_Patient_Confirm",
+            "Donor"        : "NeedBlood_Donor",
+            "System admin" : "BloodWarrior_Admin",
+            "Volunteer"    : "Donation_Request"
         };
         return message[roleId] ?? "New_User";
     }
