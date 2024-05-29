@@ -27,7 +27,7 @@ export class getAdditionalInfoSevice {
         @inject(NeedleService) private needleService?: NeedleService,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(translateService) private translate?: translateService,
-        @inject (kerotoplastyService) private kerotoplastyService?:kerotoplastyService,
+        @inject (kerotoplastyService) private KerotoplastyService?:kerotoplastyService,
         @inject(dialoflowMessageFormatting) private DialogflowServices?: dialoflowMessageFormatting,
     ){}
 
@@ -55,7 +55,7 @@ export class getAdditionalInfoSevice {
             const clientName = this.clientEnvironment.getClientEnvironmentVariable("NAME");
             if (clientName === "GGHN")
             {
-                message = await this.getMessageForGGHN(EHRNumber,userId,userName,languageCode,eventObj);
+                message = await this.getMessageForGGHN(EHRNumber,userName);
             }
             if (clientName === "LVPEI")
             {
@@ -87,7 +87,7 @@ export class getAdditionalInfoSevice {
     {
         console.log("for LVPEI");
         let response: any = {};
-        response =  await this.kerotoplastyService.makeApiCall(EHRNumber, eventObj);
+        response =  await this.KerotoplastyService.makeApiCall(EHRNumber, eventObj);
         let message = null;
         if (response.body.patient_details){
             const responseObject = await this.formulate_LVPEI_ResposeObj(response);
@@ -113,7 +113,7 @@ export class getAdditionalInfoSevice {
         return responseObj;
     }
 
-    async getMessageForGGHN(EHRNumber,userId,userName,languageCode,eventObj)
+    async getMessageForGGHN(EHRNumber,userName)
     {
         const authenticationToken = await this.getauthenticationToken();
         const next_appointment_date = await this.getUserInfo(authenticationToken, EHRNumber );

@@ -68,7 +68,7 @@ export class kerotoplastyService {
             break;
         }
         }
-        const responseToSend = this.DialogflowServices.making_response(message);
+        this.DialogflowServices.making_response(message);
         console.log("Our location data is being sent!!!!");
         return message;
 

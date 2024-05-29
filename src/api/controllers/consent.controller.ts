@@ -7,7 +7,6 @@ import { ConsentInfo } from '../../models/consent.info.model';
 import { EntityManagerProvider } from '../../services/entity.manager.provider.service';
 import { ErrorHandler } from '../../utils/error.handler';
 import {CountryCodeService } from '../../utils/phone.number.formatting';
-import { PhoneNumberFormat,  PhoneNumberUtil} from 'google-libphonenumber';
 
 // Get an instance of PhoneNumberUtil.
 
