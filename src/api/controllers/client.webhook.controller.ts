@@ -59,7 +59,7 @@ export class ClientWebhookController {
         let patientUserId = null;
         const entityManagerProvider = req.container.resolve(EntityManagerProvider);
         const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ContactList);
-        const prevSessions = await chatMessageRepository.findOne({where : {mobileNumber : userId,}
+        const prevSessions = await chatMessageRepository.findOne({ where : { mobileNumber: userId, }
         });
         if (prevSessions){
             patientUserId  = prevSessions.dataValues.patientUserId;
@@ -126,7 +126,7 @@ export class ClientWebhookController {
             const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
             this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
             this._clientAuthenticatorService.authenticate(req,res);
-            let userPlatformId= null;
+            let userPlatformId = null;
             let platformUserName = null;
             this._platformMessageService = req.container.resolve(req.params.channel);
             this._platformMessageService.res = res;
@@ -153,11 +153,7 @@ export class ClientWebhookController {
                     return res.status(200).send(response);
                 }
                 else {
-                    if (firstTimeUser || !patientUSerId  ){
-                        const patientUserId = await this.registrationService.getPatientUserId(req.params.channel, userPlatformId, platformUserName);
-                        await this.registrationService.wrapperRegistration(entityManagerProvider,userPlatformId, platformUserName,req.params.channel,patientUserId);
-                    }
-                    this._platformMessageService.handleMessage(req.body, req.params.channel);
+                    this.handelRequestWithoutConsent(firstTimeUser,patientUSerId,req,entityManagerProvider,userPlatformId, platformUserName );
                 }
                 
             }
@@ -168,6 +164,18 @@ export class ClientWebhookController {
 
         }
     };
+
+    async  handelRequestWithoutConsent(firstTimeUser,patientUSerId,req,entityManagerProvider,userPlatformId, platformUserName ) {
+        try {
+            if (firstTimeUser || !patientUSerId  ){
+                const patientUserId = await this.registrationService.getPatientUserId(req.params.channel, userPlatformId, platformUserName);
+                await this.registrationService.wrapperRegistration(entityManagerProvider,userPlatformId, platformUserName,req.params.channel,patientUserId);
+            }
+            this._platformMessageService.handleMessage(req.body, req.params.channel);
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
     private async handleConsentMessage(req: any, res: any, handleReqVariable,buttonKeyName,channel,firstTimeUser ) {
         try {
@@ -319,11 +327,7 @@ export class ClientWebhookController {
                     await this.handleConsentMessage(req, res,req.body.entry[0].changes[0].value, "interactivebuttons", req.params.channel,firstTimeUser);
                 }
                 else {
-                    if (firstTimeUser || !ehrSystemCode){
-                        const patientUserId = await this.registrationService.getPatientUserId(req.params.channel, userPlatformId, platformUserName);
-                        await this.registrationService.wrapperRegistration(entityManagerProvider,userPlatformId, platformUserName,req.params.channel,patientUserId);
-                    }
-                    this._platformMessageService.handleMessage(req.body.entry[0].changes[0].value, req.params.channel);
+                    this.handelRequestWithoutConsent(firstTimeUser,ehrSystemCode,req,entityManagerProvider,userPlatformId, platformUserName );
                 }
                 
             }

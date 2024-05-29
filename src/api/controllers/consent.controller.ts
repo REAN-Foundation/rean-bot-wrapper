@@ -130,21 +130,6 @@ export class consentController {
         }
     };
 
-    checkPhoneNumber =  async(req, res)=>{
-        try {
-            var mobile_number = req.body.PhoneNumber;
-            const formattedNumber = await this.countryCodeService.formatPhoneNumber(mobile_number);
-            const responseObject = {
-                FormattedNumber: formattedNumber,
-            };
-            this.responseHandler.sendSuccessResponse(res, 200, "all ok", responseObject );
-        }
-        catch (error) {
-            console.log("in error", error);
-            this.errorHandler.handle_controller_error(error, res, req);
-        }
-    };
-
     deleteConsentinfo = async(req, res)=>{
         try {
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);

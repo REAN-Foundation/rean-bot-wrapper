@@ -8,7 +8,6 @@ import { platformServiceInterface } from '../refactor/interface/platform.interfa
 import needle from 'needle';
 import { ContactList } from '../models/contact.list';
 import { ResponseHandler } from '../utils/response.handler';
-import { whatsappMetaButtonService } from './whatsappmeta.button.service';
 import { commonResponseMessageFormat } from '../services/common.response.format.object';
 import { Iresponse } from '../refactor/interface/message.interface';
 import { sendApiButtonService } from './whatsappmeta.button.service';
@@ -42,6 +41,7 @@ export class getAdditionalInfoSevice {
                 this.SaveEHRNumber(ehrSystemCode,userId);
                 this.SendValidEHRResponse(ehrSystemCode,userId,userName,languageCode,eventObj);
             }
+            console.log("Info is saved");
         }
         catch (error) {
             console.log("WhileStoring the additional info", error);
@@ -122,8 +122,6 @@ export class getAdditionalInfoSevice {
             message = `Hi ${userName}! I’m GGHN Jara Wellness Assistant – Your Health Companion! 🤖\n Get instant clarity on any questions regarding  HIV & Tuberculosis (TB) in your preferred local language.
                 \n⏰ you will get reminder for your next appointment date on ${next_appointment_date}.`;
         }
-        else {
-            message = null; }
         return message;
     }
 
@@ -196,7 +194,7 @@ export class getAdditionalInfoSevice {
     async getauthenticationToken(){
         try {
             const url = "https://hid4mel.gghnigeria.org/account/JWTAuthentication";
-            var headers = {
+            const headers = {
                 'Content-Type' : 'application/json',
                 accept         : 'application/json'
             };
@@ -227,7 +225,7 @@ export class getAdditionalInfoSevice {
                 const patientUserId = personContactList.dataValues.patientUserId;
                 const SearchByUserApiUrl = `/patients/${patientUserId}}`;
                 const obj = { ExternalMedicalRegistrationId: ehrSystemCode };
-                const searchResult = await this.needleService.needleRequestForREAN("put", SearchByUserApiUrl,null,obj);
+                await this.needleService.needleRequestForREAN("put", SearchByUserApiUrl,null,obj);
             }
             else {
                 console.log("while updating the EHR number");

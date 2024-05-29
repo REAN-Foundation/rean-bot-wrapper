@@ -1,8 +1,6 @@
 import { kerotoplastyService } from "../../services/kerotoplasty.service";
 import { NeedleService } from "../../services/needle.service";
 import { dialoflowMessageFormatting } from "../../services/Dialogflow.service";
-import { sendApiButtonService } from "../../services/whatsappmeta.button.service";
-import { sendTelegramButtonService } from "../../services/telegram.button.service";
 import { getAdditionalInfoSevice } from "../../services/get.additional.info.service";
 import { translateService } from "../../services/translate.service";
 
@@ -18,10 +16,8 @@ export const kerotoplastyLocationListener = async (intent:string, eventObj) => {
 async function keratoplastyNextSteps(intent,eventObj) {
     try {
         console.log("STEP 4");
-        const channel = eventObj.body.originalDetectIntentRequest.payload.source;
         const kerotoplastyServiceObj: kerotoplastyService = eventObj.container.resolve(kerotoplastyService);
-        const needleService: NeedleService = eventObj.container.resolve(NeedleService);
-        const location_response = await kerotoplastyServiceObj.conditionSpecificResponse(intent,eventObj);
+        const location_response = await kerotoplastyServiceObj.conditionSpecificResponse(intent);
         const additionalObj: getAdditionalInfoSevice = eventObj.container.resolve(getAdditionalInfoSevice);
         const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
         const languageCode = eventObj.body.queryResult.languageCode;

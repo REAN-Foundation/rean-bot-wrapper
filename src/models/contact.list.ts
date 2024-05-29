@@ -5,7 +5,7 @@ import { contactList } from '../refactor/interface/message.interface';
     timestamps : true,
     modelName  : 'ContactList',
     tableName  : 'contact_list'
-    })
+})
 export class ContactList extends Model implements contactList {
     
     @AutoIncrement

@@ -6,7 +6,6 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 import path from 'path';
 import needle from 'needle';
 import { EntityManagerProvider } from "./entity.manager.provider.service";
-import { ChatMessage } from "../models/chat.message.model";
 import { ContactList } from '../models/contact.list';
 
 @scoped(Lifecycle.ContainerScoped)
@@ -45,7 +44,7 @@ export class kerotoplastyService {
         }
     };
 
-    async conditionSpecificResponse(intent,eventObj){
+    async conditionSpecificResponse(intent){
         const setSeverityGrade = {
             'hyperCriticalCondition' : 3,
             'criticalCondition'      : 2,
@@ -53,39 +52,22 @@ export class kerotoplastyService {
         };
         const severityGrade = setSeverityGrade[intent];
         console.log("SEVERITY GRADE IS",severityGrade);
-
-        // const locationData = await this.getLocation.getLoctionData(eventObj,severityGrade);
         let message = null;
-
-        // console.log("our location data is ",locationData);
-        // const postalAddresses = Array.from(locationData).map(obj => obj["Postal_Address"]);
-        // const address_1 = postalAddresses[0].replace(/\n/g, ', ');
-        // const address_2 = postalAddresses[1].replace(/\n/g, ', ');
-        // const address_3 = postalAddresses[2].replace(/\n/g, ', ');
-        // const address_4 = postalAddresses[3].replace(/\n/g, ', ');
         switch (intent) {
         case 'hyperCriticalCondition': {
             message = `Your situation seems hyper-critical.\n Please Visit the nearest care center as soon as possible.\n \n Do you want to Book appointment`;
-
-            //\n Your Possible nearest centers are: \n 1. ${address_1}  \n 2. ${address_2} \n 3. ${address_3} \n 4. ${address_4}`;
             break;
         }
         case 'criticalCondition':
         {
             message = `Your situation seems critical.\n Please visit us at the nearest center on the next available.\n\n Do you want to Book appointment`;
-
-            //\n Your Possible nearest centers are: \n 1. ${address_1}  \n 2. ${address_2}\n 3. ${address_3} \n 4. ${address_4}`;
             break;
         }
         case 'normalCondition': {
             message = `Your situation seems normal.\n Please visit us at our nearest center if there is drop in vision or severe pain in your operated eye.. Do you want to Book appointment`;
-
-            //\n Your Possible nearest centers are: \n 1. ${address_1}  \n 2. ${address_2}\n 3. ${address_3} \n 4. ${address_4}`;
             break;
         }
         }
-        
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const responseToSend = this.DialogflowServices.making_response(message);
         console.log("Our location data is being sent!!!!");
         return message;
@@ -146,7 +128,7 @@ export class kerotoplastyService {
 
     async appoinmentDetailsByUser(parameters)
     {
-        var AppoinmentComment  = "Patient is requesting for Appointment\n";
+        let AppoinmentComment  = "Patient is requesting for Appointment\n";
 
         if (parameters.Date){
             AppoinmentComment += ` - Date : ${parameters.Date.date_time} \n`;
@@ -162,7 +144,6 @@ export class kerotoplastyService {
 
     async UpdatingAppointmentOnClickup(intent,eventObj){
         const parameters = eventObj.body.queryResult.parameters;
-        const payload = eventObj.body.originalDetectIntentRequest.payload;
         const symptomComment = await this.appoinmentDetailsByUser(parameters);
         const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
         const contactList =
