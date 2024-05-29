@@ -88,9 +88,15 @@ export interface chatSession {
 export interface contactList {
     autoIncrementalID: number;
     mobileNumber: string;
+    ehrSystemCode?:string;
+    patientUserId?:string;
     username: string;
+    cmrChatTaskID?: string;
+    cmrCaseTaskID?: string;
     platform: string;
     emailID: string;
+    preferredLanguage?: string;
+    optOut?: string;
 }
 
 export interface IprocessedDialogflowResponseFormat{

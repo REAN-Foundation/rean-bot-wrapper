@@ -7,6 +7,7 @@ import path from 'path';
 import needle from 'needle';
 import { EntityManagerProvider } from "./entity.manager.provider.service";
 import { ChatMessage } from "../models/chat.message.model";
+import { ContactList } from '../models/contact.list';
 
 @scoped(Lifecycle.ContainerScoped)
 export class kerotoplastyService {
@@ -52,26 +53,34 @@ export class kerotoplastyService {
         };
         const severityGrade = setSeverityGrade[intent];
         console.log("SEVERITY GRADE IS",severityGrade);
-        const locationData = await this.getLocation.getLoctionData(eventObj,severityGrade);
+
+        // const locationData = await this.getLocation.getLoctionData(eventObj,severityGrade);
         let message = null;
-        console.log("our location data is ",locationData);
-        const postalAddresses = Array.from(locationData).map(obj => obj["Postal_Address"]);
-        const address_1 = postalAddresses[0].replace(/\n/g, ', ');
-        const address_2 = postalAddresses[1].replace(/\n/g, ', ');
-        const address_3 = postalAddresses[2].replace(/\n/g, ', ');
-        const address_4 = postalAddresses[3].replace(/\n/g, ', ');
+
+        // console.log("our location data is ",locationData);
+        // const postalAddresses = Array.from(locationData).map(obj => obj["Postal_Address"]);
+        // const address_1 = postalAddresses[0].replace(/\n/g, ', ');
+        // const address_2 = postalAddresses[1].replace(/\n/g, ', ');
+        // const address_3 = postalAddresses[2].replace(/\n/g, ', ');
+        // const address_4 = postalAddresses[3].replace(/\n/g, ', ');
         switch (intent) {
         case 'hyperCriticalCondition': {
-            message = `Your situation seems hyper-critical.\n Please Visit the nearest care center as soon as possible.\n Your Possible nearest centers are: \n 1. ${address_1}  \n 2. ${address_2} \n 3. ${address_3} \n 4. ${address_4}`;
+            message = `Your situation seems hyper-critical.\n Please Visit the nearest care center as soon as possible.\n \n Do you want to Book appointment`;
+
+            //\n Your Possible nearest centers are: \n 1. ${address_1}  \n 2. ${address_2} \n 3. ${address_3} \n 4. ${address_4}`;
             break;
         }
         case 'criticalCondition':
         {
-            message = `Your situation seems critical.\n Please visit us at the nearest center on the next available.\n Your Possible nearest centers are: \n 1. ${address_1}  \n 2. ${address_2}\n 3. ${address_3} \n 4. ${address_4}`;
+            message = `Your situation seems critical.\n Please visit us at the nearest center on the next available.\n\n Do you want to Book appointment`;
+
+            //\n Your Possible nearest centers are: \n 1. ${address_1}  \n 2. ${address_2}\n 3. ${address_3} \n 4. ${address_4}`;
             break;
         }
         case 'normalCondition': {
-            message = `Your situation seems normal.\n Please visit us at our nearest center if there is drop in vision or severe pain in your operated eye.\n Your Possible nearest centers are: \n 1. ${address_1}  \n 2. ${address_2}\n 3. ${address_3} \n 4. ${address_4}`;
+            message = `Your situation seems normal.\n Please visit us at our nearest center if there is drop in vision or severe pain in your operated eye.. Do you want to Book appointment`;
+
+            //\n Your Possible nearest centers are: \n 1. ${address_1}  \n 2. ${address_2}\n 3. ${address_3} \n 4. ${address_4}`;
             break;
         }
         }
@@ -103,7 +112,11 @@ export class kerotoplastyService {
 
     async postingOnClickup(intent,eventObj){
         const parameters = eventObj.body.queryResult.parameters;
-        const payload = eventObj.body.originalDetectIntentRequest.payload;
+        const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
+        const contactList =
+        (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
+        const personContactList = await contactList.findOne({ where: { mobileNumber: userId } });
+        const EMRNumber  = personContactList.dataValues.ehrSystemCode;
         const filename = path.basename(parameters.image);
         const symptomComment = await this.symptomByUser(parameters);
         const attachmentPath = `./photo/` + filename;
@@ -113,35 +126,62 @@ export class kerotoplastyService {
             'normalCondition'        : 3
         };
         const priority = set_priority[intent];
-        const user_details = await this.getEMRDetails(parameters.medicalRecordNumber, eventObj);
-        const topic =  parameters.medicalRecordNumber;
-        // eslint-disable-next-line max-len
-        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-        const responseChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: payload.userId } });
-        if (responseChatMessage[responseChatMessage.length - 1]){
-            // eslint-disable-next-line max-len
-            if (responseChatMessage.some((checkArray) => checkArray.supportChannelTaskID !== null && checkArray.supportChannelTaskID !== undefined)) {
-                const taskID = responseChatMessage[responseChatMessage.length - 1].supportChannelTaskID;
-                await this.clickUpTask.updateTask(taskID,priority,user_details);
-                await this.clickUpTask.taskAttachment(taskID,attachmentPath);
-                await this.clickUpTask.postCommentOnTask(taskID,symptomComment);
-            }
-            else
-            {
-                const taskID = await this.clickUpTask.createTask(responseChatMessage, topic, user_details, priority);
-                await this.clickUpTask.taskAttachment(taskID, attachmentPath);
-                await this.clickUpTask.postCommentOnTask(taskID, symptomComment);
-                await chatMessageRepository.update({ supportChannelTaskID: taskID, humanHandoff: "false" }, { where: { id: responseChatMessage[responseChatMessage.length - 1].id } });
-
-            }
+        const user_details = await this.getEMRDetails(EMRNumber , eventObj);
+        const taskId = personContactList.dataValues.cmrCaseTaskID;
+        if (taskId){
+            await this.clickUpTask.updateTask(taskId,priority,user_details,EMRNumber);
+            await this.clickUpTask.taskAttachment(taskId,attachmentPath);
+            await this.clickUpTask.postCommentOnTask(taskId,symptomComment);
         }
         else
         {
-            const taskID = await this.clickUpTask.createTask(responseChatMessage, topic, user_details, priority);
+            const taskID = await this.clickUpTask.createTask( null, EMRNumber, user_details, priority);
             await this.clickUpTask.taskAttachment(taskID, attachmentPath);
             await this.clickUpTask.postCommentOnTask(taskID, symptomComment);
+            await contactList.update({ cmrCaseTaskID: taskID, humanHandoff: "false" }, { where: { mobileNumber: userId } });
+    
+        }
+
+    }
+
+    async appoinmentDetailsByUser(parameters)
+    {
+        var AppoinmentComment  = "Patient is requesting for Appointment\n";
+
+        if (parameters.Date){
+            AppoinmentComment += ` - Date : ${parameters.Date.date_time} \n`;
+        }
+        if (parameters.Location){
+            AppoinmentComment  += ` - Hospital : ${parameters.Location} \n`;
+        }
+        if (parameters.Doctor){
+            AppoinmentComment  += ` - Doctor : ${parameters.Doctor.name} \n`;
+        }
+        return (AppoinmentComment);
+    }
+
+    async UpdatingAppointmentOnClickup(intent,eventObj){
+        const parameters = eventObj.body.queryResult.parameters;
+        const payload = eventObj.body.originalDetectIntentRequest.payload;
+        const symptomComment = await this.appoinmentDetailsByUser(parameters);
+        const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
+        const contactList =
+        (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
+        const personContactList = await contactList.findOne({ where: { mobileNumber: userId } });
+        const taskId = personContactList.dataValues.cmrCaseTaskID;
+        const EMRNumber  = personContactList.dataValues.ehrSystemCode;
+        const user_details = await this.getEMRDetails(EMRNumber,eventObj);
+        const ClickupListID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_CASE_LIST_ID");
+        if (taskId){
+            await this.clickUpTask.updateTask(taskId,null,user_details,EMRNumber, "Appointment");
+            await this.clickUpTask.postCommentOnTask(taskId,symptomComment);
+        }
+        else
+        {
+            const taskID = await this.clickUpTask.createTask(null, EMRNumber , user_details,1,ClickupListID,"Appoinment");
+            await this.clickUpTask.postCommentOnTask(taskID, symptomComment);
             console.log("we are Here");
-            await chatMessageRepository.update({ supportChannelTaskID: taskID, humanHandoff: "false" }, { where: { id: responseChatMessage[responseChatMessage.length - 1].id } });
+            await contactList.update({ cmrCaseTaskID: taskID, humanHandoff: "false" }, { where: { mobileNumber: userId } });
         }
 
     }
@@ -196,7 +236,7 @@ export class kerotoplastyService {
                 report = report + "### Surgeries \n";
                 for (const operate of response.body.surgeries) {
                     report = report + '- Procedure Info : ' + operate.procedure_info + '\n';
-                    report = report + '  - Surgeon Name : ' + operate.surgeon_name + '\n';
+                    report = report + '  - Surgeon Name : ' +  operate.surgeon_name + '\n';
                 }
                 report = report + '### Patient Visit History\n';
                 report = report + '- ' + 'First Visit Date : ' + patient_details.first_visit_date + '\n';

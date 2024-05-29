@@ -6,12 +6,21 @@ import { AwsS3manager } from '../../services/aws.file.upload.service';
 import { ConsentInfo } from '../../models/consent.info.model';
 import { EntityManagerProvider } from '../../services/entity.manager.provider.service';
 import { ErrorHandler } from '../../utils/error.handler';
+import {CountryCodeService } from '../../utils/phone.number.formatting';
+import { PhoneNumberFormat,  PhoneNumberUtil} from 'google-libphonenumber';
+
+// Get an instance of PhoneNumberUtil.
+
+
+// Get an instance of PhoneNumberUtil. 
+
 
 // @autoInjectable()
 @scoped(Lifecycle.ContainerScoped)
 export class consentController {
 
     constructor(
+        @inject(CountryCodeService ) private countryCodeService ?:CountryCodeService ,
         @inject(ResponseHandler) private responseHandler?: ResponseHandler,
         @inject(ClientEnvironmentProviderService) private clientEnvironment?: ClientEnvironmentProviderService,
         @inject(AwsS3manager) private awss3manager?: AwsS3manager,
@@ -114,6 +123,21 @@ export class consentController {
                     this.responseHandler.sendSuccessResponse(res, 200, 'Language not exist ', "");
                 }
             }
+        }
+        catch (error) {
+            console.log("in error", error);
+            this.errorHandler.handle_controller_error(error, res, req);
+        }
+    };
+
+    checkPhoneNumber =  async(req, res)=>{
+        try {
+            var mobile_number = req.body.PhoneNumber;
+            const formattedNumber = await this.countryCodeService.formatPhoneNumber(mobile_number);
+            const responseObject = {
+                FormattedNumber: formattedNumber,
+            };
+            this.responseHandler.sendSuccessResponse(res, 200, "all ok", responseObject );
         }
         catch (error) {
             console.log("in error", error);
