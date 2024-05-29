@@ -18,6 +18,7 @@ export class ConsentRoutes{
         router.get(`/:client/consent/read`,this._consentController.readConsentinfo);
         router.put(`/:client/consent/update`,this._consentController.updateConsentinfo);
         router.delete(`/:client/consent/delete`,this._consentController.deleteConsentinfo);
+        
         app.use('/v1/', router);
     }
 

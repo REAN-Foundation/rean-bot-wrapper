@@ -23,7 +23,27 @@ export class ContactList extends Model implements contactList {
     @Column({
         type : DataType.STRING
     })
+        ehrSystemCode:string;
+
+    @Column({
+        type : DataType.STRING
+    })
+        patientUserId: string;
+
+    @Column({
+        type : DataType.STRING
+    })
         username: string;
+
+    @Column({
+        type : DataType.STRING
+    })
+        cmrChatTaskID: string;
+
+    @Column({
+        type : DataType.STRING
+    })
+        cmrCaseTaskID: string;
 
     @Column({
         type : DataType.STRING

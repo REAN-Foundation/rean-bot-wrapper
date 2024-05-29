@@ -79,6 +79,10 @@ import {ConsentYesListner} from './intentListeners/consentListners/consent.yes.l
 import { DeleteReminderListener } from './intentListeners/medicationReminder/delete.reminder.listener';
 import { CincinnatiPerMinuteMsgListener } from './intentListeners/maternity.careplan/cincinnati.per.minute.listener copy';
 import { PatientDonationConfirmationListener } from './intentListeners/bloodWarrior/patient.donation.confirmation.listener';
+import { AdditionalInfoEditListener } from './intentListeners/consentListners/get.additional.info.listener';
+import { AdditionalInfoReadListener } from './intentListeners/consentListners/read.additional.info.listener';
+import {NearestLocationListner} from './intentListeners/nearest.location.listner';
+import { AppoinmentBookingListner } from './intentListeners/appoinment.booking.listner';
 /*
  * Init function (being called during application bootstrap)
  * This is the place to register any new intent and corresponding listeners
@@ -229,6 +233,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('Dmc_Yes', DmcAssessmentAnswerYesListener);
         IntentEmitter.registerListener('Dmc_No', DmcAssessmentAnswerNoListener);
         IntentEmitter.registerListener('Registration_PerMinMsg', RegistrationPerMinuteMsgListener);
+        IntentEmitter.registerListener('Cincinnati_PerMinMsg', CincinnatiPerMinuteMsgListener);
         IntentEmitter.registerListener('ImageQualityCheck', eyeImageQualityCheckListener);
         IntentEmitter.registerListener('Appointment_Reminder', AppointmentReminderListener);
         IntentEmitter.registerListener('Reminder_Registration', ReminderRegistrationListener);
@@ -249,7 +254,10 @@ export class IntentRegister {
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
         IntentEmitter.registerListener('consent_yes',ConsentYesListner.handleIntent);
         IntentEmitter.registerListener('Cincinnati_PerMinMsg', CincinnatiPerMinuteMsgListener);
-
+        IntentEmitter.registerListener('AdditionalInfo', AdditionalInfoEditListener);
+        IntentEmitter.registerListener('readAdditionalInfo', AdditionalInfoReadListener);
+        IntentEmitter.registerListener('findNearestLocation', NearestLocationListner);
+        IntentEmitter.registerListener('Book Appoinment', AppoinmentBookingListner);
         // Intent fulfillement - Success listener
         // TODO: Pending implementation
         // eslint-disable-next-line max-len

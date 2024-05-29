@@ -19,7 +19,7 @@ export class ClickUpTask{
     @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider) { }
 
     // eslint-disable-next-line max-len
-    async createTask(responseChatMessage, postTopic:string = null, description:string = null, priority = null, ClickupListID = null,tag = ''){
+    async createTask(responseChatMessage = null, postTopic:string = null, description:string = null, priority = null, ClickupListID = null,tag = ''){
         let listID = null;
         if (ClickupListID){
             listID = ClickupListID;
@@ -39,6 +39,9 @@ export class ClickUpTask{
         }
         else if (responseChatMessage.length >= 1 ){
             topic = responseChatMessage[responseChatMessage.length - 1].dataValues.messageContent;
+        }
+        else {
+            topic = "New USer";
         }
         const obj = {
             "name"                 : topic,
@@ -116,7 +119,7 @@ export class ClickUpTask{
 
     }
 
-    async updateTask(taskID,priority,user_details, topic = null){
+    async updateTask(taskID,priority,user_details, topic = null,tag = null){
         try {
             const updateTaskUrl = `https://api.clickup.com/api/v2/task/${taskID}`;
             const options = getRequestOptions();
@@ -132,6 +135,7 @@ export class ClickUpTask{
                 "notify_all"           : true,
                 "parent"               : null,
                 "links_to"             : null,
+                "tags"                 : [tag],
                 "markdown_description" : user_details,
                 "name"                 : topic
             };
