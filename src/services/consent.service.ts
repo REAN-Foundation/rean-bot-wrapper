@@ -30,10 +30,13 @@ export class ConsentService {
 
     async handleConsentYesreply(userPlatformId, platformUserName,eventObj): Promise<any> {
         try {
-
             console.log("consent yes listener is called");
-            const sourceChannel = eventObj.body.originalDetectIntentRequest.payload.source;
-            this._platformMessageService = eventObj.container.resolve(sourceChannel.toLowerCase());
+            let sourceChannel = eventObj.body.originalDetectIntentRequest.payload.source;
+            if (sourceChannel === "Telegram")
+            {
+                sourceChannel = "telegram";
+            }
+            this._platformMessageService = eventObj.container.resolve(sourceChannel);
             const EnvironmentProviderService = eventObj.container.resolve(ClientEnvironmentProviderService);
             const patientUserId = await this.registrationService.getPatientUserId(sourceChannel, userPlatformId, platformUserName);
             await this.registrationService.wrapperRegistration(this.entityManagerProvider,userPlatformId, platformUserName,sourceChannel,patientUserId);
