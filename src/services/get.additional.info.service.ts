@@ -33,6 +33,7 @@ export class getAdditionalInfoSevice {
 
     async processAdditionalInfo(eventObj){
         try {
+            console.log("additional info  intent is trigered");
             const userName = eventObj.body.originalDetectIntentRequest.payload.userName;
             const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
             const languageCode = eventObj.body.queryResult.languageCode;
@@ -217,6 +218,7 @@ export class getAdditionalInfoSevice {
 
     async SaveEHRNumber(ehrSystemCode,userId){
         try {
+            console.log("EHR number is saved");
             const contactList =
              (await this.entityManagerProvider.getEntityManager(this.clientEnvironment)).getRepository(ContactList);
             const personContactList = await contactList.findOne({ where: { mobileNumber: userId } });
