@@ -30,9 +30,10 @@ export class ConsentService {
 
     async handleConsentYesreply(userPlatformId, platformUserName,eventObj): Promise<any> {
         try {
-            
+            console.log("consent yes listener is called");
             const sourceChannel = eventObj.body.originalDetectIntentRequest.payload.source;
-            this._platformMessageService = eventObj.container.resolve(sourceChannel);
+
+            this._platformMessageService = eventObj.container.resolve(sourceChannel.toLowerCase());
             const EnvironmentProviderService = eventObj.container.resolve(ClientEnvironmentProviderService);
             const patientUserId = await this.registrationService.getPatientUserId(sourceChannel, userPlatformId, platformUserName);
             await this.registrationService.wrapperRegistration(this.entityManagerProvider,userPlatformId, platformUserName,sourceChannel,patientUserId);
@@ -49,6 +50,7 @@ export class ConsentService {
 
     async triggerAdditionalInfoIntent(sourceChannel,eventObj,userPlatformId,EnvironmentProviderService){
         try {
+            console.log("additional info intent is called");
             const languageCode = eventObj.body.queryResult.languageCode;
             let payload = null;
             let messageType = null;
@@ -115,7 +117,7 @@ export class ConsentService {
             }
         } catch (error) {
             Logger.instance()
-                .log_error(error.message,500,'Consent Yes error');
+                .log_error(error.message,500,'Consent No error');
         }
     }
 
