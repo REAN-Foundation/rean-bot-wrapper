@@ -87,7 +87,7 @@ export class getAdditionalInfoSevice {
 
     async getMessageForLVPEI(EHRNumber,userId,userName,languageCode,eventObj)
     {
-        console.log("for LVPEI");
+        console.log("getting for LVPEI");
         let response: any = {};
         response =  await this.KerotoplastyService.makeApiCall(EHRNumber, eventObj);
         let message = null;
