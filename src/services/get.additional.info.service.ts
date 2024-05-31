@@ -59,7 +59,7 @@ export class getAdditionalInfoSevice {
             {
                 message = await this.getMessageForGGHN(EHRNumber,userName);
             }
-            if (clientName === "LVPEI")
+            if (clientName === "LVPEI" || clientName === "REAN_BOT")
             {
                 message = await this.getMessageForLVPEI(EHRNumber,userId,userName,languageCode,eventObj);
             }
@@ -129,7 +129,7 @@ export class getAdditionalInfoSevice {
 
     async sendResponsebyButton(message,eventObj,userId,buttonArray){
         try {
-            const sourceChannel = eventObj.body.originalDetectIntentRequest.payload.source;
+            let sourceChannel = eventObj.body.originalDetectIntentRequest.payload.source;
             let payload = null;
             let messageType = null;
             if (sourceChannel === "whatsappMeta"){
@@ -139,6 +139,10 @@ export class getAdditionalInfoSevice {
             else {
                 payload = await sendTelegramButtonService(buttonArray);
                 messageType = "inline_keyboard";
+            }
+            if (sourceChannel === "Telegram")
+            {
+                sourceChannel = "telegram";
             }
             this._platformMessageService = eventObj.container.resolve(sourceChannel);
             await this.sendButton(this._platformMessageService,message, messageType, userId ,payload);
