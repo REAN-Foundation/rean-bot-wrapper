@@ -58,7 +58,7 @@ export class getAdditionalInfoSevice {
             {
                 message = await this.getMessageForGGHN(EHRNumber,userName);
             }
-            if (clientName === "LVPEI")
+            if (clientName === "LVPEI" || clientName === "REAN_BOT")
             {
                 message = await this.getMessageForLVPEI(EHRNumber,userId,userName,languageCode,eventObj);
             }
