@@ -53,7 +53,6 @@ export class getAdditionalInfoSevice {
     async SendValidEHRResponse(EHRNumber,userId,userName,languageCode,eventObj){
         try {
             let message = null;
-            
             const clientName = this.clientEnvironment.getClientEnvironmentVariable("NAME");
             if (clientName === "GGHN")
             {
