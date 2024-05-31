@@ -153,7 +153,7 @@ export class ClientWebhookController {
                     return res.status(200).send(response);
                 }
                 else {
-                    this.handelRequestWithoutConsent(firstTimeUser,patientUSerId,req,entityManagerProvider,userPlatformId, platformUserName );
+                    this.handelRequestWithoutConsent(firstTimeUser,patientUSerId,req,entityManagerProvider,userPlatformId, platformUserName, req.body );
                 }
                 
             }
@@ -165,13 +165,13 @@ export class ClientWebhookController {
         }
     };
 
-    async  handelRequestWithoutConsent(firstTimeUser,patientUSerId,req,entityManagerProvider,userPlatformId, platformUserName ) {
+    async  handelRequestWithoutConsent(firstTimeUser,patientUSerId,req,entityManagerProvider,userPlatformId, platformUserName,reqVariable ) {
         try {
             if (firstTimeUser || !patientUSerId  ){
                 const patientUserId = await this.registrationService.getPatientUserId(req.params.channel, userPlatformId, platformUserName);
                 await this.registrationService.wrapperRegistration(entityManagerProvider,userPlatformId, platformUserName,req.params.channel,patientUserId);
             }
-            this._platformMessageService.handleMessage(req.body, req.params.channel);
+            this._platformMessageService.handleMessage(reqVariable, req.params.channel);
         } catch (error) {
             console.log(error);
         }
@@ -327,7 +327,7 @@ export class ClientWebhookController {
                     await this.handleConsentMessage(req, res,req.body.entry[0].changes[0].value, "interactivebuttons", req.params.channel,firstTimeUser);
                 }
                 else {
-                    this.handelRequestWithoutConsent(firstTimeUser,ehrSystemCode,req,entityManagerProvider,userPlatformId, platformUserName );
+                    this.handelRequestWithoutConsent(firstTimeUser,ehrSystemCode,req,entityManagerProvider,userPlatformId, platformUserName, req.body.entry[0].changes[0].value);
                 }
                 
             }
