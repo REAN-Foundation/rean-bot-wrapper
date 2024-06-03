@@ -5,6 +5,7 @@ import { inject, Lifecycle, scoped } from 'tsyringe';
 import needle from 'needle';
 import { Logger } from '../../common/logger';
 import { NeedleService } from '../needle.service';
+import { isNull } from 'lodash';
 
 @scoped(Lifecycle.ContainerScoped)
 export class EnrollPatientService {
@@ -17,14 +18,14 @@ export class EnrollPatientService {
         @inject(NeedleService) private needleService?: NeedleService
     ){}
 
-    enrollPatientService = async (eventObj) => {
+    enrollPatientService = async (eventObj, patientUserId = null) => {
         try {
             let result = null;
-            result = await this.getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
-        
-            const patientUserId = result.message[0].UserId;
-            const accessToken = result.message[0].accessToken;
-            const options = this.getHeaders.getHeaders(accessToken);
+            if (patientUserId == null) {
+                result = await this.getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
+                patientUserId = result.message[0].UserId;
+            }
+            const options = this.getHeaders.getHeaders();
         
             //Update patient information
             if (!result.message[0].IsRemindersLoaded) {

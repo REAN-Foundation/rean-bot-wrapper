@@ -1,7 +1,7 @@
 import { EnrollPatientService } from "../../../services/bloodWrrior/enroll.service";
 
 export const BloodWarriorPatientEnroll = async (intent, eventObj) => {
-    const enrollPatient = eventObj.container.resolve(EnrollPatientService);
+    const enrollPatient: EnrollPatientService = eventObj.container.resolve(EnrollPatientService);
     try {
         let result = null;
         result = await enrollPatient.enrollPatientService(eventObj);
