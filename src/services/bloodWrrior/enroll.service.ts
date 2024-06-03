@@ -5,7 +5,6 @@ import { inject, Lifecycle, scoped } from 'tsyringe';
 import needle from 'needle';
 import { Logger } from '../../common/logger';
 import { NeedleService } from '../needle.service';
-import { isNull } from 'lodash';
 
 @scoped(Lifecycle.ContainerScoped)
 export class EnrollPatientService {
