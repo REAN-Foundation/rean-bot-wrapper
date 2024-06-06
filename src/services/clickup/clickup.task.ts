@@ -56,21 +56,10 @@ export class ClickUpTask{
             "links_to"             : null,
             "markdown_description" : description
         };
-
         if (description === null) {
             obj["markdown_description"] = `User details not found`;
         }
-
         const response = await needle("post", createTaskUrl, obj, options);
-        // eslint-disable-next-line max-len
-        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-        if (responseChatMessage[responseChatMessage.length - 1]){
-            const objID = responseChatMessage[responseChatMessage.length - 1].dataValues.id;
-            await chatMessageRepository.update({ supportChannelTaskID: response.body.id }, { where: { id: objID } })
-                .then(() => { console.log("updated"); })
-                .catch(error => console.log("error on update", error));
-            return response.body.id;
-        }
         const taskID = response.body.id;
         return taskID;
     }
