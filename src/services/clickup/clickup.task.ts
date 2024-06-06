@@ -7,7 +7,6 @@ import fs from 'fs';
 import axios from 'axios';
 import crypto from 'crypto';
 import { EntityManagerProvider } from '../entity.manager.provider.service';
-import { ChatMessage } from '../../models/chat.message.model';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ClickUpTask{
