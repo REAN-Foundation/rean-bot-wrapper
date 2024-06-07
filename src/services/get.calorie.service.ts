@@ -4,7 +4,6 @@ import { CalorieInfo } from "../models/calorie.info.model";
 import { CalorieDatabase } from "../models/calorie.db.model";
 import requestCalorie = require('request');
 import { EntityManagerProvider } from "./entity.manager.provider.service";
-import filesystem = require('fs');
 
 @scoped(Lifecycle.ContainerScoped)
 export class GetCalories {
@@ -204,6 +203,7 @@ export class GetCalories {
                     record_date   : date_update
                 });
             });
+            console.log(findit);
             const data = {
                 "text"      : text,
                 "meta_data" : JSON.parse(JSON.stringify(meta_data)),
