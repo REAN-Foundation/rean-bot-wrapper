@@ -4,7 +4,6 @@ import { NeedleService } from '../needle.service';
 import { dialoflowMessageFormatting } from '../Dialogflow.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { sendApiButtonService } from '../whatsappmeta.button.service';
-import { GetPatientInfoService } from '../support.app.service';
 import { GeneralReminderService } from './general.reminder.service';
 import { CacheMemory } from '../cache.memory.service';
 import { TimeHelper } from '../../common/time.helper';
