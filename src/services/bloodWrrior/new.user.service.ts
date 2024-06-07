@@ -2,7 +2,7 @@ import { Logger } from '../../common/logger';
 
 export class NewUserService {
 
-    async newUserService (eventObj) {
+    async newUserService () {
         try {
             const dffMessage = `Welcome Dear Blood Warrior, \nYou can chat here to know more about Thalassemia and Blood Donation 
                         or \nYou could also sign up to support Thalassemia patients as a Blood Donor. \nThis is your home menu, Click on any of them 

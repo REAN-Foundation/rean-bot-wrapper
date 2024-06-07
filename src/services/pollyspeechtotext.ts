@@ -3,7 +3,7 @@ import AWS from 'aws-sdk';
 import fs from 'fs';
 import crypto from 'crypto';
 import { AwsS3manager } from './aws.file.upload.service';
-import { autoInjectable, inject, Lifecycle, scoped } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 
 @scoped(Lifecycle.ContainerScoped)
 export class AWSPolly {

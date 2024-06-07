@@ -1,7 +1,7 @@
 import { GetHeaders } from '../../services/biometrics/get.headers';
 import { GetPatientInfoService } from "../../services/support.app.service";
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
-import { container, inject, Lifecycle, scoped,  } from 'tsyringe';
+import { inject, Lifecycle, scoped,  } from 'tsyringe';
 import needle from "needle";
 
 @scoped(Lifecycle.ContainerScoped)

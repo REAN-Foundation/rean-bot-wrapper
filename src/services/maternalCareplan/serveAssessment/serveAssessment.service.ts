@@ -12,7 +12,6 @@ import { commonResponseMessageFormat } from '../../common.response.format.object
 import { platformServiceInterface } from '../../../refactor/interface/platform.interface';
 import { ChatMessage } from '../../../models/chat.message.model';
 import { CacheMemory } from '../../../services/cache.memory.service';
-import { ChatSession } from '../../../models/chat.session';
 import { CustomModelResponseFormat } from '../../../services/response.format/custom.model.response.format';
 import { sendTelegramButtonService } from '../../../services/telegram.button.service';
 
