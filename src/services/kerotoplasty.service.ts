@@ -118,6 +118,7 @@ export class kerotoplastyService {
         else
         {
             const taskID = await this.clickUpTask.createTask( null, EMRNumber, user_details, priority);
+            await contactList.update({ cmrCaseTaskID : taskID }, { where: { mobileNumber: userId } });
             await this.clickUpTask.taskAttachment(taskID, attachmentPath);
             await this.clickUpTask.postCommentOnTask(taskID, symptomComment);
             await contactList.update({ cmrCaseTaskID: taskID, humanHandoff: "false" }, { where: { mobileNumber: userId } });
@@ -131,7 +132,8 @@ export class kerotoplastyService {
         let AppoinmentComment  = "Patient is requesting for Appointment\n";
 
         if (parameters.Date){
-            AppoinmentComment += ` - Date : ${parameters.Date.date_time} \n`;
+            const date = new Date(parameters.Date.date_time).toDateString();
+            AppoinmentComment += ` - Date : ${ date} \n`;
         }
         if (parameters.Location){
             AppoinmentComment  += ` - Hospital : ${parameters.Location} \n`;
@@ -159,7 +161,8 @@ export class kerotoplastyService {
         }
         else
         {
-            const taskID = await this.clickUpTask.createTask(null, EMRNumber , user_details,1,ClickupListID,"Appoinment");
+            const taskID = await this.clickUpTask.createTask(null, EMRNumber , user_details , 1 , ClickupListID,"Appoinment");
+            await contactList.update({ cmrCaseTaskID : taskID }, { where: { mobileNumber: userId } });
             await this.clickUpTask.postCommentOnTask(taskID, symptomComment);
             console.log("we are Here");
             await contactList.update({ cmrCaseTaskID: taskID, humanHandoff: "false" }, { where: { mobileNumber: userId } });
@@ -198,18 +201,18 @@ export class kerotoplastyService {
                         report = report + '  - Prescription Date: ' + pres.Prescribed_date_time + '\n';
                     }
                     report = report + "- Taper Drops\n";
-                    for (const taper of response.body.Last_Prescription[0].taper_drops){
-                        report = report + '  - Medicine Name:' + taper.MedicineName + '\n';
-                        report = report + '  - Generic Name:' + taper.GenericName + '\n';
-                        report = report + '  - Precautions: ' + taper.Precautions + '\n';
-                        report = report + '  - Eye: ' + taper.Eye + '\n';
-                        report = report + '  - Drugs:\n';
-                        for (const drug of taper.drugs){
-                            report = report + '    - Drops: ' + drug.Drops + '\n';
-                            report = report + '    - Times: ' + drug.Times + '\n';
-                            report = report + '    - Time Period: ' + drug.TimesPeriod + '\n';
-                        }
-                    }
+                    // for (const taper of response.body.Last_Prescription[0].taper_drops){
+                    //     report = report + '  - Medicine Name:' + taper.MedicineName + '\n';
+                    //     report = report + '  - Generic Name:' + taper.GenericName + '\n';
+                    //     report = report + '  - Precautions: ' + taper.Precautions + '\n';
+                    //     report = report + '  - Eye: ' + taper.Eye + '\n';
+                    //     report = report + '  - Drugs:\n';
+                    //     for (const drug of taper.drugs){
+                    //         report = report + '    - Drops: ' + drug.Drops + '\n';
+                    //         report = report + '    - Times: ' + drug.Times + '\n';
+                    //         report = report + '    - Time Period: ' + drug.TimesPeriod + '\n';
+                    //     }
+                    // }
                 } else {
                     report = report + '  - No General Prescription Found\n';
                 }
