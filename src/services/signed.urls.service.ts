@@ -14,7 +14,7 @@ export class SignedUrls{
     ){}
 
     async getSignedUrl(url){
-        return new Promise<string> ((resolve,reject) => {
+        return new Promise<string> ((resolve) => {
             const millisecond = parseFloat(this.clientEnvironmentProviderservice.getClientEnvironmentVariable("EXPIRE_LINK_TIME"));
             var signingParams = {
                 keypairId        : process.env.CF_KEY_PAIR_ID,

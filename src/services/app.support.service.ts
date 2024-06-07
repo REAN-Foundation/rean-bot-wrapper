@@ -25,6 +25,7 @@ export class platformMessageService implements platformServiceInterface{
     }
 
     getMessageIdFromResponse(responseBody: any) {
+        console.log(responseBody);
         throw new Error('Method not implemented.');
     }
 

@@ -5,11 +5,8 @@ import { CommaSeparatedListOutputParser } from "langchain/schema/output_parser";
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import { Imessage, OutgoingMessage } from "../../refactor/interface/message.interface";
 import { FeedbackService } from "../feedback/feedback.service";
-import { ChatMessage } from "../../models/chat.message.model";
 import { EntityManagerProvider } from "../entity.manager.provider.service";
 import { ClientEnvironmentProviderService } from "../set.client/client.environment.provider.service";
-const dialogflow = require('@google-cloud/dialogflow');
-import { v4 } from "uuid";
 import { MessageHandlerType, NlpProviderType, UserFeedbackType, ChannelType } from "../../refactor/messageTypes/message.types";
 import { EmojiFilter } from "../filter.message.for.emoji.service";
 import { DialogflowResponseService } from '../dialogflow.response.service';
@@ -75,6 +72,7 @@ export class DecisionRouter {
     async checkFeedback(messageBody: Imessage, channel: string){
 
         // Check if message is feedback or not
+        console.log(`Checking feedback for ${channel}`);
         let feedbackType = '';
         let feedback = '';
         if (messageBody.contextId || messageBody.intent !== null ){
@@ -120,6 +118,7 @@ export class DecisionRouter {
         //     order : [ [ 'createdAt', 'DESC'] ]
         // });
 
+        console.log(`Checking assessment for ${channel}`);
         const key = `${messageBody.platformId}:NextQuestionFlag`;
         const nextQuestionFlag = await CacheMemory.get(key);
         if (nextQuestionFlag) {

@@ -14,7 +14,6 @@ export class VerifyBridgeService {
     async VerifyBridge(eventObj) {
         try {
             const bridgeId = eventObj.body.queryResult.parameters.bridge_Id;
-            const phoneNumber = eventObj.body.queryResult.parameters.phoneNumber;
             let result = null;
             let dffMessage = "";
             const apiURL = `clinical/patient-donors/search?name=${bridgeId}&onlyElligible=true`;

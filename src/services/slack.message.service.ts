@@ -31,6 +31,7 @@ export class SlackMessageService implements platformServiceInterface {
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider) {}
 
     getMessageIdFromResponse(responseBody: any) {
+        console.log(responseBody);
         throw new Error('Method not implemented.');
     }
 

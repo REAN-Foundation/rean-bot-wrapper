@@ -3,11 +3,9 @@ import { Logger } from '../../common/logger';
 import { NeedleService } from '../needle.service';
 import { dialoflowMessageFormatting } from '../Dialogflow.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { GetPatientInfoService } from '../support.app.service';
 import { CacheMemory } from '../cache.memory.service';
 import { GeneralReminderService } from './general.reminder.service';
 import { OpenAIResponseService } from '../openai.response.service';
-import { DurationType, TimeHelper } from '../../common/time.helper';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ReminderAskTimeService {

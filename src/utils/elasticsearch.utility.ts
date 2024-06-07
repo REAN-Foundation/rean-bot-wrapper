@@ -1,5 +1,5 @@
 import elasticsearch from 'elasticsearch';
-import { Lifecycle, scoped, singleton } from 'tsyringe';
+import { Lifecycle, scoped } from 'tsyringe';
 
 @scoped(Lifecycle.ContainerScoped)
 export class elasticsearchUtilities{

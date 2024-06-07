@@ -1,6 +1,6 @@
 import { AwsS3manager } from './aws.file.upload.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { autoInjectable, inject, Lifecycle, scoped } from 'tsyringe';
+import { autoInjectable, inject } from 'tsyringe';
 import { ResponseHandler } from '../utils/response.handler';
 import needle from "needle";
 

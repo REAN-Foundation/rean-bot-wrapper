@@ -71,6 +71,7 @@ export class translateService{
             message = translation;
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             dialogflow_language = defultLanguage;
+            console.log("dialogflow_language", dialogflow_language);
         }
 
         console.log("exited the translate msg");

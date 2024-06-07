@@ -3,14 +3,11 @@
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 
-const { Configuration, OpenAIApi } = require("openai");
-
 import OpenAI from 'openai';
 
 // import { Configuration, OpenAIApi } from "openai";
 import { OpenAIResponseFormat } from './response.format/openai.response.format';
 import { EntityManagerProvider } from './entity.manager.provider.service';
-import { ChatMessage } from '../models/chat.message.model';
 
 @scoped(Lifecycle.ContainerScoped)
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
