@@ -134,9 +134,9 @@ jobs:
           data: '{"TaskDefinition":${{ steps.taskdefintionvar.outputs.task_definition_arn }},"Name": "${{ secrets.SERVICE_NAME }}","Replicas":1, "DnsPrfx": "", "HealthCheckGracePeriodSeconds": 1200,"DnsPrfx": ""}'
           bearerToken: ${{ secrets.DUPLOCLOUD_TOKEN }}
 
-      - name: New Release Publish
-        uses: release-drafter/release-drafter@v5
-        with:
-          publish : true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
+      # - name: New Release Publish
+      #   uses: release-drafter/release-drafter@v5
+      #   with:
+      #     publish : true
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN  }}

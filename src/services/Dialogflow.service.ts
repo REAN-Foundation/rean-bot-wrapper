@@ -10,7 +10,11 @@ export  class dialoflowMessageFormatting {
         };
     }
 
-    async making_response(response:string){
+    async makingResponseWithButtons(dffMessage,buttons  ){
+        return { "fulfillmentMessages": [{ "text": { "text": [dffMessage] } }, buttons] };
+    }
+
+    async making_response(response){
         const data = {
             "fulfillmentMessages" : [{ "text": { "text": [response] } }],
         };
