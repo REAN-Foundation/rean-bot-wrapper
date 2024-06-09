@@ -169,7 +169,7 @@ export class ChangeTransfusionDateService {
                 BloodTransfusionDate : transfusionDate.split("T")[0]
             };
             await this.needleService.needleRequestForREAN("put", apiURL, null, obj);
-            dffMessage = `Date ${transfusionDate.split("T")[0]} updated Successfully. We will remind you before expected transfusion`;
+            dffMessage = `Date ${transfusionDate.split("T")[0]} updated Successfully. We will remind the patient before expected transfusion date.`;
 
             //Load reminders for patient
             const body : QueueDoaminModel =  {
