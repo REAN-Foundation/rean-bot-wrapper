@@ -12,6 +12,7 @@ import { ChecklistDateValidationService } from './bloodWrrior/checklist.date.val
 import { NoBabyMovementAssessmentService } from './commonAssesssment/common.assessment.service';
 import { CincinnatiPerMinMsgService } from './maternalCareplan/cincannati.demo';
 import { AcceptDonationRequestService } from './bloodWrrior/accept.donation.request.service';
+import { ChangeTransfusionDateService } from './bloodWrrior/chnage.transfusion.date.service';
 
 export interface QueueDoaminModel {
     Intent : string;
@@ -74,7 +75,7 @@ export class FireAndForgetService {
         if (model.Intent === "Change_TF_Date_Load_Reminders") {
             const eventObj = model.Body.EventObj;
             const _enrollPatientService:  EnrollPatientService = eventObj.container.resolve(EnrollPatientService);
-            await _enrollPatientService.enrollPatientService(eventObj );
+            await _enrollPatientService.enrollPatientService(eventObj, model.Body.PatientUserId );
             console.log(`Fire and Forget Domain Model: ${model}`);
         }
         if (model.Intent === "Generate_Certificate_Inform_Volunteer") {
@@ -135,7 +136,7 @@ export class FireAndForgetService {
                 eventObj.container.resolve(ChecklistDateValidationService);
             await checklistDateValidationService.sendConfirmationMessage(eventObj, model.Body.TransfusionDate,
                 model.Body.Donor, model.Body.RequestedQuantity, model.Body.StringTransfusionDate,
-                model.Body.PatientUserId, model.Body.VolunteerUserId);
+                model.Body.PatientUserId, model.Body.VolunteerUserId, model.Body);
             console.log(`Fire and Forget Domain Model: ${model}`);
         }
         if (model.Intent === "StartAssessment") {
@@ -152,6 +153,14 @@ export class FireAndForgetService {
             const acceptDonationService:  AcceptDonationRequestService =
                 eventObj.container.resolve(AcceptDonationRequestService);
             await acceptDonationService.updateCommunicationDetails(model.Body);
+            console.log(`Fire and Forget Domain Model: ${model}`);
+        }
+        if (model.Intent === "Volunteer_Update_TF_Date") {
+            const eventObj = model.Body.EventObj;
+            await FireAndForgetService.delay(1000);
+            const changeTFDateService:  ChangeTransfusionDateService =
+                eventObj.container.resolve(ChangeTransfusionDateService);
+            await changeTFDateService.sendPatientListToVolunteer(model.Body);
             console.log(`Fire and Forget Domain Model: ${model}`);
         }
     };

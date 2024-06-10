@@ -19,21 +19,25 @@ export class CommonWhatsappService implements platformServiceInterface {
         @inject(WhatsappMessageToDialogflow) public whatsappMessageToDialogflow?: WhatsappMessageToDialogflow){}
 
     async handleMessage(requestBody: any, channel: string) {
-        requestBody.channel = channel;
-        const generatorWhatsappMessage = this.whatsappMessageToDialogflow.messageToDialogflow(requestBody);
-        let done = false;
-        const whatsappMessages = [];
-        let whatsappMessagetoDialogflow: Imessage;
-        while (done === false) {
-            const nextgeneratorObj = generatorWhatsappMessage.next();
-            whatsappMessagetoDialogflow = (await nextgeneratorObj).value;
-            done = (await nextgeneratorObj).done;
-            whatsappMessages.push(whatsappMessagetoDialogflow);
-        }
-        for (whatsappMessagetoDialogflow of whatsappMessages){
-            if (whatsappMessagetoDialogflow) {
-                await this.messageFlow.checkTheFlowRouter(whatsappMessagetoDialogflow, channel, this);
+        try {
+            requestBody.channel = channel;
+            const generatorWhatsappMessage = this.whatsappMessageToDialogflow.messageToDialogflow(requestBody);
+            let done = false;
+            const whatsappMessages = [];
+            let whatsappMessagetoDialogflow: Imessage;
+            while (done === false) {
+                const nextgeneratorObj = generatorWhatsappMessage.next();
+                whatsappMessagetoDialogflow = (await nextgeneratorObj).value;
+                done = (await nextgeneratorObj).done;
+                whatsappMessages.push(whatsappMessagetoDialogflow);
             }
+            for (whatsappMessagetoDialogflow of whatsappMessages){
+                if (whatsappMessagetoDialogflow) {
+                    await this.messageFlow.checkTheFlowRouter(whatsappMessagetoDialogflow, channel, this);
+                }
+            }
+        } catch (error) {
+            console.log(error);
         }
     
     }

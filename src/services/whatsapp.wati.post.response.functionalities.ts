@@ -22,9 +22,9 @@ export class WhatsappWatiPostResponseFunctionalities {
         try {
             const phoneNumber = response_format.platformId;
             const params = {'messageText': response_format.messageText};
-            const watiUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_BASE_URL")
+            const watiUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_BASE_URL");
             const baseUrl = `${watiUrl}/api/v1/sendSessionMessage/${phoneNumber}?messageText=`;
-
+            console.log("Sending Wati Text Response");
             const url = encodeURI(baseUrl + response_format.messageText);
             const options = {
                 method  : 'POST',
