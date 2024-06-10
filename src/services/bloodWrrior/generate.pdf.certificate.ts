@@ -6,7 +6,7 @@ import pDFDocument from 'pdfkit';
 export const generatePdfCertificate = async (donorName, date) => {
     try {
         const doc = new pDFDocument();
-        const pdfFilePath = path.join(process.cwd(), `uploads/blood_warriors/${donorName}_${Date.now()}_certificate.pdf`);
+        const pdfFilePath = path.join(process.cwd(), `uploads/${donorName}_${Date.now()}_certificate.pdf`);
 
         // Define colors
         const secondaryColor = '#E74C3C'; // Red

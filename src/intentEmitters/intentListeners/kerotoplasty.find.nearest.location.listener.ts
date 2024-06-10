@@ -1,6 +1,7 @@
 import { kerotoplastyService } from "../../services/kerotoplasty.service";
-import { NeedleService } from "../../services/needle.service";
 import { dialoflowMessageFormatting } from "../../services/Dialogflow.service";
+import { getAdditionalInfoSevice } from "../../services/get.additional.info.service";
+import { translateService } from "../../services/translate.service";
 
 export const kerotoplastyLocationListener = async (intent:string, eventObj) => {
     // eslint-disable-next-line max-len
@@ -14,42 +15,50 @@ export const kerotoplastyLocationListener = async (intent:string, eventObj) => {
 async function keratoplastyNextSteps(intent,eventObj) {
     try {
         console.log("STEP 4");
-        const channel = eventObj.body.originalDetectIntentRequest.payload.source;
         const kerotoplastyServiceObj: kerotoplastyService = eventObj.container.resolve(kerotoplastyService);
-        const needleService: NeedleService = eventObj.container.resolve(NeedleService);
+        const location_response = await kerotoplastyServiceObj.conditionSpecificResponse(intent);
+        const additionalObj: getAdditionalInfoSevice = eventObj.container.resolve(getAdditionalInfoSevice);
+        const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
+        const languageCode = eventObj.body.queryResult.languageCode;
+        const translationServiceObj: translateService = eventObj.container.resolve( translateService);
+        const button_yes = await translationServiceObj.translatestring("Yes",languageCode);
+        const button_no = await translationServiceObj.translatestring("No",languageCode);
+        const buttonArray = [button_yes, "BookAppointment",button_no,"AppoinmentNotNeeded"];
+        additionalObj.sendResponsebyButton(location_response,eventObj, userId,buttonArray);
+        kerotoplastyServiceObj.postingOnClickup(intent,eventObj);
 
 
-        const location_response = await kerotoplastyServiceObj.conditionSpecificResponse(intent,eventObj);
-
-        const payload = eventObj.body.originalDetectIntentRequest.payload;
-        payload.completeMessage.messageType = 'text';
-        payload.completeMessage.messageBody = location_response;
-        payload.completeMessage.intent = 'nearest.location.send';
-        if (channel === "whatsappMeta") {
-            const endPoint = 'messages';
-            const postData = {
-                "messaging_product" : "whatsapp",
-                "recipient_type"    : "individual",
-                "to"                : eventObj.body.originalDetectIntentRequest.payload.userId,
-                "type"              : "text",
-                "text"              : {
-                    "body" : location_response
-                }
-            };
-            await needleService.needleRequestForWhatsappMeta("post", endPoint, JSON.stringify(postData), payload);
-        } else if (channel === "telegram") {
-            const postData = {
-                chat_id : eventObj.body.originalDetectIntentRequest.payload.userId,
-                text    : location_response
-            };
-            await needleService.needleRequestForTelegram("post", "sendMessage", postData, payload);
-        } else {
-            throw new Error("Invalid Channel");
-        }
-        await kerotoplastyServiceObj.postingOnClickup(intent,eventObj);
-        console.log("STEP 5! Final");
+        // const payload = eventObj.body.originalDetectIntentRequest.payload;
+        // payload.completeMessage.messageType = 'text';
+        // payload.completeMessage.messageBody = location_response;
+        // payload.completeMessage.intent = 'nearest.location.send';
+        // if (channel === "whatsappMeta") {
+        //     const endPoint = 'messages';
+        //     const postData = {
+        //         "messaging_product" : "whatsapp",
+        //         "recipient_type"    : "individual",
+        //         "to"                : eventObj.body.originalDetectIntentRequest.payload.userId,
+        //         "type"              : "text",
+        //         "text"              : {
+        //             "body" : location_response
+        //         }
+        //     };
+        //     await needleService.needleRequestForWhatsappMeta("post", endPoint, JSON.stringify(postData), payload);
+        // } else if (channel === "telegram") {
+        //     const postData = {
+        //         chat_id : eventObj.body.originalDetectIntentRequest.payload.userId,
+        //         text    : location_response
+        //     };
+        //     await needleService.needleRequestForTelegram("post", "sendMessage", postData, payload);
+        // } else {
+        //     throw new Error("Invalid Channel");
+        // }
+        // await kerotoplastyServiceObj.postingOnClickup(intent,eventObj);
+        // console.log("STEP 5! Final");
     } catch (error) {
         console.log(error);
         throw new Error("Keratoplasty next steps error");
     }
+
+    
 }

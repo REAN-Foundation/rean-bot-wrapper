@@ -6,9 +6,11 @@ export class ConsentYesListner {
         try {
 
             const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
-            console.log(userId);
+            const userName = eventObj.body.originalDetectIntentRequest.payload.userName;
+            console.log("intent is called");
             const consentService: ConsentService = eventObj.container.resolve(ConsentService);
-            const response = await consentService.handleConsentYesreply(userId, eventObj);
+            consentService.handleConsentYesreply(userId,userName, eventObj);
+            const response = null;
             return response;
 
         }
