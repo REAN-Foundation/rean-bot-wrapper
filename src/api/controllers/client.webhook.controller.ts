@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 import { ResponseHandler } from '../../utils/response.handler';
 import { ErrorHandler } from '../../utils/error.handler';
@@ -107,12 +108,10 @@ export class ClientWebhookController {
                 this.responseHandler.sendSuccessResponse(res, 200, 'Message read successfully!', "");
             }
             else {
-                this.responseHandler.sendSuccessResponse(res, 200, 'Notification received successfully!', "");
+                const temp = this.responseHandler.sendSuccessResponse(res, 200, 'Notification received successfully!', "");
             }
-        }
-        catch (error) {
+        } catch (error) {
             console.log("While sending success Response", error);
-
         }
         
     }
@@ -336,6 +335,25 @@ export class ClientWebhookController {
         catch (error) {
             console.log("in error", error);
 
+            this.errorHandler.handle_controller_error(error, res, req);
+        }
+    };
+
+    receiveMessageWatiWhatsapp = async (req, res) =>{
+        try {
+            this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
+            const entityManagerProvider = req.container.resolve(EntityManagerProvider);
+            const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
+            console.log("Wati Client Name:", clientName);
+            
+            // const chatMessageRepository = (await entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService, clientName)).getRepository(ChatMessage);
+            // this.sendSuccessMessage(chatMessageRepository, res, req.body.statusString);
+            this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
+            this._clientAuthenticatorService.authenticate(req, res);
+            this._platformMessageService = req.container.resolve(req.params.channel);
+            this._platformMessageService.handleMessage(req.body, req.params.channel);
+        } catch (error) {
+            console.log("error in Wati message handler", error);
             this.errorHandler.handle_controller_error(error, res, req);
         }
     };

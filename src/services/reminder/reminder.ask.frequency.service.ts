@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../common/logger';
 import { NeedleService } from '../needle.service';
 import { dialoflowMessageFormatting } from '../Dialogflow.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { sendApiButtonService } from '../whatsappmeta.button.service';
+import { sendWhatsappWatiButtonService } from '../whtasapp.wati.button.service';
+import { GetPatientInfoService } from '../support.app.service';
 import { GeneralReminderService } from './general.reminder.service';
 import { CacheMemory } from '../cache.memory.service';
 import { TimeHelper } from '../../common/time.helper';
@@ -91,6 +94,9 @@ export class ReminderFrequencyService {
             if (channelName === 'whatsappMeta') {
                 payload = await sendApiButtonService(buttonArray);
                 messageType = 'interactivebuttons';
+            } else if (channelName === 'whatsappWati'){
+                payload = await sendWhatsappWatiButtonService(buttonArray);
+                messageType = "interactivebuttons";
             } else {
                 payload = await sendTelegramButtonService(buttonArray);
                 messageType = 'inline_keyboard';
