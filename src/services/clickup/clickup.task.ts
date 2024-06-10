@@ -7,7 +7,6 @@ import fs from 'fs';
 import axios from 'axios';
 import crypto from 'crypto';
 import { EntityManagerProvider } from '../entity.manager.provider.service';
-import { ChatMessage } from '../../models/chat.message.model';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ClickUpTask{
@@ -19,7 +18,7 @@ export class ClickUpTask{
     @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider) { }
 
     // eslint-disable-next-line max-len
-    async createTask(responseChatMessage, postTopic:string = null, description:string = null, priority = null, ClickupListID = null,tag = ''){
+    async createTask(responseChatMessage = null, postTopic:string = null, description:string = null, priority = null, ClickupListID = null,tag = ''){
         let listID = null;
         if (ClickupListID){
             listID = ClickupListID;
@@ -40,6 +39,9 @@ export class ClickUpTask{
         else if (responseChatMessage.length >= 1 ){
             topic = responseChatMessage[responseChatMessage.length - 1].dataValues.messageContent;
         }
+        else {
+            topic = "New USer";
+        }
         const obj = {
             "name"                 : topic,
             "status"               : "TO DO",
@@ -53,21 +55,10 @@ export class ClickUpTask{
             "links_to"             : null,
             "markdown_description" : description
         };
-
         if (description === null) {
             obj["markdown_description"] = `User details not found`;
         }
-
         const response = await needle("post", createTaskUrl, obj, options);
-        // eslint-disable-next-line max-len
-        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-        if (responseChatMessage[responseChatMessage.length - 1]){
-            const objID = responseChatMessage[responseChatMessage.length - 1].dataValues.id;
-            await chatMessageRepository.update({ supportChannelTaskID: response.body.id }, { where: { id: objID } })
-                .then(() => { console.log("updated"); })
-                .catch(error => console.log("error on update", error));
-            return response.body.id;
-        }
         const taskID = response.body.id;
         return taskID;
     }
@@ -116,7 +107,7 @@ export class ClickUpTask{
 
     }
 
-    async updateTask(taskID,priority,user_details, topic = null){
+    async updateTask(taskID,priority,user_details, topic = null,tag = null){
         try {
             const updateTaskUrl = `https://api.clickup.com/api/v2/task/${taskID}`;
             const options = getRequestOptions();
@@ -132,6 +123,7 @@ export class ClickUpTask{
                 "notify_all"           : true,
                 "parent"               : null,
                 "links_to"             : null,
+                "tags"                 : [tag],
                 "markdown_description" : user_details,
                 "name"                 : topic
             };

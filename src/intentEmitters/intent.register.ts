@@ -33,7 +33,7 @@ import { BloodWarriorPatient } from './intentListeners/bloodWarrior/patient.list
 import { BloodWarriorDonor } from './intentListeners/bloodWarrior/donor.listener';
 import { BloodWarriorNewUser } from './intentListeners/bloodWarrior/new.userlistener';
 import { BloodWarriorPatientEnroll } from './intentListeners/bloodWarrior/patient.enroll.listener';
-import { ChangeTransfusionDate, GiveTransfusionDate } from './intentListeners/bloodWarrior/change.tf.date.listener';
+import { ChangeTransfusionDate, GiveTransfusionDate, VolunteerChangeTransfusionDate } from './intentListeners/bloodWarrior/change.tf.date.listener';
 import { kerotoplastyConditionIdentificationListener} from './intentListeners/kerotoplasty.bot.condition.Identification.listener';
 import { kerotoplastyLocationListener } from './intentListeners/kerotoplasty.find.nearest.location.listener';
 import { BloodWarriorMenu } from './intentListeners/bloodWarrior/menu.listener';
@@ -79,6 +79,11 @@ import {ConsentYesListner} from './intentListeners/consentListners/consent.yes.l
 import { DeleteReminderListener } from './intentListeners/medicationReminder/delete.reminder.listener';
 import { CincinnatiPerMinuteMsgListener } from './intentListeners/maternity.careplan/cincinnati.per.minute.listener copy';
 import { PatientDonationConfirmationListener } from './intentListeners/bloodWarrior/patient.donation.confirmation.listener';
+import { AdditionalInfoEditListener } from './intentListeners/consentListners/get.additional.info.listener';
+import { AdditionalInfoReadListener } from './intentListeners/consentListners/read.additional.info.listener';
+import {NearestLocationListner} from './intentListeners/nearest.location.listner';
+import { AppoinmentBookingListner } from './intentListeners/appoinment.booking.listner';
+import { VolunteerSelectedPatient } from './intentListeners/bloodWarrior/volunteer.selected.patient';
 /*
  * Init function (being called during application bootstrap)
  * This is the place to register any new intent and corresponding listeners
@@ -229,6 +234,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('Dmc_Yes', DmcAssessmentAnswerYesListener);
         IntentEmitter.registerListener('Dmc_No', DmcAssessmentAnswerNoListener);
         IntentEmitter.registerListener('Registration_PerMinMsg', RegistrationPerMinuteMsgListener);
+        IntentEmitter.registerListener('Cincinnati_PerMinMsg', CincinnatiPerMinuteMsgListener);
         IntentEmitter.registerListener('ImageQualityCheck', eyeImageQualityCheckListener);
         IntentEmitter.registerListener('Appointment_Reminder', AppointmentReminderListener);
         IntentEmitter.registerListener('Reminder_Registration', ReminderRegistrationListener);
@@ -244,12 +250,17 @@ export class IntentRegister {
         IntentEmitter.registerListener('Reminder_Delete', DeleteReminderListener);
         IntentEmitter.registerListener('PatientDonationConfirmationYes', PatientDonationConfirmationListener.yesReply);
         IntentEmitter.registerListener('PatientDonationConfirmationNo', PatientDonationConfirmationListener.noReply);
+        IntentEmitter.registerListener('Volunteer_Update_TF_Date', VolunteerChangeTransfusionDate);
+        IntentEmitter.registerListener('Volunteer_Select_Patient', VolunteerSelectedPatient);
 
         // Intent Failure/fallback listener
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
         IntentEmitter.registerListener('consent_yes',ConsentYesListner.handleIntent);
         IntentEmitter.registerListener('Cincinnati_PerMinMsg', CincinnatiPerMinuteMsgListener);
-
+        IntentEmitter.registerListener('AdditionalInfo', AdditionalInfoEditListener);
+        IntentEmitter.registerListener('readAdditionalInfo', AdditionalInfoReadListener);
+        IntentEmitter.registerListener('findNearestLocation', NearestLocationListner);
+        IntentEmitter.registerListener('Book Appoinment', AppoinmentBookingListner);
         // Intent fulfillement - Success listener
         // TODO: Pending implementation
         // eslint-disable-next-line max-len

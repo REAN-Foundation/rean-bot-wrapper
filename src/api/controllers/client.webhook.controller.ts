@@ -12,6 +12,7 @@ import { ConsentInfo } from '../../models/consent.info.model';
 import { translateService } from '../../services/translate.service';
 import { UserConsent } from '../../models/user.consent.model';
 import { ConsentService } from '../../services/consent.service';
+import { Registration } from '../../services/registration/patient.registration.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ClientWebhookController {
@@ -26,13 +27,13 @@ export class ClientWebhookController {
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(translateService) private translate?: translateService,
         @inject(ConsentService) private consentService?: ConsentService,
+        @inject(Registration) private registrationService?: Registration,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
     ) {
 
     }
 
     sendMessage = async (req, res) => {
-        console.log("sendMessage webhook");
         try {
             // eslint-disable-next-line max-len
             this._platformMessageService = req.container.resolve(req.params.channel);
@@ -50,24 +51,24 @@ export class ClientWebhookController {
     };
 
     private async checkFirstTimeUser (req, userId)
+    
     {
         const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
         const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
         let firstTimeUser  = false;
+        let patientUserId = null;
         const entityManagerProvider = req.container.resolve(EntityManagerProvider);
         const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ContactList);
-        const prevSessions = await chatMessageRepository. findAll({
-            where : {
-                mobileNumber : userId,
-            }
+        const prevSessions = await chatMessageRepository.findOne({ where : { mobileNumber: userId, }
         });
-        if (prevSessions.length >= 1){
+        if (prevSessions){
+            patientUserId  = prevSessions.dataValues.patientUserId;
             firstTimeUser = false;
             
         } else {
             firstTimeUser  = true;
         }
-        return firstTimeUser ;
+        return [firstTimeUser , patientUserId ]  ;
     }
 
     private async checkConsentRequired(req,userId){
@@ -88,26 +89,32 @@ export class ClientWebhookController {
     }
 
     async sendSuccessMessage(chatMessageRepository,res,statuses){
+        try {
+            const date = new Date(parseInt(statuses[0].timestamp) * 1000);
+            if (statuses[0].status === "sent") {
+                await chatMessageRepository.update({ whatsappResponseStatusSentTimestamp: date },{ where: { responseMessageID: statuses[0].id } })
+                    .then(() => { console.log("Sent timestamp entered in database"); });
+                this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', "");
+            }
+            else if (statuses[0].status === "delivered") {
+                await chatMessageRepository.update({ whatsappResponseStatusDeliveredTimestamp: date },{ where: { responseMessageID: statuses[0].id } })
+                    .then(() => { console.log("Delivered timestamp of entered in database"); });
+                this.responseHandler.sendSuccessResponse(res, 200, 'Message delivered successfully!', "");
+            }
+            else if (statuses[0].status === "read") {
+                await chatMessageRepository.update({ whatsappResponseStatusReadTimestamp: date },{ where: { responseMessageID: statuses[0].id } })
+                    .then(() => { console.log("Read timestamp of entered in database"); });
+                this.responseHandler.sendSuccessResponse(res, 200, 'Message read successfully!', "");
+            }
+            else {
+                this.responseHandler.sendSuccessResponse(res, 200, 'Notification received successfully!', "");
+            }
+        }
+        catch (error) {
+            console.log("While sending success Response", error);
 
-        const date = new Date(parseInt(statuses[0].timestamp) * 1000);
-        if (statuses[0].status === "sent") {
-            await chatMessageRepository.update({ whatsappResponseStatusSentTimestamp: date },{ where: { responseMessageID: statuses[0].id } })
-                .then(() => { console.log("Sent timestamp entered in database"); });
-            this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', "");
         }
-        else if (statuses[0].status === "delivered") {
-            await chatMessageRepository.update({ whatsappResponseStatusDeliveredTimestamp: date },{ where: { responseMessageID: statuses[0].id } })
-                .then(() => { console.log("Delivered timestamp of entered in database"); });
-            this.responseHandler.sendSuccessResponse(res, 200, 'Message delivered successfully!', "");
-        }
-        else if (statuses[0].status === "read") {
-            await chatMessageRepository.update({ whatsappResponseStatusReadTimestamp: date },{ where: { responseMessageID: statuses[0].id } })
-                .then(() => { console.log("Read timestamp of entered in database"); });
-            this.responseHandler.sendSuccessResponse(res, 200, 'Message read successfully!', "");
-        }
-        else {
-            this.responseHandler.sendSuccessResponse(res, 200, 'Notification received successfully!', "");
-        }
+        
     }
 
     receiveMessage = async (req, res) => {
@@ -119,32 +126,34 @@ export class ClientWebhookController {
             const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
             this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
             this._clientAuthenticatorService.authenticate(req,res);
-            const statuses = req.body.statuses;
-            if (statuses) {
-                this.sendSuccessMessage(chatMessageRepository,res,statuses);
+            let userPlatformId = null;
+            let platformUserName = null;
+            this._platformMessageService = req.container.resolve(req.params.channel);
+            this._platformMessageService.res = res;
+            if (req.params.channel === "telegram"){
+                [userPlatformId ,platformUserName] = await this.getTelegramUserID(req.body);
+            }
+            if (req.body.statuses) {
+                this.sendSuccessMessage(chatMessageRepository,res,req.body.statuses);
             }
             else {
+                const consentRequirement =  clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_ACTIVATION");
+                console.log("Consent feature is ", consentRequirement);
                 const validChannels = ["REAN_SUPPORT", "slack", "SNEHA_SUPPORT", "mockChannel"];
                 if (!validChannels.includes(req.params.channel)) {
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
                 }
-                this._platformMessageService = req.container.resolve(req.params.channel);
-                this._platformMessageService.res = res;
-                const consentActivation =  clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_ACTIVATION");
-                console.log("Consent feature is ", consentActivation);
-                console.log(typeof consentActivation);
-                if (consentActivation && req.params.channel === "telegram"){
+                const [firstTimeUser,patientUSerId ]  = await this.checkFirstTimeUser(req, userPlatformId);
+                if (consentRequirement && req.params.channel === "telegram"){
                     console.log("Processing the consent message for telegram");
-                    await this.handleConsentMessage(req, res,req.body,"inline_keyboard",req.params.channel);
+                    await this.handleConsentMessage(req, res,req.body,"inline_keyboard",req.params.channel,firstTimeUser );
                 }
                 else if (req.params.channel === "mockChannel"){
-                    
-                    //this condition is for test automations using mockchannel
                     const response = await this._platformMessageService.handleMessage(req.body, req.params.channel);
                     return res.status(200).send(response);
                 }
                 else {
-                    this._platformMessageService.handleMessage(req.body, req.params.channel);
+                    this.handelRequestWithoutConsent(firstTimeUser,patientUSerId,req,entityManagerProvider,userPlatformId, platformUserName, req.body );
                 }
                 
             }
@@ -156,72 +165,120 @@ export class ClientWebhookController {
         }
     };
 
-    private async handleConsentMessage(req: any, res: any, handleReqVariable,buttonKeyName,channel) {
-        const clientEnvironmentProviderService = await req.container.resolve(ClientEnvironmentProviderService);
-        const clientName = await  clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-        console.log(clientName);
-        console.log("Here in handle consent Message");
-        const entityManagerProvider = req.container.resolve(EntityManagerProvider);
-        const consentRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ConsentInfo);
-        const [userId, consentReply, languageCode] = await this.getUserIdAndLanguagecode(handleReqVariable, channel,req);
-        const firstTimeUser = await this.checkFirstTimeUser(req, userId);
-        let consentRequired = true;
-        console.log("Handling the consent message flow ", userId, consentReply, languageCode, firstTimeUser);
-        if (firstTimeUser || consentReply === "consent_no") {
-            consentRequired = true;
+    async  handelRequestWithoutConsent(firstTimeUser,patientUSerId,req,entityManagerProvider,userPlatformId, platformUserName,reqVariable ) {
+        try {
+            if (firstTimeUser || !patientUSerId  ){
+                const patientUserId = await this.registrationService.getPatientUserId(req.params.channel, userPlatformId, platformUserName);
+                await this.registrationService.wrapperRegistration(entityManagerProvider,userPlatformId, platformUserName,req.params.channel,patientUserId);
+            }
+            this._platformMessageService.handleMessage(reqVariable, req.params.channel);
+        } catch (error) {
+            console.log(error);
         }
-        else {
-            consentRequired = await this.checkConsentRequired(req, userId);
-        }
-        if (firstTimeUser && consentReply !== "consent_yes") {
-            this.consentService.handleConsentRequest(req, userId, consentReply, languageCode, consentRepository, res,buttonKeyName);
-        }
-        else {
-            if (consentRequired && consentReply !== "consent_yes") {
-                this.consentService.handleConsentRequest(req, userId, consentReply, languageCode, consentRepository, res, buttonKeyName);
+    }
+
+    private async handleConsentMessage(req: any, res: any, handleReqVariable,buttonKeyName,channel,firstTimeUser ) {
+        try {
+            const clientEnvironmentProviderService = await req.container.resolve(ClientEnvironmentProviderService);
+            const clientName = await  clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            console.log(clientName);
+            console.log("Here in handle consent Message");
+            const entityManagerProvider = req.container.resolve(EntityManagerProvider);
+            const consentRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ConsentInfo);
+            const [userId, consentReply, languageCode] = await this.getUserIdAndLanguagecode(handleReqVariable, channel,req);
+            let consentRequired = true;
+            console.log("Handling the consent message flow ", userId, consentReply, languageCode, firstTimeUser);
+            if (firstTimeUser || consentReply === "consent_no") {
+                consentRequired = true;
             }
             else {
-                this._platformMessageService.handleMessage(handleReqVariable, req.params.channel);
+                consentRequired = await this.checkConsentRequired(req, userId);
+            }
+            if (firstTimeUser && consentReply !== "consent_yes") {
+                this.consentService.handleConsentRequest(req, userId, consentReply, languageCode, consentRepository, res,buttonKeyName);
+            }
+            else {
+                if (consentRequired && consentReply !== "consent_yes") {
+                    this.consentService.handleConsentRequest(req, userId, consentReply, languageCode, consentRepository, res, buttonKeyName);
+                }
+                else {
+
+                    this._platformMessageService.handleMessage(handleReqVariable, req.params.channel);
+                }
             }
         }
+        catch (error) {
+            console.log("While Sending Consent Response", error);
+
+        }
+        
     }
 
     async getUserIdAndLanguagecode(reqBody,channel,req)
     {
-        const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
-        let userId = null;
-        let consentReply  = null;
-        let languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
-        if (channel === "whatsappMeta"){
-            if (reqBody.messages[0].type === 'interactive'){
-                consentReply = reqBody.messages[0].interactive.button_reply.id;
-                languageCode = consentReply.split("-")[1];
-                if (!languageCode){
-                    languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+        try {
+            const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
+            let userId = null;
+            let consentReply  = null;
+            let languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+            if (channel === "whatsappMeta"){
+                if (reqBody.messages[0].type === 'interactive'){
+                    consentReply = reqBody.messages[0].interactive.button_reply.id;
+                    languageCode = consentReply.split("-")[1];
+                    if (!languageCode){
+                        languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+                    }
+                    userId = reqBody.messages[0].from;
                 }
-                userId = reqBody.messages[0].from;
+                else {
+                    userId = reqBody.messages[0].from;
+        
+                }
             }
-            else {
-                userId = reqBody.messages[0].from;
+            else if (channel === "telegram") {
+                if (reqBody.callback_query){
+                    consentReply = reqBody.callback_query.data;
+                    languageCode = consentReply.split("-")[1];
+                    if (!languageCode){
+                        languageCode = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+                    }
+                    userId = reqBody.callback_query.message.chat.id;
+                }
+                else {
+                    userId = reqBody.message.chat.id;
+        
+                }
+            }
     
-            }
+            return [userId, consentReply, languageCode];
         }
-        else if (channel === "telegram") {
+        catch (error) {
+            console.log("While getting user ID ,Language code", error);
+
+        }
+    }
+
+    async getTelegramUserID(reqBody)
+    {
+        try {
+            let userId = null;
+            let userName = null;
             if (reqBody.callback_query){
-                consentReply = reqBody.callback_query.data;
-                languageCode = consentReply.split("-")[1];
-                if (!languageCode){
-                    languageCode = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
-                }
                 userId = reqBody.callback_query.message.chat.id;
+                userName = reqBody.callback_query.message.chat.first_name;
             }
             else {
                 userId = reqBody.message.chat.id;
+                userName = reqBody.message.chat.first_name;
     
             }
+            return [userId ,userName];
+        }
+        catch (error) {
+            console.log("While getting telegram ID", error);
+
         }
 
-        return [userId, consentReply, languageCode];
     }
 
     authenticateMetaWhatsappWebhook = async (req, res) => {
@@ -246,6 +303,10 @@ export class ClientWebhookController {
             this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
             this._clientAuthenticatorService.authenticate(req,res);
             const statuses = req.body.entry[0].changes[0].value.statuses;
+            this._platformMessageService = req.container.resolve(req.params.channel);
+            const consentActivation =  clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_ACTIVATION");
+            let userPlatformId = null;
+            let platformUserName = null;
             if (statuses) {
                 this.sendSuccessMessage(chatMessageRepository,res,statuses);
             }
@@ -256,14 +317,17 @@ export class ClientWebhookController {
                 req.params.channel !== "SNEHA_SUPPORT") {
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
                 }
-                this._platformMessageService = req.container.resolve(req.params.channel);
-                const consentActivation =  clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_ACTIVATION");
+                if (req.params.channel === "whatsappMeta"){
+                    userPlatformId = req.body.entry[0].changes[0].value.messages[0].from;
+                    platformUserName = req.body.entry[0].changes[0].value.contacts[0].profile.name;
+                }
+                const [firstTimeUser ,ehrSystemCode ]  = await this.checkFirstTimeUser(req, userPlatformId);
                 if (consentActivation &&  req.params.channel === "whatsappMeta"){
                     console.log("Processing the consent message for whatsapp");
-                    await this.handleConsentMessage(req, res,req.body.entry[0].changes[0].value, "interactivebuttons", req.params.channel);
+                    await this.handleConsentMessage(req, res,req.body.entry[0].changes[0].value, "interactivebuttons", req.params.channel,firstTimeUser);
                 }
                 else {
-                    this._platformMessageService.handleMessage(req.body.entry[0].changes[0].value, req.params.channel);
+                    this.handelRequestWithoutConsent(firstTimeUser,ehrSystemCode,req,entityManagerProvider,userPlatformId, platformUserName, req.body.entry[0].changes[0].value);
                 }
                 
             }

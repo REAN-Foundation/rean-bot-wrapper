@@ -19,7 +19,21 @@ export const GiveTransfusionDate = async (intent, eventObj) => {
     const changeTransfusionDateService: ChangeTransfusionDateService = eventObj.container.resolve(ChangeTransfusionDateService);
     try {
         let result = null;
-        result = await changeTransfusionDateService.GiveTransfusionDate(eventObj);
+        result = await changeTransfusionDateService.GetTransfusionDate(eventObj);
+        console.log(result);
+        return result.message;
+
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+export const VolunteerChangeTransfusionDate = async (intent, eventObj) => {
+    // eslint-disable-next-line max-len
+    const changeTransfusionDateService: ChangeTransfusionDateService = eventObj.container.resolve(ChangeTransfusionDateService);
+    try {
+        let result = null;
+        result = await changeTransfusionDateService.VolunteerChangeTransfusionDate(eventObj);
         console.log(result);
         return result.message;
 
