@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 import { ResponseHandler } from '../../utils/response.handler';
 import { ErrorHandler } from '../../utils/error.handler';

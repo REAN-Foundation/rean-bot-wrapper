@@ -43,7 +43,7 @@ export class WhatsappWatiPostResponseFunctionalities {
         } catch (error) {
             console.log("Error while sending text message to whatsapp wati", error);
         }
-    }
+    };
 
     sendcustom_payloadResponse = async(response_format: Iresponse, payload) => {
         let response;
@@ -64,7 +64,7 @@ export class WhatsappWatiPostResponseFunctionalities {
             }
         }
         return response;
-    }
+    };
 
     sendinteractivebuttonsResponse = async(response_format: Iresponse, payload) => {
         const endPoint = "sendInteractiveButtonsMessage";
@@ -80,7 +80,7 @@ export class WhatsappWatiPostResponseFunctionalities {
         const response = await this.postRequestToWati(response_format, endPoint, postDataWati);
         response["data"]["buttonMetaData"] = JSON.stringify(buttons);
         return response;
-    }
+    };
 
     sendinteractivelistResponse = async (response_format: Iresponse, payload) => {
         const endPoint = "sendInteractiveListMessage";
@@ -122,7 +122,7 @@ export class WhatsappWatiPostResponseFunctionalities {
         postDataWati["buttonText"] = buttonText;
         const response = await this.postRequestToWati(response_format, endPoint, postDataWati);
         return response;
-    }
+    };
 
     async createTemplateParams(payload) {
         const customParams = [];
@@ -166,7 +166,7 @@ export class WhatsappWatiPostResponseFunctionalities {
                 console.error(error);
             });
         return response;
-    }
+    };
 
     messageTextAccordingToMessageType = (response_format: Iresponse, payload: any, custom_payload_type: string) => {
         let message = "";
@@ -182,7 +182,7 @@ export class WhatsappWatiPostResponseFunctionalities {
             message = response_format.messageText;
         }
         return message;
-    }
+    };
 
     postRequestToWati = async (response_format: Iresponse, endPoint: string, postDataWati: any) => {
         const baseUrl = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_BASE_URL");
@@ -212,7 +212,7 @@ export class WhatsappWatiPostResponseFunctionalities {
                 console.error(error);
             });
         return response;
-    }
+    };
 
     getButtonData = async (response_format: Iresponse, payload) => {
         const buttons = [];
@@ -229,5 +229,5 @@ export class WhatsappWatiPostResponseFunctionalities {
             buttons.push(tempObject);
         }
         return buttons;
-    }
+    };
 }
