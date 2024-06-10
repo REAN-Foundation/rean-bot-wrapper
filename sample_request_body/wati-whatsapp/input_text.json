@@ -1,0 +1,23 @@
+{
+    "id": "abc",
+    "created": "2022-10-14T05:53:01.3833674Z",
+    "whatsappMessageId": "abcdefghi_jklmnop",
+    "conversationId": "bbq",
+    "ticketId": "bbe",
+    "text": "Hello there",
+    "type": "text",
+    "data": null,
+    "timestamp": "1665726781",
+    "owner": false,
+    "eventType": "message",
+    "statusString": "SENT",
+    "avatarUrl": null,
+    "assignedId": "3dfgg",
+    "operatorName": "Wati User",
+    "operatorEmail": "hello@wati.io",
+    "waId": "911234567890",
+    "messageContact": null,
+    "senderName": "wati user",
+    "listReply": null,
+    "replyContextId": null
+  }

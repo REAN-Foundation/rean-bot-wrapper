@@ -14,7 +14,8 @@ export const commonResponseMessageFormat = () => {
         messageImageCaption : null,
         sessionId           : null,
         messageText         : null,
-        similarDoc          : null
+        similarDoc          : null,
+        platformId          : null
     };
     return response_message;
 };

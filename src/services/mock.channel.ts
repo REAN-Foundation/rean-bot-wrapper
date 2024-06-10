@@ -179,22 +179,23 @@ export class MockMessageService implements platformServiceInterface {
         const payload = processedResponse.message_from_nlp.getPayload();
         const intent = processedResponse.message_from_nlp.getIntent();
         const similarDoc = processedResponse.message_from_nlp.getSimilarDoc();
+        const platformId = message.platformId;
 
         if (processedResponse) {
             if (image && image.url) {
-                reaponse_message = { name: mock_user_name, platform: "MockChannel", chat_message_id: mock_chat_message_id, direction: "Out", message_type: "image", intent: intent, messageBody: image.url, messageImageUrl: image.url, messageImageCaption: image.caption, sessionId: mock_whatsapp_id, input_message: mock_input_message, messageText: image.caption, similarDoc: similarDoc };
+                reaponse_message = { name: mock_user_name, platform: "MockChannel", platformId: platformId, chat_message_id: mock_chat_message_id, direction: "Out", message_type: "image", intent: intent, messageBody: image.url, messageImageUrl: image.url, messageImageCaption: image.caption, sessionId: mock_whatsapp_id, input_message: mock_input_message, messageText: image.caption, similarDoc: similarDoc };
             }
             else if (processedResponse.processed_message.length > 1) {
                 if (pasrseMode && pasrseMode === 'HTML') {
                     const uploadImageName = await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
                     const vaacinationImageFile = await this.awsS3manager.uploadFile(uploadImageName);
                     if (vaacinationImageFile) {
-                        reaponse_message = { name: mock_user_name, platform: "MockChannel", chat_message_id: mock_chat_message_id, direction: "Out", message_type: "image", intent: intent, messageBody: String(vaacinationImageFile), messageImageUrl: null, messageImageCaption: null, sessionId: mock_whatsapp_id, input_message: mock_input_message, messageText: processedResponse.processed_message[1], similarDoc: similarDoc };
+                        reaponse_message = { name: mock_user_name, platform: "MockChannel", platformId: platformId, chat_message_id: mock_chat_message_id, direction: "Out", message_type: "image", intent: intent, messageBody: String(vaacinationImageFile), messageImageUrl: null, messageImageCaption: null, sessionId: mock_whatsapp_id, input_message: mock_input_message, messageText: processedResponse.processed_message[1], similarDoc: similarDoc };
                     }
                 }
                 else {
-                    reaponse_message = { name: mock_user_name, platform: "MockChannel", chat_message_id: mock_chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: mock_whatsapp_id, input_message: mock_input_message, messageText: processedResponse.processed_message[0], similarDoc: similarDoc };
-                    reaponse_message = { name: mock_user_name, platform: "MockChannel", chat_message_id: mock_chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: mock_whatsapp_id, input_message: mock_input_message, messageText: processedResponse.processed_message[1], similarDoc: similarDoc };
+                    reaponse_message = { name: mock_user_name, platform: "MockChannel", platformId: platformId, chat_message_id: mock_chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: mock_whatsapp_id, input_message: mock_input_message, messageText: processedResponse.processed_message[0], similarDoc: similarDoc };
+                    reaponse_message = { name: mock_user_name, platform: "MockChannel", platformId: platformId, chat_message_id: mock_chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: mock_whatsapp_id, input_message: mock_input_message, messageText: processedResponse.processed_message[1], similarDoc: similarDoc };
                 }
             }
             else {
@@ -202,7 +203,7 @@ export class MockMessageService implements platformServiceInterface {
                 if (payload !== null){
                     message_type = payload.fields.messagetype.stringValue;
                 }
-                reaponse_message = { name: mock_user_name, platform: "MockChannel", chat_message_id: mock_chat_message_id, direction: "Out", message_type: message_type, intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: mock_whatsapp_id, input_message: mock_input_message, messageText: processedResponse.processed_message[0], similarDoc: similarDoc };
+                reaponse_message = { name: mock_user_name, platform: "MockChannel", platformId: platformId, chat_message_id: mock_chat_message_id, direction: "Out", message_type: message_type, intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: mock_whatsapp_id, input_message: mock_input_message, messageText: processedResponse.processed_message[0], similarDoc: similarDoc };
             }
         }
         return reaponse_message;
