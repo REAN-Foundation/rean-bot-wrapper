@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 import {inject, delay, scoped, Lifecycle} from 'tsyringe';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';

@@ -1,7 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 import { getMessageFunctionalities  } from "../refactor/interface/message.service.functionalities.interface";
-import http from 'https';
-import fs from 'fs';
 import { Imessage } from '../refactor/interface/message.interface';
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 import { Speechtotext } from "./speech.to.text.service";

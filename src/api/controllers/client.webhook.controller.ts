@@ -344,6 +344,7 @@ export class ClientWebhookController {
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
             const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             console.log("Wati Client Name:", clientName);
+            
             // const chatMessageRepository = (await entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService, clientName)).getRepository(ChatMessage);
             // this.sendSuccessMessage(chatMessageRepository, res, req.body.statusString);
             this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
@@ -354,7 +355,7 @@ export class ClientWebhookController {
             console.log("error in Wati message handler", error);
             this.errorHandler.handle_controller_error(error, res, req);
         }
-    }
+    };
 
     receiveMessageOldNumber = async (req, res) => {
         console.log("receiveMessageold webhook");
