@@ -29,7 +29,7 @@ export class WhatsappWatiPostResponseFunctionalities {
                 method  : 'POST',
                 url     : url,
                 headers : {
-                    Authorization : 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0YzFmMDgwNy1lOTllLTQxM2YtYTUyYS1kOTNiNWQzODYwM2UiLCJ1bmlxdWVfbmFtZSI6InN1c2hhbnQudGhvdGFrdXJhQHJlYW5mb3VuZGF0aW9uLm9yZyIsIm5hbWVpZCI6InN1c2hhbnQudGhvdGFrdXJhQHJlYW5mb3VuZGF0aW9uLm9yZyIsImVtYWlsIjoic3VzaGFudC50aG90YWt1cmFAcmVhbmZvdW5kYXRpb24ub3JnIiwiYXV0aF90aW1lIjoiMDUvMjEvMjAyNCAwNzoxMToxMiIsImRiX25hbWUiOiJtdC1wcm9kLVRlbmFudHMiLCJ0ZW5hbnRfaWQiOiIzMDkxNzkiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOlsiQlJPQURDQVNUX01BTkFHRVIiLCJURU1QTEFURV9NQU5BR0VSIiwiREVWRUxPUEVSIiwiQVVUT01BVElPTl9NQU5BR0VSIl0sImV4cCI6MjUzNDAyMzAwODAwLCJpc3MiOiJDbGFyZV9BSSIsImF1ZCI6IkNsYXJlX0FJIn0.fqQmfCAl7Z3vGY03zoHMfPezH7GugyNITJqV_uat6R8'
+                    Authorization : this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_TOKEN")
                 }
             };
             const response = await axios.request(options).then(function (response){
