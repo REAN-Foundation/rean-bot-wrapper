@@ -124,16 +124,19 @@ export class handleRequestservice{
         switch (messageHandler) {
         
         case 'NLP': {
+            console.log("inside NLP");
             message_from_nlp = outgoingMessage.Intent.IntentContent;
             
             // message_from_nlp = await this.DialogflowResponseService.getDialogflowMessage(metaData.messageBody, metaData.platform, metaData.intent, metaData);
             break;
         }
         case 'QnA': {
+            console.log("inside QnA");
             message_from_nlp = await this.customMLModelResponseService.getCustomModelResponse(metaData.messageBody, metaData.platform, metaData);
             break;
         }
         case 'Assessments': {
+            console.log("inside Assessments");
             const key = `${metaData.platformId}:Assessment`;
             const userMessageId = await CacheMemory.get(key);
             message_from_nlp = await this.serveAssessmentService.answerQuestion(eventObj, metaData.platformId, metaData.messageBody, userMessageId, metaData.platform, true);
@@ -141,6 +144,7 @@ export class handleRequestservice{
             break;
         }
         case 'Feedback': {
+            console.log("inside Feedback");
             let message_to_ml_model;
 
             if (metaData.contextId && !metaData.intent){
