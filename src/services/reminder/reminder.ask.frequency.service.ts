@@ -4,6 +4,7 @@ import { NeedleService } from '../needle.service';
 import { dialoflowMessageFormatting } from '../Dialogflow.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { sendApiButtonService } from '../whatsappmeta.button.service';
+import { sendWhatsappWatiButtonService } from '../whtasapp.wati.button.service';
 import { GetPatientInfoService } from '../support.app.service';
 import { GeneralReminderService } from './general.reminder.service';
 import { CacheMemory } from '../cache.memory.service';
@@ -92,6 +93,9 @@ export class ReminderFrequencyService {
             if (channelName === 'whatsappMeta') {
                 payload = await sendApiButtonService(buttonArray);
                 messageType = 'interactivebuttons';
+            } else if (channelName === 'whatsappWati'){
+                payload = await sendWhatsappWatiButtonService(buttonArray);
+                messageType = "interactivebuttons";
             } else {
                 payload = await sendTelegramButtonService(buttonArray);
                 messageType = 'inline_keyboard';

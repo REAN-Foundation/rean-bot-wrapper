@@ -188,6 +188,7 @@ export class GeneralReminderService {
             "whatsappMeta" : NotificationType.WhatsApp,
             "telegram"     : NotificationType.Telegram,
             "Telegram"     : NotificationType.Telegram,
+            "whatsappWati" : NotificationType.WhatsappWati
         };
         return channelType[channel] ?? NotificationType.WhatsApp;
     }
@@ -200,19 +201,23 @@ export class GeneralReminderService {
             Variables    : {
                 en : [{
                     "type" : "text",
-                    "text" : "Patient_name"
+                    "text" : "Patient_name",
+                    "name" : "patient_name"
                 },
                 {
                     "type" : "text",
-                    "text" : jsonFormat.TaskName
+                    "text" : jsonFormat.TaskName,
+                    "name" : "task_name"
                 },
                 {
                     "type" : "text",
-                    "text" : jsonFormat.TimeString
+                    "text" : jsonFormat.TimeString,
+                    "name" : "time_string"
                 },
                 {
                     "type" : "text",
-                    "text" : fourthVariable
+                    "text" : fourthVariable,
+                    "name" : "fourth_variable"
                 }]
             },
             ButtonsIds  : [ "App_Reminder_Yes", "App_Reminder_No"],

@@ -98,7 +98,8 @@ export enum NotificationType {
     WhatsApp       = 'WhatsApp',
     Telegram       = 'Telegram',
     Slack          = 'Slack',
-    MicrosoftTeams = 'MicrosoftTeams'
+    MicrosoftTeams = 'MicrosoftTeams',
+    WhatsappWati   = 'WhatsappWati'
 }
 
 export const NotificationTypeList: NotificationType [] = [
