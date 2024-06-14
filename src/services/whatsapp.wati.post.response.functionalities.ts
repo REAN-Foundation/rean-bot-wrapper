@@ -8,6 +8,7 @@ import { inject, Lifecycle, scoped } from "tsyringe";
 import needle from 'needle';
 import axios from 'axios';
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
+import { ChatMessage } from '../models/chat.message.model';
 
 @scoped(Lifecycle.ContainerScoped)
 export class WhatsappWatiPostResponseFunctionalities {
@@ -22,7 +23,7 @@ export class WhatsappWatiPostResponseFunctionalities {
     sendtextResponse = async(response_format:Iresponse, payload) => {
         try {
             const phoneNumber = response_format.platformId;
-            const params = {'messageText': response_format.messageText};
+            const params = { 'messageText': response_format.messageText };
             const watiUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_BASE_URL");
             const baseUrl = `${watiUrl}/api/v1/sendSessionMessage/${phoneNumber}?messageText=`;
             console.log("Sending Wati Text Response");
@@ -35,10 +36,10 @@ export class WhatsappWatiPostResponseFunctionalities {
                 }
             };
             const response = await axios.request(options).then(function (response){
-                return response;
-            }).catch(function (error) {
-                console.log(error);
-            });
+                return response;})
+                .catch(function (error) {
+                    console.log(error);
+                });
             return response;
         } catch (error) {
             console.log("Error while sending text message to whatsapp wati", error);
@@ -51,11 +52,12 @@ export class WhatsappWatiPostResponseFunctionalities {
         const payloadContent = this.handleMessagetypePayload.getPayloadContent(payload);
         const listofPostDataWati = [];
         const languageForSession = await this.userLanguage.getPreferredLanguageofSession(response_format.sessionId);
-        for (let i=0; i < payloadContent.length; i++){
+        for (let i = 0; i < payloadContent.length; i++){
             const payloadContentMessageTypeWati = payloadContent[i].fields.messagetype.stringValue;
             if (payloadContentMessageTypeWati === "interactive-buttons") {
                 response = await this.sendinteractivebuttonsResponse(response_format, payloadContent[i]);
             } else if (payloadContentMessageTypeWati === "image") {
+
                 // Method not implemented yet
             } else {
                 const payloadMessageWati = await this.translateService.translateResponse([payloadContent[i].fields.content], languageForSession);
@@ -148,9 +150,19 @@ export class WhatsappWatiPostResponseFunctionalities {
             "template_name"  : payload.templateName,
             "broadcast_name" : "Reminder"
         };
+        const buttons = [
+            {
+                "id"   : payload.buttonIds ? payload.buttonIds[0] : null,
+                "text" : "Yes"
+            },
+            {
+                "id"   : payload.buttonIds ? payload.buttonIds[1] : null,
+                "text" : "No"
+            }
+        ];
         const options = {
             method  : "POST",
-            url     : `${baseUrl}/api/v1/sendTemplateMessage?whatsappNumber=${phoneNumber}`,
+            url     : `${baseUrl}/api/v2/sendTemplateMessage?whatsappNumber=${phoneNumber}`,
             headers : {
                 'content-type' : 'application/json-patch+json',
                 Authorization  : watiToken
@@ -159,12 +171,13 @@ export class WhatsappWatiPostResponseFunctionalities {
         };
         const response = await axios
             .request(options)
-            .then(function (response) {
+            .then(async function (response) {
                 return response;
             })
             .catch(function (error) {
                 console.error(error);
             });
+        response["data"]["buttonMetaData"] = JSON.stringify(buttons);
         return response;
     };
 
@@ -218,7 +231,7 @@ export class WhatsappWatiPostResponseFunctionalities {
         const buttons = [];
         const numberofButtons = (payload.fields.buttons.listValue.values).length;
         const languageForSession = await this.userLanguage.getPreferredLanguageofSession(response_format.sessionId);
-        for (let i=0; i < numberofButtons; i++){
+        for (let i = 0; i < numberofButtons; i++){
             const id = payload.fields.buttons.listValue.values[i].structValue.fields.reply.structValue.fields.id.stringValue;
             const title = payload.fields.buttons.listValue.values[i].structValue.fields.reply.structValue.fields.title.stringValue;
             const translatedTitle = await this.translateService.translateResponse([title], languageForSession);
@@ -230,4 +243,5 @@ export class WhatsappWatiPostResponseFunctionalities {
         }
         return buttons;
     };
+    
 }

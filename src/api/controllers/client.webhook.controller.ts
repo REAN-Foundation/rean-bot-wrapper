@@ -39,7 +39,7 @@ export class ClientWebhookController {
             // eslint-disable-next-line max-len
             this._platformMessageService = req.container.resolve(req.params.channel);
             const response = await this._platformMessageService.sendManualMesage(req.body);
-            if (response.statusCode === 200 || response.message_id !== undefined) {
+            if (response.statusCode === 200 || response.message_id !== undefined || response.status === 200) {
                 this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', response.body);
             }
             else {
@@ -341,17 +341,31 @@ export class ClientWebhookController {
 
     receiveMessageWatiWhatsapp = async (req, res) =>{
         try {
-            this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
             const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             console.log("Wati Client Name:", clientName);
-            
+            if (req.body.statusString === "SENT" && req.body.type === "template"){
+                this.responseHandler.sendSuccessResponse(res, 200, "Sent status read", "");
+                await this.sleep(5000);
+                const chatMessageRepository = (await entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService, clientName)).getRepository(ChatMessage);
+                const whatsappMessageId = req.body.whatsappMessageId;
+                await chatMessageRepository.update({ responseMessageID: whatsappMessageId }, { where: { responseMessageID: req.body.localMessageId } })
+                    .then(() => { console.log("DB Updated with Whatsapp Response ID"); })
+                    .catch(error => console.log("error on update", error));
+
+            } else if (req.body.statusString === "SENT") {
+                this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
+                this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
+                this._clientAuthenticatorService.authenticate(req, res);
+                this._platformMessageService = req.container.resolve(req.params.channel);
+                this._platformMessageService.handleMessage(req.body, req.params.channel);
+            } else {
+
+                // Future addition
+            }
+
             // const chatMessageRepository = (await entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService, clientName)).getRepository(ChatMessage);
             // this.sendSuccessMessage(chatMessageRepository, res, req.body.statusString);
-            this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
-            this._clientAuthenticatorService.authenticate(req, res);
-            this._platformMessageService = req.container.resolve(req.params.channel);
-            this._platformMessageService.handleMessage(req.body, req.params.channel);
         } catch (error) {
             console.log("error in Wati message handler", error);
             this.errorHandler.handle_controller_error(error, res, req);
@@ -379,6 +393,12 @@ export class ClientWebhookController {
             console.log("in error", error);
             this.errorHandler.handle_controller_error(error, res, req);
         }
+    };
+
+    sleep = async (ms) => {
+        return new Promise((resolve) => {
+            setTimeout(resolve, ms);
+        });
     };
 
 }
