@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
-import {inject, delay, scoped, Lifecycle} from 'tsyringe';
+import { inject, delay, scoped, Lifecycle } from 'tsyringe';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { MessageFlow } from './get.put.message.flow.service';
 import { WhatsappWatiMessageToDialogflow } from './whatsapp.wati.messagetodialogflow';
@@ -46,7 +46,6 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
             }
         }
 
-
         console.log("HI WATI!!!");
     }
 
@@ -76,12 +75,12 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
                     whatsappMessageId = watiResp.data.message ? watiResp.data.message.whatsappMessageId : watiResp.data.receivers[0].localMessageId;
                     if (watiResp.data.buttonMetaData){
                         console.log("Button Meta Data is present");
-                        await chatMessageRepository.update({ responseMessageID: whatsappMessageId, imageContent: watiResp.data.buttonMetaData }, { where: {id: id}})
-                            .then(() => {console.log("DB Updated with Whatsapp Response ID");})
+                        await chatMessageRepository.update({ responseMessageID: whatsappMessageId, imageContent: watiResp.data.buttonMetaData }, { where: { id: id } })
+                            .then(() => { console.log("DB Updated with Whatsapp Response ID"); })
                             .catch(error => console.log("error on update", error));
                     } else {
-                        await chatMessageRepository.update({ responseMessageID: whatsappMessageId }, { where: {id: id}})
-                            .then(() => {console.log("DB Updated with Whatsapp Response ID");})
+                        await chatMessageRepository.update({ responseMessageID: whatsappMessageId }, { where: { id: id } })
+                            .then(() => { console.log("DB Updated with Whatsapp Response ID"); })
                             .catch(error => console.log("error on update", error));
                     }
 
@@ -122,8 +121,8 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
                         response_message = { name: user_name, platform: platform, platformId: platformId, chat_message_id: chat_message_id, direction: "Out", message_type: "image", intent: intent, messageBody: String(vacinationImageFile), messageImageUrl: null, messageImageCaption: null, sessionId: wati_whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[1], similarDoc: similar_doc };
                     }
                 } else {
-                    response_message = {name: user_name, platform: platform, platformId: platformId, chat_message_id: chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: wati_whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[0], similarDoc: similar_doc};
-                    response_message = {name: user_name, platform: platform, platformId: platformId, chat_message_id: chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: wati_whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[1], similarDoc: similar_doc};
+                    response_message = { name: user_name, platform: platform, platformId: platformId, chat_message_id: chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: wati_whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[0], similarDoc: similar_doc };
+                    response_message = { name: user_name, platform: platform, platformId: platformId, chat_message_id: chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: wati_whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[1], similarDoc: similar_doc };
                 }
             } else {
                 let message_type = "text";
@@ -137,7 +136,7 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
                         message_type = "interactivelist";
                     }
                 }
-                response_message = { name: user_name, platform: platform, platformId: platformId, chat_message_id: chat_message_id, direction: "Out", message_type: message_type, intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: wati_whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[0], similarDoc: similar_doc, buttonMetaData: buttonMetaData};
+                response_message = { name: user_name, platform: platform, platformId: platformId, chat_message_id: chat_message_id, direction: "Out", message_type: message_type, intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: wati_whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[0], similarDoc: similar_doc, buttonMetaData: buttonMetaData };
             }
         }
         return response_message;
@@ -166,4 +165,5 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
     async getMessageIdFromResponse(responseBody: any) {
         throw new Error("Method not implemented.");
     }
+    
 }

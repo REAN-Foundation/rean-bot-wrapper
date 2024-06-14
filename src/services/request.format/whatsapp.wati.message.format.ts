@@ -101,4 +101,5 @@ export class Message implements IWhatsappRequestMessageEntities {
     setChannel(channel) {
         this.list.channel = channel;
     }
+
 }

@@ -349,8 +349,8 @@ export class ClientWebhookController {
                 await this.sleep(5000);
                 const chatMessageRepository = (await entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService, clientName)).getRepository(ChatMessage);
                 const whatsappMessageId = req.body.whatsappMessageId;
-                await chatMessageRepository.update({ responseMessageID: whatsappMessageId }, { where: {responseMessageID: req.body.localMessageId}})
-                    .then(() => {console.log("DB Updated with Whatsapp Response ID");})
+                await chatMessageRepository.update({ responseMessageID: whatsappMessageId }, { where: { responseMessageID: req.body.localMessageId } })
+                    .then(() => { console.log("DB Updated with Whatsapp Response ID"); })
                     .catch(error => console.log("error on update", error));
 
             } else if (req.body.statusString === "SENT") {
@@ -399,6 +399,6 @@ export class ClientWebhookController {
         return new Promise((resolve) => {
             setTimeout(resolve, ms);
         });
-    }
+    };
 
 }
