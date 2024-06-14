@@ -63,32 +63,34 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
     }
     
     async SendMediaMessage(response_format: Iresponse, payload: any) {
+        let whatsappMessageId;
         const type = response_format.message_type;
         if (type) {
             const classmethod = `send${type}Response`;
             const watiResp = await this.whatsappWatiPostResponseFunctionalities[classmethod](response_format, payload);
             if (watiResp.status === 200) {
+                const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+                const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.sessionId } } );
+                if (respChatMessage.length > 0) {
+                    const id = respChatMessage[respChatMessage.length - 1].id;
+                    whatsappMessageId = watiResp.data.message ? watiResp.data.message.whatsappMessageId : watiResp.data.receivers[0].localMessageId;
+                    if (watiResp.data.buttonMetaData){
+                        console.log("Button Meta Data is present");
+                        await chatMessageRepository.update({ responseMessageID: whatsappMessageId, imageContent: watiResp.data.buttonMetaData }, { where: {id: id}})
+                            .then(() => {console.log("DB Updated with Whatsapp Response ID");})
+                            .catch(error => console.log("error on update", error));
+                    } else {
+                        await chatMessageRepository.update({ responseMessageID: whatsappMessageId }, { where: {id: id}})
+                            .then(() => {console.log("DB Updated with Whatsapp Response ID");})
+                            .catch(error => console.log("error on update", error));
+                    }
+
+                }
                 if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE")){
                     if (response_format.name !== "ReanCare") {
                         console.log("Providing QA service through clickUp");
                         await this.logsQAService.logMesssages(response_format);
                     }
-                }
-                const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-                const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.sessionId } } );
-                if (respChatMessage.length > 0) {
-                    const id = respChatMessage[respChatMessage.length - 1].id;
-                    if (watiResp.data.buttonMetaData){
-                        console.log("Button Meta Data is present");
-                        await chatMessageRepository.update({ responseMessageID: watiResp.data.message.whatsappMessageId, imageContent: watiResp.data.buttonMetaData }, { where: {id: id}})
-                            .then(() => {console.log("DB Updated with Whatsapp Response ID");})
-                            .catch(error => console.log("error on update", error));
-                    } else {
-                        await chatMessageRepository.update({ responseMessageID: watiResp.data.message.whatsappMessageId }, { where: {id: id}})
-                            .then(() => {console.log("DB Updated with Whatsapp Response ID");})
-                            .catch(error => console.log("error on update", error));
-                    }
-
                 }
                 return watiResp;
             }

@@ -8,6 +8,7 @@ import { inject, Lifecycle, scoped } from "tsyringe";
 import needle from 'needle';
 import axios from 'axios';
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
+import { ChatMessage } from '../models/chat.message.model';
 
 @scoped(Lifecycle.ContainerScoped)
 export class WhatsappWatiPostResponseFunctionalities {
@@ -148,9 +149,19 @@ export class WhatsappWatiPostResponseFunctionalities {
             "template_name"  : payload.templateName,
             "broadcast_name" : "Reminder"
         };
+        const buttons = [
+            {
+                "id"   : payload.buttonIds ? payload.buttonIds[0] : null,
+                "text" : "Yes"
+            },
+            {
+                "id"   : payload.buttonIds ? payload.buttonIds[1] : null,
+                "text" : "No"
+            }
+        ];
         const options = {
             method  : "POST",
-            url     : `${baseUrl}/api/v1/sendTemplateMessage?whatsappNumber=${phoneNumber}`,
+            url     : `${baseUrl}/api/v2/sendTemplateMessage?whatsappNumber=${phoneNumber}`,
             headers : {
                 'content-type' : 'application/json-patch+json',
                 Authorization  : watiToken
@@ -159,12 +170,13 @@ export class WhatsappWatiPostResponseFunctionalities {
         };
         const response = await axios
             .request(options)
-            .then(function (response) {
+            .then(async function (response) {
                 return response;
             })
             .catch(function (error) {
                 console.error(error);
             });
+        response["data"]["buttonMetaData"] = JSON.stringify(buttons);
         return response;
     };
 

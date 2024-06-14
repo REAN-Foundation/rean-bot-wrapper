@@ -78,7 +78,17 @@ export class WatiMessageFunctionalities implements getMessageFunctionalities {
     }
 
     async buttonMessageFormat(messageObj: Message) {
-        // Method not implemented yet
+        const message = messageObj.getButton().title;
+        const messagetoDialogflow = this.inputMessageFormat(messageObj);
+        const contextId = messageObj.getContextId();
+        messagetoDialogflow.messageBody = message;
+
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+        const contextMessage = await chatMessageRepository.findOne({ where: { responseMessageID: contextId } });
+        const buttonContext = JSON.parse(contextMessage.dataValues.imageContent);
+        const intent = buttonContext.find(o => o.text === message);
+        messagetoDialogflow.intent = intent.id.parameters[0].payload;
+        return messagetoDialogflow;
     }
 
     inputMessageFormat(messageObj) {
