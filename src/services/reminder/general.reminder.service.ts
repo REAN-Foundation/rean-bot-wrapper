@@ -125,7 +125,7 @@ export class GeneralReminderService {
             let apiURL = null;
             const channel = eventObj.body.originalDetectIntentRequest.payload.source;
             const hookUrl = "https://api.weatherstack.com/current?access_key=93fdf8204559b90ec79466809edb7aad&query=Pune";
-            const rawData = this.getTemplateData(jsonFormat, personName);
+            const rawData = this.getTemplateData(jsonFormat, personName, channel);
             const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
             if (frequency === "Once" || frequency === ""){
                 apiURL = `reminders/one-time`;
@@ -190,36 +190,44 @@ export class GeneralReminderService {
         return channelType[channel] ?? NotificationType.WhatsApp;
     }
 
-    private getTemplateData(jsonFormat: any, personName? ) {
+    private getTemplateData(jsonFormat: any, personName? , channel?) {
         const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
         const fourthVariable = jsonFormat.TaskType === 'medication' ? 'take your medicine' : 'attend your appointment';
+        let variables = null;
+        const commonStructure: any = [
+            {
+                "type" : "text",
+                "text" : "Patient_name"
+            },
+            {
+                "type" : "text",
+                "text" : jsonFormat.TaskName
+            },
+            {
+                "type" : "text",
+                "text" : jsonFormat.TimeString
+            },
+            {
+                "type" : "text",
+                "text" : fourthVariable
+            }
+        ];
+
+        if (channel === "whatsappWati") {
+            commonStructure[0].name = "patient_name";
+            commonStructure[1].name = "task_name";
+            commonStructure[2].name = "time_string";
+            commonStructure[3].name = "fourth_variable";
+        }
+
+        variables = { en: commonStructure };
+
         return {
             TemplateName : "appointment_rem_question",
-            Variables    : {
-                en : [{
-                    "type" : "text",
-                    "text" : "Patient_name",
-                    "name" : "patient_name"
-                },
-                {
-                    "type" : "text",
-                    "text" : jsonFormat.TaskName,
-                    "name" : "task_name"
-                },
-                {
-                    "type" : "text",
-                    "text" : jsonFormat.TimeString,
-                    "name" : "time_string"
-                },
-                {
-                    "type" : "text",
-                    "text" : fourthVariable,
-                    "name" : "fourth_variable"
-                }]
-            },
-            ButtonsIds  : [ "App_Reminder_Yes", "App_Reminder_No"],
-            ClientName  : clientName,
-            TextMessage : `Hi ${personName}, \nYou have ${jsonFormat.TaskName} scheduled at ${jsonFormat.TimeString}. Will you be able to ${fourthVariable}?`
+            Variables    : variables,
+            ButtonsIds   : [ "App_Reminder_Yes", "App_Reminder_No"],
+            ClientName   : clientName,
+            TextMessage  : `Hi ${personName}, \nYou have ${jsonFormat.TaskName} scheduled at ${jsonFormat.TimeString}. Will you be able to ${fourthVariable}?`
         };
     }
 
