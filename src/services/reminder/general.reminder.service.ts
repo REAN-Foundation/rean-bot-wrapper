@@ -194,6 +194,7 @@ export class GeneralReminderService {
         const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
         const fourthVariable = jsonFormat.TaskType === 'medication' ? 'take your medicine' : 'attend your appointment';
         let variables = null;
+        let templateName = "appointment_rem_question";
         const commonStructure: any = [
             {
                 "type" : "text",
@@ -214,6 +215,7 @@ export class GeneralReminderService {
         ];
 
         if (channel === "whatsappWati") {
+            templateName = "appointment_reminder_message";
             commonStructure[0].name = "patient_name";
             commonStructure[1].name = "task_name";
             commonStructure[2].name = "time_string";
@@ -223,7 +225,7 @@ export class GeneralReminderService {
         variables = { en: commonStructure };
 
         return {
-            TemplateName : "appointment_rem_question",
+            TemplateName : templateName,
             Variables    : variables,
             ButtonsIds   : [ "App_Reminder_Yes", "App_Reminder_No"],
             ClientName   : clientName,
