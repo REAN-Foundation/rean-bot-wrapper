@@ -21,6 +21,7 @@ export class PlatformWebhookRoutes{
         router.get(`/:client/:channel/:unique_token/webhook`, this._clientWebhookController.authenticateMetaWhatsappWebhook);
         router.post(`/:client/:channel/:unique_token/webhook`, this._clientWebhookController.receiveMessageMetaWhatsapp);
         router.post(`/:client/:form_name/kobotoolbox/abcd/getData`, this._kobotoolboxController.kobotoolbox );
+        router.post(`/:client/:channel/:unique_token/watiwebhook`, this._clientWebhookController.receiveMessageWatiWhatsapp);
         app.use('/v1/', router);
     }
 

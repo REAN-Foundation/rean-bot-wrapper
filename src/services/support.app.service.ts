@@ -277,7 +277,7 @@ export class GetPatientInfoService{
             } else {
                 patientUserId = result.Data.Patients.Items[0].UserId;
             }
-        } else if (channel === "whatsappMeta") {
+        } else if (channel === "whatsappMeta" || channel === "whatsappWati" || channel === "MockChannel") {
             const apiURL = `patients/byPhone?phone=${encodeURIComponent(this.convertPhoneNumber(personPhoneNumber))}`;
             const result = await this.needleService.needleRequestForREAN("get", apiURL);
             if (result.Data.Patients.Items.length === 0) {

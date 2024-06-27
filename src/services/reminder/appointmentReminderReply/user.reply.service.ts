@@ -30,7 +30,7 @@ export class AppointmentUserReplyService {
                 .split('T')[0];
             todayDate = Helper.removeLeadingZerosFromDay(todayDate);
 
-            const getUrl = `${docProcessBaseURL}appointment-schedules/gmu/appointment-status/${phoneNumber}/days/${todayDate}`;
+            const getUrl = `${docProcessBaseURL}appointment-schedules/gghn/appointment-status/${phoneNumber}/days/${todayDate}`;
             const respnse =  await needle("get", getUrl);
             if (respnse.body.message){
                 msg = "Sorry to inform you the appointment passed.";

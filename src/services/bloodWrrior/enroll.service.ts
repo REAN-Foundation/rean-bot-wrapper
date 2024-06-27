@@ -5,6 +5,7 @@ import { inject, Lifecycle, scoped } from 'tsyringe';
 import needle from 'needle';
 import { Logger } from '../../common/logger';
 import { NeedleService } from '../needle.service';
+import { BloodWarriorCommonService } from './common.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class EnrollPatientService {
@@ -14,20 +15,26 @@ export class EnrollPatientService {
         @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,
         // eslint-disable-next-line max-len
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
-        @inject(NeedleService) private needleService?: NeedleService
+        @inject(NeedleService) private needleService?: NeedleService,
+        @inject(BloodWarriorCommonService) private bloodWarriorCommonService?: BloodWarriorCommonService
     ){}
 
     enrollPatientService = async (eventObj, patientUserId = null) => {
         try {
             let result = null;
+            let isRemindersLoaded = false;
             if (patientUserId == null) {
                 result = await this.getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
                 patientUserId = result.message[0].UserId;
+                isRemindersLoaded = result.message[0].IsRemindersLoaded;
+            } else {
+                const patient = await this.bloodWarriorCommonService.getPatientPhoneByUserId(patientUserId);
+                isRemindersLoaded = patient.IsRemindersLoaded;
             }
             const options = this.getHeaders.getHeaders();
         
             //Update patient information
-            if (!result.message[0].IsRemindersLoaded) {
+            if (!isRemindersLoaded) {
                 const ReanBackendBaseUrl =
                     this.clientEnvironmentProviderService.getClientEnvironmentVariable('REAN_APP_BACKEND_BASE_URL');
         

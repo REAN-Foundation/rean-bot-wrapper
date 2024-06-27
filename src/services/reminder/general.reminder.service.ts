@@ -5,14 +5,12 @@ import { NeedleService } from '../needle.service';
 import { dialoflowMessageFormatting } from '../Dialogflow.service';
 import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { sendApiButtonService } from '../whatsappmeta.button.service';
 import { GetPatientInfoService } from '../support.app.service';
 import { DateStringFormat, DurationType, TimeHelper } from '../../common/time.helper';
 import { OpenAIResponseService } from '../openai.response.service';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 import { CacheMemory } from '../cache.memory.service';
 import { NotificationType, ReminderBody, ReminderDomainModel, ReminderType, RepeatAfterEveryNUnit } from '../../domain.types/reminder/reminder.domain.model';
-import { DATE } from 'sequelize';
 
 @scoped(Lifecycle.ContainerScoped)
 export class GeneralReminderService {
@@ -31,7 +29,6 @@ export class GeneralReminderService {
     async createReminder (eventObj) {
         try {
             const dayName : string = eventObj.body.queryResult.parameters.dayName;
-            const message : string = eventObj.body.queryResult.queryText;
             const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
             const eventName : string = eventObj.body.queryResult.parameters.event;
             const frequency : string = eventObj.body.queryResult.parameters.frequency;
@@ -78,7 +75,7 @@ export class GeneralReminderService {
             await CacheMemory.set(phoneNumber, jsonFormat);
 
             // extract whentime and whenday from schedule timestamp
-            const { whenDay, whenTime } = await this.extractWhenDateTime(jsonFormat.StartDateTime);
+            // const { whenDay, whenTime } = await this.extractWhenDateTime(jsonFormat.StartDateTime);
             
             if (jsonFormat.TaskType === 'medication' && frequency === "" ) {
                 console.log(`trigerring the ${jsonFormat.TaskType} reminder event`);
@@ -128,7 +125,7 @@ export class GeneralReminderService {
             let apiURL = null;
             const channel = eventObj.body.originalDetectIntentRequest.payload.source;
             const hookUrl = "https://api.weatherstack.com/current?access_key=93fdf8204559b90ec79466809edb7aad&query=Pune";
-            const rawData = this.getTemplateData(jsonFormat, personName);
+            const rawData = this.getTemplateData(jsonFormat, personName, channel);
             const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
             if (frequency === "Once" || frequency === ""){
                 apiURL = `reminders/one-time`;
@@ -188,36 +185,51 @@ export class GeneralReminderService {
             "whatsappMeta" : NotificationType.WhatsApp,
             "telegram"     : NotificationType.Telegram,
             "Telegram"     : NotificationType.Telegram,
+            "whatsappWati" : NotificationType.WhatsappWati
         };
         return channelType[channel] ?? NotificationType.WhatsApp;
     }
 
-    private getTemplateData(jsonFormat: any, personName? ) {
+    private getTemplateData(jsonFormat: any, personName? , channel?) {
         const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
         const fourthVariable = jsonFormat.TaskType === 'medication' ? 'take your medicine' : 'attend your appointment';
-        return {
-            TemplateName : "appointment_rem_question",
-            Variables    : {
-                en : [{
-                    "type" : "text",
-                    "text" : "Patient_name"
-                },
-                {
-                    "type" : "text",
-                    "text" : jsonFormat.TaskName
-                },
-                {
-                    "type" : "text",
-                    "text" : jsonFormat.TimeString
-                },
-                {
-                    "type" : "text",
-                    "text" : fourthVariable
-                }]
+        let variables = null;
+        let templateName = "appointment_rem_question";
+        const commonStructure: any = [
+            {
+                "type" : "text",
+                "text" : "Patient_name"
             },
-            ButtonsIds  : [ "App_Reminder_Yes", "App_Reminder_No"],
-            ClientName  : clientName,
-            TextMessage : `Hi ${personName}, \nYou have ${jsonFormat.TaskName} scheduled at ${jsonFormat.TimeString}. Will you be able to ${fourthVariable}?`
+            {
+                "type" : "text",
+                "text" : jsonFormat.TaskName
+            },
+            {
+                "type" : "text",
+                "text" : jsonFormat.TimeString
+            },
+            {
+                "type" : "text",
+                "text" : fourthVariable
+            }
+        ];
+
+        if (channel === "whatsappWati") {
+            templateName = "appointment_reminder_message";
+            commonStructure[0].name = "patient_name";
+            commonStructure[1].name = "task_name";
+            commonStructure[2].name = "time_string";
+            commonStructure[3].name = "fourth_variable";
+        }
+
+        variables = { en: commonStructure };
+
+        return {
+            TemplateName : templateName,
+            Variables    : variables,
+            ButtonsIds   : [ "App_Reminder_Yes", "App_Reminder_No"],
+            ClientName   : clientName,
+            TextMessage  : `Hi ${personName}, \nYou have ${jsonFormat.TaskName} scheduled at ${jsonFormat.TimeString}. Will you be able to ${fourthVariable}?`
         };
     }
 
