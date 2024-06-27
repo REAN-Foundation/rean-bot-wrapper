@@ -116,13 +116,6 @@ export class FireAndForgetService {
                 messageContextId, channel, false);
             console.log(`Fire and Forget Domain Model: ${model}`);
         }
-        if (model.Intent === "Registration_PerMinMsg") {
-            const eventObj = model.Body.EventObj;
-            const registrationPerMinMsgService:  RegistrationPerMinMsgService =
-                eventObj.container.resolve(RegistrationPerMinMsgService);
-            await registrationPerMinMsgService.collectMessage(eventObj);
-            console.log(`Fire and Forget Domain Model: ${model}`);
-        }
         if (model.Intent === "cincinnati_PerMinMsg") {
             const eventObj = model.Body.EventObj;
             const cincinnatiPerMinMsgService:  CincinnatiPerMinMsgService =
