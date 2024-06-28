@@ -273,7 +273,7 @@ export class MessageFlow{
             const AssessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
             await AssessmentSessionRepo.create(assessmentSession);
         }
-        if (msg.provider === "REAN_BOT" || msg.provider === "GGHN"&& message_to_platform.statusCode === 200) {
+        if (msg.provider === "REAN_BOT" || msg.provider === "GGHN" && message_to_platform.statusCode === 200) {
             const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
             let todayDate = new Date().toISOString()
                 .split('T')[0];
