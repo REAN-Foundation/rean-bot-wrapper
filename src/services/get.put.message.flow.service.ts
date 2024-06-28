@@ -273,14 +273,15 @@ export class MessageFlow{
             const AssessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
             await AssessmentSessionRepo.create(assessmentSession);
         }
-        if (msg.provider === "REAN_BOT" && message_to_platform.statusCode === 200) {
+        if (msg.provider === "REAN_BOT" || msg.provider === "GGHN"&& message_to_platform.statusCode === 200) {
             const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
             let todayDate = new Date().toISOString()
                 .split('T')[0];
             todayDate = Helper.removeLeadingZerosFromDay(todayDate);
+            const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
             const messageId = await platformMessageService.getMessageIdFromResponse(message_to_platform);
             const phoneNumber = Helper.formatPhoneForDocProcessor(msg.userId);
-            const apiUrl = `${docProcessBaseURL}appointment-schedules/gghn/appointment-status/${phoneNumber}/days/${todayDate}`;
+            const apiUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
             const headers = { headers : {
                 'Content-Type' : 'application/json',
                 Accept         : 'application/json',
