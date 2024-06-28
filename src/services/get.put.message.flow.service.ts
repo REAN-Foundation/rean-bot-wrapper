@@ -278,7 +278,7 @@ export class MessageFlow{
             let todayDate = new Date().toISOString()
                 .split('T')[0];
             todayDate = Helper.removeLeadingZerosFromDay(todayDate);
-            const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
+            const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
             const messageId = await platformMessageService.getMessageIdFromResponse(message_to_platform);
             const phoneNumber = Helper.formatPhoneForDocProcessor(msg.userId);
             const apiUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
