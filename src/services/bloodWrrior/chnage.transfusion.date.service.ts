@@ -127,7 +127,7 @@ export class ChangeTransfusionDateService {
     async sendPatientListToVolunteer (body) {
 
         let result = null;
-        const apiURL = `clinical/patient-donors/search?volunteerUserId=${body.Volunteer.UserId}`;
+        const apiURL = `clinical/patient-donors/search?itemsPerPage=100&volunteerUserId=${body.Volunteer.UserId}`;
         result = await this.needleService.needleRequestForREAN("get", apiURL);
         const patientList = this.extractUniquePatientInfo(result);
 

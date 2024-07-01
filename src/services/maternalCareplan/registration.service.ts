@@ -109,6 +109,7 @@ export class RegistrationService {
             return TotalDays;
         };
 
+        const channel = eventObj.body.originalDetectIntentRequest.payload.source;
         const enrollmentUrl = `care-plans/patients/${patientUserId}/enroll`;
         const obj1 = {
             Provider  : "REAN",
@@ -116,7 +117,9 @@ export class RegistrationService {
             PlanCode  : "DMC-Maternity",
             StartDate : new Date().toISOString()
                 .split('T')[0],
-            DayOffset : (days(date_1, date_2) - 28)
+            DayOffset  : (days(date_1, date_2) - 28),
+            Channel    : this.getPatientInfoService.getReminderType(channel),
+            TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
         };
         const resp = await this.needleService.needleRequestForREAN("post", enrollmentUrl, null, obj1);
 

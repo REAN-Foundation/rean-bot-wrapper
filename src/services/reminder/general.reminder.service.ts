@@ -10,7 +10,7 @@ import { DateStringFormat, DurationType, TimeHelper } from '../../common/time.he
 import { OpenAIResponseService } from '../openai.response.service';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 import { CacheMemory } from '../cache.memory.service';
-import { NotificationType, ReminderBody, ReminderDomainModel, ReminderType, RepeatAfterEveryNUnit } from '../../domain.types/reminder/reminder.domain.model';
+import { ReminderBody, ReminderDomainModel, ReminderType, RepeatAfterEveryNUnit } from '../../domain.types/reminder/reminder.domain.model';
 
 @scoped(Lifecycle.ContainerScoped)
 export class GeneralReminderService {
@@ -180,16 +180,6 @@ export class GeneralReminderService {
         }
     }
 
-    public getReminderType( channel: string) {
-        const channelType = {
-            "whatsappMeta" : NotificationType.WhatsApp,
-            "telegram"     : NotificationType.Telegram,
-            "Telegram"     : NotificationType.Telegram,
-            "whatsappWati" : NotificationType.WhatsappWati
-        };
-        return channelType[channel] ?? NotificationType.WhatsApp;
-    }
-
     private getTemplateData(jsonFormat: any, personName? , channel?) {
         const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
         const fourthVariable = jsonFormat.TaskType === 'medication' ? 'take your medicine' : 'attend your appointment';
@@ -269,7 +259,7 @@ export class GeneralReminderService {
             "WhenDate"         : `${whenDay}`,
             "WhenTime"         : `${whenTime}`,
             "HookUrl"          : `${hookUrl}`,
-            "NotificationType" : this.getReminderType(channel),
+            "NotificationType" : this.getPatientInfoService.getReminderType(channel),
             "RawContent"       : JSON.stringify(rawContent)
         };
         return obj;

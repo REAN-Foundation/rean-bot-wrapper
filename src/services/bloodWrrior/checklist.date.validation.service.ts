@@ -79,7 +79,8 @@ export class ChecklistDateValidationService {
 
             //donationDate.setDate(donationDate.getDate() - 1);
         }
-        await this.bloodWarriorCommonService.fetchDonorDonationReminders(donor.UserId, transfusionDate);
+        // eslint-disable-next-line max-len
+        await this.bloodWarriorCommonService.fetchDonorDonationReminders(donor.UserId, transfusionDate, intentPayload.source);
 
         //Template message formation
         const payload = {};

@@ -36,7 +36,8 @@ export class Registration{
                 Password        : "Test@123",
                 FirstName       : platformUserName,
                 DefaultTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
-                CurrentTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE")
+                CurrentTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
+                TenantCode      : this.EnvironmentProviderService.getClientEnvironmentVariable("NAME")
             };
         }
         else if (creationMethod === "userName")
@@ -47,7 +48,8 @@ export class Registration{
                 UserName        : UserId,
                 TelegramChatId  : UserId,
                 DefaultTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
-                CurrentTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE")
+                CurrentTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
+                TenantCode      : this.EnvironmentProviderService.getClientEnvironmentVariable("NAME")
             };
         }
         const apiURL = `patients`;
