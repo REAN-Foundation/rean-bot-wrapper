@@ -6,6 +6,7 @@ import { inject, Lifecycle, scoped,  } from 'tsyringe';
 import { GetHeaders } from '../services/biometrics/get.headers';
 import { Dose,Duration,MedicationAdministrationRoutes,MedicationDomainModel,MedicineName } from '../refactor/interface/medication.interface';
 import { NeedleService } from './needle.service';
+import { NotificationType } from '../domain.types/reminder/reminder.domain.model';
 
 // eslint-disable-next-line max-len
 @scoped(Lifecycle.ContainerScoped)
@@ -325,6 +326,16 @@ export class GetPatientInfoService{
             completeNumber = `+${contryCode}-${number}`;
         }
         return completeNumber;
+    }
+
+    getReminderType( channel: string) {
+        const channelType = {
+            "whatsappMeta" : NotificationType.WhatsApp,
+            "telegram"     : NotificationType.Telegram,
+            "Telegram"     : NotificationType.Telegram,
+            "whatsappWati" : NotificationType.WhatsappWati
+        };
+        return channelType[channel] ?? NotificationType.WhatsApp;
     }
 
 }

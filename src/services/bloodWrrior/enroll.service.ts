@@ -21,6 +21,7 @@ export class EnrollPatientService {
 
     enrollPatientService = async (eventObj, patientUserId = null) => {
         try {
+            const channel = eventObj.body.originalDetectIntentRequest.payload.source;
             let result = null;
             let isRemindersLoaded = false;
             if (patientUserId == null) {
@@ -44,7 +45,9 @@ export class EnrollPatientService {
                     PlanName  : "Patient messages",
                     PlanCode  : "Patient-Reminders",
                     StartDate : new Date().toISOString()
-                        .split('T')[0]
+                        .split('T')[0],
+                    Channel    : this.getPatientInfoService.getReminderType(channel),
+                    TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
                 };
         
                 const resp = await needle('post', url, obj1, options);

@@ -23,6 +23,7 @@ export class ScheduleOneTimeTakeValuesService {
             try {
                 const donation_Date = eventObj.body.queryResult.parameters.donation_Date;
                 const location = eventObj.body.queryResult.parameters.location;
+                const channel = eventObj.body.originalDetectIntentRequest.payload.source;
                 const volunteer = await this.bloodWarriorCommonService.getVolunteerByPhoneNumber(eventObj);
                 let result = null;
                 let dffMessage = "";
@@ -52,15 +53,15 @@ export class ScheduleOneTimeTakeValuesService {
     
                     //Fetch donation reminders for donors
                     const nextDonationDate = new Date(donation_Date.split("T")[0]);
-                    await this.bloodWarriorCommonService.fetchDonorDonationReminders(donor.UserId,nextDonationDate);
+                    await this.bloodWarriorCommonService.fetchDonorDonationReminders(donor.UserId,
+                        nextDonationDate, channel);
     
                     //Message sent to donor
                     const heading1 = `Hi ${donor.DisplayName}, \nThe donation request has been created by volunteer.`;
-                    const previousPayload = eventObj.body.originalDetectIntentRequest.payload;
                     const donorPhone =
                         this.raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(donor.Phone);
                     const response_format: Iresponse = commonResponseMessageFormat();
-                    response_format.platform = previousPayload.source;
+                    response_format.platform = channel;
                     response_format.sessionId = donorPhone;
                     response_format.messageText = heading1 + commonMessage;
                     response_format.message_type = "text";
