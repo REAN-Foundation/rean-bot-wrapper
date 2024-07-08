@@ -9,6 +9,11 @@ import needle from 'needle';
 import axios from 'axios';
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 import { ChatMessage } from '../models/chat.message.model';
+import http from 'http';
+import fs from 'fs';
+import request from 'request';
+import stream from 'stream';
+import FormData from 'form-data';
 
 @scoped(Lifecycle.ContainerScoped)
 export class WhatsappWatiPostResponseFunctionalities {
@@ -125,6 +130,88 @@ export class WhatsappWatiPostResponseFunctionalities {
         const response = await this.postRequestToWati(response_format, endPoint, postDataWati);
         return response;
     };
+
+    sendimageResponse = async (response_format:Iresponse, payload) => {
+        const endpoint = "sendSessionFile";
+        const baseUrl = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_BASE_URL");
+        const watiToken = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_TOKEN");
+        const phoneNumber = response_format.platformId;
+        let imageLink =  response_format.messageBody;
+        if (!imageLink) {
+            imageLink = payload.fields.url.stringValue;
+        }
+
+        const imageRes = await axios({
+            method       : 'get',
+            url          : imageLink,
+            responseType : 'arraybuffer'
+        }).then(async response => {
+            const bufferStream = new stream.PassThrough();
+            bufferStream.end(response.data);
+
+            const form = new FormData();
+            form.append('file', bufferStream, {
+                filename    : 'image.jpg',
+                contentType : 'image/jpeg',
+                knownLength : response.data.length
+            });
+            const url = `${baseUrl}/api/v1/${endpoint}/${phoneNumber}?caption=${response_format.messageText}`;
+            const options = {
+                method  : 'POST',
+                url     : url,
+                headers : {
+                    'content-type' : 'multipart/form-data; boundary=---011000010111000001101001',
+                    Authorization  : watiToken
+                },
+                data : form
+            };
+            const res = await axios.request(
+                options
+            );
+            return res;
+
+        });
+        return imageRes;
+    };
+
+    sendvoiceResponse = async (response_format:Iresponse, payload) => {
+        const endpoint = "sendSessionFile";
+        const baseUrl = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_BASE_URL");
+        const watiToken = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_TOKEN");
+        const phoneNumber = response_format.platformId;
+        const voiceLink = response_format.messageBody;
+        const voiceRes = await axios({
+            method       : 'get',
+            url          : voiceLink,
+            responseType : 'arraybuffer'
+        }).then(async response => {
+            const bufferStream = new stream.PassThrough();
+            bufferStream.end(response.data);
+
+            const form = new FormData();
+            form.append('file', bufferStream, {
+                filename    : 'voice.ogg',
+                contentType : 'audio/ogg',
+                knownLength : response.data.length
+            });
+            const url = `${baseUrl}/api/v1/${endpoint}/${phoneNumber}?caption=${response_format.messageText}`;
+            const options = {
+                method  : 'POST',
+                url     : url,
+                headers : {
+                    'content-type' : 'multipart/form-data; boundary=---011000010111000001101001',
+                    Authorization  : watiToken
+                },
+                data : form
+            };
+            const res = await axios.request(
+                options
+            );
+            return res;
+
+        });
+        return voiceRes;
+    }
 
     async createTemplateParams(payload) {
         const customParams = [];
@@ -243,5 +330,11 @@ export class WhatsappWatiPostResponseFunctionalities {
         }
         return buttons;
     };
+
+    fetchImageAsBase64 = async (imageUrl) => {
+        const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+        const base64Data = Buffer.from(response.data, 'binary').toString('base64');
+        return base64Data;
+    }
     
 }
