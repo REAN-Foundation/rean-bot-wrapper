@@ -1,34 +1,62 @@
 [
     {
         "Sequence": 1,
-        "Message": "Tetanus diphtheria vaccine is important for you and your unborn child. Ensure you have the dosages required."
+        "Message": "Welcome. You have just missed your period, and you're already 5 weeks pregnant. Arrange to go to the clinic soon."
     },
     {
         "Sequence": 2,
-        "Message": "Remember the health of the mother is very important for the health of the baby and the whole family. Please come to the clinic for regular check-ups for yourself and please contact your healthcare provider for free if you have any questions about your health."
+        "Message": "Please take iron and folic acid tablets each day during your pregnancy to help your baby grow well. You can get them free of cost from the clinic."
     },
     {
         "Sequence": 3,
-        "Message": "Remember to take your medications. They help even if you can't tell they are working. If you have any questions about your medication, you can talk to your healthcare provider."
+        "Message": "Are you feeling uneasy or sick. Most women do early in pregnancy. It is common in pregnancy. Eat healthy and take ample rest.  You can also try having ginger mint  or lemon tea. Visit the clinic if the symptoms persist."
     },
     {
         "Sequence": 4,
-        "Message": "Be a part of EVERY health decision for a healthy pregnancy, healthy child & healthy family. If you need help with any decisions about your pregnancy you can speak with your healthcare provider."
+        "Message": "Do you know your baby is the size of a lentil? Your baby has tiny hands, feet, and a beating heart."
     },
     {
         "Sequence": 5,
-        "Message": "Always wear loose clothes to ensure free movement of the baby and also free blood flow to the stomach.  Always wear flat shoes to provide you with good control over your body's increased size."
+        "Message": "Please take  regular checkups and make sure you and your baby stay healthy. Take iron and folic acid tablets each day during your pregnancy to help your baby grow well. You can get them free of cost from the clinic."
     },
     {
         "Sequence": 6,
-        "Message": "Deworming is recommended as an intervention for pregnant women to reduce the worm burden. If you have any questions about deworming, you can ask them by responding to this message for free "
+        "Message": "Are you feeling uneasy or experiencing spotting or light bleeding. It is common in pregnancy. Eat healthy and take ample rest.  If you have bleeding with pain it is worrying. Visit the clinic if the symptoms persist."
     },
     {
         "Sequence": 7,
-        "Message": "The health of the mother affects the health of the whole family. Discussing your pregnancy and health with your partner is important. Testing together and knowing each other's HIV status allows you to plan together and make joint informed decisions about your family's future.  If you are having trouble talking about any health topics at home we are here to support you."
+        "Message": "Eat healthy and drink plenty of water. Try to add lentils, beans, milk, yogurt, soya, green vegetables, and fruits to your meal every day.  Slowly increase the amount of food you eat as your stomach grows. This will help Your baby grow well.  You can also add meat and add eggs to your meal if you are a non-vegetarian."
     },
     {
         "Sequence": 8,
-        "Message": "It is recommended that babies be exclusively breastfed for the first six months of their lives to promote optimal growth and development. Breastfeeding offers numerous benefits for both mother and baby, including reducing the risk of infections and allergies in infants."
+        "Message": "Are you feeling uneasy , light bleeding about the time you would have had your period. It is common in pregnancy. Eat healthy and take ample rest.  If you have bleeding with pain it is worrying. Visit the clinic if the symptoms persist."
+    },
+    {
+        "Sequence": 9,
+        "Message": "The size of your baby is similar to a size of a grape and his bones are developing. You should take adequate amount of nutritional food and drink plenty of clean water as prescribed by the clinician."
+    },
+    {
+        "Sequence": 10,
+        "Message": "Please consult your health worker they may give you medicine, mosquito net to prevent malaria."
+    },
+    {
+        "Sequence": 11,
+        "Message": "You are 2 months pregnant. It is common to feel tired during pregnancy. Visit the clinic if the symptoms persist."
+    },
+    {
+        "Sequence": 12,
+        "Message": "The size of your baby is similar to a size of a date. You should take iron and folic acid as prescribed by the clinician."
+    },
+    {
+        "Sequence": 13,
+        "Message": "Please ask your health worker about Tetanus vaccine, iron level in blood tests, and HIV detection. If there is any history of TB, mention it to your health worker to get treatment. It will protect your baby from infection."
+    },
+    {
+        "Sequence": 14,
+        "Message": "Please take Iodine salt in your diet iron and folic acid tablets each day during your pregnancy to help your baby grow well. You can get them free of cost from the clinic."
+    },
+    {
+        "Sequence": 15,
+        "Message": "Your baby is the size of your thumb and floats inside your womb. It will protect  him from injuries at birth."
     }
 ]
