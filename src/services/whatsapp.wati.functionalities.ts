@@ -13,7 +13,7 @@ import { Message } from "./request.format/whatsapp.wati.message.format";
 import { getRequestOptions } from "../utils/helper";
 import { EntityManagerProvider } from "./entity.manager.provider.service";
 import { ChatMessage } from "../models/chat.message.model";
-import axios, {AxiosRequestConfig} from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import fs from 'fs';
 import FormData from 'form-data';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -68,7 +68,6 @@ export class WatiMessageFunctionalities implements getMessageFunctionalities {
         const mediaUrl = messageObj.getMediaPath();
         const filePath = await this.getWatiMedia('image', mediaUrl, '.jpg');
         const location = await this.awsS3manager.uploadFile(filePath);
-
 
         const messageToDialogflow = this.inputMessageFormat(messageObj);
         const text = messageObj.getText();
@@ -171,7 +170,7 @@ export class WatiMessageFunctionalities implements getMessageFunctionalities {
                 resolve(fileName);
             });
         });
-    }
+    };
 
     async commonVoiceAudiFormat(messageObj, mediaUrl) {
         const userId = messageObj.getUserId();

@@ -41,7 +41,7 @@ export class WhatsappWatiPostResponseFunctionalities {
                 }
             };
             const response = await axios.request(options).then(function (response){
-                return response;})
+                return response; })
                 .catch(function (error) {
                     console.log(error);
                 });
@@ -79,7 +79,7 @@ export class WhatsappWatiPostResponseFunctionalities {
         const postDataWati = {
             "body" : "",
         };
-        const buttons = await this.getButtonData(response_format, payload); 
+        const buttons = await this.getButtonData(response_format, payload);
         const message = this.messageTextAccordingToMessageType(response_format, payload, "interactive-buttons");
         const translatedText = await this.translateService.translateResponse([message], languageForSession);
         postDataWati["buttons"] = buttons;
@@ -109,7 +109,7 @@ export class WhatsappWatiPostResponseFunctionalities {
             let description_wati = "";
             if (lit.structValue.fields.description){
                 description_wati = lit.structValue.fields.description.stringValue;
-            } 
+            }
             if (lit.structValue.fields.id){
                 id_wati = lit.structValue.fields.id.stringValue;
             }
@@ -211,7 +211,7 @@ export class WhatsappWatiPostResponseFunctionalities {
 
         });
         return voiceRes;
-    }
+    };
 
     async createTemplateParams(payload) {
         const customParams = [];
@@ -276,6 +276,7 @@ export class WhatsappWatiPostResponseFunctionalities {
             } else if (custom_payload_type === "image") {
                 message = payload.fields.title.stringValue;
             } else {
+
                 //
             }
         } else {
@@ -335,6 +336,6 @@ export class WhatsappWatiPostResponseFunctionalities {
         const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
         const base64Data = Buffer.from(response.data, 'binary').toString('base64');
         return base64Data;
-    }
+    };
     
 }
