@@ -5,13 +5,8 @@ import { UserLanguage } from "./set.language";
 import { translateService } from "./translate.service";
 import { HandleMessagetypePayload } from "./handle.messagetype.payload";
 import { inject, Lifecycle, scoped } from "tsyringe";
-import needle from 'needle';
 import axios from 'axios';
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
-import { ChatMessage } from '../models/chat.message.model';
-import http from 'http';
-import fs from 'fs';
-import request from 'request';
 import stream from 'stream';
 import FormData from 'form-data';
 
@@ -132,57 +127,27 @@ export class WhatsappWatiPostResponseFunctionalities {
     };
 
     sendimageResponse = async (response_format:Iresponse, payload) => {
-        const endpoint = "sendSessionFile";
-        const baseUrl = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_BASE_URL");
-        const watiToken = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_TOKEN");
-        const phoneNumber = response_format.platformId;
-        let imageLink =  response_format.messageBody;
-        if (!imageLink) {
-            imageLink = payload.fields.url.stringValue;
-        }
-
-        const imageRes = await axios({
-            method       : 'get',
-            url          : imageLink,
-            responseType : 'arraybuffer'
-        }).then(async response => {
-            const bufferStream = new stream.PassThrough();
-            bufferStream.end(response.data);
-
-            const form = new FormData();
-            form.append('file', bufferStream, {
-                filename    : 'image.jpg',
-                contentType : 'image/jpeg',
-                knownLength : response.data.length
-            });
-            const url = `${baseUrl}/api/v1/${endpoint}/${phoneNumber}?caption=${response_format.messageText}`;
-            const options = {
-                method  : 'POST',
-                url     : url,
-                headers : {
-                    'content-type' : 'multipart/form-data; boundary=---011000010111000001101001',
-                    Authorization  : watiToken
-                },
-                data : form
-            };
-            const res = await axios.request(
-                options
-            );
-            return res;
-
-        });
+        const imageRes = await this.sendMediaMessage(response_format, payload, "image.jpg", "image/jpeg");
         return imageRes;
     };
 
     sendvoiceResponse = async (response_format:Iresponse, payload) => {
+        const voiceRes = await this.sendMediaMessage(response_format, payload, "voice.mp3", "audio/mpeg");
+        return voiceRes;
+    };
+
+    async sendMediaMessage(response_format, payload, fileName, contentType) {
         const endpoint = "sendSessionFile";
         const baseUrl = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_BASE_URL");
         const watiToken = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_TOKEN");
         const phoneNumber = response_format.platformId;
-        const voiceLink = response_format.messageBody;
-        const voiceRes = await axios({
+        let mediaLink =  response_format.messageBody;
+        if (!mediaLink) {
+            mediaLink = payload.fields.url.stringValue;
+        }
+        const response = await axios({
             method       : 'get',
-            url          : voiceLink,
+            url          : mediaLink,
             responseType : 'arraybuffer'
         }).then(async response => {
             const bufferStream = new stream.PassThrough();
@@ -190,8 +155,8 @@ export class WhatsappWatiPostResponseFunctionalities {
 
             const form = new FormData();
             form.append('file', bufferStream, {
-                filename    : 'voice.ogg',
-                contentType : 'audio/ogg',
+                filename    : fileName,
+                contentType : contentType,
                 knownLength : response.data.length
             });
             const url = `${baseUrl}/api/v1/${endpoint}/${phoneNumber}?caption=${response_format.messageText}`;
@@ -208,10 +173,9 @@ export class WhatsappWatiPostResponseFunctionalities {
                 options
             );
             return res;
-
         });
-        return voiceRes;
-    };
+        return response;
+    }
 
     async createTemplateParams(payload) {
         const customParams = [];
