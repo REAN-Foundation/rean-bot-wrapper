@@ -183,7 +183,7 @@ export class WhatsappWatiPostResponseFunctionalities {
         let i;
         for (i in payload.variables) {
             temp = {
-                "name"  : payload.variables[i].name,
+                "name"  : `${payload.templateName}_${i}`,
                 "value" : payload.variables[i].text
             };
             customParams.push(temp);

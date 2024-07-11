@@ -120,7 +120,7 @@ export class WatiMessageFunctionalities implements getMessageFunctionalities {
         const contextMessage = await chatMessageRepository.findOne({ where: { responseMessageID: contextId } });
         const buttonContext = JSON.parse(contextMessage.dataValues.imageContent);
         const intent = buttonContext.find(o => o.text === message);
-        messagetoDialogflow.intent = intent.id.parameters[0].payload;
+        messagetoDialogflow.intent = intent.id;
         return messagetoDialogflow;
     }
 
