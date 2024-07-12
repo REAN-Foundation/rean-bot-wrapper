@@ -13,6 +13,11 @@ import { Message } from "./request.format/whatsapp.wati.message.format";
 import { getRequestOptions } from "../utils/helper";
 import { EntityManagerProvider } from "./entity.manager.provider.service";
 import { ChatMessage } from "../models/chat.message.model";
+import axios, { AxiosRequestConfig } from 'axios';
+import fs from 'fs';
+import FormData from 'form-data';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const https = require('follow-redirects').https;
 
 @scoped(Lifecycle.ContainerScoped)
 export class WatiMessageFunctionalities implements getMessageFunctionalities {
@@ -47,17 +52,38 @@ export class WatiMessageFunctionalities implements getMessageFunctionalities {
 
     async voiceMessageFormat(messageObj: Message) {
 
-        // Method not implemented yet
+        const mediaUrl = messageObj.getMediaPath();
+        const filePath = await this.getWatiMedia('audio', mediaUrl, '.ogg');
+        return await this.commonVoiceAudiFormat(messageObj, filePath);
     }
 
     async audioMessageFormat(messageObj: Message) {
 
-        // Method not implemented yet
+        const mediaUrl = messageObj.getMediaPath();
+        const filePath = await this.getWatiMedia('audio', mediaUrl, '.ogg');
+        return await this.commonVoiceAudiFormat(messageObj, filePath);
     }
 
     async imageMessageFormat(messageObj: Message) {
+        const mediaUrl = messageObj.getMediaPath();
+        const filePath = await this.getWatiMedia('image', mediaUrl, '.jpg');
+        const location = await this.awsS3manager.uploadFile(filePath);
 
-        // Method not implemented yet
+        const messageToDialogflow = this.inputMessageFormat(messageObj);
+        const text = messageObj.getText();
+        const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(text);
+        messageToDialogflow.messageBody = text;
+        if (emojiFilteredMessage === "NegativeFeedback"){
+            messageToDialogflow.intent = "NegativeFeedback";
+        }
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const url = require('url');
+        const urlParse = url.parse(location);
+        const imageUrl = (urlParse.protocol + urlParse.hostname + urlParse.pathname);
+        messageToDialogflow.type = 'image';
+        messageToDialogflow.imageUrl = location;
+        messageToDialogflow.messageBody = imageUrl;
+        return messageToDialogflow;
     }
 
     async interactiveMessageFormat(messageObj: Message) {
@@ -94,7 +120,7 @@ export class WatiMessageFunctionalities implements getMessageFunctionalities {
         const contextMessage = await chatMessageRepository.findOne({ where: { responseMessageID: contextId } });
         const buttonContext = JSON.parse(contextMessage.dataValues.imageContent);
         const intent = buttonContext.find(o => o.text === message);
-        messagetoDialogflow.intent = intent.id.parameters[0].payload;
+        messagetoDialogflow.intent = intent.id;
         return messagetoDialogflow;
     }
 
@@ -115,6 +141,59 @@ export class WatiMessageFunctionalities implements getMessageFunctionalities {
             contextId         : messageObj.getContextId()
         };
         return messagetoDialogflow;
+    }
+
+    getWatiMedia = async (type, mediaPath, extension) => {
+        const watiToken = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_TOKEN");
+        const baseUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_BASE_URL");
+        const fileName = `${type}/` + Date.now() + `${extension}`;
+        const writer = fs.createWriteStream(fileName);
+        const data = new FormData();
+        data.append('fileName', mediaPath);
+        const options: AxiosRequestConfig = {
+            method        : "GET",
+            maxBodyLength : Infinity,
+            url           : `${baseUrl}/api/v1/getMedia`,
+            headers       : {
+                Authorization : `${watiToken}`,
+                ...data.getHeaders()
+            },
+            data         : data,
+            responseType : 'stream',
+        };
+        const response = await axios.request(options);
+
+        response.data.pipe(writer);
+
+        return new Promise((resolve, reject) => {
+            writer.on('finish', () => {
+                resolve(fileName);
+            });
+        });
+    };
+
+    async commonVoiceAudiFormat(messageObj, mediaUrl) {
+        const userId = messageObj.getUserId();
+        const preferredLanguage = await this.userLanguage.getPreferredLanguageofSession(userId);
+        const convertedToText = await this.speechtotext.SendSpeechRequest(mediaUrl, "whatsapp", preferredLanguage);
+        if (preferredLanguage !== 'null') {
+            if (convertedToText) {
+                const messagetoDialogflow = this.inputMessageFormat(messageObj);
+                messagetoDialogflow.messageBody = String(convertedToText);
+                messagetoDialogflow.type = 'voice';
+                return messagetoDialogflow;
+            } else {
+                const messageToDialogflow = this.inputMessageFormat(messageObj);
+                messageToDialogflow.messageBody = " ";
+                messageToDialogflow.type = 'text';
+                return messageToDialogflow;
+            }
+        } else {
+            const messageToDialogflow = this.inputMessageFormat(messageObj);
+            messageToDialogflow.messageBody = "Need to set language";
+            messageToDialogflow.type = 'text';
+            return messageToDialogflow;
+        }
     }
     
 }

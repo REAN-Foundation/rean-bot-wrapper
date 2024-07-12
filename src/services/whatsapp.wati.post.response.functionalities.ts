@@ -5,10 +5,10 @@ import { UserLanguage } from "./set.language";
 import { translateService } from "./translate.service";
 import { HandleMessagetypePayload } from "./handle.messagetype.payload";
 import { inject, Lifecycle, scoped } from "tsyringe";
-import needle from 'needle';
 import axios from 'axios';
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
-import { ChatMessage } from '../models/chat.message.model';
+import stream from 'stream';
+import FormData from 'form-data';
 
 @scoped(Lifecycle.ContainerScoped)
 export class WhatsappWatiPostResponseFunctionalities {
@@ -36,7 +36,7 @@ export class WhatsappWatiPostResponseFunctionalities {
                 }
             };
             const response = await axios.request(options).then(function (response){
-                return response;})
+                return response; })
                 .catch(function (error) {
                     console.log(error);
                 });
@@ -74,7 +74,7 @@ export class WhatsappWatiPostResponseFunctionalities {
         const postDataWati = {
             "body" : "",
         };
-        const buttons = await this.getButtonData(response_format, payload); 
+        const buttons = await this.getButtonData(response_format, payload);
         const message = this.messageTextAccordingToMessageType(response_format, payload, "interactive-buttons");
         const translatedText = await this.translateService.translateResponse([message], languageForSession);
         postDataWati["buttons"] = buttons;
@@ -104,7 +104,7 @@ export class WhatsappWatiPostResponseFunctionalities {
             let description_wati = "";
             if (lit.structValue.fields.description){
                 description_wati = lit.structValue.fields.description.stringValue;
-            } 
+            }
             if (lit.structValue.fields.id){
                 id_wati = lit.structValue.fields.id.stringValue;
             }
@@ -126,13 +126,64 @@ export class WhatsappWatiPostResponseFunctionalities {
         return response;
     };
 
+    sendimageResponse = async (response_format:Iresponse, payload) => {
+        const imageRes = await this.sendMediaMessage(response_format, payload, "image.jpg", "image/jpeg");
+        return imageRes;
+    };
+
+    sendvoiceResponse = async (response_format:Iresponse, payload) => {
+        const voiceRes = await this.sendMediaMessage(response_format, payload, "voice.mp3", "audio/mpeg");
+        return voiceRes;
+    };
+
+    async sendMediaMessage(response_format, payload, fileName, contentType) {
+        const endpoint = "sendSessionFile";
+        const baseUrl = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_BASE_URL");
+        const watiToken = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_TOKEN");
+        const phoneNumber = response_format.platformId;
+        let mediaLink =  response_format.messageBody;
+        if (!mediaLink) {
+            mediaLink = payload.fields.url.stringValue;
+        }
+        const response = await axios({
+            method       : 'get',
+            url          : mediaLink,
+            responseType : 'arraybuffer'
+        }).then(async response => {
+            const bufferStream = new stream.PassThrough();
+            bufferStream.end(response.data);
+
+            const form = new FormData();
+            form.append('file', bufferStream, {
+                filename    : fileName,
+                contentType : contentType,
+                knownLength : response.data.length
+            });
+            const url = `${baseUrl}/api/v1/${endpoint}/${phoneNumber}?caption=${response_format.messageText}`;
+            const options = {
+                method  : 'POST',
+                url     : url,
+                headers : {
+                    'content-type' : 'multipart/form-data; boundary=---011000010111000001101001',
+                    Authorization  : watiToken
+                },
+                data : form
+            };
+            const res = await axios.request(
+                options
+            );
+            return res;
+        });
+        return response;
+    }
+
     async createTemplateParams(payload) {
         const customParams = [];
         let temp;
         let i;
         for (i in payload.variables) {
             temp = {
-                "name"  : payload.variables[i].name,
+                "name"  : `${payload.templateName}_${i}`,
                 "value" : payload.variables[i].text
             };
             customParams.push(temp);
@@ -189,6 +240,7 @@ export class WhatsappWatiPostResponseFunctionalities {
             } else if (custom_payload_type === "image") {
                 message = payload.fields.title.stringValue;
             } else {
+
                 //
             }
         } else {
@@ -242,6 +294,12 @@ export class WhatsappWatiPostResponseFunctionalities {
             buttons.push(tempObject);
         }
         return buttons;
+    };
+
+    fetchImageAsBase64 = async (imageUrl) => {
+        const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+        const base64Data = Buffer.from(response.data, 'binary').toString('base64');
+        return base64Data;
     };
     
 }

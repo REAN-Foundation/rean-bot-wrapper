@@ -11,7 +11,7 @@ import { SlackMessageService } from "./slack.message.service";
 import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
 import { translateService } from './translate.service';
-import { sendApiButtonService, templateButtonService } from './whatsappmeta.button.service';
+import { sendApiButtonService, templateButtonService, watiTemplateButtonService } from './whatsappmeta.button.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { EntityManagerProvider } from './entity.manager.provider.service';
 import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
@@ -181,6 +181,7 @@ export class MessageFlow{
         
         //Add a check if user not found dont check
         const personName = personContactList.username;
+        const channel = personContactList.platform;
 
         if (msg.type === "template") {
             payload["templateName"] = msg.templateName;
@@ -235,7 +236,12 @@ export class MessageFlow{
         }
         
         if (msg.message.ButtonsIds != null) {
-            payload["buttonIds"] = await templateButtonService(msg.message.ButtonsIds);
+            if (channel === "whatsappWati"){
+                payload["buttonIds"] = await watiTemplateButtonService(msg.message.ButtonsIds);
+            } else {
+                payload["buttonIds"] = await templateButtonService(msg.message.ButtonsIds);
+            }
+
         }
         const response_format = await platformMessageService.createFinalMessageFromHumanhandOver(msg);
         const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);

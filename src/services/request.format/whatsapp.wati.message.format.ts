@@ -94,6 +94,12 @@ export class Message implements IWhatsappRequestMessageEntities {
         return interactiveList;
     }
 
+    getMediaPath() {
+        const mediaUrl = this.list.data;
+        const mediaPath = mediaUrl.split('=')[1];
+        return mediaPath;
+    }
+
     getChannel() {
         return this.list.channel;
     }
