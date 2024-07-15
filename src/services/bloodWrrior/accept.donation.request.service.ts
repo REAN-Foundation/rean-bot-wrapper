@@ -1,7 +1,7 @@
 import { Logger } from '../../common/logger';
 import { NeedleService } from '../needle.service';
 import { BloodWarriorCommonService } from './common.service';
-import { templateButtonService, whatsappMetaButtonService } from '../whatsappmeta.button.service';
+import { templateButtonService } from '../whatsappmeta.button.service';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
