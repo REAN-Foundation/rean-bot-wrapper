@@ -32,7 +32,7 @@ export class CountryCodeService {
 
     public async formatPhoneNumber(phone: string): Promise<string> {
         const countryName = await this.getCountryCode(phone);
-        const number = this.phoneUtil.parseAndKeepRawInput(phone, countryName);
+        const number = await this.phoneUtil.parseAndKeepRawInput(phone, countryName);
         const countryCode = await number.getCountryCode();
         const phoneNumber = phone.slice(countryCode.toString().length);
         const formattedPhoneNummber = `+${countryCode}-${phoneNumber }`;

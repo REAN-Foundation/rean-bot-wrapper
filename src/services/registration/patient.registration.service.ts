@@ -32,7 +32,7 @@ export class Registration{
     {   let obj = null;
         if (creationMethod === "phoneNumber"){
             obj = {
-                Phone           : this.countryCodeService.formatPhoneNumber(UserId),
+                Phone           : await this.countryCodeService.formatPhoneNumber(UserId),
                 Password        : process.env.USER_REGISTRATION_PASSWORD,
                 FirstName       : platformUserName,
                 DefaultTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
