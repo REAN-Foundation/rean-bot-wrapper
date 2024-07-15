@@ -2,10 +2,9 @@ import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../common/logger';
 import { NeedleService } from '../needle.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { GetPatientInfoService } from '../support.app.service';
-import { AppointmentReminderService } from './appointment.reminder.service';
 import { DateTime } from 'luxon';
 import cityTimezones from 'city-timezones';
+import { Registration } from '../registration/patient.registration.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ReminderRegistrationService {
@@ -13,9 +12,8 @@ export class ReminderRegistrationService {
     private _platformMessageService :  platformServiceInterface = null;
 
     constructor(
-        @inject(AppointmentReminderService) private appointmentReminderService?: AppointmentReminderService,
         @inject(NeedleService) private needleService?: NeedleService,
-        @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,
+        @inject(Registration) private registration?: Registration,
     ){}
 
     async setUserTimeZone (eventObj) {
@@ -26,7 +24,7 @@ export class ReminderRegistrationService {
             let dffMessage = null;
             const channel = eventObj.body.originalDetectIntentRequest.payload.source;
 
-            const patientUserId = await this.getPatientInfoService.getPatientUserId(channel,
+            const patientUserId = await this.registration.getPatientUserId(channel,
                 personPhoneNumber, personName);
 
             const cityLookup = cityTimezones.lookupViaCity(cityName);
