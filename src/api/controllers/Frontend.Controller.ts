@@ -1,5 +1,5 @@
 import { ResponseHandler } from '../../utils/response.handler';
-import { autoInjectable, inject, Lifecycle, scoped } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { elasticsearchUtilities } from '../../utils/elasticsearch.utility';
 
 @scoped(Lifecycle.ContainerScoped)

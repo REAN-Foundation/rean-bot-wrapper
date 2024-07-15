@@ -25,6 +25,7 @@ export class ScheduleDonationTakeValuesService {
                 const phoneNumber = eventObj.body.queryResult.parameters.phoneNumber;
                 const donation_Date = eventObj.body.queryResult.parameters.donation_Date;
                 const location = eventObj.body.queryResult.parameters.location;
+                const channel = eventObj.body.originalDetectIntentRequest.payload;
                 console.log(`TAKE value phonenumber is ${phoneNumber}`);
                 let result = null;
                 let dffMessage = "";
@@ -66,7 +67,7 @@ export class ScheduleDonationTakeValuesService {
                     //Fetch donation reminders for donors
                     const nextDonationDate = new Date(donation_Date.split("T")[0]);
                     // eslint-disable-next-line max-len
-                    await this.bloodWarriorCommonService.fetchDonorDonationReminders(patientDonors.DonorUserId,nextDonationDate);
+                    await this.bloodWarriorCommonService.fetchDonorDonationReminders(patientDonors.DonorUserId,nextDonationDate, channel);
     
                     //Message sent to patient
                     const heading = `Hi ${patient.User.Person.DisplayName}, `;

@@ -127,7 +127,7 @@ export class ChangeTransfusionDateService {
     async sendPatientListToVolunteer (body) {
 
         let result = null;
-        const apiURL = `clinical/patient-donors/search?volunteerUserId=${body.Volunteer.UserId}`;
+        const apiURL = `clinical/patient-donors/search?itemsPerPage=100&volunteerUserId=${body.Volunteer.UserId}`;
         result = await this.needleService.needleRequestForREAN("get", apiURL);
         const patientList = this.extractUniquePatientInfo(result);
 
@@ -169,7 +169,7 @@ export class ChangeTransfusionDateService {
                 BloodTransfusionDate : transfusionDate.split("T")[0]
             };
             await this.needleService.needleRequestForREAN("put", apiURL, null, obj);
-            dffMessage = `Date ${transfusionDate.split("T")[0]} updated Successfully. We will remind you before expected transfusion`;
+            dffMessage = `Date ${transfusionDate.split("T")[0]} updated Successfully. We will remind the patient before expected transfusion date.`;
 
             //Load reminders for patient
             const body : QueueDoaminModel =  {

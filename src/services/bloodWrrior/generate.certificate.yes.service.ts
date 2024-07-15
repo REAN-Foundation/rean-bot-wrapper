@@ -12,6 +12,8 @@ import { DateStringFormat, DurationType, TimeHelper } from '../../common/time.he
 import { AwsS3manager } from '../aws.file.upload.service';
 import { generatePdfCertificate } from './generate.pdf.certificate';
 import { CacheMemory } from '../cache.memory.service';
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
+import { GetPatientInfoService } from '../support.app.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class GenerateCertificateYesService {
@@ -21,8 +23,11 @@ export class GenerateCertificateYesService {
     constructor(
         @inject(BloodWarriorCommonService) private bloodWarriorCommonService?: BloodWarriorCommonService,
         @inject(RaiseDonationRequestService) private raiseDonationRequestService?: RaiseDonationRequestService,
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(NeedleService) private needleService?: NeedleService,
         @inject(AwsS3manager) private awsS3manager?: AwsS3manager,
+        @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,
     ) {}
 
     async sendUserMessage (eventObj) {
@@ -100,7 +105,11 @@ export class GenerateCertificateYesService {
                     type : "text",
                     text : nextDonationDate
                 }];
-            cirtificatePayload["headers"] = { link: file_url };
+            cirtificatePayload["headers"] = {
+                "type"     : "document",
+                "document" : {
+                    "link" : file_url
+                } };
             cirtificatePayload["templateName"] = "generate_certificate_yes_donor_1";
             cirtificatePayload["languageForSession"] = "en";
             response_format.message_type = "template";
@@ -110,10 +119,12 @@ export class GenerateCertificateYesService {
             const reminderDate = TimeHelper.addDuration(new Date(body.Donor.LastDonationDate), 5, DurationType.Day);
             const apiURL = `care-plans/patients/${body.PatientUserId}/enroll`;
             const obj = {
-                Provider  : "REAN_BW",
-                PlanName  : "Patient donation confirmation message",
-                PlanCode  : "Patient-Donation-Confirmation",
-                StartDate : reminderDate.toISOString().split('T')[0]
+                Provider   : "REAN_BW",
+                PlanName   : "Patient donation confirmation message",
+                PlanCode   : "Patient-Donation-Confirmation",
+                StartDate  : reminderDate.toISOString().split('T')[0],
+                Channel    : this.getPatientInfoService.getReminderType(payload.source),
+                TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
             };
             await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
 

@@ -98,6 +98,7 @@ export class ClickUpMessageService implements platformServiceInterface {
     }
 
     async eventComment(requestBody,tag) {
+
         try {
             let platform = null;
             let userId = null;
@@ -122,10 +123,12 @@ export class ClickUpMessageService implements platformServiceInterface {
             const filterText = (requestBody.history_items[0].comment.text_content).replace(tag, '');
             const textToUser = `Response from Expert : ${filterText}`;
             console.log("textToUser", textToUser);
+
             await this.slackClickupCommonFunctions.sendCustomMessage(platform, userId, textToUser);
         } catch (error) {
             console.error('Error processing request:', error);
         } }
+
 
     async eventStatusUpdated(requestBody) {
         const contactMail = "example@gmail.com";

@@ -11,7 +11,7 @@ import { SlackMessageService } from "./slack.message.service";
 import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
 import { translateService } from './translate.service';
-import { sendApiButtonService, templateButtonService } from './whatsappmeta.button.service';
+import { sendApiButtonService, templateButtonService, watiTemplateButtonService } from './whatsappmeta.button.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { EntityManagerProvider } from './entity.manager.provider.service';
 import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
@@ -181,6 +181,7 @@ export class MessageFlow{
         
         //Add a check if user not found dont check
         const personName = personContactList.username;
+        const channel = personContactList.platform;
 
         if (msg.type === "template") {
             payload["templateName"] = msg.templateName;
@@ -235,7 +236,12 @@ export class MessageFlow{
         }
         
         if (msg.message.ButtonsIds != null) {
-            payload["buttonIds"] = await templateButtonService(msg.message.ButtonsIds);
+            if (channel === "whatsappWati"){
+                payload["buttonIds"] = await watiTemplateButtonService(msg.message.ButtonsIds);
+            } else {
+                payload["buttonIds"] = await templateButtonService(msg.message.ButtonsIds);
+            }
+
         }
         const response_format = await platformMessageService.createFinalMessageFromHumanhandOver(msg);
         const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
@@ -273,14 +279,15 @@ export class MessageFlow{
             const AssessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
             await AssessmentSessionRepo.create(assessmentSession);
         }
-        if (msg.provider === "REAN_BOT" && message_to_platform.statusCode === 200) {
+        if (msg.provider === "REAN_BOT" || msg.provider === "GGHN" && message_to_platform.statusCode === 200) {
             const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
             let todayDate = new Date().toISOString()
                 .split('T')[0];
             todayDate = Helper.removeLeadingZerosFromDay(todayDate);
+            const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
             const messageId = await platformMessageService.getMessageIdFromResponse(message_to_platform);
             const phoneNumber = Helper.formatPhoneForDocProcessor(msg.userId);
-            const apiUrl = `${docProcessBaseURL}appointment-schedules/gmu/appointment-status/${phoneNumber}/days/${todayDate}`;
+            const apiUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
             const headers = { headers : {
                 'Content-Type' : 'application/json',
                 Accept         : 'application/json',
