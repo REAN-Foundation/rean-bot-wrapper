@@ -38,7 +38,7 @@ export class RegistrationService {
 
             const patientDomainModel = {
                 Phone      : phoneNumber,
-                Password   : "REAN@DMC",
+                Password   : process.env.USER_REGISTRATION_PASSWORD,
                 FirstName  : name.split(" ")[0],
                 LastName   : name.split(" ")[1],
                 Gender     : "Female",

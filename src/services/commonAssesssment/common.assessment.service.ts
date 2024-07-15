@@ -12,7 +12,7 @@ import { ServeAssessmentService } from '../maternalCareplan/serveAssessment/serv
 import { CacheMemory } from '../cache.memory.service';
 import { ChatMessage } from '../../models/chat.message.model';
 import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
-import { GetPatientInfoService } from '../support.app.service';
+import { Registration } from '../registration/patient.registration.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class NoBabyMovementAssessmentService {
@@ -21,10 +21,10 @@ export class NoBabyMovementAssessmentService {
 
     constructor(
         @inject(NeedleService) private needleService?: NeedleService,
-        @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,
         @inject(ServeAssessmentService) private serveAssessmentService?: ServeAssessmentService,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(Registration) private registration?: Registration,
     ){}
     
     async createAssessment (eventObj, assessmentCode) {
@@ -32,7 +32,7 @@ export class NoBabyMovementAssessmentService {
             const channel = eventObj.body.originalDetectIntentRequest.payload.source;
             const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
             const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
-            const patientUserId = await this.getPatientInfoService.getPatientUserId(channel,
+            const patientUserId = await this.registration.getPatientUserId(channel,
                 personPhoneNumber, personName);
 
             // const assessmentId = userTask.Action.Assessment.id;
