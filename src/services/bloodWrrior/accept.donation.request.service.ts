@@ -1,12 +1,17 @@
 import { Logger } from '../../common/logger';
 import { NeedleService } from '../needle.service';
 import { BloodWarriorCommonService } from './common.service';
-import { whatsappMetaButtonService } from '../whatsappmeta.button.service';
+import { templateButtonService, whatsappMetaButtonService } from '../whatsappmeta.button.service';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
+import { platformServiceInterface } from '../../refactor/interface/platform.interface';
+import { commonResponseMessageFormat } from '../common.response.format.object';
+import { Iresponse } from '../../refactor/interface/message.interface';
 
 @scoped(Lifecycle.ContainerScoped)
 export class AcceptDonationRequestService {
+
+    private _platformMessageService :  platformServiceInterface = null;
 
     constructor(
         @inject(BloodWarriorCommonService) private bloodWarriorCommonService?: BloodWarriorCommonService,
@@ -22,8 +27,7 @@ export class AcceptDonationRequestService {
             const apiURL = `clinical/donation-record/search?donorUserId=${donor.UserId}`;
             const requestBody = await this.needleService.needleRequestForREAN("get", apiURL);
             const donationRecord = requestBody.Data.Donation.Items[0];
-            const buttons = await whatsappMetaButtonService("Yes", "Checklist_Yes","No", "Checklist_No");
-            const dffMessage = `Thank you for accepting the request. \n\nPlease go through the checklist and confirm if you are eligible to donate. https://drive.google.com/file/d/1-g_GTVZcjO0GSkaAK0IMXZHHGLlKpMxk/view \nRegards \nTeam Blood Warriors`;
+            const dffMessage = `Thank you for accepting the request.`;
 
             const body : QueueDoaminModel =  {
                 Intent : "Update_Accept_Donation_Flags",
@@ -34,7 +38,7 @@ export class AcceptDonationRequestService {
                 }
             };
             FireAndForgetService.enqueue(body);
-            return ( { message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }, buttons] } });
+            return ( { message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } });
 
         } catch (error) {
             Logger.instance()
@@ -61,6 +65,24 @@ export class AcceptDonationRequestService {
             };
             console.log(`Update donation communication details ${JSON.stringify(bodyObj)}`);
             await this.bloodWarriorCommonService.updatePatientCommunicationFlags(bodyObj);
+
+            const response_format: Iresponse = commonResponseMessageFormat();
+            const payload = body.EventObj.body.originalDetectIntentRequest.payload;
+            response_format.platform = payload.source;
+            response_format.sessionId = body.EventObj.body.originalDetectIntentRequest.payload.userId;
+            this._platformMessageService = body.EventObj.container.resolve(payload.source);
+            const templatePayload = {};
+            templatePayload["variables"] = [];
+            templatePayload["headers"] = {
+                "type"  : "image",
+                "image" : {
+                    "link" : "https://d3uqieugp2i3ic.cloudfront.net/blood_warriors/Blood%20Donation%20Checklist_image.jpg"
+                } };
+            templatePayload["buttonIds"] = await templateButtonService(["Checklist_Yes","Checklist_No"]);
+            templatePayload["templateName"] = "donor_checklist_image";
+            templatePayload["languageForSession"] = "en";
+            response_format.message_type = "template";
+            await this._platformMessageService.SendMediaMessage(response_format, templatePayload);
 
         } catch (error) {
             Logger.instance()
