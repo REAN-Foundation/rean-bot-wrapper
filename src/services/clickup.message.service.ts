@@ -98,22 +98,34 @@ export class ClickUpMessageService implements platformServiceInterface {
     }
 
     async eventComment(requestBody,tag) {
-
         try {
-            const contactList =
-            (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
-            let personContactList = await contactList.findOne({ where: { cmrCaseTaskID:  requestBody.task_id } });
-            if (!personContactList){
-                personContactList = await contactList.findOne({ where: { cmrChatTaskID:  requestBody.task_id } });
+            let platform = null;
+            let userId = null;
+            const entityManager = await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService);
+            const contactList = entityManager.getRepository(ContactList);
+        
+            const personContactList = await contactList.findOne({ where: { cmrCaseTaskID: requestBody.task_id } }) ||
+                                    await contactList.findOne({ where: { cmrChatTaskID: requestBody.task_id } });
+            if (!personContactList) {
+                const chatMessageRepository = entityManager.getRepository(ChatMessage);
+                const dataValues = await chatMessageRepository.findOne({ where: { supportChannelTaskID: requestBody.task_id } });
+                if (dataValues) {
+                    platform = dataValues.platform;
+                    userId = dataValues.userPlatformID;
+                } else {
+                    console.log('User not found');
+                }
+            } else {
+                platform = personContactList.dataValues.platform;
+                userId = personContactList.dataValues.mobileNumber;
             }
             const filterText = (requestBody.history_items[0].comment.text_content).replace(tag, '');
             const textToUser = `Response from Expert : ${filterText}`;
             console.log("textToUser", textToUser);
-            await this.slackClickupCommonFunctions.sendCustomMessage(personContactList.dataValues.platform, personContactList.dataValues.mobileNumber, textToUser);
-    
+            await this.slackClickupCommonFunctions.sendCustomMessage(platform, userId, textToUser);
         } catch (error) {
-            console.log(error);
-        }    }
+            console.error('Error processing request:', error);
+        } }
 
     async eventStatusUpdated(requestBody) {
         const contactMail = "example@gmail.com";

@@ -60,6 +60,8 @@ export class ClickUpTask{
         }
         const response = await needle("post", createTaskUrl, obj, options);
         const taskID = response.body.id;
+        // eslint-disable-next-line max-len
+        
         return taskID;
     }
 
