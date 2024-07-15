@@ -105,7 +105,11 @@ export class GenerateCertificateYesService {
                     type : "text",
                     text : nextDonationDate
                 }];
-            cirtificatePayload["headers"] = { link: file_url };
+            cirtificatePayload["headers"] = {
+                "type"     : "document",
+                "document" : {
+                    "link" : file_url
+                } };
             cirtificatePayload["templateName"] = "generate_certificate_yes_donor_1";
             cirtificatePayload["languageForSession"] = "en";
             response_format.message_type = "template";
