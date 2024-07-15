@@ -2,12 +2,14 @@ import 'reflect-metadata';
 import { DependencyContainer } from 'tsyringe';
 import { AuthInjector } from '../auth/auth.injector';
 import { WhatsappMetaMessageService } from '../services/whatsapp.meta.message.service';
+import { WhatsappWatiMessageService } from '../services/whatsapp.wati.message.service';
 import { WhatsappMessageService } from '../services/whatsapp.message.service';
 import { TelegramMessageService as telegramPlatformservice } from '../services/telegram.message.service';
 import { platformMessageService as rean_SUPPORT_Platformservice } from '../services/app.support.service';
 import { snehaMessagePlatformService as sneha_SUPPORT_Platformservice } from '../services/sneha.support.service';
 import { TelegramAuthenticator } from '../services/clientAuthenticator/telegram.authenticator';
 import { WhatsappAuthenticator } from '../services/clientAuthenticator/whatsapp.authenticator';
+import { WatiWhatsappAuthenticator } from '../services/clientAuthenticator/wati.whatsapp.authenticator';
 import { ReanAppAuthenticator } from '../services/clientAuthenticator/reanapp.authenticator';
 import { SlackAuthenticator } from '../services/clientAuthenticator/slack.authenticator.servie';
 import { SlackMessageService } from '../services/slack.message.service';
@@ -29,6 +31,7 @@ export class Injector {
         container.register('whatsapp', WhatsappMessageService);
         container.register('clickup', ClickUpMessageService);
         container.register('whatsappMeta', WhatsappMetaMessageService);
+        container.register('whatsappWati', WhatsappWatiMessageService);
         container.register('telegram', telegramPlatformservice);
         container.register('REAN_SUPPORT', rean_SUPPORT_Platformservice);
         container.register('SNEHA_SUPPORT', sneha_SUPPORT_Platformservice);
@@ -43,6 +46,7 @@ export class Injector {
         container.register('mockChannel', MockMessageService);
         container.register('clickup.authenticator', ClickUpAuthenticator);
         container.register('mockChannel.authenticator', MockChannelAuthenticator);
+        container.register('whatsappWati.authenticator', WatiWhatsappAuthenticator);
 
     }
 

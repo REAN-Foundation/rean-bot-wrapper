@@ -32,6 +32,8 @@ export interface Iresponse{
     messageImageUrl: string;
     messageImageCaption: string;
     similarDoc : string;
+    platformId: string;
+    buttonMetaData?: any;
 }
 
 export interface handlerequest{

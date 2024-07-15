@@ -122,6 +122,15 @@ export const templateButtonService = async (buttonId) => {
     return payloadButtons;
 };
 
+export const watiTemplateButtonService = async (buttonId) => {
+    const payloadButtons = [
+        buttonId[0],
+        buttonId[1]
+    ];
+
+    return payloadButtons;
+};
+
 export const sendApiInteractiveListService = async (buttons) => {
     const objects = [];
     for (let i = 0; i < buttons.length; i += 2) {
