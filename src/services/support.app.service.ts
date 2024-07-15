@@ -256,50 +256,6 @@ export class GetPatientInfoService{
         }
     }
 
-    public async getPatientUserId(channel: any, personPhoneNumber: string, personName: string) {
-        let patientUserId = null;
-        if (channel === "telegram" || channel === "Telegram") {
-            const apiURL = `patients/byPhone?userName=${personPhoneNumber}`;
-            const result = await this.needleService.needleRequestForREAN("get", apiURL);
-            if (result.Data.Patients.Items.length === 0) {
-                const obj = {
-                    Phone           : `+91-${this.generateRandomPhoneNumber()}`,
-                    Password        : "Test@123",
-                    FirstName       : personName,
-                    UserName        : personPhoneNumber,
-                    TelegramChatId  : personPhoneNumber,
-                    DefaultTimeZone : this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
-                    CurrentTimeZone : this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
-                    TenantCode      : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
-                };
-                const apiURL = `patients`;
-                const response = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
-                patientUserId = response.Data.Patient.UserId;
-            } else {
-                patientUserId = result.Data.Patients.Items[0].UserId;
-            }
-        } else if (channel === "whatsappMeta" || channel === "whatsappWati" || channel === "MockChannel") {
-            const apiURL = `patients/byPhone?phone=${encodeURIComponent(this.convertPhoneNumber(personPhoneNumber))}`;
-            const result = await this.needleService.needleRequestForREAN("get", apiURL);
-            if (result.Data.Patients.Items.length === 0) {
-                const obj = {
-                    Phone           : this.convertPhoneNumber(personPhoneNumber),
-                    Password        : "Test@123",
-                    FirstName       : personName,
-                    DefaultTimeZone : this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
-                    CurrentTimeZone : this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
-                    TenantCode      : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
-                };
-                const apiURL = `patients`;
-                const response = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
-                patientUserId = response.Data.Patient.UserId;
-            } else {
-                patientUserId = result.Data.Patients.Items[0].UserId;
-            }
-        }
-        return patientUserId;
-    }
-
     generateRandomPhoneNumber(): string {
         const now = new Date();
         const seed = now.getTime();

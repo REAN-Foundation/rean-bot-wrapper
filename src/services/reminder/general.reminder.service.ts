@@ -7,10 +7,10 @@ import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.servi
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { GetPatientInfoService } from '../support.app.service';
 import { DateStringFormat, DurationType, TimeHelper } from '../../common/time.helper';
-import { OpenAIResponseService } from '../openai.response.service';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 import { CacheMemory } from '../cache.memory.service';
 import { ReminderBody, ReminderDomainModel, ReminderType, RepeatAfterEveryNUnit } from '../../domain.types/reminder/reminder.domain.model';
+import { Registration } from '../registration/patient.registration.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class GeneralReminderService {
@@ -21,8 +21,8 @@ export class GeneralReminderService {
         @inject(NeedleService) private needleService?: NeedleService,
         @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,
         @inject(dialoflowMessageFormatting) private dialoflowMessageFormattingService?: dialoflowMessageFormatting,
-        @inject(OpenAIResponseService) private openAIResponseService?: OpenAIResponseService,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(Registration) private registration?: Registration,
 
     ){}
 
@@ -62,7 +62,7 @@ export class GeneralReminderService {
             const phoneNumber = await this.needleService.getPhoneNumber(eventObj);
 
             // extract patient data and set to catch memory
-            const patientUserId = await this.getPatientInfoService.getPatientUserId(channel,
+            const patientUserId = await this.registration.getPatientUserId(channel,
                 personPhoneNumber, personName);
             jsonFormat.PatientUserId = patientUserId;
             jsonFormat.TaskName = `${eventName} reminder`;

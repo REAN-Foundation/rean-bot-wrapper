@@ -33,7 +33,7 @@ export class Registration{
         if (creationMethod === "phoneNumber"){
             obj = {
                 Phone           : this.countryCodeService.formatPhoneNumber(UserId),
-                Password        : process.env.userregistrationpassword,
+                Password        : process.env.USER_REGISTRATION_PASSWORD,
                 FirstName       : platformUserName,
                 DefaultTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
                 CurrentTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
@@ -43,7 +43,7 @@ export class Registration{
         else if (creationMethod === "userName")
         {
             obj = {
-                Password        : process.env.userregistrationpassword,
+                Password        : process.env.USER_REGISTRATION_PASSWORD,
                 FirstName       : platformUserName,
                 UserName        : UserId,
                 TelegramChatId  : UserId,

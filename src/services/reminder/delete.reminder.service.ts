@@ -1,14 +1,14 @@
 import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../common/logger';
 import { NeedleService } from '../needle.service';
-import { GetPatientInfoService } from '../support.app.service';
+import { Registration } from '../registration/patient.registration.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class DeleteReminderService {
 
     constructor(
         @inject(NeedleService) private needleService?: NeedleService,
-        @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,
+        @inject(Registration) private registration?: Registration,
 
     ){}
 
@@ -18,7 +18,7 @@ export class DeleteReminderService {
             const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
             const channelName = eventObj.body.originalDetectIntentRequest.payload.source;
 
-            const patientUserId = await this.getPatientInfoService.getPatientUserId(channelName,
+            const patientUserId = await this.registration.getPatientUserId(channelName,
                 phoneNumber, personName);
 
             let message = null;
