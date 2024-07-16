@@ -30,7 +30,10 @@ export class AppointmentUserReplyService {
                 .split('T')[0];
             todayDate = Helper.removeLeadingZerosFromDay(todayDate);
             const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-            const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
+            
+            // eslint-disable-next-line max-len
+            // const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
+            const getUrl = `${docProcessBaseURL}appointments/tests/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
             const respnse =  await needle("get", getUrl);
             if (respnse.body.message){
                 msg = "Sorry to inform you the appointment passed.";
