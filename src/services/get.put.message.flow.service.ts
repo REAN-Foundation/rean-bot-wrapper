@@ -287,7 +287,9 @@ export class MessageFlow{
             const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
             const messageId = await platformMessageService.getMessageIdFromResponse(message_to_platform);
             const phoneNumber = Helper.formatPhoneForDocProcessor(msg.userId);
-            const apiUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
+            
+            // const apiUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
+            const apiUrl = `${docProcessBaseURL}appointments/tests/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
             const headers = { headers : {
                 'Content-Type' : 'application/json',
                 Accept         : 'application/json',
