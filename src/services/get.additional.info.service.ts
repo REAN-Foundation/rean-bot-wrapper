@@ -92,7 +92,7 @@ export class getAdditionalInfoSevice {
         let message = null;
         if (response.body.patient_details){
             const responseObject = await this.formulate_LVPEI_ResposeObj(response);
-            message = `Hi *${responseObject.Name}*!!\nWe have record your MR Number *${EHRNumber}* .\n\n *You have Undergone following Surgeries:* ${responseObject.surgey}. \n Your last appoinment was on ${responseObject.LastVisitDate} with ${responseObject.LastVisitDoctor}.\n If the above Provided info is correct?`;
+            message = `Hi *${responseObject.Name}*!!\nWe have record your MR number *${EHRNumber}* .\n\n Your last appoinment was on ${responseObject.LastVisitDate} with ${responseObject.LastVisitDoctor}.\n *You have Undergone following Surgeries:* ${responseObject.surgey}. \n \n If the above Provided info is correct?`;
         }
         return message;
     }
@@ -101,8 +101,10 @@ export class getAdditionalInfoSevice {
 
     {
         const surgeryName = [];
-        for (const operate of response.body.surgeries) {
-            surgeryName.push(operate.procedure_info + '\n');
+        if (response.body.surgeries !== null){
+            for (const operate of response.body.surgeries) {
+                surgeryName.push(operate.procedure_info + '\n');
+            }
         }
         const responseObj = {
             Name            : response.body.patient_details.FirstName + ' ' + response.body.patient_details.LastName,
