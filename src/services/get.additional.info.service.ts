@@ -86,7 +86,7 @@ export class getAdditionalInfoSevice {
 
     async getMessageForLVPEI(EHRNumber,userId,userName,languageCode,eventObj)
     {
-        console.log("for LVPEI");
+        console.log("getting for LVPEI");
         let response: any = {};
         response =  await this.KerotoplastyService.makeApiCall(EHRNumber, eventObj);
         let message = null;
@@ -128,7 +128,7 @@ export class getAdditionalInfoSevice {
 
     async sendResponsebyButton(message,eventObj,userId,buttonArray){
         try {
-            const sourceChannel = eventObj.body.originalDetectIntentRequest.payload.source;
+            let sourceChannel = eventObj.body.originalDetectIntentRequest.payload.source;
             let payload = null;
             let messageType = null;
             if (sourceChannel === "whatsappMeta"){
@@ -138,6 +138,10 @@ export class getAdditionalInfoSevice {
             else {
                 payload = await sendTelegramButtonService(buttonArray);
                 messageType = "inline_keyboard";
+            }
+            if (sourceChannel === "Telegram")
+            {
+                sourceChannel = "telegram";
             }
             this._platformMessageService = eventObj.container.resolve(sourceChannel);
             await this.sendButton(this._platformMessageService,message, messageType, userId ,payload);
