@@ -182,6 +182,7 @@ export  class FeedbackService implements feedbackInterface {
             }
             const comment = messageContent;
             await this.clickuptask.postCommentOnTask(clickUpResponseTaskID,comment);
+
         }
         else {
             await this.slackMessageService.postMessage(responseChatMessage,topic);
