@@ -219,7 +219,7 @@ export class MessageFlow{
 
             // make compatible for telegram also.
             const { metaPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment(msg, msg.payload);
-            if (metaPayload["channel"] === 'whatsappMeta') {
+            if (metaPayload["channel"] === 'whatsappMeta' || metaPayload["channel"] === 'WhatsappWati') {
                 messageType = msg.type;
                 msg.type = 'template';
                 payload = metaPayload;
