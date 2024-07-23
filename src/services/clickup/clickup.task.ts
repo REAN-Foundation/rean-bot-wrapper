@@ -60,6 +60,7 @@ export class ClickUpTask{
         }
         const response = await needle("post", createTaskUrl, obj, options);
         const taskID = response.body.id;
+        console.log(`task has been created with ${taskID}`);
         return taskID;
     }
 
@@ -100,6 +101,7 @@ export class ClickUpTask{
                 "notify_all"   : true
             };
             await needle("post", createTaskUrl, obj, options);
+            console.log("comment has been added in the task");
         }
         catch (error){
             console.log(error);

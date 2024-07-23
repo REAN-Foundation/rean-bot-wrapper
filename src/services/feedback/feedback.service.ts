@@ -25,6 +25,7 @@ export  class FeedbackService implements feedbackInterface {
         const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         const responseChatMessage = await chatMessageRepository.findAll({ where: { responseMessageID: contextID } });
         await this.supportChannel("ClickUp", responseChatMessage, message,null, tag);
+        console.log("we are getting into recording feedback");
     }
 
     async NegativeFeedback(eventObj) {
@@ -172,14 +173,15 @@ export  class FeedbackService implements feedbackInterface {
             const chatMessageRepository = await (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
 
             const clickUpResponseTaskID:any = await this.clickuptask.createTask(responseChatMessage,topic,null,null, listID,tag);
+            console.log(`new ticket has been created with task id ${clickUpResponseTaskID}`);
             if (responseChatMessage[responseChatMessage.length - 1]){
                 const userPlatformId = responseChatMessage[responseChatMessage.length - 1].dataValues.id;
                 await chatMessageRepository.update({ supportChannelTaskID: clickUpResponseTaskID }, { where: { id: userPlatformId } })
-                    .then(() => { console.log(" task ID updated"); })
+                    .then(() => { console.log(" task ID updated for feedback"); })
                     .catch(error => console.log("error on updating Task ID", error));
             }
             const comment = messageContent;
-            this.clickuptask.postCommentOnTask(clickUpResponseTaskID,comment);
+            await this.clickuptask.postCommentOnTask(clickUpResponseTaskID,comment);
         }
         else {
             await this.slackMessageService.postMessage(responseChatMessage,topic);
