@@ -196,7 +196,10 @@ export class getAdditionalInfoSevice {
 
     async getauthenticationToken(){
         try {
-            const url = "https://hid4mel.gghnigeria.org/account/JWTAuthentication";
+            const gghnUrl =  await this.clientEnvironment.getClientEnvironmentVariable("GGHN_URL");
+            const userName = await this.clientEnvironment.getClientEnvironmentVariable("GGHN_USER_NAME");
+            const password = await this.clientEnvironment.getClientEnvironmentVariable("GGHN_PASSWORD");
+            const url = gghnUrl;
             const headers = {
                 'Content-Type' : 'application/json',
                 accept         : 'application/json'
@@ -205,8 +208,8 @@ export class getAdditionalInfoSevice {
                 headers : headers,
             };
             const obj = {
-                "username" : "reanapi",
-                "Password" : "$reanAPI503$$"
+                "username" : userName,
+                "Password" : password
             };
             const response = await needle("post",url, obj,options);
             return response.body.token;
