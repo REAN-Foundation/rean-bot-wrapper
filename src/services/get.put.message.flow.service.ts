@@ -204,6 +204,7 @@ export class MessageFlow{
                     payload["variables"] = msg.message.Variables[this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE")];
                     payload["languageForSession"] = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
                 }
+                payload["variables"] = await this.updatePatientName(payload["variables"], personName);
             }
         }
         else if (msg.type === "text") {
@@ -431,14 +432,18 @@ export class MessageFlow{
         }
     }
 
-    // async serveReancareAssessment(message :any, payload: any){
-    //     try {
-    //         const {message } = await this.serveAssessmentService.startAssessment(msg, msg.payload);
-
-    //         return { message, payload };
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
+    async updatePatientName(variables: any, personName: string){
+        try {
+            if (variables.length !== 0) {
+                const variableName = variables[0].text;
+                if (variableName === "PatientName") {
+                    variables[0].text = personName;
+                }
+            }
+            return variables;
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
 }
