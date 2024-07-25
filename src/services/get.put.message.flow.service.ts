@@ -274,6 +274,7 @@ export class MessageFlow{
         let message_to_platform = null;
         // eslint-disable-next-line max-len
         message_to_platform = await platformMessageService.SendMediaMessage(response_format, payload);
+        console.log(message_to_platform.data);
 
         if (messageType === "reancareAssessment") {
             assessmentSession.userMessageId = message_to_platform.body.messages[0].id;
