@@ -190,8 +190,10 @@ export class getAdditionalInfoSevice {
 
     async getauthenticationToken(){
         try {
-            
-            const url = "https://hid4mel.gghnigeria.org/account/JWTAuthentication";
+            const gghnUrl =  await this.clientEnvironment.getClientEnvironmentVariable("GGHN_URL");
+            const userName = await this.clientEnvironment.getClientEnvironmentVariable("GGHN_USER_NAME");
+            const password = await this.clientEnvironment.getClientEnvironmentVariable("GGHN_PASSWORD");
+            const url = gghnUrl;
             const headers = {
                 'Content-Type' : 'application/json',
                 accept         : 'application/json'
