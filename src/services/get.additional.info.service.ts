@@ -202,8 +202,8 @@ export class getAdditionalInfoSevice {
                 headers : headers,
             };
             const obj = {
-                "username" : "reanapi",
-                "Password" : "$reanAPI503$$"
+                "username" : userName,
+                "Password" : password
             };
             const response = await needle("post",url, obj,options);
             return response.body.token;
