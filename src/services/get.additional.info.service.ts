@@ -54,7 +54,7 @@ export class getAdditionalInfoSevice {
         try {
             let message = null;
             const clientName = this.clientEnvironment.getClientEnvironmentVariable("NAME");
-            if (clientName === "GGHN")
+            if (clientName === "GGHN_HIVTB")
             {
                 message = await this.getMessageForGGHN(EHRNumber,userName);
             }
@@ -196,6 +196,7 @@ export class getAdditionalInfoSevice {
 
     async getauthenticationToken(){
         try {
+            
             const url = "https://hid4mel.gghnigeria.org/account/JWTAuthentication";
             const headers = {
                 'Content-Type' : 'application/json',
@@ -227,9 +228,10 @@ export class getAdditionalInfoSevice {
             if (personContactList){
                 await personContactList.update({  ehrSystemCode: ehrSystemCode });
                 const patientUserId = personContactList.dataValues.patientUserId;
-                const SearchByUserApiUrl = `/patients/${patientUserId}}`;
+                const SearchByUserApiUrl = `patients/${patientUserId}`;
                 const obj = { ExternalMedicalRegistrationId: ehrSystemCode };
-                await this.needleService.needleRequestForREAN("put", SearchByUserApiUrl,null,obj);
+                const response = await this.needleService.needleRequestForREAN("put", SearchByUserApiUrl,null,obj);
+                console.log(response);
             }
             else {
                 console.log("while updating the EHR number");

@@ -19,27 +19,32 @@ export class NeedleService {
     ) {}
 
     async needleRequestForREAN (method: string, url:string, accessToken?, obj?) {
-        const ReanBackendBaseUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
-        if (!accessToken) {
-            accessToken = null;
+        try {
+            const ReanBackendBaseUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
+            if (!accessToken) {
+                accessToken = null;
+            }
+            const options = await this.getHeaders.getHeaders(accessToken);
+            const apiUrl = ReanBackendBaseUrl + url;
+            let response = null;
+            if (method === "get") {
+                response = await needle(method, apiUrl, options);
+        
+            } else {
+                response = await needle(method, apiUrl, obj, options);
+            }
+        
+            if (response.statusCode === 200 || response.statusCode === 201) {
+                console.log('Reancare Api is successfull');
+            } else {
+                console.log("Failed to get response from Reancare API.");
+            }
+        
+            return response.body;
+        } catch (error) {
+            console.log(error);
+            
         }
-        const options = await this.getHeaders.getHeaders(accessToken);
-        const apiUrl = ReanBackendBaseUrl + url;
-        let response = null;
-        if (method === "get") {
-            response = await needle(method, apiUrl, options);
-    
-        } else {
-            response = await needle(method, apiUrl, obj, options);
-        }
-    
-        if (response.statusCode === 200 || response.statusCode === 201) {
-            console.log('Reancare Api is successfull');
-        } else {
-            console.log("Failed to get response from Reancare API.");
-        }
-    
-        return response.body;
     }
 
     async getPhoneNumber(eventObj: any) {
