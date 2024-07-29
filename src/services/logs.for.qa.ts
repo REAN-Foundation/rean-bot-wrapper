@@ -44,7 +44,6 @@ export class LogsQAService {
             const messageContentOut = response_format.messageText;
             taskId = await this.postingOnClickup(`Bot : ` + messageContentOut + `\nIntent Name : ${response_format.intent}`, taskId, responseChatMessage, userName);
             await contactList.update({ cmrChatTaskID : taskId }, { where: { mobileNumber: response_format.sessionId } });
-            await this.postingOnClickup(`Bot : ${messageContentOut}\nIntent Name : ${response_format.intent}`, taskId, responseChatMessage, userName);
             console.log("support channel Id is updated");
         }
     }
