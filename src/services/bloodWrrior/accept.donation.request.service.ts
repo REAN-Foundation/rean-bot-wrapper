@@ -78,10 +78,13 @@ export class AcceptDonationRequestService {
                 "image" : {
                     "link" : "https://d3uqieugp2i3ic.cloudfront.net/blood_warriors/Blood%20Donation%20Checklist_image.jpg"
                 } };
-            templatePayload["buttonIds"] = await templateButtonService(["Checklist_Yes","Checklist_No"]);
-            templatePayload["templateName"] = "donor_checklist_image";
+            templatePayload["templateName"] = "checklist_image";
             templatePayload["languageForSession"] = "en";
             response_format.message_type = "template";
+            await this._platformMessageService.SendMediaMessage(response_format, templatePayload);
+            delete templatePayload["headers"];
+            templatePayload["templateName"] = "donor_checklist_image";
+            templatePayload["buttonIds"] = await templateButtonService(["Checklist_Yes","Checklist_No"]);
             await this._platformMessageService.SendMediaMessage(response_format, templatePayload);
 
         } catch (error) {
