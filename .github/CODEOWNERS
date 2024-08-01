@@ -1,0 +1,10 @@
+# This is a comment.
+# The "*" character designates all files.
+* Rohitkemprai93 
+
+# This matches any file in the root directory.
+/ @githubuser1
+
+# Matches specific files or paths.
+/docs/ @team-name
+/src/*.js @githubuser3
