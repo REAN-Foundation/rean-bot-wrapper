@@ -1,8 +1,9 @@
+/* eslint-disable init-declarations */
 import { inject, Lifecycle, scoped } from "tsyringe";
 import { ChatSession } from "../models/chat.session";
 import { EntityManagerProvider } from "./entity.manager.provider.service";
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
-import { v2, TranslationServiceClient } from '@google-cloud/translate';
+import { v2 } from '@google-cloud/translate';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ChangeLanguage{
