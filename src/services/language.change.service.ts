@@ -2,6 +2,7 @@ import { inject, Lifecycle, scoped } from "tsyringe";
 import { ChatSession } from "../models/chat.session";
 import { EntityManagerProvider } from "./entity.manager.provider.service";
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
+import { v2, TranslationServiceClient } from '@google-cloud/translate';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ChangeLanguage{
@@ -12,46 +13,43 @@ export class ChangeLanguage{
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService) {
     }
 
+    private GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+
+    private obj = {
+        credentials : this.GCPCredentials,
+        projectId   : this.GCPCredentials.project_id
+    };
+
     async askForLanguage(eventObj) {
         return new Promise(async(resolve, reject) =>{
             try {
-                console.log("eventobj.body", eventObj.body);
+                let reply: string;
                 let newLanguage = eventObj.body.queryResult.parameters.Language.toLowerCase();
                 if (!eventObj.body.queryResult.parameters.Language) {
                     newLanguage = eventObj.body.queryResult.queryText.toLowerCase();
                 }
 
                 const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
-                const listOfLanguages = {
-                    "hindi"     : "hi",
-                    "english"   : "en",
-                    "tamil"     : "ta",
-                    "telugu"    : "te",
-                    "punjabi"   : "pa",
-                    "marathi"   : "mr",
-                    "malayalam" : "ml",
-                    "kannada"   : "kn",
-                    "gujarati"  : "gu",
-                    "bengali"   : "bn",
-                    "assamese"  : "as",
-                    "odia"      : "or",
-                    "french"    : "fr",
-                    "spanish"   : "es",
-                    "swahili"   : "sw"
-                };
-                const newLanguageCode = await this.languageCode(newLanguage,listOfLanguages);
-                
-                //stop the old session
+
+                // Connecting to the google translate service to fetch the list of languages
+                const translate = new v2.Translate(this.obj);
+                const languages = await translate.getLanguages();
+
+                const targetLanguageCode = await this.getCodeByName(newLanguage, languages[0]);
+                if (targetLanguageCode === null){
+                    reply = "We apologize for the inconvenience. We currently do not support this language.";
+                }
+
                 // eslint-disable-next-line max-len
                 const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
-                await chatSessionRepository.update({ preferredLanguage: newLanguageCode }, {
+                await chatSessionRepository.update({ preferredLanguage: targetLanguageCode }, {
                     where : {
                         userPlatformID : userId
                     }
                 });
 
                 //create a new session
-                const reply = `Language changed to: ${newLanguage}`;
+                reply = `Language changed to: ${newLanguage}`;
                 const data = {
                     "fulfillmentMessages" : [
                         {
@@ -71,6 +69,11 @@ export class ChangeLanguage{
             }
         });
     
+    }
+
+    async getCodeByName(inputlanguage: string, data) {
+        const result = data.find(item => item.name.toLowerCase() === inputlanguage);
+        return result ? result.code : null;
     }
 
     async languageCode(newLanguage, listOfLanguages) {
