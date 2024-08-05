@@ -98,6 +98,7 @@ export class Registration{
                     patientUserId = result.Data.Patients.Items[0].UserId;
                 }
             } else {
+                console.log(`Channel in registration service: ${channel}`);
                 throw Error("Channel not integrated");
             }
             return patientUserId;
