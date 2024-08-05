@@ -2,7 +2,7 @@
 import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../../common/logger';
 import { NeedleService } from '../../needle.service';
-import { sendApiButtonService, templateButtonService } from '../../whatsappmeta.button.service';
+import { sendApiButtonService, templateButtonService, watiTemplateButtonService } from '../../whatsappmeta.button.service';
 import { translateService } from '../../translate.service';
 import { ClientEnvironmentProviderService } from '../../set.client/client.environment.provider.service';
 import { Iresponse } from '../../../refactor/interface/message.interface';
@@ -56,7 +56,11 @@ export class ServeAssessmentService {
 
                 // Extract buttons
                 if (questionData.ButtonsIds) {
-                    metaPayload["buttonIds"] = await templateButtonService(questionData.ButtonsIds);
+                    if (userTask.Channel === "WhatsappWati"){
+                        metaPayload["buttonIds"] = await watiTemplateButtonService(questionData.ButtonsIds);
+                    } else {
+                        metaPayload["buttonIds"] = await templateButtonService(questionData.ButtonsIds);
+                    }
                 }
 
                 //save entry into DB
@@ -122,7 +126,7 @@ export class ServeAssessmentService {
                         buttonArray.push( optionsNameArray[i].Text, buttonId);
                         i = i + 1;
                     }
-                    if (channel === 'whatsappMeta') {
+                    if (channel === 'whatsappMeta' || channel === 'whatsappWati') {
                         payload = await sendApiButtonService(buttonArray);
                         messageType = 'interactivebuttons';
                     } else {

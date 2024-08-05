@@ -87,7 +87,8 @@ export class Registration{
                 } else {
                     patientUserId = result.Data.Patients.Items[0].UserId;
                 }
-            } else if (channel === "whatsappMeta") {
+            } else if (channel === "whatsappMeta" || channel === "whatsapp" ||
+                channel === "whatsappWati" || channel === "MockChannel" ) {
                 const PhoneNumber = await this.countryCodeService.formatPhoneNumber(UserId);
                 const apiURL = `patients/byPhone?phone=${encodeURIComponent(PhoneNumber)}`;
                 const result = await this.needleService.needleRequestForREAN("get", apiURL);
@@ -96,6 +97,9 @@ export class Registration{
                 } else {
                     patientUserId = result.Data.Patients.Items[0].UserId;
                 }
+            } else {
+                console.log(`Channel in registration service: ${channel}`);
+                throw Error("Channel not integrated");
             }
             return patientUserId;
         }

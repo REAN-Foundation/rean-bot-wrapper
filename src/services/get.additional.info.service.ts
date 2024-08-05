@@ -54,7 +54,7 @@ export class getAdditionalInfoSevice {
         try {
             let message = null;
             const clientName = this.clientEnvironment.getClientEnvironmentVariable("NAME");
-            if (clientName === "GGHN")
+            if (clientName === "GGHN_HIVTB")
             {
                 message = await this.getMessageForGGHN(EHRNumber,userName);
             }
@@ -85,34 +85,31 @@ export class getAdditionalInfoSevice {
     }
 
     async getMessageForLVPEI(EHRNumber,userId,userName,languageCode,eventObj)
-    {
-        console.log("for LVPEI");
-        let response: any = {};
-        response =  await this.KerotoplastyService.makeApiCall(EHRNumber, eventObj);
-        let message = null;
-        if (response.body.patient_details){
-            const responseObject = await this.formulate_LVPEI_ResposeObj(response);
-            message = `Hi *${responseObject.Name}*!!\nWe have record your MR Number *${EHRNumber}* .\n\n *You have Undergone following Surgeries:* ${responseObject.surgey}. \n Your last appoinment was on ${responseObject.LastVisitDate} with ${responseObject.LastVisitDoctor}.\n If the above Provided info is correct?`;
-        }
-        return message;
-    }
-
-    async formulate_LVPEI_ResposeObj(response)
 
     {
-        const surgeryName = [];
-        for (const operate of response.body.surgeries) {
-            surgeryName.push(operate.procedure_info + '\n');
+        try {
+            let response: any = {};
+            response =  await this.KerotoplastyService.makeApiCall(EHRNumber, eventObj);
+            const surgeryName = [];
+            const name = response.body.patient_details.FirstName + ' ' + response.body.patient_details.LastName;
+            let message = `Hi, *${name}*!\n\n We have recorded your MR number: *${EHRNumber}*` ;
+    
+            if (response.body.patient_details.last_visted_date !== null){
+                message = message + `\n\n Your last appointment was on ${response.body.patient_details.last_visted_date} with ${response.body.patient_details.last_visted_doctor}.`;
+            }
+            if (response.body.surgeries !== null){
+                for (const operate of response.body.surgeries) {
+                    surgeryName.push(operate.procedure_info + '\n');
+                }
+                message = message + `\n *You have undergone following Surgeries:* ${surgeryName}.`;
+            }
+            message = message + ` \n \n Is the above provided information correct?`;
+            return message;
+        } catch (error) {
+            console.log("error in formatting message for LVPEI",error);
         }
-        const responseObj = {
-            Name            : response.body.patient_details.FirstName + ' ' + response.body.patient_details.LastName,
-            surgey          : surgeryName,
-            LastVisitDoctor : response.body.patient_details.last_visted_doctor,
-            LastVisitDate   : response.body.patient_details.last_visted_date
-
-        };
-        return responseObj;
     }
+
 
     async getMessageForGGHN(EHRNumber,userName)
     {
@@ -194,7 +191,11 @@ export class getAdditionalInfoSevice {
 
     async getauthenticationToken(){
         try {
-            const url = "https://hid4mel.gghnigeria.org/account/JWTAuthentication";
+            const gghnUrl =  await this.clientEnvironment.getClientEnvironmentVariable("GGHN_URL");
+            const userName = await this.clientEnvironment.getClientEnvironmentVariable("GGHN_USER_NAME");
+            const password = await this.clientEnvironment.getClientEnvironmentVariable("GGHN_PASSWORD");
+            const url = gghnUrl;
+
             const headers = {
                 'Content-Type' : 'application/json',
                 accept         : 'application/json'
@@ -203,8 +204,8 @@ export class getAdditionalInfoSevice {
                 headers : headers,
             };
             const obj = {
-                "username" : "reanapi",
-                "Password" : "$reanAPI503$$"
+                "username" : userName,
+                "Password" : password
             };
             const response = await needle("post",url, obj,options);
             return response.body.token;
@@ -225,9 +226,10 @@ export class getAdditionalInfoSevice {
             if (personContactList){
                 await personContactList.update({  ehrSystemCode: ehrSystemCode });
                 const patientUserId = personContactList.dataValues.patientUserId;
-                const SearchByUserApiUrl = `/patients/${patientUserId}}`;
+                const SearchByUserApiUrl = `patients/${patientUserId}`;
                 const obj = { ExternalMedicalRegistrationId: ehrSystemCode };
-                await this.needleService.needleRequestForREAN("put", SearchByUserApiUrl,null,obj);
+                const response = await this.needleService.needleRequestForREAN("put", SearchByUserApiUrl,null,obj);
+                console.log(response);
             }
             else {
                 console.log("while updating the EHR number");

@@ -30,6 +30,7 @@ export class AppointmentUserReplyService {
                 .split('T')[0];
             todayDate = Helper.removeLeadingZerosFromDay(todayDate);
             const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            
             const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
             const respnse =  await needle("get", getUrl);
             if (respnse.body.message){

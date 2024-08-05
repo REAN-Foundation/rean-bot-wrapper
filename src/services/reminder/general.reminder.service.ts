@@ -204,6 +204,21 @@ export class GeneralReminderService {
             }
         ];
 
+        const kannadaVariables =  [
+            {
+                "type" : "text",
+                "text" : personName
+            },
+            {
+                "type" : "text",
+                "text" : jsonFormat.TimeString
+            },
+            {
+                "type" : "text",
+                "text" : jsonFormat.TaskName
+            }
+        ];
+
         if (channel === "whatsappWati") {
             templateName = "appointment_reminder_message";
             commonStructure[0].name = "patient_name";
@@ -212,7 +227,7 @@ export class GeneralReminderService {
             commonStructure[3].name = "fourth_variable";
         }
 
-        variables = { en: commonStructure };
+        variables = { en: commonStructure, kn: kannadaVariables };
 
         return {
             TemplateName : templateName,

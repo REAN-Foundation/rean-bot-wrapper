@@ -67,6 +67,7 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
         if (type) {
             const classmethod = `send${type}Response`;
             const watiResp = await this.whatsappWatiPostResponseFunctionalities[classmethod](response_format, payload);
+            console.log(watiResp.data);
             if (watiResp.status === 200) {
                 const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
                 const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.sessionId } } );

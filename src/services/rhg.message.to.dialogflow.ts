@@ -18,7 +18,7 @@ export class RHGMessageToDialogflow{
                     const message = rhgRequestBodyObj.getMessage();
                     messagetoDialogflow = {
                         name              : null,
-                        platform          : "Rean_Support",
+                        platform          : "REAN_SUPPORT",
                         chat_message_id   : null,
                         direction         : "In",
                         messageBody       : message,
