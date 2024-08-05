@@ -185,7 +185,6 @@ export class GeneralReminderService {
         const fourthVariable = jsonFormat.TaskType === 'medication' ? 'take your medicine' : 'attend your appointment';
         let variables = null;
         let templateName = "appointment_rem_question";
-
         const commonStructure: any = [
             {
                 "type" : "text",

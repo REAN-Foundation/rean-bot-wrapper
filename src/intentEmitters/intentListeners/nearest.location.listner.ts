@@ -24,4 +24,3 @@ export const NearestLocationListner = async (intent:string, eventObj) => {
     return  response;
     
 };
-
