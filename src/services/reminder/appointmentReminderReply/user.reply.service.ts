@@ -30,7 +30,6 @@ export class AppointmentUserReplyService {
                 .split('T')[0];
             todayDate = Helper.removeLeadingZerosFromDay(todayDate);
             const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-            
             const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
             const respnse =  await needle("get", getUrl);
             if (respnse.body.message){
@@ -50,7 +49,6 @@ export class AppointmentUserReplyService {
                 msg = intentName === "Reminder_Reply_Yes" ? "Thank you for the confirmation." : "Thank you for your feedback.";
             }
             return { fulfillmentMessages: [{ text: { text: [msg] } }]  };
-
         } catch (error) {
             Logger.instance()
                 .log_error(error.message,500,'User reply on appointment service error');
