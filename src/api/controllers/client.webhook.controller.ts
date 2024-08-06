@@ -341,13 +341,14 @@ export class ClientWebhookController {
 
     receiveMessageWatiWhatsapp = async (req, res) =>{
         try {
+            const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
-            const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
+            const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
             console.log("Wati Client Name:", clientName);
             if (req.body.statusString === "SENT" && req.body.type === "template"){
                 this.responseHandler.sendSuccessResponse(res, 200, "Sent status read", "");
                 await this.sleep(5000);
-                const chatMessageRepository = (await entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService, clientName)).getRepository(ChatMessage);
+                const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(ChatMessage);
                 const whatsappMessageId = req.body.whatsappMessageId;
                 await chatMessageRepository.update({ responseMessageID: whatsappMessageId }, { where: { responseMessageID: req.body.localMessageId } })
                     .then(() => { console.log("DB Updated with Whatsapp Response ID"); })
