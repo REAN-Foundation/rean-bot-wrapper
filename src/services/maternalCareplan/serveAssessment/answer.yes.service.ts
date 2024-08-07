@@ -57,6 +57,7 @@ export class AnswerYesMsgService {
             for (const msg of userResponses) {
                 if (msg.Messege === previousMessage) {
                     message = this.getAnswer(intentName, message, msg);
+                    break;
                 } else {
                     message = null;
                 }
@@ -66,6 +67,7 @@ export class AnswerYesMsgService {
             for (const msg of userResponses) {
                 if (msg.WhatsAppTemplateName === previousMessage) {
                     message = this.getAnswer(intentName, message, msg);
+                    break;
                 } else {
                     message = null;
                 }
