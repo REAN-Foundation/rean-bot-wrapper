@@ -66,7 +66,7 @@ import { GenerateCertificateListener } from './intentListeners/bloodWarrior/gene
 import { GenerateCertificateYesListener } from './intentListeners/bloodWarrior/generate.certificate.yes.listener';
 import { GenerateCertificateConfirmYesListener } from './intentListeners/bloodWarrior/generate.certificate.confirm.yes.listener';
 import { GeneralReminderListener } from './intentListeners/medicationReminder/general.reminder.listener';
-import { ReminderFrequencyListener, SendFrequencyButtonsListener } from './intentListeners/medicationReminder/reminder.ask.frequency.listener';
+import { ReminderFrequencyListener, SendFrequencyButtonsListener, StopMedicationReasonListener } from './intentListeners/medicationReminder/reminder.ask.frequency.listener';
 import { ReminderAskTimeListener } from './intentListeners/medicationReminder/reminder.ask.time.listener';
 import { DmcAssessmentAnswerYesListener } from './intentListeners/maternity.careplan/answer.yes.listener';
 import { RegistrationPerMinuteMsgListener } from './intentListeners/maternity.careplan/regstration.per.minute.listener';
@@ -247,6 +247,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('Reminder_Frequency_Daily', ReminderFrequencyListener);
         IntentEmitter.registerListener('Reminder_Frequency_Weekly', ReminderFrequencyListener);
         IntentEmitter.registerListener('Reminder_Ask_Frequency', SendFrequencyButtonsListener);
+        IntentEmitter.registerListener('Medication_Stopped', StopMedicationReasonListener);
         IntentEmitter.registerListener('Reminder_Delete', DeleteReminderListener);
         IntentEmitter.registerListener('PatientDonationConfirmationYes', PatientDonationConfirmationListener.yesReply);
         IntentEmitter.registerListener('PatientDonationConfirmationNo', PatientDonationConfirmationListener.noReply);

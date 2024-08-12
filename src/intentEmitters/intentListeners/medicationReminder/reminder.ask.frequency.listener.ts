@@ -1,4 +1,5 @@
 import { ReminderFrequencyService } from "../../../services/reminder/reminder.ask.frequency.service";
+import { MedicationStoppedReasonService } from "../../../services/reminder/medication.not.taken.followup.service"
 
 export const ReminderFrequencyListener = async (intent, eventObj) => {
     // eslint-disable-next-line max-len
@@ -22,6 +23,20 @@ export const SendFrequencyButtonsListener = async (intent, eventObj) => {
     try {
         let result = null;
         result = await reminderAskFrequency.sendFrequencyButtons(eventObj);
+        console.log(result);
+        return result;
+
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+export const StopMedicationReasonListener = async (intent, eventObj) => {
+    // eslint-disable-next-line max-len
+    const medicationStoppedReason: MedicationStoppedReasonService = eventObj.container.resolve(MedicationStoppedReasonService);
+    try {
+        let result = null;
+        result = await medicationStoppedReason.medicationStoppedReasonButtons(eventObj);
         console.log(result);
         return result;
 
