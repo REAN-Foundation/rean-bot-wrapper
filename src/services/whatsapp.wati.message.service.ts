@@ -11,6 +11,7 @@ import { WhatsappWatiPostResponseFunctionalities } from './whatsapp.wati.post.re
 import { LogsQAService } from './logs.for.qa';
 import { EntityManagerProvider } from './entity.manager.provider.service';
 import { ChatMessage } from '../models/chat.message.model';
+import { Logger } from '../common/logger';
 
 @scoped(Lifecycle.ContainerScoped)
 export class WhatsappWatiMessageService implements platformServiceInterface{
@@ -67,7 +68,7 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
         if (type) {
             const classmethod = `send${type}Response`;
             const watiResp = await this.whatsappWatiPostResponseFunctionalities[classmethod](response_format, payload);
-            console.log(watiResp.data);
+            Logger.instance().log(JSON.stringify(watiResp.data,null,2));
             if (watiResp.status === 200) {
                 const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
                 const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.sessionId } } );
@@ -75,7 +76,7 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
                     const id = respChatMessage[respChatMessage.length - 1].id;
                     whatsappMessageId = watiResp.data.message ? watiResp.data.message.whatsappMessageId : watiResp.data.receivers[0].localMessageId;
                     if (watiResp.data.buttonMetaData){
-                        console.log("Button Meta Data is present");
+                        Logger.instance().log("Button Meta Data is present");
                         await chatMessageRepository.update({ responseMessageID: whatsappMessageId, imageContent: watiResp.data.buttonMetaData }, { where: { id: id } })
                             .then(() => { console.log("DB Updated with Whatsapp Response ID"); })
                             .catch(error => console.log("error on update", error));
@@ -88,7 +89,7 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
                 }
                 if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE")){
                     if (response_format.name !== "ReanCare") {
-                        console.log("Providing QA service through clickUp");
+                        Logger.instance().log("Providing QA service through clickUp");
                         await this.logsQAService.logMesssages(response_format);
                     }
                 }
