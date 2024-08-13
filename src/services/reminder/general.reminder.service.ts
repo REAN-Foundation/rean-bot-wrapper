@@ -221,7 +221,7 @@ export class GeneralReminderService {
         ];
 
         if (channel === "whatsappWati") {
-            templateName = "appointment_reminder_message";
+            templateName = "reminder_message";
             commonStructure[0].name = "patient_name";
             commonStructure[1].name = "task_name";
             commonStructure[2].name = "time_string";

@@ -21,6 +21,7 @@ import { CacheMemory } from './cache.memory.service';
 import { Helper } from '../common/helper';
 import needle from "needle";
 import { sendTelegramButtonService } from './telegram.button.service';
+import { Logger } from '../common/logger';
 
 @scoped(Lifecycle.ContainerScoped)
 export class MessageFlow{
@@ -438,7 +439,11 @@ export class MessageFlow{
                 const variableName = variables[0].text;
                 if (variableName === "PatientName") {
                     variables[0].text = personName;
+                } else {
+                    Logger.instance().log("Patient name is already updated.");
                 }
+            } else {
+                Logger.instance().log("Template message variable is empty.");
             }
             return variables;
         } catch (error) {
