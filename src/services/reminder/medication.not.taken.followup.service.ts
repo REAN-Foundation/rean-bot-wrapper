@@ -1,11 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../common/logger';
-// import { NeedleService } from '../needle.service';
-// import { dialoflowMessageFormatting } from '../Dialogflow.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { sendApiInteractiveListService } from '../whatsappmeta.button.service';
-// import { GeneralReminderService } from './general.reminder.service';
 import { commonResponseMessageFormat } from '../common.response.format.object';
 import { sendTelegramButtonService } from '../telegram.button.service';
 import { Iresponse } from '../../refactor/interface/message.interface';
@@ -15,12 +12,7 @@ export class MedicationStoppedReasonService {
 
     private _platformMessageService :  platformServiceInterface = null;
 
-    constructor(
-        // @inject(NeedleService) private needleService?: NeedleService,
-        // @inject(GeneralReminderService) private generalReminderService?: GeneralReminderService,
-        // @inject(dialoflowMessageFormatting) private dialoflowMessageFormattingService?: dialoflowMessageFormatting,
-
-    ){}
+    constructor(){}
 
     async medicationStoppedReasonButtons (eventObj: any ) {
         try {
@@ -33,27 +25,26 @@ export class MedicationStoppedReasonService {
             if (channelName === 'whatsappMeta') {
                 payload = await sendApiInteractiveListService(buttonArray);
                 messageType = 'interactivelist';
-            } else {
+            } else if(channelName === "telegram" || channelName === "Telegram"){
                 payload = await sendTelegramButtonService(buttonArray);
                 messageType = 'inline_keyboard';
-            }
-            if (channelName === "telegram" || channelName === "Telegram") {
                 channelName = "telegram";
             }
+            else {
+                throw new Error(`channel method not implemented: ${channelName}`)
+            }
             payload["typeOfButton"] = "vertical";
-            
             this._platformMessageService = eventObj.container.resolve(channelName);
             const response_format: Iresponse = commonResponseMessageFormat();
             response_format.sessionId = sessionId;
             response_format.messageText = message;
             response_format.message_type = messageType;
-
             await this._platformMessageService.SendMediaMessage(response_format, payload);
             return null;
 
         } catch (error) {
             Logger.instance()
-                .log_error(error.message,500,'Medication reminder service error');
+                .log_error(error.message,500,'Medication stopped service error');
         }
     }
 
