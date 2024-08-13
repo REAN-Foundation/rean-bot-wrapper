@@ -12,7 +12,6 @@ import { getRiskAssessmentFollowup } from './intentListeners/risk.assessment.fol
 import { getMedicationInfo } from './intentListeners/support.app.listener';
 import { AppSupportListener } from './intentListeners/app.support.listener';
 import { AppSymptomListener } from './intentListeners/app.symptom.listener';
-// import { getGenericpedia, getGenericpediaChemist } from './intentListeners/genericpedia.listener';
 import { AnemiaBotListener } from './intentListeners/anemia.bot.listener';
 import { NegativeFeedbackListener } from './intentListeners/negative.feedabck.listener';
 import { PositiveFeedbackListener } from './intentListeners/positive.feedback.listener';
@@ -23,7 +22,6 @@ import { HumanHandoverListener } from './intentListeners/human.handover.listener
 import { RequestLiveAgent } from './intentListeners/request.live.agent.listener';
 import { createDemoBot } from './intentListeners/create.demo.bot.listener';
 import { calorieDetection } from './intentListeners/calorie.detection.listener';
-// import { calorieReport } from './intentListeners/calorie.report.listener';
 import { CalorieUpdate } from './intentListeners/calorie.update.listener';
 import { WhatsAppTemplateOpting } from './intentListeners/whatsapp.tempalte.opting.listener';
 import { eyeSymptomAssessment } from './intentListeners/eye.symptom.assesment.listener';
@@ -34,7 +32,7 @@ import { BloodWarriorDonor } from './intentListeners/bloodWarrior/donor.listener
 import { BloodWarriorNewUser } from './intentListeners/bloodWarrior/new.userlistener';
 import { BloodWarriorPatientEnroll } from './intentListeners/bloodWarrior/patient.enroll.listener';
 import { ChangeTransfusionDate, GiveTransfusionDate, VolunteerChangeTransfusionDate } from './intentListeners/bloodWarrior/change.tf.date.listener';
-import { kerotoplastyConditionIdentificationListener} from './intentListeners/kerotoplasty.bot.condition.Identification.listener';
+import { kerotoplastyConditionIdentificationListener } from './intentListeners/kerotoplasty.bot.condition.Identification.listener';
 import { kerotoplastyLocationListener } from './intentListeners/kerotoplasty.find.nearest.location.listener';
 import { BloodWarriorMenu } from './intentListeners/bloodWarrior/menu.listener';
 import { RaiseBloodDonationRequest } from './intentListeners/bloodWarrior/raise.request.listener';
@@ -66,7 +64,7 @@ import { GenerateCertificateListener } from './intentListeners/bloodWarrior/gene
 import { GenerateCertificateYesListener } from './intentListeners/bloodWarrior/generate.certificate.yes.listener';
 import { GenerateCertificateConfirmYesListener } from './intentListeners/bloodWarrior/generate.certificate.confirm.yes.listener';
 import { GeneralReminderListener } from './intentListeners/medicationReminder/general.reminder.listener';
-import { ReminderFrequencyListener, SendFrequencyButtonsListener } from './intentListeners/medicationReminder/reminder.ask.frequency.listener';
+import { ReminderFrequencyListener, SendFrequencyButtonsListener, StopMedicationReasonListener } from './intentListeners/medicationReminder/reminder.ask.frequency.listener';
 import { ReminderAskTimeListener } from './intentListeners/medicationReminder/reminder.ask.time.listener';
 import { DmcAssessmentAnswerYesListener } from './intentListeners/maternity.careplan/answer.yes.listener';
 import { RegistrationPerMinuteMsgListener } from './intentListeners/maternity.careplan/regstration.per.minute.listener';
@@ -75,7 +73,7 @@ import { eyeImageQualityCheckListener } from './intentListeners/eye.image.qualit
 import { AppointmentReminderListener, AppointmentReminderReplyListener } from './intentListeners/medicationReminder/appointment.reminder.listener';
 import { ReminderRegistrationListener } from './intentListeners/medicationReminder/reminder.registration.listener';
 import { CommonAssessmentListener } from './intentListeners/commonAssessment/common.assessment.listener';
-import {ConsentYesListner} from './intentListeners/consentListners/consent.yes.listner';
+import { ConsentYesListner } from './intentListeners/consentListners/consent.yes.listner';
 import { DeleteReminderListener } from './intentListeners/medicationReminder/delete.reminder.listener';
 import { CincinnatiPerMinuteMsgListener } from './intentListeners/maternity.careplan/cincinnati.per.minute.listener copy';
 import { PatientDonationConfirmationListener } from './intentListeners/bloodWarrior/patient.donation.confirmation.listener';
@@ -85,12 +83,14 @@ import {NearestLocationListner} from './intentListeners/nearest.location.listner
 import { AppoinmentBookingListner } from './intentListeners/appoinment.booking.listner';
 import { WelcomeIntentListener } from './intentListeners/welcome.intent.listener';
 import { VolunteerSelectedPatient } from './intentListeners/bloodWarrior/volunteer.selected.patient';
+
 /*
  * Init function (being called during application bootstrap)
  * This is the place to register any new intent and corresponding listeners
  * ** One Intent can have multiple Listeners
  * ** Listener functions are further modulerised in "./intentListeners" based on context
 */
+
 export class IntentRegister {
 
     register(){
@@ -134,6 +134,7 @@ export class IntentRegister {
 
         //Intents for calorie information
         IntentEmitter.registerListener('foodItemsDetails', calorieDetection);
+
         // IntentEmitter.registerListener('calorie.report.creation', calorieReport);
         IntentEmitter.registerListener('CalorieNegativeFeedback - yes', CalorieUpdate);
 
@@ -157,6 +158,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('liver', getRiskAssessmentFollowup);
         IntentEmitter.registerListener('lungs', getRiskAssessmentFollowup);
         IntentEmitter.registerListener('pregnancy', getRiskAssessmentFollowup);
+
         // IntentEmitter.registerListener('genericpedia', getGenericpedia);
         // IntentEmitter.registerListener('genericpedia location', getGenericpediaChemist);
 
@@ -249,6 +251,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('Reminder_Frequency_Daily', ReminderFrequencyListener);
         IntentEmitter.registerListener('Reminder_Frequency_Weekly', ReminderFrequencyListener);
         IntentEmitter.registerListener('Reminder_Ask_Frequency', SendFrequencyButtonsListener);
+        IntentEmitter.registerListener('Medication_Stopped', StopMedicationReasonListener);
         IntentEmitter.registerListener('Reminder_Delete', DeleteReminderListener);
         IntentEmitter.registerListener('PatientDonationConfirmationYes', PatientDonationConfirmationListener.yesReply);
         IntentEmitter.registerListener('PatientDonationConfirmationNo', PatientDonationConfirmationListener.noReply);
@@ -263,6 +266,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('readAdditionalInfo', AdditionalInfoReadListener);
         IntentEmitter.registerListener('findNearestLocation', NearestLocationListner);
         IntentEmitter.registerListener('Book Appoinment', AppoinmentBookingListner);
+        
         // Intent fulfillement - Success listener
         // TODO: Pending implementation
         // eslint-disable-next-line max-len
