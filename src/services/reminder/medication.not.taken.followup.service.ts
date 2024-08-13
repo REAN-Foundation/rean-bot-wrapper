@@ -12,8 +12,6 @@ export class MedicationStoppedReasonService {
 
     private _platformMessageService :  platformServiceInterface = null;
 
-    constructor(){}
-
     async medicationStoppedReasonButtons (eventObj: any ) {
         try {
             const message = "Please select an option from below";
@@ -25,13 +23,13 @@ export class MedicationStoppedReasonService {
             if (channelName === 'whatsappMeta') {
                 payload = await sendApiInteractiveListService(buttonArray);
                 messageType = 'interactivelist';
-            } else if(channelName === "telegram" || channelName === "Telegram"){
+            } else if (channelName === "telegram" || channelName === "Telegram"){
                 payload = await sendTelegramButtonService(buttonArray);
                 messageType = 'inline_keyboard';
                 channelName = "telegram";
             }
             else {
-                throw new Error(`channel method not implemented: ${channelName}`)
+                throw new Error(`channel method not implemented: ${channelName}`);
             }
             payload["typeOfButton"] = "vertical";
             this._platformMessageService = eventObj.container.resolve(channelName);
