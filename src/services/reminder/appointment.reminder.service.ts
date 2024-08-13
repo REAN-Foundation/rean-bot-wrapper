@@ -1,8 +1,8 @@
 import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../common/logger';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { GetPatientInfoService } from '../support.app.service';
 import { GeneralReminderService } from './general.reminder.service';
+import { Registration } from '../registration/patient.registration.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class AppointmentReminderService {
@@ -11,8 +11,8 @@ export class AppointmentReminderService {
 
     constructor(
         // eslint-disable-next-line max-len
-        @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,
         @inject(GeneralReminderService) private generalReminderService?: GeneralReminderService,
+        @inject(Registration) private registration?: Registration,
 
     ){}
 
@@ -31,7 +31,7 @@ export class AppointmentReminderService {
             }
 
             const channel = eventObj.body.originalDetectIntentRequest.payload.source;
-            const patientUserId = await this.getPatientInfoService.getPatientUserId(channel,
+            const patientUserId = await this.registration.getPatientUserId(channel,
                 personPhoneNumber, personName);
 
             const { whenDay, whenTime } = await this.generalReminderService.extractWhenDateTime(date);

@@ -29,8 +29,8 @@ export class AppointmentUserReplyService {
             let todayDate = new Date().toISOString()
                 .split('T')[0];
             todayDate = Helper.removeLeadingZerosFromDay(todayDate);
-
-            const getUrl = `${docProcessBaseURL}appointment-schedules/gmu/appointment-status/${phoneNumber}/days/${todayDate}`;
+            const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
             const respnse =  await needle("get", getUrl);
             if (respnse.body.message){
                 msg = "Sorry to inform you the appointment passed.";
@@ -49,7 +49,6 @@ export class AppointmentUserReplyService {
                 msg = intentName === "Reminder_Reply_Yes" ? "Thank you for the confirmation." : "Thank you for your feedback.";
             }
             return { fulfillmentMessages: [{ text: { text: [msg] } }]  };
-
         } catch (error) {
             Logger.instance()
                 .log_error(error.message,500,'User reply on appointment service error');

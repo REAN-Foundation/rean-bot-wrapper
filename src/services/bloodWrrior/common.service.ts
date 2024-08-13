@@ -1,12 +1,17 @@
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import { Logger } from '../../common/logger';
 import { NeedleService } from '../needle.service';
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
+import { GetPatientInfoService } from '../support.app.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class BloodWarriorCommonService {
 
     constructor(
-        @inject(NeedleService) private needleService: NeedleService
+        @inject(NeedleService) private needleService: NeedleService,
+        @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,
+        // eslint-disable-next-line max-len
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
     ){}
 
     async getDonorByPhoneNumber (eventObj) {
@@ -87,15 +92,17 @@ export class BloodWarriorCommonService {
         }
     }
 
-    async fetchDonorDonationReminders (donorUserId: string, bloodTransfusionDate: Date ) {
+    async fetchDonorDonationReminders (donorUserId: string, bloodTransfusionDate: Date, channel: string ) {
         try {
             let result = null;
             const url = `care-plans/patients/${donorUserId}/enroll`;
             const obj = {
-                Provider  : "REAN_BW",
-                PlanName  : "Donor messages",
-                PlanCode  : "Donor-Reminders",
-                StartDate : bloodTransfusionDate.toISOString().split("T")[0]
+                Provider   : "REAN_BW",
+                PlanName   : "Donor messages",
+                PlanCode   : "Donor-Reminders",
+                StartDate  : bloodTransfusionDate.toISOString().split("T")[0],
+                Channel    : this.getPatientInfoService.getReminderType(channel),
+                TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
             };
             result = await this.needleService.needleRequestForREAN("post", url, null, obj);
             if (result.HttpCode === 201) {

@@ -2,7 +2,7 @@
 import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../../common/logger';
 import { NeedleService } from '../../needle.service';
-import { sendApiButtonService, templateButtonService } from '../../whatsappmeta.button.service';
+import { sendApiButtonService, templateButtonService, watiTemplateButtonService } from '../../whatsappmeta.button.service';
 import { translateService } from '../../translate.service';
 import { ClientEnvironmentProviderService } from '../../set.client/client.environment.provider.service';
 import { Iresponse } from '../../../refactor/interface/message.interface';
@@ -12,7 +12,6 @@ import { commonResponseMessageFormat } from '../../common.response.format.object
 import { platformServiceInterface } from '../../../refactor/interface/platform.interface';
 import { ChatMessage } from '../../../models/chat.message.model';
 import { CacheMemory } from '../../../services/cache.memory.service';
-import { ChatSession } from '../../../models/chat.session';
 import { CustomModelResponseFormat } from '../../../services/response.format/custom.model.response.format';
 import { sendTelegramButtonService } from '../../../services/telegram.button.service';
 
@@ -57,7 +56,11 @@ export class ServeAssessmentService {
 
                 // Extract buttons
                 if (questionData.ButtonsIds) {
-                    metaPayload["buttonIds"] = await templateButtonService(questionData.ButtonsIds);
+                    if (userTask.Channel === "WhatsappWati"){
+                        metaPayload["buttonIds"] = await watiTemplateButtonService(questionData.ButtonsIds);
+                    } else {
+                        metaPayload["buttonIds"] = await templateButtonService(questionData.ButtonsIds);
+                    }
                 }
 
                 //save entry into DB
@@ -123,7 +126,7 @@ export class ServeAssessmentService {
                         buttonArray.push( optionsNameArray[i].Text, buttonId);
                         i = i + 1;
                     }
-                    if (channel === 'whatsappMeta') {
+                    if (channel === 'whatsappMeta' || channel === 'whatsappWati') {
                         payload = await sendApiButtonService(buttonArray);
                         messageType = 'interactivebuttons';
                     } else {

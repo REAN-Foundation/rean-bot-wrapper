@@ -25,6 +25,7 @@ export  class FeedbackService implements feedbackInterface {
         const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         const responseChatMessage = await chatMessageRepository.findAll({ where: { responseMessageID: contextID } });
         await this.supportChannel("ClickUp", responseChatMessage, message,null, tag);
+        console.log("we are getting into recording feedback");
     }
 
     async NegativeFeedback(eventObj) {
@@ -64,13 +65,13 @@ export  class FeedbackService implements feedbackInterface {
                         ]
                     };
                     resolve(data);
-                } 
+                }
                 else {
                     // eslint-disable-next-line init-declarations
                     const preferredSupportChannel = clientEnvironmentProviderService.getClientEnvironmentVariable("SUPPORT_CHANNEL");
                     if (payload.contextId){
                         responseChatMessage = await chatMessageRepository.findAll({ where: { responseMessageID: payload.contextId } });
-                        await this.supportChannel(preferredSupportChannel,responseChatMessage, messageContent);
+                        await this.supportChannel(preferredSupportChannel,responseChatMessage,messageContent,null,"Negative Feedback");
                     }
                     else {
                         const topic = responseChatMessage[responseChatMessage.length - 2].messageContent;
@@ -168,17 +169,24 @@ export  class FeedbackService implements feedbackInterface {
 
     supportChannel = async(preferredSupportChannel, responseChatMessage, messageContent, topic = null,tag = null) => {
         if (preferredSupportChannel === "ClickUp"){
-            const listID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_ISSUES_LIST_ID");
+            const listID = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_ISSUES_LIST_ID");
             const chatMessageRepository = await (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+
             const clickUpResponseTaskID:any = await this.clickuptask.createTask(responseChatMessage,topic,null,null, listID,tag);
+            console.log(`new ticket has been created with task id ${clickUpResponseTaskID}`);
+            if (responseChatMessage[responseChatMessage.length - 1]){
+                const userPlatformId = responseChatMessage[responseChatMessage.length - 1].dataValues.id;
+                await chatMessageRepository.update({ supportChannelTaskID: clickUpResponseTaskID }, { where: { id: userPlatformId } })
+                    .then(() => { console.log(" task ID updated for feedback"); })
+                    .catch(error => console.log("error on updating Task ID", error));
+            }
             const comment = messageContent;
             await this.clickuptask.postCommentOnTask(clickUpResponseTaskID,comment);
-        
+
         }
         else {
             await this.slackMessageService.postMessage(responseChatMessage,topic);
         }
     };
-
 
 }

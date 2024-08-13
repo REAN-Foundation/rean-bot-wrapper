@@ -155,16 +155,11 @@ export class WhatsappPostResponseFunctionalities{
         };
 
         if (payload.headers) {
-            const headersLink = payload.headers.link;
+            const headerBody = payload.headers;
             postDataMeta["template"].components.push({
                 "type"       : "header",
                 "parameters" : [
-                    {
-                        "type"     : "document",
-                        "document" : {
-                            "link" : headersLink
-                        }
-                    }
+                    headerBody
                 ]
             });
         }

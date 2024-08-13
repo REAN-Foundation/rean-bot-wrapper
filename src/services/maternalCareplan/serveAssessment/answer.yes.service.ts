@@ -51,15 +51,37 @@ export class AnswerYesMsgService {
         const userResponses = AssessmetUserResponses['default'];
         const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         const assessmentSession = await chatMessageRepository.findOne({ where: { "responseMessageID": chatMessageId } });
-        const previousMessage = assessmentSession.messageContent ? assessmentSession.messageContent : "";
-        for (const msg of userResponses) {
-            if (msg.Messege === previousMessage) {
-                if (intentName === "Dmc_Yes") {
-                    message = msg.ReplyYesText;
+
+        if (channel === "telegram" || channel === "Telegram") {
+            const previousMessage = assessmentSession.messageContent ? assessmentSession.messageContent : "";
+            for (const msg of userResponses) {
+                if (msg.Messege === previousMessage) {
+                    message = this.getAnswer(intentName, message, msg);
+                    break;
                 } else {
-                    message = msg.ReplyNoText;
+                    message = null;
                 }
             }
+        } else {
+            const previousMessage = assessmentSession.intent ? assessmentSession.intent : "";
+            for (const msg of userResponses) {
+                if (msg.WhatsAppTemplateName === previousMessage) {
+                    message = this.getAnswer(intentName, message, msg);
+                    break;
+                } else {
+                    message = null;
+                }
+            }
+        }
+        
+        return message;
+    }
+
+    private getAnswer(intentName: any, message: string, msg: any) {
+        if (intentName === "Dmc_Yes") {
+            message = msg.ReplyYesText;
+        } else {
+            message = msg.ReplyNoText;
         }
         return message;
     }

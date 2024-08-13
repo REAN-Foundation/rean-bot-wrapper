@@ -1,14 +1,14 @@
 import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../common/logger';
 import { NeedleService } from '../needle.service';
-import { GetPatientInfoService } from '../support.app.service';
+import { Registration } from '../registration/patient.registration.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class DeleteReminderService {
 
     constructor(
         @inject(NeedleService) private needleService?: NeedleService,
-        @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,
+        @inject(Registration) private registration?: Registration,
 
     ){}
 
@@ -18,7 +18,7 @@ export class DeleteReminderService {
             const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
             const channelName = eventObj.body.originalDetectIntentRequest.payload.source;
 
-            const patientUserId = await this.getPatientInfoService.getPatientUserId(channelName,
+            const patientUserId = await this.registration.getPatientUserId(channelName,
                 phoneNumber, personName);
 
             let message = null;
@@ -31,7 +31,7 @@ export class DeleteReminderService {
             } else {
                 for (const reminder of reminderArray) {
                     const apiURL = `reminders/${reminder.id}`;
-                    const responseBody = await this.needleService.needleRequestForREAN("delete", apiURL, null, null);
+                    await this.needleService.needleRequestForREAN("delete", apiURL, null, null);
                 }
                 message = "You're welcome! All reminders have been successfully deleted. If you need any further assistance, feel free to ask!";
             }

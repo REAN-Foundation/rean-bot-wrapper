@@ -11,7 +11,7 @@ import { SlackMessageService } from "./slack.message.service";
 import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
 import { translateService } from './translate.service';
-import { sendApiButtonService, templateButtonService } from './whatsappmeta.button.service';
+import { sendApiButtonService, templateButtonService, watiTemplateButtonService } from './whatsappmeta.button.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { EntityManagerProvider } from './entity.manager.provider.service';
 import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
@@ -21,6 +21,7 @@ import { CacheMemory } from './cache.memory.service';
 import { Helper } from '../common/helper';
 import needle from "needle";
 import { sendTelegramButtonService } from './telegram.button.service';
+import { Logger } from '../common/logger';
 
 @scoped(Lifecycle.ContainerScoped)
 export class MessageFlow{
@@ -181,6 +182,7 @@ export class MessageFlow{
         
         //Add a check if user not found dont check
         const personName = personContactList.username;
+        const channel = personContactList.platform;
 
         if (msg.type === "template") {
             payload["templateName"] = msg.templateName;
@@ -203,6 +205,7 @@ export class MessageFlow{
                     payload["variables"] = msg.message.Variables[this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE")];
                     payload["languageForSession"] = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
                 }
+                payload["variables"] = await this.updatePatientName(payload["variables"], personName);
             }
         }
         else if (msg.type === "text") {
@@ -218,7 +221,7 @@ export class MessageFlow{
 
             // make compatible for telegram also.
             const { metaPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment(msg, msg.payload);
-            if (metaPayload["channel"] === 'whatsappMeta') {
+            if (metaPayload["channel"] === 'whatsappMeta' || metaPayload["channel"] === 'WhatsappWati') {
                 messageType = msg.type;
                 msg.type = 'template';
                 payload = metaPayload;
@@ -235,7 +238,12 @@ export class MessageFlow{
         }
         
         if (msg.message.ButtonsIds != null) {
-            payload["buttonIds"] = await templateButtonService(msg.message.ButtonsIds);
+            if (channel === "whatsappWati"){
+                payload["buttonIds"] = await watiTemplateButtonService(msg.message.ButtonsIds);
+            } else {
+                payload["buttonIds"] = await templateButtonService(msg.message.ButtonsIds);
+            }
+
         }
         const response_format = await platformMessageService.createFinalMessageFromHumanhandOver(msg);
         const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
@@ -273,14 +281,16 @@ export class MessageFlow{
             const AssessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
             await AssessmentSessionRepo.create(assessmentSession);
         }
-        if (msg.provider === "REAN_BOT" && message_to_platform.statusCode === 200) {
+        if (msg.provider === "REAN_BOT" || msg.provider === "GGHN" && message_to_platform.statusCode === 200) {
             const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
             let todayDate = new Date().toISOString()
                 .split('T')[0];
             todayDate = Helper.removeLeadingZerosFromDay(todayDate);
+            const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
             const messageId = await platformMessageService.getMessageIdFromResponse(message_to_platform);
             const phoneNumber = Helper.formatPhoneForDocProcessor(msg.userId);
-            const apiUrl = `${docProcessBaseURL}appointment-schedules/gmu/appointment-status/${phoneNumber}/days/${todayDate}`;
+            
+            const apiUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
             const headers = { headers : {
                 'Content-Type' : 'application/json',
                 Accept         : 'application/json',
@@ -423,14 +433,22 @@ export class MessageFlow{
         }
     }
 
-    // async serveReancareAssessment(message :any, payload: any){
-    //     try {
-    //         const {message } = await this.serveAssessmentService.startAssessment(msg, msg.payload);
-
-    //         return { message, payload };
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
+    async updatePatientName(variables: any, personName: string){
+        try {
+            if (variables.length !== 0) {
+                const variableName = variables[0].text;
+                if (variableName === "PatientName") {
+                    variables[0].text = personName;
+                } else {
+                    Logger.instance().log("Patient name is already updated.");
+                }
+            } else {
+                Logger.instance().log("Template message variable is empty.");
+            }
+            return variables;
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
 }

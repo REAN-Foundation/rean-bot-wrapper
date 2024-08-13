@@ -56,7 +56,7 @@ export class GetLocation{
             console.log("STEP 4");
             const channel = eventObj.body.originalDetectIntentRequest.payload.source;
             const needleService: NeedleService = eventObj.container.resolve(NeedleService);
-            const locationData = await this.getLoctionData(eventObj,2);
+            const locationData = await this.getLoctionData(eventObj,3);
             const postalAddresses = Array.from(locationData).map(obj => obj["Postal_Address"]);
             const address_1 = postalAddresses[0].replace(/\n/g, ', ');
             const address_2 = postalAddresses[1].replace(/\n/g, ', ');
