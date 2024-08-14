@@ -95,7 +95,7 @@ export class IntentRegister {
 
     register(){
         Logger.instance().log("Begin registering Intents...");
-        
+
         // IntentEmitter.registerListener('Vaccination.AppointmentAvailability', getVaccinationAppointments);
         // IntentEmitter.registerListener('vaccination:appointments', secondListener);
 
