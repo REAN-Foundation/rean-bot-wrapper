@@ -39,7 +39,7 @@ export  class WelcomeIntentService {
                         }
                     ]
                 };
-                return data
+                return data;
             }
             else {
                 const fulfillmentMessages = eventobj.body.queryResult.fulfillmentMessages[0];
