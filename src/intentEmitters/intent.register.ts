@@ -79,8 +79,9 @@ import { CincinnatiPerMinuteMsgListener } from './intentListeners/maternity.care
 import { PatientDonationConfirmationListener } from './intentListeners/bloodWarrior/patient.donation.confirmation.listener';
 import { AdditionalInfoEditListener } from './intentListeners/consentListners/get.additional.info.listener';
 import { AdditionalInfoReadListener } from './intentListeners/consentListners/read.additional.info.listener';
-import {NearestLocationListner} from './intentListeners/nearest.location.listner';
+import { NearestLocationListner } from './intentListeners/nearest.location.listner';
 import { AppoinmentBookingListner } from './intentListeners/appoinment.booking.listner';
+import { WelcomeIntentListener } from './intentListeners/welcome.intent.listener';
 import { VolunteerSelectedPatient } from './intentListeners/bloodWarrior/volunteer.selected.patient';
 
 /*
@@ -94,6 +95,7 @@ export class IntentRegister {
 
     register(){
         Logger.instance().log("Begin registering Intents...");
+        
         // IntentEmitter.registerListener('Vaccination.AppointmentAvailability', getVaccinationAppointments);
         // IntentEmitter.registerListener('vaccination:appointments', secondListener);
 
@@ -104,6 +106,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('covid-resources', getCovidResources1s);
 
         IntentEmitter.registerListener('Custom Welcome Intent', CustomWelcomeIntent);
+        IntentEmitter.registerListener('Default Welcome Intent', WelcomeIntentListener);
         IntentEmitter.registerListener('Custom Language - custom', CustomLanguageListener);
         IntentEmitter.registerListener('Change Language', LanguageChangeListener);
 
