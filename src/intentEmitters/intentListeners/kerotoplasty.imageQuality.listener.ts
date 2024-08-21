@@ -16,39 +16,12 @@ export const kerotoplastyEyeQualityListener = async (intent:string, eventObj) =>
 
 async function eyeImageQuality(eventObj,intent){
     try {
-        const channel = eventObj.body.originalDetectIntentRequest.payload.source;
-        const needleService: NeedleService = eventObj.container.resolve(NeedleService);
+        const kerotoplastyServiceObj: kerotoplastyService = eventObj.container.resolve(kerotoplastyService);
         const EyeImgQultyModel: CallEyeImageQualityCheckModel =
          eventObj.container.resolve(CallEyeImageQualityCheckModel);
         const messageFromModel =
         await EyeImgQultyModel.getEyeImageQualityCheckModelResponse(eventObj.body.queryResult.queryText,eventObj);
-        const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
-        const payload = eventObj.body.originalDetectIntentRequest.payload;
-        payload.completeMessage.messageType = 'text';
-        payload.completeMessage.messageBody = messageFromModel;
-        payload.completeMessage.intent = intent;
-        if (channel === "whatsappMeta") {
-            const endPoint = 'messages';
-            const postData = {
-                "messaging_product" : "whatsapp",
-                "recipient_type"    : "individual",
-                "to"                : userId ,
-                "type"              : "text",
-                "text"              : {
-                    "body" : messageFromModel
-                }
-            };
-            await needleService.needleRequestForWhatsappMeta("post", endPoint, JSON.stringify(postData), payload);
-        } else if (channel === "telegram") {
-            const postData = {
-                chat_id : userId,
-                text    : messageFromModel
-            };
-            await needleService.needleRequestForTelegram("post", "sendMessage", postData, payload);
-        } else {
-            throw new Error("Invalid Channel");
-        }
-        const kerotoplastyServiceObj: kerotoplastyService = eventObj.container.resolve(kerotoplastyService);
+        await kerotoplastyServiceObj.sendExtraMessage(eventObj, intent, messageFromModel);
         const repetitionFlag = await kerotoplastyServiceObj.postingImage(eventObj);
         if (repetitionFlag !== "True"){
             keratoplastyNextSteps(eventObj);
@@ -57,6 +30,7 @@ async function eyeImageQuality(eventObj,intent){
         console.log(error);
     }
 }
+
 
 async function keratoplastyNextSteps(eventObj) {
     try {

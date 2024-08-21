@@ -1,4 +1,3 @@
-import { GetLocation } from "./find.nearest.location.service";
 import { dialoflowMessageFormatting } from "./Dialogflow.service";
 import { inject, Lifecycle, scoped } from "tsyringe";
 import { ClickUpTask } from "./clickup/clickup.task";
@@ -7,6 +6,7 @@ import path from 'path';
 import needle from 'needle';
 import { EntityManagerProvider } from "./entity.manager.provider.service";
 import { ContactList } from '../models/contact.list';
+import { NeedleService } from "./needle.service";
 
 @scoped(Lifecycle.ContainerScoped)
 export class kerotoplastyService {
@@ -15,11 +15,9 @@ export class kerotoplastyService {
 
     constructor(
         @inject(dialoflowMessageFormatting) private DialogflowServices?: dialoflowMessageFormatting,
-        @inject(GetLocation) private getLocation?: GetLocation,
         @inject(ClickUpTask) private clickUpTask?: ClickUpTask,
+        @inject(NeedleService) private needleService?: NeedleService,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
-
-        // eslint-disable-next-line max-len
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
     ){}
 
@@ -89,6 +87,36 @@ export class kerotoplastyService {
             symptomComment += " - Drop in vision \n";
         }
         return (symptomComment);
+    }
+
+    async sendExtraMessage(eventObj, intent, messageFromModel){
+        const channel = eventObj.body.originalDetectIntentRequest.payload.source;
+        const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
+        const payload = eventObj.body.originalDetectIntentRequest.payload;
+        payload.completeMessage.messageType = 'text';
+        payload.completeMessage.messageBody = messageFromModel;
+        payload.completeMessage.intent = intent;
+        if (channel === "whatsappMeta") {
+            const endPoint = 'messages';
+            const postData = {
+                "messaging_product" : "whatsapp",
+                "recipient_type"    : "individual",
+                "to"                : userId ,
+                "type"              : "text",
+                "text"              : {
+                    "body" : messageFromModel
+                }
+            };
+            await this.needleService.needleRequestForWhatsappMeta("post", endPoint, JSON.stringify(postData), payload);
+        } else if (channel === "telegram") {
+            const postData = {
+                chat_id : userId,
+                text    : messageFromModel
+            };
+            await this.needleService.needleRequestForTelegram("post", "sendMessage", postData, payload);
+        } else {
+            throw new Error("Invalid Channel");
+        }
     }
 
     async postingImage(eventObj){

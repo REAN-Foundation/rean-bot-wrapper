@@ -34,35 +34,6 @@ async function keratoplastyNextSteps(intent,eventObj,severityGrade) {
         const buttonArray = [button_yes, "EyeImage",button_no,"responseNo"];
         additionalObj.sendResponsebyButton( message,eventObj, userId,buttonArray);
         kerotoplastyServiceObj.postingOnClickup(intent,eventObj,severityGrade);
-
-
-        // const payload = eventObj.body.originalDetectIntentRequest.payload;
-        // payload.completeMessage.messageType = 'text';
-        // payload.completeMessage.messageBody = location_response;
-        // payload.completeMessage.intent = 'nearest.location.send';
-        // if (channel === "whatsappMeta") {
-        //     const endPoint = 'messages';
-        //     const postData = {
-        //         "messaging_product" : "whatsapp",
-        //         "recipient_type"    : "individual",
-        //         "to"                : eventObj.body.originalDetectIntentRequest.payload.userId,
-        //         "type"              : "text",
-        //         "text"              : {
-        //             "body" : location_response
-        //         }
-        //     };
-        //     await needleService.needleRequestForWhatsappMeta("post", endPoint, JSON.stringify(postData), payload);
-        // } else if (channel === "telegram") {
-        //     const postData = {
-        //         chat_id : eventObj.body.originalDetectIntentRequest.payload.userId,
-        //         text    : location_response
-        //     };
-        //     await needleService.needleRequestForTelegram("post", "sendMessage", postData, payload);
-        // } else {
-        //     throw new Error("Invalid Channel");
-        // }
-        // await kerotoplastyServiceObj.postingOnClickup(intent,eventObj);
-        // console.log("STEP 5! Final");
     } catch (error) {
         console.log(error);
         throw new Error("Keratoplasty next steps error");
