@@ -160,7 +160,6 @@ export class IntentRegister {
 
         // IntentEmitter.registerListener('genericpedia', getGenericpedia);
         // IntentEmitter.registerListener('genericpedia location', getGenericpediaChemist);
-
         IntentEmitter.registerListener('SupportApp.GetMedication', getMedicationInfo);
         IntentEmitter.registerListener('BloodGlucose.update', AppSupportListener.handleIntent);
         IntentEmitter.registerListener('BloodGlucose.Create', AppSupportListener.handleIntent);
@@ -193,9 +192,6 @@ export class IntentRegister {
         IntentEmitter.registerListener('Change_TF_Date_Input', ChangeTransfusionDate);
         IntentEmitter.registerListener('appointment-followconditionIdentification', kerotoplastyConditionIdentificationListener);
         IntentEmitter.registerListener('conditionIdentification', kerotoplastyConditionIdentificationListener);
-        // IntentEmitter.registerListener('criticalCondition', kerotoplastyLocationListener);
-        // IntentEmitter.registerListener('hyperCriticalCondition', kerotoplastyLocationListener);
-        // IntentEmitter.registerListener('normalCondition', kerotoplastyLocationListener);
         IntentEmitter.registerListener('eyeImage', kerotoplastyEyeQualityListener);
         IntentEmitter.registerListener('Menu', BloodWarriorMenu);
         IntentEmitter.registerListener('Raise_Request_Yes', RaiseBloodDonationRequest);
@@ -259,12 +255,13 @@ export class IntentRegister {
         IntentEmitter.registerListener('Volunteer_Select_Patient', VolunteerSelectedPatient);
 
         IntentEmitter.registerListener('IntentFulfillment:Failure', handleIntentFufillmentError);
-        IntentEmitter.registerListener('consent_yes',ConsentYesListner.handleIntent);
+        IntentEmitter.registerListener('consent_yes', ConsentYesListner.handleIntent);
         IntentEmitter.registerListener('Cincinnati_PerMinMsg', CincinnatiPerMinuteMsgListener);
         IntentEmitter.registerListener('AdditionalInfo', AdditionalInfoEditListener);
         IntentEmitter.registerListener('readAdditionalInfo', AdditionalInfoReadListener);
         IntentEmitter.registerListener('findNearestLocation', NearestLocationListner);
         IntentEmitter.registerListener('Book Appointment', AppointmentBookingListner);
+
         // Intent fulfillement - Success listener
         // TODO: Pending implementation
         // eslint-disable-next-line max-len

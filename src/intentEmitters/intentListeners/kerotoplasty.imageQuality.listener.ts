@@ -3,7 +3,6 @@ import { dialoflowMessageFormatting } from "../../services/Dialogflow.service";
 import { getAdditionalInfoSevice } from "../../services/get.additional.info.service";
 import { translateService } from "../../services/translate.service";
 import { CallEyeImageQualityCheckModel } from '../../services/call.eye.image.quality.check';
-import { NeedleService } from "../../services/needle.service";
 
 export const kerotoplastyEyeQualityListener = async (intent:string, eventObj) => {
     const dialogflowMsgFormatObj: dialoflowMessageFormatting = eventObj.container.resolve(dialoflowMessageFormatting);
@@ -24,7 +23,7 @@ async function eyeImageQuality(eventObj,intent){
         await kerotoplastyServiceObj.sendExtraMessage(eventObj, intent, messageFromModel);
         const repetitionFlag = await kerotoplastyServiceObj.postingImage(eventObj);
         if (repetitionFlag !== "True"){
-            keratoplastyNextSteps(eventObj);
+            keratoplastycallforappointment(eventObj);
         }
     } catch (error) {
         console.log(error);
@@ -32,7 +31,7 @@ async function eyeImageQuality(eventObj,intent){
 }
 
 
-async function keratoplastyNextSteps(eventObj) {
+async function keratoplastycallforappointment(eventObj) {
     try {
         console.log("STEP 4");
         let message = `Would you like to request an appointment?`;
