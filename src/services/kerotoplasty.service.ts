@@ -89,35 +89,7 @@ export class kerotoplastyService {
         return (symptomComment);
     }
 
-    async sendExtraMessage(eventObj, intent, messageFromModel){
-        const channel = eventObj.body.originalDetectIntentRequest.payload.source;
-        const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
-        const payload = eventObj.body.originalDetectIntentRequest.payload;
-        payload.completeMessage.messageType = 'text';
-        payload.completeMessage.messageBody = messageFromModel;
-        payload.completeMessage.intent = intent;
-        if (channel === "whatsappMeta") {
-            const endPoint = 'messages';
-            const postData = {
-                "messaging_product" : "whatsapp",
-                "recipient_type"    : "individual",
-                "to"                : userId ,
-                "type"              : "text",
-                "text"              : {
-                    "body" : messageFromModel
-                }
-            };
-            await this.needleService.needleRequestForWhatsappMeta("post", endPoint, JSON.stringify(postData), payload);
-        } else if (channel === "telegram") {
-            const postData = {
-                chat_id : userId,
-                text    : messageFromModel
-            };
-            await this.needleService.needleRequestForTelegram("post", "sendMessage", postData, payload);
-        } else {
-            throw new Error("Invalid Channel");
-        }
-    }
+
 
     async postingImage(eventObj){
         try {
@@ -255,19 +227,6 @@ export class kerotoplastyService {
                         report = report + '  - Prescription Date: ' + pres.Prescribed_date_time + '\n';
                     }
                     report = report + "- Taper Drops\n";
-
-                    // for (const taper of response.body.Last_Prescription[0].taper_drops){
-                    //     report = report + '  - Medicine Name:' + taper.MedicineName + '\n';
-                    //     report = report + '  - Generic Name:' + taper.GenericName + '\n';
-                    //     report = report + '  - Precautions: ' + taper.Precautions + '\n';
-                    //     report = report + '  - Eye: ' + taper.Eye + '\n';
-                    //     report = report + '  - Drugs:\n';
-                    //     for (const drug of taper.drugs){
-                    //         report = report + '    - Drops: ' + drug.Drops + '\n';
-                    //         report = report + '    - Times: ' + drug.Times + '\n';
-                    //         report = report + '    - Time Period: ' + drug.TimesPeriod + '\n';
-                    //     }
-                    // }
                 } else {
                     report = report + '  - No General Prescription Found\n';
                 }

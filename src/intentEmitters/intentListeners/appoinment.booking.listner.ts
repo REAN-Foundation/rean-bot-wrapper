@@ -2,8 +2,7 @@ import { kerotoplastyService } from "../../services/kerotoplasty.service";
 import { Logger } from "../../common/logger";
 import { dialoflowMessageFormatting } from "../../services/Dialogflow.service";
 import { translateService } from "../../services/translate.service";
-import { getAdditionalInfoSevice } from "../../services/get.additional.info.service";
-
+import { sendExtraMessages } from "../../services/send.extra.messages.service";
 
 export const AppointmentBookingListner= async ( intent, eventObj ) => {
     const dialoflowMessageFormattingObj: dialoflowMessageFormatting = eventObj.container.resolve(dialoflowMessageFormatting);
@@ -36,7 +35,7 @@ async function keratoplastyNextSteps(intent,eventObj) {
     try {
         console.log("STEP 4");
         let message = "Do you have any *symptoms* in your operated eye that you would like to discuss with your doctor?";
-        const additionalObj: getAdditionalInfoSevice = eventObj.container.resolve(getAdditionalInfoSevice);
+        const sendExtraMessagesobj: sendExtraMessages = eventObj.container.resolve(sendExtraMessages);
         const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
         const languageCode = eventObj.body.queryResult.languageCode;
         const translationServiceObj: translateService = eventObj.container.resolve( translateService);
@@ -44,7 +43,7 @@ async function keratoplastyNextSteps(intent,eventObj) {
         const button_yes = await translationServiceObj.translatestring("Yes",languageCode);
         const button_no = await translationServiceObj.translatestring("No",languageCode);
         const buttonArray = [button_yes, "afConditionIdentification",button_no,"responseNo"];
-        additionalObj.sendResponsebyButton(message,eventObj, userId,buttonArray);
+        sendExtraMessagesobj.sendResponsebyButton(message,eventObj, userId,buttonArray);
     } catch (error) {
         console.log(error);
         throw new Error("Keratoplasty appointment next steps error");

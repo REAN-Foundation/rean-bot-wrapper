@@ -1,34 +1,22 @@
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { ErrorHandler } from '../utils/error.handler';
 import { translateService } from '../services/translate.service';
-import { dialoflowMessageFormatting } from "./Dialogflow.service";
 import { EntityManagerProvider } from './entity.manager.provider.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import needle from 'needle';
 import { ContactList } from '../models/contact.list';
-import { ResponseHandler } from '../utils/response.handler';
-import { commonResponseMessageFormat } from '../services/common.response.format.object';
-import { Iresponse } from '../refactor/interface/message.interface';
-import { sendApiButtonService } from './whatsappmeta.button.service';
-import { sendTelegramButtonService } from '../services/telegram.button.service';
 import { NeedleService } from './needle.service';
 import { kerotoplastyService } from './kerotoplasty.service';
-
+import { sendExtraMessages } from './send.extra.messages.service';
 @scoped(Lifecycle.ContainerScoped)
 export class getAdditionalInfoSevice {
-    
-    private _platformMessageService?: platformServiceInterface;
 
     constructor(
         @inject(ClientEnvironmentProviderService) private clientEnvironment?: ClientEnvironmentProviderService,
-        @inject(ResponseHandler) private responseHandler?: ResponseHandler,
-        @inject(ErrorHandler) private errorHandler?: ErrorHandler,
         @inject(NeedleService) private needleService?: NeedleService,
+        @inject(sendExtraMessages) private sendExtraMessagesobj?: sendExtraMessages,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(translateService) private translate?: translateService,
         @inject (kerotoplastyService) private KerotoplastyService?:kerotoplastyService,
-        @inject(dialoflowMessageFormatting) private DialogflowServices?: dialoflowMessageFormatting,
     ){}
 
     async   processAdditionalInfo(eventObj){
@@ -66,7 +54,7 @@ export class getAdditionalInfoSevice {
                 const button_yes = await this.translate.translatestring("Yes",languageCode);
                 const button_no = await this.translate.translatestring("No",languageCode);
                 const buttonArray = [button_yes, "Welcome",button_no,"additionalInfo"];
-                this.sendResponsebyButton(message,eventObj,userId,buttonArray);
+                this.sendExtraMessagesobj.sendResponsebyButton(message,eventObj,userId,buttonArray);
             }
             else {
                 const RequiredAdditionalInfo =  await this.clientEnvironment.getClientEnvironmentVariable("REQUIRED_ADDITIONAL_INFO");
@@ -75,7 +63,7 @@ export class getAdditionalInfoSevice {
                 const button_yes = await this.translate.translatestring("Yes",languageCode);
                 const button_no = await this.translate.translatestring("No",languageCode);
                 const buttonArray = [button_yes, "additionalInfo" ,button_no,"Welcome"];
-                this.sendResponsebyButton(message,eventObj,userId,buttonArray);
+                this.sendExtraMessagesobj.sendResponsebyButton(message,eventObj,userId,buttonArray);
             }
         }
         catch (error) {
@@ -130,44 +118,7 @@ export class getAdditionalInfoSevice {
         return message;
     }
 
-    async sendResponsebyButton(message, eventObj, userId, buttonArray){
-        try {
-            const sourceChannel = eventObj.body.originalDetectIntentRequest.payload.source;
-            let payload = null;
-            let messageType = null;
-            if (sourceChannel === "whatsappMeta"){
-                payload = await sendApiButtonService(buttonArray);
-                messageType = "interactivebuttons";
-            }
-            else {
-                payload = await sendTelegramButtonService(buttonArray);
-                messageType = "inline_keyboard";
-            }
-            this._platformMessageService = eventObj.container.resolve(sourceChannel);
-            await this.sendButton(this._platformMessageService,message, messageType, userId ,payload);
-        }
-        catch (error) {
-            console.log("While formulating button response", error);
-
-        }
-
-    }
-
-    async sendButton(_platformMessageService , message, messageType, sessionId, payload){
-        try {
-            const response_format: Iresponse = commonResponseMessageFormat();
-            response_format.sessionId = sessionId;
-            response_format.messageText = message;
-            response_format.message_type = messageType;
-    
-            _platformMessageService.SendMediaMessage(response_format, payload );
-        }
-        catch (error) {
-            console.log("While Sending button response", error);
-
-        }
-
-    }
+   
 
     async getUserInfo(authenticationToken,userID){
         try {
@@ -266,7 +217,7 @@ export class getAdditionalInfoSevice {
                 const button_yes = await this.translate.translatestring("Yes",languageCode);
                 const button_no = await this.translate.translatestring("No",languageCode);
                 const buttonArray = [button_yes, "additionalInfo" ,button_no,"Welcome"];
-                this.sendResponsebyButton(message,eventObj,userId,buttonArray);
+                this.sendExtraMessagesobj.sendResponsebyButton(message,eventObj,userId,buttonArray);
                 return { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } ;
             }
         }

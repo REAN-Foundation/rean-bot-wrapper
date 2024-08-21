@@ -1,8 +1,7 @@
 import { kerotoplastyService } from "../../services/kerotoplasty.service";
 import { dialoflowMessageFormatting } from "../../services/Dialogflow.service";
-import { getAdditionalInfoSevice } from "../../services/get.additional.info.service";
-import { translateService } from "../../services/translate.service";
 import { CallEyeImageQualityCheckModel } from '../../services/call.eye.image.quality.check';
+import { sendExtraMessages } from "../../services/send.extra.messages.service";
 
 export const kerotoplastyEyeQualityListener = async (intent:string, eventObj) => {
     const dialogflowMsgFormatObj: dialoflowMessageFormatting = eventObj.container.resolve(dialoflowMessageFormatting);
@@ -16,14 +15,18 @@ export const kerotoplastyEyeQualityListener = async (intent:string, eventObj) =>
 async function eyeImageQuality(eventObj,intent){
     try {
         const kerotoplastyServiceObj: kerotoplastyService = eventObj.container.resolve(kerotoplastyService);
+        const sendExtraMessagesobj: sendExtraMessages = eventObj.container.resolve(sendExtraMessages);
         const EyeImgQultyModel: CallEyeImageQualityCheckModel =
          eventObj.container.resolve(CallEyeImageQualityCheckModel);
         const messageFromModel =
         await EyeImgQultyModel.getEyeImageQualityCheckModelResponse(eventObj.body.queryResult.queryText,eventObj);
-        await kerotoplastyServiceObj.sendExtraMessage(eventObj, intent, messageFromModel);
+        await sendExtraMessagesobj.sendExtraMessage(eventObj, intent, messageFromModel);
         const repetitionFlag = await kerotoplastyServiceObj.postingImage(eventObj);
         if (repetitionFlag !== "True"){
-            keratoplastycallforappointment(eventObj);
+            const inputMessage = `Would you like to request an appointment?`;
+            const yesIntentName = "BookAppointment";
+            const noIntentName = "responseNo";
+            sendExtraMessagesobj.sendSecondaryButtonMessage(inputMessage, yesIntentName, noIntentName,  eventObj);
         }
     } catch (error) {
         console.log(error);
@@ -31,22 +34,4 @@ async function eyeImageQuality(eventObj,intent){
 }
 
 
-async function keratoplastycallforappointment(eventObj) {
-    try {
-        console.log("STEP 4");
-        let message = `Would you like to request an appointment?`;
-        const additionalObj: getAdditionalInfoSevice = eventObj.container.resolve(getAdditionalInfoSevice);
-        const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
-        const languageCode = eventObj.body.queryResult.languageCode;
-        const translationServiceObj: translateService = eventObj.container.resolve( translateService);
-        const button_yes = await translationServiceObj.translatestring("Yes",languageCode);
-        const button_no = await translationServiceObj.translatestring("No",languageCode);
-        message  = await translationServiceObj.translatestring(message,languageCode);
-        const buttonArray = [button_yes, "BookAppointment",button_no,"responseNo"];
-        additionalObj.sendResponsebyButton( message,eventObj, userId,buttonArray);
 
-    } catch (error) {
-        console.log(error);
-        throw new Error("Keratoplasty next steps error");
-    }
-}
