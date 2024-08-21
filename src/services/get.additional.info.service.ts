@@ -31,7 +31,7 @@ export class getAdditionalInfoSevice {
         @inject(dialoflowMessageFormatting) private DialogflowServices?: dialoflowMessageFormatting,
     ){}
 
-    async processAdditionalInfo(eventObj){
+    async   processAdditionalInfo(eventObj){
         try {
             console.log("additional info  intent is trigered");
             const userName = eventObj.body.originalDetectIntentRequest.payload.userName;
@@ -90,20 +90,27 @@ export class getAdditionalInfoSevice {
         try {
             let response: any = {};
             response =  await this.KerotoplastyService.makeApiCall(EHRNumber, eventObj);
+            let name = null;
+            let message = null;
             const surgeryName = [];
-            const name = response.body.patient_details.FirstName + ' ' + response.body.patient_details.LastName;
-            let message = `Hi, *${name}*!\n\n We have recorded your MR number: *${EHRNumber}*` ;
-    
-            if (response.body.patient_details.last_visted_date !== null){
-                message = message + `\n\n Your last appointment was on ${response.body.patient_details.last_visted_date} with ${response.body.patient_details.last_visted_doctor}.`;
-            }
-            if (response.body.surgeries !== null){
-                for (const operate of response.body.surgeries) {
-                    surgeryName.push(operate.procedure_info + '\n');
+            if (response.body.patient_details){
+                name = response.body.patient_details.FirstName + ' ' + response.body.patient_details.LastName;
+                message = `Hi, *${name}*!\n\n We have recorded your MR number: *${EHRNumber}*` ;
+                if (response.body.patient_details.last_visted_date !== null){
+                    message = message + `\n\n Your last appointment was on ${response.body.patient_details.last_visted_date} with ${response.body.patient_details.last_visted_doctor}.`;
                 }
-                message = message + `\n *You have undergone following Surgeries:* ${surgeryName}.`;
+                if (response.body.surgeries !== null){
+                    for (const operate of response.body.surgeries) {
+                        surgeryName.push(operate.procedure_info + '\n');
+                    }
+                    message = message + `\n *You have undergone following Surgeries:* ${surgeryName}.`;
+                }
+                message = message + ` \n \n Is the above provided information correct?`;
             }
-            message = message + ` \n \n Is the above provided information correct?`;
+            else 
+            {
+                message = null;
+            }
             return message;
         } catch (error) {
             console.log("error in formatting message for LVPEI",error);
@@ -123,7 +130,7 @@ export class getAdditionalInfoSevice {
         return message;
     }
 
-    async sendResponsebyButton(message,eventObj,userId,buttonArray){
+    async sendResponsebyButton(message, eventObj, userId, buttonArray){
         try {
             const sourceChannel = eventObj.body.originalDetectIntentRequest.payload.source;
             let payload = null;

@@ -97,6 +97,7 @@ export interface contactList {
     cmrCaseTaskID?: string;
     platform: string;
     emailID: string;
+    repetitionFlag:string;
     preferredLanguage?: string;
     optOut?: string;
 }

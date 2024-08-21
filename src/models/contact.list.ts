@@ -5,7 +5,7 @@ import { contactList } from '../refactor/interface/message.interface';
     timestamps : true,
     modelName  : 'ContactList',
     tableName  : 'contact_list'
-})
+    })
 export class ContactList extends Model implements contactList {
     
     @AutoIncrement
@@ -29,6 +29,11 @@ export class ContactList extends Model implements contactList {
         type : DataType.STRING
     })
         patientUserId: string;
+
+    @Column({
+        type : DataType.STRING
+    })
+        repetitionFlag: string;
 
     @Column({
         type : DataType.STRING

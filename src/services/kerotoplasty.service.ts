@@ -27,50 +27,49 @@ export class kerotoplastyService {
         if (eventObj) {
             const dropInVision = eventObj.body.queryResult.parameters.complexDropInVision.name;
             const complexSeverePain = eventObj.body.queryResult.parameters.complexSeverePain.name;
+            let condition = null;
 
             //const params = eventObj.body.queryResult.parameters;
             if (dropInVision === 'Yes' && complexSeverePain === 'Yes')
             {
-                return await this.DialogflowServices.triggerIntent('triggerHyperCritical',eventObj);
+                condition  = 'HyperCritical';
             }
             else if (dropInVision === 'Yes' || complexSeverePain === 'Yes') {
-                return await this.DialogflowServices.triggerIntent('triggerCritical',eventObj);
+                condition = 'Critical';
             }
             else {
-                return await this.DialogflowServices.triggerIntent('triggerNormal',eventObj);
+                condition = 'Normal';
             }
+            return condition;
         } else {
             throw new Error(`500, kerotoplasy response Service Error!`);
         }
     };
 
-    async conditionSpecificResponse(intent){
-        const setSeverityGrade = {
-            'hyperCriticalCondition' : 3,
-            'criticalCondition'      : 2,
-            'normalCondition'        : 1
-        };
-        const severityGrade = setSeverityGrade[intent];
-        console.log("SEVERITY GRADE IS",severityGrade);
+    async conditionSpecificResponse(condition){
+        let severityGrade = null;
         let message = null;
-        switch (intent) {
-        case 'hyperCriticalCondition': {
-            message = `Your situation seems hyper-critical.\n Please Visit the nearest care center as soon as possible.\n \n Do you want to Book appointment`;
+        switch (condition) {
+        case 'HyperCritical': {
+            message = `Your situation seems *hyper-critical*.\n Please Visit the nearest care center as soon as possible.`;
+            severityGrade = 1;
             break;
         }
-        case 'criticalCondition':
+        case 'Critical':
         {
-            message = `Your situation seems critical.\n Please visit us at the nearest center on the next available.\n\n Do you want to Book appointment`;
+            message = `Your situation seems *critical*.\n Please visit us at the nearest center on the next available.`;
+            severityGrade = 2;
             break;
         }
-        case 'normalCondition': {
-            message = `Your situation seems normal.\n Please visit us at our nearest center if there is drop in vision or severe pain in your operated eye.. Do you want to Book appointment`;
+        case 'Normal': {
+            message = `Your situation seems *normal*.\n Please visit us at our nearest center if there is drop in vision or severe pain in your operated eye.`;
+            severityGrade = 3;
             break;
         }
         }
-        this.DialogflowServices.making_response(message);
+        message = await this.DialogflowServices.making_response(message);
         console.log("Our location data is being sent!!!!");
-        return message;
+        return [message, severityGrade];
 
     }
     
@@ -92,34 +91,51 @@ export class kerotoplastyService {
         return (symptomComment);
     }
 
-    async postingOnClickup(intent,eventObj){
+    async postingImage(eventObj){
+        try {
+            const parameters = eventObj.body.queryResult.parameters;
+            const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
+            const filename = path.basename(parameters.imageUrl);
+            const attachmentPath = `./photo/` + filename;
+            const contactList =
+            (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
+            const personContactList = await contactList.findOne({ where: { mobileNumber: userId } });
+            const repetitionFlag  = personContactList.dataValues.repetitionFlag;
+            const taskId = personContactList.dataValues.cmrCaseTaskID;
+            if (taskId){
+                await this.clickUpTask.taskAttachment(taskId,attachmentPath);
+            }
+            return repetitionFlag;
+        } catch (error) {
+            console.log(error);
+        }
+
+    }
+
+    async postingOnClickup(intent,eventObj,severityGrade){
         const parameters = eventObj.body.queryResult.parameters;
         const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
         const contactList =
         (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
         const personContactList = await contactList.findOne({ where: { mobileNumber: userId } });
         const EMRNumber  = personContactList.dataValues.ehrSystemCode;
-        const filename = path.basename(parameters.image);
+        if (intent === "appointment-followconditionIdentification"){
+            await contactList.update({ repetitionFlag: "True" }, { where: { mobileNumber: userId } });
+        }
+        else {
+            await contactList.update({ repetitionFlag: "False" }, { where: { mobileNumber: userId } });
+        }
         const symptomComment = await this.symptomByUser(parameters);
-        const attachmentPath = `./photo/` + filename;
-        const set_priority = {
-            'hyperCriticalCondition' : 1,
-            'criticalCondition'      : 2,
-            'normalCondition'        : 3
-        };
-        const priority = set_priority[intent];
         const user_details = await this.getEMRDetails(EMRNumber , eventObj);
         const taskId = personContactList.dataValues.cmrCaseTaskID;
         if (taskId){
-            await this.clickUpTask.updateTask(taskId,priority,user_details,EMRNumber);
-            await this.clickUpTask.taskAttachment(taskId,attachmentPath);
+            await this.clickUpTask.updateTask(taskId,severityGrade,user_details,EMRNumber);
             await this.clickUpTask.postCommentOnTask(taskId,symptomComment);
         }
         else
         {
-            const taskID = await this.clickUpTask.createTask( null, EMRNumber, user_details, priority);
-            await contactList.update({ cmrCaseTaskID : taskID }, { where: { mobileNumber: userId } });
-            await this.clickUpTask.taskAttachment(taskID, attachmentPath);
+            const taskID = await this.clickUpTask.createTask( null, EMRNumber, user_details, severityGrade);
+            await contactList.update({ cmrCaseTaskID: taskID }, { where: { mobileNumber: userId } });
             await this.clickUpTask.postCommentOnTask(taskID, symptomComment);
             await contactList.update({ cmrCaseTaskID: taskID, humanHandoff: "false" }, { where: { mobileNumber: userId } });
     
@@ -144,6 +160,16 @@ export class kerotoplastyService {
         return (AppoinmentComment);
     }
 
+    async CheckRepetitionFlag(eventObj){
+        const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
+        const contactList =
+        (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
+        const personContactList = await contactList.findOne({ where: { mobileNumber: userId } });
+        const repetitionFlag = personContactList.dataValues.repetitionFlag;
+        await contactList.update({ repetitionFlag: "True" }, { where: { mobileNumber: userId } });
+        return repetitionFlag;
+    }
+
     async UpdatingAppointmentOnClickup(intent,eventObj){
         const parameters = eventObj.body.queryResult.parameters;
         const symptomComment = await this.appoinmentDetailsByUser(parameters);
@@ -162,7 +188,7 @@ export class kerotoplastyService {
         else
         {
             const taskID = await this.clickUpTask.createTask(null, EMRNumber , user_details , 1 , ClickupListID,"Appoinment");
-            await contactList.update({ cmrCaseTaskID : taskID }, { where: { mobileNumber: userId } });
+            await contactList.update({ cmrCaseTaskID: taskID }, { where: { mobileNumber: userId } });
             await this.clickUpTask.postCommentOnTask(taskID, symptomComment);
             console.log("we are Here");
             await contactList.update({ cmrCaseTaskID: taskID, humanHandoff: "false" }, { where: { mobileNumber: userId } });
@@ -201,6 +227,7 @@ export class kerotoplastyService {
                         report = report + '  - Prescription Date: ' + pres.Prescribed_date_time + '\n';
                     }
                     report = report + "- Taper Drops\n";
+
                     // for (const taper of response.body.Last_Prescription[0].taper_drops){
                     //     report = report + '  - Medicine Name:' + taper.MedicineName + '\n';
                     //     report = report + '  - Generic Name:' + taper.GenericName + '\n';
