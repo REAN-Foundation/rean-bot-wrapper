@@ -72,6 +72,13 @@ export class MessageFlow{
             console.log("The message is being set to make the decision");
             const outgoingMessage: OutgoingMessage = await this.decisionRouter.getDecision(preprocessedOutgoingMessage.message, channel);
             console.log("The outgoing message is being handled in routing");
+            if (
+                this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_TRANSLATE_SERVICE") === "llm"
+            &&
+                outgoingMessage.QnA.NLPProvider === "LLM"
+            ) {
+                outgoingMessage.MetaData.messageBody = preprocessedOutgoingMessage.translate_message['original_message'];
+            }
             const processedResponse = await this.handleRequestservice.handleUserRequestForRouting(outgoingMessage, platformMessageService);
             const response = await this.processOutgoingMessage(messageToLlmRouter, channel, platformMessageService, processedResponse);
 
@@ -95,6 +102,7 @@ export class MessageFlow{
             
             await this.engageMySQL(message);
             const translate_message = await this.translate.translateMessage(message.type, message.messageBody, message.platformId);
+            translate_message["original_message"] = message.messageBody;
             message.messageBody = translate_message.message;
             return { message, translate_message };
         } catch (error) {
