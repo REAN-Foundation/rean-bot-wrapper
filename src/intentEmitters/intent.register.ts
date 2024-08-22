@@ -78,7 +78,7 @@ import { PatientDonationConfirmationListener } from './intentListeners/bloodWarr
 import { AdditionalInfoEditListener } from './intentListeners/consentListners/get.additional.info.listener';
 import { AdditionalInfoReadListener } from './intentListeners/consentListners/read.additional.info.listener';
 import { WelcomeIntentListener } from './intentListeners/welcome.intent.listener';
-import {NearestLocationListner} from './intentListeners/nearest.location.listner';
+import { NearestLocationListner } from './intentListeners/nearest.location.listner';
 import { AppointmentBookingListner } from './intentListeners/appoinment.booking.listner';
 import { VolunteerSelectedPatient } from './intentListeners/bloodWarrior/volunteer.selected.patient';
 
@@ -260,7 +260,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('AdditionalInfo', AdditionalInfoEditListener);
         IntentEmitter.registerListener('readAdditionalInfo', AdditionalInfoReadListener);
         IntentEmitter.registerListener('findNearestLocation', NearestLocationListner);
-        IntentEmitter.registerListener('Book Appointment', AppointmentBookingListner);
+        IntentEmitter.registerListener('bookAppointment', AppointmentBookingListner);
 
         // Intent fulfillement - Success listener
         // TODO: Pending implementation
