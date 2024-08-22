@@ -10,8 +10,6 @@ import { EntityManagerProvider } from './entity.manager.provider.service';
 import { NeedleService } from '../services/needle.service';
 import { Logger } from '../common/logger';
 
-
-
 @scoped(Lifecycle.ContainerScoped)
 export class CallEyeImageQualityCheckModel {
 
@@ -25,17 +23,16 @@ export class CallEyeImageQualityCheckModel {
         // eslint-disable-next-line max-len
         const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         const respChatMessage = await chatMessageRepository.findAll({ where: { "messageContent": imagePathFromDF, "direction": "In" } });
-        const eyeQualityCheckModelUrl = this.  clientEnvironmentProviderService.getClientEnvironmentVariable("EYE_QUALITY_IMAGE_URL");
+        const eyeQualityCheckModelUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("EYE_QUALITY_IMAGE_URL");
         const REQUEST_AUTHENTICATION =  this.clientEnvironmentProviderService.getClientEnvironmentVariable("REQUEST_AUTHENTICATION");
         const cloudFrontPath = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("LVPEI_Data_CLOUD_FRONT_PATH");
         const parameters = eventObj.body.queryResult.parameters;
-        const filename = path.basename(parameters.url);
+        const filename = path.basename(parameters.imageUrl);
         const filePath =  `./photo/` + filename;
         const options = await getRequestOptions();
         options.headers["Authorization"] = `Bearer ${REQUEST_AUTHENTICATION}`;
         options.headers["Content-Type"] = `application/json`;
         const imagePath = respChatMessage[respChatMessage.length - 1].imageUrl;
-
         const obj = {
             "imagePath" : imagePath
         };
@@ -45,30 +42,25 @@ export class CallEyeImageQualityCheckModel {
             console.log("got results successfully");
             if (response.body.result)
             {
-                message = "It is a Good Quality image as "+ response.body.message +"\n Do you agree with the response?";
+                message = "It is a *Good Quality* image as " + response.body.message ;
             }
             else {
-                message = "It is a Bad Quality image as "+ response.body.message + "\n Do you agree with the response?";
+                message = "It is a *Bad Quality* image as " + response.body.message ;
             }
         }
-        else 
+        else
         {
             console.log("Failed to get response from API.", response.statusCode);
             message = "request is not fullfilled";
         }
-
-        console.log(message);
-
-
         this.backingImage(message,filename, cloudFrontPath,filePath);
-        this.sendMessageToTelegram(message,eventObj);
         return message;
 
     }
 
     async backingImage(message,fileName, cloudFrontPath,filePath){
         const newMessage = message.replace(/ /g, "_");
-        const newfileName = newMessage + "_" +fileName;
+        const newfileName = newMessage + "_" + fileName;
         await this.awsS3manager.uploadFile(filePath,process.env.BUCKET_NAME, cloudFrontPath,newfileName);
 
     }
