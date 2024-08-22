@@ -155,8 +155,11 @@ export class RegisterAllProfileService {
 
             } else if (body.Profile === 'Blood Bridge') {
                 let patientUserId = null;
+                let patientName = null;
                 let donorUserId = null;
+                let donorName = null;
                 let volunteerUserId = null;
+                let volunteerName = null;
                 const bridgeId = body.BridgeId;
                 const patientPhone = body.BridgePatientPhone;
                 const donorPhone = body.BridgeDonorPhone;
@@ -166,6 +169,7 @@ export class RegisterAllProfileService {
                 const response = await this.needleService.needleRequestForREAN("get", URL);
                 if (response.Data.Patients.Items.length > 0) {
                     patientUserId = response.Data.Patients.Items[0].UserId;
+                    patientName = response.Data.Patients.Items[0].DisplayName;
                 }
                 const patientURL = `patients/${patientUserId}`;
                 const response1 = await this.needleService.needleRequestForREAN("get", patientURL);
@@ -175,12 +179,14 @@ export class RegisterAllProfileService {
                 const result = await this.needleService.needleRequestForREAN("get", apiURL);
                 if (result.Data.Donors.Items.length > 0) {
                     donorUserId = result.Data.Donors.Items[0].UserId;
+                    donorName = result.Data.Donors.Items[0].DisplayName;
                 }
 
                 const apiURL1 = `volunteers/search?phone=${volunteerPhone}`;
                 const result1 = await this.needleService.needleRequestForREAN("get", apiURL1);
                 if (result1.Data.Volunteers.Items.length > 0) {
                     volunteerUserId = result1.Data.Volunteers.Items[0].UserId;
+                    volunteerName = result1.Data.Volunteers.Items[0].DisplayName;
                 }
 
                 const object = {
@@ -198,24 +204,41 @@ export class RegisterAllProfileService {
                 const bridgeURL = `clinical/patient-donors`;
                 await this.needleService.needleRequestForREAN("post", bridgeURL, null, object);
 
-                const phoneArray = [donorPhone, volunteerPhone];
                 const sendPayload = {};
+                let bridgeDetails = `Bridge Id: *${bridgeId}* \\nPatient Name: *${patientName}* \\nVolunteer Name: *${volunteerName}*`;
                 sendPayload["variables"] = [
                     {
                         type : "text",
-                        text : bridgeId
+                        text : donorName
+                    },
+                    {
+                        type : "text",
+                        text : bridgeDetails
                     }];
-                sendPayload["templateName"] = "bridge_confirmation";
+                sendPayload["templateName"] = "bridge_confirmation_donor";
                 sendPayload["languageForSession"] = "en";
-                phoneArray.forEach(async (phone) => {
-                    const message = `Hi, \nYou have successfully registered with blood bridge ${bridgeId}.\nRegards \nTeam Blood Warriors`;
-                    response_format.platform = payload.source;
-                    response_format.sessionId = `91${phone}`;
-                    response_format.messageText = message;
-                    response_format.message_type = "template";
-                    await this._platformMessageService.SendMediaMessage(response_format, sendPayload);
-                });
-                
+                const message = `Hi, \nYou have successfully registered with blood bridge ${bridgeId}.\nRegards \nTeam Blood Warriors`;
+                response_format.sessionId = `91${donorPhone}`;
+                response_format.messageText = message;
+                response_format.message_type = "template";
+                await this._platformMessageService.SendMediaMessage(response_format, sendPayload);
+                bridgeDetails = `Bridge Id: *${bridgeId}*. \\nPatient Name: *${patientName}*, ${patientPhone}. \\nDonor Name: *${donorName}*, ${donorPhone}`;
+                sendPayload["variables"] = [
+                    {
+                        type : "text",
+                        text : volunteerName
+                    },
+                    {
+                        type : "text",
+                        text : bridgeId
+                    },
+                    {
+                        type : "text",
+                        text : bridgeDetails
+                    }];
+                sendPayload["templateName"] = "bridge_confirmation_volunteer";
+                response_format.sessionId = `91${volunteerPhone}`;
+                await this._platformMessageService.SendMediaMessage(response_format, sendPayload);
             }
 
         } catch (error) {
