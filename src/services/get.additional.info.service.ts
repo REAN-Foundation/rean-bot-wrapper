@@ -42,7 +42,7 @@ export class getAdditionalInfoSevice {
         try {
             let message = null;
             const clientName = this.clientEnvironment.getClientEnvironmentVariable("NAME");
-            if (clientName === "GGHN_HIVTB")
+            if (clientName === "GGHN_HIVTB" || clientName === "REAN_BOT")
             {
                 message = await this.getMessageForGGHN(EHRNumber,userName);
             }
