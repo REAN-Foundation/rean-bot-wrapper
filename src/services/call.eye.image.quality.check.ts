@@ -27,6 +27,7 @@ export class CallEyeImageQualityCheckModel {
         const REQUEST_AUTHENTICATION =  this.clientEnvironmentProviderService.getClientEnvironmentVariable("REQUEST_AUTHENTICATION");
         const cloudFrontPath = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("LVPEI_Data_CLOUD_FRONT_PATH");
         const parameters = eventObj.body.queryResult.parameters;
+        let goodQuality = false;
         const filename = path.basename(parameters.imageUrl);
         const filePath =  `./photo/` + filename;
         const options = await getRequestOptions();
@@ -40,12 +41,14 @@ export class CallEyeImageQualityCheckModel {
         let message = null;
         if (response.statusCode === 200) {
             console.log("got results successfully");
+            
             if (response.body.result)
             {
-                message = "It is a *Good Quality* image as " + response.body.message ;
+                message = "It is a *Good Quality* image as " + response.body.message  ;
+                goodQuality = true;
             }
             else {
-                message = "It is a *Bad Quality* image as " + response.body.message ;
+                message = "It is a *Bad Quality* image as " + response.body.message + "\n Would you like to resend image?";
             }
         }
         else
@@ -54,7 +57,7 @@ export class CallEyeImageQualityCheckModel {
             message = "request is not fullfilled";
         }
         this.backingImage(message,filename, cloudFrontPath,filePath);
-        return message;
+        return [message, goodQuality];
 
     }
 

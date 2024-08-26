@@ -18,9 +18,16 @@ async function eyeImageQuality(eventObj,intent){
         const sendExtraMessagesobj: sendExtraMessages = eventObj.container.resolve(sendExtraMessages);
         const EyeImgQultyModel: CallEyeImageQualityCheckModel =
          eventObj.container.resolve(CallEyeImageQualityCheckModel);
-        const messageFromModel =
+        const [message, goodQuality] =
         await EyeImgQultyModel.getEyeImageQualityCheckModelResponse(eventObj.body.queryResult.queryText,eventObj);
-        await sendExtraMessagesobj.sendExtraMessage(eventObj, intent, messageFromModel);
+        if (goodQuality === true) {
+            await sendExtraMessagesobj.sendExtraMessage(eventObj, intent, message);
+        }
+        else {
+            const yesIntentName = "EyeImage";
+            const noIntentName = "responseNo";
+            await sendExtraMessagesobj.sendSecondaryButtonMessage(message, yesIntentName, noIntentName,  eventObj);
+        }
         const repetitionFlag = await kerotoplastyServiceObj.postingImage(eventObj);
         if (repetitionFlag !== "True"){
             const inputMessage = `Would you like to request an appointment?`;
@@ -32,6 +39,3 @@ async function eyeImageQuality(eventObj,intent){
         console.log(error);
     }
 }
-
-
-
