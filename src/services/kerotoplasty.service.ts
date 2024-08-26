@@ -119,6 +119,7 @@ export class kerotoplastyService {
         (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
         const personContactList = await contactList.findOne({ where: { mobileNumber: userId } });
         const EMRNumber  = personContactList.dataValues.ehrSystemCode;
+        const ClickupListID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_CASE_LIST_ID");
         if (intent === "appointment-followconditionIdentification"){
             await contactList.update({ repetitionFlag: "True" }, { where: { mobileNumber: userId } });
         }
@@ -134,7 +135,7 @@ export class kerotoplastyService {
         }
         else
         {
-            const taskID = await this.clickUpTask.createTask( null, EMRNumber, user_details, severityGrade);
+            const taskID = await this.clickUpTask.createTask( null, EMRNumber, user_details, severityGrade, ClickupListID );
             await contactList.update({ cmrCaseTaskID: taskID }, { where: { mobileNumber: userId } });
             await this.clickUpTask.postCommentOnTask(taskID, symptomComment);
             await contactList.update({ cmrCaseTaskID: taskID, humanHandoff: "false" }, { where: { mobileNumber: userId } });
@@ -187,6 +188,7 @@ export class kerotoplastyService {
         }
         else
         {
+            
             const taskID = await this.clickUpTask.createTask(null, EMRNumber , user_details , 1 , ClickupListID,"Appoinment");
             await contactList.update({ cmrCaseTaskID: taskID }, { where: { mobileNumber: userId } });
             await this.clickUpTask.postCommentOnTask(taskID, symptomComment);
