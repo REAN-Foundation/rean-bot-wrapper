@@ -14,7 +14,7 @@ export const eyeImageQualityCheckListener = async (intent, eventObj) => {
 
         const [message, goodQuality] = await callEyeImageQualityCheckModel.getEyeImageQualityCheckModelResponse(eventObj.body.queryResult.queryText,eventObj);
         console.log(message);
-        
+        console.log(goodQuality);
         const data = {
             "fulfillmentMessages" : [
                 {
