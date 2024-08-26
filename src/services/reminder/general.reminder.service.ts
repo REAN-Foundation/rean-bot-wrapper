@@ -228,7 +228,7 @@ export class GeneralReminderService {
             commonStructure[3].name = "fourth_variable";
         }
 
-        variables = { en: commonStructure, kn: kannadaVariables };
+        variables = { en: commonStructure, kn: kannadaVariables, sw: commonStructure };
 
         return {
             TemplateName : templateName,

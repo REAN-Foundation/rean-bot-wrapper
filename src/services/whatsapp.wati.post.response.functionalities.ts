@@ -211,6 +211,10 @@ export class WhatsappWatiPostResponseFunctionalities {
                 "text" : "No"
             }
         ];
+        for (let i = 0; i < buttons.length; i++){
+            const translatedTitle = await this.translateService.translateResponse([buttons[i].text], payload.languageForSession);
+            buttons[i].text = translatedTitle[0];
+        }
         const options = {
             method  : "POST",
             url     : `${baseUrl}/api/v2/sendTemplateMessage?whatsappNumber=${phoneNumber}`,
