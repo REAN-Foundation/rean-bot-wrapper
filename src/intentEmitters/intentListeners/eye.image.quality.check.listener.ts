@@ -9,12 +9,11 @@ export const eyeImageQualityCheckListener = async (intent, eventObj) => {
     try {
         Logger.instance()
             .log('Calling Eye Image Quality Check Service !!!!!!');
+
+        callEyeImageQualityCheckModel.getEyeImageQualityCheckModelResponse(eventObj.body.queryResult.queryText,eventObj);
         
-
-
-        const [message, goodQuality] = await callEyeImageQualityCheckModel.getEyeImageQualityCheckModelResponse(eventObj.body.queryResult.queryText,eventObj);
-        console.log(message);
-        console.log(goodQuality);
+        // console.log(message);
+        // console.log(goodQuality);
         const data = {
             "fulfillmentMessages" : [
                 {
