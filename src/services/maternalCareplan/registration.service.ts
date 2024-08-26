@@ -130,7 +130,7 @@ export class RegistrationService {
         };
         await this.needleService.needleRequestForREAN("post", communicationUrl, null, obj);
 
-        const enrollmentId = resp.Data.Enrollment.EnrollmentId;
+        const enrollmentId = resp.Data.Enrollment.id;
         Logger.instance().log(`Enrollment id of user ${name} is: ${enrollmentId}`);
 
         await this.sendMessage(msg, eventObj);
