@@ -141,7 +141,6 @@ export class InitiateDeleteReminderService {
                         }
                     ]
                 };
-                await this.delay();
                 return data;
             }
         } catch (error) {
