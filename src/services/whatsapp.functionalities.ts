@@ -192,7 +192,6 @@ export class MessageFunctionalities implements getMessageFunctionalities {
                     if (err){
                         console.log('FAiled to REad File',err);
                     }
-                    console.log(type(body));
                     const file_name = `${type}/` + Date.now() + `${extension}`;
                     fs.writeFile('./' + file_name,body, err => {
                         if (err) {

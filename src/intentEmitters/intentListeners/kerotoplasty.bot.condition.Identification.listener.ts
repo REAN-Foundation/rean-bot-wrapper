@@ -1,4 +1,5 @@
 
+import { sendExtraMessages } from "../../services/send.extra.messages.service";
 import { Logger } from "../../common/logger";
 import { kerotoplastyService } from "../../services/kerotoplasty.service";
 
@@ -6,13 +7,10 @@ export const kerotoplastyConditionIdentificationListener = async (intent, eventO
 
     const kerotoplastyServiceObj: kerotoplastyService = eventObj.container.resolve(kerotoplastyService);
     try {
-        const response = await kerotoplastyServiceObj.identifyCondition(eventObj);
-        if (!response) {
-            throw new Error('kerotoplasty_bot_condition identification Listener Error!');
-        }
-        else {
-            return response;
-        }
+        const condition = await kerotoplastyServiceObj.identifyCondition(eventObj);
+        const [response,severityGrade] = await kerotoplastyServiceObj.conditionSpecificResponse(condition);
+        askingForImage(intent,eventObj,severityGrade);
+        return response;
     }
     catch (error) {
         Logger.instance()
@@ -20,3 +18,17 @@ export const kerotoplastyConditionIdentificationListener = async (intent, eventO
         throw new Error("Keratoplasty bot condition identification Listener Error");
     }
 };
+async function askingForImage(intent,eventObj,severityGrade) {
+    try {
+        const kerotoplastyServiceObj: kerotoplastyService = eventObj.container.resolve(kerotoplastyService);
+        const sendExtraMessagesobj: sendExtraMessages = eventObj.container.resolve(sendExtraMessages);
+        const inputMessage =  "Would you like to send an image of the affected area for the doctor's reference?";
+        const yesIntentName = "EyeImage";
+        const noIntentName = "responseNo";
+        sendExtraMessagesobj.sendSecondaryButtonMessage(inputMessage, yesIntentName, noIntentName,  eventObj);
+        kerotoplastyServiceObj.postingOnClickup(intent,eventObj,severityGrade);
+    } catch (error) {
+        console.log(error);
+        throw new Error("Keratoplasty next steps error");
+    }
+}

@@ -33,6 +33,11 @@ export class ContactList extends Model implements contactList {
     @Column({
         type : DataType.STRING
     })
+        repetitionFlag: string;
+
+    @Column({
+        type : DataType.STRING
+    })
         username: string;
 
     @Column({

@@ -185,6 +185,7 @@ export class MessageFlow{
         let payload = {};
         let messageType = "";
         let assessmentSession = null;
+        const defaultLangaugeCode = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
         const contactList = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
         const personContactList = await contactList.findOne({ where: { mobileNumber: msg.userId } });
         
@@ -200,7 +201,7 @@ export class MessageFlow{
             payload["variables"] = msg.message.Variables;
             payload["languageForSession"] = "en";
             if (msg.provider !== "REAN_BW") {
-                const languageForSession = await this.translate.detectUsersLanguage( msg.userId);
+                let languageForSession = await this.translate.detectUsersLanguage( msg.userId);
                 if (msg.agentName !== 'postman') {
                     if (typeof msg.message.Variables === "string") {
                         msg.message.Variables = JSON.parse(msg.message.Variables);
@@ -210,8 +211,14 @@ export class MessageFlow{
                     payload["variables"] = msg.message.Variables[`${languageForSession}`];
                     payload["languageForSession"] = languageForSession;
                 } else {
-                    payload["variables"] = msg.message.Variables[this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE")];
-                    payload["languageForSession"] = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+                    languageForSession = defaultLangaugeCode;
+                    payload["variables"] = msg.message.Variables[defaultLangaugeCode];
+                    payload["languageForSession"] = defaultLangaugeCode;
+                }
+
+                // Update template name for whatsapp wati other than english
+                if (channel === "whatsappWati" && languageForSession !== "en") {
+                    payload["templateName"] = `${msg.templateName}_${languageForSession}`;
                 }
                 payload["variables"] = await this.updatePatientName(payload["variables"], personName);
             }
