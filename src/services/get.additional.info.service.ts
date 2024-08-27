@@ -1,37 +1,25 @@
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { ErrorHandler } from '../utils/error.handler';
 import { translateService } from '../services/translate.service';
-import { dialoflowMessageFormatting } from "./Dialogflow.service";
 import { EntityManagerProvider } from './entity.manager.provider.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import needle from 'needle';
 import { ContactList } from '../models/contact.list';
-import { ResponseHandler } from '../utils/response.handler';
-import { commonResponseMessageFormat } from '../services/common.response.format.object';
-import { Iresponse } from '../refactor/interface/message.interface';
-import { sendApiButtonService } from './whatsappmeta.button.service';
-import { sendTelegramButtonService } from '../services/telegram.button.service';
 import { NeedleService } from './needle.service';
 import { kerotoplastyService } from './kerotoplasty.service';
-
+import { sendExtraMessages } from './send.extra.messages.service';
 @scoped(Lifecycle.ContainerScoped)
 export class getAdditionalInfoSevice {
-    
-    private _platformMessageService?: platformServiceInterface;
 
     constructor(
         @inject(ClientEnvironmentProviderService) private clientEnvironment?: ClientEnvironmentProviderService,
-        @inject(ResponseHandler) private responseHandler?: ResponseHandler,
-        @inject(ErrorHandler) private errorHandler?: ErrorHandler,
         @inject(NeedleService) private needleService?: NeedleService,
+        @inject(sendExtraMessages) private sendExtraMessagesobj?: sendExtraMessages,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(translateService) private translate?: translateService,
         @inject (kerotoplastyService) private KerotoplastyService?:kerotoplastyService,
-        @inject(dialoflowMessageFormatting) private DialogflowServices?: dialoflowMessageFormatting,
     ){}
 
-    async processAdditionalInfo(eventObj){
+    async   processAdditionalInfo(eventObj){
         try {
             console.log("additional info  intent is trigered");
             const userName = eventObj.body.originalDetectIntentRequest.payload.userName;
@@ -54,11 +42,11 @@ export class getAdditionalInfoSevice {
         try {
             let message = null;
             const clientName = this.clientEnvironment.getClientEnvironmentVariable("NAME");
-            if (clientName === "GGHN_HIVTB")
+            if (clientName === "GGHN_HIVTB" || clientName === "REAN_BOT")
             {
                 message = await this.getMessageForGGHN(EHRNumber,userName);
             }
-            if (clientName === "LVPEI" || clientName === "REAN_BOT")
+            if (clientName === "LVPEI")
             {
                 message = await this.getMessageForLVPEI(EHRNumber,userId,userName,languageCode,eventObj);
             }
@@ -66,7 +54,7 @@ export class getAdditionalInfoSevice {
                 const button_yes = await this.translate.translatestring("Yes",languageCode);
                 const button_no = await this.translate.translatestring("No",languageCode);
                 const buttonArray = [button_yes, "Welcome",button_no,"additionalInfo"];
-                this.sendResponsebyButton(message,eventObj,userId,buttonArray);
+                this.sendExtraMessagesobj.sendResponsebyButton(message,eventObj,userId,buttonArray);
             }
             else {
                 const RequiredAdditionalInfo =  await this.clientEnvironment.getClientEnvironmentVariable("REQUIRED_ADDITIONAL_INFO");
@@ -75,7 +63,7 @@ export class getAdditionalInfoSevice {
                 const button_yes = await this.translate.translatestring("Yes",languageCode);
                 const button_no = await this.translate.translatestring("No",languageCode);
                 const buttonArray = [button_yes, "additionalInfo" ,button_no,"Welcome"];
-                this.sendResponsebyButton(message,eventObj,userId,buttonArray);
+                this.sendExtraMessagesobj.sendResponsebyButton(message,eventObj,userId,buttonArray);
             }
         }
         catch (error) {
@@ -90,20 +78,27 @@ export class getAdditionalInfoSevice {
         try {
             let response: any = {};
             response =  await this.KerotoplastyService.makeApiCall(EHRNumber, eventObj);
+            let name = null;
+            let message = null;
             const surgeryName = [];
-            const name = response.body.patient_details.FirstName + ' ' + response.body.patient_details.LastName;
-            let message = `Hi, *${name}*!\n\n We have recorded your MR number: *${EHRNumber}*` ;
-    
-            if (response.body.patient_details.last_visted_date !== null){
-                message = message + `\n\n Your last appointment was on ${response.body.patient_details.last_visted_date} with ${response.body.patient_details.last_visted_doctor}.`;
-            }
-            if (response.body.surgeries !== null){
-                for (const operate of response.body.surgeries) {
-                    surgeryName.push(operate.procedure_info + '\n');
+            if (response.body.patient_details){
+                name = response.body.patient_details.FirstName + ' ' + response.body.patient_details.LastName;
+                message = `Hi, *${name}*!\n\n We have recorded your MR number: *${EHRNumber}*` ;
+                if (response.body.patient_details.last_visted_date !== null){
+                    message = message + `\n\n Your last appointment was on ${response.body.patient_details.last_visted_date} with ${response.body.patient_details.last_visted_doctor}.`;
                 }
-                message = message + `\n *You have undergone following Surgeries:* ${surgeryName}.`;
+                if (response.body.surgeries !== null){
+                    for (const operate of response.body.surgeries) {
+                        surgeryName.push(operate.procedure_info + '\n');
+                    }
+                    message = message + `\n *You have undergone following Surgeries:* ${surgeryName}.`;
+                }
+                message = message + ` \n \n Is the above provided information correct?`;
             }
-            message = message + ` \n \n Is the above provided information correct?`;
+            else 
+            {
+                message = null;
+            }
             return message;
         } catch (error) {
             console.log("error in formatting message for LVPEI",error);
@@ -123,44 +118,7 @@ export class getAdditionalInfoSevice {
         return message;
     }
 
-    async sendResponsebyButton(message,eventObj,userId,buttonArray){
-        try {
-            const sourceChannel = eventObj.body.originalDetectIntentRequest.payload.source;
-            let payload = null;
-            let messageType = null;
-            if (sourceChannel === "whatsappMeta"){
-                payload = await sendApiButtonService(buttonArray);
-                messageType = "interactivebuttons";
-            }
-            else {
-                payload = await sendTelegramButtonService(buttonArray);
-                messageType = "inline_keyboard";
-            }
-            this._platformMessageService = eventObj.container.resolve(sourceChannel);
-            await this.sendButton(this._platformMessageService,message, messageType, userId ,payload);
-        }
-        catch (error) {
-            console.log("While formulating button response", error);
-
-        }
-
-    }
-
-    async sendButton(_platformMessageService , message, messageType, sessionId, payload){
-        try {
-            const response_format: Iresponse = commonResponseMessageFormat();
-            response_format.sessionId = sessionId;
-            response_format.messageText = message;
-            response_format.message_type = messageType;
-    
-            _platformMessageService.SendMediaMessage(response_format, payload );
-        }
-        catch (error) {
-            console.log("While Sending button response", error);
-
-        }
-
-    }
+   
 
     async getUserInfo(authenticationToken,userID){
         try {
@@ -259,7 +217,7 @@ export class getAdditionalInfoSevice {
                 const button_yes = await this.translate.translatestring("Yes",languageCode);
                 const button_no = await this.translate.translatestring("No",languageCode);
                 const buttonArray = [button_yes, "additionalInfo" ,button_no,"Welcome"];
-                this.sendResponsebyButton(message,eventObj,userId,buttonArray);
+                this.sendExtraMessagesobj.sendResponsebyButton(message,eventObj,userId,buttonArray);
                 return { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } ;
             }
         }

@@ -31,6 +31,7 @@ export class ServeAssessmentService {
         try {
             const metaPayload = {};
             const userTask = JSON.parse(userTaskData);
+            const defaultLangaugeCode = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
 
             // const assessmentId = userTask.Action.Assessment.id;
             const assessmentId = userTask.Action ? userTask.Action.Assessment.id : userTask.id;
@@ -45,13 +46,19 @@ export class ServeAssessmentService {
 
                 // Extract variables
                 metaPayload["templateName"] = questionData.TemplateName;
-                const languageForSession = await this.translate.detectUsersLanguage( message.userId );
+                let languageForSession = await this.translate.detectUsersLanguage( message.userId );
                 if (questionData.TemplateVariables[`${languageForSession}`]) {
                     metaPayload["variables"] = questionData.TemplateVariables[`${languageForSession}`];
                     metaPayload["languageForSession"] = languageForSession;
                 } else {
-                    metaPayload["variables"] = questionData.TemplateVariables[this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE")];
-                    metaPayload["languageForSession"] = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+                    languageForSession = defaultLangaugeCode;
+                    metaPayload["variables"] = questionData.TemplateVariables[defaultLangaugeCode];
+                    metaPayload["languageForSession"] = defaultLangaugeCode;
+                }
+
+                // Update template name for whatsapp wati other than english
+                if (userTask.Channel === "WhatsappWati" && languageForSession !== "en") {
+                    metaPayload["templateName"] = `${questionData.TemplateName}_${languageForSession}`;
                 }
 
                 // Extract buttons
