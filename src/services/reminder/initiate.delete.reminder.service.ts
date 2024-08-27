@@ -17,6 +17,7 @@ export class InitiateDeleteReminderService {
         @inject(Registration) private registration?: Registration
 
     ){}
+
     private _platformMessageService :  platformServiceInterface = null;
 
     async initiateDelete (eventObj) {
@@ -33,22 +34,22 @@ export class InitiateDeleteReminderService {
             const getreminderurl = `reminders/search?userId=${patientUserId}`;
             const responseBody = await this.needleService.needleRequestForREAN("get", getreminderurl);
             const listOfReminders = responseBody.Data.Reminders.Items;
-            if (listOfReminders.length>0) {
-                let buttonArray = []
+            if (listOfReminders.length > 0) {
+                let reminderTypeButtonArray = [];
                 for (const reminder of listOfReminders) {
-                    buttonArray.push(reminder.Name)
+                    reminderTypeButtonArray.push(reminder.Name);
                 }
-                buttonArray = [...new Set(buttonArray)];
-                let uniqueuttonArrays = []
-                for (let i = 0; i < buttonArray.length; i++){
-                    uniqueuttonArrays.push(buttonArray[i])
-                    uniqueuttonArrays.push("delete_reminder_type" + String(i))
+                reminderTypeButtonArray = [...new Set(reminderTypeButtonArray)];
+                let uniqueReminderTypeButtonArrays = [];
+                for (let i = 0; i < reminderTypeButtonArray.length; i++){
+                    uniqueReminderTypeButtonArrays.push(reminderTypeButtonArray[i]);
+                    uniqueReminderTypeButtonArrays.push("delete_reminder_type" + String(i));
                 }
                 if (channelName === 'whatsappMeta') {
-                    payload = await sendApiInteractiveListService(uniqueuttonArrays);
+                    payload = await sendApiInteractiveListService(uniqueReminderTypeButtonArrays);
                     messageType = 'interactivelist';
                 } else if (channelName === "telegram" || channelName === "Telegram"){
-                    payload = await sendTelegramButtonService(uniqueuttonArrays);
+                    payload = await sendTelegramButtonService(uniqueReminderTypeButtonArrays);
                     messageType = 'inline_keyboard';
                     channelName = "telegram";
                 }
@@ -92,25 +93,25 @@ export class InitiateDeleteReminderService {
             const patientUserId = await this.registration.getPatientUserId(channelName,
                 sessionId, userName);
             let message = null;
-            CacheMemory.set(sessionId,messageBody)
+            CacheMemory.set(sessionId,messageBody);
             const getreminderurl = `reminders/search?userId=${patientUserId}&name=${messageBody}`;
             const responseBody = await this.needleService.needleRequestForREAN("get", getreminderurl);
             const listOfReminders = responseBody.Data.Reminders.Items;
-            if (listOfReminders.length>0) {
+            if (listOfReminders.length > 0) {
                 let buttonArray = []
                 for (const reminder of listOfReminders) {
-                    if(reminder.WhenDate !== null){
-                        buttonArray.push(reminder.ReminderType+', ' + reminder.WhenDate + ', ' + reminder.WhenTime)
+                    if (reminder.WhenDate !== null){
+                        buttonArray.push(reminder.ReminderType+', ' + reminder.WhenDate + ', ' + reminder.WhenTime);
                     }
-                    else{
-                        buttonArray.push(reminder.ReminderType + ', ' + reminder.WhenTime)
+                    else {
+                        buttonArray.push(reminder.ReminderType + ', ' + reminder.WhenTime);
                     }
                 }
                 buttonArray = [...new Set(buttonArray)];
-                let uniqueuttonArrays = []
+                let uniqueuttonArrays = [];
                 for (let i = 0; i < buttonArray.length; i++){
                     uniqueuttonArrays.push(buttonArray[i])
-                    uniqueuttonArrays.push("delete_reminder_time" + String(i))
+                    uniqueuttonArrays.push("delete_reminder_time" + String(i));
                 }
                 if (channelName === 'whatsappMeta') {
                     payload = await sendApiInteractiveListService(uniqueuttonArrays);
@@ -154,26 +155,25 @@ export class InitiateDeleteReminderService {
             const sessionId : string = eventObj.body.originalDetectIntentRequest.payload.userId;
             const userName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
             const messageBody : string = eventObj.body.originalDetectIntentRequest.payload.completeMessage.messageBody;
-            const details = messageBody.split(',')
-            const whenTime = details[details.length-1];
-            let channelName = eventObj.body.originalDetectIntentRequest.payload.source;
-            const cache = await CacheMemory.get(sessionId)
+            const details = messageBody.split(',');
+            const whenTime = details[details.length - 1];
+            const channelName = eventObj.body.originalDetectIntentRequest.payload.source;
+            const cache = await CacheMemory.get(sessionId);
             const patientUserId = await this.registration.getPatientUserId(channelName,
                 sessionId, userName);
             let message = null;
-            const reminderType = details[0]
+            const reminderType = details[0];
             const getreminderurl = `reminders/search?userId=${patientUserId}&name=${cache}&whenTime=${whenTime}&reminderType=${reminderType}`;
             const responseBody = await this.needleService.needleRequestForREAN("get", getreminderurl);
             const listOfReminders = responseBody.Data.Reminders.Items;
-            // const reminderArrayLength = listOfReminders.length;
-            if (listOfReminders.length>0) {
+            if (listOfReminders.length > 0) {
                 for (const reminder of listOfReminders) {
                     const apiURL = `reminders/${reminder.id}`;
                     this.needleService.needleRequestForREAN("delete", apiURL, null, null);
                 }
                 message = `Hi ${userName}, \nYour ${cache} set at ${details} has been deleted`;
             }
-            else{
+            else {
                 message = `Hi ${userName}, \nIt seems like we were not able to find this reminder to delete. If you are still getting the reminder kindly connect with our support, or simply reply with a thumbs down`;
             }
             const data = {
@@ -190,7 +190,4 @@ export class InitiateDeleteReminderService {
         }
     }
 
-    delay() {
-        return new Promise(resolve => setTimeout(resolve, 1000));
-    }
 }
