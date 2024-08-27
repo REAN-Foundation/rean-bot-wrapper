@@ -83,6 +83,7 @@ import { NearestLocationListner } from './intentListeners/nearest.location.listn
 import { AppoinmentBookingListner } from './intentListeners/appoinment.booking.listner';
 import { WelcomeIntentListener } from './intentListeners/welcome.intent.listener';
 import { VolunteerSelectedPatient } from './intentListeners/bloodWarrior/volunteer.selected.patient';
+import { InitiateDeleteReminderListener, GetReminderDetails, DeleteReminder } from './intentListeners/initiate.delete.reminder.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -267,6 +268,11 @@ export class IntentRegister {
         IntentEmitter.registerListener('readAdditionalInfo', AdditionalInfoReadListener);
         IntentEmitter.registerListener('findNearestLocation', NearestLocationListner);
         IntentEmitter.registerListener('Book Appoinment', AppoinmentBookingListner);
+
+        //delete reminder
+        IntentEmitter.registerListener('initiate_delete_reminder', InitiateDeleteReminderListener);
+        IntentEmitter.registerListener('delete_reminder_type', GetReminderDetails);
+        IntentEmitter.registerListener('delete_reminder_time', DeleteReminder);
         
         // Intent fulfillement - Success listener
         // TODO: Pending implementation
