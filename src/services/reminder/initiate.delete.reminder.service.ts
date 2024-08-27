@@ -40,7 +40,7 @@ export class InitiateDeleteReminderService {
                     reminderTypeButtonArray.push(reminder.Name);
                 }
                 reminderTypeButtonArray = [...new Set(reminderTypeButtonArray)];
-                let uniqueReminderTypeButtonArrays = [];
+                const uniqueReminderTypeButtonArrays = [];
                 for (let i = 0; i < reminderTypeButtonArray.length; i++){
                     uniqueReminderTypeButtonArrays.push(reminderTypeButtonArray[i]);
                     uniqueReminderTypeButtonArrays.push("delete_reminder_type" + String(i));
@@ -98,19 +98,19 @@ export class InitiateDeleteReminderService {
             const responseBody = await this.needleService.needleRequestForREAN("get", getreminderurl);
             const listOfReminders = responseBody.Data.Reminders.Items;
             if (listOfReminders.length > 0) {
-                let buttonArray = []
+                let buttonArray = [];
                 for (const reminder of listOfReminders) {
                     if (reminder.WhenDate !== null){
-                        buttonArray.push(reminder.ReminderType+', ' + reminder.WhenDate + ', ' + reminder.WhenTime);
+                        buttonArray.push(reminder.ReminderType + ', ' + reminder.WhenDate + ', ' + reminder.WhenTime);
                     }
                     else {
                         buttonArray.push(reminder.ReminderType + ', ' + reminder.WhenTime);
                     }
                 }
                 buttonArray = [...new Set(buttonArray)];
-                let uniqueuttonArrays = [];
+                const uniqueuttonArrays = [];
                 for (let i = 0; i < buttonArray.length; i++){
-                    uniqueuttonArrays.push(buttonArray[i])
+                    uniqueuttonArrays.push(buttonArray[i]);
                     uniqueuttonArrays.push("delete_reminder_time" + String(i));
                 }
                 if (channelName === 'whatsappMeta') {
