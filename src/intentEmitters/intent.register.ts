@@ -88,12 +88,10 @@ import { VolunteerSelectedPatient } from './intentListeners/bloodWarrior/volunte
  * ** One Intent can have multiple Listeners
  * ** Listener functions are further modulerised in "./intentListeners" based on context
 */
-
 export class IntentRegister {
 
     register(){
         Logger.instance().log("Begin registering Intents...");
-
         // IntentEmitter.registerListener('Vaccination.AppointmentAvailability', getVaccinationAppointments);
         // IntentEmitter.registerListener('vaccination:appointments', secondListener);
 
@@ -133,7 +131,6 @@ export class IntentRegister {
 
         //Intents for calorie information
         IntentEmitter.registerListener('foodItemsDetails', calorieDetection);
-
         // IntentEmitter.registerListener('calorie.report.creation', calorieReport);
         IntentEmitter.registerListener('CalorieNegativeFeedback - yes', CalorieUpdate);
 

@@ -20,7 +20,6 @@ import { MockChannelAuthenticator } from '../services/clientAuthenticator/mockCh
 import { ClickUpAuthenticator } from '../services/clientAuthenticator/clickup.authenticator';
 import { SnehaAuthenticator } from '../services/clientAuthenticator/sneha.authenticator';
 
-
 export class Injector {
 
     static registerInjections(container: DependencyContainer) {
