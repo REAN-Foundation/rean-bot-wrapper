@@ -131,9 +131,9 @@ export const watiTemplateButtonService = async (buttonId) => {
     return payloadButtons;
 };
 
-export const sendApiInteractiveListService = async (buttons,description=false) => {
+export const sendApiInteractiveListService = async (buttons,description = false) => {
     const objects = [];
-    if(description === false){
+    if (description === false){
         for (let i = 0; i < buttons.length; i += 2) {
             const buttonObject = {
                 structValue : {
@@ -153,7 +153,7 @@ export const sendApiInteractiveListService = async (buttons,description=false) =
             objects.push(buttonObject);
         }
     }
-    else{
+    else {
         for (let i = 0; i < buttons.length; i += 3) {
             const buttonObject = {
                 structValue : {

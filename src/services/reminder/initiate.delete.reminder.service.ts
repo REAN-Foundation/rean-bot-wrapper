@@ -93,21 +93,21 @@ export class InitiateDeleteReminderService {
             const patientUserId = await this.registration.getPatientUserId(channelName,
                 sessionId, userName);
             let message = null;
-            let reminderType = ""
+            let reminderType = "";
             const getreminderurl = `reminders/search?userId=${patientUserId}&name=${messageBody}`;
             const responseBody = await this.needleService.needleRequestForREAN("get", getreminderurl);
             const listOfReminders = responseBody.Data.Reminders.Items;
             if (listOfReminders.length > 0) {
-                let buttonArray = [];
+                const buttonArray = [];
                 for (const reminder of listOfReminders) {
-                    if(channelName !== 'whatsappMeta'){
+                    if (channelName !== 'whatsappMeta'){
                         if (reminder.WhenDate !== null){
                             buttonArray.push(reminder.ReminderType + ', ' + reminder.WhenDate + ', ' + reminder.WhenTime);
-                            reminderType = reminder.ReminderType
+                            reminderType = reminder.ReminderType;
                         }
                         else {
                             buttonArray.push(reminder.ReminderType + ', ' + reminder.WhenTime);
-                            reminderType = reminder.ReminderType
+                            reminderType = reminder.ReminderType;
                         }
                     }
                     else {
@@ -115,28 +115,27 @@ export class InitiateDeleteReminderService {
                         if (reminder.WhenDate !== null){
                             buttonArray.push(reminder.WhenDate + ', ' + reminder.WhenTime);
                         }
-                        else{
+                        else {
                             buttonArray.push(reminder.WhenTime);
                         }
-                        reminderType = reminder.ReminderType
+                        reminderType = reminder.ReminderType;
                     }
                     
                 }
-                CacheMemory.set(sessionId,{reminderName: messageBody, reminderType: reminderType});
-                // buttonArray = [...new Set(buttonArray)];
+                CacheMemory.set(sessionId,{ reminderName: messageBody, reminderType: reminderType });
                 const uniqueuttonArrays = [];
-                if(channelName === 'whatsappMeta'){
+                if (channelName === 'whatsappMeta'){
                     for (let i = 0; i < buttonArray.length; i += 2){
                         uniqueuttonArrays.push(buttonArray[i]);
-                        uniqueuttonArrays.push(buttonArray[i+1]);
+                        uniqueuttonArrays.push(buttonArray[i + 1]);
                         uniqueuttonArrays.push("delete_reminder_time" + String(i));
-                    }    
+                    }
                 }
-                else{
+                else {
                     for (let i = 0; i < buttonArray.length; i++){
                         uniqueuttonArrays.push(buttonArray[i]);
                         uniqueuttonArrays.push("delete_reminder_time" + String(i));
-                    }  
+                    }
                 }
                 if (channelName === 'whatsappMeta') {
                     payload = await sendApiInteractiveListService(uniqueuttonArrays,true);
