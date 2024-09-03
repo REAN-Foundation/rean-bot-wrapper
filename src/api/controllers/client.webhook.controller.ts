@@ -222,7 +222,8 @@ export class ClientWebhookController {
             let languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
             if (channel === "whatsappMeta"){
                 if (reqBody.messages[0].type === 'interactive'){
-                    consentReply = reqBody.messages[0].interactive.button_reply.id;
+                    const interactiveType = reqBody.messages[0].interactive.type
+                    consentReply = reqBody.messages[0].interactive[interactiveType].id;
                     languageCode = consentReply.split("-")[1];
                     if (!languageCode){
                         languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
