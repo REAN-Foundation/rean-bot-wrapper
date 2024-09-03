@@ -19,9 +19,10 @@ export class MedicationStoppedReasonService {
             let messageType = "";
             let payload = null;
             let channelName = eventObj.body.originalDetectIntentRequest.payload.source;
+            const whatsappButtonArray = ["Drug Cycle", "I am done with the drug cycle", "drug_cycle_done","Forgot", "I forgot to take my meds" ,"forgot_taking_meds", "Out Of Meds", "I am out of mmedications and couldnot et refill","out_of_meds", "Tired Of Drugs", "I am tired of taking these drugs","tired_of_drugs", "Meds Not Required", "I don't need them. I am good", "meds_not_required","Side Effects", "I experience side effects", "side_effects", "Other Illness", "I have other illness so stopped taking these medications", "other_illness", "New Drugs Prescribed", "I have new drugs prescribed so not sure if it is ok to take my ARVs", "new_drugs_prescribed", "Uncomfortable", "Not comfortable to continue medication in current environment", "current_env_uncomfortable", "Trying Alternatives", "Trying out alternative therapy/ Herbal Medication", "trying_alternatives"];
             const buttonArray = ["I am done with the drug cycle", "drug_cycle_done", "I forgot to take my meds" ,"forgot_taking_meds", "I am out of mmedications and couldnot et refill","out_of_meds","I am tired of taking these drugs","tired_of_drugs", "I don't need them. I am good", "meds_not_required", "I experience side effects", "side_effects", "I have other illness so stopped taking these medications", "other_illness", "I have new drugs prescribed so not sure if it is ok to take my ARVs", "new_drugs_prescribed", "Not comfortable to continue medication in current environment", "current_env_uncomfortable","Trying out alternative therapy/ Herbal Medication", "trying_alternatives"];
             if (channelName === 'whatsappMeta') {
-                payload = await sendApiInteractiveListService(buttonArray);
+                payload = await sendApiInteractiveListService(whatsappButtonArray,true);
                 messageType = 'interactivelist';
             } else if (channelName === "telegram" || channelName === "Telegram"){
                 payload = await sendTelegramButtonService(buttonArray);

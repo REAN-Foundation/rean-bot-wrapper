@@ -93,28 +93,52 @@ export class InitiateDeleteReminderService {
             const patientUserId = await this.registration.getPatientUserId(channelName,
                 sessionId, userName);
             let message = null;
-            CacheMemory.set(sessionId,messageBody);
+            let reminderType = "";
             const getreminderurl = `reminders/search?userId=${patientUserId}&name=${messageBody}`;
             const responseBody = await this.needleService.needleRequestForREAN("get", getreminderurl);
             const listOfReminders = responseBody.Data.Reminders.Items;
             if (listOfReminders.length > 0) {
-                let buttonArray = [];
+                const buttonArray = [];
                 for (const reminder of listOfReminders) {
-                    if (reminder.WhenDate !== null || channelName !== 'whatsappMeta'){
-                        buttonArray.push(reminder.ReminderType + ', ' + reminder.WhenDate + ', ' + reminder.WhenTime);
+                    if (channelName !== 'whatsappMeta'){
+                        if (reminder.WhenDate !== null){
+                            buttonArray.push(reminder.ReminderType + ', ' + reminder.WhenDate + ', ' + reminder.WhenTime);
+                            reminderType = reminder.ReminderType;
+                        }
+                        else {
+                            buttonArray.push(reminder.ReminderType + ', ' + reminder.WhenTime);
+                            reminderType = reminder.ReminderType;
+                        }
                     }
                     else {
-                        buttonArray.push(reminder.ReminderType + ', ' + reminder.WhenTime);
+                        buttonArray.push(reminder.ReminderType);
+                        if (reminder.WhenDate !== null){
+                            buttonArray.push(reminder.WhenDate + ', ' + reminder.WhenTime);
+                        }
+                        else {
+                            buttonArray.push(reminder.WhenTime);
+                        }
+                        reminderType = reminder.ReminderType;
+                    }
+                    
+                }
+                CacheMemory.set(sessionId,{ reminderName: messageBody, reminderType: reminderType });
+                const uniqueuttonArrays = [];
+                if (channelName === 'whatsappMeta'){
+                    for (let i = 0; i < buttonArray.length; i += 2){
+                        uniqueuttonArrays.push(buttonArray[i]);
+                        uniqueuttonArrays.push(buttonArray[i + 1]);
+                        uniqueuttonArrays.push("delete_reminder_time" + String(i));
                     }
                 }
-                buttonArray = [...new Set(buttonArray)];
-                const uniqueuttonArrays = [];
-                for (let i = 0; i < buttonArray.length; i++){
-                    uniqueuttonArrays.push(buttonArray[i]);
-                    uniqueuttonArrays.push("delete_reminder_time" + String(i));
+                else {
+                    for (let i = 0; i < buttonArray.length; i++){
+                        uniqueuttonArrays.push(buttonArray[i]);
+                        uniqueuttonArrays.push("delete_reminder_time" + String(i));
+                    }
                 }
                 if (channelName === 'whatsappMeta') {
-                    payload = await sendApiInteractiveListService(uniqueuttonArrays);
+                    payload = await sendApiInteractiveListService(uniqueuttonArrays,true);
                     messageType = 'interactivelist';
                 } else if (channelName === "telegram" || channelName === "Telegram"){
                     payload = await sendTelegramButtonService(uniqueuttonArrays);
@@ -161,8 +185,7 @@ export class InitiateDeleteReminderService {
             const patientUserId = await this.registration.getPatientUserId(channelName,
                 sessionId, userName);
             let message = null;
-            const reminderType = details[0];
-            const getreminderurl = `reminders/search?userId=${patientUserId}&name=${cache}&whenTime=${whenTime}&reminderType=${reminderType}`;
+            const getreminderurl = `reminders/search?userId=${patientUserId}&name=${cache.reminderName}&whenTime=${whenTime}&reminderType=${cache.reminderType}`;
             const responseBody = await this.needleService.needleRequestForREAN("get", getreminderurl);
             const listOfReminders = responseBody.Data.Reminders.Items;
             if (listOfReminders.length > 0) {
@@ -170,7 +193,7 @@ export class InitiateDeleteReminderService {
                     const apiURL = `reminders/${reminder.id}`;
                     this.needleService.needleRequestForREAN("delete", apiURL, null, null);
                 }
-                message = `Hi ${userName}, \nYour ${cache} set at ${details} has been deleted`;
+                message = `Hi ${userName}, \nYour ${cache.reminderName} set at ${details} has been deleted`;
             }
             else {
                 message = `Hi ${userName}, \nIt seems like we were not able to find this reminder to delete. If you are still getting the reminder kindly connect with our support, or simply reply with a thumbs down`;
