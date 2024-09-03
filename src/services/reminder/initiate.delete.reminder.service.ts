@@ -111,20 +111,35 @@ export class InitiateDeleteReminderService {
                         }
                     }
                     else {
-                        buttonArray.push(reminder.WhenDate + ', ' + reminder.WhenTime);
+                        buttonArray.push(reminder.ReminderType);
+                        if (reminder.WhenDate !== null){
+                            buttonArray.push(reminder.WhenDate + ', ' + reminder.WhenTime);
+                        }
+                        else{
+                            buttonArray.push(reminder.WhenTime);
+                        }
                         reminderType = reminder.ReminderType
                     }
                     
                 }
                 CacheMemory.set(sessionId,{reminderName: messageBody, reminderType: reminderType});
-                buttonArray = [...new Set(buttonArray)];
+                // buttonArray = [...new Set(buttonArray)];
                 const uniqueuttonArrays = [];
-                for (let i = 0; i < buttonArray.length; i++){
-                    uniqueuttonArrays.push(buttonArray[i]);
-                    uniqueuttonArrays.push("delete_reminder_time" + String(i));
+                if(channelName === 'whatsappMeta'){
+                    for (let i = 0; i < buttonArray.length; i += 2){
+                        uniqueuttonArrays.push(buttonArray[i]);
+                        uniqueuttonArrays.push(buttonArray[i+1]);
+                        uniqueuttonArrays.push("delete_reminder_time" + String(i));
+                    }    
+                }
+                else{
+                    for (let i = 0; i < buttonArray.length; i++){
+                        uniqueuttonArrays.push(buttonArray[i]);
+                        uniqueuttonArrays.push("delete_reminder_time" + String(i));
+                    }  
                 }
                 if (channelName === 'whatsappMeta') {
-                    payload = await sendApiInteractiveListService(uniqueuttonArrays);
+                    payload = await sendApiInteractiveListService(uniqueuttonArrays,true);
                     messageType = 'interactivelist';
                 } else if (channelName === "telegram" || channelName === "Telegram"){
                     payload = await sendTelegramButtonService(uniqueuttonArrays);
