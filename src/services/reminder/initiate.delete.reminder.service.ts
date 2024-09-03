@@ -100,7 +100,7 @@ export class InitiateDeleteReminderService {
             if (listOfReminders.length > 0) {
                 let buttonArray = [];
                 for (const reminder of listOfReminders) {
-                    if (reminder.WhenDate !== null){
+                    if (reminder.WhenDate !== null || channelName !== 'whatsappMeta'){
                         buttonArray.push(reminder.ReminderType + ', ' + reminder.WhenDate + ', ' + reminder.WhenTime);
                     }
                     else {
