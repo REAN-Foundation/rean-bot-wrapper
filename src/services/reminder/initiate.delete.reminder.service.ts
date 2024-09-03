@@ -100,12 +100,18 @@ export class InitiateDeleteReminderService {
             if (listOfReminders.length > 0) {
                 let buttonArray = [];
                 for (const reminder of listOfReminders) {
-                    if (reminder.WhenDate !== null || channelName !== 'whatsappMeta'){
-                        buttonArray.push(reminder.ReminderType + ', ' + reminder.WhenDate + ', ' + reminder.WhenTime);
+                    if(channelName !== 'whatsappMeta'){
+                        if (reminder.WhenDate !== null){
+                            buttonArray.push(reminder.ReminderType + ', ' + reminder.WhenDate + ', ' + reminder.WhenTime);
+                        }
+                        else {
+                            buttonArray.push(reminder.ReminderType + ', ' + reminder.WhenTime);
+                        }
                     }
                     else {
-                        buttonArray.push(reminder.ReminderType + ', ' + reminder.WhenTime);
+                        buttonArray.push(reminder.WhenDate + ', ' + reminder.WhenTime);
                     }
+                    
                 }
                 buttonArray = [...new Set(buttonArray)];
                 const uniqueuttonArrays = [];
