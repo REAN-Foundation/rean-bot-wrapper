@@ -94,6 +94,7 @@ export class InitiateDeleteReminderService {
                 sessionId, userName);
             let message = null;
             let reminderType = "";
+            let whenTime = "";
             const getreminderurl = `reminders/search?userId=${patientUserId}&name=${messageBody}`;
             const responseBody = await this.needleService.needleRequestForREAN("get", getreminderurl);
             const listOfReminders = responseBody.Data.Reminders.Items;
@@ -104,10 +105,12 @@ export class InitiateDeleteReminderService {
                         if (reminder.WhenDate !== null){
                             buttonArray.push(reminder.ReminderType + ', ' + reminder.WhenDate + ', ' + reminder.WhenTime);
                             reminderType = reminder.ReminderType;
+                            whenTime = reminder.WhenTime;
                         }
                         else {
                             buttonArray.push(reminder.ReminderType + ', ' + reminder.WhenTime);
                             reminderType = reminder.ReminderType;
+                            whenTime = reminder.WhenTime;
                         }
                     }
                     else {
@@ -119,10 +122,11 @@ export class InitiateDeleteReminderService {
                             buttonArray.push(reminder.WhenTime);
                         }
                         reminderType = reminder.ReminderType;
+                        whenTime = reminder.WhenTime;
                     }
                     
                 }
-                CacheMemory.set(sessionId,{ reminderName: messageBody, reminderType: reminderType });
+                CacheMemory.set(sessionId,{ reminderName: messageBody, reminderType: reminderType, whenTime:  whenTime });
                 const uniqueuttonArrays = [];
                 if (channelName === 'whatsappMeta'){
                     for (let i = 0; i < buttonArray.length; i += 2){
@@ -179,13 +183,12 @@ export class InitiateDeleteReminderService {
             const userName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
             const messageBody : string = eventObj.body.originalDetectIntentRequest.payload.completeMessage.messageBody;
             const details = messageBody.split(',');
-            const whenTime = details[details.length - 1];
             const channelName = eventObj.body.originalDetectIntentRequest.payload.source;
             const cache = await CacheMemory.get(sessionId);
             const patientUserId = await this.registration.getPatientUserId(channelName,
                 sessionId, userName);
             let message = null;
-            const getreminderurl = `reminders/search?userId=${patientUserId}&name=${cache.reminderName}&whenTime=${whenTime}&reminderType=${cache.reminderType}`;
+            const getreminderurl = `reminders/search?userId=${patientUserId}&name=${cache.reminderName}&whenTime=${cache.whenTime}&reminderType=${cache.reminderType}`;
             const responseBody = await this.needleService.needleRequestForREAN("get", getreminderurl);
             const listOfReminders = responseBody.Data.Reminders.Items;
             if (listOfReminders.length > 0) {
