@@ -92,7 +92,8 @@ export class Message implements IWhatsappRequestMessageEntities {
     getinteractivelist() {
         const interactiveList = {
             title : this.list.interactive.list_reply.title,
-            id    : this.list.interactive.list_reply.id
+            id    : this.list.interactive.list_reply.id,
+            description : this.list.interactive.list_reply.description
         };
         return interactiveList;
     }

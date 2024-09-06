@@ -163,11 +163,11 @@ export const sendApiInteractiveListService = async (buttons,description = false)
                             "kind"        : "stringValue"
                         },
                         "title" : {
-                            "stringValue" : buttons[i],
+                            "stringValue" : buttons[i+1],
                             "kind"        : "stringValue"
                         },
                         "description" : {
-                            "stringValue" : buttons[i + 1],
+                            "stringValue" : buttons[i],
                             "kind"        : "stringValue"
                         }
                     }
