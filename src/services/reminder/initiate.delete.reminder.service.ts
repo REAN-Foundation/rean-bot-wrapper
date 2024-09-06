@@ -93,8 +93,6 @@ export class InitiateDeleteReminderService {
             const patientUserId = await this.registration.getPatientUserId(channelName,
                 sessionId, userName);
             let message = null;
-            let reminderType = "";
-            let whenTime = "";
             const getreminderurl = `reminders/search?userId=${patientUserId}&name=${messageBody}`;
             const responseBody = await this.needleService.needleRequestForREAN("get", getreminderurl);
             const listOfReminders = responseBody.Data.Reminders.Items;
