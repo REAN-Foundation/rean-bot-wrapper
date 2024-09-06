@@ -118,7 +118,7 @@ export class InitiateDeleteReminderService {
                     }
                     
                 }
-                CacheMemory.set(sessionId,{ reminderName: messageBody});
+                CacheMemory.set(sessionId,{ reminderName: messageBody });
                 const uniqueuttonArrays = [];
                 if (channelName === 'whatsappMeta'){
                     for (let i = 0; i < buttonArray.length; i += 2){

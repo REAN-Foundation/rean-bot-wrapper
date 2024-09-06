@@ -112,9 +112,9 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         messagetoDialogflow.messageBody = emojiFilteredMessage;
         messagetoDialogflow.intent = messageObj.getinteractivelist().id;
         const description = messageObj.getinteractivelist().description;
-        //need to change the structure of messagetoDialogflow such that it considers description when message type is list
-        //the below loop is just a temporary measure to make get description in delete reminders
-        if(description){
+
+        //need to change the structure of messagetoDialogflow such that it considers description when message type is list. the below loop is just a temporary measure to make get description in delete reminders
+        if (description){
             messagetoDialogflow.messageBody = description + ',' + emojiFilteredMessage;
         }
         return messagetoDialogflow;
