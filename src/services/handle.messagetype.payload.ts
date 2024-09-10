@@ -1,5 +1,3 @@
-
-
 export class HandleMessagetypePayload{
 
     getPayloadContent(payload) {

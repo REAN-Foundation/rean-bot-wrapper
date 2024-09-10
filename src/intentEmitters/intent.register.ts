@@ -93,10 +93,12 @@ import { InitiateDeleteReminderListener, GetReminderDetails, DeleteReminder } fr
  * ** Listener functions are further modulerised in "./intentListeners" based on context
 */
 
+
 export class IntentRegister {
 
     register(){
         Logger.instance().log("Begin registering Intents...");
+
 
         // IntentEmitter.registerListener('Vaccination.AppointmentAvailability', getVaccinationAppointments);
         // IntentEmitter.registerListener('vaccination:appointments', secondListener);
