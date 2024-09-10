@@ -1,5 +1,8 @@
 import { Logger } from '../common/logger';
 import { IntentEmitter } from './intent.emitter';
+
+// Register All listener handlers
+
 // import { getVaccinationAppointments, secondListener } from './intentListeners/vaccination.listener';
 import { getCovidInfo1s, getCovidResources1s } from './intentListeners/covid.listener';
 import { handleIntentFufillmentError } from './intentListeners/fallback.listener';
@@ -30,7 +33,7 @@ import { BloodWarriorDonor } from './intentListeners/bloodWarrior/donor.listener
 import { BloodWarriorNewUser } from './intentListeners/bloodWarrior/new.userlistener';
 import { BloodWarriorPatientEnroll } from './intentListeners/bloodWarrior/patient.enroll.listener';
 import { ChangeTransfusionDate, GiveTransfusionDate, VolunteerChangeTransfusionDate } from './intentListeners/bloodWarrior/change.tf.date.listener';
-import { kerotoplastyConditionIdentificationListener} from './intentListeners/kerotoplasty.bot.condition.Identification.listener';
+import { kerotoplastyConditionIdentificationListener } from './intentListeners/kerotoplasty.bot.condition.Identification.listener';
 import { kerotoplastyEyeQualityListener } from './intentListeners/kerotoplasty.imageQuality.listener';
 import { BloodWarriorMenu } from './intentListeners/bloodWarrior/menu.listener';
 import { RaiseBloodDonationRequest } from './intentListeners/bloodWarrior/raise.request.listener';
@@ -81,6 +84,7 @@ import { WelcomeIntentListener } from './intentListeners/welcome.intent.listener
 import { NearestLocationListner } from './intentListeners/nearest.location.listner';
 import { AppointmentBookingListner } from './intentListeners/appoinment.booking.listner';
 import { VolunteerSelectedPatient } from './intentListeners/bloodWarrior/volunteer.selected.patient';
+import { InitiateDeleteReminderListener, GetReminderDetails, DeleteReminder } from './intentListeners/initiate.delete.reminder.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -88,10 +92,14 @@ import { VolunteerSelectedPatient } from './intentListeners/bloodWarrior/volunte
  * ** One Intent can have multiple Listeners
  * ** Listener functions are further modulerised in "./intentListeners" based on context
 */
+
+
 export class IntentRegister {
 
     register(){
         Logger.instance().log("Begin registering Intents...");
+
+
         // IntentEmitter.registerListener('Vaccination.AppointmentAvailability', getVaccinationAppointments);
         // IntentEmitter.registerListener('vaccination:appointments', secondListener);
 
@@ -131,6 +139,7 @@ export class IntentRegister {
 
         //Intents for calorie information
         IntentEmitter.registerListener('foodItemsDetails', calorieDetection);
+
         // IntentEmitter.registerListener('calorie.report.creation', calorieReport);
         IntentEmitter.registerListener('CalorieNegativeFeedback - yes', CalorieUpdate);
 
@@ -257,8 +266,15 @@ export class IntentRegister {
         IntentEmitter.registerListener('AdditionalInfo', AdditionalInfoEditListener);
         IntentEmitter.registerListener('readAdditionalInfo', AdditionalInfoReadListener);
         IntentEmitter.registerListener('findNearestLocation', NearestLocationListner);
-        IntentEmitter.registerListener('bookAppointment', AppointmentBookingListner);
+        IntentEmitter.registerListener('Book Appoinment', AppointmentBookingListner);
 
+        //delete reminder
+        IntentEmitter.registerListener('initiate_delete_reminder', InitiateDeleteReminderListener);
+        IntentEmitter.registerListener('delete_reminder_type', GetReminderDetails);
+        IntentEmitter.registerListener('delete_reminder_time', DeleteReminder);
+
+        IntentEmitter.registerListener('bookAppointment', AppointmentBookingListner);
+      
         // Intent fulfillement - Success listener
         // TODO: Pending implementation
         // eslint-disable-next-line max-len

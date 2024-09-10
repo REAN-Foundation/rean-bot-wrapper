@@ -185,13 +185,15 @@ export class MessageFlow{
         let payload = {};
         let messageType = "";
         let assessmentSession = null;
+        let personName = " ";
         const defaultLangaugeCode = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
         const contactList = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
         const personContactList = await contactList.findOne({ where: { mobileNumber: msg.userId } });
         
-        //Add a check if user not found dont check
-        const personName = personContactList.username;
-        const channel = personContactList.platform;
+        if (personContactList) {
+            personName = personContactList.username;
+        }
+        const channel = msg.channel;
 
         if (msg.type === "template") {
             payload["templateName"] = msg.templateName;

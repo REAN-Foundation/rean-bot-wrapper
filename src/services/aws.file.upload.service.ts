@@ -221,4 +221,5 @@ export class AwsS3manager{
         });
 
     }
+
 }
