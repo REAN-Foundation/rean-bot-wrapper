@@ -3,6 +3,7 @@ import { autoInjectable, singleton } from 'tsyringe';
 import { ChatMessage } from '../models/chat.message.model';
 import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
+import { MessageStatus } from '../models/message.status';
 import { ClientEnvironmentProviderService } from '../services/set.client/client.environment.provider.service';
 import { CalorieInfo } from '../models/calorie.info.model';
 import { CalorieDatabase } from '../models/calorie.db.model';
@@ -32,7 +33,15 @@ export class SequelizeClient {
                 // eslint-disable-next-line max-len
                 sequelizeClient.addModels([ChatMessage, ChatSession, ContactList, CalorieInfo, CalorieDatabase,ConsentInfo,UserConsent]);
             } else {
-                sequelizeClient.addModels([ChatMessage, ChatSession, ContactList, AssessmentSessionLogs,ConsentInfo,UserConsent]);
+                sequelizeClient.addModels([
+                    ChatMessage,
+                    ChatSession,
+                    ContactList,
+                    AssessmentSessionLogs,
+                    ConsentInfo,
+                    UserConsent,
+                    MessageStatus
+                ]);
             }
     
             await sequelizeClient.authenticate()

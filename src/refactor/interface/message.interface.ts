@@ -102,6 +102,17 @@ export interface contactList {
     optOut?: string;
 }
 
+export interface IMessageStatus {
+    autoIncrementalID?: number;
+    chatMessageId: number;
+    channel: string;
+    messageStatus: string;
+    messageSentTimestamp: Date;
+    messageDeliveredTimestamp: Date;
+    messageReadTimestamp: Date;
+    messageRepliedTimestamp: Date;
+}
+
 export interface IprocessedDialogflowResponseFormat{
     processed_message: any;
     message_from_nlp: IserviceResponseFunctionalities;
