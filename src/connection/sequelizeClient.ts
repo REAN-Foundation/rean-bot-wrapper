@@ -9,7 +9,7 @@ import { CalorieInfo } from '../models/calorie.info.model';
 import { CalorieDatabase } from '../models/calorie.db.model';
 import { AssessmentSessionLogs } from '../models/assessment.session.model';
 import { ConsentInfo } from '../models/consent.info.model';
-import {UserConsent} from '../models/user.consent.model';
+import { UserConsent } from '../models/user.consent.model';
 const sequrlizeClients = new Map<string, Sequelize>();
 @autoInjectable()
 @singleton()
@@ -61,7 +61,6 @@ export class SequelizeClient {
             console.log("No DB to connect");
         }
         
-
     };
 
     // eslint-disable-next-line max-len

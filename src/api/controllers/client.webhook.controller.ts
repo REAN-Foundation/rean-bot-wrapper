@@ -118,12 +118,12 @@ export class ClientWebhookController {
                 this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', "");
             }
             else if (statuses[0].status === "delivered") {
-                await messageStatusRepostiory.update({ messageDeliveredTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: message.id }})
+                await messageStatusRepostiory.update({ messageDeliveredTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: message.id } })
                     .then(() => { Logger.instance().log("Delivered timestamp entered in the database"); });
                 this.responseHandler.sendSuccessResponse(res, 200, 'Message delivered successfully!', "");
             }
             else if (statuses[0].status === "read") {
-                await messageStatusRepostiory.update({ messageReadTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: message.id }})
+                await messageStatusRepostiory.update({ messageReadTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: message.id } })
                     .then(() => { Logger.instance().log("Read timestamp entered in the database"); });
                 this.responseHandler.sendSuccessResponse(res, 200, 'Message read successfully!', "");
             }
