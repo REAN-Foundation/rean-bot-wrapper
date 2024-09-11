@@ -229,11 +229,12 @@ export class GeneralReminderService {
         }
 
         variables = { en: commonStructure, kn: kannadaVariables, sw: commonStructure };
+        const buttonsIds = jsonFormat.TaskType === 'medication' ? [ "App_Reminder_Yes", "Medication_Taken_No" ] : [ "App_Reminder_Yes", "App_Reminder_No"] ;
 
         return {
             TemplateName : templateName,
             Variables    : variables,
-            ButtonsIds   : [ "App_Reminder_Yes", "App_Reminder_No"],
+            ButtonsIds   : buttonsIds,
             ClientName   : clientName,
             TextMessage  : `Hi ${personName}, \nYou have ${jsonFormat.TaskName} scheduled at ${jsonFormat.TimeString}. Will you be able to ${fourthVariable}?`
         };
