@@ -42,12 +42,12 @@ export class InitiateDeleteReminderService {
                 reminderTypeButtonArray = [...new Set(reminderTypeButtonArray)];
                 const uniqueReminderTypeButtonArrays = [];
                 for (let i = 0; i < reminderTypeButtonArray.length; i++){
-                    if(channelName === 'whatsappMeta'){
+                    if (channelName === 'whatsappMeta') {
                         uniqueReminderTypeButtonArrays.push(reminderTypeButtonArray[i]);
-                        uniqueReminderTypeButtonArrays.push("Reminder " +String(i+1));
+                        uniqueReminderTypeButtonArrays.push("Reminder " +String(i + 1));
                         uniqueReminderTypeButtonArrays.push("delete_reminder_type" + String(i));
                     }
-                    else{
+                    else {
                         uniqueReminderTypeButtonArrays.push(reminderTypeButtonArray[i]);
                         uniqueReminderTypeButtonArrays.push("delete_reminder_type" + String(i));
                     }
