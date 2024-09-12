@@ -42,11 +42,18 @@ export class InitiateDeleteReminderService {
                 reminderTypeButtonArray = [...new Set(reminderTypeButtonArray)];
                 const uniqueReminderTypeButtonArrays = [];
                 for (let i = 0; i < reminderTypeButtonArray.length; i++){
-                    uniqueReminderTypeButtonArrays.push(reminderTypeButtonArray[i]);
-                    uniqueReminderTypeButtonArrays.push("delete_reminder_type" + String(i));
+                    if (channelName === 'whatsappMeta') {
+                        uniqueReminderTypeButtonArrays.push(reminderTypeButtonArray[i]);
+                        uniqueReminderTypeButtonArrays.push("Reminder " +String(i + 1));
+                        uniqueReminderTypeButtonArrays.push("delete_reminder_type" + String(i));
+                    }
+                    else {
+                        uniqueReminderTypeButtonArrays.push(reminderTypeButtonArray[i]);
+                        uniqueReminderTypeButtonArrays.push("delete_reminder_type" + String(i));
+                    }
                 }
                 if (channelName === 'whatsappMeta') {
-                    payload = await sendApiInteractiveListService(uniqueReminderTypeButtonArrays);
+                    payload = await sendApiInteractiveListService(uniqueReminderTypeButtonArrays,true);
                     messageType = 'interactivelist';
                 } else if (channelName === "telegram" || channelName === "Telegram"){
                     payload = await sendTelegramButtonService(uniqueReminderTypeButtonArrays);
