@@ -44,7 +44,7 @@ export class InitiateDeleteReminderService {
                 for (let i = 0; i < reminderTypeButtonArray.length; i++){
                     if (channelName === 'whatsappMeta') {
                         uniqueReminderTypeButtonArrays.push(reminderTypeButtonArray[i]);
-                        uniqueReminderTypeButtonArrays.push("Reminder " +String(i + 1));
+                        uniqueReminderTypeButtonArrays.push("Reminder " + String(i + 1));
                         uniqueReminderTypeButtonArrays.push("delete_reminder_type" + String(i));
                     }
                     else {
@@ -94,7 +94,7 @@ export class InitiateDeleteReminderService {
             const sessionId : string = eventObj.body.originalDetectIntentRequest.payload.userId;
             const userName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
             const messageBody : string = eventObj.body.originalDetectIntentRequest.payload.completeMessage.messageBody;
-            const messageBodyList = messageBody.split(',')
+            const messageBodyList = messageBody.split(',');
             let messageType = "";
             let payload = null;
             let channelName = eventObj.body.originalDetectIntentRequest.payload.source;
