@@ -40,6 +40,7 @@ export class ClientWebhookController {
         try {
             // eslint-disable-next-line max-len
             this._platformMessageService = req.container.resolve(req.params.channel);
+            req.body["channel"] = req.params.channel;
             const response = await this._platformMessageService.sendManualMesage(req.body);
             if (response.statusCode === 200 || response.message_id !== undefined || response.status === 200) {
                 this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', response.body);
@@ -248,7 +249,8 @@ export class ClientWebhookController {
             let languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
             if (channel === "whatsappMeta"){
                 if (reqBody.messages[0].type === 'interactive'){
-                    consentReply = reqBody.messages[0].interactive.button_reply.id;
+                    const interactiveType = reqBody.messages[0].interactive.type;
+                    consentReply = reqBody.messages[0].interactive[interactiveType].id;
                     languageCode = consentReply.split("-")[1];
                     if (!languageCode){
                         languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");

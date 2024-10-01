@@ -131,25 +131,51 @@ export const watiTemplateButtonService = async (buttonId) => {
     return payloadButtons;
 };
 
-export const sendApiInteractiveListService = async (buttons) => {
+export const sendApiInteractiveListService = async (buttons,description = false) => {
     const objects = [];
-    for (let i = 0; i < buttons.length; i += 2) {
-        const buttonObject = {
-            structValue : {
-                fields : {
-                    "id" : {
-                        "stringValue" : buttons[i + 1],
-                        "kind"        : "stringValue"
-                    },
-                    "title" : {
-                        "stringValue" : buttons[i],
-                        "kind"        : "stringValue"
+    if (description === false){
+        for (let i = 0; i < buttons.length; i += 2) {
+            const buttonObject = {
+                structValue : {
+                    fields : {
+                        "id" : {
+                            "stringValue" : buttons[i + 1],
+                            "kind"        : "stringValue"
+                        },
+                        "title" : {
+                            "stringValue" : buttons[i],
+                            "kind"        : "stringValue"
+                        }
                     }
-                }
-            },
-            kind : "structValue",
-        };
-        objects.push(buttonObject);
+                },
+                kind : "structValue",
+            };
+            objects.push(buttonObject);
+        }
+    }
+    else {
+        for (let i = 0; i < buttons.length; i += 3) {
+            const buttonObject = {
+                structValue : {
+                    fields : {
+                        "id" : {
+                            "stringValue" : buttons[i + 2],
+                            "kind"        : "stringValue"
+                        },
+                        "title" : {
+                            "stringValue" : buttons[i + 1],
+                            "kind"        : "stringValue"
+                        },
+                        "description" : {
+                            "stringValue" : buttons[i],
+                            "kind"        : "stringValue"
+                        }
+                    }
+                },
+                kind : "structValue",
+            };
+            objects.push(buttonObject);
+        }
     }
     const payload = {
         "fields" : { "buttons" : {
