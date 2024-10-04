@@ -2,118 +2,41 @@ import { Logger } from "../../common/logger";
 import fs from 'fs';
 import path from 'path';
 import pDFDocument from 'pdfkit';
+import axios from 'axios';
 
-export const generatePdfCertificate = async (donorName, date) => {
+export const generatePdfCertificate = async (donorName, date, imageUrl) => {
     try {
-        const doc = new pDFDocument();
-        const pdfFilePath = path.join(process.cwd(), `uploads/${donorName}_${Date.now()}_certificate.pdf`);
+        let donationDate = new Date(date).toDateString();
+        donationDate = donationDate.replace(/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)\s*/, '');
 
-        // Define colors
-        const secondaryColor = '#E74C3C'; // Red
-        const textColor = '#333'; // Dark Gray
-
-        // Define fonts (you can add your own fonts)
-        const titleFont = 'Helvetica-Bold';
-        const textFont = 'Helvetica';
-        const instagramLink = 'https://www.instagram.com/bwindia_/';
-        const logoImage = path.join(process.cwd(), "./src/assets/images/instagram_logo.png");
-
-        const linkdinLink = 'https://www.linkedin.com/company/bloodwarriors/';
-        const linkdinImage = path.join(process.cwd(), "./src/assets/images/linkdin_logo.png");
+        // Create a document in landscape mode
+        const doc = new pDFDocument({
+            size   : [595.28, 841.89], // A4 in landscape (height * width)
+            layout : 'landscape',
+            margin : 30
+        });
+        const pdfFilePath = path.join(process.cwd(), `uploads/${donorName.replace(/\s+/g, '')}_${donationDate.replace(/\s+/g, '')}_certificate.pdf`);
 
         // Pipe the PDF document to a writable stream (in this case, a file)
         const stream = fs.createWriteStream(pdfFilePath);
         doc.pipe(stream);
 
-        // Add a colorful background
-        doc.rect(0, 0, 612, 792) // Letter-size page
-            .fillColor('white')
-            .fill();
+        const data = await downloadImage(imageUrl);
 
-        // Add a border to the certificate
-        doc.rect(20, 20, 572, 752)
-            .lineWidth(4)
-            .strokeColor(secondaryColor)
-            .stroke();
+        // Set the background image
+        doc.image(data, 0, 0, {
+            width  : doc.page.width,
+            height : doc.page.height
+        });
 
-        // Define the certificate content
-        const msgPart1 = "Dear ";
-        const certificateContent1 = `                This is to confirm that your donation on `;
-        const donationDate = `${new Date(date).toDateString()} `;
-        const certificateContent2 = `is successfully recorded. As a token of gratitude, we are sharing this certificate of appreciation, in recognition of your selfless act of donating blood to save lives. Your generosity and compassion have made a significant difference in our community.
-
-Thank you for your contribution to the cause of saving lives through blood donation.
-
-Forever Grateful,
-`;
-
-        // Add content to the PDF
-        doc.fillColor(textColor)
-            .font(titleFont)
-            .fontSize(28)
-            .text('Certificate of Appreciation', { align: 'center', underline: true })
-            .image( path.join(process.cwd(), "./src/assets/images/blood_warrior_logo.jpg"),  50, 40, { width: 80 });
-
-        doc.moveDown(1);
-
-        doc.font(textFont)
-            .fontSize(15)
-            .text(msgPart1, { continued: true })
+        // Add recipient's name and donation date
+        doc.fontSize(18)
+            .fillColor('#FF005C')
             .font('Helvetica-Bold')
-            .fontSize(15)
-            .text(donorName);
-
-        doc.moveDown(1);
-
-        doc.font(textFont)
-            .fontSize(15)
-            .text(certificateContent1, {
-                align     : 'justify',
-                width     : 470, // Adjusted width of text block
-                indent    : 0, // Left margin
-                lineGap   : 10, // Line spacing
-                continued : true
+            .text(`${donorName} on ${donationDate}`, doc.page.width / 2 + 18, 200, {
+                align : 'center',
+                width : doc.page.width / 2 - 60
             });
-
-        doc.font('Helvetica-Bold')
-            .fontSize(15)
-            .text(donationDate, {
-                align     : 'justify',
-                width     : 470, // Adjusted width of text block
-                indent    : 0, // Left margin
-                lineGap   : 10, // Line spacing
-                continued : true
-            });
-
-        doc.font(textFont)
-            .fontSize(14)
-            .text(certificateContent2, {
-                align   : 'justify',
-                width   : 470, // Adjusted width of text block
-                indent  : 0, // Left margin
-                lineGap : 10 // Line spacing
-            });
-
-        doc.font('Helvetica-Bold')
-            .fontSize(15)
-            .text("Team Blood Warriors", {
-                align   : 'left',
-                width   : 470, // Adjusted width of text block
-                indent  : 0, // Left margin
-                lineGap : 10 // Line spacing
-            });
-        doc.font(textFont)
-            .fontSize(15)
-            .text("Follow us on:", {
-                align   : 'left',
-                width   : 470, // Adjusted width of text block
-                indent  : 0, // Left margin
-                lineGap : 10 // Line spacing
-            })
-            .image(logoImage, 165, 460, { width: 25, height: 25 })
-            .link(165, 460, 25, 25, instagramLink)
-            .image(linkdinImage, 195, 460, { width: 25, height: 25 })
-            .link(195, 460, 25, 25, linkdinLink);
 
         // Finalize the PDF document
         doc.end();
@@ -134,5 +57,13 @@ Forever Grateful,
         Logger.instance()
             .log_error(error.message, 500, 'Generate pdf error!');
         throw new Error("Risk assessment followup listener error");
+    }
+
+    async function downloadImage(url) {
+        const response = await axios({
+            url,
+            responseType : 'arraybuffer' // Download as buffer
+        });
+        return response.data; // Return the image buffer
     }
 };
