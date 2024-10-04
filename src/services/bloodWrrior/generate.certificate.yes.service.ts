@@ -88,7 +88,8 @@ export class GenerateCertificateYesService {
 
             //Certificate message to donor
             const donorName = body.Donor.User.Person.DisplayName;
-            const filePath = await generatePdfCertificate(donorName, body.Donor.LastDonationDate );
+            const imageUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CERTIFICATE_URL");
+            const filePath = await generatePdfCertificate(donorName, body.Donor.LastDonationDate, imageUrl );
             const bucket_name = process.env.TEMP_BUCKET_NAME;
             const cloud_front_path = process.env.TEMP_CLOUD_FRONT_PATH;
 

@@ -2,9 +2,12 @@ import { Logger } from "../../common/logger";
 import fs from 'fs';
 import path from 'path';
 import pDFDocument from 'pdfkit';
+import axios from 'axios';
 
-export const generatePdfCertificate = async (donorName, date) => {
+export const generatePdfCertificate = async (donorName, date, imageUrl) => {
     try {
+        let donationDate = new Date(date).toDateString();
+        donationDate = donationDate.replace(/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)\s*/, '');
 
         // Create a document in landscape mode
         const doc = new pDFDocument({
@@ -12,21 +15,21 @@ export const generatePdfCertificate = async (donorName, date) => {
             layout : 'landscape',
             margin : 30
         });
-        const pdfFilePath = path.join(process.cwd(), `uploads/${donorName}_${Date.now()}_certificate.pdf`);
+        const pdfFilePath = path.join(process.cwd(), `uploads/${donorName.replace(/\s+/g, '')}_${donationDate.replace(/\s+/g, '')}_certificate.pdf`);
 
         // Pipe the PDF document to a writable stream (in this case, a file)
         const stream = fs.createWriteStream(pdfFilePath);
         doc.pipe(stream);
 
-        // Set the background image on the left half
-        doc.image(path.join(process.cwd(), "./src/assets/images/donation_certificate.jpg"), 0, 0, {
+        const data = await downloadImage(imageUrl);
+
+        // Set the background image
+        doc.image(data, 0, 0, {
             width  : doc.page.width,
             height : doc.page.height
         });
 
         // Add recipient's name and donation date
-        let donationDate = new Date(date).toDateString();
-        donationDate = donationDate.replace(/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)\s*/, '');
         doc.fontSize(18)
             .fillColor('#FF005C')
             .font('Helvetica-Bold')
@@ -54,5 +57,13 @@ export const generatePdfCertificate = async (donorName, date) => {
         Logger.instance()
             .log_error(error.message, 500, 'Generate pdf error!');
         throw new Error("Risk assessment followup listener error");
+    }
+
+    async function downloadImage(url) {
+        const response = await axios({
+            url,
+            responseType : 'arraybuffer' // Download as buffer
+        });
+        return response.data; // Return the image buffer
     }
 };
