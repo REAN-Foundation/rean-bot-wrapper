@@ -22,6 +22,4 @@ export const NearestLocationListner = async (intent:string, eventObj) => {
     const message =  await LocationService.formatLoctionResponse(locationResponse);
     const response = await dialoflowMessageFormattingObj.making_response(message);
     return  response;
-    
 };
-
