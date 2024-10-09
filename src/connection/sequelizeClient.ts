@@ -3,12 +3,13 @@ import { autoInjectable, singleton } from 'tsyringe';
 import { ChatMessage } from '../models/chat.message.model';
 import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
+import { MessageStatus } from '../models/message.status';
 import { ClientEnvironmentProviderService } from '../services/set.client/client.environment.provider.service';
 import { CalorieInfo } from '../models/calorie.info.model';
 import { CalorieDatabase } from '../models/calorie.db.model';
 import { AssessmentSessionLogs } from '../models/assessment.session.model';
 import { ConsentInfo } from '../models/consent.info.model';
-import {UserConsent} from '../models/user.consent.model';
+import { UserConsent } from '../models/user.consent.model';
 const sequrlizeClients = new Map<string, Sequelize>();
 @autoInjectable()
 @singleton()
@@ -32,7 +33,15 @@ export class SequelizeClient {
                 // eslint-disable-next-line max-len
                 sequelizeClient.addModels([ChatMessage, ChatSession, ContactList, CalorieInfo, CalorieDatabase,ConsentInfo,UserConsent]);
             } else {
-                sequelizeClient.addModels([ChatMessage, ChatSession, ContactList, AssessmentSessionLogs,ConsentInfo,UserConsent]);
+                sequelizeClient.addModels([
+                    ChatMessage,
+                    ChatSession,
+                    ContactList,
+                    AssessmentSessionLogs,
+                    ConsentInfo,
+                    UserConsent,
+                    MessageStatus
+                ]);
             }
     
             await sequelizeClient.authenticate()
@@ -52,7 +61,6 @@ export class SequelizeClient {
             console.log("No DB to connect");
         }
         
-
     };
 
     // eslint-disable-next-line max-len
