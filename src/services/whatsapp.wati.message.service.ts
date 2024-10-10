@@ -129,16 +129,18 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
             } else {
                 let message_type = "text";
                 let buttonMetaData = null;
+                response_message = { name: user_name, platform: platform, platformId: platformId, chat_message_id: chat_message_id, direction: "Out", message_type: message_type, intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: wati_whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[0], similarDoc: similar_doc, buttonMetaData: buttonMetaData };
                 if (payload !== null) {
                     message_type = payload.fields.messagetype.stringValue;
                     if (message_type === "interactive-buttons") {
-                        message_type = "interactive-buttons";
+                        message_type = "interactivebuttons";
                         buttonMetaData = JSON.stringify(this.whatsappWatiPostResponseFunctionalities.getButtonData(response_message, payload));
                     } else if (message_type === "interactive-list") {
                         message_type = "interactivelist";
                     }
                 }
-                response_message = { name: user_name, platform: platform, platformId: platformId, chat_message_id: chat_message_id, direction: "Out", message_type: message_type, intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: wati_whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[0], similarDoc: similar_doc, buttonMetaData: buttonMetaData };
+                response_message.message_type = message_type;
+                response_message.buttonMetaData = buttonMetaData;
             }
         }
         return response_message;

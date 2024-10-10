@@ -53,8 +53,9 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
                 options.headers['Content-Type'] = 'application/json';
                 options.headers['Authorization'] = `Bearer ${token}`;
                 const hostname = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
+                const version = process.env.WHATSAPP_API_VERSION;
                 const whatsappPhoneNumberID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_PHONE_NUMBER_ID");
-                const path = `/v14.0/${whatsappPhoneNumberID}/messages`;
+                const path = `/${version}/${whatsappPhoneNumberID}/messages`;
                 const apiUrl_meta = hostname + path;
                 const response = await needle("post", apiUrl_meta, postdata, options);
                 console.log(response.body);

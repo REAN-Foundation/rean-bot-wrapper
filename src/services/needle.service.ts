@@ -68,12 +68,13 @@ export class NeedleService {
 
     async needleRequestForWhatsappMeta(method: string, endPoint:string, postDataMeta?, payload?){
         const whatsappHost = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
+        const version = process.env.WHATSAPP_API_VERSION;
         const options = getRequestOptions();
         const whatsappToken = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
         options.headers['Content-Type'] = 'application/json';
         options.headers['Authorization'] = `Bearer ${whatsappToken}`;
         const whatsappPhoneNumberID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_PHONE_NUMBER_ID");
-        const url = `/v14.0/${whatsappPhoneNumberID}/${endPoint}`;
+        const url = `/${version}/${whatsappPhoneNumberID}/${endPoint}`;
         const whatsappaApi = whatsappHost + url;
         let response = null;
         if (method === "get") {

@@ -119,6 +119,10 @@ export class ClientWebhookController {
                 this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', "");
             }
             else if (statuses[0].status === "delivered") {
+                const messageStatus = await messageStatusRepostiory.findOne({ where: { chatMessageId: message.id } });
+                if (!messageStatus) {
+                    await this.sleep(1000);
+                }
                 await messageStatusRepostiory.update({ messageDeliveredTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: message.id } })
                     .then(() => { Logger.instance().log("Delivered timestamp entered in the database"); });
                 this.responseHandler.sendSuccessResponse(res, 200, 'Message delivered successfully!', "");
@@ -132,6 +136,11 @@ export class ClientWebhookController {
                 await messageStatusRepostiory.update({ messageRepliedTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: message.id } })
                     .then(() => { Logger.instance().log("Replied timestamp entered in the database"); });
                 this.responseHandler.sendSuccessResponse(res, 200, 'Message replied successfully!', "");
+            }
+            else if (statuses[0].status === "failed") {
+                await messageStatusRepostiory.update({ messageSentTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: message.id } })
+                    .then(() => { Logger.instance().log("Failed timestamp entered in the database"); });
+                this.responseHandler.sendSuccessResponse(res, 200, 'Message failed successfully!', "");
             }
             else {
                 const temp = this.responseHandler.sendSuccessResponse(res, 200, 'Notification received successfully!', "");
