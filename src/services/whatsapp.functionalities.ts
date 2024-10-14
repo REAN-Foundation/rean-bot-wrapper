@@ -284,7 +284,8 @@ export class MessageFunctionalities implements getMessageFunctionalities {
             options.headers['Content-Type'] = 'application/json';
             options.headers['Authorization'] = `Bearer ${token}`;
             const hostname = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
-            const path = `/v14.0/${mediaId}`;
+            const version = process.env.WHATSAPP_API_VERSION;
+            const path = `/${version}/${mediaId}`;
             const apiUrl_meta = hostname + path;
             const response = await needle("get",apiUrl_meta, options);
             return response.body.url;
