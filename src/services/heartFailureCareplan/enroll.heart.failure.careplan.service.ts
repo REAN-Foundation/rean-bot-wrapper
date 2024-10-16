@@ -40,12 +40,13 @@ export class HeartFailureRegistrationService {
                     EventObj      : eventObj
                 }
             };
-            const patientUpdateUrl = `patients${patientUserId}`;
+            const patientUpdateUrl = `patients/${patientUserId}`;
+            const defaultDOB = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_DOB");
 
             const patientDomainModel = {
                 Phone     : `+91-${personPhoneNumber}`,
                 Gender    : "Male",
-                BirthDate : new Date("2000-01-01").toISOString()
+                BirthDate : new Date(defaultDOB).toISOString()
                     .split("T")[0],
             };
             await this.needleService.needleRequestForREAN("put", patientUpdateUrl, null, patientDomainModel);
@@ -71,7 +72,7 @@ export class HeartFailureRegistrationService {
             if (remindersFlag === false) {
                 await this.enrollPatient(patientUserId, name, msg, eventObj);
             } else {
-                msg = `You have already enrolled in the Haert Failure care plan. If you wish to enroll again please contact to REAN support. https://www.reanfoundation.org/`;
+                msg = `You have already enrolled in the Heart Failure care plan. If you wish to enroll again please contact to REAN support. https://www.reanfoundation.org/`;
                 await this.sendMessage(msg, eventObj);
             }
         } else {
@@ -82,7 +83,7 @@ export class HeartFailureRegistrationService {
     async enrollPatient(patientUserId: string, name: string, msg: string, eventObj) {
 
         const channel: string = eventObj.body.originalDetectIntentRequest.payload.source;
-        const enrollmentUrl = `care-plans/patients/${patientUserId}/enroll`;
+        const enrollRoute = `care-plans/patients/${patientUserId}/enroll`;
         const obj1 = {
             Provider  : "REAN",
             PlanName  : "Heart Failure",
@@ -93,17 +94,17 @@ export class HeartFailureRegistrationService {
             Channel    : this.getPatientInfoService.getReminderType(channel),
             TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
         };
-        const resp = await this.needleService.needleRequestForREAN("post", enrollmentUrl, null, obj1);
+        const response = await this.needleService.needleRequestForREAN("post", enrollRoute, null, obj1);
 
-        const communicationUrl = `clinical/donation-communication`;
-        const obj = {
+        const communicationRoute = `clinical/donation-communication`;
+        const body = {
             PatientUserId     : patientUserId,
             IsRemindersLoaded : true
         };
-        await this.needleService.needleRequestForREAN("post", communicationUrl, null, obj);
+        await this.needleService.needleRequestForREAN("post", communicationRoute, null, body);
 
-        const enrollmentId = resp.Data.Enrollment.id;
-        Logger.instance().log(`Enrollment id of user ${name} is: ${enrollmentId}`);
+        const enrollmentIdHF = response.Data.Enrollment.id;
+        Logger.instance().log(`Enrollment id of Heart failure user ${name} is: ${enrollmentIdHF}`);
         await this.sendMessage(msg, eventObj);
     }
 
