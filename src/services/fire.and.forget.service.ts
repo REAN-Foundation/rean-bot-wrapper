@@ -13,6 +13,7 @@ import { NoBabyMovementAssessmentService } from './commonAssesssment/common.asse
 import { CincinnatiPerMinMsgService } from './maternalCareplan/cincannati.demo';
 import { AcceptDonationRequestService } from './bloodWrrior/accept.donation.request.service';
 import { ChangeTransfusionDateService } from './bloodWrrior/chnage.transfusion.date.service';
+import { HeartFailureRegistrationService } from './heartFailureCareplan/enroll.heart.failure.careplan.service';
 
 export interface QueueDoaminModel {
     Intent : string;
@@ -154,6 +155,14 @@ export class FireAndForgetService {
             const changeTFDateService:  ChangeTransfusionDateService =
                 eventObj.container.resolve(ChangeTransfusionDateService);
             await changeTFDateService.sendPatientListToVolunteer(model.Body);
+            console.log(`Fire and Forget Domain Model: ${model}`);
+        }
+        if (model.Intent === "RegistrationHeartFailure") {
+            const eventObj = model.Body.EventObj;
+            const _registrationService:  HeartFailureRegistrationService =
+                eventObj.container.resolve(HeartFailureRegistrationService);
+            await _registrationService.enrollPatientService(model.Body.PatientUserId,
+                model.Body.Name, eventObj );
             console.log(`Fire and Forget Domain Model: ${model}`);
         }
     };
