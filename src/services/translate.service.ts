@@ -135,6 +135,7 @@ export class translateService{
 
     translateResponse = async (responseMessage: string[], detected_language: string) => {
         console.log(`entered the translateResponse of translateService JJJJJJJJJJJ`);
+        const responseLanguage = await this.detectLanguage(responseMessage[0]);
         const defultLanguage = await this.getDialogflowLanguage();
         const translate = new v2.Translate(this.obj);
         this.translateGlossaryId = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TRANSLATE_GLOSSARY");
@@ -145,6 +146,11 @@ export class translateService{
                 } else {
                     this.translated_message = await translate.translate(responseMessage[0], { to: detected_language, format: "text" });
                 }
+                const [translation] = this.translated_message;
+                responseMessage = [translation];
+            }
+            else if (responseLanguage !== detected_language) {
+                this.translated_message = await translate.translate(responseMessage[0], { to: detected_language, format: "text" });
                 const [translation] = this.translated_message;
                 responseMessage = [translation];
             }
