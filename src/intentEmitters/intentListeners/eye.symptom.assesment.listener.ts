@@ -14,5 +14,4 @@ export const eyeSymptomAssessment = async ( intent,eventObj ) => {
             .log_error(error.message,500,'Eye Symptom listener error');
         throw new Error("Eye symptom listener error");
     }
-
 };
