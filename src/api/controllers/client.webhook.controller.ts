@@ -331,7 +331,7 @@ export class ClientWebhookController {
 
     receiveMessageMetaWhatsapp = async (req, res) => {
         try {
-            const clientEnvironmentProviderService = req. container.resolve(ClientEnvironmentProviderService);
+            const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
             const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
             console.log("clientName in webhook", clientName);

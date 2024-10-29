@@ -162,4 +162,3 @@ export class CalorieFeedback {
             throw new Error("Calorie Negative Feedback Service Error");
         }
     }
-}
