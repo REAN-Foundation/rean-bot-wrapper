@@ -27,8 +27,7 @@ export class Registration{
         return searchResult;
     }
 
-
-    async createUser(platformUserName,UserId,creationMethod)
+    async registerUserOnReanCare(platformUserName,UserId,creationMethod)
     {   let obj = null;
         if (creationMethod === "phoneNumber"){
             obj = {
@@ -83,7 +82,7 @@ export class Registration{
             if (channel === "telegram" || channel === "Telegram") {
                 const result = await this.checkPatientExist(UserId,null);
                 if (result.Data.Patients.Items.length === 0) {
-                    patientUserId = await this.createUser(platformUserName,UserId,"userName");
+                    patientUserId = await this.registerUserOnReanCare(platformUserName,UserId,"userName");
                 } else {
                     patientUserId = result.Data.Patients.Items[0].UserId;
                 }
@@ -93,7 +92,7 @@ export class Registration{
                 const apiURL = `patients/byPhone?phone=${encodeURIComponent(PhoneNumber)}`;
                 const result = await this.needleService.needleRequestForREAN("get", apiURL);
                 if (result.Data.Patients.Items.length === 0) {
-                    patientUserId = await this.createUser(platformUserName,UserId,"phoneNumber");
+                    patientUserId = await this.registerUserOnReanCare(platformUserName,UserId,"phoneNumber");
                 } else {
                     patientUserId = result.Data.Patients.Items[0].UserId;
                 }
@@ -107,4 +106,5 @@ export class Registration{
         }
         
     }
+
 }
