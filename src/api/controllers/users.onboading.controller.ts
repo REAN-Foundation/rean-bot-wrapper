@@ -13,7 +13,7 @@ import { Registration } from '../../services/registration/patient.registration.s
 @scoped(Lifecycle.ContainerScoped)
 export class UserOnboadingController{
 
-    private _validator = new UserDetailsValidator()
+    private _validator = new UserDetailsValidator();
 
     private _platformMessageService?: platformServiceInterface;
 
@@ -29,14 +29,12 @@ export class UserOnboadingController{
 
     onboadingProcess= async(request, response)=>{
         try {
-            {
-                const userDetails :  UserDetailsDomainModel = await this._validator.getDomainModel(request);
-                const entityManagerProvider = request.container.resolve(EntityManagerProvider);
-                const patientUserId = await this.registrationService.getPatientUserId(request.params.channel, userDetails.phoneNumber, userDetails.userName);
-                this.registrationService.wrapperRegistration(entityManagerProvider,userDetails.phoneNumber,userDetails.userName,request.params.channel,patientUserId);
-                this.sendWelcomeMessage(request,response);
-                this.responseHandler.sendSuccessResponse(response, 200, 'Onboarding Successfull', "");
-            }
+            const userDetails :  UserDetailsDomainModel = await this._validator.getDomainModel(request);
+            const entityManagerProvider = request.container.resolve(EntityManagerProvider);
+            const patientUserId = await this.registrationService.getPatientUserId(request.params.channel, userDetails.phoneNumber, userDetails.userName);
+            this.registrationService.wrapperRegistration(entityManagerProvider,userDetails.phoneNumber,userDetails.userName,request.params.channel,patientUserId);
+            this.sendWelcomeMessage(request,response);
+            this.responseHandler.sendSuccessResponse(response, 200, 'Onboarding Successfull', "");
         }
         catch (error) {
             console.log("in error", error);
