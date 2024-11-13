@@ -93,31 +93,17 @@ export const sendApiButtonService = async (buttons) => {
 };
 
 export const templateButtonService = async (buttonId) => {
-    const payloadButtons = [
-        {
-            "type"       : "button",
-            "sub_type"   : "quick_reply",
-            "index"      : "0",
-            "parameters" : [
-                {
-                    "type"    : "payload",
-                    "payload" : buttonId[0]
-    
-                }
-            ]
-        },
-        {
-            "type"       : "button",
-            "sub_type"   : "quick_reply",
-            "index"      : "1",
-            "parameters" : [
-                {
-                    "type"    : "payload",
-                    "payload" : buttonId[1]
-                }
-            ]
-        }
-    ];
+    const payloadButtons = buttonId.map((id, index) => ({
+        "type"       : "button",
+        "sub_type"   : "quick_reply",
+        "index"      : index.toString(),
+        "parameters" : [
+            {
+                "type"    : "payload",
+                "payload" : id
+            }
+        ]
+    }));
 
     return payloadButtons;
 };
