@@ -385,7 +385,7 @@ export class MessageFlow{
             // console.log("starting a new session");
             await chatSessionRepository.create({ userPlatformID  : messagetoDialogflow.platformId,
                 platform        : messagetoDialogflow.platform, sessionOpen     : "true",
-                lastMessageDate : lastMessageDate, askForFeedback  : "flase" });
+                lastMessageDate : lastMessageDate, askForFeedback  : "false" });
 
             // console.log("newChatsession", newChatsession);
             // await newChatsession.save();

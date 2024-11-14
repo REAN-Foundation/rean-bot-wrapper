@@ -100,7 +100,9 @@ export class FireAndForgetService {
             await registrationPerMinMsgService.collectMessage(eventObj);
             console.log(`Fire and Forget Domain Model: ${model}`);
         }
-        if (model.Intent === "Dmc_Yes" || model.Intent === "Dmc_No") {
+        if (model.Intent === "Dmc_Yes" || model.Intent === "Dmc_No" || model.Intent === "Work_Commitments"
+             || model.Intent === "Feeling_Unwell_A" || model.Intent === "Transit_Issues"
+        ) {
             const eventObj = model.Body.EventObj;
             const serveAssessmentService:  ServeAssessmentService = eventObj.container.resolve(ServeAssessmentService);
             const channel = eventObj.body.originalDetectIntentRequest.payload.source;
@@ -139,7 +141,8 @@ export class FireAndForgetService {
             const assessmentService:  NoBabyMovementAssessmentService =
                 eventObj.container.resolve(NoBabyMovementAssessmentService);
             await assessmentService.startAssessmentAndUpdateDb(eventObj, model.Body.PatientUserId,
-                model.Body.PersonPhoneNumber , model.Body.AssessmentTemplateId , model.Body.Channel);
+                model.Body.PersonPhoneNumber, model.Body.AssessmentTemplateId,
+                model.Body.AssessmentTemplateTitle, model.Body.Channel);
             console.log(`Fire and Forget Domain Model: ${model}`);
         }
         if (model.Intent === "Update_Accept_Donation_Flags") {

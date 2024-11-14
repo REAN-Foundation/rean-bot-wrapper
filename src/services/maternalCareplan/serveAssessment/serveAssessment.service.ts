@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../../common/logger';
+import needle from "needle";
 import { NeedleService } from '../../needle.service';
 import { sendApiButtonService, templateButtonService, watiTemplateButtonService } from '../../whatsappmeta.button.service';
 import { translateService } from '../../translate.service';
@@ -14,6 +15,7 @@ import { ChatMessage } from '../../../models/chat.message.model';
 import { CacheMemory } from '../../../services/cache.memory.service';
 import { CustomModelResponseFormat } from '../../../services/response.format/custom.model.response.format';
 import { sendTelegramButtonService } from '../../../services/telegram.button.service';
+import { Helper } from '../../../common/helper';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ServeAssessmentService {
@@ -120,7 +122,10 @@ export class ServeAssessmentService {
 
             //Next question send or complete the assessment
             if (requestBody.Data.AnswerResponse.Next !== null) {
-                const questionRawData = JSON.parse(requestBody.Data.AnswerResponse.Next.RawData);
+                let questionRawData = null;
+                if (requestBody.Data.AnswerResponse.Next?.RawData) {
+                    questionRawData = JSON.parse(requestBody.Data.AnswerResponse.Next.RawData);
+                }
                 message = questionData.Description;
                 console.log("    inside next////// question block");
 
@@ -198,6 +203,32 @@ export class ServeAssessmentService {
                 if (requestBody.Data.AnswerResponse.Next) {
                     await this.updateDBChatSessionWithMessageId(userId, messageId, chatMessageRepository, AssessmentSessionRepo);
                 }
+
+                if (userResponse === "Work_Commitments" || userResponse === "Feeling_Unwell_A" || userResponse === "Transit_Issues") {
+                    const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
+                    let todayDate = new Date().toISOString()
+                        .split('T')[0];
+                    const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
+                    const phoneNumber = Helper.formatPhoneForDocProcessor(personPhoneNumber);
+                    todayDate = Helper.removeLeadingZerosFromDay(todayDate);
+                    const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+
+                    // const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
+                    const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/follow-up/assessment/reply/${phoneNumber}/date/${todayDate}`;
+                    const res = await needle("put",
+                        getUrl,
+                        { assessment_id   : assessmentSession.assesmentId, patient_user_id : questionData.PatientUserId,
+                            chosen_option   : { sequence: userAnswer, text: userResponse }
+                        },
+                        { headers : {
+                            'Content-Type' : 'application/json',
+                            Accept         : 'application/json',
+                        },
+                        },
+                    );
+                    console.log(`Object in reply service ${JSON.stringify(res.body,null, 4)}`);
+            
+                }
             }
 
         } catch (error) {
@@ -221,8 +252,12 @@ export class ServeAssessmentService {
 
     public getAnswerFromIntent( intentName ) {
         const message = {
-            "Dmc_Yes" : 1,
-            "Dmc_No"  : 2
+            "Dmc_Yes"          : 1,
+            "Dmc_No"           : 2,
+            "Work_Commitments" : 1,
+            "Feeling_Unwell_A" : 2,
+            "Transit_Issues"   : 3
+
         };
         return message[intentName] ?? intentName;
     }
