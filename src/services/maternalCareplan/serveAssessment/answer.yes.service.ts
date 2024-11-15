@@ -63,7 +63,7 @@ export class AnswerYesMsgService {
                 }
             }
         } else {
-            const previousMessage = assessmentSession.intent ? assessmentSession.intent : "";
+            const previousMessage = assessmentSession ? assessmentSession.intent : "";
             for (const msg of userResponses) {
                 if (msg.WhatsAppTemplateName === previousMessage) {
                     message = this.getAnswer(intentName, message, msg);

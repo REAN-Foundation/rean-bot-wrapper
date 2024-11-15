@@ -151,7 +151,8 @@ export class WhatsappPostResponseFunctionalities{
 
             },
             payload.buttonIds ? payload.buttonIds[0] : null,
-            payload.buttonIds ? payload.buttonIds[1] : null]
+            payload.buttonIds ? payload.buttonIds[1] : null,
+            payload.buttonIds ? payload.buttonIds[2] : null]
         };
 
         if (payload.headers) {
