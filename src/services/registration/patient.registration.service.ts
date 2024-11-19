@@ -60,7 +60,7 @@ export class Registration{
         const contactListRepository =
         (await entityManagerProvider.getEntityManager(this.EnvironmentProviderService)).getRepository(ContactList);
         const respContactList = await contactListRepository.findAll({ where: { mobileNumber: userPlatformId } });
-        if (respContactList.length === 0) {
+        if (respContactList) {
             await contactListRepository.create({
                 mobileNumber  : userPlatformId,
                 username      : userPlatformName,
@@ -97,7 +97,7 @@ export class Registration{
                     patientUserId = result.Data.Patients.Items[0].UserId;
                 }
             } else {
-                throw Error("Channel not integrated");
+                throw   Error("Channel not integrated");
             }
             return patientUserId;
         }

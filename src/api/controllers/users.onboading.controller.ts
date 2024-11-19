@@ -31,9 +31,9 @@ export class UserOnboadingController{
         try {
             const userDetails :  UserDetailsDomainModel = await this._validator.getDomainModel(request);
             const entityManagerProvider = request.container.resolve(EntityManagerProvider);
-            const patientUserId = await this.registrationService.getPatientUserId(request.params.channel, userDetails.phoneNumber, userDetails.userName);
-            this.registrationService.wrapperRegistration(entityManagerProvider,userDetails.phoneNumber,userDetails.userName,request.params.channel,patientUserId);
-            this.sendWelcomeMessage(request,response);
+            const patientUserId = await this.registrationService.getPatientUserId(userDetails.platform, userDetails.phoneNumber, userDetails.userName);
+            await this.registrationService.wrapperRegistration(entityManagerProvider,userDetails.phoneNumber,userDetails.userName,userDetails.platform,patientUserId);
+            await this.sendWelcomeMessage(request,response);
             this.responseHandler.sendSuccessResponse(response, 200, 'Onboarding Successfull', "");
         }
         catch (error) {
@@ -49,14 +49,14 @@ export class UserOnboadingController{
             const WelcomeMessageTemplateNameJson = clientEnvironmentProviderService.getClientEnvironmentVariable("WELCOME_MESSAGE_TEMPLATE_NAMES");
             const payload: Record<string, any> = {
                 variables          : [],
-                templateName       : "welcome_message",
+                templateName       : JSON.parse(WelcomeMessageTemplateNameJson)[userDetails.languageCode],
                 languageForSession : userDetails.languageCode,
             };
-            this._platformMessageService = request.container.resolve(request.params.channel);
+            this._platformMessageService = request.container.resolve(userDetails.platform);
             const response_format: Iresponse = commonResponseMessageFormat();
-            response_format.platform = request.params.channel;
+            response_format.platform = userDetails.platform;
             response_format.sessionId = userDetails.phoneNumber;
-            response_format.messageText = WelcomeMessageTemplateNameJson[userDetails.languageCode];
+            response_format.messageText = JSON.parse(WelcomeMessageTemplateNameJson)[userDetails.languageCode];
             response_format.message_type = "template";
             await this._platformMessageService.SendMediaMessage(response_format, payload);
         } catch (error) {
