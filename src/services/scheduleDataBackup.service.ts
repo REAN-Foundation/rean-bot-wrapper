@@ -14,8 +14,8 @@ export class databackup{
     ){}
 
     async getKeys(clientName){
-        const URL = process.env[clientName+ "_" + "URL"];
-        const assetIDs = process.env[clientName+ "_" + "ASSET_ID"];
+        const URL = process.env[clientName + "_" + "URL"];
+        const assetIDs = process.env[clientName + "_" + "ASSET_ID"];
         const myToken = process.env[clientName + "_" + "TOKEN"];
         return [URL,assetIDs,myToken];
     }
@@ -32,11 +32,12 @@ export class databackup{
             "get",
             finalURL,
             options
-        );    
+        );
         const response_data = response.body.results;
         return response_data;
 
     }
+
     async getdatastructure(getFileKey){
         const awsFile = await this.awss3manager.getFile(getFileKey);
         const datastructure = JSON.parse(awsFile.Body.toString('utf-8'));
@@ -63,7 +64,7 @@ export class databackup{
             const uploadFileKey = `${formName}/Data/${fileName}.json`;
             await this.awss3manager.uploadKoboData(uploadFileKey,reformedData);
             console.log("data is successfully uploaded");
-        }  
+        }
 
     }
 

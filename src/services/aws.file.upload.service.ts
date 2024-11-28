@@ -6,6 +6,7 @@ import { inject, Lifecycle, scoped } from 'tsyringe';
 import { SignedUrls } from './signed.urls.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { Helper } from '../common/helper';
+import * as csv from 'fast-csv';
 
 @scoped(Lifecycle.ContainerScoped)
 export class AwsS3manager{
@@ -40,7 +41,7 @@ export class AwsS3manager{
         });
     }
 
-    async uploadKoboData(key,fileContent)
+    async uploadKoboData(key,fileContent, datastructure = null)
     {
         try {
             console.log("function is called ");
@@ -49,16 +50,56 @@ export class AwsS3manager{
             if (this.clientEnvironment.getClientEnvironmentVariable("S3_BUCKET_NAME")) {
                 var BUCKET_NAME = this.clientEnvironment.getClientEnvironmentVariable("S3_BUCKET_NAME");
             }
-            console.log("bucket_name is ",BUCKET_NAME);
-            console.log("file path",key);
-            console.log(fileContent);
             const params = {
                 Bucket : BUCKET_NAME,
                 Key    : key,// File name you want to save as in S3
-                Body   : JSON.stringify(fileContent)
             };
             const s3 = new AWS.S3(responseCredentials);
-            await s3.upload(params, function(err){
+            const s3File = await s3.getObject(params).promise();
+            const csvContent = s3File.Body.toString(); // File content as string
+            const fieldNames: string[] = Object.keys(datastructure);
+            const newRow: string[] = fieldNames.map((fieldName) => {
+                const value = fileContent[fieldName];
+                // Check if the key requires date formatting
+                if (value && (fieldName === 'start' || fieldName === 'end' || fieldName === '_submission_time')) {
+                    const date = new Date(value);
+                    return date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+                }
+                return value || ''; // Return original value or empty string
+            });
+            const rows = [];
+            await new Promise((resolve, reject) => {
+                csv.parseString(csvContent, { headers: false })
+                    .on('data', (row) => rows.push(row))
+                    .on('end', resolve)
+                    .on('error', reject);
+            });
+        
+            rows.push(newRow);
+
+            // Step 3: Convert updated rows back to CSV format
+            let updatedCsvContent = '';
+            await new Promise((resolve, reject) => {
+                const csvStream = csv.format({ headers: false });
+                csvStream
+                    .on('data', (chunk) => {
+                        updatedCsvContent += chunk.toString();
+                    })
+                    .on('end', resolve)
+                    .on('error', reject);
+
+                rows.forEach((row) => csvStream.write(row));
+                csvStream.end();
+            });
+
+            // Step 4: Upload the updated file back to S3
+            const uploadParams = {
+                Bucket      : BUCKET_NAME,
+                Key         : key, // Overwrite the existing file
+                Body        : updatedCsvContent,
+                ContentType : 'text/csv',
+            };
+            await s3.upload(uploadParams, function(err){
                 console.log(err);
             });
         }
