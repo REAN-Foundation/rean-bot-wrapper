@@ -27,12 +27,10 @@ export class kobotoolboxController{
     async getdatastructure(getFileKey){
         const awsFile = await this.awss3manager.getFile(getFileKey);
         const datastructure = JSON.parse(awsFile.Body);
-        console.log("data structure is ",datastructure);
         return datastructure;
     }
 
     kobotoolbox = async(req, res)=>{
-        console.log(req.body);
         const filename = this.clientEnvironment.getClientEnvironmentVariable("S3_KOBO_FILENAME");
         const [datastructureFileKey,dataFileKey] = await this.getKeys(req,filename);
         const datastructure = await this.getdatastructure(datastructureFileKey);

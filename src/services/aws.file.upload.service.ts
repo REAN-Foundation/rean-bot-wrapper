@@ -67,7 +67,6 @@ export class AwsS3manager{
                 }
                 return value || ''; // Return original value or empty string
             });
-            console.log(newRow);
             const rows = [];
             await new Promise((resolve, reject) => {
                 csv.parseString(csvContent, { headers: false })
