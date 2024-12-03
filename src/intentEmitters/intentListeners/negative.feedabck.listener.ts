@@ -1,5 +1,6 @@
 import { Logger } from '../../common/logger';
 import { FeedbackService } from '../../services/feedback/feedback.service';
+import { Loader } from '../../startup/loader';
 
 export const NegativeFeedbackListener = async (intent, eventObj) => {
     try {
@@ -7,6 +8,7 @@ export const NegativeFeedbackListener = async (intent, eventObj) => {
             .log('Negative Feedback received!!!!!');
 
         let response = null;
+        eventObj.container = Loader.container;
         const feedbackService = eventObj.container.resolve(FeedbackService);
         response = await feedbackService.NegativeFeedback(eventObj);
 

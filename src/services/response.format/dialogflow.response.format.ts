@@ -60,6 +60,12 @@ export class DialogflowResponseFormat implements IserviceResponseFunctionalities
         const intent = this.response[0].queryResult && this.response[0].queryResult.intent ? this.response[0].queryResult.intent.displayName : '';
         return intent;
     }
+    
+    getCode(){
+        if (this.response.body.data && this.response.body.data.hasOwnProperty('workflow')) {
+            return this.response.body.data.workflow;
+        }
+    }
 
     getPayload() {
         let payload = null;

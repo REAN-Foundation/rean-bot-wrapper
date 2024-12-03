@@ -236,6 +236,21 @@ export class DecisionRouter {
         return tags;
     }
 
+    async checkVerticleFlag(messageBody: Imessage) {
+        try{
+            const verticleCache = await CacheMemory.get(messageBody.platformId);
+            if (verticleCache) {
+                if (verticleCache.verticleComplete === false) {
+                    return this.clientEnvironmentProviderService.getClientEnvironmentVariable(verticleCache.verticle)
+                }
+            }
+        }
+        catch(error){
+            throw new Error(`check verticle flag: ${error}`)
+        }
+        
+    }
+
     async getDecision(messageBody: Imessage, channel: string){
         try {
             const resultFeedback = await this.checkFeedback(messageBody, channel);

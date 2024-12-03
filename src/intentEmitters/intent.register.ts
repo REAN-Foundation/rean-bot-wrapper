@@ -64,7 +64,8 @@ import { CreateReminderListener } from './intentListeners/medicationReminder/cre
 import { GenerateCertificateListener } from './intentListeners/bloodWarrior/generate.certificate.flow.listener';
 import { GenerateCertificateYesListener } from './intentListeners/bloodWarrior/generate.certificate.yes.listener';
 import { GenerateCertificateConfirmYesListener } from './intentListeners/bloodWarrior/generate.certificate.confirm.yes.listener';
-import { GeneralReminderListener } from './intentListeners/medicationReminder/general.reminder.listener';
+// import { GeneralReminderListener } from './intentListeners/medicationReminder/general.reminder.listener';
+import { SetReminderListener } from './intentListeners/medicationReminder/general.reminder.listener';
 import { ReminderFrequencyListener, SendFrequencyButtonsListener, StopMedicationReasonListener } from './intentListeners/medicationReminder/reminder.ask.frequency.listener';
 import { ReminderAskTimeListener } from './intentListeners/medicationReminder/reminder.ask.time.listener';
 import { DmcAssessmentAnswerYesListener } from './intentListeners/maternity.careplan/answer.yes.listener';
@@ -234,7 +235,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('Generate_Certificate', GenerateCertificateListener);
         IntentEmitter.registerListener('Generate_Certificate_Yes', GenerateCertificateYesListener);
         IntentEmitter.registerListener('Generate_Certificate_Confirm_Yes', GenerateCertificateConfirmYesListener);
-        IntentEmitter.registerListener('General_Reminder', GeneralReminderListener);
+        IntentEmitter.registerListener('SetReminder', SetReminderListener);
         IntentEmitter.registerListener('Reminder_Ask_Time', ReminderAskTimeListener);
         IntentEmitter.registerListener('Dmc_Yes', DmcAssessmentAnswerYesListener);
         IntentEmitter.registerListener('Dmc_No', DmcAssessmentAnswerNoListener);
