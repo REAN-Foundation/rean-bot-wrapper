@@ -10,8 +10,8 @@ export class CustomModelResponseFormat implements IserviceResponseFunctionalitie
     getText() {
 
         //get text. improve this method after deciding a json format for custom ML model response
-        if (this.response.body && this.response.body.answer) {
-            return [this.response.body.answer];
+        if (this.response.body.data && this.response.body.data.hasOwnProperty('bot')) {
+            return [this.response.body.data.bot];
         } else {
 
             // Handle the case where there is an error in the response body
@@ -26,7 +26,7 @@ export class CustomModelResponseFormat implements IserviceResponseFunctionalitie
         return image;
     }
 
-    getIntent(){
+    getIntent() {
 
         //get intent
         let intent;
@@ -45,17 +45,56 @@ export class CustomModelResponseFormat implements IserviceResponseFunctionalitie
         return payload;
     }
 
-    getParseMode(){
+    getParseMode() {
         const parse_mode = null;
         return parse_mode;
     }
 
-    getSimilarDoc(){
+    getSimilarDoc() {
 
         if (this.response.body && this.response.body.similar_docs) {
             return [this.response.body.similar_docs];
         } else {
             return null;
+        }
+    }
+
+    getVerticleFlag() {
+
+        if (this.response.body.data && this.response.body.data.hasOwnProperty('verticle_complete')) {
+            return this.response.body.data.verticle_complete;
+        } else {
+            throw new Error("Verticle flag not found")
+        }
+    }
+
+    getVerticle() {
+
+        if (this.response.body.data && this.response.body.data.hasOwnProperty('verticle')) {
+            return this.response.body.data.verticle;
+        } else {
+            throw new Error("Verticle missing")
+        }
+    }
+
+    eventObjectEntities() {
+
+        if (this.response.body.data && this.response.body.data.hasOwnProperty('entities')){
+            const entities = this.response.body.data.entities
+            return {
+                body : {
+                    queryResult : {
+                        parameters : entities
+                    }
+                }
+            }
+        }
+        
+    }
+
+    getworkflowflag() {
+        if (this.response.body.data && this.response.body.data.hasOwnProperty('workflow')) {
+            return this.response.body.data.workflow;
         }
     }
 

@@ -17,8 +17,12 @@ import { OutgoingMessage } from '../refactor/interface/message.interface';
 import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
 import { CacheMemory } from './cache.memory.service';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
+import { workflowInterface } from '../refactor/interface/wrokflow.interface';
+import { Loader } from '../startup/loader';
 @scoped(Lifecycle.ContainerScoped)
 export class handleRequestservice{
+
+    private _executeWorkflow?: workflowInterface;
 
     // constructor(
     constructor(
@@ -142,7 +146,6 @@ export class handleRequestservice{
         }
         case 'Feedback': {
             let message_to_ml_model;
-
             if (metaData.contextId && !metaData.intent){
                 let tag = "null";
                 tag = (metaData.type === "reaction") ? "reaction" : "Feedback";
@@ -150,8 +153,23 @@ export class handleRequestservice{
                 message_to_ml_model = "I have sent feedback to your message tell me that : we have achnowlwged your feedback out team of experts will come back to you";
                 message_from_nlp = await this.customMLModelResponseService.getCustomModelResponse(message_to_ml_model, metaData.platform, metaData);
             } else {
-                message_to_ml_model = outgoingMessage.Feedback.FeedbackContent;
-                message_from_nlp = await this.DialogflowResponseService.getDialogflowMessage(message_to_ml_model, metaData.platform, metaData.intent, metaData);
+                //setup module for workflow here
+                const verticleCache = await CacheMemory.get(metaData.platformId);
+                if (verticleCache){
+                    if(verticleCache.hasOwnProperty("workflow")){
+                        this._executeWorkflow = Loader.container.resolve(verticleCache.workflow.name);
+                        await this._executeWorkflow.next(metaData)
+                    }
+                } 
+                else{
+                    message_to_ml_model = outgoingMessage.Feedback.FeedbackContent;
+                    message_from_nlp = await this.DialogflowResponseService.getDialogflowMessage(message_to_ml_model, metaData.platform, metaData.intent, metaData);
+                    // message_from_nlp.getCode()
+                    // if(message_from_nlp){
+                    //     message_from_nlp = await this.customMLModelResponseService.getCustomModelResponse(message_to_ml_model, metaData.platform, metaData);
+                    // }
+                }
+
             }
             break;
         }

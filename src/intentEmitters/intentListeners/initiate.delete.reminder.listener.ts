@@ -1,4 +1,5 @@
 import { Logger } from '../../common/logger';
+import { Loader } from '../../startup/loader';
 import { InitiateDeleteReminderService } from '../../services/reminder/initiate.delete.reminder.service';
 export const InitiateDeleteReminderListener = async (intent, eventObj) => {
     try {
@@ -6,6 +7,7 @@ export const InitiateDeleteReminderListener = async (intent, eventObj) => {
             .log('Initiate Delete Reminder received!!!!!');
 
         let response = null;
+        eventObj.container = Loader.container;
         const deleteReminderService = eventObj.container.resolve(InitiateDeleteReminderService);
         response = await deleteReminderService.initiateDelete(eventObj);
 

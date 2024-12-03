@@ -16,5 +16,7 @@ export interface IserviceResponseFunctionalities {
     getPayload()
     getParseMode()
     getSimilarDoc()
+    // getVerticle()
+    // getCode()
 
 }

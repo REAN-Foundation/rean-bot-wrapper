@@ -19,6 +19,7 @@ import { ClickUpMessageService } from '../services/clickup.message.service';
 import { MockChannelAuthenticator } from '../services/clientAuthenticator/mockChannel.authenticator';
 import { ClickUpAuthenticator } from '../services/clientAuthenticator/clickup.authenticator';
 import { SnehaAuthenticator } from '../services/clientAuthenticator/sneha.authenticator';
+import { DeleteRemindersWorkflow } from '../services/workflow/delete.reminder.workflow'
 
 
 export class Injector {
@@ -48,6 +49,7 @@ export class Injector {
         container.register('clickup.authenticator', ClickUpAuthenticator);
         container.register('mockChannel.authenticator', MockChannelAuthenticator);
         container.register('whatsappWati.authenticator', WatiWhatsappAuthenticator);
+        container.register('DeleteReminders', DeleteRemindersWorkflow);
 
     }
 
