@@ -272,6 +272,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('Work_Commitments', DmcAssessmentAnswerNoListener);
         IntentEmitter.registerListener('Feeling_Unwell_A', DmcAssessmentAnswerNoListener);
         IntentEmitter.registerListener('Transit_Issues', DmcAssessmentAnswerNoListener);
+        IntentEmitter.registerListener('Start_Careplan_HeartF_Select', EnrollHFCareplanListener);
 
         //delete reminder
         IntentEmitter.registerListener('initiate_delete_reminder', InitiateDeleteReminderListener);
