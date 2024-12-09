@@ -58,7 +58,7 @@ export class AwsS3manager{
             const s3File = await s3.getObject(params).promise();
             const csvContent = s3File.Body.toString(); // File content as string
             const fieldNames: string[] = Object.keys(datastructure);
-            const newRow: string[] = fieldNames.map((fieldName) => {
+            let newRow: string[] = fieldNames.map((fieldName) => {
                 const value = fileContent[fieldName];
                 // Check if the key requires date formatting
                 if (value && (fieldName === 'start' || fieldName === 'end' || fieldName === '_submission_time')) {
@@ -74,6 +74,17 @@ export class AwsS3manager{
                     .on('end', resolve)
                     .on('error', reject);
             });
+            // Utility function to convert a string to title case
+            const toTitleCase = (str: string): string => {
+                return str
+                    .toLowerCase()
+                    .split(' ') // Split by spaces
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
+                    .join(' '); // Join the words back
+            };
+            
+            // Convert newRow values to title case
+            newRow = newRow.map(toTitleCase);
         
             rows.push(newRow);
 
