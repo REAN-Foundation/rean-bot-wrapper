@@ -9,7 +9,6 @@ export class kobotoolboxController{
     
     constructor(
         @inject(ResponseHandler) private responseHandler?: ResponseHandler,
-        @inject(ClientEnvironmentProviderService) private clientEnvironment?: ClientEnvironmentProviderService,
         @inject(AwsS3manager) private awss3manager?: AwsS3manager
     ) {
 
@@ -31,7 +30,10 @@ export class kobotoolboxController{
     }
 
     kobotoolbox = async(req, res)=>{
-        const filename = this.clientEnvironment.getClientEnvironmentVariable("S3_KOBO_FILENAME");
+
+        const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
+        this.awss3manager = req.container.resolve(AwsS3manager);
+        const filename = clientEnvironmentProviderService.getClientEnvironmentVariable("S3_KOBO_FILENAME");
         const [datastructureFileKey,dataFileKey] = await this.getKeys(req,filename);
         const datastructure = await this.getdatastructure(datastructureFileKey);
         await this.awss3manager.uploadKoboData(dataFileKey,req.body, datastructure);

@@ -60,6 +60,7 @@ export class AwsS3manager{
             const fieldNames: string[] = Object.keys(datastructure);
             let newRow: string[] = fieldNames.map((fieldName) => {
                 const value = fileContent[fieldName];
+
                 // Check if the key requires date formatting
                 if (value && (fieldName === 'start' || fieldName === 'end' || fieldName === '_submission_time')) {
                     const date = new Date(value);
@@ -74,6 +75,7 @@ export class AwsS3manager{
                     .on('end', resolve)
                     .on('error', reject);
             });
+
             // Utility function to convert a string to title case
             const toTitleCase = (str: string): string => {
                 return str
