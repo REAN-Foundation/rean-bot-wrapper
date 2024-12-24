@@ -5,6 +5,7 @@ import { autoInjectable } from 'tsyringe';
 import { PlatformWebhookRoutes } from './platform.webhook.routes';
 import { FrontendRoutes } from "./Frontend.routes";
 import { ConsentRoutes } from "./consent.routes";
+import { UserOnboadingRoutes } from "./user.onboading.routes";
 
 // import { ClientEnvironmentProviderService } from "../../services/set.client/client.environment.provider.service";
 
@@ -17,7 +18,8 @@ export class Router {
                 private chatBotRoutes?: ChatBotRoutes,
                 private whatsappWebhookRoutes?: PlatformWebhookRoutes,
                 private frontendRoutes?: FrontendRoutes,
-                private consentRoutes?: ConsentRoutes){
+                private consentRoutes?: ConsentRoutes,
+                private userOnboadingRoutes?:UserOnboadingRoutes){
         this._app = app;
     }
 
@@ -35,6 +37,7 @@ export class Router {
                 this.whatsappWebhookRoutes.register(this._app);
                 this.frontendRoutes.register(this._app);
                 this.consentRoutes.register(this._app);
+                this.userOnboadingRoutes.register(this._app);
                 resolve(true);
 
             } catch (error) {

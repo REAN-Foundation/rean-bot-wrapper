@@ -12,8 +12,9 @@ export class AnswerNoMsgService {
 
     async replyNoService (eventObj ): Promise<any> {
         try {
+            const intentName = eventObj.body.queryResult ? eventObj.body.queryResult.intent.displayName : null;
             const body : QueueDoaminModel =  {
-                Intent : "Dmc_No",
+                Intent : intentName,
                 Body   : {
                     EventObj : eventObj
                 }

@@ -21,6 +21,7 @@ export const getAssessmentDisplayCode = (intentName) => {
         "NoBabyMovement"          : "AssessmentNoBaby",
         "AssessmentBloodPressure" : "AssessmentBloodPressure",
         "AssessmentRegistration"  : "AssessmentRegistration",
+        "Reminder_Reply_No"       : "AppointmentFollowUp",
     };
     return message[intentName] ?? "";
 };

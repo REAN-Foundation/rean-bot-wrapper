@@ -86,6 +86,7 @@ import { NearestLocationListner } from './intentListeners/nearest.location.listn
 import { AppointmentBookingListner } from './intentListeners/appoinment.booking.listner';
 import { VolunteerSelectedPatient } from './intentListeners/bloodWarrior/volunteer.selected.patient';
 import { InitiateDeleteReminderListener, GetReminderDetails, DeleteReminder } from './intentListeners/initiate.delete.reminder.listener';
+import { EnrollHFCareplanListener, SentRegistrationMSGListener } from './intentListeners/heartFailureCareplan/start.careplan.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -248,6 +249,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('AssessmentBloodPressure', CommonAssessmentListener);
         IntentEmitter.registerListener('Reminder_Reply_Yes', AppointmentReminderReplyListener);
         IntentEmitter.registerListener('Reminder_Reply_No', AppointmentReminderReplyListener);
+        IntentEmitter.registerListener('Reminder_Reply_No', CommonAssessmentListener);
         IntentEmitter.registerListener('Reminder_Frequency_Once', ReminderFrequencyListener);
         IntentEmitter.registerListener('Reminder_Frequency_Daily', ReminderFrequencyListener);
         IntentEmitter.registerListener('Reminder_Frequency_Weekly', ReminderFrequencyListener);
@@ -266,6 +268,11 @@ export class IntentRegister {
         IntentEmitter.registerListener('readAdditionalInfo', AdditionalInfoReadListener);
         IntentEmitter.registerListener('findNearestLocation', NearestLocationListner);
         IntentEmitter.registerListener('Book Appoinment', AppointmentBookingListner);
+        IntentEmitter.registerListener('HF_Send_Registration_Msg', SentRegistrationMSGListener);
+        IntentEmitter.registerListener('Start_Careplan_HF', EnrollHFCareplanListener);
+        IntentEmitter.registerListener('Work_Commitments', DmcAssessmentAnswerNoListener);
+        IntentEmitter.registerListener('Feeling_Unwell_A', DmcAssessmentAnswerNoListener);
+        IntentEmitter.registerListener('Transit_Issues', DmcAssessmentAnswerNoListener);
 
         //delete reminder
         IntentEmitter.registerListener('initiate_delete_reminder', InitiateDeleteReminderListener);

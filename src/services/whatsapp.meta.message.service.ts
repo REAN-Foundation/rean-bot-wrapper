@@ -53,8 +53,9 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
                 options.headers['Content-Type'] = 'application/json';
                 options.headers['Authorization'] = `Bearer ${token}`;
                 const hostname = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
+                const version = process.env.WHATSAPP_API_VERSION;
                 const whatsappPhoneNumberID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_PHONE_NUMBER_ID");
-                const path = `/v14.0/${whatsappPhoneNumberID}/messages`;
+                const path = `/${version}/${whatsappPhoneNumberID}/messages`;
                 const apiUrl_meta = hostname + path;
                 const response = await needle("post", apiUrl_meta, postdata, options);
                 console.log(response.body);
@@ -99,7 +100,7 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
                         }
                     }
                     const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-                    const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.sessionId } });
+                    const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.chat_message_id} });
                     if (respChatMessage.length > 0) {
                         const id = respChatMessage[respChatMessage.length - 1].id;
                         await chatMessageRepository.update({ responseMessageID: needleResp.body.messages[0].id }, { where: { id: id } } )

@@ -42,14 +42,16 @@ export class NoBabyMovementAssessmentService {
             //let assessmentSessionLogs = null;
             if (requestBody.Data.AssessmentTemplateRecords.Items.length !== 0) {
                 const assessmentTemplateId = requestBody.Data.AssessmentTemplateRecords.Items[0].id;
+                const assessmentTemplateTitle = requestBody.Data.AssessmentTemplateRecords.Items[0].Title;
                 const body : QueueDoaminModel =  {
                     Intent : "StartAssessment",
                     Body   : {
-                        EventObj             : eventObj,
-                        PatientUserId        : patientUserId,
-                        PersonPhoneNumber    : personPhoneNumber,
-                        AssessmentTemplateId : assessmentTemplateId,
-                        Channel              : channel
+                        EventObj                : eventObj,
+                        PatientUserId           : patientUserId,
+                        PersonPhoneNumber       : personPhoneNumber,
+                        AssessmentTemplateId    : assessmentTemplateId,
+                        Channel                 : channel,
+                        AssessmentTemplateTitle : assessmentTemplateTitle
                     }
                 };
                 FireAndForgetService.enqueue(body);
@@ -79,16 +81,36 @@ export class NoBabyMovementAssessmentService {
         return object;
     }
 
-    public async startAssessmentAndUpdateDb (eventObj, patientUserId: string, personPhoneNumber: string, assessmentTemplateId: string, channel: string)  {
+    public async startAssessmentAndUpdateDb (eventObj, patientUserId: string, personPhoneNumber: string, assessmentTemplateId: string,
+        assessmentTemplateTitle: string, channel: string)  {
+
+        const currentDate = new Date().toISOString()
+            .split('T')[0];
+
+        // Create assessment for the patient.
         const apiURL = `clinical/assessments`;
         const obj = {
             "PatientUserId"        : patientUserId,
-            "Title"                : "A new assessment",
+            "Title"                : assessmentTemplateTitle,
             "AssessmentTemplateId" : assessmentTemplateId,
-            "ScheduledDate"        : new Date().toISOString()
-                .split('T')[0]
+            "ScheduledDate"        : currentDate
         };
         const requestBody1 = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
+
+        // Create user task for the patient.
+        const userTaskApiURL = `user-tasks`;
+        const userTaskBody = {
+            "UserId"             : patientUserId,
+            "Task"               : assessmentTemplateTitle,
+            "Category"           : "Assessment",
+            "ActionType"         : "Custom",
+            "ActionId"           : requestBody1.Data.Assessment.id,
+            "ScheduledStartTime" : currentDate,
+            "ScheduledEndTime"   : currentDate,
+            "IsRecurrent"        : false
+        };
+        await this.needleService.needleRequestForREAN("post", userTaskApiURL, null, userTaskBody);
+
         if (requestBody1.Data.Assessment) {
             const msg = { userId: personPhoneNumber, channel: channel };
             const assessment = JSON.stringify(requestBody1.Data.Assessment);
