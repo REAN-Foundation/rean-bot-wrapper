@@ -24,9 +24,14 @@ export class CustomMLModelResponseService{
         const verticleCache = await CacheMemory.get(completeMessage.platformId);
         if(verticleCache){
             if (verticleCache.hasOwnProperty("verticleComplete")){
-                let verticle = verticleCache.verticle
-                verticle.toLowerCase()
-                customModelUrl = `${customModelUrl}/${verticle}`
+                if(verticleCache.verticleComplete === false){
+                    let verticle = verticleCache.verticle
+                    verticle.toLowerCase()
+                    customModelUrl = `${customModelUrl}/${verticle}`
+                }
+                else{
+                    customModelUrl = `${customModelUrl}/intent_identifier`
+                }
             }
             else{
                 customModelUrl = `${customModelUrl}/intent_identifier`
