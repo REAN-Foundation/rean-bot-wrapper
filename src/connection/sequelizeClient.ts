@@ -10,6 +10,7 @@ import { CalorieDatabase } from '../models/calorie.db.model';
 import { AssessmentSessionLogs } from '../models/assessment.session.model';
 import { ConsentInfo } from '../models/consent.info.model';
 import { UserConsent } from '../models/user.consent.model';
+import { WorkflowUserData } from '../models/workflow.user.data.model';
 const sequrlizeClients = new Map<string, Sequelize>();
 @autoInjectable()
 @singleton()
@@ -40,7 +41,8 @@ export class SequelizeClient {
                     AssessmentSessionLogs,
                     ConsentInfo,
                     UserConsent,
-                    MessageStatus
+                    MessageStatus,
+                    WorkflowUserData
                 ]);
             }
     

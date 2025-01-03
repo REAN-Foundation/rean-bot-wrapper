@@ -11,9 +11,12 @@ import { MessageHandlerType, NlpProviderType, UserFeedbackType, ChannelType } fr
 import { EmojiFilter } from "../filter.message.for.emoji.service";
 import { DialogflowResponseService } from '../dialogflow.response.service';
 import { CacheMemory } from "../cache.memory.service";
+import { AlertHandler } from '../../services/emergency/alert.handler';
 
 @scoped(Lifecycle.ContainerScoped)
 export class DecisionRouter {
+
+    private alertHandle = new AlertHandler();
 
     outgoingMessage!: OutgoingMessage;
 
@@ -56,6 +59,8 @@ export class DecisionRouter {
             },
             Feedback : {
 
+            },
+            Alert : {
             }
             
         };
@@ -127,6 +132,7 @@ export class DecisionRouter {
                 await CacheMemory.set(key, false);
             }
         }
+
         //const assessmentInProgress = botMessages[botMessages.length - 3].messageFlag
 
         // Implement further logic for checking if assessment.
@@ -238,6 +244,17 @@ export class DecisionRouter {
 
     async getDecision(messageBody: Imessage, channel: string){
         try {
+            const mode = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WORK_FLOW_MODE");
+            if (mode === 'TRUE')
+            {
+                // const result = await this.alertHandle.commenceAlertFunc(messageBody, channel);
+                // if (result)
+                {
+                    this.outgoingMessage.MetaData = messageBody;
+                    this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.Alert;
+                    return this.outgoingMessage;
+                }
+            }
             const resultFeedback = await this.checkFeedback(messageBody, channel);
             this.outgoingMessage.MetaData = messageBody;
             if (!resultFeedback.feedbackFlag){

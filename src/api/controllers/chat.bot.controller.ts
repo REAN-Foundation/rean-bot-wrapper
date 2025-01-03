@@ -1,15 +1,26 @@
 import { Logger } from '../../common/logger';
 import { ResponseHandler } from '../../utils/response.handler';
-import { autoInjectable } from 'tsyringe';
+import { autoInjectable, inject, Lifecycle, scoped } from 'tsyringe';
 import { IntentEmitter } from '../../intentEmitters/intent.emitter';
-
+import { platformServiceInterface } from '../../refactor/interface/platform.interface';
+import { Iresponse } from '../../refactor/interface/message.interface';
+import { commonResponseMessageFormat } from '../../services/common.response.format.object';
+import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
+import { TelegramMessageService } from '../../services/telegram.message.service';
 @autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class ChatBotController {
 
     logger: Logger;
+    private _platformMessageService :  platformServiceInterface ;
 
-    constructor(private responseHandler?: ResponseHandler) {
+    constructor(
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+       @inject(TelegramMessageService) private telegramMessageService?:TelegramMessageService,
+        private responseHandler?: ResponseHandler) {
+        
         this.logger = Logger.instance();
+       
     }
 
     ping = async (request, response) => {
@@ -75,4 +86,18 @@ export class ChatBotController {
         return this.responseHandler.sendSuccessResponse(response, 200, 'Intent fulfilled successfully.', fulfillmentResponse);
     };
 
+    sendWorkflowMessage = async (request, response) => {
+        const request_body = request.body;
+        console.log(request_body);
+        this._platformMessageService = await request.container.resolve("telegram");
+        const response_format: Iresponse = commonResponseMessageFormat();
+        response_format.platform = "telegram";
+        response_format.sessionId = request_body.Phone;
+        response_format.messageText = request_body.TextMessage;
+        response_format.message_type = "text";
+        const result = await this.telegramMessageService.SendMediaMessage(response_format, null);
+        return this.responseHandler.sendSuccessResponse(response, 200, 'ok', { 'Data': request_body }, true);
+    };
+
 }
+

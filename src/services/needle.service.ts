@@ -188,4 +188,52 @@ export class NeedleService {
         return responseObject;
     };
 
+    async needleRequestForWorkflow (method: string, url:string,obj?) {
+        try {
+            const WorkflowBaseUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WORKFLOW_URL");
+            const loginUrl = `${WorkflowBaseUrl}/users/login-password`;
+            const WorkflowAPIkey = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WORK_FLOW_API_KEY");
+            const Username = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WORK_FLOW_USERNAME");
+            const Password = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WORK_FLOW_PASSWORD");
+            
+            const messageContent = {
+                "UserName" : Username,
+                "Password" : Password
+            };
+            const option = {
+                headers : {
+                    'Content-Type' : 'application/json',
+                    'X-Api-Key'    : WorkflowAPIkey
+                }
+            };
+            const respToken = await needle("post", loginUrl, messageContent, option);
+
+            if (!respToken) {
+                var accessToken = null;
+            }
+            console.log(respToken);
+            var accessToken = respToken.body.Data.AccessToken;
+            const options = await this.getHeaders.getWorkflowHeaders(accessToken);
+            const apiUrl = WorkflowBaseUrl + url;
+            let response = null;
+            if (method === "get") {
+                response = await needle(method, apiUrl, options);
+        
+            } else {
+                response = await needle(method, apiUrl, obj, options);
+            }
+        
+            if (response.statusCode === 200 || response.statusCode === 201) {
+                console.log('Workflow Api is successfull');
+            } else {
+                console.log("Failed to get response from workflow API.");
+            }
+        
+            return response.body;
+        } catch (error) {
+            console.log(error);
+            
+        }
+    }
+
 }

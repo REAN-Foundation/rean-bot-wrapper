@@ -1,5 +1,5 @@
 import { IserviceResponseFunctionalities } from "../../services/response.format/response.interface";
-import { MessageHandlerType, NlpProviderType, UserFeedbackType, ChannelType } from "../messageTypes/message.types";
+import { MessageHandlerType, NlpProviderType, UserFeedbackType, ChannelType,} from "../messageTypes/message.types";
 
 export interface Imessage{
     name : string;
@@ -199,6 +199,11 @@ export interface QnADetails {
     UserQuery       : string;
 }
 
+export interface AlertDetails {
+    AlertId         ?: string;
+  
+}
+
 export interface OutgoingMessage {
     PrimaryMessageHandler: MessageHandlerType;
     MetaData             : Imessage;
@@ -206,4 +211,6 @@ export interface OutgoingMessage {
     Assessment          ?: AssessmentDetails;
     Feedback            ?: Feedback;
     QnA                 ?: QnADetails;
+    Alert               ?: AlertDetails;
 }
+

@@ -3,7 +3,7 @@
 import { DialogflowResponseService } from './dialogflow.response.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { translateService } from './translate.service';
-import { inject, Lifecycle, scoped } from 'tsyringe';
+import { container, inject, Lifecycle, scoped } from 'tsyringe';
 import { Imessage } from '../refactor/interface/message.interface';
 import { ChatSession } from '../models/chat.session';
 import { EntityManagerProvider } from './entity.manager.provider.service';
@@ -17,11 +17,14 @@ import { OutgoingMessage } from '../refactor/interface/message.interface';
 import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
 import { CacheMemory } from './cache.memory.service';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
+import { CustomModelResponseFormat } from './response.format/custom.model.response.format';
+import { AlertListener } from './emergency/alert.listener';
 @scoped(Lifecycle.ContainerScoped)
 export class handleRequestservice{
 
     // constructor(
     constructor(
+        @inject(AlertListener) private alertListener?: AlertListener,
         @inject(DialogflowResponseService) private DialogflowResponseService?: DialogflowResponseService,
         @inject(translateService) private translateService?: translateService,
         @inject(EmojiFilter) private emojiFilter?: EmojiFilter,
@@ -159,6 +162,12 @@ export class handleRequestservice{
             break;
         }
         case 'Unhandled': {
+            break;
+        }
+        case 'Alert':{
+            console.log("Alert.....");
+            const resp = await this.alertListener.commenceAlertListener(metaData,  eventObj);
+           
             break;
         }
         }
