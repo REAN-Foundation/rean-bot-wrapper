@@ -41,6 +41,9 @@ export class CustomMLModelResponseService{
         else{
             customModelUrl = `${customModelUrl}/intent_identifier`
         }
+        if(!message){
+            message = completeMessage.messageBody
+        }
         const obj = { "userID": completeMessage.platformId,"user_query": message };
         
         // send authorisation once enabled for the custom model
@@ -101,6 +104,9 @@ export class CustomMLModelResponseService{
                     const res = (await this.chatBotController.processIntent(request, response))
                     if(res.statusCode ===200){
                         callCustomModel.body.data.bot = res.body.fulfillmentMessages[0].text.text[0]
+                        if(res.body.fulfillmentMessages.length>1){
+                            callCustomModel.body.data.payload = res.body.fulfillmentMessages[1].payload
+                        }
                         const customModelResponseFormat = new CustomModelResponseFormat(callCustomModel);
                         return customModelResponseFormat
                     }
