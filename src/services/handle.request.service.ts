@@ -155,19 +155,13 @@ export class handleRequestservice{
             } else {
                 //setup module for workflow here
                 const verticleCache = await CacheMemory.get(metaData.platformId);
-                if (verticleCache){
-                    if(verticleCache.hasOwnProperty("workflow")){
-                        this._executeWorkflow = Loader.container.resolve(verticleCache.workflow.name);
-                        await this._executeWorkflow.next(metaData)
-                    }
-                } 
+                if (verticleCache && verticleCache.hasOwnProperty("workflow")){
+                    this._executeWorkflow = Loader.container.resolve(verticleCache.workflow.name);
+                    await this._executeWorkflow.next(metaData)
+                    
+                }
                 else{
-                    message_to_ml_model = outgoingMessage.Feedback.FeedbackContent;
-                    message_from_nlp = await this.DialogflowResponseService.getDialogflowMessage(message_to_ml_model, metaData.platform, metaData.intent, metaData);
-                    // message_from_nlp.getCode()
-                    // if(message_from_nlp){
-                    //     message_from_nlp = await this.customMLModelResponseService.getCustomModelResponse(message_to_ml_model, metaData.platform, metaData);
-                    // }
+                    message_from_nlp = await this.customMLModelResponseService.getCustomModelResponse(message_to_ml_model, metaData.platform, metaData);
                 }
 
             }

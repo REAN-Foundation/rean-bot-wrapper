@@ -151,8 +151,19 @@ export class GeneralReminderService {
             throw new Error("This frequency is not yet setup")
         }
         
-        const data = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
-        return data;
+        const res = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
+        const data = {
+            "fulfillmentMessages" : [
+                {
+                    "text" : {
+                        "text" : [
+                            res.Message
+                        ]
+                    }
+                }
+            ]
+        };
+        return(data);
     }
 
     private getTemplateData(jsonFormat) {

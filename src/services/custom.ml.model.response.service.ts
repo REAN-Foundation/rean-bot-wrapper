@@ -63,7 +63,7 @@ export class CustomMLModelResponseService{
             const verticle = customModelResponseFormat.getVerticle();
             CacheMemory.set(completeMessage.platformId, { "verticle" : verticle, "verticleComplete" : verticle_complete });
             console.log("cache", CacheMemory.get(completeMessage.platformId))
-            if(!verticle_complete){
+            if(!verticle_complete || verticle === "FAQ"){
                 return customModelResponseFormat
             }
             else{
@@ -98,7 +98,12 @@ export class CustomMLModelResponseService{
                         return this;
                         }
                     };
-                    this.chatBotController.processIntent(request, response)
+                    const res = (await this.chatBotController.processIntent(request, response))
+                    if(res.statusCode ===200){
+                        callCustomModel.body.data.bot = res.body.fulfillmentMessages[0].text.text[0]
+                        const customModelResponseFormat = new CustomModelResponseFormat(callCustomModel);
+                        return customModelResponseFormat
+                    }
                 }
             }
         }
