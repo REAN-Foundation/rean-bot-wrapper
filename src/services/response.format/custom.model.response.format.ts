@@ -41,8 +41,11 @@ export class CustomModelResponseFormat implements IserviceResponseFunctionalitie
     }
 
     getPayload() {
-        const payload = this.response.payload ? this.response.payload : null;
-        return payload;
+        let payload = null;
+        if (this.response.body.data && this.response.body.data.hasOwnProperty('payload')) {
+            payload =  this.response.body.data.payload;
+        }
+        return payload
     }
 
     getParseMode() {

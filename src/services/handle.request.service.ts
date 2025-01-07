@@ -90,8 +90,10 @@ export class handleRequestservice{
         let customTranslations = null;
         const payload = message_from_nlp.getPayload();
         if (payload) {
-            if (payload.fields.customTranslations){
-                customTranslations = payload.fields.translations.structValue.fields[languageForSession].stringValue;
+            if (payload.fields){
+                if(payload.fields.customTranslations){
+                    customTranslations = payload.fields.translations.structValue.fields[languageForSession].stringValue;
+                }
             }
         }
         return customTranslations;
