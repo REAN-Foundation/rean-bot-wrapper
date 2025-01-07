@@ -104,6 +104,27 @@ export class GeneralReminderService {
             Logger.instance()
                 .log_error(error.message,500,'Send success general reminder creation error');
         }
+        else if( eventObj.body.data.bot.frequency.hasOwnProperty('MonthlyReminder') ){
+            apiURL = `reminders/repeat-every-month-on`;
+            obj["EndAfterNRepetitions"] = 6;
+        }
+        else{
+            throw new Error("This frequency is not yet setup")
+        }
+        
+        const res = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
+        const data = {
+            "fulfillmentMessages" : [
+                {
+                    "text" : {
+                        "text" : [
+                            res.Message
+                        ]
+                    }
+                }
+            ]
+        };
+        return(data);
     }
 
     public async extractWhenDateTime(time: any) {

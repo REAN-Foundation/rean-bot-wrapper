@@ -31,13 +31,61 @@ export class CustomMLModelResponseService{
 
         //call the model
         const callCustomModel = await needle("post",customModelUrl,obj,options);
-        const customModelResponseFormat = new CustomModelResponseFormat(callCustomModel);
-        const text = customModelResponseFormat.getText();
-        return customModelResponseFormat;
+        
+        if(callCustomModel.statusCode === 200){
+            const customModelResponseFormat = new CustomModelResponseFormat(callCustomModel);
+            const verticle_complete = customModelResponseFormat.getVerticleFlag();
+            const verticle = customModelResponseFormat.getVerticle();
+            CacheMemory.set(completeMessage.platformId, { "verticle" : verticle, "verticleComplete" : verticle_complete });
+            console.log("cache", CacheMemory.get(completeMessage.platformId))
+            if(!verticle_complete || verticle === "FAQ"){
+                return customModelResponseFormat
+            }
+            else{
+                if(customModelResponseFormat.getworkflowflag()){
+                    //start the wrokflow
+                    // const payload = {
+                    //     "userId" : completeMessage.platformId,
+                    //     "userName"
+                    // }
+                    // customModelResponseFormat.
+                    
+                    this._executeWorkflow = Loader.container.resolve(verticle);
+                    const steps = ["initiateDelete","getReminderDetails","deleteRemider"]
+                    await this._executeWorkflow.startWorkflow(verticle,completeMessage.platformId,steps)
+                    await this._executeWorkflow.next(completeMessage)
 
-        // const response = await this.dialogflowResponseService.getDialogflowMessage(text.answer, platform, text.intent, completeMessage);
-        // return response;
-
+                }
+                else{
+                    //call llm service listener and then create a response format that is same for all
+                    const request = { body : { queryResult : { intent : { displayName : verticle } }, data:  callCustomModel.body.data, payload: completeMessage } }
+                    const response = {
+                        statusCode: 200,
+                        body: null,
+                        
+                        status(code) {
+                        this.statusCode = code;
+                        return this;
+                        },
+                    
+                        send(message) {
+                        this.body = message;
+                        return this;
+                        }
+                    };
+                    const res = (await this.chatBotController.processIntent(request, response))
+                    if(res.statusCode ===200){
+                        callCustomModel.body.data.bot = res.body.fulfillmentMessages[0].text.text[0]
+                        const customModelResponseFormat = new CustomModelResponseFormat(callCustomModel);
+                        return customModelResponseFormat
+                    }
+                }
+            }
+        }
+        else{
+            throw new Error(`Error: ${callCustomModel.statusCode}`)
+        }
+        
     };
 
 }

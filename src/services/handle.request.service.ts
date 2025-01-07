@@ -150,8 +150,19 @@ export class handleRequestservice{
                 message_to_ml_model = "I have sent feedback to your message tell me that : we have achnowlwged your feedback out team of experts will come back to you";
                 message_from_nlp = await this.customMLModelResponseService.getCustomModelResponse(message_to_ml_model, metaData.platform, metaData);
             } else {
-                message_to_ml_model = outgoingMessage.Feedback.FeedbackContent;
-                message_from_nlp = await this.DialogflowResponseService.getDialogflowMessage(message_to_ml_model, metaData.platform, metaData.intent, metaData);
+                //setup module for workflow here
+                const verticleCache = await CacheMemory.get(metaData.platformId);
+                if (verticleCache && verticleCache.hasOwnProperty("workflow")){
+                    this._executeWorkflow = Loader.container.resolve(verticleCache.workflow.name);
+                    await this._executeWorkflow.next(metaData)
+                    
+                } 
+                else{
+                    message_to_ml_model = outgoingMessage.Feedback.FeedbackContent;
+                    message_from_nlp = await this.customMLModelResponseService.getCustomModelResponse(message_to_ml_model, metaData.platform, metaData);
+                    // message_from_nlp = await this.DialogflowResponseService.getDialogflowMessage(metaData.messageBody, metaData.platform, metaData.intent, metaData);
+                }
+
             }
             break;
         }
