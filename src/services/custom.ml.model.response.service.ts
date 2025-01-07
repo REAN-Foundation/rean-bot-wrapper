@@ -2,20 +2,45 @@
 /* eslint-disable max-len */
 import needle from "needle";
 import { scoped, Lifecycle } from "tsyringe";
-import { getRequestOptions } from "../utils/helper";
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 import { CustomModelResponseFormat } from "./response.format/custom.model.response.format";
-import { DialogflowResponseService } from "./dialogflow.response.service";
 import { Imessage } from "../refactor/interface/message.interface";
+import { CacheMemory } from "./cache.memory.service";
+import { ChatBotController } from '../api/controllers/chat.bot.controller';
+import { workflowInterface } from '../refactor/interface/wrokflow.interface';
+import { Loader } from '../startup/loader';
+const express = require('express');
 
 @scoped(Lifecycle.ContainerScoped)
 export class CustomMLModelResponseService{
 
+    private _executeWorkflow?: workflowInterface;
+
     constructor(private clientEnvironmentProviderService?:ClientEnvironmentProviderService,
-        private dialogflowResponseService?:DialogflowResponseService){}
+        private chatBotController?:ChatBotController){}
 
     getCustomModelResponse = async(message: string, platform: string = null, completeMessage:Imessage = null) =>{
-        const customModelUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CUSTOM_ML_MODEL_URL");
+        let customModelUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CUSTOM_ML_MODEL_URL");
+        const verticleCache = await CacheMemory.get(completeMessage.platformId);
+        if(verticleCache){
+            if (verticleCache.hasOwnProperty("verticleComplete")){
+                if(verticleCache.verticleComplete === false){
+                    let verticle = verticleCache.verticle
+                    verticle.toLowerCase()
+                    customModelUrl = `${customModelUrl}/${verticle}`
+                }
+                else{
+                    customModelUrl = `${customModelUrl}/intent_identifier`
+                }
+            }
+            else{
+                customModelUrl = `${customModelUrl}/intent_identifier`
+            }
+            
+        }
+        else{
+            customModelUrl = `${customModelUrl}/intent_identifier`
+        }
         const obj = { "userID": completeMessage.platformId,"user_query": message };
         
         // send authorisation once enabled for the custom model
@@ -38,7 +63,7 @@ export class CustomMLModelResponseService{
             const verticle = customModelResponseFormat.getVerticle();
             CacheMemory.set(completeMessage.platformId, { "verticle" : verticle, "verticleComplete" : verticle_complete });
             console.log("cache", CacheMemory.get(completeMessage.platformId))
-            if(!verticle_complete || verticle === "FAQ"){
+            if(!verticle_complete){
                 return customModelResponseFormat
             }
             else{
@@ -73,12 +98,7 @@ export class CustomMLModelResponseService{
                         return this;
                         }
                     };
-                    const res = (await this.chatBotController.processIntent(request, response))
-                    if(res.statusCode ===200){
-                        callCustomModel.body.data.bot = res.body.fulfillmentMessages[0].text.text[0]
-                        const customModelResponseFormat = new CustomModelResponseFormat(callCustomModel);
-                        return customModelResponseFormat
-                    }
+                    this.chatBotController.processIntent(request, response)
                 }
             }
         }

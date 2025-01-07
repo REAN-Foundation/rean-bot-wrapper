@@ -1,6 +1,5 @@
 import { Logger } from '../../common/logger';
 import { FeedbackService } from '../../services/feedback/feedback.service';
-import { Loader } from '../../startup/loader';
 
 export const PositiveFeedbackListener = async (intent, eventObj) => {
     try {
@@ -8,7 +7,6 @@ export const PositiveFeedbackListener = async (intent, eventObj) => {
             .log('Positive Feedback received!!!!!');
         
         let response = null;
-        eventObj.container = Loader.container;
         const feedbackService = eventObj.container.resolve(FeedbackService);
         response = await feedbackService.PositiveFeedback(eventObj);
         console.log('Inside listener: ', response);

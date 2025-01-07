@@ -100,7 +100,7 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
                         }
                     }
                     const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-                    const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.sessionId } });
+                    const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.chat_message_id} });
                     if (respChatMessage.length > 0) {
                         const id = respChatMessage[respChatMessage.length - 1].id;
                         await chatMessageRepository.update({ responseMessageID: needleResp.body.messages[0].id }, { where: { id: id } } )
@@ -119,7 +119,7 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
                             imageContent      : response_format.messageBody,
                             imageUrl          : response_format.messageImageUrl,
                             userPlatformID    : response_format.sessionId,
-                            intent            : payload ? payload.templateName : null
+                            intent            : payload.templateName
                         };
                         await chatMessageRepository.create(chatMessageObj)
                             .then(() => { console.log("created"); })

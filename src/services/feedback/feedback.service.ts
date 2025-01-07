@@ -33,9 +33,9 @@ export  class FeedbackService implements feedbackInterface {
             try {
                 const humanHandoff: HumanHandoff = eventObj.container.resolve(HumanHandoff);
                 const clientEnvironmentProviderService = eventObj.container.resolve(ClientEnvironmentProviderService);
-                const messageContent = eventObj.body.payload.messageBody;
-                const payload = eventObj.body.payload;
-                const userId = payload.platformId;
+                const messageContent = eventObj.body.originalDetectIntentRequest.payload.completeMessage.messageBody;
+                const payload = eventObj.body.originalDetectIntentRequest.payload;
+                const userId = payload.userId;
                 const client_name = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
                 const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(ChatMessage);
                 let responseChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: userId } });
@@ -139,8 +139,8 @@ export  class FeedbackService implements feedbackInterface {
     async PositiveFeedback(eventObj) {
         return new Promise(async(resolve, reject) =>{
             try {
-                const payload = eventObj.body.payload;
-                const userId = payload.platformId;
+                const payload = eventObj.body.originalDetectIntentRequest.payload;
+                const userId = payload.userId;
                 const clientEnvironmentProviderService = eventObj.container.resolve(ClientEnvironmentProviderService);
                 const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(ChatMessage);
                 const listOfUserRequestdata = await chatMessageRepository.findAll({ where: { userPlatformID: userId } });
@@ -160,7 +160,7 @@ export  class FeedbackService implements feedbackInterface {
                 resolve(data);
             }
             catch (error) {
-                console.log(error, 500, "Positive Feedback Service Error!");
+                console.log(error, 500, "Negative Feedback Service Error!");
                 reject(error.message);
             }
         });

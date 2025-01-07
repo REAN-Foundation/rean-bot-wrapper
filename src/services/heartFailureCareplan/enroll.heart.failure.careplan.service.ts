@@ -42,22 +42,22 @@ export class HeartFailureRegistrationService {
             };
             const patientUpdateUrl = `patients/${patientUserId}`;
             const defaultDOB = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_DOB");
-            const defaultGender = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_GENDER");
 
             const patientDomainModel = {
-                Gender    : defaultGender,
+                Phone     : `+91-${personPhoneNumber}`,
+                Gender    : "Male",
                 BirthDate : new Date(defaultDOB).toISOString()
                     .split("T")[0],
             };
             await this.needleService.needleRequestForREAN("put", patientUpdateUrl, null, patientDomainModel);
             
-            const registrationMessage = `Hi ${personName}, \nWe're fetching your heart disease care plan details. Please hold on a moment!⏳`;
+            const registrationMessage = `Hi ${personName}, \nWe're fetching your heart failure care plan details. Please hold on a moment!⏳`;
             FireAndForgetService.enqueue(body);
             return { fulfillmentMessages: [{ text: { text: [registrationMessage] } }]  };
 
         } catch (error) {
             Logger.instance()
-                .log_error(error.message,500,'Heart failure disease registration service error');
+                .log_error(error.message,500,'Heart failure careplan registration service error');
         }
 
     }
@@ -72,7 +72,7 @@ export class HeartFailureRegistrationService {
             if (remindersFlag === false) {
                 await this.enrollPatient(patientUserId, name, msg, eventObj);
             } else {
-                msg = `You have already enrolled in the Heart Disease care plan. If you wish to enroll again please contact to REAN support. https://www.reanfoundation.org/`;
+                msg = `You have already enrolled in the Heart Failure care plan. If you wish to enroll again please contact to REAN support. https://www.reanfoundation.org/`;
                 await this.sendMessage(msg, eventObj);
             }
         } else {
@@ -83,12 +83,11 @@ export class HeartFailureRegistrationService {
     async enrollPatient(patientUserId: string, name: string, msg: string, eventObj) {
 
         const channel: string = eventObj.body.originalDetectIntentRequest.payload.source;
-        const buttonId: string = eventObj.body.queryResult.queryText ?? null;
         const enrollRoute = `care-plans/patients/${patientUserId}/enroll`;
         const obj1 = {
             Provider  : "REAN",
             PlanName  : "Heart Failure",
-            PlanCode  : this.getSelectedCareplan(buttonId),
+            PlanCode  : "Heart-Failure",
             StartDate : new Date().toISOString()
                 .split('T')[0],
             DayOffset  : 0,
@@ -113,29 +112,12 @@ export class HeartFailureRegistrationService {
         const msgPayload: Iresponse = commonResponseMessageFormat();
         const payload = eventObj.body.originalDetectIntentRequest.payload;
         const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
-        if (payload.source === "telegram" || payload.source === "Telegram") {
-            payload.source = "telegram";
-        }
-        this._platformMessageService = eventObj.container.resolve(payload.source);
+        this._platformMessageService = eventObj.container.resolve("telegram");
         msgPayload.platform = payload.source;
         msgPayload.sessionId = personPhoneNumber;
         msgPayload.messageText = msg;
         msgPayload.message_type = "text";
         await this._platformMessageService.SendMediaMessage(msgPayload, null);
-    }
-
-    getSelectedCareplan( buttonId: string) {
-        const careplanCodeMapping = {
-            "Start_Careplan_HeartF1" : "HD_HTN_Smoker",
-            "Start_Careplan_HeartF2" : "HD_HTN_Non-smoker",
-            "Start_Careplan_HeartF3" : "HD_No_HTN_Smoker",
-            "Start_Careplan_HeartF4" : "HD_No_HTN_Non-smoker",
-            "Start_Careplan_HeartF5" : "RF_HTN_Smoker",
-            "Start_Careplan_HeartF6" : "RF_HTN_Non-smoker",
-            "Start_Careplan_HeartF7" : "RF_No_HTN_Smoker",
-            "Start_Careplan_HeartF8" : "RF_No_HTN_Non-smoker"
-        };
-        return careplanCodeMapping[buttonId] ?? "Heart-Failure";
     }
 
 }

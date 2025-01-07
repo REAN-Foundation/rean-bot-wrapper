@@ -17,50 +17,50 @@ export class AppointmentReminderService {
     ){}
 
     async createReminder (eventObj) {
-        try {
-            const event = eventObj.body.queryResult.parameters.event;
-            let date = eventObj.body.queryResult.parameters.dateTime;
-            const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
-            const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
+        // try {
+        //     const event = eventObj.body.queryResult.parameters.event;
+        //     let date = eventObj.body.queryResult.parameters.dateTime;
+        //     const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
+        //     const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
 
-            //const timeString = eventObj.body.queryResult.outputContexts[0].parameters["time.original"];
-            //const phoneNumber : any = await this.needleService.getPhoneNumber(eventObj);
-            console.log(`Time stamp in appointment reminder ${date}`);
-            if (date.date_time) {
-                date = date.date_time;
-            }
+        //     //const timeString = eventObj.body.queryResult.outputContexts[0].parameters["time.original"];
+        //     //const phoneNumber : any = await this.needleService.getPhoneNumber(eventObj);
+        //     console.log(`Time stamp in appointment reminder ${date}`);
+        //     if (date.date_time) {
+        //         date = date.date_time;
+        //     }
 
-            const channel = eventObj.body.originalDetectIntentRequest.payload.source;
-            const patientUserId = await this.registration.getPatientUserId(channel,
-                personPhoneNumber, personName);
+        //     const channel = eventObj.body.originalDetectIntentRequest.payload.source;
+        //     const patientUserId = await this.registration.getPatientUserId(channel,
+        //         personPhoneNumber, personName);
 
-            const { whenDay, whenTime } = await this.generalReminderService.extractWhenDateTime(date);
-            console.log(`date and time ${event} ${whenDay} ${whenTime}`);
-            const jsonFormat = {
-                patientUserId : patientUserId,
-                TaskName      : event,
-                TaskType      : "other",
-                Frequency     : "Once",
-                DayName       : null,
-                WhenTime      : whenTime,
-            };
+        //     const { whenDay, whenTime } = await this.generalReminderService.extractWhenDateTime(date);
+        //     console.log(`date and time ${event} ${whenDay} ${whenTime}`);
+        //     const jsonFormat = {
+        //         patientUserId : patientUserId,
+        //         TaskName      : event,
+        //         TaskType      : "other",
+        //         Frequency     : "Once",
+        //         DayName       : null,
+        //         WhenTime      : whenTime,
+        //     };
             
-            await this.generalReminderService.createCommonReminders(eventObj, "Once", jsonFormat, patientUserId, whenDay, whenTime, personName, personPhoneNumber, null );
+        //     await this.generalReminderService.createCommonReminders(eventObj, "Once", jsonFormat, patientUserId, whenDay, whenTime, personName, personPhoneNumber, null );
 
-            const data = {
-                "fulfillmentMessages" : [
-                    {
-                        "text" : { "text": ["Your reminder has been successfully set, and you will receive a notification at the scheduled time."] }
-                    }
-                ]
-            };
+        //     const data = {
+        //         "fulfillmentMessages" : [
+        //             {
+        //                 "text" : { "text": ["Your reminder has been successfully set, and you will receive a notification at the scheduled time."] }
+        //             }
+        //         ]
+        //     };
 
-            return { sendDff: true, message: data };
+        //     return { sendDff: true, message: data };
 
-        } catch (error) {
-            Logger.instance()
-                .log_error(error.message,500,'Appointment reminder creation error');
-        }
+        // } catch (error) {
+        //     Logger.instance()
+        //         .log_error(error.message,500,'Appointment reminder creation error');
+        // }
     }
 
 }
