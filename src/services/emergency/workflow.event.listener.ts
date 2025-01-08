@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { EntityManagerProvider } from "../entity.manager.provider.service";
 import { inject, Lifecycle, scoped } from "tsyringe";
 import { ClientEnvironmentProviderService } from "../set.client/client.environment.provider.service";
 import WorkflowUserData from "../../models/workflow.user.data.model";
 import { NeedleService } from "../needle.service";
 import { Imessage } from "../../refactor/interface/message.interface";
-import { platformServiceInterface } from "../../refactor/interface/platform.interface";
 import { UserMessageType, WorkflowEvent } from "./workflow.event.types";
 
 //////////////////////////////////////////////////////////////////////////////
@@ -13,13 +13,13 @@ import { UserMessageType, WorkflowEvent } from "./workflow.event.types";
 export class WorkflowEventListener {
 
     constructor (
-        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
+        @inject(EntityManagerProvider) private _entityProvider?: EntityManagerProvider,
         @inject(NeedleService) private needleService?: NeedleService,
         @inject(ClientEnvironmentProviderService) private environmentProviderService?: ClientEnvironmentProviderService,
     ){}
 
     public getPreviousMessageFromWorkflow = async (platformUserId: string): Promise<WorkflowUserData> => {
-        const entManager = await this.entityManagerProvider.getEntityManager(this.environmentProviderService);
+        const entManager = await this._entityProvider.getEntityManager(this.environmentProviderService);
         const workflowRepository = entManager.getRepository(WorkflowUserData);
         const previousMessage = await workflowRepository.findOne({
             where : {
@@ -123,7 +123,7 @@ export class WorkflowEventListener {
                 return null;
             }
 
-            const entManager = await this.entityManagerProvider.getEntityManager(this.environmentProviderService);
+            const entManager = await this._entityProvider.getEntityManager(this.environmentProviderService);
             const workflowRepository = entManager.getRepository(WorkflowUserData);
             const workflowEvent  = {
                 TenantId          : tenantId,

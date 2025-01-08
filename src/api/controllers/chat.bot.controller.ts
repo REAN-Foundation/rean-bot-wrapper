@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Logger } from '../../common/logger';
 import { ResponseHandler } from '../../utils/response.handler';
 import { autoInjectable, inject, Lifecycle, scoped } from 'tsyringe';
@@ -7,15 +8,23 @@ import { Iresponse } from '../../refactor/interface/message.interface';
 import { commonResponseMessageFormat } from '../../services/common.response.format.object';
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
 import { TelegramMessageService } from '../../services/telegram.message.service';
+import WorkflowUserData from '../../models/workflow.user.data.model';
+import { WorkflowEvent } from '../../services/emergency/workflow.event.types';
+import { EntityManagerProvider } from '../../services/entity.manager.provider.service';
+
+///////////////////////////////////////////////////////////////////////////////////
+
 @autoInjectable()
 @scoped(Lifecycle.ContainerScoped)
 export class ChatBotController {
 
     logger: Logger;
+
     private _platformMessageService :  platformServiceInterface ;
 
     constructor(
-        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(ClientEnvironmentProviderService) private environmentProviderService?: ClientEnvironmentProviderService,
+        @inject(EntityManagerProvider) private _entityProvider?: EntityManagerProvider,
        @inject(TelegramMessageService) private telegramMessageService?:TelegramMessageService,
         private responseHandler?: ResponseHandler) {
 
@@ -87,20 +96,57 @@ export class ChatBotController {
     };
 
     sendWorkflowMessage = async (request, response) => {
-        const request_body = request.body;
-        console.log(request_body);
+        const requestBody = request.body;
+        console.log(requestBody);
+
         this._platformMessageService = await request.container.resolve("telegram");
         const response_format: Iresponse = commonResponseMessageFormat();
 
-        
+        const event: WorkflowEvent = requestBody;
+
+        const workflowEventEntiry = {
+            TenantId          : event.TenantId,
+            EventType         : event.EventType,
+            SchemaId          : event.SchemaId,
+            SchemaInstanceId  : event.SchemaInstanceId,
+            ChatSessionId     : null, //To be updated later
+            MessageId         : null, //To be updated later
+            UserPlatformId    : event.UserMessage.Phone ?? null,
+            PhoneNumber       : event.UserMessage.Phone ?? null,
+            ChannelType       : event.UserMessage.MessageChannel,
+            MessageType       : event.UserMessage.MessageType,
+            IsMessageFromUser : false,
+            TextMessage       : event.UserMessage.TextMessage ?? null,
+            Location          : event.UserMessage.Location ?? null,
+            ImageUrl          : event.UserMessage.ImageUrl ?? null,
+            AudioUrl          : event.UserMessage.AudioUrl ?? null,
+            VideoUrl          : event.UserMessage.VideoUrl ?? null,
+            FileUrl           : event.UserMessage.FileUrl ?? null,
+            EventTimestamp    : event.UserMessage.EventTimestamp ?
+                new Date(event.UserMessage.EventTimestamp) : new Date(),
+            SchemaName       : event.UserMessage.Payload.SchemaName ?? null,
+            NodeInstanceId   : event.UserMessage.Payload.NodeInstanceId ?? null,
+            NodeId           : event.UserMessage.Payload.NodeId ?? null,
+            NodeActionId     : event.UserMessage.Payload.ActionId ?? null,
+            Question         : event.UserMessage.Question ?? null,
+            QuestionOptions  : event.UserMessage.QuestionOptions ?? null,
+            QuestionResponse : event.UserMessage.QuestionResponse ?? null,
+            Placeholders     : event.UserMessage.Placeholders ?? null,
+            Payload          : event.UserMessage.Payload ?? null,
+        };
+
+        const entManager = await this._entityProvider.getEntityManager(this.environmentProviderService);
+        const workflowRepository = entManager.getRepository(WorkflowUserData);
+        console.log("Storing the workflow event to database", workflowEventEntiry);
+        await workflowRepository.create(workflowEventEntiry);
 
         response_format.platform = "telegram";
-        response_format.sessionId = request_body.Phone;
-        response_format.messageText = request_body.TextMessage;
+        response_format.sessionId = requestBody.Phone;
+        response_format.messageText = requestBody.TextMessage;
         response_format.message_type = "text";
 
         const result = await this.telegramMessageService.SendMediaMessage(response_format, null);
-        return this.responseHandler.sendSuccessResponse(response, 200, 'ok', { 'Data': request_body }, true);
+        return this.responseHandler.sendSuccessResponse(response, 200, 'ok', { 'Data': requestBody }, true);
     };
 
 }

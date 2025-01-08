@@ -10,8 +10,14 @@ import { CalorieDatabase } from '../models/calorie.db.model';
 import { AssessmentSessionLogs } from '../models/assessment.session.model';
 import { ConsentInfo } from '../models/consent.info.model';
 import { UserConsent } from '../models/user.consent.model';
-import { WorkflowUserData } from '../models/workflow.user.data.model';
+import WorkflowUserData from '../models/workflow.user.data.model';
+
+//////////////////////////////////////////////////////////////////////////////////////
+
 const sequrlizeClients = new Map<string, Sequelize>();
+
+//////////////////////////////////////////////////////////////////////////////////////
+
 @autoInjectable()
 @singleton()
 export class SequelizeClient {
@@ -29,7 +35,7 @@ export class SequelizeClient {
                 logging        : false,
                 repositoryMode : true
             });
-            
+
             if (clientEnvironmentProviderService.getClientEnvironmentVariable('NAME') === "CALORIE_BOT") {
                 // eslint-disable-next-line max-len
                 sequelizeClient.addModels([ChatMessage, ChatSession, ContactList, CalorieInfo, CalorieDatabase,ConsentInfo,UserConsent]);
@@ -45,7 +51,7 @@ export class SequelizeClient {
                     WorkflowUserData
                 ]);
             }
-    
+
             await sequelizeClient.authenticate()
                 .then(async () => {
                     try {
@@ -62,7 +68,7 @@ export class SequelizeClient {
         else {
             console.log("No DB to connect");
         }
-        
+
     };
 
     // eslint-disable-next-line max-len
@@ -79,5 +85,5 @@ export class SequelizeClient {
             return sequrlizeClients[clientName];
         }
     };
-    
+
 }

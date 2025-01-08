@@ -59,7 +59,7 @@ export default class Application {
     public app(): express.Application {
         return this._app;
     }
-    
+
     async processClientEnvVariables() {
         console.log("We are in the " + process.env.ENVIRONMENT);
         if  (process.env.ENVIRONMENT === 'LOCAL'){
@@ -93,6 +93,7 @@ export default class Application {
                                 process.env[ele.NAME + "_" + k.toUpperCase()] = ele[k];
                             }
                         }
+                        
                         //console.log("loading this key", k.toUpperCase());
                     }
                 }
@@ -147,7 +148,7 @@ export default class Application {
             } else {
                 console.log("Telegram webhook need not to be set");
             }
-            
+
             if (clientEnvironmentProviderService.getClientEnvironmentVariable('WHATSAPP_LIVE_API_KEY') || clientEnvironmentProviderService.getClientEnvironmentVariable('META_API_TOKEN')) {
                 whatsapp.setWebhook(clientName);
             }
@@ -223,7 +224,7 @@ export default class Application {
                 this._app.use(this._checkCrossConnection.checkCrossConnection);
 
                 // this._app.use(this.limiter);
-                
+
                 const MAX_UPLOAD_FILE_SIZE = ConfigurationManager.MaxUploadFileSize();
 
                 this._app.use(fileUpload({

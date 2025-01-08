@@ -1,6 +1,7 @@
-import { uuid } from "aws-sdk/clients/customerprofiles";
+import { uuid } from "../../services/emergency/workflow.event.types";
 import { MessageChannelType, MetaParamsType, UserMessageType } from "../messageTypes/workflow.mode.message.types";
 
+//////////////////////////////////////////////////////////////////////////////
 
 export interface Location {
     Name     ?: string;
@@ -48,7 +49,7 @@ export interface MessagePayload {
 }
 
 // Back and forth
-export interface WorkflowMessageEvent {
+export interface WorkflowUserMessage {
     Phone?           : string;
     EventTimestamp   : string;
     MessageType      : UserMessageType;
@@ -73,3 +74,17 @@ export interface Params {
     Value        ?: string;
 }
 
+export enum EventType {
+    UserMessage          = 'UserMessage',
+    WorkflowSystemMessage= 'WorkflowSystemMessage',
+    TerminateWorkflow    = 'TerminateWorkflow',
+    TriggerChildWorkflow = 'TriggerChildWorkflow',
+}
+
+export interface WorkflowEvent {
+    EventType        : EventType;
+    TenantId         : uuid;
+    SchemaId        ?: uuid;
+    SchemaInstanceId?: uuid;
+    UserMessage     ?: WorkflowUserMessage;
+}
