@@ -1,13 +1,24 @@
 /* eslint-disable indent */
-import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from 'sequelize-typescript';
-import { IworkflowUserData } from '../refactor/interface/workflow.user.data.interfce';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import {
+    Table,
+    Column,
+    Model,
+    DataType,
+    PrimaryKey,
+    AutoIncrement,
+    CreatedAt,
+    UpdatedAt
+} from 'sequelize-typescript';
+
+//////////////////////////////////////////////////////////////////////////
 
 @Table({
     timestamps : true,
     modelName  : 'WorkflowUserData',
     tableName  : 'workflow_user_data'
 })
-export class WorkflowUserData extends Model implements IworkflowUserData {
+export default class WorkflowUserData extends Model {
 
     @AutoIncrement
     @PrimaryKey
@@ -15,83 +26,176 @@ export class WorkflowUserData extends Model implements IworkflowUserData {
         type      : DataType.INTEGER,
         allowNull : false
     })
-        id?: number;
+    id?: number;
+
+    @Column({
+        type : DataType.STRING(256),
+        allowNull : false
+    })
+    TenantId: string;
+
+    @Column({
+        type : DataType.STRING(256),
+        allowNull : false
+    })
+    EventType: string;
 
     @Column({
         type      : DataType.INTEGER,
         allowNull : false
     })
-        chatSessionId: number;
+    ChatSessionId: number;
 
     @Column({
         type : DataType.STRING(256),
         allowNull : false
     })
-        userPlatformId: string;
+    UserPlatformId: string;
+
+    @Column({
+        type : DataType.STRING(32),
+        allowNull : true,
+    })
+    PhoneNumber: string;
 
     @Column({
         type : DataType.STRING(256),
         allowNull : false
     })
-        channelType: string;
+    ChannelType: string;
 
     @Column({
         type : DataType.STRING(256),
         allowNull : false
     })
-        messageType: string;
+    MessageType: string;
+
+    @Column({
+        type : DataType.BOOLEAN,
+        allowNull : false
+    })
+    IsMessageFromUser: boolean;
 
     @Column({
         type : DataType.STRING(256),
         allowNull : false
     })
-        messageId: string;
+    MessageId: string;
+
+    @Column({
+        type : DataType.DATE,
+        allowNull : false
+    })
+    EventTimestamp: Date;
 
     @Column({
         type : DataType.STRING(256),
         allowNull : false
     })
-        eventTimestamp: string;
+    SchemaId: string;
 
     @Column({
         type : DataType.STRING(256),
         allowNull : false
     })
-        schemaId: string;
+    SchemaInstanceId: string;
 
     @Column({
         type : DataType.STRING(256),
         allowNull : false
     })
-        schemaInstanceId: string;
+    SchemaName: string;
 
     @Column({
         type : DataType.STRING(256),
         allowNull : false
     })
-        schemaName: string;
+    NodeInstanceId: string;
 
     @Column({
         type : DataType.STRING(256),
-        allowNull : false
+        allowNull : true
     })
-        nodeInstanceId: string;
+    NodeId: string;
 
     @Column({
         type : DataType.STRING(256),
-        allowNull : false
+        allowNull : true
     })
-        nodeId: string;
+    NodeActionId: string;
 
     @Column({
-        type : DataType.STRING(256),
-        allowNull : false
+        type : DataType.STRING,
+        allowNull : true
     })
-        actionId: string;
+    TextMessage: string;
 
     @Column({
         type : DataType.JSON,
         allowNull : true
     })
-        metaData: any;
+    Location: any;
+
+    @Column({
+        type : DataType.STRING,
+        allowNull : true
+    })
+    ImageUrl: string;
+
+    @Column({
+        type : DataType.STRING,
+        allowNull : true
+    })
+    AudioUrl: string;
+
+    @Column({
+        type : DataType.STRING,
+        allowNull : true
+    })
+    VideoUrl: string;
+
+    @Column({
+        type : DataType.STRING,
+        allowNull : true
+    })
+    FileUrl: string;
+
+    @Column({
+        type : DataType.STRING,
+        allowNull : true
+    })
+    Question: string;
+
+    @Column({
+        type : DataType.JSON,
+        allowNull : true
+    })
+    QuestionOptions: any;
+
+    @Column({
+        type : DataType.JSON,
+        allowNull : true
+    })
+    QuestionResponse: any;
+
+    @Column({
+        type : DataType.JSON,
+        allowNull : true
+    })
+    Placeholders: any;
+
+    @Column({
+        type : DataType.JSON,
+        allowNull : true
+    })
+    Payload: any;
+
+    @Column({type: DataType.DATE})
+    @CreatedAt
+    CreatedAt: Date;
+
+    @Column({type: DataType.DATE})
+    @UpdatedAt
+    UpdatedAt: Date;
+
 }

@@ -5,7 +5,7 @@ export enum MessageHandlerType {
     Feedback    = 'Feedback',
     Custom      = 'Custom',
     Unhandled   = 'Unhandled',
-    Alert       = 'Alert'
+    WorkflowService       = 'Alert'
 }
 
 export enum NlpProviderType {

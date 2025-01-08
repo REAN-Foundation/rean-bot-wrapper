@@ -2,38 +2,37 @@ import { IserviceResponseFunctionalities } from "../../services/response.format/
 import { MessageHandlerType, NlpProviderType, UserFeedbackType, ChannelType,} from "../messageTypes/message.types";
 
 export interface Imessage{
-    name : string;
-    platform : string;
-    platformId : string;
-    chat_message_id : string;
-    direction: string;
-    type : string;
-    messageBody : string;
-    imageUrl : string;
-    latlong : any;
-    replyPath : string;
-    intent  : string;
-    responseMessageID : string;
-    contextId : string;
-
+    name             : string;
+    platform         : string;
+    platformId       : string;
+    chat_message_id  : string;
+    direction        : string;
+    type             : string;
+    messageBody      : string;
+    imageUrl         : string;
+    latlong          : any;
+    replyPath        : string;
+    intent           : string;
+    responseMessageID: string;
+    contextId        : string;
 }
 
 export interface Iresponse{
-    name : string;
-    platform : string;
-    sessionId: string;
-    chat_message_id : string;
-    direction: string;
+    name           : string;
+    platform       : string;
+    sessionId      : string;
+    chat_message_id: string;
+    direction      : string;
     input_message;
-    message_type: string;
-    messageBody: string;
-    messageText: string;
-    intent: string;
-    messageImageUrl: string;
-    messageImageCaption: string;
-    similarDoc : string;
-    platformId: string;
-    buttonMetaData?: any;
+    message_type        : string;
+    messageBody         : string;
+    messageText         : string;
+    intent              : string;
+    messageImageUrl     : string;
+    messageImageCaption : string;
+    similarDoc          : string;
+    platformId          : string;
+    buttonMetaData     ?: any;
 }
 
 export interface handlerequest{
@@ -201,7 +200,7 @@ export interface QnADetails {
 
 export interface AlertDetails {
     AlertId         ?: string;
-  
+
 }
 
 export interface OutgoingMessage {

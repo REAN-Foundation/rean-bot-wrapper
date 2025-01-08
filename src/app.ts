@@ -61,36 +61,73 @@ export default class Application {
     }
     
     async processClientEnvVariables() {
-
-        try {
-            const secretObjectList = await this._awsSecretsManager.getSecrets();
-
-            for (const ele of secretObjectList) {
-                if (!ele.NAME) {
-                    for (const k in ele) {
-                        if (typeof ele[k] === "object"){
-                            process.env[k.toUpperCase()] = JSON.stringify(ele[k]);
-                        }
-                        else {
-                            process.env[k.toUpperCase()] = ele[k];
-                        }
-                        console.log("loading this key", k.toUpperCase());
-                    }
+        console.log("We are in the " + process.env.ENVIRONMENT);
+        if  (process.env.ENVIRONMENT === 'LOCAL'){
+            try {
+                const secretNameList = process.env.secretNameList.split(',');
+                const secretObjectList = [];
+                for (const element of secretNameList) {
+                    // eslint-disable-next-line @typescript-eslint/no-var-requires
+                    const responseSecretValue = require(`../${element}.json`);
+                    const secretStringToObj = responseSecretValue;
+                    secretObjectList.push(secretStringToObj);
                 }
-                else {
-                    this.clientsList.push(ele.NAME);
-                    for (const k in ele) {
-                        if (typeof ele[k] === "object"){
-                            process.env[ele.NAME + "_" + k.toUpperCase()] = JSON.stringify(ele[k]);
-                        }
-                        else {
-                            process.env[ele.NAME + "_" + k.toUpperCase()] = ele[k];
+                for (const ele of secretObjectList) {
+                    if (!ele.NAME) {
+                        for (const k in ele) {
+                            if (typeof ele[k] === "object"){
+                                process.env[k.toUpperCase()] = JSON.stringify(ele[k]);
+                            }
+                            else {
+                                process.env[k.toUpperCase()] = ele[k];
+                            }
                         }
                     }
+                    else {
+                        this.clientsList.push(ele.NAME);
+                        for (const k in ele) {
+                            if (typeof ele[k] === "object"){
+                                process.env[ele.NAME + "_" + k.toUpperCase()] = JSON.stringify(ele[k]);
+                            }
+                            else {
+                                process.env[ele.NAME + "_" + k.toUpperCase()] = ele[k];
+                            }
+                        }
+                        //console.log("loading this key", k.toUpperCase());
+                    }
                 }
+            } catch (e) {
+                console.log(e);
             }
-        } catch (e) {
-            console.log(e);
+        } else {
+            try {
+                const secretObjectList = await this._awsSecretsManager.getSecrets();
+                for (const ele of secretObjectList) {
+                    if (!ele.NAME) {
+                        for (const k in ele) {
+                            if (typeof ele[k] === "object"){
+                                process.env[k.toUpperCase()] = JSON.stringify(ele[k]);
+                            }
+                            else {
+                                process.env[k.toUpperCase()] = ele[k];
+                            }
+                        }
+                    }
+                    else {
+                        this.clientsList.push(ele.NAME);
+                        for (const k in ele) {
+                            if (typeof ele[k] === "object"){
+                                process.env[ele.NAME + "_" + k.toUpperCase()] = JSON.stringify(ele[k]);
+                            }
+                            else {
+                                process.env[ele.NAME + "_" + k.toUpperCase()] = ele[k];
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.log(e);
+            }
         }
     }
 

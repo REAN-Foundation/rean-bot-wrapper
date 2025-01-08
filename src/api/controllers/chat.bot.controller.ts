@@ -18,9 +18,9 @@ export class ChatBotController {
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
        @inject(TelegramMessageService) private telegramMessageService?:TelegramMessageService,
         private responseHandler?: ResponseHandler) {
-        
+
         this.logger = Logger.instance();
-       
+
     }
 
     ping = async (request, response) => {
@@ -91,13 +91,16 @@ export class ChatBotController {
         console.log(request_body);
         this._platformMessageService = await request.container.resolve("telegram");
         const response_format: Iresponse = commonResponseMessageFormat();
+
+        
+
         response_format.platform = "telegram";
         response_format.sessionId = request_body.Phone;
         response_format.messageText = request_body.TextMessage;
         response_format.message_type = "text";
+
         const result = await this.telegramMessageService.SendMediaMessage(response_format, null);
         return this.responseHandler.sendSuccessResponse(response, 200, 'ok', { 'Data': request_body }, true);
     };
 
 }
-

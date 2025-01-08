@@ -15,7 +15,8 @@ import { UserConsent } from '../../models/user.consent.model';
 import { ConsentService } from '../../services/consent.service';
 import { Registration } from '../../services/registration/patient.registration.service';
 import { Logger } from '../../common/logger';
-import { AlertHandler } from '../../services/emergency/alert.handler';
+
+///////////////////////////////////////////////////////////////////////////////////////
 
 @scoped(Lifecycle.ContainerScoped)
 export class ClientWebhookController {
@@ -23,8 +24,6 @@ export class ClientWebhookController {
     private _clientAuthenticatorService?: clientAuthenticator;
 
     private _platformMessageService?: platformServiceInterface;
-
-    private alertHandle = new AlertHandler();
 
     constructor(
         @inject(ResponseHandler) private responseHandler?: ResponseHandler,
@@ -39,11 +38,12 @@ export class ClientWebhookController {
 
     sendMessage = async (req, res) => {
         try {
-            // eslint-disable-next-line max-len
             this._platformMessageService = req.container.resolve(req.params.channel);
             req.body["channel"] = req.params.channel;
             const response = await this._platformMessageService.sendManualMesage(req.body);
-            if (response.statusCode === 200 || response.message_id !== undefined || response.status === 200) {
+            if (response.statusCode === 200 ||
+                response.message_id !== undefined ||
+                response.status === 200) {
                 this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', response.body);
             }
             else {
@@ -56,7 +56,6 @@ export class ClientWebhookController {
     };
 
     private async checkFirstTimeUser (req, userId)
-    
     {
         const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
         const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
@@ -69,7 +68,7 @@ export class ClientWebhookController {
         if (prevSessions){
             patientUserId  = prevSessions.dataValues.patientUserId;
             firstTimeUser = false;
-            
+
         } else {
             firstTimeUser  = true;
         }
@@ -93,106 +92,48 @@ export class ClientWebhookController {
         return consentRequired;
     }
 
-    // async sendSuccessMessage(chatMessageRepository, messageStatusRepostiory, res, statuses){
-    //     try {
-    //         const date = new Date(parseInt(statuses[0].timestamp) * 1000);
-    //         let message = await chatMessageRepository.findOne({ where: { responseMessageID: statuses[0].id } });
-
-    //         if (message == null){
-    //             await this.sleep(2000);
-    //             message = await chatMessageRepository.findOne({ where: { responseMessageID: statuses[0].id } });
-    //         }
-
-    //         const messageStatusObj: Partial<MessageStatus> = {
-    //             chatMessageId : message.id,
-    //             messageStatus : statuses[0].status,
-    //             channel       : message.platform,
-    //         };
-    //         if (statuses[0].status === "sent") {
-    //             messageStatusObj.messageSentTimestamp = date;
-    //             const messageStatus = await messageStatusRepostiory.findOne({ where: { chatMessageId: message.id } });
-    //             if (messageStatus) {
-    //                 await messageStatusRepostiory.update({ messageSentTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: message.id } });
-    //             } else {
-    //                 await messageStatusRepostiory.create(messageStatusObj)
-    //                     .then(() => { Logger.instance().log("Send timestamp entered in the database"); });
-    //             }
-    //             this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', "");
-    //         }
-    //         else if (statuses[0].status === "delivered") {
-    //             const messageStatus = await messageStatusRepostiory.findOne({ where: { chatMessageId: message.id } });
-    //             if (!messageStatus) {
-    //                 await this.sleep(1000);
-    //             }
-    //             await messageStatusRepostiory.update({ messageDeliveredTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: message.id } })
-    //                 .then(() => { Logger.instance().log("Delivered timestamp entered in the database"); });
-    //             this.responseHandler.sendSuccessResponse(res, 200, 'Message delivered successfully!', "");
-    //         }
-    //         else if (statuses[0].status === "read") {
-    //             await messageStatusRepostiory.update({ messageReadTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: message.id } })
-    //                 .then(() => { Logger.instance().log("Read timestamp entered in the database"); });
-    //             this.responseHandler.sendSuccessResponse(res, 200, 'Message read successfully!', "");
-    //         }
-    //         else if (statuses[0].status === "replied") {
-    //             await messageStatusRepostiory.update({ messageRepliedTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: message.id } })
-    //                 .then(() => { Logger.instance().log("Replied timestamp entered in the database"); });
-    //             this.responseHandler.sendSuccessResponse(res, 200, 'Message replied successfully!', "");
-    //         }
-    //         else if (statuses[0].status === "failed") {
-    //             await messageStatusRepostiory.update({ messageSentTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: message.id } })
-    //                 .then(() => { Logger.instance().log("Failed timestamp entered in the database"); });
-    //             this.responseHandler.sendSuccessResponse(res, 200, 'Message failed successfully!', "");
-    //         }
-    //         else {
-    //             const temp = this.responseHandler.sendSuccessResponse(res, 200, 'Notification received successfully!', "");
-    //         }
-    //     } catch (error) {
-    //         console.log("While sending success Response", error);
-    //     }
-        
-    // }
     async sendSuccessMessage(chatMessageRepository, messageStatusRepository, res, statuses) {
         try {
             const { id, status, timestamp } = statuses[0];
             const date = new Date(parseInt(timestamp) * 1000);
             console.log(id);
-    
+
             // Retrieve message info
             let messageInfo = await chatMessageRepository.findOne({ where: { responseMessageID: id } });
             if (!messageInfo) {
                 await this.sleep(2000); // Retry after delay
                 messageInfo = await chatMessageRepository.findOne({ where: { responseMessageID: id } });
             }
-    
+
             if (!messageInfo) {
                 console.log("Message info not found");
                 return this.responseHandler.sendFailureResponse(res, 404, "Message info not found.");
             }
-    
+
             console.log(messageInfo.id);
-    
+
             const messageStatusObj: Partial<MessageStatus> = {
                 chatMessageId : messageInfo.id,
                 messageStatus : status,
                 channel       : messageInfo.platform,
             };
-    
+
             const existingMessageStatus = await messageStatusRepository.findOne({ where: { chatMessageId: messageInfo.id } });
             if (["sent", "read", "delivered", "replied", "failed"].includes(status)) {
                 messageStatusObj.messageSentTimestamp = date;
                 await this.handleStatusUpdate(existingMessageStatus, messageStatusObj, messageStatusRepository, res, `Message ${status} successfully!`, `${status} timestamp entered in the database`);
-    
+
             }
             else {
                 this.responseHandler.sendSuccessResponse(res, 200, "Notification received successfully!", "");
             }
-                
+
         } catch (error) {
             console.error("Error trace:", error.trace || error);
             console.error("While sending success response:", error);
         }
     }
-    
+
     // Helper method to update or create message status
     private async handleStatusUpdate(
         existingMessageStatus,
@@ -214,7 +155,7 @@ export class ClientWebhookController {
     receiveMessage = async (req, res) => {
         console.log("receiveMessage webhook");
         try {
-          
+
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
             const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
 
@@ -230,7 +171,7 @@ export class ClientWebhookController {
             this._platformMessageService.res = res;
             if (req.params.channel === "telegram"){
                 [userPlatformId ,platformUserName] = await this.getTelegramUserID(req.body);
-           
+
             }
             if (req.body.statuses) {
                 this.sendSuccessMessage(chatMessageRepository, messageStatusRepostiory, res,req.body.statuses);
@@ -253,10 +194,15 @@ export class ClientWebhookController {
                     return res.status(200).send(response);
                 }
                 else {
-                    this.handelRequestWithoutConsent(firstTimeUser,patientUSerId,req,entityManagerProvider,userPlatformId, platformUserName, req.body );
-
+                    this.handelRequestWithoutConsent(
+                        firstTimeUser,
+                        patientUSerId,
+                        req,
+                        entityManagerProvider,
+                        userPlatformId,
+                        platformUserName,
+                        req.body);
                 }
-                
             }
         }
         catch (error) {
@@ -266,7 +212,14 @@ export class ClientWebhookController {
         }
     };
 
-    async  handelRequestWithoutConsent(firstTimeUser,patientUSerId,req,entityManagerProvider,userPlatformId, platformUserName,reqVariable ) {
+    async  handelRequestWithoutConsent(
+        firstTimeUser,
+        patientUSerId,
+        req,
+        entityManagerProvider,
+        userPlatformId,
+        platformUserName,
+        reqVariable) {
         try {
             if (firstTimeUser || !patientUSerId  ){
                 const patientUserId = await this.registrationService.getPatientUserId(req.params.channel, userPlatformId, platformUserName);
@@ -305,7 +258,7 @@ export class ClientWebhookController {
                 else {
 
                     this._platformMessageService.handleMessage(handleReqVariable, req.params.channel);
-                    
+
                 }
             }
         }
@@ -313,7 +266,7 @@ export class ClientWebhookController {
             console.log("While Sending Consent Response", error);
 
         }
-        
+
     }
 
     async getUserIdAndLanguagecode(reqBody,channel,req)
@@ -335,7 +288,7 @@ export class ClientWebhookController {
                 }
                 else {
                     userId = reqBody.messages[0].from;
-        
+
                 }
             }
             else if (channel === "telegram") {
@@ -349,10 +302,10 @@ export class ClientWebhookController {
                 }
                 else {
                     userId = reqBody.message.chat.id;
-        
+
                 }
             }
-    
+
             return [userId, consentReply, languageCode];
         }
         catch (error) {
@@ -373,7 +326,7 @@ export class ClientWebhookController {
             else {
                 userId = reqBody.message.chat.id;
                 userName = reqBody.message.chat.first_name;
-    
+
             }
             return [userId ,userName];
         }
@@ -412,7 +365,7 @@ export class ClientWebhookController {
             let userPlatformId = null;
             let platformUserName = null;
             if (statuses) {
-                
+
                 // Logs have been added to track the status will be removed in next release
                 console.log(statuses[0].status);
                 console.log("request.body", req.body);
@@ -437,9 +390,9 @@ export class ClientWebhookController {
                 else {
                     this.handelRequestWithoutConsent(firstTimeUser,ehrSystemCode,req,entityManagerProvider,userPlatformId, platformUserName, req.body.entry[0].changes[0].value);
                 }
-                
+
             }
-            
+
         }
         catch (error) {
             console.log("in error", error);
@@ -498,11 +451,9 @@ export class ClientWebhookController {
                 // status = sent, received & read
             }
             else {
-
                 // eslint-disable-next-line max-len
                 // const response_message = "We have migrated REAN Health Guru to a new number. Click this link to chat with REAN Health Guru. Link: https://api.whatsapp.com/send/?phone=15712152682&text=Hey&app_absent=0";
                 this._platformMessageService = req.container.resolve('whatsapp');
-
                 this._platformMessageService.handleMessage(req.body, req.params.client);
             }
         }

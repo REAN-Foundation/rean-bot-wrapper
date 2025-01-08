@@ -11,12 +11,11 @@ import { MessageHandlerType, NlpProviderType, UserFeedbackType, ChannelType } fr
 import { EmojiFilter } from "../filter.message.for.emoji.service";
 import { DialogflowResponseService } from '../dialogflow.response.service';
 import { CacheMemory } from "../cache.memory.service";
-import { AlertHandler } from '../../services/emergency/alert.handler';
+
+////////////////////////////////////////////////////////////////////////////////////
 
 @scoped(Lifecycle.ContainerScoped)
 export class DecisionRouter {
-
-    private alertHandle = new AlertHandler();
 
     outgoingMessage!: OutgoingMessage;
 
@@ -24,9 +23,9 @@ export class DecisionRouter {
         @inject(DialogflowResponseService) private dialogflowResponseService?: DialogflowResponseService,
         @inject(FeedbackService) private feedbackService?: FeedbackService,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
-        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(ClientEnvironmentProviderService) private environmentProviderService?: ClientEnvironmentProviderService,
         @inject(EmojiFilter) private emojiFilter?: EmojiFilter
-    ){
+    ) {
         this.outgoingMessage = {
             PrimaryMessageHandler : MessageHandlerType.Unhandled,
             MetaData              : {
@@ -62,14 +61,14 @@ export class DecisionRouter {
             },
             Alert : {
             }
-            
+
         };
     }
 
     public model = new ChatOpenAI({ temperature: 0, modelName: "gpt-3.5-turbo" });
 
     public feedbackFlag = false;
-    
+
     public assessmentFlag = false;
 
     public intentFlag = false;
@@ -203,22 +202,22 @@ export class DecisionRouter {
             There might be follow up questions to this question as well. So if the conversation seems to be relevant to this case classify it as assessments.
             3. If the user is asking to set a reminder or a task then classify it as reminders. We do send the reminders to the user which might require the user to give a response.
             If the conversation is in line with this, then also classify it as reminders.
-            
+
             Return only one topic that matches closesly as a string.
             For example, if the user query is "What is the meaning of life?" and the classification is "faq's", then return "faq's".
             If the classification is "other" then return "other".
-            
+
             User Query:
             {question}
-            
+
             Conversation History:
                 Human: Hello
                 Bot: Welcome to our chatbot, here you can ask queries, register to careplans and set any reminders.
-            
+
             <question>
             {question}
             </question>
-            
+
             Classification:
             `
         );
@@ -244,16 +243,12 @@ export class DecisionRouter {
 
     async getDecision(messageBody: Imessage, channel: string){
         try {
-            const mode = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WORK_FLOW_MODE");
-            if (mode === 'TRUE')
+            const workflowMode = this.environmentProviderService.getClientEnvironmentVariable("WORK_FLOW_MODE");
+            if (workflowMode === 'TRUE')
             {
-                // const result = await this.alertHandle.commenceAlertFunc(messageBody, channel);
-                // if (result)
-                {
-                    this.outgoingMessage.MetaData = messageBody;
-                    this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.Alert;
-                    return this.outgoingMessage;
-                }
+                this.outgoingMessage.MetaData = messageBody;
+                this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.WorkflowService;
+                return this.outgoingMessage;
             }
             const resultFeedback = await this.checkFeedback(messageBody, channel);
             this.outgoingMessage.MetaData = messageBody;
@@ -306,8 +301,8 @@ export class DecisionRouter {
     }
 
     async getDialogflowLanguage(){
-        if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("DIALOGFLOW_DEFAULT_LANGUAGE_CODE")){
-            return this.clientEnvironmentProviderService.getClientEnvironmentVariable("DIALOGFLOW_DEFAULT_LANGUAGE_CODE");
+        if (this.environmentProviderService.getClientEnvironmentVariable("DIALOGFLOW_DEFAULT_LANGUAGE_CODE")){
+            return this.environmentProviderService.getClientEnvironmentVariable("DIALOGFLOW_DEFAULT_LANGUAGE_CODE");
         }
         else {
             return "en-US";
