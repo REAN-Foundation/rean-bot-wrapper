@@ -26,6 +26,7 @@ export class GetHeaders {
         }
         const options = {
             headers : {
+                "Content-Type"  : 'application/json',
                 "Authorization" : `Bearer ${accessToken}`,
                 "x-api-key"     : workflow_api_key
             }

@@ -11,6 +11,7 @@ import { TelegramMessageService } from '../../services/telegram.message.service'
 import WorkflowUserData from '../../models/workflow.user.data.model';
 import { WorkflowEvent } from '../../services/emergency/workflow.event.types';
 import { EntityManagerProvider } from '../../services/entity.manager.provider.service';
+import { ChatSession } from '../../models/chat.session';
 
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -104,14 +105,18 @@ export class ChatBotController {
 
         const event: WorkflowEvent = requestBody;
 
+        const userPlatformId = event.UserMessage?.Phone ?? null;
+        const chatSessionId = await this.getChatSessionId(userPlatformId);
+
         const workflowEventEntiry = {
             TenantId          : event.TenantId,
             EventType         : event.EventType,
             SchemaId          : event.SchemaId,
             SchemaInstanceId  : event.SchemaInstanceId,
-            ChatSessionId     : null, //To be updated later
-            MessageId         : null, //To be updated later
-            UserPlatformId    : event.UserMessage.Phone ?? null,
+            ChatSessionId     : chatSessionId,
+            BotMessageId      : null, //To be updated later
+            ChannelMessageId  : null, //To be updated later
+            UserPlatformId    : userPlatformId,
             PhoneNumber       : event.UserMessage.Phone ?? null,
             ChannelType       : event.UserMessage.MessageChannel,
             MessageType       : event.UserMessage.MessageType,
@@ -146,7 +151,24 @@ export class ChatBotController {
         response_format.message_type = "text";
 
         const result = await this.telegramMessageService.SendMediaMessage(response_format, null);
+
+        //Please update the BotMessageId and ChannelMessageId in the database in table WorkflowUserData
+
         return this.responseHandler.sendSuccessResponse(response, 200, 'ok', { 'Data': requestBody }, true);
+    };
+
+    getChatSessionId = async (platformUserId: string) => {
+        const entManager = await this._entityProvider.getEntityManager(this.environmentProviderService);
+        const chatSessionRepository = entManager.getRepository(ChatSession);
+        const chatSession = await chatSessionRepository.findOne({
+            where : {
+                userPlatformID : platformUserId
+            }
+        });
+        if (!chatSession) {
+            return null;
+        }
+        return chatSession.id;
     };
 
 }

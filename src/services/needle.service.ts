@@ -188,47 +188,4 @@ export class NeedleService {
         return responseObject;
     };
 
-    async sendWorkflowEvent (url:string, obj?: any): Promise<any> {
-        try {
-            const WorkflowBaseUrl = this.environmentProviderService.getClientEnvironmentVariable("WORKFLOW_URL");
-            const loginUrl = `${WorkflowBaseUrl}/users/login-password`;
-            const WorkflowAPIkey = this.environmentProviderService.getClientEnvironmentVariable("WORK_FLOW_API_KEY");
-            const Username = this.environmentProviderService.getClientEnvironmentVariable("WORK_FLOW_USERNAME");
-            const Password = this.environmentProviderService.getClientEnvironmentVariable("WORK_FLOW_PASSWORD");
-
-            const messageContent = {
-                UserName : Username,
-                Password : Password
-            };
-            const option = {
-                headers : {
-                    'Content-Type' : 'application/json',
-                    'X-Api-Key'    : WorkflowAPIkey
-                }
-            };
-            const respToken = await needle("post", loginUrl, messageContent, option);
-
-            if (!respToken) {
-                var accessToken = null;
-            }
-
-            // console.log(respToken);
-
-            var accessToken = respToken.body.Data.AccessToken;
-            const options = await this.getHeaders.getWorkflowHeaders(accessToken);
-            const apiUrl = WorkflowBaseUrl + url;
-            let response = null;
-            response = await needle('post', apiUrl, obj, options);
-
-            if (response.statusCode !== 200 && response.statusCode !== 201) {
-                console.log("Failed to get response from workflow API.");
-                return null;
-            }
-            return response.body;
-        } catch (error) {
-            console.log(error);
-            return null;
-        }
-    }
-
 }

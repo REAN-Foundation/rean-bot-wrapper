@@ -42,7 +42,7 @@ export default class WorkflowUserData extends Model {
 
     @Column({
         type      : DataType.INTEGER,
-        allowNull : false
+        allowNull : true
     })
     ChatSessionId: number;
 
@@ -78,9 +78,15 @@ export default class WorkflowUserData extends Model {
 
     @Column({
         type : DataType.STRING(256),
-        allowNull : false
+        allowNull : true
     })
-    MessageId: string;
+    BotMessageId: string;
+
+    @Column({
+        type : DataType.STRING(256),
+        allowNull : true
+    })
+    ChannelMessageId: string;
 
     @Column({
         type : DataType.DATE,
@@ -96,19 +102,19 @@ export default class WorkflowUserData extends Model {
 
     @Column({
         type : DataType.STRING(256),
-        allowNull : false
+        allowNull : true
     })
     SchemaInstanceId: string;
 
     @Column({
         type : DataType.STRING(256),
-        allowNull : false
+        allowNull : true
     })
     SchemaName: string;
 
     @Column({
         type : DataType.STRING(256),
-        allowNull : false
+        allowNull : true
     })
     NodeInstanceId: string;
 
