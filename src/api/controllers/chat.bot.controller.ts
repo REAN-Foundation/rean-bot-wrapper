@@ -168,7 +168,7 @@ export class ChatBotController {
         if (!chatSession) {
             return null;
         }
-        return chatSession.id;
+        return chatSession.autoIncrementalID;
     };
 
 }

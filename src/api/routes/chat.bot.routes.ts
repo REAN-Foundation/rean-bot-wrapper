@@ -15,8 +15,8 @@ export class ChatBotRoutes {
 
         router.get('/:client/chat-bot/ping', authenticator.authenticateUser, controller.ping);
         router.get('/:client/chat-bot/intent/validate', authenticator.authenticateUser, controller.validateIntent);
-        router.post('/:client/chat-bot/intent/fulfill', authenticator.authenticateUser, controller.processIntent);
         router.post('/message/send', controller.sendWorkflowMessage);
+        router.post('/:client/chat-bot/intent/fulfill', authenticator.authenticateUser, controller.processIntent);
 
         app.use('/v1', router);
 

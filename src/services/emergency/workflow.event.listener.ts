@@ -140,8 +140,6 @@ export class WorkflowEventListener {
             console.log("messageContent",messageContent);
             const url = '/engine/events/user-message';
 
-            //http://localhost:2345/api/v1/engine/events/user-message
-            //http://localhost:2345/api/v1/engine/events/user-message
             const response = await this.callWorkflowApi('post', url, messageContent);
             if (response) {
                 console.log("Workflow event acknowledged", response);
