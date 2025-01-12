@@ -145,10 +145,27 @@ export class ChatBotController {
         console.log("Storing the workflow event to database", workflowEventEntiry);
         await workflowRepository.create(workflowEventEntiry);
 
-        response_format.platform = "telegram";
-        response_format.sessionId = requestBody.Phone;
-        response_format.messageText = requestBody.TextMessage;
-        response_format.message_type = "text";
+        response_format.platformId = event.UserMessage.Phone;
+        response_format.platform = event.UserMessage.MessageChannel === "Telegram" ?
+            "telegram" : "whatsApp";
+
+        response_format.sessionId = event.UserMessage.Phone;
+        if (event.UserMessage.MessageType === "Text") {
+            response_format.messageText = event.UserMessage.TextMessage;
+            response_format.message_type = "text";
+        }
+        else if (event.UserMessage.MessageType === "Location") {
+            response_format.location = {
+                latitude  : event.UserMessage?.Location?.Latitude,
+                longitude : event.UserMessage?.Location?.Longitude
+            };
+            response_format.message_type = "location";
+        }
+        else if (event.UserMessage.MessageType === "Question") {
+            response_format.message_type = "question";
+            response_format.messageText = event.UserMessage.Question;
+            response_format.buttonMetaData = event.UserMessage.QuestionOptions;
+        }
 
         const result = await this.telegramMessageService.SendMediaMessage(response_format, null);
 

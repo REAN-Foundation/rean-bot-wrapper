@@ -33,6 +33,10 @@ export interface Iresponse{
     similarDoc          : string;
     platformId          : string;
     buttonMetaData     ?: any;
+    location ?: {
+        latitude: number;
+        longitude: number;
+    }
 }
 
 export interface handlerequest{

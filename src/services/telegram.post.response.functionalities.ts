@@ -16,18 +16,23 @@ export class TelegramPostResponseFunctionalities {
         @inject(EntityManagerProvider) private entityManagerProvider?:EntityManagerProvider
     ){}
 
-    sendtextResponse = async(response_format:Iresponse,telegram,payload) => {
+    sendtextResponse = async(response_format:Iresponse, telegram, payload) => {
         let responseId = 0;
         let telegramResponseData;
         const message = this.sanitizeMessage(response_format.messageText);
-        await telegram.sendMessage(response_format.sessionId, message, { parse_mode: 'HTML' }).then(async function (data) {
+        await telegram.sendMessage(
+            response_format.sessionId,
+            message,
+            {
+                parse_mode : 'HTML'
+            }).then(async function (data) {
             responseId = data.message_id;
             telegramResponseData = data;
         });
         await this.updateResponseMessageId(responseId,response_format.sessionId);
         return telegramResponseData;
     };
-    
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     sendvoiceResponse = async(response_format:Iresponse,telegram,payload) => {
         let telegramResponseData;
@@ -60,6 +65,23 @@ export class TelegramPostResponseFunctionalities {
         return telegramResponseData;
     };
 
+    sendLocationResponse = (response_format:Iresponse, telegram, payload) => {
+        let telegramResponseData;
+        const latitude = response_format.location?.latitude;
+        const longitude = response_format.location?.longitude;
+        if (latitude && longitude) {
+            telegram.sendLocation(
+                response_format.sessionId,
+                latitude,
+                longitude)
+                .then(function (data) {
+                    telegramResponseData = data;
+                });
+            return telegramResponseData;
+        }
+        return null;
+    };
+
     updateResponseMessageId = async(responseId, userPlatformID) => {
         // eslint-disable-next-line max-len
         const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
@@ -71,7 +93,6 @@ export class TelegramPostResponseFunctionalities {
                 .then(() => { console.log("updated telegram respomse id"); })
                 .catch(error => console.log("error on update", error));
         }
-
     };
 
     sanitizeMessage = (message) => {
@@ -109,7 +130,7 @@ export class TelegramPostResponseFunctionalities {
                     text          : ele_h.structValue.fields.text.stringValue,
                     callback_data : ele_h.structValue.fields.callback_data.stringValue
                 };
-                
+
                 listOfHorizontalKeyboard.push(tempButton);
             }
             listOfButtons.push(listOfHorizontalKeyboard);
@@ -125,7 +146,7 @@ export class TelegramPostResponseFunctionalities {
                     text          : ele_v.structValue.fields.text.stringValue,
                     callback_data : ele_v.structValue.fields.callback_data.stringValue
                 };
-                
+
                 listOfVerticalKeyboard.push([tempButton]);
             }
         }
@@ -141,7 +162,7 @@ export class TelegramPostResponseFunctionalities {
 
         console.log(keyboard);
         console.log(keyboard1);
-    
+
         const opts = {
             reply_markup : JSON.stringify(keyboard)
         };

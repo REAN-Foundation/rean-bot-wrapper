@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable init-declarations */
 /* eslint-disable max-len */
 
@@ -22,7 +23,6 @@ export class TelegramMessageService implements platformServiceInterface{
 
     public res;
 
-    // public req;
     constructor(@inject(delay(() => MessageFlow)) public messageFlow,
         @inject(AwsS3manager) private awsS3manager?: AwsS3manager,
         @inject(ClientEnvironmentProviderService) private environmentProviderService?: ClientEnvironmentProviderService,
@@ -30,8 +30,8 @@ export class TelegramMessageService implements platformServiceInterface{
         @inject(TelegramPostResponseFunctionalities) private telegramPostResponseFunctionalities?: TelegramPostResponseFunctionalities,
         @inject("telegram.authenticator") private clientAuthenticator?: clientAuthenticator,
         @inject(LogsQAService) private logsQAService?: LogsQAService) {
-
-        this._telegram = new TelegramBot(this.environmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
+        const token = this.environmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN");
+        this._telegram = new TelegramBot(token);
         this.init();
     }
 
