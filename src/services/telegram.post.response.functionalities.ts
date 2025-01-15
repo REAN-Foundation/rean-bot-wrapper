@@ -65,7 +65,7 @@ export class TelegramPostResponseFunctionalities {
         return telegramResponseData;
     };
 
-    sendLocationResponse = (response_format:Iresponse, telegram, payload) => {
+    sendlocationResponse = (response_format:Iresponse, telegram, payload) => {
         let telegramResponseData;
         const latitude = response_format.location?.latitude;
         const longitude = response_format.location?.longitude;
