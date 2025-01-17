@@ -17,11 +17,11 @@ permissions:
   contents: write
 
 jobs:
-  
+
   Publish-Release:
     runs-on: ubuntu-latest
     steps:
-    
+
       - name: New Release Publish
         id: new_publish
         uses: release-drafter/release-drafter@v5
@@ -29,7 +29,7 @@ jobs:
           publish : true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
-           
+
     outputs:
       release_id: ${{ steps.new_publish.outputs.id }}
       release_name: ${{ steps.new_publish.outputs.tag_name }}
@@ -111,7 +111,7 @@ jobs:
           image: public.ecr.aws/i9y2d4u3/rean-bot:${{ needs.Publish-Release.outputs.release_name }}_${{ needs.Publish-Release.outputs.release_id }}
 
       - name: Deploy Amazon ECS task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           wait-for-service-stability: true
