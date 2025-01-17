@@ -85,12 +85,12 @@ export class HeartFailureRegistrationService {
         const channel: string = eventObj.body.originalDetectIntentRequest.payload.source;
         const buttonId: string = eventObj.body.queryResult.queryText ?? null;
         const enrollRoute = `care-plans/patients/${patientUserId}/enroll`;
+        const startDate = this.calculateStartDateByButtonId(buttonId, new Date());
         const obj1 = {
-            Provider  : "REAN",
-            PlanName  : "Heart Failure",
-            PlanCode  : this.getSelectedCareplan(buttonId),
-            StartDate : new Date().toISOString()
-                .split('T')[0],
+            Provider   : "REAN",
+            PlanName   : "Heart Failure",
+            PlanCode   : this.getSelectedCareplan(buttonId),
+            StartDate  : startDate.toISOString().split('T')[0],
             DayOffset  : 0,
             Channel    : this.getPatientInfoService.getReminderType(channel),
             TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
@@ -124,7 +124,7 @@ export class HeartFailureRegistrationService {
         await this._platformMessageService.SendMediaMessage(msgPayload, null);
     }
 
-    getSelectedCareplan( buttonId: string) {
+    getSelectedCareplan(buttonId: string): string {
         const careplanCodeMapping = {
             "Start_Careplan_HeartF1" : "HD_HTN_Smoker",
             "Start_Careplan_HeartF2" : "HD_HTN_Non-smoker",
@@ -136,6 +136,41 @@ export class HeartFailureRegistrationService {
             "Start_Careplan_HeartF8" : "RF_No_HTN_Non-smoker"
         };
         return careplanCodeMapping[buttonId] ?? "Heart-Failure";
+    }
+    
+    calculateStartDateByButtonId(buttonId: string, todayDate: Date): Date {
+
+        /**
+         * Calculate the start date based on the button ID.
+         * If the button ID matches a key in the careplanCodeMapping object, calculate the next Sunday.
+         * Otherwise, return the current date.
+         */
+    
+        // Use `getSelectedCareplan` to check if the button ID exists in the mapping
+        const careplan = this.getSelectedCareplan(buttonId);
+    
+        if (careplan !== "Heart-Failure") {
+
+            // Calculate the next Sunday
+            const dayOfWeek = todayDate.getDay(); // Get the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+    
+            if (dayOfWeek === 0) {
+
+                // If today is Sunday
+                return todayDate;
+            } else {
+
+                // Calculate the days to the next Sunday
+                const daysUntilNextSunday = 7 - dayOfWeek;
+                const startDate = new Date(todayDate);
+                startDate.setDate(todayDate.getDate() + daysUntilNextSunday);
+                return startDate;
+            }
+        } else {
+
+            // If the button ID does not match, return the current date
+            return todayDate;
+        }
     }
 
 }
