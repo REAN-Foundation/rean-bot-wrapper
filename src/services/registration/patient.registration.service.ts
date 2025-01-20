@@ -106,5 +106,4 @@ export class Registration{
         }
         
     }
-
 }

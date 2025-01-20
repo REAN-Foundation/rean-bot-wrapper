@@ -37,7 +37,6 @@ export class databackup{
         return response_data;
 
     }
-
     async getdatastructure(getFileKey){
         const awsFile = await this.awss3manager.getFile(getFileKey);
         const datastructure = JSON.parse(awsFile.Body.toString('utf-8'));
