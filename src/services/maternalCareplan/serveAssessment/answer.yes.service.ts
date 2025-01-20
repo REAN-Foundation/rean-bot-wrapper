@@ -50,10 +50,10 @@ export class AnswerYesMsgService {
         }
         const userResponses = AssessmetUserResponses['default'];
         const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-        const assessmentSession = await chatMessageRepository.findOne({ where: { "responseMessageID": chatMessageId } });
+        const chatMessage = await chatMessageRepository.findOne({ where: { "responseMessageID": chatMessageId } });
 
         if (channel === "telegram" || channel === "Telegram") {
-            const previousMessage = assessmentSession.messageContent ? assessmentSession.messageContent : "";
+            const previousMessage = chatMessage.messageContent ? chatMessage.messageContent : "";
             for (const msg of userResponses) {
                 if (msg.Messege === previousMessage) {
                     message = this.getAnswer(intentName, message, msg);
@@ -63,9 +63,9 @@ export class AnswerYesMsgService {
                 }
             }
         } else {
-            const previousMessage = assessmentSession.intent ? assessmentSession.intent : "";
+            const metaTemplateName = chatMessage ? chatMessage.intent : "";
             for (const msg of userResponses) {
-                if (msg.WhatsAppTemplateName === previousMessage) {
+                if (msg.WhatsAppTemplateName === metaTemplateName) {
                     message = this.getAnswer(intentName, message, msg);
                     break;
                 } else {

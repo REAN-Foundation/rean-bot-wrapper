@@ -11,7 +11,6 @@ import { EntityManagerProvider } from '../../services/entity.manager.provider.se
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
 import { ContactList } from '../../models/contact.list';
 import { ConsentInfo } from '../../models/consent.info.model';
-import { translateService } from '../../services/translate.service';
 import { UserConsent } from '../../models/user.consent.model';
 import { ConsentService } from '../../services/consent.service';
 import { Registration } from '../../services/registration/patient.registration.service';
@@ -28,7 +27,6 @@ export class ClientWebhookController {
         @inject(ResponseHandler) private responseHandler?: ResponseHandler,
         @inject(ErrorHandler) private errorHandler?: ErrorHandler,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
-        @inject(translateService) private translate?: translateService,
         @inject(ConsentService) private consentService?: ConsentService,
         @inject(Registration) private registrationService?: Registration,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
@@ -92,63 +90,128 @@ export class ClientWebhookController {
         return consentRequired;
     }
 
-    async sendSuccessMessage(chatMessageRepository, messageStatusRepostiory, res, statuses){
+    // async sendSuccessMessage(chatMessageRepository, messageStatusRepostiory, res, statuses){
+    //     try {
+    //         const date = new Date(parseInt(statuses[0].timestamp) * 1000);
+    //         console.log(statuses[0].id);
+    //         let messageInfo = await chatMessageRepository.findOne({ where: { responseMessageID: statuses[0].id } });
+    //         if (messageInfo == null){
+    //             await this.sleep(2000);
+    //             messageInfo = await chatMessageRepository.findOne({ where: { responseMessageID: statuses[0].id } });
+    //         }
+    //             console.log(messageInfo.id);
+    //             const messageStatusObj: Partial<MessageStatus> = {
+    //                 chatMessageId : messageInfo.id,
+    //                 messageStatus : statuses[0].status,
+    //                 channel       : messageInfo.platform,
+    //             };
+    //             if (statuses[0].status === "sent") {
+    //                 messageStatusObj.messageSentTimestamp = date;
+    //                 const messageStatus = await messageStatusRepostiory.findOne({ where: { chatMessageId: messageInfo.id } });
+    //                 if (messageStatus) {
+    //                     await messageStatusRepostiory.update({ messageSentTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: messageInfo.id } });
+    //                 } else {
+    //                     await messageStatusRepostiory.create(messageStatusObj)
+    //                         .then(() => { Logger.instance().log("Send timestamp entered in the database"); });
+    //                 }
+    //                 this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', "");
+    //             }
+    //             else if (statuses[0].status === "delivered") {
+    //                 const messageStatus = await messageStatusRepostiory.findOne({ where: { chatMessageId: messageInfo.id } });
+    //                 if (!messageStatus) {
+    //                     await this.sleep(1000);
+    //                 }
+    //                 await messageStatusRepostiory.update({ messageDeliveredTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: messageInfo.id } })
+    //                     .then(() => { Logger.instance().log("Delivered timestamp entered in the database"); });
+    //                 this.responseHandler.sendSuccessResponse(res, 200, 'Message delivered successfully!', "");
+    //             }
+    //             else if (statuses[0].status === "read") {
+    //                 await messageStatusRepostiory.update({ messageReadTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: messageInfo.id } })
+    //                     .then(() => { Logger.instance().log("Read timestamp entered in the database"); });
+    //                 this.responseHandler.sendSuccessResponse(res, 200, 'Message read successfully!', "");
+    //             }
+    //             else if (statuses[0].status === "replied") {
+    //                 await messageStatusRepostiory.update({ messageRepliedTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: messageInfo.id } })
+    //                     .then(() => { Logger.instance().log("Replied timestamp entered in the database"); });
+    //                 this.responseHandler.sendSuccessResponse(res, 200, 'Message replied successfully!', "");
+    //             }
+    //             else if (statuses[0].status === "failed") {
+    //                 await messageStatusRepostiory.update({ messageSentTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: messageInfo.id } })
+    //                     .then(() => { Logger.instance().log("Failed timestamp entered in the database"); });
+    //                 this.responseHandler.sendSuccessResponse(res, 200, 'Message failed successfully!', "");
+    //             }
+            
+    //         else {
+    //             const temp = this.responseHandler.sendSuccessResponse(res, 200, 'Notification received successfully!', "");
+    //         }
+    //     } catch (error) {
+    //         console.log(`error trace : ${error.trace}`);
+    //         console.log("While sending success Response", error);
+    //     }
+        
+    // }
+
+    async sendSuccessMessage(chatMessageRepository, messageStatusRepository, res, statuses) {
         try {
-            const date = new Date(parseInt(statuses[0].timestamp) * 1000);
-            let message = await chatMessageRepository.findOne({ where: { responseMessageID: statuses[0].id } });
-
-            if (message == null){
-                await this.sleep(2000);
-                message = await chatMessageRepository.findOne({ where: { responseMessageID: statuses[0].id } });
+            const { id, status, timestamp } = statuses[0];
+            const date = new Date(parseInt(timestamp) * 1000);
+            console.log(id);
+    
+            // Retrieve message info
+            let messageInfo = await chatMessageRepository.findOne({ where: { responseMessageID: id } });
+            if (!messageInfo) {
+                await this.sleep(2000); // Retry after delay
+                messageInfo = await chatMessageRepository.findOne({ where: { responseMessageID: id } });
             }
-
+    
+            if (!messageInfo) {
+                console.log("Message info not found");
+                return this.responseHandler.sendFailureResponse(res, 404, "Message info not found.");
+            }
+    
+            console.log(messageInfo.id);
+    
             const messageStatusObj: Partial<MessageStatus> = {
-                chatMessageId : message.id,
-                messageStatus : statuses[0].status,
-                channel       : message.platform,
+                chatMessageId : messageInfo.id,
+                messageStatus : status,
+                channel       : messageInfo.platform,
             };
-            if (statuses[0].status === "sent") {
-                messageStatusObj.messageSentTimestamp = date;
-                const messageStatus = await messageStatusRepostiory.findOne({ where: { chatMessageId: message.id } });
-                if (messageStatus) {
-                    await messageStatusRepostiory.update({ messageSentTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: message.id } });
-                } else {
-                    await messageStatusRepostiory.create(messageStatusObj)
-                        .then(() => { Logger.instance().log("Send timestamp entered in the database"); });
-                }
-                this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', "");
-            }
-            else if (statuses[0].status === "delivered") {
-                const messageStatus = await messageStatusRepostiory.findOne({ where: { chatMessageId: message.id } });
-                if (!messageStatus) {
-                    await this.sleep(1000);
-                }
-                await messageStatusRepostiory.update({ messageDeliveredTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: message.id } })
-                    .then(() => { Logger.instance().log("Delivered timestamp entered in the database"); });
-                this.responseHandler.sendSuccessResponse(res, 200, 'Message delivered successfully!', "");
-            }
-            else if (statuses[0].status === "read") {
-                await messageStatusRepostiory.update({ messageReadTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: message.id } })
-                    .then(() => { Logger.instance().log("Read timestamp entered in the database"); });
-                this.responseHandler.sendSuccessResponse(res, 200, 'Message read successfully!', "");
-            }
-            else if (statuses[0].status === "replied") {
-                await messageStatusRepostiory.update({ messageRepliedTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: message.id } })
-                    .then(() => { Logger.instance().log("Replied timestamp entered in the database"); });
-                this.responseHandler.sendSuccessResponse(res, 200, 'Message replied successfully!', "");
-            }
-            else if (statuses[0].status === "failed") {
-                await messageStatusRepostiory.update({ messageSentTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: message.id } })
-                    .then(() => { Logger.instance().log("Failed timestamp entered in the database"); });
-                this.responseHandler.sendSuccessResponse(res, 200, 'Message failed successfully!', "");
+    
+            const existingMessageStatus = await messageStatusRepository.findOne({ where: { chatMessageId: messageInfo.id } });
+            if (["sent", "read", "delivered", "replied", "failed"].includes(status)) {
+                const statusVariableName = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+                messageStatusObj[`message${statusVariableName}Timestamp`] = date;
+                await this.handleStatusUpdate(existingMessageStatus, messageStatusObj, messageStatusRepository, res, `Message ${status} successfully!`, `${status} timestamp entered in the database`);
+
             }
             else {
-                const temp = this.responseHandler.sendSuccessResponse(res, 200, 'Notification received successfully!', "");
+                this.responseHandler.sendSuccessResponse(res, 200, "Notification received successfully!", "");
             }
-        } catch (error) {
-            console.log("While sending success Response", error);
         }
-        
+
+        catch (error) {
+            console.error("Error trace:", error.trace || error);
+            console.error("While sending success response:", error);
+        }
+    }
+    
+    // Helper method to update or create message status
+    private async handleStatusUpdate(
+        existingMessageStatus,
+        messageStatusObj,
+        messageStatusRepository,
+        res,
+        successMessage,
+        logMessage
+    ) {
+        if (existingMessageStatus) {
+            console.log(messageStatusObj.chatMessageId);
+            await messageStatusRepository.update(messageStatusObj, { where: { chatMessageId: messageStatusObj.chatMessageId } });
+        } else {
+            await messageStatusRepository.create(messageStatusObj);
+        }
+        Logger.instance().log(logMessage);
+        this.responseHandler.sendSuccessResponse(res, 200, successMessage, "");
     }
 
     receiveMessage = async (req, res) => {
@@ -169,7 +232,7 @@ export class ClientWebhookController {
                 [userPlatformId ,platformUserName] = await this.getTelegramUserID(req.body);
             }
             if (req.body.statuses) {
-                this.sendSuccessMessage(chatMessageRepository, messageStatusRepostiory, res,req.body.statuses);
+                await this.sendSuccessMessage(chatMessageRepository, messageStatusRepostiory, res,req.body.statuses);
             }
             else {
                 const consentRequirement =  clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_ACTIVATION");
@@ -345,10 +408,7 @@ export class ClientWebhookController {
             let userPlatformId = null;
             let platformUserName = null;
             if (statuses) {
-                
-                // Logs have been added to track the status will be removed in next release
-                console.log(statuses[0].status);
-                this.sendSuccessMessage(chatMessageRepository, messageStatusRepository, res,statuses);
+                await this.sendSuccessMessage(chatMessageRepository, messageStatusRepository, res,statuses);
             }
             else {
                 console.log("receiveMessage webhook receiveMessageWhatsappNew");

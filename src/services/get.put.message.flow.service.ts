@@ -218,6 +218,15 @@ export class MessageFlow{
                     payload["languageForSession"] = defaultLangaugeCode;
                 }
 
+                // Fetch image URL in template message
+                if (msg.message.Url) {
+                    payload["headers"] = {
+                        "type"  : "image",
+                        "image" : {
+                            "link" : msg.message.Url
+                        }};
+                }
+
                 // Update template name for whatsapp wati other than english
                 if (channel === "whatsappWati" && languageForSession !== "en") {
                     payload["templateName"] = `${msg.templateName}_${languageForSession}`;
@@ -385,7 +394,7 @@ export class MessageFlow{
             // console.log("starting a new session");
             await chatSessionRepository.create({ userPlatformID  : messagetoDialogflow.platformId,
                 platform        : messagetoDialogflow.platform, sessionOpen     : "true",
-                lastMessageDate : lastMessageDate, askForFeedback  : "flase" });
+                lastMessageDate : lastMessageDate, askForFeedback  : "false" });
 
             // console.log("newChatsession", newChatsession);
             // await newChatsession.save();

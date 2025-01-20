@@ -42,22 +42,22 @@ export class HeartFailureRegistrationService {
             };
             const patientUpdateUrl = `patients/${patientUserId}`;
             const defaultDOB = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_DOB");
+            const defaultGender = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_GENDER");
 
             const patientDomainModel = {
-                Phone     : `+91-${personPhoneNumber}`,
-                Gender    : "Male",
+                Gender    : defaultGender,
                 BirthDate : new Date(defaultDOB).toISOString()
                     .split("T")[0],
             };
             await this.needleService.needleRequestForREAN("put", patientUpdateUrl, null, patientDomainModel);
             
-            const registrationMessage = `Hi ${personName}, \nWe're fetching your heart failure care plan details. Please hold on a moment!⏳`;
+            const registrationMessage = `Hi ${personName}, \nWe're fetching your heart disease care plan details. Please hold on a moment!⏳`;
             FireAndForgetService.enqueue(body);
             return { fulfillmentMessages: [{ text: { text: [registrationMessage] } }]  };
 
         } catch (error) {
             Logger.instance()
-                .log_error(error.message,500,'Heart failure careplan registration service error');
+                .log_error(error.message,500,'Heart failure disease registration service error');
         }
 
     }
@@ -72,7 +72,7 @@ export class HeartFailureRegistrationService {
             if (remindersFlag === false) {
                 await this.enrollPatient(patientUserId, name, msg, eventObj);
             } else {
-                msg = `You have already enrolled in the Heart Failure care plan. If you wish to enroll again please contact to REAN support. https://www.reanfoundation.org/`;
+                msg = `You have already enrolled in the Heart Disease care plan. If you wish to enroll again please contact to REAN support. https://www.reanfoundation.org/`;
                 await this.sendMessage(msg, eventObj);
             }
         } else {
@@ -83,13 +83,14 @@ export class HeartFailureRegistrationService {
     async enrollPatient(patientUserId: string, name: string, msg: string, eventObj) {
 
         const channel: string = eventObj.body.originalDetectIntentRequest.payload.source;
+        const buttonId: string = eventObj.body.queryResult.queryText ?? null;
         const enrollRoute = `care-plans/patients/${patientUserId}/enroll`;
+        const startDate = this.calculateStartDateByButtonId(buttonId, new Date());
         const obj1 = {
-            Provider  : "REAN",
-            PlanName  : "Heart Failure",
-            PlanCode  : "Heart-Failure",
-            StartDate : new Date().toISOString()
-                .split('T')[0],
+            Provider   : "REAN",
+            PlanName   : "Heart Failure",
+            PlanCode   : this.getSelectedCareplan(buttonId),
+            StartDate  : startDate.toISOString().split('T')[0],
             DayOffset  : 0,
             Channel    : this.getPatientInfoService.getReminderType(channel),
             TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
@@ -112,12 +113,64 @@ export class HeartFailureRegistrationService {
         const msgPayload: Iresponse = commonResponseMessageFormat();
         const payload = eventObj.body.originalDetectIntentRequest.payload;
         const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
-        this._platformMessageService = eventObj.container.resolve("telegram");
+        if (payload.source === "telegram" || payload.source === "Telegram") {
+            payload.source = "telegram";
+        }
+        this._platformMessageService = eventObj.container.resolve(payload.source);
         msgPayload.platform = payload.source;
         msgPayload.sessionId = personPhoneNumber;
         msgPayload.messageText = msg;
         msgPayload.message_type = "text";
         await this._platformMessageService.SendMediaMessage(msgPayload, null);
+    }
+
+    getSelectedCareplan(buttonId: string): string {
+        const careplanCodeMapping = {
+            "Start_Careplan_HeartF1" : "HD_HTN_Smoker",
+            "Start_Careplan_HeartF2" : "HD_HTN_Non-smoker",
+            "Start_Careplan_HeartF3" : "HD_No_HTN_Smoker",
+            "Start_Careplan_HeartF4" : "HD_No_HTN_Non-smoker",
+            "Start_Careplan_HeartF5" : "RF_HTN_Smoker",
+            "Start_Careplan_HeartF6" : "RF_HTN_Non-smoker",
+            "Start_Careplan_HeartF7" : "RF_No_HTN_Smoker",
+            "Start_Careplan_HeartF8" : "RF_No_HTN_Non-smoker"
+        };
+        return careplanCodeMapping[buttonId] ?? "Heart-Failure";
+    }
+    
+    calculateStartDateByButtonId(buttonId: string, todayDate: Date): Date {
+
+        /**
+         * Calculate the start date based on the button ID.
+         * If the button ID matches a key in the careplanCodeMapping object, calculate the next Sunday.
+         * Otherwise, return the current date.
+         */
+    
+        // Use `getSelectedCareplan` to check if the button ID exists in the mapping
+        const careplan = this.getSelectedCareplan(buttonId);
+    
+        if (careplan !== "Heart-Failure") {
+
+            // Calculate the next Sunday
+            const dayOfWeek = todayDate.getDay(); // Get the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+    
+            if (dayOfWeek === 0) {
+
+                // If today is Sunday
+                return todayDate;
+            } else {
+
+                // Calculate the days to the next Sunday
+                const daysUntilNextSunday = 7 - dayOfWeek;
+                const startDate = new Date(todayDate);
+                startDate.setDate(todayDate.getDate() + daysUntilNextSunday);
+                return startDate;
+            }
+        } else {
+
+            // If the button ID does not match, return the current date
+            return todayDate;
+        }
     }
 
 }

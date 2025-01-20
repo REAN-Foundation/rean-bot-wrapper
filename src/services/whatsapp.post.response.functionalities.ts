@@ -145,15 +145,22 @@ export class WhatsappPostResponseFunctionalities{
             "language" : {
                 "code" : payload.languageForSession
             },
-            "components" : [{
-                "type"       : "body",
-                "parameters" : payload.variables,
-
-            },
-            payload.buttonIds ? payload.buttonIds[0] : null,
-            payload.buttonIds ? payload.buttonIds[1] : null]
+            "components" : [
+                {
+                    "type"       : "body",
+                    "parameters" : payload.variables
+                }
+            ]
         };
-
+        
+        // Incorporate all buttons dynamically
+        if (payload.buttonIds && Array.isArray(payload.buttonIds)) {
+            payload.buttonIds.forEach(buttonId => {
+                postDataMeta["template"].components.push(buttonId);
+            });
+        }
+        
+        // Add headers if present
         if (payload.headers) {
             const headerBody = payload.headers;
             postDataMeta["template"].components.push({

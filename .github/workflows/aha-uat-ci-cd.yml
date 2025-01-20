@@ -127,7 +127,7 @@ jobs:
           image: public.ecr.aws/i9y2d4u3/rean-bot:${{ needs.Github-ECR-Tag-Check.outputs.release_name }}_${{ needs.Github-ECR-Tag-Check.outputs.release_id }}
 
       - name: Deploy Amazon ECS task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           wait-for-service-stability: true

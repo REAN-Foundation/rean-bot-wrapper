@@ -119,7 +119,7 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
                             imageContent      : response_format.messageBody,
                             imageUrl          : response_format.messageImageUrl,
                             userPlatformID    : response_format.sessionId,
-                            intent            : payload.templateName
+                            intent            : payload ? payload.templateName : null
                         };
                         await chatMessageRepository.create(chatMessageObj)
                             .then(() => { console.log("created"); })
