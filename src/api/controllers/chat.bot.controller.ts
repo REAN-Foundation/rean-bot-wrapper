@@ -12,6 +12,7 @@ import WorkflowUserData from '../../models/workflow.user.data.model';
 import { WorkflowEvent } from '../../services/emergency/workflow.event.types';
 import { EntityManagerProvider } from '../../services/entity.manager.provider.service';
 import { ChatSession } from '../../models/chat.session';
+import { sendTelegramButtonService } from '../../services/telegram.button.service';
 
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -104,7 +105,7 @@ export class ChatBotController {
         const response_format: Iresponse = commonResponseMessageFormat();
 
         const event: WorkflowEvent = requestBody;
-
+        console.log("event", event);
         const userPlatformId = event.UserMessage?.Phone ?? null;
         const chatSessionId = await this.getChatSessionId(userPlatformId);
 
@@ -133,8 +134,8 @@ export class ChatBotController {
             NodeInstanceId   : event.UserMessage.Payload.NodeInstanceId ?? null,
             NodeId           : event.UserMessage.Payload.NodeId ?? null,
             NodeActionId     : event.UserMessage.Payload.ActionId ?? null,
-            Question         : event.UserMessage.Question ?? null,
-            QuestionOptions  : event.UserMessage.QuestionOptions ?? null,
+            Question         : event.UserMessage.QuestionText ?? null,
+            QuestionOptions  : event.UserMessage.Options ?? null,
             QuestionResponse : event.UserMessage.QuestionResponse ?? null,
             Placeholders     : event.UserMessage.Placeholders ?? null,
             Payload          : event.UserMessage.Payload ?? null,
@@ -163,16 +164,68 @@ export class ChatBotController {
         }
         else if (event.UserMessage.MessageType === "Question") {
             response_format.message_type = "question";
-            response_format.messageText = event.UserMessage.Question;
-            response_format.buttonMetaData = event.UserMessage.QuestionOptions;
+            response_format.messageText = event.UserMessage.QuestionText;
+            response_format.buttonMetaData = event.UserMessage.Options;
+
+            // response_format.buttonMetaData = event.UserMessage.Options;
+            if (event.UserMessage.Options !== null) {
+
+                const buttonArray = [];
+                const buttons = request.body.Options;
+
+                // const optionsNameArray = request.Options;
+                let i = 0;
+                for (const button of buttons){
+
+                    // buttonArray.push( optionsNameArray[i].Text, buttonId);
+                    buttonArray.push(button.text, button.buttonid);
+                    i = i + 1;
+                }
+                var payload = await sendTelegramButtonService(buttonArray);
+                response_format.message_type = 'inline_keyboard';
+
+            }
+
+            const result = await this.telegramMessageService.SendMediaMessage(response_format, payload);
+
+            //Please update the BotMessageId and ChannelMessageId in the database in table WorkflowUserData
+
+            return this.responseHandler.sendSuccessResponse(response, 200, 'ok', { 'Data': requestBody }, true);
         }
+        else if (event.UserMessage.MessageType === "QuestionNode") {
+            response_format.message_type = "question";
+            response_format.messageText = event.UserMessage.QuestionText;
 
+            // response_format.buttonMetaData = event.UserMessage.Options;
+            if (event.UserMessage.Options !== null) {
+
+                const buttonArray = [];
+                const buttons = request.body.Options;
+
+                // const optionsNameArray = request.Options;
+                let i = 0;
+                for (const button of buttons){
+
+                    // buttonArray.push( optionsNameArray[i].Text, buttonId);
+                    buttonArray.push(button.text, button.buttonid);
+                    i = i + 1;
+                }
+                var payload = await sendTelegramButtonService(buttonArray);
+                response_format.message_type = 'inline_keyboard';
+
+            }
+
+            const result = await this.telegramMessageService.SendMediaMessage(response_format, payload);
+
+            //Please update the BotMessageId and ChannelMessageId in the database in table WorkflowUserData
+
+            return this.responseHandler.sendSuccessResponse(response, 200, 'ok', { 'Data': requestBody }, true);
+        }
         const result = await this.telegramMessageService.SendMediaMessage(response_format, null);
-
+        
         //Please update the BotMessageId and ChannelMessageId in the database in table WorkflowUserData
-
         return this.responseHandler.sendSuccessResponse(response, 200, 'ok', { 'Data': requestBody }, true);
-    };
+    }
 
     getChatSessionId = async (platformUserId: string) => {
         const entManager = await this._entityProvider.getEntityManager(this.environmentProviderService);

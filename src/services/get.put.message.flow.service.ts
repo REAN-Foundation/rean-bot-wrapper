@@ -22,6 +22,7 @@ import { Helper } from '../common/helper';
 import needle from "needle";
 import { sendTelegramButtonService } from './telegram.button.service';
 import { Logger } from '../common/logger';
+import { MessageHandlerType } from '../refactor/messageTypes/message.types';
 
 @scoped(Lifecycle.ContainerScoped)
 export class MessageFlow{
@@ -80,18 +81,24 @@ export class MessageFlow{
                 outgoingMessage.MetaData.messageBody = preprocessedOutgoingMessage.translate_message['original_message'];
             }
             const processedResponse = await this.handleRequestservice.handleUserRequestForRouting(outgoingMessage, platformMessageService);
-            const response = await this.processOutgoingMessage(messageToLlmRouter, channel, platformMessageService, processedResponse);
 
-            // Update the DB using message Id only if outgoing meesage is related with assessment
-            const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-            const assessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
-            const key = `${messageToLlmRouter.platformId}:NextQuestionFlag`;
-            const nextQuestionFlag = await CacheMemory.get(key);
-            if (nextQuestionFlag === true && outgoingMessage.PrimaryMessageHandler === "Assessments") {
-                const messageId = platformMessageService.getMessageIdFromResponse(response);
-                await this.serveAssessmentService.updateDBChatSessionWithMessageId(messageToLlmRouter.platformId, messageId, chatMessageRepository, assessmentSessionRepo);
+            if (outgoingMessage.PrimaryMessageHandler !== MessageHandlerType.WorkflowService) {
+                        
+                const response = await this.processOutgoingMessage(messageToLlmRouter, channel, platformMessageService, processedResponse);
+
+                // Update the DB using message Id only if outgoing meesage is related with assessment
+                const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+                const assessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
+                const key = `${messageToLlmRouter.platformId}:NextQuestionFlag`;
+                const nextQuestionFlag = await CacheMemory.get(key);
+                if (nextQuestionFlag === true && outgoingMessage.PrimaryMessageHandler === "Assessments") {
+                    const messageId = platformMessageService.getMessageIdFromResponse(response);
+                    await this.serveAssessmentService.updateDBChatSessionWithMessageId(messageToLlmRouter.platformId, messageId, chatMessageRepository, assessmentSessionRepo);
+                }
+                return response;
+
             }
-            return response;
+            
         } catch (error) {
             console.log(error);
         }
@@ -224,7 +231,7 @@ export class MessageFlow{
                         "type"  : "image",
                         "image" : {
                             "link" : msg.message.Url
-                        }};
+                        } };
                 }
 
                 // Update template name for whatsapp wati other than english

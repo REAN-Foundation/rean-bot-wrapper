@@ -81,7 +81,7 @@ export class WorkflowEventListener {
             }
 
             var platform = message.platform;
-            if (platform === 'whatsapp') {
+            if (platform === 'whatsappMeta') {
                 platform = 'WhatsApp';
             }
             if (platform === 'telegram') {
@@ -99,7 +99,7 @@ export class WorkflowEventListener {
                     "Phone"          : message.platformId,
                     "EventTimestamp" : timestamp,
                     "MessageType"    : incomingMessageType,
-                    "MessageChannel" : message.platform,
+                    "MessageChannel" : platform,
                 }
             };
 

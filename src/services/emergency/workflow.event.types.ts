@@ -97,8 +97,8 @@ export interface WorkflowUserMessage {
     VideoUrl        ?: string;
     Location        ?: Location;
     FileUrl         ?: string;
-    Question        ?: string;
-    QuestionOptions ?: QuestionAnswerOption[];
+    QuestionText        ?: string;
+    Options ?: QuestionAnswerOption[];
     QuestionResponse?: QuestionResponseMessage;
     Placeholders    ?: { Key: string, Value: string }[];
     Payload         ?: MessagePayload;
