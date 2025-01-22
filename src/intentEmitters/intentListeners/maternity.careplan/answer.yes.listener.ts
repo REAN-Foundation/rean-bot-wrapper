@@ -1,6 +1,6 @@
 import { AnswerYesMsgService } from "../../../services/maternalCareplan/serveAssessment/answer.yes.service";
 
-export const  DmcAssessmentAnswerYesListener = async (_intent, eventObj) => {
+export const  AssessmentAnswerYesListener = async (_intent, eventObj) => {
     try {
         const answerYesMsgService: AnswerYesMsgService = eventObj.container.resolve(AnswerYesMsgService);
         const response = await answerYesMsgService.replyYesService(eventObj);
