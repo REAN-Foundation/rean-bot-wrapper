@@ -256,7 +256,16 @@ export class ServeAssessmentService {
             "Dmc_No"           : 2,
             "Work_Commitments" : 1,
             "Feeling_Unwell_A" : 2,
-            "Transit_Issues"   : 3
+            "Transit_Issues"   : 3,
+            "Assessment_Yes"   : 1,
+            "Assessment_No"    : 2,
+            "Assessment_No1"   : 1,
+            "Assessment_No2"   : 2,
+            "Assessment_No3"   : 3,
+            "Assessment_No4"   : 4,
+            "Assessment_No5"   : 5,
+            "Assessment_No6"   : 6,
+            "Assessment_No7"   : 7,
 
         };
         return message[intentName] ?? intentName;

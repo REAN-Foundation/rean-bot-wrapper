@@ -100,25 +100,51 @@ export class FireAndForgetService {
             await registrationPerMinMsgService.collectMessage(eventObj);
             console.log(`Fire and Forget Domain Model: ${model}`);
         }
-        if (model.Intent === "Dmc_Yes" || model.Intent === "Dmc_No" || model.Intent === "Work_Commitments"
-             || model.Intent === "Feeling_Unwell_A" || model.Intent === "Transit_Issues"
-        ) {
+
+        // List of valid intents
+        const validAssessmentReplyIntents = [
+            "Dmc_Yes",
+            "Dmc_No",
+            "Work_Commitments",
+            "Feeling_Unwell_A",
+            "Transit_Issues",
+            "Assessment_Yes",
+            "Assessment_No",
+        ];
+
+        if (validAssessmentReplyIntents.includes(model.Intent)) {
             const eventObj = model.Body.EventObj;
-            const serveAssessmentService:  ServeAssessmentService = eventObj.container.resolve(ServeAssessmentService);
+            const serveAssessmentService: ServeAssessmentService = eventObj.container.resolve(ServeAssessmentService);
             const channel = eventObj.body.originalDetectIntentRequest.payload.source;
-            let messageContextId = null;
+
+            // Determine the message context ID based on the channel
+            let messageContextId: string | null = null;
             if (channel === "telegram" || channel === "Telegram") {
                 messageContextId = eventObj.body.originalDetectIntentRequest.payload.completeMessage.chat_message_id;
             } else {
                 messageContextId = eventObj.body.originalDetectIntentRequest.payload.contextId;
             }
+
+            // Extract user information
             const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
-            const userResponse = eventObj.body.queryResult.intent.displayName;
+            const userResponse = eventObj.body.queryResult.queryText;
+
+            // Delay for a brief period
             await FireAndForgetService.delay(1000);
-            await serveAssessmentService.answerQuestion(eventObj, userId, userResponse,
-                messageContextId, channel, false);
-            console.log(`Fire and Forget Domain Model: ${model}`);
+
+            // Call the assessment service to process the response
+            await serveAssessmentService.answerQuestion(
+                eventObj,
+                userId,
+                userResponse,
+                messageContextId,
+                channel,
+                false
+            );
+
+            console.log(`Fire and Forget Domain Model: ${JSON.stringify(model)}`);
         }
+
         if (model.Intent === "cincinnati_PerMinMsg") {
             const eventObj = model.Body.EventObj;
             const cincinnatiPerMinMsgService:  CincinnatiPerMinMsgService =
