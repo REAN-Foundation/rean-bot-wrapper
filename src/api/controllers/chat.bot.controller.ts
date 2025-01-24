@@ -9,9 +9,12 @@ import { commonResponseMessageFormat } from '../../services/common.response.form
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
 import { TelegramMessageService } from '../../services/telegram.message.service';
 import WorkflowUserData from '../../models/workflow.user.data.model';
-import { WorkflowEvent } from '../../services/emergency/workflow.event.types';
+import { QuestionResponseType, WorkflowEvent } from '../../services/emergency/workflow.event.types';
 import { EntityManagerProvider } from '../../services/entity.manager.provider.service';
 import { ChatSession } from '../../models/chat.session';
+import { sendApiButtonService } from '../../services/whatsappmeta.button.service';
+import { sendTelegramButtonService } from '../../services/telegram.button.service';
+import { ChatMessage } from '../../models/chat.message.model';
 
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -129,27 +132,31 @@ export class ChatBotController {
             FileUrl           : event.UserMessage.FileUrl ?? null,
             EventTimestamp    : event.UserMessage.EventTimestamp ?
                 new Date(event.UserMessage.EventTimestamp) : new Date(),
-            SchemaName       : event.UserMessage.Payload.SchemaName ?? null,
-            NodeInstanceId   : event.UserMessage.Payload.NodeInstanceId ?? null,
-            NodeId           : event.UserMessage.Payload.NodeId ?? null,
-            NodeActionId     : event.UserMessage.Payload.ActionId ?? null,
-            Question         : event.UserMessage.Question ?? null,
-            QuestionOptions  : event.UserMessage.QuestionOptions ?? null,
-            QuestionResponse : event.UserMessage.QuestionResponse ?? null,
-            Placeholders     : event.UserMessage.Placeholders ?? null,
-            Payload          : event.UserMessage.Payload ?? null,
+            SchemaName           : event.UserMessage.Payload.SchemaName ?? null,
+            NodeInstanceId       : event.UserMessage.Payload.NodeInstanceId ?? null,
+            NodeId               : event.UserMessage.Payload.NodeId ?? null,
+            NodeActionId         : event.UserMessage.Payload.ActionId ?? null,
+            Question             : event.UserMessage.Question ?? null,
+            QuestionOptions      : event.UserMessage.QuestionOptions ?? null,
+            QuestionResponse     : event.UserMessage.QuestionResponse ?? null,
+            QuestionResponseType : event.UserMessage.QuestionResponseType as QuestionResponseType,
+            Placeholders         : event.UserMessage.Placeholders ?? null,
+            Payload              : event.UserMessage.Payload ?? null,
         };
 
         const entManager = await this._entityProvider.getEntityManager(this.environmentProviderService);
         const workflowRepository = entManager.getRepository(WorkflowUserData);
         console.log("Storing the workflow event to database", workflowEventEntiry);
-        await workflowRepository.create(workflowEventEntiry);
+        const workflowEventEntityRecord = await workflowRepository.create(workflowEventEntiry);
 
         response_format.platformId = event.UserMessage.Phone;
         response_format.platform = event.UserMessage.MessageChannel === "Telegram" ?
             "telegram" : "whatsApp";
 
         response_format.sessionId = event.UserMessage.Phone;
+
+        let payload = null;
+
         if (event.UserMessage.MessageType === "Text") {
             response_format.messageText = event.UserMessage.TextMessage;
             response_format.message_type = "text";
@@ -165,12 +172,55 @@ export class ChatBotController {
             response_format.message_type = "question";
             response_format.messageText = event.UserMessage.Question;
             response_format.buttonMetaData = event.UserMessage.QuestionOptions;
+            const options = event.UserMessage.QuestionOptions;
+            const buttonArray = [];
+            let messageType = 'text';
+            if (workflowEventEntiry.QuestionResponseType === QuestionResponseType.SingleChoiceSelection) {
+                let i = 0;
+                for (const option of options){
+                    const buttonId = option.Sequence;
+                    buttonArray.push(option.Text, buttonId);
+                    i = i + 1;
+                }
+                if (event.UserMessage.MessageChannel === 'whatsappMeta' ||
+                    event.UserMessage.MessageChannel === 'whatsappWati') {
+                    payload = await sendApiButtonService(buttonArray);
+                    messageType = 'interactivebuttons';
+                    response_format.message_type = messageType;
+                } else {
+                    payload = await sendTelegramButtonService(buttonArray);
+                    messageType = 'inline_keyboard';
+                    response_format.message_type = messageType;
+                }
+            }
         }
+        const res = await this._platformMessageService.SendMediaMessage(response_format, payload);
+        const channelMessageId = await this._platformMessageService.getMessageIdFromResponse(res);
 
-        const result = await this.telegramMessageService.SendMediaMessage(response_format, null);
+        const chatMessageObj = {
+            chatSessionID  : null,
+            platform       : response_format.platform,
+            direction      : "Out",
+            messageType    : response_format.message_type,
+            messageContent : response_format.messageText,
+            userPlatformID : response_format.sessionId,
+            intent         : "workflow",
+            messageId      : channelMessageId,
+        };
+        const chatMessageRepository = await entManager.getRepository(ChatMessage);
+        const msgRecord = await chatMessageRepository.create(chatMessageObj);
+        const botMessageId = msgRecord.id;
 
-        //Please update the BotMessageId and ChannelMessageId in the database in table WorkflowUserData
-
+        const eventRecordId = workflowEventEntityRecord ? workflowEventEntityRecord.id : null;
+        if (eventRecordId) {
+            await workflowRepository.update({
+                BotMessageId     : botMessageId,
+                ChannelMessageId : channelMessageId
+            },
+            {
+                where : { id: eventRecordId }
+            });
+        }
         return this.responseHandler.sendSuccessResponse(response, 200, 'ok', { 'Data': requestBody }, true);
     };
 

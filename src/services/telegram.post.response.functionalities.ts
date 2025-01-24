@@ -105,7 +105,8 @@ export class TelegramPostResponseFunctionalities {
         return message;
     };
 
-    sendinline_keyboardResponse = async(response_format:Iresponse,telegram,payload) => {
+    sendinline_keyboardResponse = async(
+        response_format:Iresponse, telegram, payload) => {
         let responseId = 0;
         let telegramResponseData;
         const message = response_format.messageText;

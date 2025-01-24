@@ -87,21 +87,22 @@ export interface MessagePayload {
 
 // Back and forth
 export interface WorkflowUserMessage {
-    Phone?           : string;
-    EventTimestamp   : string;
-    MessageType      : string;
-    MessageChannel   : string;
-    TextMessage     ?: string;
-    ImageUrl        ?: string;
-    AudioUrl        ?: string;
-    VideoUrl        ?: string;
-    Location        ?: Location;
-    FileUrl         ?: string;
-    Question        ?: string;
-    QuestionOptions ?: QuestionAnswerOption[];
-    QuestionResponse?: QuestionResponseMessage;
-    Placeholders    ?: { Key: string, Value: string }[];
-    Payload         ?: MessagePayload;
+    Phone?               : string;
+    EventTimestamp       : string;
+    MessageType          : string;
+    MessageChannel       : string;
+    TextMessage         ?: string;
+    ImageUrl            ?: string;
+    AudioUrl            ?: string;
+    VideoUrl            ?: string;
+    Location            ?: Location;
+    FileUrl             ?: string;
+    Question            ?: string;
+    QuestionOptions     ?: QuestionAnswerOption[];
+    QuestionResponse    ?: QuestionResponseMessage;
+    QuestionResponseType?: QuestionResponseType;
+    Placeholders        ?: { Key: string, Value: string }[];
+    Payload             ?: MessagePayload;
 }
 
 export interface WorkflowEvent {

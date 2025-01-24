@@ -179,6 +179,12 @@ export default class WorkflowUserData extends Model {
     QuestionOptions: any;
 
     @Column({
+        type : DataType.STRING,
+        allowNull : true
+    })
+    QuestionResponseType: string;
+
+    @Column({
         type : DataType.JSON,
         allowNull : true
     })
