@@ -35,7 +35,7 @@ export class TelegramPostResponseFunctionalities {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     sendvoiceResponse = async(response_format:Iresponse,telegram,payload) => {
-        let telegramResponseData;
+        let responseData;
         var data = {
             chat_id : response_format.sessionId,
             voice   : response_format.messageBody
@@ -49,13 +49,13 @@ export class TelegramPostResponseFunctionalities {
                 console.log("error", err);
             }
             else {
-                telegramResponseData = data;
+                responseData = data;
             }
         });
-        return telegramResponseData;
+        return responseData;
     };
 
-    sendimageResponse = (response_format:Iresponse,telegram,payload) => {
+    sendimageResponse = (response_format:Iresponse,telegram, payload) => {
         let telegramResponseData;
         const message = this.sanitizeMessage(response_format.messageText);
         telegram.sendPhoto(response_format.sessionId,response_format.messageBody,{ caption: message })
@@ -65,19 +65,19 @@ export class TelegramPostResponseFunctionalities {
         return telegramResponseData;
     };
 
-    sendlocationResponse = (response_format:Iresponse, telegram, payload) => {
-        let telegramResponseData;
+    sendlocationResponse = async (response_format:Iresponse, telegram, payload) => {
+        let responseId = 0;
         const latitude = response_format.location?.latitude;
         const longitude = response_format.location?.longitude;
         if (latitude && longitude) {
-            telegram.sendLocation(
+            const responseData = await telegram.sendLocation(
                 response_format.sessionId,
                 latitude,
-                longitude)
-                .then(function (data) {
-                    telegramResponseData = data;
-                });
-            return telegramResponseData;
+                longitude
+            );
+            responseId = responseData?.message_id;
+            await this.updateResponseMessageId(responseId, response_format.sessionId);
+            return responseData;
         }
         return null;
     };
@@ -100,7 +100,10 @@ export class TelegramPostResponseFunctionalities {
             var strshortened = message.slice(0, 3800);
             strshortened = strshortened.substring(0, strshortened.lastIndexOf("\n\n") + 1);
             strshortened = strshortened.replace(/(<\/ b>|<\/b>)/mgi, "</b>");
-            message = strshortened + '\n\n Too many appointments to display here, please visit the CoWin website - https://www.cowin.gov.in/home -  to view more appointments. \n or \n Enter additional details to filter the results.';
+            var str = `\n\n Too many appointments to display here, please visit the CoWin website - https://www.cowin.gov.in/home -
+            // to view more appointments.
+            // \n or \n Enter additional details to filter the results.`;
+            message = strshortened + str;
         }
         return message;
     };
@@ -108,7 +111,6 @@ export class TelegramPostResponseFunctionalities {
     sendinline_keyboardResponse = async(
         response_format:Iresponse, telegram, payload) => {
         let responseId = 0;
-        let telegramResponseData;
         const message = response_format.messageText;
 
         //this works but this is not inline keyboard/ this adds a permanent button on the bar
@@ -168,12 +170,11 @@ export class TelegramPostResponseFunctionalities {
             reply_markup : JSON.stringify(keyboard)
         };
 
-        await telegram.sendMessage(response_format.sessionId, message, opts).then(async function (data) {
-            responseId = data.message_id;
-            telegramResponseData = data;
-        });
+        var responseData = await telegram.sendMessage(response_format.sessionId, message, opts);
+        responseId = responseData?.message_id;
         await this.updateResponseMessageId(responseId,response_format.sessionId);
-        return telegramResponseData;
+
+        return responseData;
     };
 
 }

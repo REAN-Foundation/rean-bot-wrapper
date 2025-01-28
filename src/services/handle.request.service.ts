@@ -173,7 +173,9 @@ export class handleRequestservice {
             break;
         }
         }
-        processed_message = await this.processMessage(message_from_nlp, metaData.platformId);
+        if (outgoingMessage.PrimaryMessageHandler !== MessageHandlerType.WorkflowService) {
+            processed_message = await this.processMessage(message_from_nlp, metaData.platformId);
+        }
 
         return { message_from_nlp, processed_message };
     }

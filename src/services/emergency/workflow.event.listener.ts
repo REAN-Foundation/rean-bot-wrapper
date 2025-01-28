@@ -5,7 +5,7 @@ import { ClientEnvironmentProviderService } from "../set.client/client.environme
 import WorkflowUserData from "../../models/workflow.user.data.model";
 import { NeedleService } from "../needle.service";
 import { Imessage } from "../../refactor/interface/message.interface";
-import { UserMessageType, WorkflowEvent } from "./workflow.event.types";
+import { QuestionResponseType, UserMessageType, WorkflowEvent } from "./workflow.event.types";
 import { ChatSession } from "../../models/chat.session";
 import { ChatMessage } from "../../models/chat.message.model";
 import { WorkflowCache } from "./workflow.cache";
@@ -112,19 +112,34 @@ export class WorkflowEventListener {
             }
             if (prevMessage?.Payload) {
                 messageContent["UserMessage"]['Payload'] = prevMessage?.Payload;
+                messageContent["UserMessage"]['Payload']['ChannelMessageId'] = message.chat_message_id;
             }
 
-            const isQuestion = prevMessage?.MessageType === UserMessageType.Question;
+            const isResponseToQuestion = prevMessage?.MessageType === UserMessageType.Question;
 
             if (incomingMessageType === 'Text') {
-                if (isQuestion) {
-                    messageContent["UserMessage"]['Question']  = prevMessage.Question;
-                    messageContent["UserMessage"]['QuestionOptions'] = prevMessage.QuestionOptions;
-                    messageContent["UserMessage"]['QuestionResponse'] = prevMessage.QuestionResponse;
-
-                    //Below set the user's response to question
-                    //Please check the correct type
-                    messageContent["UserMessage"]['QuestionResponse']['ResponseContent'] = message.messageBody;
+                if (isResponseToQuestion) {
+                    messageContent["UserMessage"]['MessageType'] = UserMessageType.QuestionResponse;
+                    var questionResponse = prevMessage.QuestionResponse;
+                    if (!questionResponse) {
+                        questionResponse = {
+                            ResponseContent      : message.messageBody,
+                            QuestionId           : prevMessage.NodeId,
+                            QuestionResponseType : prevMessage.QuestionResponseType,
+                            QuestionText         : prevMessage.Question,
+                            QuestionOptions      : prevMessage.QuestionOptions,
+                        };
+                    }
+                    if (prevMessage.QuestionResponseType === QuestionResponseType.SingleChoiceSelection) {
+                        questionResponse['SingleChoiceChosenOption'] = message.messageBody;
+                        if (prevMessage.QuestionOptions) {
+                            const option = prevMessage.QuestionOptions.find((o) => o.Option === message.messageBody);
+                            if (option) {
+                                questionResponse['SingleChoiceChosenOptionSequence'] = option.Sequence;
+                            }
+                        }
+                    }
+                    messageContent["UserMessage"]['QuestionResponse'] = questionResponse;
                 }
                 else {
                     messageContent["UserMessage"]['TextMessage'] = message.messageBody;
@@ -181,10 +196,10 @@ export class WorkflowEventListener {
                 AudioUrl             : null,
                 VideoUrl             : null,
                 FileUrl              : null,
-                Question             : isQuestion ? prevMessage.Question : null,
-                QuestionOptions      : isQuestion ? prevMessage.QuestionOptions : null,
-                QuestionResponse     : isQuestion ? message.messageBody : null,
-                QuestionResponseType : isQuestion ? prevMessage.QuestionResponseType : null,
+                Question             : isResponseToQuestion ? prevMessage.Question : null,
+                QuestionOptions      : isResponseToQuestion ? prevMessage.QuestionOptions : null,
+                QuestionResponse     : isResponseToQuestion ? message.messageBody : null,
+                QuestionResponseType : isResponseToQuestion ? prevMessage.QuestionResponseType : null,
                 Placeholders         : prevMessage?.Placeholders ?? null,
                 Payload              : prevMessage?.Payload ?? null,
             };

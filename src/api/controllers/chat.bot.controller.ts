@@ -136,7 +136,7 @@ export class ChatBotController {
             NodeInstanceId       : event.UserMessage.Payload.NodeInstanceId ?? null,
             NodeId               : event.UserMessage.Payload.NodeId ?? null,
             NodeActionId         : event.UserMessage.Payload.ActionId ?? null,
-            Question             : event.UserMessage.Question ?? null,
+            Question             : event.UserMessage.QuestionText ?? null,
             QuestionOptions      : event.UserMessage.QuestionOptions ?? null,
             QuestionResponse     : event.UserMessage.QuestionResponse ?? null,
             QuestionResponseType : event.UserMessage.QuestionResponseType as QuestionResponseType,
@@ -150,7 +150,8 @@ export class ChatBotController {
         const workflowEventEntityRecord = await workflowRepository.create(workflowEventEntiry);
 
         response_format.platformId = event.UserMessage.Phone;
-        response_format.platform = event.UserMessage.MessageChannel === "Telegram" ?
+        response_format.platform = event.UserMessage.MessageChannel === "Telegram" ||
+            event.UserMessage.MessageChannel === "telegram" ?
             "telegram" : "whatsApp";
 
         response_format.sessionId = event.UserMessage.Phone;
@@ -170,7 +171,7 @@ export class ChatBotController {
         }
         else if (event.UserMessage.MessageType === "Question") {
             response_format.message_type = "question";
-            response_format.messageText = event.UserMessage.Question;
+            response_format.messageText = event.UserMessage.QuestionText;
             response_format.buttonMetaData = event.UserMessage.QuestionOptions;
             const options = event.UserMessage.QuestionOptions;
             const buttonArray = [];
