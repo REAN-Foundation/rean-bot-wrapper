@@ -13,7 +13,7 @@ import { ContactList } from '../../models/contact.list';
 import { ConsentInfo } from '../../models/consent.info.model';
 import { UserConsent } from '../../models/user.consent.model';
 import { ConsentService } from '../../services/consent.service';
-import { Registration } from '../../services/registration/patient.registration.service';
+import { Registration } from '../../services/registrationsAndEnrollements/patient.registration.service';
 import { Logger } from '../../common/logger';
 
 @scoped(Lifecycle.ContainerScoped)
@@ -48,7 +48,7 @@ export class ClientWebhookController {
             }
         }
         catch (error) {
-            this.errorHandler.handle_controller_error(error, res, req);
+            this.errorHandler.handleControllerError(error, res, req);
         }
     };
 
@@ -89,67 +89,6 @@ export class ClientWebhookController {
         }
         return consentRequired;
     }
-
-    // async sendSuccessMessage(chatMessageRepository, messageStatusRepostiory, res, statuses){
-    //     try {
-    //         const date = new Date(parseInt(statuses[0].timestamp) * 1000);
-    //         console.log(statuses[0].id);
-    //         let messageInfo = await chatMessageRepository.findOne({ where: { responseMessageID: statuses[0].id } });
-    //         if (messageInfo == null){
-    //             await this.sleep(2000);
-    //             messageInfo = await chatMessageRepository.findOne({ where: { responseMessageID: statuses[0].id } });
-    //         }
-    //             console.log(messageInfo.id);
-    //             const messageStatusObj: Partial<MessageStatus> = {
-    //                 chatMessageId : messageInfo.id,
-    //                 messageStatus : statuses[0].status,
-    //                 channel       : messageInfo.platform,
-    //             };
-    //             if (statuses[0].status === "sent") {
-    //                 messageStatusObj.messageSentTimestamp = date;
-    //                 const messageStatus = await messageStatusRepostiory.findOne({ where: { chatMessageId: messageInfo.id } });
-    //                 if (messageStatus) {
-    //                     await messageStatusRepostiory.update({ messageSentTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: messageInfo.id } });
-    //                 } else {
-    //                     await messageStatusRepostiory.create(messageStatusObj)
-    //                         .then(() => { Logger.instance().log("Send timestamp entered in the database"); });
-    //                 }
-    //                 this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', "");
-    //             }
-    //             else if (statuses[0].status === "delivered") {
-    //                 const messageStatus = await messageStatusRepostiory.findOne({ where: { chatMessageId: messageInfo.id } });
-    //                 if (!messageStatus) {
-    //                     await this.sleep(1000);
-    //                 }
-    //                 await messageStatusRepostiory.update({ messageDeliveredTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: messageInfo.id } })
-    //                     .then(() => { Logger.instance().log("Delivered timestamp entered in the database"); });
-    //                 this.responseHandler.sendSuccessResponse(res, 200, 'Message delivered successfully!', "");
-    //             }
-    //             else if (statuses[0].status === "read") {
-    //                 await messageStatusRepostiory.update({ messageReadTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: messageInfo.id } })
-    //                     .then(() => { Logger.instance().log("Read timestamp entered in the database"); });
-    //                 this.responseHandler.sendSuccessResponse(res, 200, 'Message read successfully!', "");
-    //             }
-    //             else if (statuses[0].status === "replied") {
-    //                 await messageStatusRepostiory.update({ messageRepliedTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: messageInfo.id } })
-    //                     .then(() => { Logger.instance().log("Replied timestamp entered in the database"); });
-    //                 this.responseHandler.sendSuccessResponse(res, 200, 'Message replied successfully!', "");
-    //             }
-    //             else if (statuses[0].status === "failed") {
-    //                 await messageStatusRepostiory.update({ messageSentTimestamp: date, messageStatus: statuses[0].status }, { where: { chatMessageId: messageInfo.id } })
-    //                     .then(() => { Logger.instance().log("Failed timestamp entered in the database"); });
-    //                 this.responseHandler.sendSuccessResponse(res, 200, 'Message failed successfully!', "");
-    //             }
-            
-    //         else {
-    //             const temp = this.responseHandler.sendSuccessResponse(res, 200, 'Notification received successfully!', "");
-    //         }
-    //     } catch (error) {
-    //         console.log(`error trace : ${error.trace}`);
-    //         console.log("While sending success Response", error);
-    //     }
-        
-    // }
 
     async sendSuccessMessage(chatMessageRepository, messageStatusRepository, res, statuses) {
         try {
@@ -258,7 +197,7 @@ export class ClientWebhookController {
         }
         catch (error) {
             console.log("in error", error);
-            this.errorHandler.handle_controller_error(error, res, req);
+            this.errorHandler.handleControllerError(error, res, req);
 
         }
     };
@@ -266,8 +205,8 @@ export class ClientWebhookController {
     async  handelRequestWithoutConsent(firstTimeUser,patientUSerId,req,entityManagerProvider,userPlatformId, platformUserName,reqVariable ) {
         try {
             if (firstTimeUser || !patientUSerId  ){
-                const patientUserId = await this.registrationService.getPatientUserId(req.params.channel, userPlatformId, platformUserName);
-                await this.registrationService.wrapperRegistration(entityManagerProvider,userPlatformId, platformUserName,req.params.channel,patientUserId);
+                const results = await this.registrationService.getPatientUserId(req.params.channel, userPlatformId, platformUserName);
+                await this.registrationService.wrapperRegistration(entityManagerProvider,userPlatformId, platformUserName,req.params.channel,results.patientUserId);
             }
             this._platformMessageService.handleMessage(reqVariable, req.params.channel);
         } catch (error) {
@@ -387,7 +326,7 @@ export class ClientWebhookController {
         }
         catch (error) {
             console.log("in error", error);
-            this.errorHandler.handle_controller_error(error, res, req);
+            this.errorHandler.handleControllerError(error, res, req);
         }
 
     };
@@ -429,14 +368,11 @@ export class ClientWebhookController {
                 else {
                     this.handelRequestWithoutConsent(firstTimeUser,ehrSystemCode,req,entityManagerProvider,userPlatformId, platformUserName, req.body.entry[0].changes[0].value);
                 }
-                
             }
-            
         }
         catch (error) {
             console.log("in error", error);
-
-            this.errorHandler.handle_controller_error(error, res, req);
+            this.errorHandler.handleControllerError(error, res, req);
         }
     };
 
@@ -477,7 +413,7 @@ export class ClientWebhookController {
             }
         } catch (error) {
             console.log("error in Wati message handler", error);
-            this.errorHandler.handle_controller_error(error, res, req);
+            this.errorHandler.handleControllerError(error, res, req);
         }
     };
 
@@ -500,7 +436,7 @@ export class ClientWebhookController {
         }
         catch (error) {
             console.log("in error", error);
-            this.errorHandler.handle_controller_error(error, res, req);
+            this.errorHandler.handleControllerError(error, res, req);
         }
     };
 

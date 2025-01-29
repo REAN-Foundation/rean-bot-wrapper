@@ -1,7 +1,7 @@
 import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../common/logger';
 import { NeedleService } from '../needle.service';
-import { Registration } from '../registration/patient.registration.service';
+import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { sendApiInteractiveListService } from '../whatsappmeta.button.service';
 import { commonResponseMessageFormat } from '../common.response.format.object';

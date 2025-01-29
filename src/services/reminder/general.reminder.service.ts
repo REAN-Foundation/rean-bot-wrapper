@@ -10,7 +10,7 @@ import { DateStringFormat, DurationType, TimeHelper } from '../../common/time.he
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 import { CacheMemory } from '../cache.memory.service';
 import { ReminderBody, ReminderDomainModel, ReminderType, RepeatAfterEveryNUnit } from '../../domain.types/reminder/reminder.domain.model';
-import { Registration } from '../registration/patient.registration.service';
+import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class GeneralReminderService {
@@ -62,9 +62,9 @@ export class GeneralReminderService {
             const phoneNumber = await this.needleService.getPhoneNumber(eventObj);
 
             // extract patient data and set to catch memory
-            const patientUserId = await this.registration.getPatientUserId(channel,
+            const result = await this.registration.getPatientUserId(channel,
                 personPhoneNumber, personName);
-            jsonFormat.PatientUserId = patientUserId;
+            jsonFormat.PatientUserId = result.patientUserId;
             jsonFormat.TaskName = `${eventName} reminder`;
 
             // const getPatientUrl = `patients/${patientUserId}`;
@@ -82,7 +82,7 @@ export class GeneralReminderService {
                 return await this.dialoflowMessageFormattingService.triggerIntent("Reminder_Ask_Frequency",eventObj);
 
             } else {
-                const response = await this.createCommonReminders(eventObj, jsonFormat.Frequency, jsonFormat, patientUserId, date, updateTime, personName,
+                const response = await this.createCommonReminders(eventObj, jsonFormat.Frequency, jsonFormat, result.patientUserId, date, updateTime, personName,
                     personPhoneNumber, dayName );
                 if (response.Status === 'failure') {
                     dffMessage = `Sorry for the inconvenience. The reminder couldn't be set because the provided date and time cannot be in the past.`;
