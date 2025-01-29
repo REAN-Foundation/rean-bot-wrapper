@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Logger } from '../../common/logger';
 import { ResponseHandler } from '../../utils/response.handler';
-import { autoInjectable, inject, Lifecycle, scoped } from 'tsyringe';
+import { autoInjectable, delay, inject, Lifecycle, scoped } from 'tsyringe';
 import { IntentEmitter } from '../../intentEmitters/intent.emitter';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { Iresponse } from '../../refactor/interface/message.interface';
@@ -15,6 +15,7 @@ import { ChatSession } from '../../models/chat.session';
 import { sendApiButtonService } from '../../services/whatsappmeta.button.service';
 import { sendTelegramButtonService } from '../../services/telegram.button.service';
 import { ChatMessage } from '../../models/chat.message.model';
+import { WhatsappMetaMessageService } from '../../services/whatsapp.meta.message.service';
 
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -26,7 +27,7 @@ export class ChatBotController {
 
     private _platformMessageService :  platformServiceInterface ;
 
-    constructor(
+    constructor(@inject(delay(() => WhatsappMetaMessageService)) public whatsappNewMessageService?: WhatsappMetaMessageService,
         @inject(ClientEnvironmentProviderService) private environmentProviderService?: ClientEnvironmentProviderService,
         @inject(EntityManagerProvider) private _entityProvider?: EntityManagerProvider,
        @inject(TelegramMessageService) private telegramMessageService?:TelegramMessageService,
@@ -102,8 +103,15 @@ export class ChatBotController {
     sendWorkflowMessage = async (request, response) => {
         const requestBody = request.body;
         console.log(requestBody);
+        let messageChannel = requestBody.UserMessage.MessageChannel;
+        if (requestBody.UserMessage.MessageChannel === "WhatsApp" || requestBody.UserMessage.MessageChannel === "Other"){
+            messageChannel = "whatsappMeta";
+        }
+        else {
+            messageChannel = "telegram";
+        }
 
-        this._platformMessageService = await request.container.resolve("telegram");
+        this._platformMessageService = await request.container.resolve(messageChannel);
         const response_format: Iresponse = commonResponseMessageFormat();
 
         const event: WorkflowEvent = requestBody;
@@ -118,7 +126,7 @@ export class ChatBotController {
             SchemaInstanceId  : event.SchemaInstanceId,
             ChatSessionId     : chatSessionId,
             BotMessageId      : null, //To be updated later
-            ChannelMessageId  : null, //To be updated later
+            ChannelMessageId  : messageChannel, //To be updated later
             UserPlatformId    : userPlatformId,
             PhoneNumber       : event.UserMessage.Phone ?? null,
             ChannelType       : event.UserMessage.MessageChannel,
@@ -152,7 +160,7 @@ export class ChatBotController {
         response_format.platformId = event.UserMessage.Phone;
         response_format.platform = event.UserMessage.MessageChannel === "Telegram" ||
             event.UserMessage.MessageChannel === "telegram" ?
-            "telegram" : "whatsApp";
+            "telegram" : "whatsappMeta";
 
         response_format.sessionId = event.UserMessage.Phone;
 
@@ -183,11 +191,11 @@ export class ChatBotController {
                     buttonArray.push(option.Text, buttonId);
                     i = i + 1;
                 }
-                if (event.UserMessage.MessageChannel === 'whatsappMeta' ||
+                if (event.UserMessage.MessageChannel === 'WhatsApp' ||
                     event.UserMessage.MessageChannel === 'whatsappWati') {
                     payload = await sendApiButtonService(buttonArray);
-                    messageType = 'interactivebuttons';
-                    response_format.message_type = messageType;
+                    // messageType = 'interactivebuttons';
+                    // response_format.message_type = messageType;
                 } else {
                     payload = await sendTelegramButtonService(buttonArray);
                     messageType = 'inline_keyboard';

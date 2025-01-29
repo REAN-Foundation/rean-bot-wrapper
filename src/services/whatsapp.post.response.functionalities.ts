@@ -154,17 +154,78 @@ export class WhatsappPostResponseFunctionalities{
             payload.buttonIds ? payload.buttonIds[1] : null,
             payload.buttonIds ? payload.buttonIds[2] : null]
         };
+    }
+    
+    locationResponseFormat = async(response_format:Iresponse,payload) => {
 
-        if (payload.headers) {
-            const headerBody = payload.headers;
-            postDataMeta["template"].components.push({
-                "type"       : "header",
-                "parameters" : [
-                    headerBody
-                ]
+        const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
+        postDataMeta.type = "location";
+        postDataMeta["location"] = {
+            "name"      : "Emergency Location",
+            "latitude"  : response_format.location.latitude,
+            "longitude" : response_format.location.longitude,
+        };
+        
+        return postDataMeta;
+    };
+
+    questionResponseFormat = async(response_format:Iresponse,payload) => {
+
+        // {
+        //     "messaging_product": "whatsapp",
+        //     "recipient_type": "individual",
+        //     "to": "{{Recipient-Phone-Number}}",
+        //     "type": "interactive",
+        //     "interactive": {
+        //         "type": "button",
+        //         "body": {
+        //             "text": "<BUTTON_TEXT>"
+        //         },
+        //         "action": {
+        //             "buttons": [
+        //                 {
+        //                     "type": "reply",
+        //                     "reply": {
+        //                         "id": "<UNIQUE_BUTTON_ID_1>",
+        //                         "title": "<BUTTON_TITLE_1>"
+        //                     }
+        //                 },
+        //                 {
+        //                     "type": "reply",
+        //                     "reply": {
+        //                         "id": "<UNIQUE_BUTTON_ID_2>",
+        //                         "title": "<BUTTON_TITLE_2>"
+        //                     }
+        //                 }
+        //             ]
+        //         }
+        //     }
+        // }
+        const buttons = [];
+        for (let i = 0; i < response_format.buttonMetaData.length; i++) {
+            buttons.push({
+                "type"  : "reply",
+                "reply" : {
+                    "id"    : response_format.buttonMetaData[i].Sequence.toString(),
+                    "title" : response_format.buttonMetaData[i].Text
+                }
             });
         }
-        postDataMeta.type = "template";
+        const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
+        postDataMeta.type = "interactive";
+        postDataMeta["interactive"] = {
+            "type" : "button",
+            "body" : {
+                "text" : response_format.messageText
+            },
+            "action" : {
+                "buttons" : [
+                    ...buttons
+                ]
+            }
+          
+        };
+        
         return postDataMeta;
     };
 

@@ -55,7 +55,7 @@ export class WorkflowEventListener {
             var nodeId: string = null;
             var actionId: string = null;
             const tenantId = this.environmentProviderService.getClientEnvironmentVariable("WORKFLOW_TENANT_ID");
-
+           
             const prevMessage: WorkflowUserData = await this.getPreviousMessageFromWorkflow(message.platformId);
             if (!prevMessage) {
                 var baseSchema = schemaList.find((schema) => schema.ParentSchemaId === null);
@@ -81,7 +81,7 @@ export class WorkflowEventListener {
             }
 
             var platform = message.platform;
-            if (platform === 'whatsapp') {
+            if (platform === 'whatsappMeta') {
                 platform = 'WhatsApp';
             }
             if (platform === 'telegram') {
@@ -99,8 +99,11 @@ export class WorkflowEventListener {
                     "Phone"          : message.platformId,
                     "EventTimestamp" : timestamp,
                     "MessageType"    : incomingMessageType,
-                    "MessageChannel" : message.platform,
-                }
+                    "MessageChannel" : platform,
+                    "Payload"        : {
+                        "ChannelMessageId" : message.chat_message_id ?? null,
+                    },
+                },
             };
 
             if (schemaInstanceId) {
@@ -180,7 +183,7 @@ export class WorkflowEventListener {
                 ChannelType       : message.platform,
                 MessageType       : incomingMessageType,
                 IsMessageFromUser : true,
-                ChannelMessageId  : message.chat_message_id, //This is channel message id
+                ChannelMessageId  : message.chat_message_id ?? null, //This is channel message id
                 BotMessageId      : botMessageId,
                 EventTimestamp    : new Date(),
                 SchemaName        : schemaName,

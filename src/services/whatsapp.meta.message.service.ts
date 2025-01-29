@@ -69,9 +69,16 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
     }
 
     SendMediaMessage = async (response_format:Iresponse, payload: any) => {
-        const type = response_format.message_type;
+        let type = response_format.message_type;
+        if (type === "Location") {
+            type = 'location';
+        }
+        // if (type === "inline_keyboard") {
+        //     type = 'question';
+        // }
         if (type) {
             const classmethod = `${type}ResponseFormat`;
+            console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",classmethod);
             const postDataMeta = await this.whatsappPostResponseFunctionalities[classmethod](response_format,payload);
 
             //custom payload helps in sending multiple response to a single request. The multiple response are handled in an array
