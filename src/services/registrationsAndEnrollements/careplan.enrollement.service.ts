@@ -1,5 +1,3 @@
-
-import axios from 'axios';
 import { NeedleService } from '../needle.service';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 import { inject, Lifecycle, scoped,  } from 'tsyringe';

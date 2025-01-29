@@ -62,7 +62,7 @@ export class UserRegistrationController{
             }
         }
         catch (error){ this.errorHandler.handleControllerError(error, response, request); }
-    }
+    };
 
     enrollToCareplan = async(request, response)=>{
         try {
@@ -103,7 +103,7 @@ export class UserRegistrationController{
             console.log("in error", error);
             this.errorHandler.handleControllerError(error, response, request);
         }
-    }
+    };
 
     async calculateOffset(lmpDateStr: string){
         try {
@@ -143,7 +143,7 @@ export class UserRegistrationController{
             console.log("in error", error);
             this.errorHandler.handleControllerError(error, response, request);
         }
-    }
+    };
 
     async sendWelcomeMessage(request,response){
         try {

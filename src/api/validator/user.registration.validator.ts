@@ -25,6 +25,6 @@ export class UserDetailsValidator{
             lmpstr   : request.body.lmp
         };
         return careplanEnrollmentDetails;
-    }
+    };
 
 }
