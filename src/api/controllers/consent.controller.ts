@@ -57,7 +57,7 @@ export class consentController {
         }
         catch (error) {
             console.log("in error", error);
-            this.errorHandler.handle_controller_error(error, res, req);
+            this.errorHandler.handleControllerError(error, res, req);
         }
     };
 
@@ -82,7 +82,7 @@ export class consentController {
         }
         catch (error) {
             console.log("in error", error);
-            this.errorHandler.handle_controller_error(error, res, req);
+            this.errorHandler.handleControllerError(error, res, req);
         }
     };
 
@@ -125,7 +125,7 @@ export class consentController {
         }
         catch (error) {
             console.log("in error", error);
-            this.errorHandler.handle_controller_error(error, res, req);
+            this.errorHandler.handleControllerError(error, res, req);
         }
     };
 
@@ -148,7 +148,7 @@ export class consentController {
         }
         catch (error) {
             console.log("in error", error);
-            this.errorHandler.handle_controller_error(error, res, req);
+            this.errorHandler.handleControllerError(error, res, req);
         }
     };
 

@@ -8,7 +8,7 @@ import { commonResponseMessageFormat } from '../common.response.format.object';
 import { Iresponse } from '../../refactor/interface/message.interface';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
-import { Registration } from '../registration/patient.registration.service';
+import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class HeartFailureRegistrationService {

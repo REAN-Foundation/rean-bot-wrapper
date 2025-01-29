@@ -2,50 +2,47 @@ import { injectable } from 'tsyringe';
 import { ResponseHandler } from './response.handler';
 
 @injectable()
-export class ErrorHandler{
+export class ErrorHandler {
 
-    constructor(private responseHandler?: ResponseHandler) {
+    constructor(private responseHandler: ResponseHandler) {}
+
+    // Method to handle controller errors
+    public handleControllerError(
+        error: any,
+        res: any,
+        req: any
+    ): void {
+        let message: string = error?.message || 'An unexpected error occurred.';
+        let errorCode = 500;
+        let trace = '';
+        let details: any = null;
+
+        if (error?.data || error?.response?.data) {
+            const data: any =
+                typeof error.data === 'string' ? JSON.parse(error.data ?? error.response.data) : error.data ?? error.response.data;
+
+            if (data) {
+                trace = data.trace || '';
+                errorCode = data.HttpCode ?? data.errorCode ?? errorCode;
+                message = data.Message ?? data.message ?? message;
+                details = data.details || null;
+            }
+        }
+
+        if (error?.Stringify) {
+            trace = error.Stringify();
+        }
+
+        if (error?.stack) {
+            trace += error.stack;
+        }
+
+        this.responseHandler.sendFailureResponse(res, errorCode, message, req, trace, details);
     }
 
-    handle_controller_error = (error, res, req) => {
-
-
-
-        
-        var message = '';
-        var error_code = 500;
-        var request = req;
-        var trace = '';
-        var details = null;
-
-        if (error.message) {
-            message = error.message;
-        }
-
-        if (error.data) {
-            var data = error.data;
-            if (data !== null) {
-                trace = error.data.trace;
-                if (data.errorCode) {
-                    error_code = error.data.errorCode;
-                }
-                if (data.details) {
-                    details = error.data.details;
-                }
-            }
-            if (error.Stringify) {
-                trace = error.Stringify();
-            }
-        }
-        if (error.stack) {
-            trace = trace + error.stack;
-        }
-
-        this.responseHandler.sendFailureResponse(res, error_code, message, request, trace, details);
-    };
-
-    throw_service_error = (error, msg) => {
-        throw new Error(msg ? msg : 'An unknown error has occurred.');
-    };
+    // Method to throw a service error
+    public throwServiceError(error: any, msg?: string): never {
+        throw new Error(msg || 'An unknown error has occurred.');
+    }
 
 }

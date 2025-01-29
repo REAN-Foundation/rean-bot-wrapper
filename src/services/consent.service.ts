@@ -12,7 +12,7 @@ import { commonResponseMessageFormat } from '../services/common.response.format.
 import { Iresponse } from '../refactor/interface/message.interface';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { sendApiButtonService } from './whatsappmeta.button.service';
-import { Registration } from './registration/patient.registration.service';
+import { Registration } from './registrationsAndEnrollements/patient.registration.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ConsentService {
@@ -38,8 +38,8 @@ export class ConsentService {
             }
             this._platformMessageService = eventObj.container.resolve(sourceChannel);
             const EnvironmentProviderService = eventObj.container.resolve(ClientEnvironmentProviderService);
-            const patientUserId = await this.registrationService.getPatientUserId(sourceChannel, userPlatformId, platformUserName);
-            await this.registrationService.wrapperRegistration(this.entityManagerProvider,userPlatformId, platformUserName,sourceChannel,patientUserId);
+            const results = await this.registrationService.getPatientUserId(sourceChannel, userPlatformId, platformUserName);
+            await this.registrationService.wrapperRegistration(this.entityManagerProvider,userPlatformId, platformUserName,sourceChannel,results.patientUserId);
             this.updateConsentStatus(userPlatformId,EnvironmentProviderService);
             const additionalInfoRequired =  EnvironmentProviderService.getClientEnvironmentVariable("ADDITIONAL_INFO_REQUIRED");
             if (additionalInfoRequired){

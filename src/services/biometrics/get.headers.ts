@@ -8,8 +8,8 @@ export class GetHeaders {
     // eslint-disable-next-line max-len
     constructor(@inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService) {}
 
-    getHeaders = (accessToken?: any) => {
-        const reancare_api_key = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY");
+    getHeaders = (accessToken?: any, api_key = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY")) => {
+        const reancare_api_key = api_key;
         if (!accessToken) {
             accessToken = null;
         }

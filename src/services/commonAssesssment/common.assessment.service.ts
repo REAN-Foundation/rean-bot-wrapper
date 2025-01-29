@@ -12,7 +12,7 @@ import { ServeAssessmentService } from '../maternalCareplan/serveAssessment/serv
 import { CacheMemory } from '../cache.memory.service';
 import { ChatMessage } from '../../models/chat.message.model';
 import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
-import { Registration } from '../registration/patient.registration.service';
+import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class NoBabyMovementAssessmentService {

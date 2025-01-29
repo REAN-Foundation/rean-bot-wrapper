@@ -4,7 +4,7 @@ import { NeedleService } from '../needle.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { DateTime } from 'luxon';
 import cityTimezones from 'city-timezones';
-import { Registration } from '../registration/patient.registration.service';
+import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ReminderRegistrationService {
