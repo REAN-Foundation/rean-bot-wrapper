@@ -2,7 +2,7 @@ import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../common/logger';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { GeneralReminderService } from './general.reminder.service';
-import { Registration } from '../registration/patient.registration.service';
+import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class AppointmentReminderService {
