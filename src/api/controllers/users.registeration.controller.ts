@@ -43,8 +43,6 @@ export class UserRegistrationController{
                 authenticationKey
             );
             if (result.statusCode === 200) {
-                result.patientUserId;
-                // Proceed with registration flow
                 await this.registrationService.wrapperRegistration(
                     entityManagerProvider,
                     userDetails.phoneNumber,
