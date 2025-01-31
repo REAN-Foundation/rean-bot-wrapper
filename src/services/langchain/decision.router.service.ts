@@ -243,6 +243,10 @@ export class DecisionRouter {
             if (!resultFeedback.feedbackFlag){
                 const resultAssessment = await this.checkAssessment(messageBody, channel);
                 if (!resultAssessment){
+                    if (messageBody.messageBody.length > 256) {
+                        this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.QnA;
+                        return this.outgoingMessage;
+                    }
                     const resultIntent = await this.checkDFIntent(messageBody);
                     if (!this.intentFlag){
                         console.log("All functions returned false");
