@@ -94,7 +94,7 @@ export class UserRegistrationController{
                 enrollmentDetails.platform
             );
             
-            // await this.sendWelcomeMessage(request,response);
+            await this.sendWelcomeMessage(request,response);
             this.responseHandler.sendSuccessResponse(response, 200, 'User successfully enrolled in the maternal care plan', "");
         }
         catch (error) {
