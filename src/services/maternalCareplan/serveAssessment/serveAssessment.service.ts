@@ -44,7 +44,7 @@ export class ServeAssessmentService {
                 const questionNode = requestBody.Data.Next;
                 const questionData = JSON.parse(requestBody.Data.Next.RawData);
                 metaPayload["messageText"] = requestBody.Data.Next.Description;
-                metaPayload["channel"] = userTask.Channel;
+                metaPayload["channel"] = message.channel;
 
                 // Extract variables
                 metaPayload["templateName"] = questionData.TemplateName;
@@ -70,6 +70,15 @@ export class ServeAssessmentService {
                     } else {
                         metaPayload["buttonIds"] = await templateButtonService(questionData.ButtonsIds);
                     }
+                }
+
+                // Fetch image URL in template message
+                if (questionData.Url) {
+                    metaPayload["headers"] = {
+                        "type"  : "image",
+                        "image" : {
+                            "link" : questionData.Url
+                        }};
                 }
 
                 //save entry into DB
