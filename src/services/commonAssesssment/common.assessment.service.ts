@@ -32,7 +32,7 @@ export class NoBabyMovementAssessmentService {
             const channel = eventObj.body.originalDetectIntentRequest.payload.source;
             const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
             const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
-            const patientUserId = await this.registration.getPatientUserId(channel,
+            const result = await this.registration.getPatientUserId(channel,
                 personPhoneNumber, personName);
 
             // const assessmentId = userTask.Action.Assessment.id;
@@ -47,7 +47,7 @@ export class NoBabyMovementAssessmentService {
                     Intent : "StartAssessment",
                     Body   : {
                         EventObj                : eventObj,
-                        PatientUserId           : patientUserId,
+                        PatientUserId           : result.patientUserId,
                         PersonPhoneNumber       : personPhoneNumber,
                         AssessmentTemplateId    : assessmentTemplateId,
                         Channel                 : channel,

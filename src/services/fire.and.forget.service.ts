@@ -141,6 +141,8 @@ export class FireAndForgetService {
                 channel,
                 false
             );
+
+            console.log(`Fire and Forget Domain Model: ${JSON.stringify(model)}`);
         }
 
         if (model.Intent === "cincinnati_PerMinMsg") {
