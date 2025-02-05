@@ -27,11 +27,11 @@ export class InitiateDeleteReminderService {
             let messageType = "";
             let payload = null;
             let channelName = eventObj.body.originalDetectIntentRequest.payload.source;
-            const patientUserId = await this.registration.getPatientUserId(channelName,
+            const result = await this.registration.getPatientUserId(channelName,
                 sessionId, userName);
 
             let message = null;
-            const getreminderurl = `reminders/search?userId=${patientUserId}`;
+            const getreminderurl = `reminders/search?userId=${result.patientUserId}`;
             const responseBody = await this.needleService.needleRequestForREAN("get", getreminderurl);
             const listOfReminders = responseBody.Data.Reminders.Items;
             if (listOfReminders.length > 0) {
@@ -98,10 +98,10 @@ export class InitiateDeleteReminderService {
             let messageType = "";
             let payload = null;
             let channelName = eventObj.body.originalDetectIntentRequest.payload.source;
-            const patientUserId = await this.registration.getPatientUserId(channelName,
+            const result = await this.registration.getPatientUserId(channelName,
                 sessionId, userName);
             let message = null;
-            const getreminderurl = `reminders/search?userId=${patientUserId}&name=${messageBodyList[0]}`;
+            const getreminderurl = `reminders/search?userId=${result.patientUserId}&name=${messageBodyList[0]}`;
             const responseBody = await this.needleService.needleRequestForREAN("get", getreminderurl);
             const listOfReminders = responseBody.Data.Reminders.Items;
             if (listOfReminders.length > 0) {
@@ -187,10 +187,10 @@ export class InitiateDeleteReminderService {
             const reminderType = details[0];
             const channelName = eventObj.body.originalDetectIntentRequest.payload.source;
             const cache = await CacheMemory.get(sessionId);
-            const patientUserId = await this.registration.getPatientUserId(channelName,
+            const result = await this.registration.getPatientUserId(channelName,
                 sessionId, userName);
             let message = null;
-            const getreminderurl = `reminders/search?userId=${patientUserId}&name=${cache.reminderName}&whenTime=${whenTime}&reminderType=${reminderType}`;
+            const getreminderurl = `reminders/search?userId=${result.patientUserId}&name=${cache.reminderName}&whenTime=${whenTime}&reminderType=${reminderType}`;
             const responseBody = await this.needleService.needleRequestForREAN("get", getreminderurl);
             const listOfReminders = responseBody.Data.Reminders.Items;
             if (listOfReminders.length > 0) {

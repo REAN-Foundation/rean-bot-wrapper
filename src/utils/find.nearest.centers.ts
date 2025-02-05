@@ -166,9 +166,7 @@ export class NearestLocation {
             });
         }
 
-        // Combine preferred centers at the top with the sorted non-preferred centers
         const finalCenters = [...preferredCenters, ...nonPreferredCenters];
-    
         return finalCenters;
     }
 
