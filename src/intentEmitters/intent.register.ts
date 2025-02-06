@@ -25,7 +25,6 @@ import { createDemoBot } from './intentListeners/create.demo.bot.listener';
 import { calorieDetection } from './intentListeners/calorie.detection.listener';
 import { CalorieUpdate } from './intentListeners/calorie.update.listener';
 import { WhatsAppTemplateOpting } from './intentListeners/whatsapp.tempalte.opting.listener';
-import { eyeSymptomAssessment } from './intentListeners/eye.symptom.assesment.listener';
 import { MaternityCareplanListener } from './intentListeners/maternity.careplan.listener';
 import { BloodWarriorWelcome } from './intentListeners/bloodWarrior/welcome.listener';
 import { BloodWarriorPatient } from './intentListeners/bloodWarrior/patient.listener';
@@ -145,14 +144,6 @@ export class IntentRegister {
         //hybrid model
         IntentEmitter.registerListener('testing-hybrid',OpenAiListener);
         IntentEmitter.registerListener('get_nutritional_values',GetNutritionalValue);
-
-        //Intents for Post Operative Eye Care Symptom tracking
-        IntentEmitter.registerListener('userDetails', eyeSymptomAssessment);
-        IntentEmitter.registerListener('DifficultLookingatLight',eyeSymptomAssessment);
-        IntentEmitter.registerListener('DropInVision',eyeSymptomAssessment);
-        IntentEmitter.registerListener('IncreasedRedness',eyeSymptomAssessment);
-        IntentEmitter.registerListener('WateringFromOperatedEye',eyeSymptomAssessment);
-        IntentEmitter.registerListener('whiteSpot',eyeSymptomAssessment);
 
         IntentEmitter.registerListener('diabetes', getRiskAssessmentFollowup);
         IntentEmitter.registerListener('cancer', getRiskAssessmentFollowup);
