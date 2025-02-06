@@ -25,7 +25,6 @@ import { createDemoBot } from './intentListeners/create.demo.bot.listener';
 import { calorieDetection } from './intentListeners/calorie.detection.listener';
 import { CalorieUpdate } from './intentListeners/calorie.update.listener';
 import { WhatsAppTemplateOpting } from './intentListeners/whatsapp.tempalte.opting.listener';
-import { eyeSymptomAssessment } from './intentListeners/eye.symptom.assesment.listener';
 import { MaternityCareplanListener } from './intentListeners/maternity.careplan.listener';
 import { BloodWarriorWelcome } from './intentListeners/bloodWarrior/welcome.listener';
 import { BloodWarriorPatient } from './intentListeners/bloodWarrior/patient.listener';
@@ -67,9 +66,9 @@ import { GenerateCertificateConfirmYesListener } from './intentListeners/bloodWa
 import { GeneralReminderListener } from './intentListeners/medicationReminder/general.reminder.listener';
 import { ReminderFrequencyListener, SendFrequencyButtonsListener, StopMedicationReasonListener } from './intentListeners/medicationReminder/reminder.ask.frequency.listener';
 import { ReminderAskTimeListener } from './intentListeners/medicationReminder/reminder.ask.time.listener';
-import { DmcAssessmentAnswerYesListener } from './intentListeners/maternity.careplan/answer.yes.listener';
+import { AssessmentAnswerYesListener } from './intentListeners/maternity.careplan/answer.yes.listener';
 import { RegistrationPerMinuteMsgListener } from './intentListeners/maternity.careplan/regstration.per.minute.listener';
-import { DmcAssessmentAnswerNoListener } from './intentListeners/maternity.careplan/answer.no.listener';
+import { AssessmentAnswerNoListener } from './intentListeners/maternity.careplan/answer.no.listener';
 import { eyeImageQualityCheckListener } from './intentListeners/eye.image.quality.check.listener';
 import { AppointmentReminderListener, AppointmentReminderReplyListener } from './intentListeners/medicationReminder/appointment.reminder.listener';
 import { ReminderRegistrationListener } from './intentListeners/medicationReminder/reminder.registration.listener';
@@ -145,14 +144,6 @@ export class IntentRegister {
         //hybrid model
         IntentEmitter.registerListener('testing-hybrid',OpenAiListener);
         IntentEmitter.registerListener('get_nutritional_values',GetNutritionalValue);
-
-        //Intents for Post Operative Eye Care Symptom tracking
-        IntentEmitter.registerListener('userDetails', eyeSymptomAssessment);
-        IntentEmitter.registerListener('DifficultLookingatLight',eyeSymptomAssessment);
-        IntentEmitter.registerListener('DropInVision',eyeSymptomAssessment);
-        IntentEmitter.registerListener('IncreasedRedness',eyeSymptomAssessment);
-        IntentEmitter.registerListener('WateringFromOperatedEye',eyeSymptomAssessment);
-        IntentEmitter.registerListener('whiteSpot',eyeSymptomAssessment);
 
         IntentEmitter.registerListener('diabetes', getRiskAssessmentFollowup);
         IntentEmitter.registerListener('cancer', getRiskAssessmentFollowup);
@@ -236,8 +227,8 @@ export class IntentRegister {
         IntentEmitter.registerListener('Generate_Certificate_Confirm_Yes', GenerateCertificateConfirmYesListener);
         IntentEmitter.registerListener('General_Reminder', GeneralReminderListener);
         IntentEmitter.registerListener('Reminder_Ask_Time', ReminderAskTimeListener);
-        IntentEmitter.registerListener('Dmc_Yes', DmcAssessmentAnswerYesListener);
-        IntentEmitter.registerListener('Dmc_No', DmcAssessmentAnswerNoListener);
+        IntentEmitter.registerListener('Dmc_Yes', AssessmentAnswerYesListener);
+        IntentEmitter.registerListener('Dmc_No', AssessmentAnswerNoListener);
         IntentEmitter.registerListener('Registration_PerMinMsg', RegistrationPerMinuteMsgListener);
         IntentEmitter.registerListener('Cincinnati_PerMinMsg', CincinnatiPerMinuteMsgListener);
         IntentEmitter.registerListener('ImageQualityCheck', eyeImageQualityCheckListener);
@@ -269,10 +260,12 @@ export class IntentRegister {
         IntentEmitter.registerListener('Book Appoinment', AppointmentBookingListner);
         IntentEmitter.registerListener('HF_Send_Registration_Msg', SentRegistrationMSGListener);
         IntentEmitter.registerListener('Start_Careplan_HF', EnrollHFCareplanListener);
-        IntentEmitter.registerListener('Work_Commitments', DmcAssessmentAnswerNoListener);
-        IntentEmitter.registerListener('Feeling_Unwell_A', DmcAssessmentAnswerNoListener);
-        IntentEmitter.registerListener('Transit_Issues', DmcAssessmentAnswerNoListener);
+        IntentEmitter.registerListener('Work_Commitments', AssessmentAnswerNoListener);
+        IntentEmitter.registerListener('Feeling_Unwell_A', AssessmentAnswerNoListener);
+        IntentEmitter.registerListener('Transit_Issues', AssessmentAnswerNoListener);
         IntentEmitter.registerListener('Start_Careplan_HeartF_Select', EnrollHFCareplanListener);
+        IntentEmitter.registerListener('Assessment_Yes', AssessmentAnswerYesListener);
+        IntentEmitter.registerListener('Assessment_No', AssessmentAnswerNoListener);
 
         //delete reminder
         IntentEmitter.registerListener('initiate_delete_reminder', InitiateDeleteReminderListener);

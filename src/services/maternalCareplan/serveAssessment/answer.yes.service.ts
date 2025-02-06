@@ -2,10 +2,10 @@
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import { FireAndForgetService, QueueDoaminModel } from '../../fire.and.forget.service';
 import { Logger } from '../../../common/logger';
-import * as AssessmetUserResponses from './assessment.user.replies.json';
 import { ClientEnvironmentProviderService } from '../../../services/set.client/client.environment.provider.service';
 import { EntityManagerProvider } from '../../../services/entity.manager.provider.service';
 import { ChatMessage } from '../../../models/chat.message.model';
+import axios from 'axios';
 
 @scoped(Lifecycle.ContainerScoped)
 export class AnswerYesMsgService {
@@ -17,8 +17,9 @@ export class AnswerYesMsgService {
 
     async replyYesService (eventObj ): Promise<any> {
         try {
+            const replyIntentName = eventObj.body.queryResult ? eventObj.body.queryResult.intent.displayName : null;
             const body : QueueDoaminModel =  {
-                Intent : "Dmc_Yes",
+                Intent : replyIntentName,
                 Body   : {
                     EventObj : eventObj
                 }
@@ -34,7 +35,7 @@ export class AnswerYesMsgService {
 
         } catch (error) {
             Logger.instance()
-                .log_error(error.message,500,'Maternity careplan registration service error');
+                .log_error(error.message,500,'Assessment reply service error');
         }
 
     }
@@ -48,7 +49,8 @@ export class AnswerYesMsgService {
         } else {
             chatMessageId = eventObj.body.originalDetectIntentRequest.payload.contextId;
         }
-        const userResponses = AssessmetUserResponses['default'];
+        const userReplyJsonUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("ASSESSMENT_USER_REPLY_JSON_URL");
+        const userResponses = await this.fetchJsonFile(userReplyJsonUrl);
         const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         const chatMessage = await chatMessageRepository.findOne({ where: { "responseMessageID": chatMessageId } });
 
@@ -78,7 +80,7 @@ export class AnswerYesMsgService {
     }
 
     private getAnswer(intentName: any, message: string, msg: any) {
-        if (intentName === "Dmc_Yes") {
+        if (intentName === "Dmc_Yes" || intentName === "Assessment_Yes") {
             message = msg.ReplyYesText;
         } else {
             message = msg.ReplyNoText;
@@ -102,5 +104,15 @@ export class AnswerYesMsgService {
         const random = (seed % (max - min)) + min;
         return random;
     }
+
+    public fetchJsonFile = async (url: string) => {
+        try {
+            const response = await axios.get(url);
+            const data = response.data;
+            return data;
+        } catch (error) {
+            console.error('Error fetching JSON:', error);
+        }
+    };
 
 }

@@ -18,13 +18,16 @@ export class NeedleService {
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider
     ) {}
 
-    async needleRequestForREAN (method: string, url:string, accessToken?, obj?) {
+    async needleRequestForREAN (method: string, url:string, accessToken?, obj?, api_key?) {
         try {
             const ReanBackendBaseUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
             if (!accessToken) {
                 accessToken = null;
             }
-            const options = await this.getHeaders.getHeaders(accessToken);
+            let options = await this.getHeaders.getHeaders(accessToken);
+            if (api_key){
+                options = await this.getHeaders.getHeaders(accessToken,api_key);
+            }
             const apiUrl = ReanBackendBaseUrl + url;
             let response = null;
             if (method === "get") {

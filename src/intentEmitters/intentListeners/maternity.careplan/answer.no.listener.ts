@@ -1,6 +1,6 @@
 import { AnswerNoMsgService } from "../../../services/maternalCareplan/serveAssessment/answer.no.service";
 
-export const  DmcAssessmentAnswerNoListener = async ( intent, eventObj) => {
+export const  AssessmentAnswerNoListener = async ( intent, eventObj) => {
     try {
         const answerNoMsgService: AnswerNoMsgService = eventObj.container.resolve(AnswerNoMsgService);
         const response = await answerNoMsgService.replyNoService(eventObj);

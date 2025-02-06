@@ -100,14 +100,14 @@ export class NearestLocation {
             } else {
                 const latitude = data[0].lat;
                 const longitude = data[0].lon;
-                const latlongString = `${latitude}-${longitude}`;
+                const latlongString = `${latitude}|${longitude}`;
                 return latlongString;
             }
         }
     }
 
     UserLocation(latlong_string: string):Location{
-        const [latitude, longitude] = latlong_string.split('-').map(parseFloat);
+        const [latitude, longitude] = latlong_string.split('|').map(parseFloat);
         return {
             cityA      : 'user_location',
             latitudeA  : latitude,

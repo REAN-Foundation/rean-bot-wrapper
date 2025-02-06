@@ -2,7 +2,7 @@ import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../common/logger';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { GeneralReminderService } from './general.reminder.service';
-import { Registration } from '../registration/patient.registration.service';
+import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class AppointmentReminderService {
@@ -31,13 +31,13 @@ export class AppointmentReminderService {
             }
 
             const channel = eventObj.body.originalDetectIntentRequest.payload.source;
-            const patientUserId = await this.registration.getPatientUserId(channel,
+            const patientIDArray = await this.registration.getPatientUserId(channel,
                 personPhoneNumber, personName);
 
             const { whenDay, whenTime } = await this.generalReminderService.extractWhenDateTime(date);
             console.log(`date and time ${event} ${whenDay} ${whenTime}`);
             const jsonFormat = {
-                patientUserId : patientUserId,
+                patientUserId : patientIDArray.patientUserId,
                 TaskName      : event,
                 TaskType      : "other",
                 Frequency     : "Once",
@@ -45,7 +45,7 @@ export class AppointmentReminderService {
                 WhenTime      : whenTime,
             };
             
-            await this.generalReminderService.createCommonReminders(eventObj, "Once", jsonFormat, patientUserId, whenDay, whenTime, personName, personPhoneNumber, null );
+            await this.generalReminderService.createCommonReminders(eventObj, "Once", jsonFormat, patientIDArray.patientUserId, whenDay, whenTime, personName, personPhoneNumber, null );
 
             const data = {
                 "fulfillmentMessages" : [

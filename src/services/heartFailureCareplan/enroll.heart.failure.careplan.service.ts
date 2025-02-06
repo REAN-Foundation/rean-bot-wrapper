@@ -8,7 +8,7 @@ import { commonResponseMessageFormat } from '../common.response.format.object';
 import { Iresponse } from '../../refactor/interface/message.interface';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
-import { Registration } from '../registration/patient.registration.service';
+import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class HeartFailureRegistrationService {
@@ -29,18 +29,18 @@ export class HeartFailureRegistrationService {
             const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
             const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
             const channel = eventObj.body.originalDetectIntentRequest.payload.source;
-            const patientUserId = await this.registration.getPatientUserId(channel,
+            const patientIDArray = await this.registration.getPatientUserId(channel,
                 personPhoneNumber, personName);
 
             const body : QueueDoaminModel =  {
                 Intent : "RegistrationHeartFailure",
                 Body   : {
-                    PatientUserId : patientUserId,
+                    PatientUserId : patientIDArray.patientUserId,
                     Name          : personName,
                     EventObj      : eventObj
                 }
             };
-            const patientUpdateUrl = `patients/${patientUserId}`;
+            const patientUpdateUrl = `patients/${patientIDArray.patientUserId}`;
             const defaultDOB = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_DOB");
             const defaultGender = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_GENDER");
 
