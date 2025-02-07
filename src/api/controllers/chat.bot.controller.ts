@@ -12,7 +12,7 @@ import WorkflowUserData from '../../models/workflow.user.data.model';
 import { QuestionResponseType, WorkflowEvent } from '../../services/emergency/workflow.event.types';
 import { EntityManagerProvider } from '../../services/entity.manager.provider.service';
 import { ChatSession } from '../../models/chat.session';
-import { sendApiButtonService } from '../../services/whatsappmeta.button.service';
+import { sendApiButtonService, templateButtonService, whatsappSingleMetaButtonService } from '../../services/whatsappmeta.button.service';
 import { sendTelegramButtonService } from '../../services/telegram.button.service';
 import { ChatMessage } from '../../models/chat.message.model';
 import { WhatsappMetaMessageService } from '../../services/whatsapp.meta.message.service';
@@ -164,12 +164,37 @@ export class ChatBotController {
 
         response_format.sessionId = event.UserMessage.Phone;
 
-        let payload = null;
+        let payload = {};
 
         if (event.UserMessage.MessageType === "Text") {
             response_format.messageText = event.UserMessage.TextMessage;
             response_format.message_type = "text";
         }
+
+        // First template to CFR
+        else if (event?.UserMessage?.Payload?.MessageTemplateId?.startsWith("An emergency incident") && event.UserMessage.MessageType === "Location" &&
+         event.UserMessage.MessageChannel === 'WhatsApp') {
+            response_format.message_type  = 'template';
+            console.log("An emergency incident message");
+
+            // payload = await whatsappSingleMetaButtonService("OK", "Okay");
+            payload["templateName"] = "alert_message";
+            payload["languageForSession"] = "en";
+            payload["text"] = event.UserMessage.TextMessage;
+            payload["location"] = {
+                name      : "Incident Location",
+                latitude  : event.UserMessage?.Location?.Latitude,
+                longitude : event.UserMessage?.Location?.Longitude
+
+            };
+            payload["variables"] = [
+                {
+                    type : "text",
+                    text : event.UserMessage.TextMessage
+                },
+            ];
+        }
+
         else if (event.UserMessage.MessageType === "Location") {
             response_format.location = {
                 latitude  : event.UserMessage?.Location?.Latitude,
@@ -177,7 +202,38 @@ export class ChatBotController {
             };
             response_format.message_type = "location";
         }
-        else if (event.UserMessage.MessageType === "Question") {
+
+        // Second template to CFR
+        else if (
+            event.UserMessage.MessageType === "Question"  && event.UserMessage.QuestionText.startsWith("Will you be available")) {
+            const options = event.UserMessage.QuestionOptions;
+            const availabliltyButton = [];
+            let i = 0;
+            for (const option of options){
+                const buttonId = option.Sequence;
+                availabliltyButton.push(option.Text, buttonId);
+                i = i + 1;
+            }
+            if (event.UserMessage.MessageChannel === 'WhatsApp' ||
+                event.UserMessage.MessageChannel === 'whatsappWati') {
+                payload = await sendApiButtonService(availabliltyButton);
+                response_format.message_type  = 'template';
+                payload["templateName"] = "availability_check";
+                payload["languageForSession"] = "en";
+                payload["variables"] = [
+                    {
+                        type : "text",
+                        text : event?.UserMessage?.QuestionText
+                    },
+                ];
+                
+            } else {
+                payload = await sendTelegramButtonService(availabliltyButton);
+                response_format.message_type = 'inline_keyboard';
+            }
+        }
+        
+        else if (event.UserMessage.MessageType === "Question" && !event.UserMessage.QuestionText.startsWith("Will you be available")) {
             response_format.message_type = "question";
             response_format.messageText = event.UserMessage.QuestionText;
             response_format.buttonMetaData = event.UserMessage.QuestionOptions;
@@ -194,6 +250,7 @@ export class ChatBotController {
                 if (event.UserMessage.MessageChannel === 'WhatsApp' ||
                     event.UserMessage.MessageChannel === 'whatsappWati') {
                     payload = await sendApiButtonService(buttonArray);
+
                     // messageType = 'interactivebuttons';
                     // response_format.message_type = messageType;
                 } else {
@@ -203,32 +260,36 @@ export class ChatBotController {
                 }
             }
         }
+       
+        console.log("PAYLOAD", JSON.stringify(payload, null, 2));
         const res = await this._platformMessageService.SendMediaMessage(response_format, payload);
-        const channelMessageId = await this._platformMessageService.getMessageIdFromResponse(res);
+        if (res) {
+            const channelMessageId = await this._platformMessageService.getMessageIdFromResponse(res);
 
-        const chatMessageObj = {
-            chatSessionID  : null,
-            platform       : response_format.platform,
-            direction      : "Out",
-            messageType    : response_format.message_type,
-            messageContent : response_format.messageText,
-            userPlatformID : response_format.sessionId,
-            intent         : "workflow",
-            messageId      : channelMessageId,
-        };
-        const chatMessageRepository = await entManager.getRepository(ChatMessage);
-        const msgRecord = await chatMessageRepository.create(chatMessageObj);
-        const botMessageId = msgRecord.id;
+            const chatMessageObj = {
+                chatSessionID  : null,
+                platform       : response_format.platform,
+                direction      : "Out",
+                messageType    : response_format.message_type,
+                messageContent : response_format.messageText,
+                userPlatformID : response_format.sessionId,
+                intent         : "workflow",
+                messageId      : channelMessageId,
+            };
+            const chatMessageRepository = await entManager.getRepository(ChatMessage);
+            const msgRecord = await chatMessageRepository.create(chatMessageObj);
+            const botMessageId = msgRecord.id;
 
-        const eventRecordId = workflowEventEntityRecord ? workflowEventEntityRecord.id : null;
-        if (eventRecordId) {
-            await workflowRepository.update({
-                BotMessageId     : botMessageId,
-                ChannelMessageId : channelMessageId
-            },
-            {
-                where : { id: eventRecordId }
-            });
+            const eventRecordId = workflowEventEntityRecord ? workflowEventEntityRecord.id : null;
+            if (eventRecordId) {
+                await workflowRepository.update({
+                    BotMessageId     : botMessageId,
+                    ChannelMessageId : channelMessageId
+                },
+                {
+                    where : { id: eventRecordId }
+                });
+            }
         }
         return this.responseHandler.sendSuccessResponse(response, 200, 'ok', { 'Data': requestBody }, true);
     };
