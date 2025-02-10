@@ -39,9 +39,10 @@ export class kobotoolboxController{
 
     async getUserDetails(body){
         const userDetails = {
-            "phoneNumber" : body["meta_data/bot_registration_phonenumber"],
-            "userName"    : body["meta_data/bot_registration_username"],
-            "platform"    : body["meta_data/platform"]
+            "phoneNumber"  : body["meta_data/bot_registration_phonenumber"],
+            "userName"     : body["meta_data/bot_registration_username"],
+            "platform"     : body["meta_data/platform"],
+            "registration" : body["meta_data/registeration_condition"]
         };
         return userDetails;
     }
@@ -80,8 +81,11 @@ export class kobotoolboxController{
             this.awss3manager = req.container.resolve(AwsS3manager);
             const filename = clientEnvironmentProviderService.getClientEnvironmentVariable("S3_KOBO_FILENAME");
             const userDetails = await this.getUserDetails(req.body);
-            this.registerUser(req,userDetails);
-            this.sendFirstWelcomeMessage(req,userDetails);
+            const registrationRequired = await clientEnvironmentProviderService.getClientEnvironmentVariable("KOBO_REGISTERATION");
+            if (registrationRequired && userDetails.registration === "true") {
+                this.registerUser(req,userDetails);
+                this.sendFirstWelcomeMessage(req,userDetails);
+            }
             const [datastructureFileKey,dataFileKey] = await this.getKeys(req,filename);
             const datastructure = await this.getdatastructure(datastructureFileKey);
             await this.awss3manager.uploadKoboData(dataFileKey,req.body, datastructure);
