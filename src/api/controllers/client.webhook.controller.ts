@@ -70,7 +70,7 @@ export class ClientWebhookController {
         } else {
             firstTimeUser  = true;
         }
-        return [firstTimeUser , patientUserId ]  ;
+        return [firstTimeUser , patientUserId ];
     }
 
     private async checkConsentRequired(req,userId){
@@ -204,6 +204,7 @@ export class ClientWebhookController {
 
     async  handelRequestWithoutConsent(firstTimeUser,patientUSerId,req,entityManagerProvider,userPlatformId, platformUserName,reqVariable ) {
         try {
+            this.registrationService = await req.container.resolve(Registration);
             if (firstTimeUser || !patientUSerId  ){
                 const results = await this.registrationService.getPatientUserId(req.params.channel, userPlatformId, platformUserName);
                 await this.registrationService.wrapperRegistration(entityManagerProvider,userPlatformId, platformUserName,req.params.channel,results.patientUserId);
@@ -333,10 +334,10 @@ export class ClientWebhookController {
 
     receiveMessageMetaWhatsapp = async (req, res) => {
         try {
-            const clientEnvironmentProviderService = req. container.resolve(ClientEnvironmentProviderService);
+            let logMessage = '';
+            const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
             const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-            console.log("clientName in webhook", clientName);
             const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
             const messageStatusRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(MessageStatus);
             this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
@@ -347,10 +348,13 @@ export class ClientWebhookController {
             let userPlatformId = null;
             let platformUserName = null;
             if (statuses) {
+                logMessage = `Handling the ${statuses[0].status} for Meta Whatsapp for message with id: ${statuses[0].id}`;
+                Logger.instance().log(logMessage);
                 await this.sendSuccessMessage(chatMessageRepository, messageStatusRepository, res,statuses);
             }
             else {
-                console.log("receiveMessage webhook receiveMessageWhatsappNew");
+                logMessage = `Processing recieve message WhatsApp Meta webhook for ${clientName}`;
+                Logger.instance().log(logMessage);
                 if (req.params.channel !== "REAN_SUPPORT" &&
                 req.params.channel !== "slack" &&
                 req.params.channel !== "SNEHA_SUPPORT") {
