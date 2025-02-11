@@ -2,6 +2,7 @@ import { CountryCodeService } from '../../utils/phone.number.formatting';
 import { NeedleService } from '../needle.service';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 import { inject, Lifecycle, scoped,  } from 'tsyringe';
+import { Logger } from '../../common/logger';
 
 import { ContactList } from '../../models/contact.list';
 
@@ -122,7 +123,7 @@ export class Registration{
                 channel === "MockChannel"
             ) {
                 const PhoneNumber = await this.countryCodeService.formatPhoneNumber(UserId);
-                console.log(encodeURIComponent(PhoneNumber));
+                Logger.instance().log(`Fetching patient details for phone number: ${PhoneNumber}`);
                 const apiURL = `patients/byPhone?phone=${encodeURIComponent(PhoneNumber)}`;
                 const result = await this.needleService.needleRequestForREAN("get", apiURL,null,null,api_key);
                 if (result.Data.Patients.Items.length === 0) {

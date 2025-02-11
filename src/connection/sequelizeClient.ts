@@ -10,6 +10,7 @@ import { CalorieDatabase } from '../models/calorie.db.model';
 import { AssessmentSessionLogs } from '../models/assessment.session.model';
 import { ConsentInfo } from '../models/consent.info.model';
 import { UserConsent } from '../models/user.consent.model';
+import { Logger } from '../../src/common/logger';
 const sequrlizeClients = new Map<string, Sequelize>();
 @autoInjectable()
 @singleton()
@@ -47,7 +48,7 @@ export class SequelizeClient {
             await sequelizeClient.authenticate()
                 .then(async () => {
                     try {
-                        console.log("MySQL DB connected");
+                        Logger.instance().log('MYSQL DB Connected');
                     }
                     catch (error) {
                         console.log("err", error);
@@ -66,13 +67,12 @@ export class SequelizeClient {
     // eslint-disable-next-line max-len
     getSequelizeClient = async(clientEnvironmentVariable: ClientEnvironmentProviderService):Promise<Sequelize> => {
         const clientName = clientEnvironmentVariable.getClientEnvironmentVariable("NAME");
-        console.log("DB client name: " + clientName);
         if (sequrlizeClients[clientName]) {
-            console.log("returning existing client", clientName);
+            Logger.instance().log(`Returning existing client DB for: ${clientName}`);
             return sequrlizeClients[clientName];
         }
         else {
-            console.log("New Client Connected", clientName);
+            Logger.instance().log(`Created a new client DB for: ${clientName}`);
             sequrlizeClients[clientName] = await this.connect(clientEnvironmentVariable);
             return sequrlizeClients[clientName];
         }
