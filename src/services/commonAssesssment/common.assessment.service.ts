@@ -12,7 +12,7 @@ import { ServeAssessmentService } from '../maternalCareplan/serveAssessment/serv
 import { CacheMemory } from '../cache.memory.service';
 import { ChatMessage } from '../../models/chat.message.model';
 import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
-import { Registration } from '../registration/patient.registration.service';
+import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class NoBabyMovementAssessmentService {
@@ -32,7 +32,7 @@ export class NoBabyMovementAssessmentService {
             const channel = eventObj.body.originalDetectIntentRequest.payload.source;
             const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
             const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
-            const patientUserId = await this.registration.getPatientUserId(channel,
+            const patientIDArray = await this.registration.getPatientUserId(channel,
                 personPhoneNumber, personName);
 
             // const assessmentId = userTask.Action.Assessment.id;
@@ -47,7 +47,7 @@ export class NoBabyMovementAssessmentService {
                     Intent : "StartAssessment",
                     Body   : {
                         EventObj                : eventObj,
-                        PatientUserId           : patientUserId,
+                        PatientUserId           : patientIDArray.patientUserId,
                         PersonPhoneNumber       : personPhoneNumber,
                         AssessmentTemplateId    : assessmentTemplateId,
                         Channel                 : channel,

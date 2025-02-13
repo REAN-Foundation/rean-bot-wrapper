@@ -4,7 +4,7 @@ import { NeedleService } from '../needle.service';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { DateTime } from 'luxon';
 import cityTimezones from 'city-timezones';
-import { Registration } from '../registration/patient.registration.service';
+import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ReminderRegistrationService {
@@ -24,7 +24,7 @@ export class ReminderRegistrationService {
             let dffMessage = null;
             const channel = eventObj.body.originalDetectIntentRequest.payload.source;
 
-            const patientUserId = await this.registration.getPatientUserId(channel,
+            const result = await this.registration.getPatientUserId(channel,
                 personPhoneNumber, personName);
 
             const cityLookup = cityTimezones.lookupViaCity(cityName);
@@ -35,7 +35,7 @@ export class ReminderRegistrationService {
                 const obj = {
                     CurrentTimeZone : timeOffset
                 };
-                const apiURL = `patients/${patientUserId}`;
+                const apiURL = `patients/${result.patientUserId}`;
                 await this.needleService.needleRequestForREAN("put", apiURL, null, obj);
                 dffMessage = `Your time zone has been successfully adjusted based on the city ${cityName}.`;
             } else {

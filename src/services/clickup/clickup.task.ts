@@ -40,7 +40,7 @@ export class ClickUpTask{
             topic = responseChatMessage[responseChatMessage.length - 1].dataValues.messageContent;
         }
         else {
-            topic = "New USer";
+            topic = "New User";
         }
         const obj = {
             "name"                 : topic,

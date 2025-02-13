@@ -1,7 +1,7 @@
 import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../common/logger';
 import { NeedleService } from '../needle.service';
-import { Registration } from '../registration/patient.registration.service';
+import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class DeleteReminderService {
@@ -18,11 +18,11 @@ export class DeleteReminderService {
             const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
             const channelName = eventObj.body.originalDetectIntentRequest.payload.source;
 
-            const patientUserId = await this.registration.getPatientUserId(channelName,
+            const patientIDArray = await this.registration.getPatientUserId(channelName,
                 phoneNumber, personName);
 
             let message = null;
-            const apiURL = `reminders/search?userId=${patientUserId}`;
+            const apiURL = `reminders/search?userId=${patientIDArray.patientUserId}`;
             const responseBody = await this.needleService.needleRequestForREAN("get", apiURL);
             const reminderArray = responseBody.Data.Reminders.Items;
             const reminderArrayLength = reminderArray.length;
