@@ -69,67 +69,77 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
     }
 
     SendMediaMessage = async (response_format:Iresponse, payload: any) => {
-        const type = response_format.message_type;
-        if (type) {
-            const classmethod = `${type}ResponseFormat`;
-            const postDataMeta = await this.whatsappPostResponseFunctionalities[classmethod](response_format,payload);
-
-            //custom payload helps in sending multiple response to a single request. The multiple response are handled in an array
-            if (Array.isArray(postDataMeta)){
-                for (let i = 0; i < postDataMeta.length; i++){
-                    if ( i === 0) {
-                        await this.postRequestMessages(postDataMeta[i]);
-                    }
-                    else {
-                        await this.delay();
-                        await this.postRequestMessages(postDataMeta[i]);
-                    }
-                }
+        try {
+            let type = response_format.message_type;
+            if (type === "Location") {
+                type = 'location';
             }
-            else {
-                const postDataString = JSON.stringify(postDataMeta);
-                const needleResp:any = await this.postRequestMessages(postDataString);
-
-                //improve this DB query
-                if (needleResp.statusCode === 200) {
-                    console.log(`QA_SERVICE Flag: ${this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE")}`);
-                    if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE")) {
-                        if (response_format.name !== "ReanCare") {
-                            console.log("Providing QA service through clickUp");
-                            await this.logsQAService.logMesssages(response_format);
+           
+            if (type) {
+                const classmethod = `${type}ResponseFormat`;
+                const postDataMeta = await this.whatsappPostResponseFunctionalities[classmethod](response_format,payload);
+    
+                //custom payload helps in sending multiple response to a single request. The multiple response are handled in an array
+                if (Array.isArray(postDataMeta)){
+                    for (let i = 0; i < postDataMeta.length; i++){
+                        if ( i === 0) {
+                            await this.postRequestMessages(postDataMeta[i]);
+                        }
+                        else {
+                            await this.delay();
+                            await this.postRequestMessages(postDataMeta[i]);
                         }
                     }
-                    const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-                    const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.sessionId } });
-                    if (respChatMessage.length > 0) {
-                        const id = respChatMessage[respChatMessage.length - 1].id;
-                        await chatMessageRepository.update({ responseMessageID: needleResp.body.messages[0].id }, { where: { id: id } } )
-                            .then(() => { console.log("updated"); })
-                            .catch(error => console.log("error on update", error));
-
-                        //Added else for those who haven't send any message on bot(blood warrior)
-                    } else {
-                        const chatMessageObj = {
-                            chatSessionID     : response_format.chat_message_id,
-                            responseMessageID : needleResp.body.messages[0].id,
-                            platform          : response_format.platform,
-                            direction         : response_format.direction,
-                            messageType       : response_format.message_type,
-                            messageContent    : response_format.messageText,
-                            imageContent      : response_format.messageBody,
-                            imageUrl          : response_format.messageImageUrl,
-                            userPlatformID    : response_format.sessionId,
-                            intent            : payload ? payload.templateName : null
-                        };
-                        await chatMessageRepository.create(chatMessageObj)
-                            .then(() => { console.log("created"); })
-                            .catch(error => console.log("error on create chatMessage entry", error));
-                    }
-                    return needleResp;
                 }
+                else {
+                    const postDataString = JSON.stringify(postDataMeta);
+                    const needleResp:any = await this.postRequestMessages(postDataString);
+    
+                    //improve this DB query
+                    if (needleResp.statusCode === 200) {
+                        console.log(`QA_SERVICE Flag: ${this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE")}`);
+                        if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE")) {
+                            if (response_format.name !== "ReanCare") {
+                                console.log("Providing QA service through clickUp");
+                                await this.logsQAService.logMesssages(response_format);
+                            }
+                        }
+                        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+                        const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.sessionId } });
+                        if (respChatMessage.length > 0) {
+                            const id = respChatMessage[respChatMessage.length - 1].id;
+                            await chatMessageRepository.update({ responseMessageID: needleResp.body.messages[0].id }, { where: { id: id } } )
+                                .then(() => { console.log("updated"); })
+                                .catch(error => console.log("error on update", error));
+    
+                            //Added else for those who haven't send any message on bot(blood warrior)
+                        } else {
+                            const chatMessageObj = {
+                                chatSessionID     : response_format.chat_message_id,
+                                responseMessageID : needleResp.body.messages[0].id,
+                                platform          : response_format.platform,
+                                direction         : response_format.direction,
+                                messageType       : response_format.message_type,
+                                messageContent    : response_format.messageText,
+                                imageContent      : response_format.messageBody,
+                                imageUrl          : response_format.messageImageUrl,
+                                userPlatformID    : response_format.sessionId,
+                                intent            : payload ? payload.templateName : null
+                            };
+                            await chatMessageRepository.create(chatMessageObj)
+                                .then(() => { console.log("created"); })
+                                .catch(error => console.log("error on create chatMessage entry", error));
+                        }
+                        return needleResp;
+                    }
+                }
+                
             }
-            
+        } catch (error) {
+            console.log("error", error);
+            return null;
         }
+        
     };
 
     delay = async() => {

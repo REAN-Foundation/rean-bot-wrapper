@@ -16,6 +16,8 @@ import { ConsentService } from '../../services/consent.service';
 import { Registration } from '../../services/registrationsAndEnrollements/patient.registration.service';
 import { Logger } from '../../common/logger';
 
+///////////////////////////////////////////////////////////////////////////////////////
+
 @scoped(Lifecycle.ContainerScoped)
 export class ClientWebhookController {
 
@@ -36,11 +38,12 @@ export class ClientWebhookController {
 
     sendMessage = async (req, res) => {
         try {
-            // eslint-disable-next-line max-len
             this._platformMessageService = req.container.resolve(req.params.channel);
             req.body["channel"] = req.params.channel;
             const response = await this._platformMessageService.sendManualMesage(req.body);
-            if (response.statusCode === 200 || response.message_id !== undefined || response.status === 200) {
+            if (response.statusCode === 200 ||
+                response.message_id !== undefined ||
+                response.status === 200) {
                 this.responseHandler.sendSuccessResponse(res, 200, 'Message sent successfully!', response.body);
             }
             else {
@@ -53,7 +56,6 @@ export class ClientWebhookController {
     };
 
     private async checkFirstTimeUser (req, userId)
-    
     {
         const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
         const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
@@ -66,7 +68,7 @@ export class ClientWebhookController {
         if (prevSessions){
             patientUserId  = prevSessions.dataValues.patientUserId;
             firstTimeUser = false;
-            
+
         } else {
             firstTimeUser  = true;
         }
@@ -95,45 +97,43 @@ export class ClientWebhookController {
             const { id, status, timestamp } = statuses[0];
             const date = new Date(parseInt(timestamp) * 1000);
             console.log(id);
-    
+
             // Retrieve message info
             let messageInfo = await chatMessageRepository.findOne({ where: { responseMessageID: id } });
             if (!messageInfo) {
                 await this.sleep(2000); // Retry after delay
                 messageInfo = await chatMessageRepository.findOne({ where: { responseMessageID: id } });
             }
-    
+
             if (!messageInfo) {
                 console.log("Message info not found");
                 return this.responseHandler.sendFailureResponse(res, 404, "Message info not found.");
             }
-    
+
             console.log(messageInfo.id);
-    
+
             const messageStatusObj: Partial<MessageStatus> = {
                 chatMessageId : messageInfo.id,
                 messageStatus : status,
                 channel       : messageInfo.platform,
             };
-    
+
             const existingMessageStatus = await messageStatusRepository.findOne({ where: { chatMessageId: messageInfo.id } });
             if (["sent", "read", "delivered", "replied", "failed"].includes(status)) {
-                const statusVariableName = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
-                messageStatusObj[`message${statusVariableName}Timestamp`] = date;
+                messageStatusObj.messageSentTimestamp = date;
                 await this.handleStatusUpdate(existingMessageStatus, messageStatusObj, messageStatusRepository, res, `Message ${status} successfully!`, `${status} timestamp entered in the database`);
 
             }
             else {
                 this.responseHandler.sendSuccessResponse(res, 200, "Notification received successfully!", "");
             }
-        }
 
-        catch (error) {
+        } catch (error) {
             console.error("Error trace:", error.trace || error);
             console.error("While sending success response:", error);
         }
     }
-    
+
     // Helper method to update or create message status
     private async handleStatusUpdate(
         existingMessageStatus,
@@ -144,7 +144,6 @@ export class ClientWebhookController {
         logMessage
     ) {
         if (existingMessageStatus) {
-            console.log(messageStatusObj.chatMessageId);
             await messageStatusRepository.update(messageStatusObj, { where: { chatMessageId: messageStatusObj.chatMessageId } });
         } else {
             await messageStatusRepository.create(messageStatusObj);
@@ -156,8 +155,11 @@ export class ClientWebhookController {
     receiveMessage = async (req, res) => {
         console.log("receiveMessage webhook");
         try {
+
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
             const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+
+            //to get db repository
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
             const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
             const messageStatusRepostiory = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(MessageStatus);
@@ -169,9 +171,11 @@ export class ClientWebhookController {
             this._platformMessageService.res = res;
             if (req.params.channel === "telegram"){
                 [userPlatformId ,platformUserName] = await this.getTelegramUserID(req.body);
+
             }
             if (req.body.statuses) {
-                await this.sendSuccessMessage(chatMessageRepository, messageStatusRepostiory, res,req.body.statuses);
+                this.sendSuccessMessage(chatMessageRepository, messageStatusRepostiory, res,req.body.statuses);
+                // console.log("request.body", req.body);
             }
             else {
                 const consentRequirement =  clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_ACTIVATION");
@@ -190,9 +194,15 @@ export class ClientWebhookController {
                     return res.status(200).send(response);
                 }
                 else {
-                    this.handelRequestWithoutConsent(firstTimeUser,patientUSerId,req,entityManagerProvider,userPlatformId, platformUserName, req.body );
+                    this.handelRequestWithoutConsent(
+                        firstTimeUser,
+                        patientUSerId,
+                        req,
+                        entityManagerProvider,
+                        userPlatformId,
+                        platformUserName,
+                        req.body);
                 }
-                
             }
         }
         catch (error) {
@@ -202,7 +212,14 @@ export class ClientWebhookController {
         }
     };
 
-    async  handelRequestWithoutConsent(firstTimeUser,patientUSerId,req,entityManagerProvider,userPlatformId, platformUserName,reqVariable ) {
+    async  handelRequestWithoutConsent(
+        firstTimeUser,
+        patientUSerId,
+        req,
+        entityManagerProvider,
+        userPlatformId,
+        platformUserName,
+        reqVariable) {
         try {
             this.registrationService = await req.container.resolve(Registration);
             if (firstTimeUser || !patientUSerId  ){
@@ -242,6 +259,7 @@ export class ClientWebhookController {
                 else {
 
                     this._platformMessageService.handleMessage(handleReqVariable, req.params.channel);
+
                 }
             }
         }
@@ -249,7 +267,7 @@ export class ClientWebhookController {
             console.log("While Sending Consent Response", error);
 
         }
-        
+
     }
 
     async getUserIdAndLanguagecode(reqBody,channel,req)
@@ -271,7 +289,7 @@ export class ClientWebhookController {
                 }
                 else {
                     userId = reqBody.messages[0].from;
-        
+
                 }
             }
             else if (channel === "telegram") {
@@ -285,10 +303,10 @@ export class ClientWebhookController {
                 }
                 else {
                     userId = reqBody.message.chat.id;
-        
+
                 }
             }
-    
+
             return [userId, consentReply, languageCode];
         }
         catch (error) {
@@ -309,7 +327,7 @@ export class ClientWebhookController {
             else {
                 userId = reqBody.message.chat.id;
                 userName = reqBody.message.chat.first_name;
-    
+
             }
             return [userId ,userName];
         }
@@ -430,11 +448,9 @@ export class ClientWebhookController {
                 // status = sent, received & read
             }
             else {
-
                 // eslint-disable-next-line max-len
                 // const response_message = "We have migrated REAN Health Guru to a new number. Click this link to chat with REAN Health Guru. Link: https://api.whatsapp.com/send/?phone=15712152682&text=Hey&app_absent=0";
                 this._platformMessageService = req.container.resolve('whatsapp');
-
                 this._platformMessageService.handleMessage(req.body, req.params.client);
             }
         }

@@ -16,6 +16,7 @@ export class WhatsappPostResponseFunctionalities{
     ) {}
 
     textResponseFormat = (response_format:Iresponse,payload) =>{
+        console.log(`........From textResponseFormat ${response_format} payload: ${JSON.stringify(payload, null, 2)}`, );
         const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
         postDataMeta["text"] = {
             "body" : response_format.messageText
@@ -30,6 +31,7 @@ export class WhatsappPostResponseFunctionalities{
     };
 
     imageResponseFormat = (response_format:Iresponse,payload) => {
+        console.log(`........From imageResponseFormat ${response_format} payload: ${JSON.stringify(payload, null, 2)}`, );
         const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
         let imageLink =  response_format.messageBody;
         if (!imageLink) {
@@ -45,6 +47,7 @@ export class WhatsappPostResponseFunctionalities{
     };
 
     voiceResponseFormat = (response_format:Iresponse,payload) => {
+        console.log(`........From voiceResponseFormat ${response_format} payload: ${JSON.stringify(payload, null, 2)}`, );
         const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
         postDataMeta["audio"] = {
             "link" : response_format.messageBody
@@ -54,6 +57,7 @@ export class WhatsappPostResponseFunctionalities{
     };
 
     interactivebuttonsResponseFormat = async(response_format:Iresponse,payload) =>{
+        console.log(`........From interactivebuttonsResponseFormat ${response_format} payload: ${JSON.stringify(payload, null, 2)}`, );
         const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
         const buttons = [];
         const numberOfButtons = (payload.fields.buttons.listValue.values).length;
@@ -88,6 +92,7 @@ export class WhatsappPostResponseFunctionalities{
     };
 
     interactivelistResponseFormat = (response_format:Iresponse,payload) =>{
+        console.log(`........From interactivelistResponseFormat ${response_format} payload: ${JSON.stringify(payload, null, 2)}`, );
         const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
         const rows_meta = [];
         var header = "";
@@ -138,43 +143,116 @@ export class WhatsappPostResponseFunctionalities{
         return postDataMeta;
     };
 
-    templateResponseFormat = (response_format:Iresponse,payload) => {
+    // templateResponseFormat = (response_format:Iresponse,payload) => {
+    //     console.log(`........From templateResponseFormat ${response_format} payload: ${JSON.stringify(payload, null, 2)}`, );
+    //     const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
+    //     postDataMeta.type = response_format.message_type;
+    //     postDataMeta["template"] = {
+    //         "name"     : payload.templateName,
+    //         "language" : {
+    //             "code" : payload.languageForSession ?? "en"
+    //         },
+    //         "components" : [{
+    //             "type"       : "body",
+    //             "parameters" : payload.variables
+
+    //         },
+
+    //         // payload.buttonIds ? payload.buttonIds[0] : null,
+    //         // payload.buttonIds ? payload.buttonIds[1] : null,
+    //         // payload.buttonIds ? payload.buttonIds[2] : null
+    //         ...(payload.buttonIds || []).filter(Boolean)
+    //         ]
+    //     };
+    //     console.log(`******payload: ${JSON.stringify(postDataMeta, null, 2)}`, );
+    //     return postDataMeta;
+    // }
+
+    templateResponseFormat = (response_format, payload) => {
+        console.log(`........From templateResponseFormat ${response_format} payload: ${JSON.stringify(payload, null, 2)}`);
+    
         const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
+        postDataMeta.type = response_format.message_type;
         postDataMeta["template"] = {
             "name"     : payload.templateName,
             "language" : {
-                "code" : payload.languageForSession
+                "code" : payload.languageForSession ?? "en"
             },
             "components" : [
+
+                // Add Header if location exists
+                ...(payload.location ? [{
+                    "type"       : "header",
+                    "parameters" : [{
+                        "type"     : "location",
+                        "location" : {
+                            "latitude"  : payload.location.latitude,
+                            "longitude" : payload.location.longitude,
+                            "name"      : payload.location.name ?? "Incident Location",
+                            "address"   : payload.location.address ?? "Location details"
+                        } }]
+                }] : []),
+    
+                // Body parameters
                 {
                     "type"       : "body",
                     "parameters" : payload.variables
-                }
+                },
+    
+                // Buttons (if any)
+                ...(payload.buttonIds || []).filter(Boolean)
             ]
         };
+    
+        // console.log(`******payload: ${JSON.stringify(postDataMeta, null, 2)}`);
+        return postDataMeta;
+    };
+    
+    locationResponseFormat = async(response_format:Iresponse,payload) => {
+        console.log(`........From locationResponseFormat ${response_format} payload: ${JSON.stringify(payload, null, 2)}`, );
+        const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
+        postDataMeta.type = "location";
+        postDataMeta["location"] = {
+            "name"      : "Emergency Location",
+            "latitude"  : response_format.location.latitude,
+            "longitude" : response_format.location.longitude,
+        };
         
-        // Incorporate all buttons dynamically
-        if (payload.buttonIds && Array.isArray(payload.buttonIds)) {
-            payload.buttonIds.forEach(buttonId => {
-                postDataMeta["template"].components.push(buttonId);
+        return postDataMeta;
+    };
+
+    questionResponseFormat = async(response_format:Iresponse,payload) => {
+        console.log(`........From questionResponseFormat ${response_format} payload: ${JSON.stringify(payload, null, 2)}`, );
+        const buttons = [];
+        for (let i = 0; i < response_format.buttonMetaData.length; i++) {
+            buttons.push({
+                "type"  : "reply",
+                "reply" : {
+                    "id"    : response_format.buttonMetaData[i].Sequence.toString(),
+                    "title" : response_format.buttonMetaData[i].Text
+                }
             });
         }
-        
-        // Add headers if present
-        if (payload.headers) {
-            const headerBody = payload.headers;
-            postDataMeta["template"].components.push({
-                "type"       : "header",
-                "parameters" : [
-                    headerBody
+        const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
+        postDataMeta.type = "interactive";
+        postDataMeta["interactive"] = {
+            "type" : "button",
+            "body" : {
+                "text" : response_format.messageText
+            },
+            "action" : {
+                "buttons" : [
+                    ...buttons
                 ]
-            });
-        }
-        postDataMeta.type = "template";
+            }
+          
+        };
+        
         return postDataMeta;
     };
 
     custom_payloadResponseFormat = async(response_format:Iresponse,payload) =>{
+        console.log(`........From custom_payloadResponseFormat ${response_format} payload: ${JSON.stringify(payload, null, 2)}`, );
         const payloadContent = this.handleMessagetypePayload.getPayloadContent(payload);
         const listOfPostDataMeta = [];
         const languageForSession = await this.userLanguage.getPreferredLanguageofSession(response_format.sessionId);
@@ -211,6 +289,7 @@ export class WhatsappPostResponseFunctionalities{
     };
 
     messageTextAccordingToMessageType = (response_format:Iresponse, payload:any, custom_payload_type:string) => {
+        console.log(`........From messageTextAccordingToMessageType ${response_format} payload: ${JSON.stringify(payload, null, 2)}`, );
         let message = "";
         if (response_format.message_type === "custom_payload"){
             if (custom_payload_type === "interactive-buttons") {

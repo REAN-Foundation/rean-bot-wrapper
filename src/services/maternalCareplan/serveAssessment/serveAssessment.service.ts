@@ -28,7 +28,7 @@ export class ServeAssessmentService {
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
     ){}
-    
+
     async startAssessment (message: any, userTaskData: any) {
         try {
             const metaPayload = {};
@@ -213,7 +213,9 @@ export class ServeAssessmentService {
                     await this.updateDBChatSessionWithMessageId(userId, messageId, chatMessageRepository, AssessmentSessionRepo);
                 }
 
-                if (userResponse === "Work_Commitments" || userResponse === "Feeling_Unwell_A" || userResponse === "Transit_Issues") {
+                if (userResponse === "Work_Commitments" ||
+                    userResponse === "Feeling_Unwell_A" ||
+                    userResponse === "Transit_Issues") {
                     const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
                     let todayDate = new Date().toISOString()
                         .split('T')[0];
@@ -226,17 +228,22 @@ export class ServeAssessmentService {
                     const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/follow-up/assessment/reply/${phoneNumber}/date/${todayDate}`;
                     const res = await needle("put",
                         getUrl,
-                        { assessment_id   : assessmentSession.assesmentId, patient_user_id : questionData.PatientUserId,
-                            chosen_option   : { sequence: userAnswer, text: userResponse }
+                        {
+                            assessment_id   : assessmentSession.assesmentId,
+                            patient_user_id : questionData.PatientUserId,
+                            chosen_option   : {
+                                sequence : userAnswer,
+                                text     : userResponse
+                            }
                         },
-                        { headers : {
-                            'Content-Type' : 'application/json',
-                            Accept         : 'application/json',
-                        },
+                        {
+                            headers : {
+                                'Content-Type' : 'application/json',
+                                Accept         : 'application/json',
+                            },
                         },
                     );
                     console.log(`Object in reply service ${JSON.stringify(res.body,null, 4)}`);
-            
                 }
             }
 
@@ -280,10 +287,22 @@ export class ServeAssessmentService {
         return message[intentName] ?? intentName;
     }
 
-    public async updateMessageFlag( userId, messageId, chatMessageRepository ) {
-        const response = await chatMessageRepository.findOne( { where: { userPlatformId: userId, responseMessageID: messageId }, order: [['createdAt', 'DESC']] });
+    public async updateMessageFlag(userId, messageId, chatMessageRepository) {
+        const response = await chatMessageRepository.findOne({
+            where : {
+                userPlatformId    : userId,
+                responseMessageID : messageId
+            }, order : [['createdAt', 'DESC']]
+        });
         if (response) {
-            await chatMessageRepository.update({ messageFlag: "assessment" }, { where: { id: response.id } });
+            await chatMessageRepository.update({
+                messageFlag : "assessment"
+            },
+            {
+                where : {
+                    id : response.id
+                }
+            });
         }
     }
 

@@ -1,20 +1,20 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable init-declarations */
 /* eslint-disable max-len */
 
-// import { DialogflowResponseService } from './dialogflow-response.service';
 import { AwsS3manager } from './aws.file.upload.service';
 import { Imessage, IprocessedDialogflowResponseFormat, Iresponse } from '../refactor/interface/message.interface';
 import { inject, delay, scoped, Lifecycle } from 'tsyringe';
 import  TelegramBot  from 'node-telegram-bot-api';
 import { MessageFlow } from './get.put.message.flow.service';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { TelegramMessageToDialogflow } from './telegram.messagetodialogflow';
 import { TelegramPostResponseFunctionalities } from './telegram.post.response.functionalities';
 import { LogsQAService } from './logs.for.qa';
+
+///////////////////////////////////////////////////////////////////////////////////////////////
 
 @scoped(Lifecycle.ContainerScoped)
 export class TelegramMessageService implements platformServiceInterface{
@@ -23,15 +23,15 @@ export class TelegramMessageService implements platformServiceInterface{
 
     public res;
 
-    // public req;
     constructor(@inject(delay(() => MessageFlow)) public messageFlow,
         @inject(AwsS3manager) private awsS3manager?: AwsS3manager,
-        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(ClientEnvironmentProviderService) private environmentProviderService?: ClientEnvironmentProviderService,
         @inject(TelegramMessageToDialogflow) private telegramMessageToDialogflow?: TelegramMessageToDialogflow,
         @inject(TelegramPostResponseFunctionalities) private telegramPostResponseFunctionalities?: TelegramPostResponseFunctionalities,
         @inject("telegram.authenticator") private clientAuthenticator?: clientAuthenticator,
         @inject(LogsQAService) private logsQAService?: LogsQAService) {
-        this._telegram = new TelegramBot(this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
+        const token = this.environmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN");
+        this._telegram = new TelegramBot(token);
         this.init();
     }
 
@@ -62,8 +62,8 @@ export class TelegramMessageService implements platformServiceInterface{
     }
 
     setWebhook(clientName){
-        this._telegram = new TelegramBot(this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
-        const webhookUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL") + '/v1/' + clientName + '/telegram/' + this.clientAuthenticator.urlToken + '/receive';
+        this._telegram = new TelegramBot(this.environmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
+        const webhookUrl = this.environmentProviderService.getClientEnvironmentVariable("BASE_URL") + '/v1/' + clientName + '/telegram/' + this.clientAuthenticator.urlToken + '/receive';
         this._telegram.setWebHook(webhookUrl);
         console.log("Telegram webhook set", webhookUrl);
     }
@@ -111,7 +111,7 @@ export class TelegramMessageService implements platformServiceInterface{
             reaponse_message = { name: name,platform: "Telegram", platformId: platformId, chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: message_type,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[0], similarDoc: similarDoc };
         }
         return reaponse_message;
-        
+
     };
 
     createFinalMessageFromHumanhandOver(requestBody) {
@@ -136,13 +136,12 @@ export class TelegramMessageService implements platformServiceInterface{
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     SendMediaMessage = async (response_format:Iresponse, payload:any) => {
-        
         const type = response_format.message_type;
         if (type) {
             const classmethod = `send${type}Response`;
-            const telegram = new TelegramBot(this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
-            console.log(`QA_SERVICE Flag: ${this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE")}`);
-            if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE")) {
+            const telegram = new TelegramBot(this.environmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
+            console.log(`QA_SERVICE Flag: ${this.environmentProviderService.getClientEnvironmentVariable("QA_SERVICE")}`);
+            if (this.environmentProviderService.getClientEnvironmentVariable("QA_SERVICE")) {
                 if (response_format.name !== "ReanCare") {
                     console.log("Providing QA service through clickUp");
                     await this.logsQAService.logMesssages(response_format);
@@ -153,6 +152,7 @@ export class TelegramMessageService implements platformServiceInterface{
     };
 
     actionOnTelegramEvent = async(requestBody) =>{
+        console.log("requestBody",requestBody);
         const generatorTelegramMessage = await this.telegramMessageToDialogflow.messageToDialogflow(requestBody);
         let done = false;
         const telegramMessages = [];

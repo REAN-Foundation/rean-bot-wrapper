@@ -14,6 +14,7 @@ export class TelegramMessageToDialogflow {
     async *messageToDialogflow(requestBody: any) {
         const telegramRequestObject = new TelegramRequest(requestBody);
         const getMessageObj = telegramRequestObject.getMessage();
+        console.log("getMessageObj", getMessageObj);
         let done = false;
         while (done === false){
             const messageNextObject = getMessageObj.next();

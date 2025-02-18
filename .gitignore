@@ -109,3 +109,6 @@ dist
 .idea/rean-bot.iml
 .idea/vcs.xml
 .pre-commit-config.yaml
+ENV1.json
+ENV2.json
+.vscode/launch.json

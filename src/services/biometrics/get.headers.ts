@@ -17,6 +17,22 @@ export class GetHeaders {
         options.headers["authorization"] = `Bearer ${accessToken}`;
         options.headers["x-api-key"] = reancare_api_key;
         return options;
-    };
-    
+    }
+
+    getWorkflowHeaders = (accessToken?: any) => {
+        const workflow_api_key = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WORK_FLOW_API_KEY");
+        if (!accessToken) {
+            accessToken = null;
+        }
+        const options = {
+            headers : {
+                "Content-Type"  : 'application/json',
+                "Authorization" : `Bearer ${accessToken}`,
+                "x-api-key"     : workflow_api_key
+            }
+        };
+
+        return options;
+    }
+
 }
