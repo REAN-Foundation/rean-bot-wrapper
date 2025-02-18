@@ -37,7 +37,7 @@ export class WorkflowEventListener {
             ]
         });
         return previousMessage;
-    }
+    };
 
     async commence(message: Imessage) {
         try {
@@ -362,6 +362,6 @@ export class WorkflowEventListener {
             console.log(error);
             return null;
         }
-    }
+    };
 
 }
