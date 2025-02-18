@@ -120,7 +120,8 @@ export class ClientWebhookController {
 
             const existingMessageStatus = await messageStatusRepository.findOne({ where: { chatMessageId: messageInfo.id } });
             if (["sent", "read", "delivered", "replied", "failed"].includes(status)) {
-                messageStatusObj.messageSentTimestamp = date;
+                const statusVariableName = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+                messageStatusObj[`message${statusVariableName}Timestamp`] = date;
                 await this.handleStatusUpdate(existingMessageStatus, messageStatusObj, messageStatusRepository, res, `Message ${status} successfully!`, `${status} timestamp entered in the database`);
 
             }
