@@ -130,7 +130,7 @@ export class CommonWhatsappService implements platformServiceInterface {
     }
 
     getMessageIdFromResponse(response: any) {
-        return response.body.messages[0].id;
+        return response.body?.messages[0].id;
     }
     
 }

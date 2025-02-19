@@ -4,7 +4,8 @@ export enum MessageHandlerType {
     Assessments = 'Assessments',
     Feedback    = 'Feedback',
     Custom      = 'Custom',
-    Unhandled   = 'Unhandled'
+    Unhandled   = 'Unhandled',
+    WorkflowService       = 'Alert'
 }
 
 export enum NlpProviderType {
@@ -32,3 +33,4 @@ export enum ChannelType {
     Clickup = 'Clickup',
     Slack = 'Slack'
 }
+

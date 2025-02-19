@@ -5,6 +5,10 @@ export class ClientEnvironmentProviderService {
 
     private clientName;
     
+    constructor() {
+        console.log("***ClientEnvironmentProviderService*** instance is created by DI container");
+    }
+      
     setClientName(clientName){
         this.clientName = clientName;
     }
