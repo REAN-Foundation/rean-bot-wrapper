@@ -81,7 +81,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
 
     async locationMessageFormat(messageObj: Message) {
         const messagetoDialogflow = this.inputMessageFormat(messageObj);
-        const location_message = `latlong:${messageObj.getLocation().latitude}-${messageObj.getLocation().longitude}`;
+        const location_message = `latlong:${messageObj.getLocation().latitude}|${messageObj.getLocation().longitude}`;
         messagetoDialogflow.type = 'location';
         messagetoDialogflow.latlong = messageObj.getLocation();
         messagetoDialogflow.messageBody = location_message;
