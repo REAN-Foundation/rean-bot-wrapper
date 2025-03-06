@@ -37,14 +37,14 @@ export class SlackClickupCommonFunctions {
             messageContent : message,
             userPlatformID : contact
         });
-        if (channel === "Telegram"){
+        if (channel === "Telegram" || channel === "telegram"){
             await this.telegramMessageservice.SendMediaMessage(response_format,null);
         }
-        else if (channel === "whatsapp"){
+        else if (channel === "whatsapp" ){
             response_format.sessionId = contact.toString();
             await this.whatsappMessageService.SendMediaMessage(response_format,null);
         }
-        else if (channel === "whatsappMeta"){
+        else if (channel === "whatsappMeta" || channel === "WhatsappMeta"){
             response_format.sessionId = contact.toString();
             await this.whatsappNewMessageService.SendMediaMessage(response_format,null);
         }

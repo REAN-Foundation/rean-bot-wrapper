@@ -158,9 +158,7 @@ export class ClientWebhookController {
         try {
 
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
-            const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-
-            //to get db repository
+            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
             const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
             const messageStatusRepostiory = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(MessageStatus);
@@ -215,7 +213,7 @@ export class ClientWebhookController {
 
     async  handelRequestWithoutConsent(
         firstTimeUser,
-        patientUSerId,
+        patientUserId,
         req,
         entityManagerProvider,
         userPlatformId,
@@ -223,7 +221,8 @@ export class ClientWebhookController {
         reqVariable) {
         try {
             this.registrationService = await req.container.resolve(Registration);
-            if (firstTimeUser || !patientUSerId  ){
+            const validChannels = ["telegram","Telegram","whatsappMeta","whatsappWati","Whatsapp","REAN_SUPPORT","SNEHA_SUPPORT"];
+            if (validChannels.includes(req.params.channel) && (firstTimeUser || !patientUserId)) {
                 const results = await this.registrationService.getPatientUserId(req.params.channel, userPlatformId, platformUserName);
                 await this.registrationService.wrapperRegistration(entityManagerProvider,userPlatformId, platformUserName,req.params.channel,results.patientUserId);
             }

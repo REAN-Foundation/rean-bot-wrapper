@@ -102,7 +102,6 @@ export class ChatBotController {
 
     sendWorkflowMessage = async (request, response) => {
         const requestBody = request.body;
-        console.log(requestBody);
         let messageChannel = requestBody.UserMessage.MessageChannel;
         if (requestBody.UserMessage.MessageChannel === "WhatsApp" || requestBody.UserMessage.MessageChannel === "Other"){
             messageChannel = "whatsappMeta";

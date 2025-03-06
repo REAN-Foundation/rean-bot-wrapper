@@ -152,7 +152,6 @@ export class TelegramMessageService implements platformServiceInterface{
     };
 
     actionOnTelegramEvent = async(requestBody) =>{
-        console.log("requestBody",requestBody);
         const generatorTelegramMessage = await this.telegramMessageToDialogflow.messageToDialogflow(requestBody);
         let done = false;
         const telegramMessages = [];
