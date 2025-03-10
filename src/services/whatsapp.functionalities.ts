@@ -48,7 +48,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
 
     async locationMessageFormat (messageObj: Message) {
         const messagetoDialogflow = this.inputMessageFormat(messageObj);
-        const loc = `latlong:${messageObj.getLocation().latitude}-${messageObj.getLocation().longitude}`;
+        const loc = `latlong:${messageObj.getLocation().latitude}|${messageObj.getLocation().longitude}`;
         messagetoDialogflow.type = 'location';
         messagetoDialogflow.latlong = messageObj.getLocation();
         messagetoDialogflow.messageBody = loc;
