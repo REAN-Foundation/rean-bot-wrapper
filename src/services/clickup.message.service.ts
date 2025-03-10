@@ -25,7 +25,6 @@ export class ClickUpMessageService implements platformServiceInterface {
     public res;
 
     async handleMessage(requestBody: any) {
-        console.log("request", requestBody);
         this.clickupEventHandler(requestBody);
         
     }
@@ -66,12 +65,13 @@ export class ClickUpMessageService implements platformServiceInterface {
     };
 
     async clickupEventHandler(requestBody) {
-        if (requestBody.event === "taskCommentPosted" || requestBody.event === "taskCommentUpdated") {
+        const validEvents = ["taskCommentPosted", "taskCommentUpdated"];
+        if (validEvents.includes(requestBody.event))   {
             if (!requestBody.history_items[0].comment) {
                 console.log("Not comment, hanlde later");
             }
             else {
-                console.log("requestbody of comment", requestBody.history_items[0].comment);
+                console.log("Comment Found");
                 const commentObj = requestBody.history_items[0].comment.comment;
                 for (let i = 0; i < commentObj.length; i++){
                     if (commentObj[i].type && commentObj[i].text === "@watchers"){
