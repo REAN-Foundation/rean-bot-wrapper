@@ -13,9 +13,10 @@ import { CacheMemory } from '../cache.memory.service';
 import { ChatMessage } from '../../models/chat.message.model';
 import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
 import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
+import { sendTelegramButtonService } from '../telegram.button.service';
 
 @scoped(Lifecycle.ContainerScoped)
-export class NoBabyMovementAssessmentService {
+export class CommonAssessmentService {
 
     private _platformMessageService :  platformServiceInterface = null;
 
@@ -27,16 +28,20 @@ export class NoBabyMovementAssessmentService {
         @inject(Registration) private registration?: Registration,
     ){}
     
-    async createAssessment (eventObj, assessmentCode) {
+    async triggerAssessment (eventObj, assessmentDisplayCode) {
         try {
-            const channel = eventObj.body.originalDetectIntentRequest.payload.source;
-            const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
-            const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
+            let channel = eventObj.body.originalDetectIntentRequest.payload.source;
+            if (channel === "Telegram"){
+                channel = "telegram";
+            }
+            this._platformMessageService = eventObj.container.resolve(channel);
+            const platformUserId : string = eventObj.body.originalDetectIntentRequest.payload.userId;
+            const platformUserName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
             const patientIDArray = await this.registration.getPatientUserId(channel,
-                personPhoneNumber, personName);
+                platformUserId, platformUserName);
 
             // const assessmentId = userTask.Action.Assessment.id;
-            const apiURL = `clinical/assessment-templates/search?displayCode=${assessmentCode}`;
+            const apiURL = `clinical/assessment-templates/search?displayCode=${assessmentDisplayCode}`;
             const requestBody = await this.needleService.needleRequestForREAN("get", apiURL );
 
             //let assessmentSessionLogs = null;
@@ -48,7 +53,7 @@ export class NoBabyMovementAssessmentService {
                     Body   : {
                         EventObj                : eventObj,
                         PatientUserId           : patientIDArray.patientUserId,
-                        PersonPhoneNumber       : personPhoneNumber,
+                        PersonPhoneNumber       : platformUserId,
                         AssessmentTemplateId    : assessmentTemplateId,
                         Channel                 : channel,
                         AssessmentTemplateTitle : assessmentTemplateTitle
@@ -59,7 +64,7 @@ export class NoBabyMovementAssessmentService {
                 return this.getFullfillmentObj(message);
 
             } else {
-                const message = `Sorry for the inconvenience, could not find the assessment template with code ${assessmentCode}.`;
+                const message = `Sorry for the inconvenience, could not find the assessment template with code ${assessmentDisplayCode}.`;
                 return this.getFullfillmentObj(message);
             }
         } catch (error) {
@@ -81,57 +86,76 @@ export class NoBabyMovementAssessmentService {
         return object;
     }
 
+    public async createAssessment(patientDetail){
+        const apiURL = `clinical/assessments`;
+        const obj = patientDetail;
+        const assesmentData = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
+        return assesmentData;
+    }
+
+    public async getAssessmentUserTasks(assessmentDetails,userTaskData){
+        const userTaskApiURL = `user-tasks`;
+        const userTaskBody = {
+            "UserId"             : assessmentDetails.patientUserId,
+            "Task"               : assessmentDetails.assessmentTemplateTitle,
+            "Category"           : "Assessment",
+            "ActionType"         : "Custom",
+            "ActionId"           : userTaskData.Data.Assessment.id,
+            "ScheduledStartTime" : assessmentDetails.currentDate,
+            "ScheduledEndTime"   : assessmentDetails.currentDate,
+            "IsRecurrent"        : false
+        };
+        await this.needleService.needleRequestForREAN("post", userTaskApiURL, null, userTaskBody);
+    }
+
     public async startAssessmentAndUpdateDb (eventObj, patientUserId: string, personPhoneNumber: string, assessmentTemplateId: string,
         assessmentTemplateTitle: string, channel: string)  {
 
         const currentDate = new Date().toISOString()
             .split('T')[0];
 
-        // Create assessment for the patient.
-        const apiURL = `clinical/assessments`;
-        const obj = {
+        const AssessmentDetails = {
             "PatientUserId"        : patientUserId,
             "Title"                : assessmentTemplateTitle,
             "AssessmentTemplateId" : assessmentTemplateId,
             "ScheduledDate"        : currentDate
         };
-        const requestBody1 = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
-
-        // Create user task for the patient.
-        const userTaskApiURL = `user-tasks`;
-        const userTaskBody = {
-            "UserId"             : patientUserId,
-            "Task"               : assessmentTemplateTitle,
-            "Category"           : "Assessment",
-            "ActionType"         : "Custom",
-            "ActionId"           : requestBody1.Data.Assessment.id,
-            "ScheduledStartTime" : currentDate,
-            "ScheduledEndTime"   : currentDate,
-            "IsRecurrent"        : false
-        };
-        await this.needleService.needleRequestForREAN("post", userTaskApiURL, null, userTaskBody);
-
-        if (requestBody1.Data.Assessment) {
-            const msg = { userId: personPhoneNumber, channel: channel };
-            const assessment = JSON.stringify(requestBody1.Data.Assessment);
-            const { metaPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment( msg, assessment);
-
-            const payload = eventObj.body.originalDetectIntentRequest.payload;
-            channel = payload.source;
+        
+        const assessmentData = await this.createAssessment(AssessmentDetails);
+        await this.getAssessmentUserTasks(AssessmentDetails,assessmentData);
+        let telegramPayload = null;
+        if (assessmentData.Data.Assessment) {
+            const assessment = JSON.stringify(assessmentData.Data.Assessment);
+            const { metaPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment(  personPhoneNumber,  channel, assessment);
             let messageType = "template";
-            if (channel === "telegram" || channel === "Telegram") {
+            if (assessmentSessionLogs.userResponseType === 'Single Choice Selection' && (channel.toLowerCase() === 'telegram' )) {
+                messageType = "inline_keyboard";
+                const buttonArray = metaPayload.buttonIds.flatMap(button => {
+                    const option = button.parameters[0].payload;
+                    return [option.split('_')[1],option ];
+                });
+                telegramPayload = await sendTelegramButtonService(buttonArray);
+                channel = "telegram";
+
+            }
+            else if (assessmentSessionLogs.userResponseType !== 'Single Choice Selection' && (channel.toLowerCase() === 'telegram')){
                 messageType = "text";
                 channel = "telegram";
             }
-
             this._platformMessageService = eventObj.container.resolve(channel);
+
             const response_format: Iresponse = commonResponseMessageFormat();
-            response_format.platform = payload.source;
+            response_format.platform = channel;
             response_format.sessionId = personPhoneNumber;
             response_format.messageText = metaPayload["messageText"];
             response_format.message_type = messageType;
-            const message_to_platform = await this._platformMessageService.SendMediaMessage(response_format, metaPayload);
-
+            let message_to_platform = null;
+            if ((channel === 'telegram' || channel === 'Telegram') &&  messageType === "inline_keyboard" ){
+                message_to_platform = await this._platformMessageService.SendMediaMessage(response_format, telegramPayload);
+            }
+            else {
+                message_to_platform = await this._platformMessageService.SendMediaMessage(response_format, metaPayload);
+            }
             assessmentSessionLogs.userMessageId = await this._platformMessageService.getMessageIdFromResponse(message_to_platform);
             const key = `${personPhoneNumber}:Assessment`;
             await CacheMemory.set(key, assessmentSessionLogs.userMessageId);
@@ -145,4 +169,5 @@ export class NoBabyMovementAssessmentService {
             }
         }
     }
+
 }

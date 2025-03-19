@@ -1,13 +1,13 @@
-import { NoBabyMovementAssessmentService } from "../../../services/commonAssesssment/common.assessment.service";
+import { CommonAssessmentService } from "../../../services/Assesssment/common.assessment.service";
 
 export const CommonAssessmentListener = async (intent, eventObj) => {
     // eslint-disable-next-line max-len
-    const noBabyMovementAssessmentService: NoBabyMovementAssessmentService = eventObj.container.resolve(NoBabyMovementAssessmentService);
+    const commonAssessmentService: CommonAssessmentService = eventObj.container.resolve(CommonAssessmentService);
     try {
         let result = null;
-        const intentName = eventObj.body.queryResult.intent.displayName;
+        const intentName = intent;
         const assessmentCode = getAssessmentDisplayCode(intentName);
-        result = await noBabyMovementAssessmentService.createAssessment(eventObj, assessmentCode);
+        result = await commonAssessmentService.triggerAssessment(eventObj, assessmentCode);
         console.log(`assessment service log ${result}`);
         return result;
 
@@ -22,6 +22,7 @@ export const getAssessmentDisplayCode = (intentName) => {
         "AssessmentBloodPressure" : "AssessmentBloodPressure",
         "AssessmentRegistration"  : "AssessmentRegistration",
         "Reminder_Reply_No"       : "AppointmentFollowUp",
+        "start_assessment_quiz"   : "ADUNUTESTASSESSMENT"
     };
     return message[intentName] ?? "";
 };
