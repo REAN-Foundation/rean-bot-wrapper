@@ -250,21 +250,22 @@ export class MessageFlow{
         else if (msg.type === "reancareAssessment") {
 
             // make compatible for telegram also.
-            const { metaPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment(msg, msg.payload);
+            const { metaPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment( msg.userId,msg.channel, msg.payload);
             if (metaPayload["channel"] === 'whatsappMeta' || metaPayload["channel"] === 'WhatsappWati') {
                 messageType = msg.type;
                 msg.type = 'template';
                 payload = metaPayload;
             } else if (metaPayload["channel"] === 'telegram' || metaPayload["channel"] === 'Telegram') {
+                messageType = msg.type;
                 msg.message = metaPayload["messageText"];
                 msg.type = 'inline_keyboard';
-                msg["payload"] = [ "Dmc_Yes", "Dmc_No" ];
+                msg["payload"] = [ "option_A","option_B","option_C","option_D" ];
             }
             assessmentSession = assessmentSessionLogs;
             console.log(`assessment record ${JSON.stringify(payload)}`);
         }
         if (msg.type === "inline_keyboard") {
-            payload = await sendTelegramButtonService([ "Yes",msg.payload[0], "No", msg.payload[1]]);
+            payload = await sendTelegramButtonService([ "Option A",msg.payload[0], "Option B",msg.payload[1],"Option C",msg.payload[2],"Option D",msg.payload[3]]);
         }
 
         if (msg.message.ButtonsIds != null) {
@@ -307,7 +308,8 @@ export class MessageFlow{
         message_to_platform = await platformMessageService.SendMediaMessage(response_format, payload);
 
         if (messageType === "reancareAssessment") {
-            assessmentSession.userMessageId = message_to_platform.body.messages[0].id;
+            // assessmentSession.userMessageId = message_to_platform.body.messages[0].id;
+            assessmentSession.userMessageId = message_to_platform.message_id;
             const AssessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
             await AssessmentSessionRepo.create(assessmentSession);
         }

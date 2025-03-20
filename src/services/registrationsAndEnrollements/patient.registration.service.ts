@@ -31,7 +31,7 @@ export class Registration{
 
     async registerUserOnReanCare(
         platformUserName: string,
-        UserId: string,
+        platformUserId: string,
         creationMethod: "phoneNumber" | "userName",
         password: string,
         api_key: string
@@ -42,7 +42,7 @@ export class Registration{
             // Build the object based on creation method
             if (creationMethod === "phoneNumber") {
                 obj = {
-                    Phone           : await this.countryCodeService.formatPhoneNumber(UserId),
+                    Phone           : await this.countryCodeService.formatPhoneNumber(platformUserId),
                     Password        : password,
                     FirstName       : platformUserName,
                     DefaultTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
@@ -53,8 +53,8 @@ export class Registration{
                 obj = {
                     Password        : password,
                     FirstName       : platformUserName,
-                    UserName        : UserId,
-                    TelegramChatId  : UserId,
+                    UserName        : platformUserId,
+                    TelegramChatId  : platformUserId,
                     DefaultTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
                     CurrentTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
                     TenantCode      : this.EnvironmentProviderService.getClientEnvironmentVariable("NAME"),
