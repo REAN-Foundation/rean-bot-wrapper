@@ -48,7 +48,7 @@ export class CallEyeImageQualityCheckModel {
                 goodQuality = true;
             }
             else {
-                message = "It is a *Bad Quality* image as " + response.body.message + "\n Would you like to resend image?";
+                message = "It is a *Bad Quality* image as " + response.body.message + "\nInstructional video on how a good quality image should be taken:\nhttps://youtube.com/shorts/vewqqpyRqG4?feature=share" + "\n Would you like to resend image?";
             }
         }
         else
