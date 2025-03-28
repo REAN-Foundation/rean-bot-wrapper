@@ -108,6 +108,7 @@ export class Registration{
     ): Promise<{ patientUserId: string | null; statusCode: number; errorMessage?: string }> {
         try {
             let patientUserId = null;
+            
     
             if (channel === "telegram" || channel === "Telegram") {
                 const result = await this.checkPatientExist(UserId, null);
@@ -120,8 +121,9 @@ export class Registration{
                 channel === "whatsappMeta" ||
                 channel === "whatsapp" ||
                 channel === "whatsappWati" ||
-                channel === "MockChannel"
-            ) {
+                channel === "MockChannel" ||
+                channel === "REAN_SUPPORT" ||
+                channel === "SNEHA_SUPPORT") {
                 const PhoneNumber = await this.countryCodeService.formatPhoneNumber(UserId);
                 Logger.instance().log(`Fetching patient details for phone number: ${PhoneNumber}`);
                 const apiURL = `patients/byPhone?phone=${encodeURIComponent(PhoneNumber)}`;
