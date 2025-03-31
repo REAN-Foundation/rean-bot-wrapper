@@ -124,6 +124,7 @@ export class Registration{
                 channel === "MockChannel" ||
                 channel === "REAN_SUPPORT" ||
                 channel === "SNEHA_SUPPORT") {
+                console.log("platformUser ID IS:",UserId);
                 const PhoneNumber = await this.countryCodeService.formatPhoneNumber(UserId);
                 Logger.instance().log(`Fetching patient details for phone number: ${PhoneNumber}`);
                 const apiURL = `patients/byPhone?phone=${encodeURIComponent(PhoneNumber)}`;
