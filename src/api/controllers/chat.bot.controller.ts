@@ -219,13 +219,6 @@ export class ChatBotController {
                 response_format.message_type  = 'template';
                 payload["templateName"] = "availability_check";
                 payload["languageForSession"] = "en";
-                payload["variables"] = [
-                    {
-                        type : "text",
-                        text : event?.UserMessage?.QuestionText
-                    },
-                ];
-                
             } else {
                 payload = await sendTelegramButtonService(availabliltyButton);
                 response_format.message_type = 'inline_keyboard';
