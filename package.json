@@ -78,7 +78,7 @@
     "sequelize": "^6.29.3",
     "sequelize-cli": "^6.3.0",
     "sequelize-typescript": "^2.1.0",
-    "sharp": "^0.32.1",
+    "sharp": "^0.33.0",
     "sleep": "^6.3.0",
     "stream-json": "^1.7.2",
     "streamifier": "^0.1.1",
