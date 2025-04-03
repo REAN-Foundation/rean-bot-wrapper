@@ -43,21 +43,21 @@ export class Registration{
             if (creationMethod === "phoneNumber") {
                 obj = {
                     Phone           : await this.countryCodeService.formatPhoneNumber(platformUserId),
-                    Password        : password,
                     FirstName       : platformUserName,
                     DefaultTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
                     CurrentTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
                     TenantCode      : this.EnvironmentProviderService.getClientEnvironmentVariable("NAME"),
+                    GenerateOTP     : false
                 };
             } else if (creationMethod === "userName") {
                 obj = {
-                    Password        : password,
                     FirstName       : platformUserName,
                     UserName        : platformUserId,
                     TelegramChatId  : platformUserId,
                     DefaultTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
                     CurrentTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
                     TenantCode      : this.EnvironmentProviderService.getClientEnvironmentVariable("NAME"),
+                    GenerateOTP     : false
                 };
             } else {
                 throw new Error(`Invalid creation method: ${creationMethod}`);
