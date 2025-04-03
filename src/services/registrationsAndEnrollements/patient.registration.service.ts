@@ -47,7 +47,7 @@ export class Registration{
                     DefaultTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
                     CurrentTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
                     TenantCode      : this.EnvironmentProviderService.getClientEnvironmentVariable("NAME"),
-                    GenerateOTP     : false
+                    GenerateOtp     : false
                 };
             } else if (creationMethod === "userName") {
                 obj = {
@@ -57,7 +57,7 @@ export class Registration{
                     DefaultTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
                     CurrentTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
                     TenantCode      : this.EnvironmentProviderService.getClientEnvironmentVariable("NAME"),
-                    GenerateOTP     : false
+                    GenerateOtp     : false
                 };
             } else {
                 throw new Error(`Invalid creation method: ${creationMethod}`);
@@ -108,8 +108,6 @@ export class Registration{
     ): Promise<{ patientUserId: string | null; statusCode: number; errorMessage?: string }> {
         try {
             let patientUserId = null;
-            
-    
             if (channel === "telegram" || channel === "Telegram") {
                 const result = await this.checkPatientExist(PlatformUserId, null);
                 if (result.Data.Patients.Items.length === 0) {
