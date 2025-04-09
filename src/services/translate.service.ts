@@ -90,12 +90,16 @@ export class translateService{
         console.log("entered the processdialogflowmessage of translateService JJJJJJJJJJJ");
         // eslint-disable-next-line init-declarations
         let translatedResponse;
+        const intent = messageFromDialogflow.getIntent();
         const parse_mode = messageFromDialogflow.getParseMode();
         const text = messageFromDialogflow.getText();
+        const customTranslateSetting = this.clientEnvironmentProviderService.getClientEnvironmentVariable("FIX_LANGUAGE");
+        const listOfNoTranslateIntents = this.clientEnvironmentProviderService.getClientEnvironmentVariable("FIX_LANGUAGE_INTENTS") ?? [];
         if (parse_mode) {
             translatedResponse = text;
-        }
-        else {
+        } else if (listOfNoTranslateIntents.includes(intent) && customTranslateSetting){
+            translatedResponse = text;
+        } else {
             translatedResponse = await this.translateResponse(text, detected_language);
         }
         return translatedResponse;
