@@ -193,6 +193,13 @@ export class WhatsappPostResponseFunctionalities{
                         } }]
                 }] : []),
     
+                ...(payload.headers ? [{
+                    "type"       : "header",
+                    "parameters" : [
+                        payload.headers
+                    ]
+                }] : []),
+    
                 // Body parameters
                 {
                     "type"       : "body",
