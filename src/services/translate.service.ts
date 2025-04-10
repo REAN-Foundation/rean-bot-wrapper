@@ -93,7 +93,7 @@ export class translateService{
         const intent = messageFromDialogflow.getIntent();
         const parse_mode = messageFromDialogflow.getParseMode();
         const text = messageFromDialogflow.getText();
-        const customTranslateSetting = this.clientEnvironmentProviderService.getClientEnvironmentVariable("FIX_LANGUAGE");
+        const customTranslateSetting: boolean = this.clientEnvironmentProviderService.getClientEnvironmentVariable("FIX_LANGUAGE") === "true";
         const listOfNoTranslateIntents = this.clientEnvironmentProviderService.getClientEnvironmentVariable("FIX_LANGUAGE_INTENTS") ?? [];
         if (parse_mode) {
             translatedResponse = text;
