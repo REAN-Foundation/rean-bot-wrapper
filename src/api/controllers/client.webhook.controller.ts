@@ -170,7 +170,10 @@ export class ClientWebhookController {
             this._platformMessageService.res = res;
             if (req.params.channel === "telegram"){
                 [userPlatformId ,platformUserName] = await this.getTelegramUserID(req.body);
-
+            }
+            else if (req.params.channel === "REAN_SUPPORT"||
+                    req.params.channel === "SNEHA_SUPPORT"){
+                userPlatformId = req.body.phoneNumber.toString();
             }
             if (req.body.statuses) {
                 this.sendSuccessMessage(chatMessageRepository, messageStatusRepostiory, res,req.body.statuses);
