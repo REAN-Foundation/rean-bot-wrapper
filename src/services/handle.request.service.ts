@@ -145,16 +145,21 @@ export class handleRequestservice {
             break;
         }
         case 'Feedback': {
-            let message_to_ml_model = null;
+            let messageToMlModel = null;
             if (metaData.contextId && !metaData.intent) {
                 let tag = "null";
                 tag = (metaData.type === "reaction") ? "reaction" : "Feedback";
                 await this.feedbackService.recordFeedback(outgoingMessage.Feedback.FeedbackContent, metaData.contextId, tag);
-                message_to_ml_model = "I have sent feedback to your message tell me that : we have achnowlwged your feedback out team of experts will come back to you";
-                message_from_nlp = await this.customMLModelResponseService.getCustomModelResponse(message_to_ml_model, metaData.platform, metaData);
+                if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("FEEDBACK_PROMPT")) {
+                    const feedbackPrompt = this.clientEnvironmentProviderService.getClientEnvironmentVariable("FEEDBACK_PROMPT");
+                    messageToMlModel = feedbackPrompt + outgoingMessage.Feedback.FeedbackContent;
+                } else {
+                    messageToMlModel = "I have sent feedback to your message tell me that : we have acknowledged your feedback out team of experts will come back to you";
+                }
+                message_from_nlp = await this.customMLModelResponseService.getCustomModelResponse(messageToMlModel, metaData.platform, metaData);
             } else {
-                message_to_ml_model = outgoingMessage.Feedback.FeedbackContent;
-                message_from_nlp = await this.DialogflowResponseService.getDialogflowMessage(message_to_ml_model, metaData.platform, metaData.intent, metaData);
+                messageToMlModel = outgoingMessage.Feedback.FeedbackContent;
+                message_from_nlp = await this.DialogflowResponseService.getDialogflowMessage(messageToMlModel, metaData.platform, metaData.intent, metaData);
             }
             break;
         }
