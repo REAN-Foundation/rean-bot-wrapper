@@ -133,7 +133,6 @@ export class TelegramPostResponseFunctionalities {
                     text          : ele_h.structValue.fields.text.stringValue,
                     callback_data : ele_h.structValue.fields.callback_data.stringValue
                 };
-
                 listOfHorizontalKeyboard.push(tempButton);
             }
             listOfButtons.push(listOfHorizontalKeyboard);
@@ -149,7 +148,6 @@ export class TelegramPostResponseFunctionalities {
                     text          : ele_v.structValue.fields.text.stringValue,
                     callback_data : ele_v.structValue.fields.callback_data.stringValue
                 };
-
                 listOfVerticalKeyboard.push([tempButton]);
             }
         }
@@ -165,7 +163,6 @@ export class TelegramPostResponseFunctionalities {
 
         console.log(keyboard);
         console.log(keyboard1);
-
         const opts = {
             reply_markup : JSON.stringify(keyboard)
         };

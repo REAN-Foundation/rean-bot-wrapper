@@ -28,7 +28,6 @@ import { MessageHandlerType } from '../refactor/messageTypes/message.types';
 export class MessageFlow{
 
     private chatMessageConnection;
-
     constructor(
         @inject(delay(() => SlackMessageService)) private slackMessageService,
         @inject(handleRequestservice) private handleRequestservice?: handleRequestservice,
@@ -48,7 +47,6 @@ export class MessageFlow{
 
         //initialising MySQL DB tables
         const chatMessageObj = await this.engageMySQL(messagetoDialogflow);
-
         const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         const resp = await chatMessageRepository.findAll({ where: { userPlatformID: chatMessageObj.userPlatformID } });
         const humanHandoff = resp[resp.length - 1].humanHandoff;
@@ -58,12 +56,10 @@ export class MessageFlow{
             const client = this.slackMessageService.client;
             const channelID = this.slackMessageService.channelID;
             await client.chat.postMessage({ channel: channelID, text: chatMessageObj.messageContent, thread_ts: ts });
-
         }
         else {
             this.processMessage(messagetoDialogflow, channel, platformMessageService);
         }
-
     }
 
     async checkTheFlowRouter(messageToLlmRouter: Imessage, channel: string, platformMessageService: platformServiceInterface){
@@ -103,7 +99,6 @@ export class MessageFlow{
 
     async preprocessOutgoingMessage(message: Imessage){
         try {
-
             await this.engageMySQL(message);
             const translate_message = await this.translate.translateMessage(message.type, message.messageBody, message.platformId);
             translate_message["original_message"] = message.messageBody;
@@ -193,7 +188,6 @@ export class MessageFlow{
         const defaultLangaugeCode = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
         const contactList = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
         const personContactList = await contactList.findOne({ where: { mobileNumber: msg.userId } });
-
         if (personContactList) {
             personName = personContactList.username;
         }
@@ -239,7 +233,6 @@ export class MessageFlow{
             }
         }
         else if (msg.type === "text") {
-
             msg.message = await msg.message.replace("PatientName", msg.payload.PersonName ?? personName);
             msg.message = await this.translate.translatePushNotifications( msg.message, msg.userId);
             msg.message = msg.message[0];
@@ -321,7 +314,6 @@ export class MessageFlow{
             const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
             const messageId = await platformMessageService.getMessageIdFromResponse(message_to_platform);
             const phoneNumber = Helper.formatPhoneForDocProcessor(msg.userId);
-
             const apiUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
             const headers = { headers : {
                 'Content-Type' : 'application/json',
@@ -389,7 +381,6 @@ export class MessageFlow{
                 username     : messagetoDialogflow.name,
                 platform     : messagetoDialogflow.platform,
                 optOut       : "false" });
-
             // console.log("newContactlistEntry", newContactlistEntry);
             // await newContactlistEntry.save();
         }
@@ -412,7 +403,6 @@ export class MessageFlow{
                 .catch(error => console.log("error on update", error));
         }
         return chatMessageObj;
-
     }
 
     saveResponseDataToUser = async(response_format,processedResponse) => {

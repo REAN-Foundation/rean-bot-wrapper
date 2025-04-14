@@ -68,7 +68,6 @@ export class DecisionRouter {
     public model = new ChatOpenAI({ temperature: 0, modelName: "gpt-3.5-turbo" });
 
     public feedbackFlag = false;
-
     public assessmentFlag = false;
 
     public intentFlag = false;
@@ -131,7 +130,6 @@ export class DecisionRouter {
                 await CacheMemory.set(key, false);
             }
         }
-
         //const assessmentInProgress = botMessages[botMessages.length - 3].messageFlag
 
         // Implement further logic for checking if assessment.
