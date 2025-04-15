@@ -24,7 +24,6 @@ export class ChatMessage extends Model implements IchatMessage {
     @Column({
         type      : DataType.INTEGER,
         allowNull : true
-
     })
         chatSessionID?: number;
 

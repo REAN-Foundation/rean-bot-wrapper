@@ -10,17 +10,17 @@ import { ChatMessage } from '../models/chat.message.model';
 
 @scoped(Lifecycle.ContainerScoped)
 export class NeedleService {
-    
+
     constructor(
         // eslint-disable-next-line max-len
-        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(ClientEnvironmentProviderService) private environmentProviderService?: ClientEnvironmentProviderService,
         @inject(GetHeaders) private getHeaders?: GetHeaders,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider
     ) {}
 
     async needleRequestForREAN (method: string, url:string, accessToken?, obj?, api_key?) {
         try {
-            const ReanBackendBaseUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
+            const ReanBackendBaseUrl = this.environmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
             if (!accessToken) {
                 accessToken = null;
             }
@@ -32,21 +32,21 @@ export class NeedleService {
             let response = null;
             if (method === "get") {
                 response = await needle(method, apiUrl, options);
-        
+
             } else {
                 response = await needle(method, apiUrl, obj, options);
             }
-        
+
             if (response.statusCode === 200 || response.statusCode === 201) {
                 console.log('Reancare Api is successfull');
             } else {
                 console.log("Failed to get response from Reancare API.");
             }
-        
+
             return response.body;
         } catch (error) {
             console.log(error);
-            
+
         }
     }
 
@@ -59,7 +59,6 @@ export class NeedleService {
         if (phoneNumber.length > 10 && phoneNumber.indexOf('+') === -1) {
             phoneNumber = '+' + phoneNumber;
         }
-    
         // adding "-" if phone number does not contain one.
         const ten_digit = phoneNumber.substr(phoneNumber.length - 10);
         const country_code = phoneNumber.split(ten_digit)[0];
@@ -70,19 +69,18 @@ export class NeedleService {
     }
 
     async needleRequestForWhatsappMeta(method: string, endPoint:string, postDataMeta?, payload?){
-        const whatsappHost = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
+        const whatsappHost = this.environmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
         const version = process.env.WHATSAPP_API_VERSION;
         const options = getRequestOptions();
-        const whatsappToken = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
+        const whatsappToken = this.environmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
         options.headers['Content-Type'] = 'application/json';
         options.headers['Authorization'] = `Bearer ${whatsappToken}`;
-        const whatsappPhoneNumberID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_PHONE_NUMBER_ID");
+        const whatsappPhoneNumberID = this.environmentProviderService.getClientEnvironmentVariable("WHATSAPP_PHONE_NUMBER_ID");
         const url = `/${version}/${whatsappPhoneNumberID}/${endPoint}`;
         const whatsappaApi = whatsappHost + url;
         let response = null;
         if (method === "get") {
             response = await needle(method, whatsappaApi, options);
-    
         } else {
             response = await needle(method, whatsappaApi, postDataMeta, options);
         }
@@ -94,14 +92,13 @@ export class NeedleService {
         } else {
             throw new Error("Needle Request for Whatsapp MetaFailed");
         }
-    
         return response.body;
     }
 
     async needleRequestForTelegram(method: string, endPoint:string, obj?, payload?){
-        const telegramHost = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_HOST");
+        const telegramHost = this.environmentProviderService.getClientEnvironmentVariable("TELEGRAM_HOST");
         const options = getRequestOptions();
-        const telegramBotToken = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN");
+        const telegramBotToken = this.environmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN");
         const url = `/bot${telegramBotToken}/${endPoint}`;
         const telegramApi = telegramHost + url;
         console.log("The telegram URL is:" + telegramApi);
@@ -109,7 +106,6 @@ export class NeedleService {
         try {
             if (method === "get") {
                 response = await needle(method, telegramApi, options);
-        
             } else {
                 console.log('The body of the request is' + JSON.stringify(obj));
                 response = await needle(method, telegramApi, obj, options);
@@ -118,7 +114,6 @@ export class NeedleService {
         } catch (error) {
             console.log("The error is: ", error);
         }
-    
         if (response.statusCode === 200 || response.statusCode === 201) {
             const responseObject = await this.createResponseObject('Telegram', payload);
             await this.saveResponsetoDB(responseObject);
@@ -126,15 +121,14 @@ export class NeedleService {
         } else {
             throw new Error("Failed");
         }
-    
         return response.body;
     }
 
     async needleRequestForWhatsapp(method: string, endPoint:string, obj?){
         const options = getRequestOptions();
         options.headers['Content-Type'] = 'application/json';
-        options.headers['D360-Api-Key'] = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY");
-        const hostname = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST");
+        options.headers['D360-Api-Key'] = this.environmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY");
+        const hostname = this.environmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST");
         const apiUrl = "https://" + hostname + endPoint;
         // eslint-disable-next-line init-declarations
         await needle.post(apiUrl, obj, options, function(err, resp) {
@@ -148,7 +142,7 @@ export class NeedleService {
 
     saveResponsetoDB = async(responseObject) => {
         // eslint-disable-next-line max-len
-        const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
+        const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.environmentProviderService)).getRepository(ChatSession);
         const chatSessionModel = await chatSessionRepository.findOne({
             where : {
                 userPlatformID : responseObject.chat_id
@@ -170,7 +164,7 @@ export class NeedleService {
             intent         : responseObject.intent
         };
         // eslint-disable-next-line max-len
-        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.environmentProviderService)).getRepository(ChatMessage);
         await (await chatMessageRepository.create(dfResponseObj)).save();
 
     };

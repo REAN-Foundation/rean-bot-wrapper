@@ -9,7 +9,7 @@ import { GenerateCertificateYesService } from './bloodWrrior/generate.certificat
 import { RegistrationPerMinMsgService } from './maternalCareplan/registration.per.minute.sercice';
 import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
 import { ChecklistDateValidationService } from './bloodWrrior/checklist.date.validation.service';
-import { NoBabyMovementAssessmentService } from './commonAssesssment/common.assessment.service';
+import { CommonAssessmentService } from './Assesssment/common.assessment.service';
 import { CincinnatiPerMinMsgService } from './maternalCareplan/cincannati.demo';
 import { AcceptDonationRequestService } from './bloodWrrior/accept.donation.request.service';
 import { ChangeTransfusionDateService } from './bloodWrrior/chnage.transfusion.date.service';
@@ -105,6 +105,10 @@ export class FireAndForgetService {
         const validAssessmentReplyIntents = [
             "Dmc_Yes",
             "Dmc_No",
+            "option_A",
+            "option_B",
+            "option_C",
+            "option_D",
             "Work_Commitments",
             "Feeling_Unwell_A",
             "Transit_Issues",
@@ -162,9 +166,9 @@ export class FireAndForgetService {
         if (model.Intent === "StartAssessment") {
             const eventObj = model.Body.EventObj;
             await FireAndForgetService.delay(2000);
-            const assessmentService:  NoBabyMovementAssessmentService =
-                eventObj.container.resolve(NoBabyMovementAssessmentService);
-            await assessmentService.startAssessmentAndUpdateDb(eventObj, model.Body.PatientUserId,
+            const commonAssessmentService:  CommonAssessmentService = 
+                eventObj.container.resolve(CommonAssessmentService);
+            await commonAssessmentService.startAssessmentAndUpdateDb(eventObj, model.Body.PatientUserId,
                 model.Body.PersonPhoneNumber, model.Body.AssessmentTemplateId,
                 model.Body.AssessmentTemplateTitle, model.Body.Channel);
             console.log(`Fire and Forget Domain Model: ${model}`);

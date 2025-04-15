@@ -50,30 +50,35 @@ export class AnswerYesMsgService {
             chatMessageId = eventObj.body.originalDetectIntentRequest.payload.contextId;
         }
         const userReplyJsonUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("ASSESSMENT_USER_REPLY_JSON_URL");
-        const userResponses = await this.fetchJsonFile(userReplyJsonUrl);
-        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-        const chatMessage = await chatMessageRepository.findOne({ where: { "responseMessageID": chatMessageId } });
+        if (userReplyJsonUrl)
+        {
+            const userResponses = await this.fetchJsonFile(userReplyJsonUrl);
+            const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+            const chatMessage = await chatMessageRepository.findOne({ where: { "responseMessageID": chatMessageId } });
 
-        if (channel === "telegram" || channel === "Telegram") {
-            const previousMessage = chatMessage.messageContent ? chatMessage.messageContent : "";
-            for (const msg of userResponses) {
-                if (msg.Messege === previousMessage) {
-                    message = this.getAnswer(intentName, message, msg);
-                    break;
-                } else {
-                    message = null;
+            if (channel === "telegram" || channel === "Telegram") {
+                const previousMessage = chatMessage.messageContent ? chatMessage.messageContent : "";
+                for (const msg of userResponses) {
+                    if (msg.Messege === previousMessage) {
+                        message = this.getAnswer(intentName, message, msg);
+                        break;
+                    } else {
+                        message = null;
+                    }
                 }
-            }
-        } else {
-            const metaTemplateName = chatMessage ? chatMessage.intent : "";
-            for (const msg of userResponses) {
-                if (msg.WhatsAppTemplateName === metaTemplateName) {
-                    message = this.getAnswer(intentName, message, msg);
-                    break;
-                } else {
-                    message = null;
+            } else {
+                const metaTemplateName = chatMessage ? chatMessage.intent : "";
+                for (const msg of userResponses) {
+                    if (msg.WhatsAppTemplateName === metaTemplateName) {
+                        message = this.getAnswer(intentName, message, msg);
+                        break;
+                    } else {
+                        message = null;
+                    }
                 }
-            }
+            } }
+        else {
+            message = null;
         }
         
         return message;

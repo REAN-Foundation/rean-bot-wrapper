@@ -31,7 +31,7 @@ export class Registration{
 
     async registerUserOnReanCare(
         platformUserName: string,
-        UserId: string,
+        platformUserId: string,
         creationMethod: "phoneNumber" | "userName",
         password: string,
         api_key: string
@@ -42,22 +42,22 @@ export class Registration{
             // Build the object based on creation method
             if (creationMethod === "phoneNumber") {
                 obj = {
-                    Phone           : await this.countryCodeService.formatPhoneNumber(UserId),
-                    Password        : password,
+                    Phone           : await this.countryCodeService.formatPhoneNumber(platformUserId),
                     FirstName       : platformUserName,
                     DefaultTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
                     CurrentTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
                     TenantCode      : this.EnvironmentProviderService.getClientEnvironmentVariable("NAME"),
+                    GenerateOtp     : false
                 };
             } else if (creationMethod === "userName") {
                 obj = {
-                    Password        : password,
                     FirstName       : platformUserName,
-                    UserName        : UserId,
-                    TelegramChatId  : UserId,
+                    UserName        : platformUserId,
+                    TelegramChatId  : platformUserId,
                     DefaultTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
                     CurrentTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
                     TenantCode      : this.EnvironmentProviderService.getClientEnvironmentVariable("NAME"),
+                    GenerateOtp     : false
                 };
             } else {
                 throw new Error(`Invalid creation method: ${creationMethod}`);
@@ -101,18 +101,17 @@ export class Registration{
 
     async getPatientUserId(
         channel: any,
-        UserId: string,
+        PlatformUserId: string,
         platformUserName: string,
         password: string = process.env.USER_REGISTRATION_PASSWORD,
         api_key:string = this.EnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY")
     ): Promise<{ patientUserId: string | null; statusCode: number; errorMessage?: string }> {
         try {
             let patientUserId = null;
-    
             if (channel === "telegram" || channel === "Telegram") {
-                const result = await this.checkPatientExist(UserId, null);
+                const result = await this.checkPatientExist(PlatformUserId, null);
                 if (result.Data.Patients.Items.length === 0) {
-                    patientUserId = await this.registerUserOnReanCare(platformUserName, UserId, "userName", password,api_key);
+                    patientUserId = await this.registerUserOnReanCare(platformUserName, PlatformUserId, "userName", password,api_key);
                 } else {
                     patientUserId = result.Data.Patients.Items[0].UserId;
                 }
@@ -120,14 +119,16 @@ export class Registration{
                 channel === "whatsappMeta" ||
                 channel === "whatsapp" ||
                 channel === "whatsappWati" ||
-                channel === "MockChannel"
-            ) {
-                const PhoneNumber = await this.countryCodeService.formatPhoneNumber(UserId);
+                channel === "MockChannel" ||
+                channel === "REAN_SUPPORT" ||
+                channel === "SNEHA_SUPPORT") {
+                console.log("platformUser ID IS:",PlatformUserId);
+                const PhoneNumber = await this.countryCodeService.formatPhoneNumber(PlatformUserId);
                 Logger.instance().log(`Fetching patient details for phone number: ${PhoneNumber}`);
                 const apiURL = `patients/byPhone?phone=${encodeURIComponent(PhoneNumber)}`;
                 const result = await this.needleService.needleRequestForREAN("get", apiURL,null,null,api_key);
                 if (result.Data.Patients.Items.length === 0) {
-                    patientUserId = await this.registerUserOnReanCare(platformUserName, UserId, "phoneNumber", password,api_key);
+                    patientUserId = await this.registerUserOnReanCare(platformUserName, PlatformUserId, "phoneNumber", password,api_key);
                 } else {
                     patientUserId = result.Data.Patients.Items[0].UserId;
                 }

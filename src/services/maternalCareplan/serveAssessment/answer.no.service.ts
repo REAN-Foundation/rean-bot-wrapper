@@ -36,7 +36,7 @@ export class AnswerNoMsgService {
     }
 
     private getRandomNoMessage() {
-        const messages = ["Thank you for your response.", "Thank you for your feedback.", "Your response has been recorded" ];
+        const messages = ["Thank you for your response.", "Your response has been recorded" ];
         const randomIndex = this.answerYesMsgService.generateRandomNumber(messages.length);
         return messages[randomIndex];
     }

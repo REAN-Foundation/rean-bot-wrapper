@@ -25,10 +25,11 @@ export class LogsQAService {
 
         //eslint-disable-next-line max-len
         const userId = response_format.sessionId;
-        const chatMessageRepository = await (await this.entityManagerProvider.getEntityManager(this.EnvironmentProviderService)).getRepository(ChatMessage);
+        const entityManager = await this.entityManagerProvider.getEntityManager(this.EnvironmentProviderService);
+        const chatMessageRepository = await entityManager.getRepository(ChatMessage);
         const responseChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: userId , direction: 'In' } });
         let messageContentIn = "firstmessage";
-        
+
         const contactList =
         (await this.entityManagerProvider.getEntityManager(this.EnvironmentProviderService)).getRepository(ContactList);
         const personContactList = await contactList.findOne({ where: { mobileNumber: userId } });
@@ -43,7 +44,14 @@ export class LogsQAService {
             let taskId = await this.postingOnClickup(`Client : ` + messageContentIn,  cmrTaskID , responseChatMessage, userName);
             const messageContentOut = response_format.messageText;
             taskId = await this.postingOnClickup(`Bot : ` + messageContentOut + `\nIntent Name : ${response_format.intent}`, taskId, responseChatMessage, userName);
-            await contactList.update({ cmrChatTaskID : taskId }, { where: { mobileNumber: response_format.sessionId } });
+            await contactList.update({
+                cmrChatTaskID : taskId
+            },
+            {
+                where : {
+                    mobileNumber : response_format.sessionId
+                }
+            });
             console.log("support channel Id is updated");
         }
     }

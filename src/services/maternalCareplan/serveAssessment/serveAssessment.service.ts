@@ -28,27 +28,28 @@ export class ServeAssessmentService {
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
     ){}
-    
-    async startAssessment (message: any, userTaskData: any) {
+
+    async startAssessment (platformUserId:any, channel: any, userTaskData: any) {
         try {
-            const metaPayload = {};
+
             const userTask = JSON.parse(userTaskData);
             const defaultLangaugeCode = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
 
             // const assessmentId = userTask.Action.Assessment.id;
             const assessmentId = userTask.Action ? userTask.Action.Assessment.id : userTask.id;
             const apiURL = `clinical/assessments/${assessmentId}/start`;
-            const requestBody = await this.needleService.needleRequestForREAN("post", apiURL, null, {});
+            const responseBody = await this.needleService.needleRequestForREAN("post", apiURL, null, {});
             let assessmentSessionLogs = null;
-            if (requestBody.Data.Next) {
-                const questionNode = requestBody.Data.Next;
-                const questionData = JSON.parse(requestBody.Data.Next.RawData);
-                metaPayload["messageText"] = requestBody.Data.Next.Description;
-                metaPayload["channel"] = message.channel;
-
-                // Extract variables
+            const metaPayload = {
+                "buttonIds" : []
+            };
+            if (responseBody.Data.Next) {
+                const questionNode = responseBody.Data.Next;
+                const questionData = JSON.parse(responseBody.Data.Next.RawData);
+                metaPayload["messageText"] = responseBody.Data.Next.Description;
+                metaPayload["channel"] = channel;
                 metaPayload["templateName"] = questionData.TemplateName;
-                let languageForSession = await this.translate.detectUsersLanguage( message.userId );
+                let languageForSession = await this.translate.detectUsersLanguage( platformUserId );
                 if (questionData.TemplateVariables[`${languageForSession}`]) {
                     metaPayload["variables"] = questionData.TemplateVariables[`${languageForSession}`];
                     metaPayload["languageForSession"] = languageForSession;
@@ -78,13 +79,13 @@ export class ServeAssessmentService {
                         "type"  : "image",
                         "image" : {
                             "link" : questionData.Url
-                        }};
+                        } };
                 }
 
                 //save entry into DB
                 assessmentSessionLogs = {
                     patientUserId        : userTask.UserId ? userTask.UserId : userTask.PatientUserId,
-                    userPlatformId       : message.userId,
+                    userPlatformId       : platformUserId,
                     assessmentTemplateId : userTask.Action ? userTask.Action.Assessment.AssessmentTemplateId : userTask.AssessmentTemplateId,
                     assesmentId          : userTask.Action ? userTask.Action.Assessment.id : userTask.id,
                     assesmentNodeId      : questionNode.id,
@@ -94,8 +95,11 @@ export class ServeAssessmentService {
                     userMessageId        : null,
                 };
 
-                const key = `${message.userId}:NextQuestionFlag`;
+                const key = `${platformUserId}:NextQuestionFlag`;
                 CacheMemory.set(key, true);
+            }
+            else {
+                metaPayload["buttonIds"] = [];
             }
             return { metaPayload, assessmentSessionLogs };
         } catch (error) {
@@ -178,7 +182,7 @@ export class ServeAssessmentService {
 
             let messageId = null;
             if (doSend === true) {
-                console.log("    sending message from handle request");
+                console.log("sending message from handle request");
                 const response = { body: { answer: message }, payload: payload };
                 const customModelResponseFormat = new CustomModelResponseFormat(response);
                 return customModelResponseFormat;
@@ -188,7 +192,7 @@ export class ServeAssessmentService {
                 if (channel === "telegram" || channel === "Telegram") {
                     channel = "telegram";
                 }
-                console.log("    sending message from fulllfillment request");
+                console.log("sending message from fulllfillment request");
                 this._platformMessageService = eventObj.container.resolve(channel);
                 const response_format: Iresponse = commonResponseMessageFormat();
                 response_format.sessionId = assessmentSession.userPlatformId;
@@ -213,7 +217,9 @@ export class ServeAssessmentService {
                     await this.updateDBChatSessionWithMessageId(userId, messageId, chatMessageRepository, AssessmentSessionRepo);
                 }
 
-                if (userResponse === "Work_Commitments" || userResponse === "Feeling_Unwell_A" || userResponse === "Transit_Issues") {
+                if (userResponse === "Work_Commitments" ||
+                    userResponse === "Feeling_Unwell_A" ||
+                    userResponse === "Transit_Issues") {
                     const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
                     let todayDate = new Date().toISOString()
                         .split('T')[0];
@@ -226,17 +232,22 @@ export class ServeAssessmentService {
                     const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/follow-up/assessment/reply/${phoneNumber}/date/${todayDate}`;
                     const res = await needle("put",
                         getUrl,
-                        { assessment_id   : assessmentSession.assesmentId, patient_user_id : questionData.PatientUserId,
-                            chosen_option   : { sequence: userAnswer, text: userResponse }
+                        {
+                            assessment_id   : assessmentSession.assesmentId,
+                            patient_user_id : questionData.PatientUserId,
+                            chosen_option   : {
+                                sequence : userAnswer,
+                                text     : userResponse
+                            }
                         },
-                        { headers : {
-                            'Content-Type' : 'application/json',
-                            Accept         : 'application/json',
-                        },
+                        {
+                            headers : {
+                                'Content-Type' : 'application/json',
+                                Accept         : 'application/json',
+                            },
                         },
                     );
                     console.log(`Object in reply service ${JSON.stringify(res.body,null, 4)}`);
-            
                 }
             }
 
@@ -263,6 +274,10 @@ export class ServeAssessmentService {
         const message = {
             "Dmc_Yes"          : 1,
             "Dmc_No"           : 2,
+            "option_A"         : 1,
+            "option_B"         : 2,
+            "option_C"         : 3,
+            "option_D"         : 4,
             "Work_Commitments" : 1,
             "Feeling_Unwell_A" : 2,
             "Transit_Issues"   : 3,
@@ -280,10 +295,22 @@ export class ServeAssessmentService {
         return message[intentName] ?? intentName;
     }
 
-    public async updateMessageFlag( userId, messageId, chatMessageRepository ) {
-        const response = await chatMessageRepository.findOne( { where: { userPlatformId: userId, responseMessageID: messageId }, order: [['createdAt', 'DESC']] });
+    public async updateMessageFlag(userId, messageId, chatMessageRepository) {
+        const response = await chatMessageRepository.findOne({
+            where : {
+                userPlatformId    : userId,
+                responseMessageID : messageId
+            }, order : [['createdAt', 'DESC']]
+        });
         if (response) {
-            await chatMessageRepository.update({ messageFlag: "assessment" }, { where: { id: response.id } });
+            await chatMessageRepository.update({
+                messageFlag : "assessment"
+            },
+            {
+                where : {
+                    id : response.id
+                }
+            });
         }
     }
 

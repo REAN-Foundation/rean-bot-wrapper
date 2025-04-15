@@ -66,13 +66,13 @@ import { GenerateCertificateConfirmYesListener } from './intentListeners/bloodWa
 import { GeneralReminderListener } from './intentListeners/medicationReminder/general.reminder.listener';
 import { ReminderFrequencyListener, SendFrequencyButtonsListener, StopMedicationReasonListener } from './intentListeners/medicationReminder/reminder.ask.frequency.listener';
 import { ReminderAskTimeListener } from './intentListeners/medicationReminder/reminder.ask.time.listener';
-import { AssessmentAnswerYesListener } from './intentListeners/maternity.careplan/answer.yes.listener';
+import { AssessmentAnswerYesListener } from './intentListeners/assessment/assessment.answer.yes.listener';
 import { RegistrationPerMinuteMsgListener } from './intentListeners/maternity.careplan/regstration.per.minute.listener';
-import { AssessmentAnswerNoListener } from './intentListeners/maternity.careplan/answer.no.listener';
+import { AssessmentAnswerNoListener } from './intentListeners/assessment/assessment.answer.no.listener';
 import { eyeImageQualityCheckListener } from './intentListeners/eye.image.quality.check.listener';
 import { AppointmentReminderListener, AppointmentReminderReplyListener } from './intentListeners/medicationReminder/appointment.reminder.listener';
 import { ReminderRegistrationListener } from './intentListeners/medicationReminder/reminder.registration.listener';
-import { CommonAssessmentListener } from './intentListeners/commonAssessment/common.assessment.listener';
+import { CommonAssessmentListener } from './intentListeners/assessment/common.assessment.listener';
 import { ConsentYesListner } from './intentListeners/consentListners/consent.yes.listner';
 import { DeleteReminderListener } from './intentListeners/medicationReminder/delete.reminder.listener';
 import { CincinnatiPerMinuteMsgListener } from './intentListeners/maternity.careplan/cincinnati.per.minute.listener copy';
@@ -85,7 +85,7 @@ import { AppointmentBookingListner } from './intentListeners/appoinment.booking.
 import { VolunteerSelectedPatient } from './intentListeners/bloodWarrior/volunteer.selected.patient';
 import { InitiateDeleteReminderListener, GetReminderDetails, DeleteReminder } from './intentListeners/initiate.delete.reminder.listener';
 import { EnrollHFCareplanListener, SentRegistrationMSGListener } from './intentListeners/heartFailureCareplan/start.careplan.listener';
-
+import { AssessmentScoringListener } from './intentListeners/assessment/assessemnt.quiz.scoring.listener';
 /*
  * Init function (being called during application bootstrap)
  * This is the place to register any new intent and corresponding listeners
@@ -229,6 +229,10 @@ export class IntentRegister {
         IntentEmitter.registerListener('Reminder_Ask_Time', ReminderAskTimeListener);
         IntentEmitter.registerListener('Dmc_Yes', AssessmentAnswerYesListener);
         IntentEmitter.registerListener('Dmc_No', AssessmentAnswerNoListener);
+        IntentEmitter.registerListener('option_A',  AssessmentScoringListener);
+        IntentEmitter.registerListener('option_B', AssessmentScoringListener);
+        IntentEmitter.registerListener('option_C', AssessmentScoringListener);
+        IntentEmitter.registerListener('option_D', AssessmentScoringListener);
         IntentEmitter.registerListener('Registration_PerMinMsg', RegistrationPerMinuteMsgListener);
         IntentEmitter.registerListener('Cincinnati_PerMinMsg', CincinnatiPerMinuteMsgListener);
         IntentEmitter.registerListener('ImageQualityCheck', eyeImageQualityCheckListener);
@@ -266,12 +270,10 @@ export class IntentRegister {
         IntentEmitter.registerListener('Start_Careplan_HeartF_Select', EnrollHFCareplanListener);
         IntentEmitter.registerListener('Assessment_Yes', AssessmentAnswerYesListener);
         IntentEmitter.registerListener('Assessment_No', AssessmentAnswerNoListener);
-
-        //delete reminder
+        IntentEmitter.registerListener('start_assessment_quiz', CommonAssessmentListener);
         IntentEmitter.registerListener('initiate_delete_reminder', InitiateDeleteReminderListener);
         IntentEmitter.registerListener('delete_reminder_type', GetReminderDetails);
         IntentEmitter.registerListener('delete_reminder_time', DeleteReminder);
-
         IntentEmitter.registerListener('bookAppointment', AppointmentBookingListner);
       
         // Intent fulfillement - Success listener

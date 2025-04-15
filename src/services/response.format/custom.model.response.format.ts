@@ -30,9 +30,11 @@ export class CustomModelResponseFormat implements IserviceResponseFunctionalitie
 
         //get intent
         let intent;
-        if (this.response.body && this.response.body.source_of_info){
-            intent = this.response.body.intent + '|' + this.response.body.source_of_info;
-        } else if (this.response.body && !this.response.body.source_of_info){
+        // if (this.response.body && this.response.body.source_of_info){
+        //     intent = this.response.body.intent + '|' + this.response.body.source_of_info;
+        // } else if (this.response.body && !this.response.body.source_of_info){
+        //     intent = this.response.body.intent;
+        if (this.response.body) {
             intent = this.response.body.intent;
         } else {
             intent = "Failed Intent";
