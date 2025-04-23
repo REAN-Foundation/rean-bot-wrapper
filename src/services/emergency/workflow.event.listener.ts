@@ -79,12 +79,6 @@ export class WorkflowEventListener {
                     schemaId = baseSchema.id;
                 }
             }
-            // else if (prevMessage.Terminated === true && prevMessage.ParentSchemaInstanceId === null) {
-            //     var baseSchema = schemaList.find((schema) => schema.ParentSchemaId === null);
-            //     if (baseSchema) {
-            //         schemaId = baseSchema.id;
-            //     }
-            // }
             else {
                 schemaId         = prevMessage.SchemaId;
                 schemaInstanceId = prevMessage.SchemaInstanceId;
