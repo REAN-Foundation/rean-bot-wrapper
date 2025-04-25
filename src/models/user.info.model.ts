@@ -17,49 +17,49 @@ export class UserInfo extends Model implements IuserInfo {
     @AutoIncrement
     @PrimaryKey
     @Column({
-        type : DataType.INTEGER,
-        allowNull : false
+        type        : DataType.INTEGER,
+        allowNull   : false
     })
         autoIncrementalID: number;
 
     @ForeignKey(() => ContactList)
     @Column({
-        type : DataType.INTEGER,
-        allowNull : false
+        type        : DataType.INTEGER,
+        allowNull   : false
     })
         userID: number;
     
     @BelongsTo(() => ContactList)
-        ContactList: ContactList
+        ContactList: ContactList;
 
     @Column({
-        type: DataType.STRING(256)
+        type    : DataType.STRING(256)
     })
         userPlatformID: string;
         
     @Column({
-        type: DataType.STRING(256)
+        type    : DataType.STRING(256)
     })
         userName?: string;
 
     @Column({
-        type: DataType.INTEGER
+        type    : DataType.INTEGER
     })
         userAge?: number;
 
     @Column({
-        type: DataType.STRING(256)
+        type    : DataType.STRING(256)
     })
-        userGender?: Gender
+        userGender?: Gender;
 
     @Column({
-        type: DataType.STRING()
+        type    : DataType.STRING()
     })
         userInfo?: string;
 
     @Column({
-        type: DataType.BOOLEAN,
+        type        : DataType.BOOLEAN,
         defaultValue: false
     })
-        infoProvided?: boolean
+        infoProvided?: boolean;
 }
