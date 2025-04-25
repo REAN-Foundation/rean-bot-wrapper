@@ -27,7 +27,7 @@ export class WorkflowEventListener {
     public getPreviousMessageFromWorkflow = async (platformUserId: string): Promise<WorkflowUserData> => {
         const entManager = await this._entityProvider.getEntityManager(this.environmentProviderService);
         const workflowRepository = entManager.getRepository(WorkflowUserData);
-        const previousMessage = await workflowRepository.findOne({
+        var previousMessage = await workflowRepository.findOne({
             where : {
                 UserPlatformId    : platformUserId,
                 IsMessageFromUser : false
@@ -36,6 +36,22 @@ export class WorkflowEventListener {
                 ['CreatedAt', 'DESC']
             ]
         });
+        
+        if (previousMessage?.SchemaInstanceId) {
+            const url = '/engine/schema-instances/' + previousMessage.SchemaInstanceId;
+            const response = await this.callWorkflowApi('get', url);
+            if (response) {
+                console.log("Workflow event acknowledged", response);
+                if (response.Data === null || (response.Data.Terminated === true && response.Data.ParentSchemaInstanceId === null)) {
+                    previousMessage = null;
+                }
+            }
+            else {
+                console.log("No response from workflow");
+            }
+
+        }
+
         return previousMessage;
     };
 
