@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from 'sequelize-typescript';
 import { contactList } from '../refactor/interface/message.interface';
 
