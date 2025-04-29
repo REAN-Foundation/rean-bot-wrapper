@@ -86,6 +86,7 @@ import { VolunteerSelectedPatient } from './intentListeners/bloodWarrior/volunte
 import { InitiateDeleteReminderListener, GetReminderDetails, DeleteReminder } from './intentListeners/initiate.delete.reminder.listener';
 import { EnrollHFCareplanListener, SentRegistrationMSGListener } from './intentListeners/heartFailureCareplan/start.careplan.listener';
 import { AssessmentScoringListener } from './intentListeners/assessment/assessemnt.quiz.scoring.listener';
+import { UserInfoListener } from './intentListeners/user.info.listener';
 /*
  * Init function (being called during application bootstrap)
  * This is the place to register any new intent and corresponding listeners
@@ -275,6 +276,9 @@ export class IntentRegister {
         IntentEmitter.registerListener('delete_reminder_type', GetReminderDetails);
         IntentEmitter.registerListener('delete_reminder_time', DeleteReminder);
         IntentEmitter.registerListener('bookAppointment', AppointmentBookingListner);
+
+        // Intents for Collecting user information
+        IntentEmitter.registerListener('UserInfo', UserInfoListener);
       
         // Intent fulfillement - Success listener
         // TODO: Pending implementation
