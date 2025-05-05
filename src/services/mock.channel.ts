@@ -133,25 +133,35 @@ export class MockMessageService implements platformServiceInterface {
             };
         }
         else {
-            const mockUri = "http://127.0.0.1:80/listener";
-            try {
-                const response = await request({
-                    method : 'POST',
-                    uri    : mockUri,
-                    body   : {
-                        conversationId : `${respChatMessage[respChatMessage.length - 2].messageId}`,
-                        responses      : [
-                            {
-                                text    : response_format.messageText,
-                                payload : payload
-                            }
-                        ]
-                    },
-                    json : true
-                });
-            } catch (error) {
-                console.log("Error in sending to botium");
-            }
+            return {
+                Status: "success",
+                conversationid: response_format.sessionId,
+                responses: [
+                    {
+                        text: response_format.messageText,
+                        payload: payload
+                    }
+                ]
+            };
+            // const mockUri = "http://127.0.0.1:80/listener";
+            // try {
+            //     const response = await request({
+            //         method : 'POST',
+            //         uri    : mockUri,
+            //         body   : {
+            //             conversationId : `${respChatMessage[respChatMessage.length - 2].messageId}`,
+            //             responses      : [
+            //                 {
+            //                     text    : response_format.messageText,
+            //                     payload : payload
+            //                 }
+            //             ]
+            //         },
+            //         json : true
+            //     });
+            // } catch (error) {
+            //     console.log("Error in sending to botium");
+            // }
         }
         
     };
@@ -161,7 +171,7 @@ export class MockMessageService implements platformServiceInterface {
         if (message.messages[0].type === "text") {
             return await this.messageFunctionalitiesmockchannel.textMessageFormat(message);
         } else if (message.messages[0].type === "interactive-list") {
-            return await this.messageFunctionalitiesmockchannel.interactiveListMessaegFormat(message);
+            return await this.messageFunctionalitiesmockchannel.interactiveListMessageFormat(message);
         }
         else {
             throw new Error("Message is not text");
