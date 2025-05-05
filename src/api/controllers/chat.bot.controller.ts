@@ -93,7 +93,6 @@ export class ChatBotController {
             IntentEmitter.emit('IntentFulfillment:Failure', request.body);
             return this.responseHandler.sendFailureResponse(response, 500, 'Failed to Process intent.', request);
         }
-
         this.logger.log(`One or more listeners have fulfilled the Intent successfully.`);
         IntentEmitter.emit('IntentFulfillment:Success', intent);
 
@@ -101,189 +100,199 @@ export class ChatBotController {
     };
 
     sendWorkflowMessage = async (request, response) => {
-        const requestBody = request.body;
-        let messageChannel = requestBody.UserMessage.MessageChannel;
-        if (requestBody.UserMessage.MessageChannel === "WhatsApp" || requestBody.UserMessage.MessageChannel === "Other"){
-            messageChannel = "whatsappMeta";
-        }
-        else {
-            messageChannel = "telegram";
-        }
+        try {
+            const clientEnvironmentProviderService = request.container.resolve(ClientEnvironmentProviderService);
+            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const entityManagerProvider = request.container.resolve(EntityManagerProvider);
+          
+            const requestBody = request.body;
+            let messageChannel = requestBody.UserMessage.MessageChannel;
+            if (requestBody.UserMessage.MessageChannel === "WhatsApp" || requestBody.UserMessage.MessageChannel === "Other"){
+                messageChannel = "whatsappMeta";
+            }
+            else {
+                messageChannel = "telegram";
+            }
 
-        this._platformMessageService = await request.container.resolve(messageChannel);
-        const response_format: Iresponse = commonResponseMessageFormat();
+            this._platformMessageService = await request.container.resolve(messageChannel);
+            const response_format: Iresponse = commonResponseMessageFormat();
 
-        const event: WorkflowEvent = requestBody;
+            const event: WorkflowEvent = requestBody;
 
-        const userPlatformId = event.UserMessage?.Phone ?? null;
-        const chatSessionId = await this.getChatSessionId(userPlatformId);
+            const userPlatformId = event.UserMessage?.Phone ?? null;
+            const chatSessionId = await this.getChatSessionId(userPlatformId);
 
-        const workflowEventEntiry = {
-            TenantId          : event.TenantId,
-            EventType         : event.EventType,
-            SchemaId          : event.SchemaId,
-            SchemaInstanceId  : event.SchemaInstanceId,
-            ChatSessionId     : chatSessionId,
-            BotMessageId      : null, //To be updated later
-            ChannelMessageId  : messageChannel, //To be updated later
-            UserPlatformId    : userPlatformId,
-            PhoneNumber       : event.UserMessage.Phone ?? null,
-            ChannelType       : event.UserMessage.MessageChannel,
-            MessageType       : event.UserMessage.MessageType,
-            IsMessageFromUser : false,
-            TextMessage       : event.UserMessage.TextMessage ?? null,
-            Location          : event.UserMessage.Location ?? null,
-            ImageUrl          : event.UserMessage.ImageUrl ?? null,
-            AudioUrl          : event.UserMessage.AudioUrl ?? null,
-            VideoUrl          : event.UserMessage.VideoUrl ?? null,
-            FileUrl           : event.UserMessage.FileUrl ?? null,
-            EventTimestamp    : event.UserMessage.EventTimestamp ?
-                new Date(event.UserMessage.EventTimestamp) : new Date(),
-            SchemaName           : event.UserMessage.Payload.SchemaName ?? null,
-            NodeInstanceId       : event.UserMessage.Payload.NodeInstanceId ?? null,
-            NodeId               : event.UserMessage.Payload.NodeId ?? null,
-            NodeActionId         : event.UserMessage.Payload.ActionId ?? null,
-            Question             : event.UserMessage.QuestionText ?? null,
-            QuestionOptions      : event.UserMessage.QuestionOptions ?? null,
-            QuestionResponse     : event.UserMessage.QuestionResponse ?? null,
-            QuestionResponseType : event.UserMessage.QuestionResponseType as QuestionResponseType,
-            Placeholders         : event.UserMessage.Placeholders ?? null,
-            Payload              : event.UserMessage.Payload ?? null,
-        };
+            const workflowEventEntiry = {
+                TenantId          : event.TenantId,
+                EventType         : event.EventType,
+                SchemaId          : event.SchemaId,
+                SchemaInstanceId  : event.SchemaInstanceId,
+                ChatSessionId     : chatSessionId,
+                BotMessageId      : null, //To be updated later
+                ChannelMessageId  : messageChannel, //To be updated later
+                UserPlatformId    : userPlatformId,
+                PhoneNumber       : event.UserMessage.Phone ?? null,
+                ChannelType       : event.UserMessage.MessageChannel,
+                MessageType       : event.UserMessage.MessageType,
+                IsMessageFromUser : false,
+                TextMessage       : event.UserMessage.TextMessage ?? null,
+                Location          : event.UserMessage.Location ?? null,
+                ImageUrl          : event.UserMessage.ImageUrl ?? null,
+                AudioUrl          : event.UserMessage.AudioUrl ?? null,
+                VideoUrl          : event.UserMessage.VideoUrl ?? null,
+                FileUrl           : event.UserMessage.FileUrl ?? null,
+                EventTimestamp    : event.UserMessage.EventTimestamp ?
+                    new Date(event.UserMessage.EventTimestamp) : new Date(),
+                SchemaName           : event.UserMessage.Payload.SchemaName ?? null,
+                NodeInstanceId       : event.UserMessage.Payload.NodeInstanceId ?? null,
+                NodeId               : event.UserMessage.Payload.NodeId ?? null,
+                NodeActionId         : event.UserMessage.Payload.ActionId ?? null,
+                Question             : event.UserMessage.QuestionText ?? null,
+                QuestionOptions      : event.UserMessage.QuestionOptions ?? null,
+                QuestionResponse     : event.UserMessage.QuestionResponse ?? null,
+                QuestionResponseType : event.UserMessage.QuestionResponseType as QuestionResponseType,
+                Placeholders         : event.UserMessage.Placeholders ?? null,
+                Payload              : event.UserMessage.Payload ?? null,
+            };
 
-        const entManager = await this._entityProvider.getEntityManager(this.environmentProviderService);
-        const workflowRepository = entManager.getRepository(WorkflowUserData);
-        console.log("Storing the workflow event to database", workflowEventEntiry);
-        const workflowEventEntityRecord = await workflowRepository.create(workflowEventEntiry);
+            const entManager = await this._entityProvider.getEntityManager(this.environmentProviderService);
+            const workflowRepository = entManager.getRepository(WorkflowUserData);
+            console.log("Storing the workflow event to database", workflowEventEntiry);
+            const workflowEventEntityRecord = await workflowRepository.create(workflowEventEntiry);
 
-        response_format.platformId = event.UserMessage.Phone;
-        response_format.platform = event.UserMessage.MessageChannel === "Telegram" ||
+            response_format.platformId = event.UserMessage.Phone;
+            response_format.platform = event.UserMessage.MessageChannel === "Telegram" ||
             event.UserMessage.MessageChannel === "telegram" ?
-            "telegram" : "whatsappMeta";
+                "telegram" : "whatsappMeta";
 
-        response_format.sessionId = event.UserMessage.Phone;
+            response_format.sessionId = event.UserMessage.Phone;
 
-        let payload = {};
+            let payload = {};
 
-        if (event.UserMessage.MessageType === "Text") {
-            response_format.messageText = event.UserMessage.TextMessage;
-            response_format.message_type = "text";
-        }
+            if (event.UserMessage.MessageType === "Text") {
+                response_format.messageText = event.UserMessage.TextMessage;
+                response_format.message_type = "text";
+            }
 
-        // First template to CFR
-        else if (event?.UserMessage?.Payload?.MessageTemplateId?.startsWith("An emergency incident") && event.UserMessage.MessageType === "Location" &&
+            // First template to CFR
+            else if (event?.UserMessage?.Payload?.MessageTemplateId?.startsWith("An emergency incident") && event.UserMessage.MessageType === "Location" &&
          event.UserMessage.MessageChannel === 'WhatsApp') {
-            response_format.message_type  = 'template';
-            console.log("An emergency incident message");
-
-            // payload = await whatsappSingleMetaButtonService("OK", "Okay");
-            payload["templateName"] = "alert_message";
-            payload["languageForSession"] = "en";
-            payload["text"] = event.UserMessage.TextMessage;
-            payload["location"] = {
-                name      : "Incident Location",
-                latitude  : event.UserMessage?.Location?.Latitude,
-                longitude : event.UserMessage?.Location?.Longitude
-
-            };
-            payload["variables"] = [
-                {
-                    type : "text",
-                    text : event.UserMessage.TextMessage
-                },
-            ];
-        }
-
-        else if (event.UserMessage.MessageType === "Location") {
-            response_format.location = {
-                latitude  : event.UserMessage?.Location?.Latitude,
-                longitude : event.UserMessage?.Location?.Longitude
-            };
-            response_format.message_type = "location";
-        }
-
-        // Second template to CFR
-        else if (
-            event.UserMessage.MessageType === "Question"  && event.UserMessage.QuestionText.startsWith("Will you be available")) {
-            const options = event.UserMessage.QuestionOptions;
-            const availabliltyButton = [];
-            let i = 0;
-            for (const option of options){
-                const buttonId = option.Sequence;
-                availabliltyButton.push(option.Text, buttonId);
-                i = i + 1;
-            }
-            if (event.UserMessage.MessageChannel === 'WhatsApp' ||
-                event.UserMessage.MessageChannel === 'whatsappWati') {
-                payload = await sendApiButtonService(availabliltyButton);
                 response_format.message_type  = 'template';
-                payload["templateName"] = "availability_check";
+                console.log("An emergency incident message");
+
+                // payload = await whatsappSingleMetaButtonService("OK", "Okay");
+                payload["templateName"] = "alert_message";
                 payload["languageForSession"] = "en";
-            } else {
-                payload = await sendTelegramButtonService(availabliltyButton);
-                response_format.message_type = 'inline_keyboard';
+                payload["text"] = event.UserMessage.TextMessage;
+                payload["location"] = {
+                    name      : "Incident Location",
+                    latitude  : event.UserMessage?.Location?.Latitude,
+                    longitude : event.UserMessage?.Location?.Longitude
+
+                };
+                payload["variables"] = [
+                    {
+                        type : "text",
+                        text : event.UserMessage.TextMessage
+                    },
+                ];
             }
-        }
-        
-        else if (event.UserMessage.MessageType === "Question" && !event.UserMessage.QuestionText.startsWith("Will you be available")) {
-            response_format.message_type = "question";
-            response_format.messageText = event.UserMessage.QuestionText;
-            response_format.buttonMetaData = event.UserMessage.QuestionOptions;
-            const options = event.UserMessage.QuestionOptions;
-            const buttonArray = [];
-            let messageType = 'text';
-            if (workflowEventEntiry.QuestionResponseType === QuestionResponseType.SingleChoiceSelection) {
+
+            else if (event.UserMessage.MessageType === "Location") {
+                response_format.location = {
+                    latitude  : event.UserMessage?.Location?.Latitude,
+                    longitude : event.UserMessage?.Location?.Longitude
+                };
+                response_format.message_type = "location";
+            }
+
+            // Second template to CFR
+            else if (
+                event.UserMessage.MessageType === "Question"  && event.UserMessage.QuestionText.startsWith("Will you be available")) {
+                const options = event.UserMessage.QuestionOptions;
+                const availabliltyButton = [];
                 let i = 0;
                 for (const option of options){
                     const buttonId = option.Sequence;
-                    buttonArray.push(option.Text, buttonId);
+                    availabliltyButton.push(option.Text, buttonId);
                     i = i + 1;
                 }
                 if (event.UserMessage.MessageChannel === 'WhatsApp' ||
+                event.UserMessage.MessageChannel === 'whatsappWati') {
+                    payload = await sendApiButtonService(availabliltyButton);
+                    response_format.message_type  = 'template';
+                    payload["templateName"] = "availability_check";
+                    payload["languageForSession"] = "en";
+                } else {
+                    payload = await sendTelegramButtonService(availabliltyButton);
+                    response_format.message_type = 'inline_keyboard';
+                }
+            }
+        
+            else if (event.UserMessage.MessageType === "Question" && !event.UserMessage.QuestionText.startsWith("Will you be available")) {
+                response_format.message_type = "question";
+                response_format.messageText = event.UserMessage.QuestionText;
+                response_format.buttonMetaData = event.UserMessage.QuestionOptions;
+                const options = event.UserMessage.QuestionOptions;
+                const buttonArray = [];
+                let messageType = 'text';
+                if (workflowEventEntiry.QuestionResponseType === QuestionResponseType.SingleChoiceSelection) {
+                    let i = 0;
+                    for (const option of options){
+                        const buttonId = option.Sequence;
+                        buttonArray.push(option.Text, buttonId);
+                        i = i + 1;
+                    }
+                    if (event.UserMessage.MessageChannel === 'WhatsApp' ||
                     event.UserMessage.MessageChannel === 'whatsappWati') {
-                    payload = await sendApiButtonService(buttonArray);
+                        payload = await sendApiButtonService(buttonArray);
 
                     // messageType = 'interactivebuttons';
                     // response_format.message_type = messageType;
-                } else {
-                    payload = await sendTelegramButtonService(buttonArray);
-                    messageType = 'inline_keyboard';
-                    response_format.message_type = messageType;
+                    } else {
+                        payload = await sendTelegramButtonService(buttonArray);
+                        messageType = 'inline_keyboard';
+                        response_format.message_type = messageType;
+                    }
                 }
             }
-        }
        
-        console.log("PAYLOAD", JSON.stringify(payload, null, 2));
-        const res = await this._platformMessageService.SendMediaMessage(response_format, payload);
-        if (res) {
-            const channelMessageId = await this._platformMessageService.getMessageIdFromResponse(res);
+            console.log("PAYLOAD", JSON.stringify(payload, null, 2));
+            const res = await this._platformMessageService.SendMediaMessage(response_format, payload);
+            if (res) {
+                const channelMessageId = await this._platformMessageService.getMessageIdFromResponse(res);
 
-            const chatMessageObj = {
-                chatSessionID  : null,
-                platform       : response_format.platform,
-                direction      : "Out",
-                messageType    : response_format.message_type,
-                messageContent : response_format.messageText,
-                userPlatformID : response_format.sessionId,
-                intent         : "workflow",
-                messageId      : channelMessageId,
-            };
-            const chatMessageRepository = await entManager.getRepository(ChatMessage);
-            const msgRecord = await chatMessageRepository.create(chatMessageObj);
-            const botMessageId = msgRecord.id;
+                const chatMessageObj = {
+                    chatSessionID  : null,
+                    platform       : response_format.platform,
+                    direction      : "Out",
+                    messageType    : response_format.message_type,
+                    messageContent : response_format.messageText,
+                    userPlatformID : response_format.sessionId,
+                    intent         : "workflow",
+                    messageId      : channelMessageId,
+                };
+                const chatMessageRepository = await entManager.getRepository(ChatMessage);
+                const msgRecord = await chatMessageRepository.create(chatMessageObj);
+                const botMessageId = msgRecord.id;
 
-            const eventRecordId = workflowEventEntityRecord ? workflowEventEntityRecord.id : null;
-            if (eventRecordId) {
-                await workflowRepository.update({
-                    BotMessageId     : botMessageId,
-                    ChannelMessageId : channelMessageId
-                },
-                {
-                    where : { id: eventRecordId }
-                });
+                const eventRecordId = workflowEventEntityRecord ? workflowEventEntityRecord.id : null;
+                if (eventRecordId) {
+                    await workflowRepository.update({
+                        BotMessageId     : botMessageId,
+                        ChannelMessageId : channelMessageId
+                    },
+                    {
+                        where : { id: eventRecordId }
+                    });
+                }
             }
+            return this.responseHandler.sendSuccessResponse(response, 200, 'ok', { 'Data': requestBody }, true);
         }
-        return this.responseHandler.sendSuccessResponse(response, 200, 'ok', { 'Data': requestBody }, true);
+        catch (error) {
+            console.log("in error", error);
+            return this.responseHandler.sendFailureResponse(response, 500, error.message);
+        }
     };
 
     getChatSessionId = async (platformUserId: string) => {

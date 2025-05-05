@@ -4,6 +4,7 @@ import { Iresponse } from "../refactor/interface/message.interface";
 import { UserLanguage } from "./set.language";
 import { translateService } from "./translate.service";
 import { HandleMessagetypePayload } from './handle.messagetype.payload';
+import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 import { inject, Lifecycle, scoped } from "tsyringe";
 
 @scoped(Lifecycle.ContainerScoped)
@@ -12,7 +13,8 @@ export class WhatsappPostResponseFunctionalities{
     constructor (
         @inject(HandleMessagetypePayload) private handleMessagetypePayload?: HandleMessagetypePayload,
         @inject(UserLanguage) private userLanguage?: UserLanguage,
-        @inject(translateService) private _translateService?: translateService
+        @inject(translateService) private _translateService?: translateService,
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
     ) {}
 
     textResponseFormat = (response_format:Iresponse,payload) =>{
@@ -62,10 +64,19 @@ export class WhatsappPostResponseFunctionalities{
         const buttons = [];
         const numberOfButtons = (payload.fields.buttons.listValue.values).length;
         const languageForSession = await this.userLanguage.getPreferredLanguageofSession(response_format.sessionId);
+        const customTranslateSetting: boolean = this.clientEnvironmentProviderService.getClientEnvironmentVariable("FIX_LANGUAGE") === "true";
+        const listOfNoTranslateIntents = this.clientEnvironmentProviderService.getClientEnvironmentVariable("FIX_LANGUAGE_INTENTS") ?? [];
+        const intent = response_format.intent;
         for (let i = 0; i < numberOfButtons; i++){
             const id = payload.fields.buttons.listValue.values[i].structValue.fields.reply.structValue.fields.id.stringValue;
             const title = payload.fields.buttons.listValue.values[i].structValue.fields.reply.structValue.fields.title.stringValue;
-            const translatedTitle = await this._translateService.translateResponse([title],languageForSession);
+            let translatedTitle = [title];
+            if (listOfNoTranslateIntents.includes(intent) && customTranslateSetting) {
+                translatedTitle = [title];
+            } else {
+                translatedTitle = await this._translateService.translateResponse([title],languageForSession);
+            }
+
             const tempObject = {
                 "type"  : "reply",
                 "reply" : {
@@ -76,7 +87,12 @@ export class WhatsappPostResponseFunctionalities{
             buttons.push(tempObject);
         }
         const message = this.messageTextAccordingToMessageType(response_format,payload,"interactive-buttons");
-        const translatedText = await this._translateService.translateResponse([message], languageForSession);
+        let translatedText = [message];
+        if (listOfNoTranslateIntents.includes(intent) && customTranslateSetting) {
+            translatedText = [message];
+        } else {
+            translatedText = await this._translateService.translateResponse([message], languageForSession);
+        }
         postDataMeta["interactive"] = {
             "type" : "button",
             "body" : {

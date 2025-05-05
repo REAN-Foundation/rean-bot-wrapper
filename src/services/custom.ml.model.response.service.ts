@@ -1,23 +1,47 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 import needle from "needle";
-import { scoped, Lifecycle } from "tsyringe";
+import { inject, scoped, Lifecycle } from "tsyringe";
 import { getRequestOptions } from "../utils/helper";
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 import { CustomModelResponseFormat } from "./response.format/custom.model.response.format";
 import { DialogflowResponseService } from "./dialogflow.response.service";
 import { Imessage } from "../refactor/interface/message.interface";
+import { EntityManagerProvider } from "./entity.manager.provider.service";
+import { UserInfo } from "../models/user.info.model";
 
 @scoped(Lifecycle.ContainerScoped)
 export class CustomMLModelResponseService{
 
     constructor(private clientEnvironmentProviderService?:ClientEnvironmentProviderService,
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         private dialogflowResponseService?:DialogflowResponseService){}
 
     getCustomModelResponse = async(message: string, platform: string = null, completeMessage:Imessage = null) =>{
         const customModelUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CUSTOM_ML_MODEL_URL");
-        const obj = { "userID": completeMessage.platformId,"user_query": message };
+
+        const UserInfoRepository = (
+            await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)
+        ).getRepository(UserInfo);
         
+        const infoProvided = await UserInfoRepository.findOne({
+            where : {
+                userPlatformID : completeMessage.platformId
+            }
+        });
+
+        if (infoProvided) {
+            if (infoProvided.dataValues.infoProvided) {
+                const userInfo = infoProvided.dataValues.userInfo;
+                const addUserInfo = `User information: ${userInfo} || User Question: `;
+                message = addUserInfo + message;
+            } else {
+                message = "User Question: " + message;
+            }
+        }
+
+        const obj = { "userID": completeMessage.platformId,"user_query": message };
+
         // send authorisation once enabled for the custom model
         // const requestAuthentication = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REQUEST_AUTHENTICATION");
         // options.headers["Authorization"] = `Bearer ${requestAuthentication}`;

@@ -78,7 +78,12 @@ export  class FeedbackService implements feedbackInterface {
                         await this.supportChannel(preferredSupportChannel,responseChatMessage,messageContent,topic,"Negative Feedback");
                     }
                     if (await humanHandoff.checkTime() === "false"){
-                        const reply = "We're genuinely sorry to hear that you weren't satisfied with the assistance provided by our chatbot. Your feedback is invaluable in helping us improve our services. our team of experts will provide you with a satisfactory resolution as quickly as possible.";
+                        let reply = "";
+                        if (clientEnvironmentProviderService.getClientEnvironmentVariable("NEGATIVE_FEEDBACK_MESSAGE")) {
+                            reply = clientEnvironmentProviderService.getClientEnvironmentVariable("NEGATIVE_FEEDBACK_MESSAGE");
+                        } else {
+                            reply = "We're genuinely sorry to hear that you weren't satisfied with the assistance provided by our chatbot. Your feedback is invaluable in helping us improve our services. our team of experts will provide you with a satisfactory resolution as quickly as possible.";
+                        }
                         const data = {
                             "fulfillmentMessages" : [
                                 {

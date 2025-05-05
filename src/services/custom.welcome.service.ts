@@ -1,6 +1,7 @@
 import { inject, Lifecycle, scoped } from "tsyringe";
 import { platformServiceInterface } from "../refactor/interface/platform.interface";
 import { ChatMessage } from '../models/chat.message.model';
+import { UserInfo } from '../models/user.info.model';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { Iresponse } from "../refactor/interface/message.interface";
 import { commonResponseMessageFormat } from "./common.response.format.object";
@@ -19,17 +20,38 @@ export class CustomWelcomeService {
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider){}
 
     async checkSession(userId:any){
-        // eslint-disable-next-line max-len
-        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+        const sessionObj = {
+            sessionFlag : "nosession"
+        };
+        const chatMessageRepository = (
+            await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)
+        ).getRepository(ChatMessage);
         const prevSessions = await chatMessageRepository.findAll({
             where : {
                 userPlatformID : userId,
             }
         });
         if (prevSessions.length > 1){
-            return true;
+            const UserInfoRepository = (
+                await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)
+            ).getRepository(UserInfo);
+            const infoProvided = await UserInfoRepository.findOne({
+                where : {
+                    userPlatformID : userId
+                }
+            });
+            if (infoProvided) {
+                if (infoProvided.dataValues.infoProvided) {
+                    sessionObj.sessionFlag = "info";
+                } else {
+                    sessionObj.sessionFlag = "noinfo";
+                }
+            } else {
+                sessionObj.sessionFlag = "noinfo";
+            }
+            return sessionObj;
         } else {
-            return false;
+            return sessionObj;
         }
     }
 

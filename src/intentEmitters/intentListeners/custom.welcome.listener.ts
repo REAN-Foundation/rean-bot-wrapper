@@ -14,7 +14,7 @@ export const CustomWelcomeIntent = async (intent, eventObj) => {
         const toCheckSession = await WelcomeService.checkSession(payload.userId);
         const imageUrl = await WelcomeService.getImageUrl();
 
-        if (toCheckSession) {
+        if (toCheckSession.sessionFlag === "nosession") {
             response = {
                 "followupEventInput" : {
                     "name"         : "DefaultWelcomeIntent",
@@ -27,7 +27,7 @@ export const CustomWelcomeIntent = async (intent, eventObj) => {
         } else {
             response = {
                 "followupEventInput" : {
-                    "name"         : "customlanguage",
+                    "name"         : "WelcomeMessage",
                     "languageCode" : "en-US"
                 }
             };
