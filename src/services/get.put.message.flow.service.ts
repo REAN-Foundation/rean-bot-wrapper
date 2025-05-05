@@ -247,6 +247,13 @@ export class MessageFlow{
         else if (msg.type === "interactivebuttons") {
             payload = await sendApiButtonService(msg.payload);
         }
+        if (msg.type === "inline_keyboard") {
+            if (msg.provider === "CINCINNATI")
+                payload = await sendTelegramButtonService([ "Option A",msg.payload[0], "Option B",msg.payload[1],"Option C",msg.payload[2],"Option D",msg.payload[3]]);
+            else {
+                payload = await sendTelegramButtonService([ "Yes",msg.payload[0], "No", msg.payload[1]]);
+            }
+        }
         else if (msg.type === "reancareAssessment") {
 
             // make compatible for telegram also.
@@ -264,9 +271,8 @@ export class MessageFlow{
             assessmentSession = assessmentSessionLogs;
             console.log(`assessment record ${JSON.stringify(payload)}`);
         }
-        if (msg.type === "inline_keyboard") {
-            payload = await sendTelegramButtonService([ "Option A",msg.payload[0], "Option B",msg.payload[1],"Option C",msg.payload[2],"Option D",msg.payload[3]]);
-        }
+
+
 
         if (msg.message.ButtonsIds != null) {
             if (channel === "whatsappWati"){
