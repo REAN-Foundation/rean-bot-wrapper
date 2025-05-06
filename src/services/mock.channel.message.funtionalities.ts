@@ -4,7 +4,7 @@ import { getMessageFunctionalities } from "../refactor/interface/message.service
 import { Imessage } from '../refactor/interface/message.interface';
 import { Lifecycle, inject, scoped } from "tsyringe";
 import { EmojiFilter } from './filter.message.for.emoji.service';
-import { Message } from './request.format/whatsapp.message.format';
+import { Message } from './request.format/api.message.format';
 import { MessageFunctionalities } from "./whatsapp.functionalities";
 import { AwsS3manager } from "./aws.file.upload.service";
 
@@ -28,21 +28,23 @@ export class MockCHannelMessageFunctionalities implements getMessageFunctionalit
     }
 
     async voiceMessageFormat(messageObj: Message) {
-        const mediaUrl = messageObj.audio?.link;
+        const voiceUrl = messageObj.getVoiceId().link;
         // const mediaUrl = await this.formatter.GetWhatsappMedia('audio', messageObj.getVoiceId(), '_voice.ogg');
-        const localFilePath = await this.getMediaFromRequest(mediaUrl, 'audio', '_voice.ogg');
-        return await this.formatter.commonVoiceAudioFormat(messageObj, mediaUrl);
+        const voiceFilePath = await this.getMediaFromRequest(voiceUrl, 'audio', '_voice.ogg');
+        return await this.formatter.commonVoiceAudioFormat(messageObj, voiceFilePath);
     }
 
     async audioMessageFormat (messageObj: Message) {
         // eslint-disable-next-line init-declarations
-        let audioFilePath = '';
-        if (messageObj.getChannel() === "whatsappMeta") {
-            const audioUrlsentByMeta = await this.formatter.getMetaMediaUrl(messageObj.getAudioId());
-            audioFilePath = await this.formatter.GetWhatsappMetaMedia('audio', audioUrlsentByMeta, '_voice.ogg');
-        } else {
-            audioFilePath = await this.formatter.GetWhatsappMedia('audio', messageObj.getAudioId(), '_voice.ogg');
-        }
+        // let audioFilePath = '';
+        // if (messageObj.getChannel() === "whatsappMeta") {
+        //     const audioUrlsentByMeta = await this.formatter.getMetaMediaUrl(messageObj.getAudioId());
+        //     audioFilePath = await this.formatter.GetWhatsappMetaMedia('audio', audioUrlsentByMeta, '_voice.ogg');
+        // } else {
+        //     audioFilePath = await this.formatter.GetWhatsappMedia('audio', messageObj.getAudioId(), '_voice.ogg');
+        // }
+        const audioUrl = messageObj.getAudioId().link;
+        const audioFilePath = this.getMediaFromRequest(audioUrl, 'audio', '_voice.ogg');
         return await this.formatter.commonVoiceAudioFormat(messageObj, audioFilePath);
     }
 
@@ -110,7 +112,7 @@ export class MockCHannelMessageFunctionalities implements getMessageFunctionalit
     }
 
     async imageMessageFormat(messageObj: Message) {
-        const imageUrl = messageObj.image?.link;
+        const imageUrl = messageObj.getImageId().link;
         //let imageFilePath = '';
         // if (messageObj.getChannel() === 'whatsapp'){
         //     imageFilePath = await this.formatter.GetWhatsappMedia('photo', messageObj.getImageId(), '.jpg');
