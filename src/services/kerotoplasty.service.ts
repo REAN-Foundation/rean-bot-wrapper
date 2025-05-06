@@ -180,7 +180,13 @@ export class kerotoplastyService {
         const personContactList = await contactList.findOne({ where: { mobileNumber: userId } });
         const taskId = personContactList.dataValues.cmrCaseTaskID;
         const EMRNumber  = personContactList.dataValues.ehrSystemCode;
-        const user_details = await this.getEMRDetails(EMRNumber,eventObj);
+        let user_details = null;
+        if (EMRNumber) {
+            user_details = await this.getEMRDetails(EMRNumber,eventObj);
+        } 
+        else {
+            user_details = `Name : ${personContactList.username}\n Mobile Number : ${personContactList.mobileNumber}`
+        }
         const ClickupListID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_CASE_LIST_ID");
         if (taskId){
             await this.clickUpTask.updateTask(taskId,null,user_details,EMRNumber, "Appointment");
