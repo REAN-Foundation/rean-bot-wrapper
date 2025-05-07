@@ -11,7 +11,7 @@ export class Contacts implements IApiRequestContactsEntities{
     }
 
     getPlatformId() {
-        const platformId:string = this.list.contacts[0].id;
+        const platformId:string = this.list.id;
         return platformId;
     }
 

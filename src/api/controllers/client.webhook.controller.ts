@@ -182,7 +182,7 @@ export class ClientWebhookController {
             else {
                 const consentRequirement =  clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_ACTIVATION");
                 console.log("Consent feature is ", consentRequirement);
-                const validChannels = ["REAN_SUPPORT", "slack", "SNEHA_SUPPORT", "mockChannel"];
+                const validChannels = ["REAN_SUPPORT", "slack", "SNEHA_SUPPORT", "api"];
                 if (!validChannels.includes(req.params.channel)) {
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
                 }

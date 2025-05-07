@@ -1,4 +1,4 @@
-import { Contacts } from "./whatsapp.contact.format";
+import { Contacts } from "./api.contact.format";
 import { Message } from "./api.message.format";
 
 export class ApiRequest {

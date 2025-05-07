@@ -8,7 +8,7 @@ import { platformServiceInterface } from '../refactor/interface/platform.interfa
 import { MessageFlow } from './get.put.message.flow.service';
 import { MockCHannelMessageFunctionalities } from './mock.channel.message.funtionalities';
 import { ChatMessage } from '../models/chat.message.model';
-import { WhatsappMessageToDialogflow } from './whatsapp.messagetodialogflow';
+import { ApiMessageToDialogflow } from './api.messagetodialogflow';
 import request from 'request';
 import { EntityManagerProvider } from './entity.manager.provider.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
@@ -23,7 +23,7 @@ export class MockMessageService implements platformServiceInterface {
     constructor(@inject(delay(() => MessageFlow)) public messageFlow,
         @inject( AwsS3manager ) private awsS3manager?: AwsS3manager,
         @inject(MockCHannelMessageFunctionalities) private messageFunctionalitiesmockchannel?: MockCHannelMessageFunctionalities,
-        @inject(WhatsappMessageToDialogflow) public whatsappMessageToDialogflow?: WhatsappMessageToDialogflow,
+        @inject(ApiMessageToDialogflow) public apiMessageToDialogflow?: ApiMessageToDialogflow,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
@@ -33,7 +33,7 @@ export class MockMessageService implements platformServiceInterface {
 
     async handleMessage(requestBody: any, channel: string) {
         this.req = requestBody;
-        const generatorMockMessage = this.whatsappMessageToDialogflow.messageToDialogflow(requestBody);
+        const generatorMockMessage = this.apiMessageToDialogflow.messageToDialogflow(requestBody);
         let done = false;
         const mockMessages = [];
         let mockMessagetoDialogflow: Imessage;
