@@ -229,12 +229,13 @@ export class ServeAssessmentService {
                     const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
 
                     // const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
-                    const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/follow-up/assessment/reply/${phoneNumber}/date/${todayDate}`;
+                    const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/assessment-response`;
                     const res = await needle("put",
                         getUrl,
                         {
                             assessment_id   : assessmentSession.assesmentId,
                             patient_user_id : questionData.PatientUserId,
+                            phone_number    : phoneNumber,
                             chosen_option   : {
                                 sequence : userAnswer,
                                 text     : userResponse

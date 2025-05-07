@@ -26,28 +26,36 @@ export class AppointmentUserReplyService {
             const phoneNumber = Helper.formatPhoneForDocProcessor(personPhoneNumber);
             const previousMessageContextID = eventObj.body.originalDetectIntentRequest.payload.contextId;
             const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
-            let todayDate = new Date().toISOString()
-                .split('T')[0];
-            todayDate = Helper.removeLeadingZerosFromDay(todayDate);
+
+            // let todayDate = new Date().toISOString()
+            //     .split('T')[0];
+            // todayDate = Helper.removeLeadingZerosFromDay(todayDate);
             const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-            const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
-            const respnse =  await needle("get", getUrl);
-            if (respnse.body.message){
-                msg = "Sorry to inform you the appointment passed.";
-            } else {
-                const userReply = intentName === "Reminder_Reply_Yes" ? "Yes" : "No";
-                const res = await needle("put",
-                    getUrl,
-                    { WhatsApp_message_id: previousMessageContextID, Patient_replied: userReply },
-                    { headers : {
-                        'Content-Type' : 'application/json',
-                        Accept         : 'application/json',
-                    },
-                    },
-                );
-                console.log(`Object in reply service ${JSON.stringify(res.body,null, 4)}`);
-                msg = intentName === "Reminder_Reply_Yes" ? "Thank you for the confirmation." : "Thank you for your feedback.";
-            }
+
+            // const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
+            // const respnse =  await needle("get", getUrl);
+
+            // if (respnse.body.message){
+            //     msg = "Sorry to inform you the appointment passed.";
+            // } else {
+            const userReply = intentName === "Reminder_Reply_Yes" ? "Yes" : "No";
+            const updateUserReplyUrl = `${docProcessBaseURL}appointment-schedules/${client}/reminder-response`;
+            const res = await needle("put",
+                updateUserReplyUrl,
+                {
+                    phone_number       : phoneNumber,
+                    channel_message_id : previousMessageContextID,
+                    replied_status     : userReply },
+                { headers : {
+                    'Content-Type' : 'application/json',
+                    Accept         : 'application/json',
+                },
+                },
+            );
+            console.log(`Object in reply service ${JSON.stringify(res.body,null, 4)}`);
+            msg = intentName === "Reminder_Reply_Yes" ? "Thank you for the confirmation." : "Thank you for your feedback.";
+
+            // }
             return { fulfillmentMessages: [{ text: { text: [msg] } }]  };
         } catch (error) {
             Logger.instance()
