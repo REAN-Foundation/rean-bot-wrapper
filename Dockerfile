@@ -1,4 +1,4 @@
-FROM node:19.1-alpine3.15 AS builder
+FROM node:18.20.8-alpine3.21 AS builder
 RUN apk add bash
 RUN apk add --no-cache \
         python3 \
@@ -15,12 +15,12 @@ WORKDIR /app
 
 COPY package*.json /app/
 RUN npm install -g typescript
-RUN npm install --no-package-lock 
+RUN npm install --no-package-lock
 RUN npm run build
 
 # RUN npm run build
 
-FROM node:19.1-alpine3.15
+FROM node:18.20.8-alpine3.21
 RUN apk add bash
 RUN apk add --no-cache \
         python3 \
