@@ -18,6 +18,7 @@ export class PlatformWebhookRoutes{
         const router = express.Router();
         router.post(`/:client/:channel/:unique_token/send`, this._clientWebhookController.sendMessage);
         router.post(`/:client/:channel/:unique_token/receive`, this._clientWebhookController.receiveMessage);
+        router.post(`/:client/:channel/receive`, this._clientWebhookController.receiveMessage);
         router.get(`/:client/:channel/:unique_token/webhook`, this._clientWebhookController.authenticateMetaWhatsappWebhook);
         router.post(`/:client/:channel/:unique_token/webhook`, this._clientWebhookController.receiveMessageMetaWhatsapp);
         router.post(`/:client/:form_name/kobotoolbox/abcd/getData`, this._kobotoolboxController.kobotoolbox );

@@ -7,6 +7,10 @@ import { EmojiFilter } from './filter.message.for.emoji.service';
 import { Message } from './request.format/api.message.format';
 import { MessageFunctionalities } from "./whatsapp.functionalities";
 import { AwsS3manager } from "./aws.file.upload.service";
+import * as fs from "fs";
+import needle from "needle";
+import path from "path";
+
 
 
 @scoped(Lifecycle.ContainerScoped)
@@ -140,10 +144,6 @@ export class MockCHannelMessageFunctionalities implements getMessageFunctionalit
     }
 
     async getMediaFromRequest(mediaUrl: string, type: string, extension: string): Promise<string> {
-        const needle = require('needle');
-        const fs = require('fs');
-        const path = require('path');
-    
         const dir = path.join(__dirname, type);
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, { recursive: true });
