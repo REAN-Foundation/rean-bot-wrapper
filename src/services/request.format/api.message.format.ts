@@ -38,7 +38,7 @@ export class Message implements IApiRequestMessageEntities {
     }
 
     getUserId() {
-        const userId: string = this.list.from;
+        const userId: string = this.list.contacts[0].id;
         return userId;
     }
 
@@ -99,7 +99,7 @@ export class Message implements IApiRequestMessageEntities {
     }
 
     getChannel() {
-        return this.list.channel;
+        return "api";
     }
 
     setChannel(channel) {

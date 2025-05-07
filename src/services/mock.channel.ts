@@ -47,7 +47,7 @@ export class MockMessageService implements platformServiceInterface {
         }
         for (mockMessagetoDialogflow of mockMessages){
             if (mockMessagetoDialogflow) {
-                mockMessagetoDialogflow.platform = 'MockChannel';
+                //mockMessagetoDialogflow.platform = 'MockChannel';
                 const response = await this.messageFlow.checkTheFlowRouter(mockMessagetoDialogflow, channel, this);
                 return response;
             }

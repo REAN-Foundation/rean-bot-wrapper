@@ -191,7 +191,7 @@ export class ClientWebhookController {
                     console.log("Processing the consent message for telegram");
                     await this.handleConsentMessage(req, res,req.body,"inline_keyboard",req.params.channel,firstTimeUser );
                 }
-                else if (req.params.channel === "mockChannel"){
+                else if (req.params.channel === "api"){
                     const response = await this._platformMessageService.handleMessage(req.body, req.params.channel);
                     return res.status(200).send(response);
                 }
