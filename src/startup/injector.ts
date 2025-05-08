@@ -44,9 +44,9 @@ export class Injector {
         container.register('SNEHA_SUPPORT.authenticator', SnehaAuthenticator);
         container.register('slack.authenticator', SlackAuthenticator);
         container.register('whatsappMeta.authenticator', WhatsappMetaAuthenticator);
-        container.register('mockChannel', MockMessageService);
+        container.register('api', MockMessageService);
         container.register('clickup.authenticator', ClickUpAuthenticator);
-        container.register('mockChannel.authenticator', MockChannelAuthenticator);
+        container.register('api.authenticator', MockChannelAuthenticator);
         container.register('whatsappWati.authenticator', WatiWhatsappAuthenticator);
 
     }
