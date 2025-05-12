@@ -27,7 +27,8 @@ export class ChatBotController {
 
     private _platformMessageService :  platformServiceInterface ;
 
-    constructor(@inject(delay(() => WhatsappMetaMessageService)) public whatsappNewMessageService?: WhatsappMetaMessageService,
+    constructor(@inject(delay(() => WhatsappMetaMessageService)) 
+        public whatsappNewMessageService?: WhatsappMetaMessageService,
         @inject(ClientEnvironmentProviderService) private environmentProviderService?: ClientEnvironmentProviderService,
         @inject(EntityManagerProvider) private _entityProvider?: EntityManagerProvider,
        @inject(TelegramMessageService) private telegramMessageService?:TelegramMessageService,
@@ -169,7 +170,24 @@ export class ChatBotController {
 
             let payload = {};
 
-            if (event.UserMessage.MessageType === "Text") {
+            if (event?.UserMessage?.Payload?.MessageTemplateId?.startsWith("The emergency incident code is") && event.UserMessage.MessageType === "Text" && event.UserMessage.MessageChannel === 'WhatsApp') {
+                {
+                    response_format.message_type = 'template';
+                    console.log("An emergency incident message");
+                  
+                    payload["templateName"] = "incident_code";
+                    payload["languageForSession"] = "en";
+                    payload["variables"] = [
+                        {
+                            type : "text",
+                            text : event.UserMessage.TextMessage
+                        },
+                    ];
+                                               
+                }
+            }
+
+            else  if (event.UserMessage.MessageType === "Text") {
                 response_format.messageText = event.UserMessage.TextMessage;
                 response_format.message_type = "text";
             }
