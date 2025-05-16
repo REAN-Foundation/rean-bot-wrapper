@@ -88,4 +88,9 @@ export class UserInfoService {
             console.log('Error while updating user info: ', error);
         }
     }
+
+    async getMessageText() {
+        const message = this.clientEnvironmentProviderService.getClientEnvironmentVariable("USER_INFO_THANK_YOU_MESSAGE");
+        return message;
+    }
 }

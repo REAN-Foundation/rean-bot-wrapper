@@ -8,21 +8,27 @@ export const UserInfoListener = async (intent, eventObj) => {
 
         const userInfoService = eventObj.container.resolve(UserInfoService);
 
-        let response = null;
         const payload = eventObj.body.originalDetectIntentRequest.payload;
         const parameters = eventObj.body.queryResult.parameters;
 
         await userInfoService.updateUserInfo(payload.userId, parameters);
 
         console.log('DB Updated successfully for user info');
+        const messageText = await userInfoService.getMessageText();
+        const message_from_nlp = `Thank You ${parameters.Name}. ${messageText}`;
 
-        response = {
-            "followupEventInput" : {
-                "name"         : "ThankYouWelcomeMessage",
-                "languageCode" : "en-US"
-            }
+        const data = {
+            "fulfillmentMessages" : [
+                {
+                    "text" : {
+                        "text" : [
+                            message_from_nlp
+                        ]
+                    }
+                }
+            ]
         };
-        return response;
+        return data;
 
     } catch (error) {
         Logger.instance()
