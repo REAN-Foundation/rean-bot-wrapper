@@ -37,6 +37,9 @@ export class WatiMessageFunctionalities implements getMessageFunctionalities {
         if (emojiFilteredMessage === "NegativeFeedback"){
             messageToDialogflow.intent = "NegativeFeedback";
         }
+        else if (emojiFilteredMessage === "PositiveFeedback"){
+            messageToDialogflow.intent = "PositiveFeedback";
+        }
         return messageToDialogflow;
     }
 
@@ -75,6 +78,9 @@ export class WatiMessageFunctionalities implements getMessageFunctionalities {
         messageToDialogflow.messageBody = text;
         if (emojiFilteredMessage === "NegativeFeedback"){
             messageToDialogflow.intent = "NegativeFeedback";
+        }
+        else if (emojiFilteredMessage === "PositiveFeedback"){
+            messageToDialogflow.intent = "PositiveFeedback";
         }
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const url = require('url');
