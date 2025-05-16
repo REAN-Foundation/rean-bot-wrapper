@@ -36,6 +36,7 @@ export  class FeedbackService implements feedbackInterface {
                 const messageContent = eventObj.body.originalDetectIntentRequest.payload.completeMessage.messageBody;
                 const payload = eventObj.body.originalDetectIntentRequest.payload;
                 const userId = payload.userId;
+                const username = payload.userName;
                 const client_name = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
                 const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(ChatMessage);
                 let responseChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: userId } });
@@ -68,14 +69,15 @@ export  class FeedbackService implements feedbackInterface {
                 }
                 else {
                     // eslint-disable-next-line init-declarations
+                    const description = `**User Details**\n\n- **User Platform ID**: ${userId}\n- **Username**: ${username}`;
                     const preferredSupportChannel = clientEnvironmentProviderService.getClientEnvironmentVariable("SUPPORT_CHANNEL");
                     if (payload.contextId){
                         responseChatMessage = await chatMessageRepository.findAll({ where: { responseMessageID: payload.contextId } });
-                        await this.supportChannel(preferredSupportChannel,responseChatMessage,messageContent,null,"Negative Feedback");
+                        await this.supportChannel(preferredSupportChannel,responseChatMessage,messageContent,null,"Negative Feedback",description);
                     }
                     else {
                         const topic = responseChatMessage[responseChatMessage.length - 2].messageContent;
-                        await this.supportChannel(preferredSupportChannel,responseChatMessage,messageContent,topic,"Negative Feedback");
+                        await this.supportChannel(preferredSupportChannel,responseChatMessage,messageContent,topic,"Negative Feedback",description);
                     }
                     if (await humanHandoff.checkTime() === "false"){
                         let reply = "";
@@ -146,11 +148,24 @@ export  class FeedbackService implements feedbackInterface {
             try {
                 const payload = eventObj.body.originalDetectIntentRequest.payload;
                 const userId = payload.userId;
+                const username = payload.userName;
                 const clientEnvironmentProviderService = eventObj.container.resolve(ClientEnvironmentProviderService);
+                const messageContent = eventObj.body.originalDetectIntentRequest.payload.completeMessage.messageBody;
                 const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(ChatMessage);
                 const listOfUserRequestdata = await chatMessageRepository.findAll({ where: { userPlatformID: userId } });
                 await chatMessageRepository.update({ feedbackType: "Positive Feedback" },{ where: { id: listOfUserRequestdata[listOfUserRequestdata.length - 1].id } });
                 const reply = "We are glad that you like it. Thank you for your valuable feedback";
+                let responseChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: userId } });
+                const preferredSupportChannel = clientEnvironmentProviderService.getClientEnvironmentVariable("SUPPORT_CHANNEL");
+                const description = `**User Details**\n\n- **User Platform ID**: ${userId}\n- **Username**: ${username}`;
+                if (payload.contextId){
+                    responseChatMessage = await chatMessageRepository.findAll({ where: { responseMessageID: payload.contextId } });
+                    await this.supportChannel(preferredSupportChannel,responseChatMessage,messageContent,null,"Positive Feedback",description);
+                }
+                else {
+                    const topic = responseChatMessage[responseChatMessage.length - 2].messageContent;
+                    await this.supportChannel(preferredSupportChannel,responseChatMessage,messageContent,topic,"Positive Feedback",description);
+                }
                 const data = {
                     "fulfillmentMessages" : [
                         {
@@ -172,12 +187,12 @@ export  class FeedbackService implements feedbackInterface {
 
     }
 
-    supportChannel = async(preferredSupportChannel, responseChatMessage, messageContent, topic = null,tag = null) => {
+    supportChannel = async(preferredSupportChannel, responseChatMessage, messageContent, topic = null,tag = null,description= null) => {
         if (preferredSupportChannel === "ClickUp"){
             const listID = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_ISSUES_LIST_ID");
             const chatMessageRepository = await (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
 
-            const clickUpResponseTaskID:any = await this.clickuptask.createTask(responseChatMessage,topic,null,null, listID,tag);
+            const clickUpResponseTaskID:any = await this.clickuptask.createTask(responseChatMessage,topic,description,null, listID,tag);
             console.log(`new ticket has been created with task id ${clickUpResponseTaskID}`);
             if (responseChatMessage[responseChatMessage.length - 1]){
                 const userPlatformId = responseChatMessage[responseChatMessage.length - 1].dataValues.id;

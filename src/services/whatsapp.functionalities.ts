@@ -30,6 +30,9 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         if (emojiFilteredMessage === "NegativeFeedback"){
             messagetoDialogflow.intent = "NegativeFeedback";
         }
+        else if (emojiFilteredMessage === "PositiveFeedback") {
+            messagetoDialogflow.intent = "PositiveFeedback";
+        }
         return messagetoDialogflow;
     }
 
@@ -39,6 +42,9 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         const emojiFilteredMessage = await this.emojiFilter.checkForEmoji(reaction.emoji);
         if (emojiFilteredMessage === "NegativeFeedback"){
             messagetoDialogflow.intent = "NegativeFeedback";
+        }
+        else if (emojiFilteredMessage === "PositiveFeedback") {
+            messagetoDialogflow.intent = "PositiveFeedback";
         }
         messagetoDialogflow.messageBody = reaction.emoji;
         messagetoDialogflow.type = 'reaction';
