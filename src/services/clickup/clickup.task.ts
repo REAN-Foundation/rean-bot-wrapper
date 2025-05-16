@@ -55,9 +55,22 @@ export class ClickUpTask{
             "links_to"             : null,
             "markdown_description" : description
         };
+        // if (description === null) {
+
+        //     obj["markdown_description"] = `User details not found`;
+        // }
         if (description === null) {
-            obj["markdown_description"] = `User details not found`;
+            if (responseChatMessage?.length >= 1) {
+                const lastMessage = responseChatMessage[responseChatMessage.length - 1].dataValues;
+                const userPlatformID = lastMessage.userPlatformID || "Not Available";
+                const username = lastMessage.name || "Not Available";
+
+                obj["markdown_description"] = `**User Details**\n\n- **User Platform ID**: ${userPlatformID}\n- **Username**: ${username}`;
+            } else {
+                obj["markdown_description"] = `**User Details Not Found**`;
+            }
         }
+
         const response = await needle("post", createTaskUrl, obj, options);
         const taskID = response.body.id;
         console.log(`task has been created with ${taskID}`);
