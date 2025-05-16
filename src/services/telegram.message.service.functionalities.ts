@@ -32,6 +32,9 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         if (emojiFilteredMessage === "NegativeFeedback"){
             messageToDialogflow.intent = "NegativeFeedback";
         }
+        else if (emojiFilteredMessage === "PositiveFeedback"){
+            messageToDialogflow.intent = "PositiveFeedback";
+        }
         return messageToDialogflow;
     }
 
@@ -42,6 +45,9 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         messageToDialogflow.intent = messageObj.getInLineKeyBoardReplyButton().id;
         if (emojiFilteredMessage === "NegativeFeedback"){
             messageToDialogflow.intent = "NegativeFeedback";
+        }
+        else if (emojiFilteredMessage === "PositiveFeedback"){
+            messageToDialogflow.intent = "PositiveFeedback";
         }
         return messageToDialogflow;
     }

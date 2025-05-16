@@ -56,6 +56,7 @@ export class ClickUpTask{
             "markdown_description" : description
         };
         if (description === null) {
+
             obj["markdown_description"] = `User details not found`;
         }
         const response = await needle("post", createTaskUrl, obj, options);
