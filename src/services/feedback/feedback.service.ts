@@ -154,7 +154,13 @@ export  class FeedbackService implements feedbackInterface {
                 const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(ChatMessage);
                 const listOfUserRequestdata = await chatMessageRepository.findAll({ where: { userPlatformID: userId } });
                 await chatMessageRepository.update({ feedbackType: "Positive Feedback" },{ where: { id: listOfUserRequestdata[listOfUserRequestdata.length - 1].id } });
-                const reply = "We are glad that you like it. Thank you for your valuable feedback";
+                const replyToSend = this.clientEnvironmentProviderService.getClientEnvironmentVariable("POSITIVE_FEEDBACK_MESSAGE");
+                let reply;
+                if (replyToSend) {
+                    reply = replyToSend;
+                } else {
+                    reply = "We are glad that you like it. Thank you for your valuable feedback";
+                }
                 let responseChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: userId } });
                 const preferredSupportChannel = clientEnvironmentProviderService.getClientEnvironmentVariable("SUPPORT_CHANNEL");
                 const description = `**User Details**\n\n- **User Platform ID**: ${userId}\n- **Username**: ${username}`;
