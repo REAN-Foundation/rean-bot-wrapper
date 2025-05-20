@@ -19,50 +19,61 @@ export class ClickUpTask{
 
     // eslint-disable-next-line max-len
     async createTask(responseChatMessage = null, postTopic:string = null, description:string = null, priority = null, ClickupListID = null,tag = ''){
-        let listID = null;
-        if (ClickupListID){
-            listID = ClickupListID;
-        }
-        else {
-            listID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_LIST_ID");
-        }
-        const createTaskUrl = `https://api.clickup.com/api/v2/list/${listID}/task`;
-        const options = getRequestOptions();
-        const CLICKUP_AUTHENTICATION = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
-        options.headers["Authorization"] =  CLICKUP_AUTHENTICATION;
-        options.headers["Content-Type"] = `application/json`;
-        let topic:any = null;
-        if (postTopic){
-            topic = postTopic;
-            
-        }
-        else if (responseChatMessage.length >= 1 ){
-            topic = responseChatMessage[responseChatMessage.length - 1].dataValues.messageContent;
-        }
-        else {
-            topic = "New User";
-        }
-        const obj = {
-            "name"                 : topic,
-            "status"               : "TO DO",
-            "priority"             : priority,
-            "due_date"             : null,
-            "due_date_time"        : false,
-            "start_date_time"      : false,
-            "notify_all"           : true,
-            "parent"               : null,
-            "tags"                 : [tag],
-            "links_to"             : null,
-            "markdown_description" : description
-        };
-        if (description === null) {
+        try {
+            let listID = null;
+            if (ClickupListID){
+                listID = ClickupListID;
+            }
+            else {
+                listID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_LIST_ID");
+            }
+            const createTaskUrl = `https://api.clickup.com/api/v2/list/${listID}/task`;
+            const options = getRequestOptions();
+            const CLICKUP_AUTHENTICATION = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
+            options.headers["Authorization"] =  CLICKUP_AUTHENTICATION;
+            options.headers["Content-Type"] = `application/json`;
+            let topic:any = null;
+            if (postTopic){
+                topic = postTopic;
+                
+            }
+            else if (responseChatMessage.length >= 1 ){
+                topic = responseChatMessage[responseChatMessage.length - 1].dataValues.messageContent;
+            }
+            else {
+                topic = "New User";
+            }
+            const obj = {
+                "name"                 : topic,
+                "status"               : "TO DO",
+                "priority"             : priority,
+                "due_date"             : null,
+                "due_date_time"        : false,
+                "start_date_time"      : false,
+                "notify_all"           : true,
+                "parent"               : null,
+                "tags"                 : [tag],
+                "links_to"             : null,
+                "markdown_description" : description
+            };
+            if (description === null) {
 
-            obj["markdown_description"] = `User details not found`;
+                obj["markdown_description"] = `User details not found`;
+            }
+            if (tag === '') {
+                obj["tags"] = [];
+            }
+            const response = await needle("post", createTaskUrl, obj, options);
+            if (response.statusCode !== 200) {
+                console.log("Error in creating the ClickUp Task");
+                console.log(response);
+            }
+            const taskID = response.body.id;
+            console.log(`task has been created with ${taskID}`);
+            return taskID;
+        } catch (error) {
+            console.log("Error while creating the task on ClickUp", error);
         }
-        const response = await needle("post", createTaskUrl, obj, options);
-        const taskID = response.body.id;
-        console.log(`task has been created with ${taskID}`);
-        return taskID;
     }
 
     async taskAttachment(taskID, imageLink){
