@@ -173,7 +173,10 @@ export class kerotoplastyService {
 
     async UpdatingAppointmentOnClickup(intent,eventObj){
         const parameters = eventObj.body.queryResult.parameters;
-        const symptomComment = await this.appoinmentDetailsByUser(parameters);
+        let symptomComment = null;
+        if(Object.keys(parameters).length > 0) {
+            symptomComment = await this.appoinmentDetailsByUser(parameters);
+        }
         const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
         const contactList =
         (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);

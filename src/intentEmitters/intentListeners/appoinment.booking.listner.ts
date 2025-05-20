@@ -15,9 +15,10 @@ export const AppointmentBookingListner= async ( intent, eventObj ) => {
         
         console.log("Appointment booking listener is here");
         const customAppointmentSetting: boolean = clientEnvironmentProviderServiceObj.getClientEnvironmentVariable("CLK_FLAG") === "true";
+        const parameters = eventObj.body.queryResult.parameters;
         let response = null;
         let message = "Thank you for your response. Someone from our side will contact you soon.";
-        if (eventObj.body.queryResult.parameters.Date.date_time){
+        if (Object.keys(parameters).length > 0){
             const date_time = eventObj.body.queryResult.parameters.Date.date_time;
             const date = new Date(date_time).toDateString();
             const time = (new Date(date_time).toTimeString()).split('G')[0];
@@ -25,20 +26,16 @@ export const AppointmentBookingListner= async ( intent, eventObj ) => {
             const doctor = eventObj.body.queryResult.parameters.Doctor.name;
             message = `Your request to schedule an appointment with *${doctor}* at *${location}* on *${date}* at  ${time}, has been sent.\n We will get back to you with a confirmation. *You can call at 080-66202020 for more information*\n \n *Disclaimer :* Please note, we may not be able to accommodate your requested time.`;
         }
+        response = await dialoflowMessageFormattingObj.making_response(message);
+        kerotoplastyServiceObj.UpdatingAppointmentOnClickup(intent, eventObj);
         if (!customAppointmentSetting){
-            response = await dialoflowMessageFormattingObj.making_response(message);
-            kerotoplastyServiceObj.UpdatingAppointmentOnClickup(intent, eventObj);
             const repetitionFlag  = await kerotoplastyServiceObj.CheckRepetitionFlag(eventObj);
             if (repetitionFlag !== "False"){
                 keratoplastyNextSteps(intent,eventObj);
             }
-            return response;
         }
-        else {
-            response = await dialoflowMessageFormattingObj.making_response(message);
-            kerotoplastyServiceObj.UpdatingAppointmentOnClickup(intent, eventObj);
-            return response;
-        }
+        return response;
+
     } catch (error) {
         Logger.instance()
             .log_error(error.message,500,'Food info listener error');
