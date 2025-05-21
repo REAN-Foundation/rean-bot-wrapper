@@ -10,6 +10,10 @@ export const UserInfoListener = async (intent, eventObj) => {
 
         const payload = eventObj.body.originalDetectIntentRequest.payload;
         const parameters = eventObj.body.queryResult.parameters;
+        
+        if (parameters.Name?.name) {
+            parameters.Name = parameters.Name.name;
+        }
 
         await userInfoService.updateUserInfo(payload.userId, parameters);
 
