@@ -3,6 +3,7 @@ import { Logger } from "../../common/logger";
 import { ChatBotRoutes } from './chat.bot.routes';
 import { autoInjectable } from 'tsyringe';
 import { PlatformWebhookRoutes } from './platform.webhook.routes';
+import { SystemGeneratedMessagesRoutes } from "./system.generated.messages.routes";
 import { FrontendRoutes } from "./Frontend.routes";
 import { ConsentRoutes } from "./consent.routes";
 import { UserRegistrationRoutes} from "./user.registration.routes";
@@ -18,7 +19,9 @@ export class Router {
                 private whatsappWebhookRoutes?: PlatformWebhookRoutes,
                 private frontendRoutes?: FrontendRoutes,
                 private consentRoutes?: ConsentRoutes,
-                private  userRegistrationRoutes?: UserRegistrationRoutes){
+                private  userRegistrationRoutes?: UserRegistrationRoutes,
+                private systemGeneratedMessagesRoutes?: SystemGeneratedMessagesRoutes
+    ){
         this._app = app;
     }
 
@@ -37,6 +40,7 @@ export class Router {
                 this.frontendRoutes.register(this._app);
                 this.consentRoutes.register(this._app);
                 this.userRegistrationRoutes.register(this._app);
+                this.systemGeneratedMessagesRoutes.register(this._app);
                 resolve(true);
 
             } catch (error) {
