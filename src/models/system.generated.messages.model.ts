@@ -1,8 +1,7 @@
 /* eslint-disable indent */
-import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, AllowNull, IsUUID } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, PrimaryKey, IsUUID } from 'sequelize-typescript';
 import { ISystemGeneratedMessages } from '../refactor/interface/system.generated.messages';
 import { v4 } from 'uuid';
-
 
 @Table(
     {

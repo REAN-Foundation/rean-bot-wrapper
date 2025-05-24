@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { inject, scoped, Lifecycle } from "tsyringe";
 import { EntityManagerProvider } from "../../services/entity.manager.provider.service";
 import { SystemGeneratedMessages } from "../../models/system.generated.messages.model";
@@ -34,7 +35,7 @@ export class SystemGeneratedMessagesController {
         } catch (error) {
             this.errorHandler.handleControllerError(error, response, request);
         }
-    }
+    };
 
     getAll = async (request, response) => {
         try {
@@ -44,12 +45,12 @@ export class SystemGeneratedMessagesController {
         } catch (error) {
             this.errorHandler.handleControllerError(error, response, request);
         }
-    }
+    };
 
     getById = async (request, response) => {
         try {
             const { repository, clientName } = await this.getContextualServices(request);
-            const data = await repository.findOne({where: {id : request.params.id}});
+            const data = await repository.findOne({ where: { id: request.params.id } });
             if (data) {
                 this.responseHandler.sendSuccessResponse(response, 200, 'Message retrieved', data);
             } else {
@@ -58,12 +59,12 @@ export class SystemGeneratedMessagesController {
         } catch (error) {
             this.errorHandler.handleControllerError(error, response, request);
         }
-    }
+    };
 
     update = async (request, response) => {
         try {
             const id = request.params.id;
-            const {name, content, languageCode } = request.body;
+            const { name, content, languageCode } = request.body;
 
             const { repository, clientName } = await this.getContextualServices(request);
 
@@ -82,7 +83,7 @@ export class SystemGeneratedMessagesController {
         } catch (error) {
             this.errorHandler.handleControllerError(error, response, request);
         }
-    }
+    };
 
     delete = async (request, response) => {
         try {
@@ -102,7 +103,7 @@ export class SystemGeneratedMessagesController {
         } catch (error) {
             this.errorHandler.handleControllerError(error, response, request);
         }
-    }
+    };
 
     private async getContextualServices(request) {
         const clientEnvironmentProvider = request.container.resolve(ClientEnvironmentProviderService);
