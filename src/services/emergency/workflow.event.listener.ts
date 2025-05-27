@@ -23,13 +23,13 @@ import { sendTelegramButtonService } from "../telegram.button.service";
 @scoped(Lifecycle.ContainerScoped)
 export class WorkflowEventListener {
 
-              private _platformMessageService :  platformServiceInterface = null;
+    private _platformMessageService :  platformServiceInterface = null;
 
-              constructor (
+    constructor (
         @inject(EntityManagerProvider) private _entityProvider?: EntityManagerProvider,
         @inject(NeedleService) private needleService?: NeedleService,
         @inject(ClientEnvironmentProviderService) private environmentProviderService?: ClientEnvironmentProviderService,
-              ){}
+    ){}
 
     public getPreviousMessageFromWorkflow = async (platformUserId: string): Promise<WorkflowUserData> => {
         const entManager = await this._entityProvider.getEntityManager(this.environmentProviderService);
