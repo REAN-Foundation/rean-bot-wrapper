@@ -59,6 +59,9 @@ export class MockCHannelMessageFunctionalities implements getMessageFunctionalit
         if (emojiFilteredMessage === "NegativeFeedback"){
             messagetoDialogflow.intent = "NegativeFeedback";
         }
+        else if (emojiFilteredMessage === "PositiveFeedback") {
+            messagetoDialogflow.intent = "PositiveFeedback";
+        }
         messagetoDialogflow.messageBody = reaction.emoji;
         messagetoDialogflow.type = 'reaction';
         messagetoDialogflow.contextId = reaction.messageId;
@@ -72,6 +75,9 @@ export class MockCHannelMessageFunctionalities implements getMessageFunctionalit
         messagetoDialogflow.messageBody = text;
         if (emojiFilteredMessage === "NegativeFeedback"){
             messagetoDialogflow.intent = "NegativeFeedback";
+        }
+        else if (emojiFilteredMessage === "PositiveFeedback"){
+            messagetoDialogflow.intent = "PositiveFeedback";
         }
         messagetoDialogflow.contextId = messageObj.getContextId();
         return messagetoDialogflow;

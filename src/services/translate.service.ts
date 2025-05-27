@@ -143,24 +143,30 @@ export class translateService{
         const defultLanguage = await this.getDialogflowLanguage();
         const translate = new v2.Translate(this.obj);
         this.translateGlossaryId = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TRANSLATE_GLOSSARY");
+        const customTranslateSetting: boolean = this.clientEnvironmentProviderService.getClientEnvironmentVariable("FIX_LANGUAGE") === "true";
         try {
-            if (detected_language !== defultLanguage) {
-                if (this.translateGlossaryId) {
-                    this.translated_message = await this.translateTextWithGlossary(responseMessage[0], detected_language, translate); 
-                } else {
-                    this.translated_message = await translate.translate(responseMessage[0], { to: detected_language, format: "text" });
-                }
-                const [translation] = this.translated_message;
-                responseMessage = [translation];
-            }
-            else if (responseLanguage !== detected_language) {
-                this.translated_message = await translate.translate(responseMessage[0], { to: detected_language, format: "text" });
-                const [translation] = this.translated_message;
-                responseMessage = [translation];
-            }
-            else {
+            if (customTranslateSetting) {
                 responseMessage = [responseMessage[0]];
+            } else {
+                if (detected_language !== defultLanguage) {
+                    if (this.translateGlossaryId) {
+                        this.translated_message = await this.translateTextWithGlossary(responseMessage[0], detected_language, translate); 
+                    } else {
+                        this.translated_message = await translate.translate(responseMessage[0], { to: detected_language, format: "text" });
+                    }
+                    const [translation] = this.translated_message;
+                    responseMessage = [translation];
+                }
+                else if (responseLanguage !== detected_language) {
+                    this.translated_message = await translate.translate(responseMessage[0], { to: detected_language, format: "text" });
+                    const [translation] = this.translated_message;
+                    responseMessage = [translation];
+                }
+                else {
+                    responseMessage = [responseMessage[0]];
+                }
             }
+
             return responseMessage;
         } catch (e) {
             console.log("catch translate", e);
