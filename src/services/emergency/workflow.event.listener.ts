@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { EntityManagerProvider } from "../entity.manager.provider.service";
-import { inject, Lifecycle, scoped } from "tsyringe";
+import { container, inject, Lifecycle, scoped } from "tsyringe";
 import { ClientEnvironmentProviderService } from "../set.client/client.environment.provider.service";
 import WorkflowUserData from "../../models/workflow.user.data.model";
 import { NeedleService } from "../needle.service";
-import { Imessage } from "../../refactor/interface/message.interface";
+import { Imessage, Iresponse } from "../../refactor/interface/message.interface";
 import { QuestionResponseType, UserMessageType, WorkflowEvent } from "./workflow.event.types";
 import { ChatSession } from "../../models/chat.session";
 import { ChatMessage } from "../../models/chat.message.model";
@@ -12,17 +12,24 @@ import { WorkflowCache } from "./workflow.cache";
 import needle from "needle";
 import axios from "axios";
 import http from 'http';
+import { sendApiButtonService } from '../whatsappmeta.button.service';
+import { commonResponseMessageFormat } from "../common.response.format.object";
+import { platformServiceInterface } from "../../refactor/interface/platform.interface";
+import { requestStatistics } from "../../refactor/interface/statistics.interface";
+import { sendTelegramButtonService } from "../telegram.button.service";
 
 //////////////////////////////////////////////////////////////////////////////
 
 @scoped(Lifecycle.ContainerScoped)
 export class WorkflowEventListener {
 
-    constructor (
+              private _platformMessageService :  platformServiceInterface = null;
+
+              constructor (
         @inject(EntityManagerProvider) private _entityProvider?: EntityManagerProvider,
         @inject(NeedleService) private needleService?: NeedleService,
         @inject(ClientEnvironmentProviderService) private environmentProviderService?: ClientEnvironmentProviderService,
-    ){}
+              ){}
 
     public getPreviousMessageFromWorkflow = async (platformUserId: string): Promise<WorkflowUserData> => {
         const entManager = await this._entityProvider.getEntityManager(this.environmentProviderService);
@@ -42,7 +49,8 @@ export class WorkflowEventListener {
             const response = await this.callWorkflowApi('get', url);
             if (response) {
                 console.log("Workflow event acknowledged", response);
-                if (response.Data === null || (response.Data.Terminated === true && response.Data.ParentSchemaInstanceId === null)) {
+                if (response.Data === null || (response.Data.Terminated === true &&
+                    response.Data.ParentSchemaInstanceId === null)) {
                     previousMessage = null;
                 }
             }
@@ -58,6 +66,49 @@ export class WorkflowEventListener {
     async commence(message: Imessage) {
         try {
             console.log("Message ->", message);
+            const schemaInstanceStatus = await this.checkSchemaInstanceStatus(message.platformId);
+            if (schemaInstanceStatus === null) {
+                if (message.messageBody.toLowerCase() === "help")
+                {
+                    console.log("Schema instance terminated and clicked help");
+                }
+                else if (message.messageBody.toLowerCase() === "not now")
+                {
+                    console.log("Schema instance terminated and clicked not now");
+                    return null;
+                }
+                else {
+                    try {
+                        message.platform = message.platform === "telegram" ?
+                            "telegram" : "whatsappMeta";
+                        const response_format: Iresponse = commonResponseMessageFormat();
+                        let payload = null;
+                        response_format.sessionId = message.platformId;
+                        const options = ["Help","Help", "Not now", "not_now"];
+                        if (message.platform === 'whatsappMeta' || message.platform === 'whatsappWati') {
+                            payload = await sendApiButtonService(options);
+                            response_format.message_type  = 'template';
+                            payload["templateName"] = "help_check";
+                            payload["languageForSession"] = "en";
+
+                        } else {
+                            payload = await sendTelegramButtonService(options);
+                            response_format.message_type = 'inline_keyboard';
+                        }
+                        console.log("PAYLOAD", JSON.stringify(payload, null, 2));
+                        this._platformMessageService = container.resolve(message.platform);
+                        if (this._platformMessageService) {
+                            const res = await this._platformMessageService.SendMediaMessage(response_format, payload);
+                        }
+                        return null;
+                    }
+                    catch (error) {
+                        console.log("While Sending button response", error);
+    
+                    }
+                }
+                
+            }
 
             const schemaList = await this.getAllSchemaForTenant();
             if (!schemaList || schemaList.length === 0) {
@@ -231,6 +282,38 @@ export class WorkflowEventListener {
             return error;
         }
     }
+
+    public checkSchemaInstanceStatus = async (platformUserId: string): Promise<WorkflowUserData> => {
+        const entManager = await this._entityProvider.getEntityManager(this.environmentProviderService);
+        const workflowRepository = entManager.getRepository(WorkflowUserData);
+        var previousMessage = await workflowRepository.findOne({
+            where : {
+                UserPlatformId    : platformUserId,
+                IsMessageFromUser : false
+            },
+            order : [
+                ['CreatedAt', 'DESC']
+            ]
+        });
+        
+        if (previousMessage?.SchemaInstanceId) {
+            const url = '/engine/schema-instances/' + previousMessage.SchemaInstanceId;
+            const response = await this.callWorkflowApi('get', url);
+            if (response) {
+                console.log("Workflow event acknowledged", response);
+                if ((response.Data.Terminated === true && response.Data.ParentSchemaInstanceId === null)) {
+                               
+                    previousMessage = null;
+                }
+            }
+            else {
+                console.log("No response from workflow");
+            }
+
+        }
+
+        return previousMessage;
+    };
 
     getChatSessionId = async (platformUserId: string) => {
         const entManager = await this._entityProvider.getEntityManager(this.environmentProviderService);
