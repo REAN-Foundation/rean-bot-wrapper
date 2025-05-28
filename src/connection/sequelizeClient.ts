@@ -53,7 +53,7 @@ export class SequelizeClient {
                     UserConsent,
                     MessageStatus,
                     WorkflowUserData,
-                    Intents
+                    Intents,
                     UserInfo,
                     SystemGeneratedMessages
                 ]);
