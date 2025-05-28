@@ -66,7 +66,7 @@ export class WorkflowEventListener {
     async commence(message: Imessage) {
         try {
             console.log("Message ->", message);
-            const schemaInstanceStatus = await this.checkSchemaInstanceStatus(message.platformId);
+            const schemaInstanceStatus = await this.getPreviousMessageFromWorkflow(message.platformId);
             if (schemaInstanceStatus === null) {
                 if (message.messageBody.toLowerCase() === "help")
                 {
@@ -282,38 +282,6 @@ export class WorkflowEventListener {
             return error;
         }
     }
-
-    public checkSchemaInstanceStatus = async (platformUserId: string): Promise<WorkflowUserData> => {
-        const entManager = await this._entityProvider.getEntityManager(this.environmentProviderService);
-        const workflowRepository = entManager.getRepository(WorkflowUserData);
-        var previousMessage = await workflowRepository.findOne({
-            where : {
-                UserPlatformId    : platformUserId,
-                IsMessageFromUser : false
-            },
-            order : [
-                ['CreatedAt', 'DESC']
-            ]
-        });
-        
-        if (previousMessage?.SchemaInstanceId) {
-            const url = '/engine/schema-instances/' + previousMessage.SchemaInstanceId;
-            const response = await this.callWorkflowApi('get', url);
-            if (response) {
-                console.log("Workflow event acknowledged", response);
-                if ((response.Data.Terminated === true && response.Data.ParentSchemaInstanceId === null)) {
-                               
-                    previousMessage = null;
-                }
-            }
-            else {
-                console.log("No response from workflow");
-            }
-
-        }
-
-        return previousMessage;
-    };
 
     getChatSessionId = async (platformUserId: string) => {
         const entManager = await this._entityProvider.getEntityManager(this.environmentProviderService);
