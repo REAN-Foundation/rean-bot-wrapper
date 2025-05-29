@@ -52,8 +52,7 @@ export class HeartFailureRegistrationService {
                     .split("T")[0],
             };
             await this.needleService.needleRequestForREAN("put", patientUpdateUrl, null, patientDomainModel);
-            const careplan_reg_msg = await this.systemGeneratedMessages.getMessage("CAREPLAN_REG_MESSAGE");;
-            // const registrationMessage = `Hi ${personName}, \nWe're fetching your heart disease care plan details. Please hold on a moment!⏳`;
+            const careplan_reg_msg = await this.systemGeneratedMessages.getMessage("CAREPLAN_REG_MESSAGE");
             const registrationMessage = `Hi ${personName}, \n`+careplan_reg_msg;
             FireAndForgetService.enqueue(body);
             return { fulfillmentMessages: [{ text: { text: [registrationMessage] } }]  };
@@ -76,7 +75,6 @@ export class HeartFailureRegistrationService {
                 await this.enrollPatient(patientUserId, name, msg, eventObj);
             } else {
                 const careplan_reg_alt_msg = await this.systemGeneratedMessages.getMessage("CAREPLAN_REG_ALT_MESSAGE");
-                //msg = `You have already enrolled in the Heart Disease care plan. If you wish to enroll again please contact to REAN support. https://www.reanfoundation.org/`;
                 msg = careplan_reg_alt_msg;
                 await this.sendMessage(msg, eventObj);
             }
