@@ -19,6 +19,8 @@ import { CacheMemory } from './cache.memory.service';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { WorkflowEventListener } from './emergency/workflow.event.listener';
 import { MessageHandlerType } from '../refactor/messageTypes/message.types';
+import { CommonAssessmentService } from './Assesssment/common.assessment.service';
+import { AssessmentHandlingService } from './Assesssment/assessment.handling.service';
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -35,7 +37,10 @@ export class handleRequestservice {
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(OpenAIResponseService) private openAIResponseService?: OpenAIResponseService,
         @inject(CustomMLModelResponseService) private customMLModelResponseService?: CustomMLModelResponseService,
-        @inject(ServeAssessmentService) private serveAssessmentService?: ServeAssessmentService) {
+        @inject(ServeAssessmentService) private serveAssessmentService?: ServeAssessmentService,
+        @inject(CommonAssessmentService) private commonAssessmentService?: CommonAssessmentService,
+        @inject(AssessmentHandlingService) private assessmentHandlingService?: AssessmentHandlingService
+    ) {
     }
 
     async handleUserRequest(message: Imessage, channel: string) {
@@ -139,9 +144,14 @@ export class handleRequestservice {
         }
         case 'Assessments': {
             const key = `${metaData.platformId}:Assessment`;
-            const userMessageId = await CacheMemory.get(key);
-            message_from_nlp = await this.serveAssessmentService.answerQuestion(eventObj, metaData.platformId, metaData.messageBody, userMessageId, metaData.platform, true);
-            console.log(`after calling answer question service, message: ${message_from_nlp.getText()}`);
+            const userCacheData = await CacheMemory.get(key);
+            if (userCacheData) {
+                message_from_nlp = await this.serveAssessmentService.answerQuestion(eventObj, metaData.platformId, metaData.messageBody, userCacheData, metaData.platform, true);
+                console.log(`after calling answer question service, message: ${message_from_nlp.getText()}`);
+            } else {
+                outgoingMessage.MetaData["eventObj"] = eventObj;
+                message_from_nlp = await this.assessmentHandlingService.initialiseAssessment(outgoingMessage, outgoingMessage.Assessment.AssessmentId, eventObj);
+            }
             break;
         }
         case 'Feedback': {
