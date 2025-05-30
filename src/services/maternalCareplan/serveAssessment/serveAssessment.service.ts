@@ -116,7 +116,8 @@ export class ServeAssessmentService {
             const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
             const assessmentSession = await AssessmentSessionRepo.findOne({ where: { "userMessageId": userContextMessageId } });
             const apiURL = `clinical/assessments/${assessmentSession.assesmentId}/questions/${assessmentSession.assesmentNodeId}/answer`;
-            const userAnswer = await this.getAnswerFromIntent(userResponse);
+            const userAnswer = await this.getAnswer(userResponse, assessmentSession.assesmentId, assessmentSession.assesmentNodeId);
+            // const userAnswer = await this.getAnswerFromIntent(userResponse);
             assessmentSession.userResponse = userAnswer;
             assessmentSession.userResponseTime = new Date();
             await assessmentSession.save();
@@ -268,6 +269,20 @@ export class ServeAssessmentService {
             await this.updateMessageFlag(userId, messageId, chatMessageRepository);
             console.log("    updated the message flag to assessment");
         }
+    }
+
+    public async getAnswer( userResponse: string, assessmentId: string, assessmentNodeId: string) {
+        const apiURL = `clinical/assessments/${assessmentId}/questions/${assessmentNodeId}`;
+        const response = await this.needleService.needleRequestForREAN("get", apiURL, null, null);
+        const options = response.Data.Question.Options;
+
+        const sequence = options?.length
+            ? options.find(
+                (option) =>
+                    option.ProviderGivenCode.toLowerCase() === userResponse.toLowerCase() 
+            )?.Sequence ?? userResponse
+            : userResponse;
+        return sequence;
     }
 
     public getAnswerFromIntent( intentName ) {

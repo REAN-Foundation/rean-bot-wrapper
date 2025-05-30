@@ -108,89 +108,91 @@ export class DecisionRouter {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async checkAssessment(messageBody: Imessage, channel: string) {
+        try {
+            const intent = messageBody.intent;
+            const key = `${messageBody.platformId}:NextQuestionFlag`;
+            const nextQuestionFlag = await CacheMemory.get(key);
 
-        const intent = messageBody.intent;
-        const key = `${messageBody.platformId}:NextQuestionFlag`;
-        const nextQuestionFlag = await CacheMemory.get(key);
+            const assessmentData = {
+                AssessmentId   : '',
+                AssessmentName : '',
+                TemplateId     : '',
+                CurrentNodeId  : '',
+                Question       : '',
+                AssessmentFlag : false,
+                MetaData       : ''
+            };
 
-        const assessmentData = {
-            AssessmentId   : '',
-            AssessmentName : '',
-            TemplateId     : '',
-            CurrentNodeId  : '',
-            Question       : '',
-            AssessmentFlag : false,
-            MetaData       : ''
-        };
+            // Currently will only support the assessment start through buttons
+            if (
+                messageBody.contextId && 
+                messageBody.intent && 
+                !nextQuestionFlag
+            ) {
+                const intentRepository = (
+                    (await this.entityManagerProvider.getEntityManager(this.environmentProviderService))
+                        .getRepository(Intents)
+                );
+        
+                const matchingIntents = await intentRepository.findOne({
+                    where : {
+                        code : intent
+                    }
+                });
 
-        // Currently will only support the assessment start through buttons
-        if (
-            messageBody.contextId &&
-            messageBody.intent &&
-            !nextQuestionFlag
-        ) {
-            const intentRepository = (
-                (await this.entityManagerProvider.getEntityManager(this.environmentProviderService))
-                    .getRepository(Intents)
-            );
-    
-            const matchingIntents = await intentRepository.findOne({
-                where : {
-                    code : intent
-                }
-            });
+                if (matchingIntents) {
 
-            if (matchingIntents) {
-
-                // we will call the reancare api here
-                const assessmentCode = matchingIntents.dataValues[0].code;
-                
-                // const apiURL = `clinical/assessments/${assessmentCode}/start`;
-                // const responseFromAssessmentService = await this.needleService.needleRequestForREAN("post", apiURL, null, {});
-                // assessmentData.MetaData = responseFromAssessmentService;
-                assessmentData.AssessmentId = assessmentCode;
-                assessmentData.AssessmentName = matchingIntents.dataValues[0].name;
-                assessmentData.AssessmentFlag = true;
-            } else {
-
-                // here we will create the false flag and return object
-                assessmentData.AssessmentFlag = false;
-            }
-        } else {
-            if (nextQuestionFlag) {
-                if (nextQuestionFlag === true) {
+                    // we will call the reancare api here
+                    const assessmentCode = matchingIntents.dataValues.code;
+                    // const apiURL = `clinical/assessments/${assessmentCode}/start`;
+                    // const responseFromAssessmentService = await this.needleService.needleRequestForREAN("post", apiURL, null, {});
+                    // assessmentData.MetaData = responseFromAssessmentService;
+                    assessmentData.AssessmentId = assessmentCode;
+                    assessmentData.AssessmentName = matchingIntents.dataValues.name;
                     assessmentData.AssessmentFlag = true;
-                    await CacheMemory.set(key, false);
+                } else {
+
+                    // here we will create the false flag and return object
+                    assessmentData.AssessmentFlag = false;
                 }
             } else {
-                assessmentData.AssessmentFlag = false;
+                if (nextQuestionFlag) {
+                    if (nextQuestionFlag === true) {
+                        assessmentData.AssessmentFlag = true;
+                        await CacheMemory.set(key, false);
+                    }
+                } else {
+                    assessmentData.AssessmentFlag = false;
+                }
             }
+
+            // Check if message is part of assessment
+            // const chatMessageRepository = (
+            //     await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+            // const botMessages = await chatMessageRepository.findAll({
+            //     where : {
+            //         userPlatformId : messageBody.platformId,
+            //         platform       : channel
+            //     },
+            //     order : [ [ 'createdAt', 'ASC' ] ]
+            // });
+
+            // const lastMessage = await chatMessageRepository.findOne({
+            //     where : {
+            //         userPlatformId : messageBody.platformId,
+            //         platform       : channel
+            //     },
+            //     order : [ [ 'createdAt', 'DESC'] ]
+            // });
+
+            //const assessmentInProgress = botMessages[botMessages.length - 3].messageFlag
+
+            // Implement further logic for checking if assessment.
+
+            return assessmentData;
+        } catch (error) {
+            console.log(error);
         }
-
-        // Check if message is part of assessment
-        // const chatMessageRepository = (
-        //     await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-        // const botMessages = await chatMessageRepository.findAll({
-        //     where : {
-        //         userPlatformId : messageBody.platformId,
-        //         platform       : channel
-        //     },
-        //     order : [ [ 'createdAt', 'ASC' ] ]
-        // });
-
-        // const lastMessage = await chatMessageRepository.findOne({
-        //     where : {
-        //         userPlatformId : messageBody.platformId,
-        //         platform       : channel
-        //     },
-        //     order : [ [ 'createdAt', 'DESC'] ]
-        // });
-
-        //const assessmentInProgress = botMessages[botMessages.length - 3].messageFlag
-
-        // Implement further logic for checking if assessment.
-
-        return assessmentData;
 
     }
 
