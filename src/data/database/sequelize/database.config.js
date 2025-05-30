@@ -1,11 +1,11 @@
 const ok = {
     "development" : {
-        "username" : "root",
-        "password" : "password",
-        "database" : "sushant_local",
-        "host"     : "localhost",
-        "dialect"  : "mysql",
-        "port"     : "3306"
+        "username" : "",
+        "password" : "",
+        "database" : "",
+        "host"     : "",
+        "dialect"  : "",
+        "port"     : ""
     },
     "uat" : {
         "username" : "",
