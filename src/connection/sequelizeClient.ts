@@ -13,6 +13,7 @@ import { UserConsent } from '../models/user.consent.model';
 import { UserInfo } from '../models/user.info.model';
 import { Logger } from '../../src/common/logger';
 import WorkflowUserData from '../models/workflow.user.data.model';
+import { Intents } from '../models/intents/intents.model';
 import { SystemGeneratedMessages } from '../models/system.generated.messages.model';
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -52,6 +53,7 @@ export class SequelizeClient {
                     UserConsent,
                     MessageStatus,
                     WorkflowUserData,
+                    Intents,
                     UserInfo,
                     SystemGeneratedMessages
                 ]);
