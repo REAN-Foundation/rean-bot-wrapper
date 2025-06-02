@@ -7,7 +7,8 @@ import { SystemGeneratedMessagesRoutes } from "./system.generated.messages.route
 import { IntentRoutes } from "./intents.routes";
 import { FrontendRoutes } from "./Frontend.routes";
 import { ConsentRoutes } from "./consent.routes";
-import { UserRegistrationRoutes} from "./user.registration.routes";
+import { UserRegistrationRoutes } from "./user.registration.routes";
+
 // import { ClientEnvironmentProviderService } from "../../services/set.client/client.environment.provider.service";
 
 @autoInjectable()

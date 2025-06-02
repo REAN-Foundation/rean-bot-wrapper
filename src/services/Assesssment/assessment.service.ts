@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Lifecycle, scoped, inject } from 'tsyringe';
 import { CommonAssessmentService } from './common.assessment.service';
 import { AssessmentRequest } from '../../refactor/interface/assessment/assessment.interface';
@@ -19,7 +20,7 @@ export class AssessmentService {
         @inject(CommonAssessmentService) private commonAssessmentService?: CommonAssessmentService,
         @inject(ServeAssessmentService) private serveAssessmentService?: ServeAssessmentService,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
-        @inject(ClientEnvironmentProviderService) 
+        @inject(ClientEnvironmentProviderService)
             private clientEnvironmentProviderService?: ClientEnvironmentProviderService
     ){}
 
@@ -38,13 +39,13 @@ export class AssessmentService {
             "ScheduledDate"        : currentDate
         };
         const assessmentData = await this.commonAssessmentService.createAssessment(AssessmentDetails);
-        const assessmentUserTasks = 
+        const assessmentUserTasks =
             await this.commonAssessmentService.getAssessmentUserTasks(AssessmentDetails, assessmentData);
 
         let telegramPayload = null;
         if (assessmentData.Data.Assessment) {
             const assessment = JSON.stringify(assessmentData.Data.Assessment);
-            const { metaPayload, assessmentSessionLogs } = 
+            const { metaPayload, assessmentSessionLogs } =
                 await this.serveAssessmentService.startAssessment(
                     input.Body.PersonPhoneNumber,
                     channel,
@@ -82,18 +83,18 @@ export class AssessmentService {
             else {
                 messageToPlatform = await platformMessageService.SendMediaMessage(responseFormat, metaPayload);
             }
-            assessmentSessionLogs.userMessageId = 
+            assessmentSessionLogs.userMessageId =
                 await platformMessageService.getMessageIdFromResponse(messageToPlatform);
             const key = `${input.Body.PersonPhoneNumber}:Assessment`;
             await CacheMemory.set(key, assessmentSessionLogs.userMessageId);
 
-            const AssessmentSession = 
+            const AssessmentSession =
                 (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService))
                     .getRepository(AssessmentSessionLogs);
             await AssessmentSession.create(assessmentSessionLogs);
 
             if (assessmentSessionLogs.userResponseType === "Text" ) {
-                const chatMessageRepository = 
+                const chatMessageRepository =
                     (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService))
                         .getRepository(ChatMessage);
                 await this.serveAssessmentService.updateMessageFlag(

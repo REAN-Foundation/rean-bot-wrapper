@@ -1,13 +1,13 @@
 /* eslint-disable indent */
-import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, IsUUID } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, PrimaryKey, IsUUID } from 'sequelize-typescript';
 import { IIntents } from '../../refactor/interface/intents/intents.interface';
 import { IntentType } from '../../refactor/messageTypes/intents/intents.message.types';
 import { v4 } from 'uuid';
 @Table(
     {
-        timestamps: true,
-        modelName: 'Intents',
-        tableName: 'intents'
+        timestamps : true,
+        modelName : 'Intents',
+        tableName : 'intents'
     }
 )
 
@@ -45,4 +45,5 @@ export class Intents extends Model implements IIntents {
         type : DataType.TEXT()
     })
         Metadata: string;
+    
 }

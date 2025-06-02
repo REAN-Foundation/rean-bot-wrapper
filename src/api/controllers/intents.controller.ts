@@ -19,7 +19,7 @@ export class IntentsController {
             const { repository, clientName } = await this.getContextualServices(request);
             console.log("Inside creating intents for ", clientName);
             const intentCode = request.body.code;
-            const intentExists = 
+            const intentExists =
                 await repository.findOne({ where: { code: intentCode } });
             if (intentExists) {
                 this.responseHandler.sendSuccessResponse(response, 200, 'Intent already exists', '');
@@ -120,6 +120,6 @@ export class IntentsController {
             await entityManagerProvider.getEntityManager(clientEnvironmentProvider, clientName)
         ).getRepository(Intents);
 
-        return { clientEnvironmentProvider, clientName, repository};
+        return { clientEnvironmentProvider, clientName, repository };
     }
 }

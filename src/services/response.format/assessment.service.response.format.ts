@@ -16,6 +16,7 @@ export class AssessmentResponseFormat implements IserviceResponseFunctionalities
     }
 
     getImageObject() {
+
         //method to be implemented
     }
 
@@ -40,6 +41,8 @@ export class AssessmentResponseFormat implements IserviceResponseFunctionalities
     }
 
     getSimilarDoc() {
+
         //method to be implemented
     }
+
 }

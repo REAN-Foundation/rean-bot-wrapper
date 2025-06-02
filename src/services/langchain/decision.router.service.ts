@@ -125,8 +125,8 @@ export class DecisionRouter {
 
             // Currently will only support the assessment start through buttons
             if (
-                messageBody.contextId && 
-                messageBody.intent && 
+                messageBody.contextId &&
+                messageBody.intent &&
                 !nextQuestionFlag
             ) {
                 const intentRepository = (
@@ -144,6 +144,7 @@ export class DecisionRouter {
 
                     // we will call the reancare api here
                     const assessmentCode = matchingIntents.dataValues.code;
+                    
                     // const apiURL = `clinical/assessments/${assessmentCode}/start`;
                     // const responseFromAssessmentService = await this.needleService.needleRequestForREAN("post", apiURL, null, {});
                     // assessmentData.MetaData = responseFromAssessmentService;

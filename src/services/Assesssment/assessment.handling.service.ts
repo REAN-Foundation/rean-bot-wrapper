@@ -1,7 +1,6 @@
 import { Lifecycle, scoped, inject } from 'tsyringe';
 import { NeedleService } from '../needle.service';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
-import { AssessmentSessionLogs } from '../../models/assessment.session.model';
 import { EntityManagerProvider } from '../entity.manager.provider.service';
 import { OutgoingMessage } from '../../refactor/interface/message.interface';
 import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
@@ -14,7 +13,7 @@ import { AssessmentResponseFormat } from '../response.format/assessment.service.
 export class AssessmentHandlingService {
 
     constructor(
-        @inject(ClientEnvironmentProviderService) 
+        @inject(ClientEnvironmentProviderService)
             private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(Registration) private registration?: Registration,
@@ -44,7 +43,7 @@ export class AssessmentHandlingService {
             let message = "";
             let responseMessage;
 
-            if (response.Data.AssessmentTemplateRecords.Items.length !==0) {
+            if (response.Data.AssessmentTemplateRecords.Items.length !== 0) {
                 const assessmentDetails = response.Data.AssessmentTemplateRecords.Items[0];
                 const assessmentBody: AssessmentRequest = {
                     Type : "StartAssessment",
@@ -78,4 +77,5 @@ export class AssessmentHandlingService {
         };
         return responseMessage;
     }
+
 }

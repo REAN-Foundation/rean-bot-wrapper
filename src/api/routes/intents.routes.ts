@@ -3,7 +3,6 @@ import { Logger } from '../../common/logger';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import { IntentsController } from '../controllers/intents.controller';
 
-
 @scoped(Lifecycle.ContainerScoped)
 export class IntentRoutes {
 
@@ -25,4 +24,5 @@ export class IntentRoutes {
 
         app.use('/v1', router);
     }
+    
 }
