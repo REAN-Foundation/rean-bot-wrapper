@@ -1,11 +1,11 @@
 import { IntentType } from "../../messageTypes/intents/intents.message.types";
 
 export interface IIntents {
-    autoIncrementalId: number;
+    id: string | undefined | null;
     name: string;
     code: string;
     type: IntentType;
-    Metadata: JSON;
+    Metadata: string;
 }
 
 export interface IIntentListeners {
