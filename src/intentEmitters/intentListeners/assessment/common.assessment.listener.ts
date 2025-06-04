@@ -22,7 +22,8 @@ export const getAssessmentDisplayCode = (intentName) => {
         "AssessmentBloodPressure" : "AssessmentBloodPressure",
         "AssessmentRegistration"  : "AssessmentRegistration",
         "Reminder_Reply_No"       : "AppointmentFollowUp",
-        "start_assessment_quiz"   : "ADUNUTESTASSESSMENT"
+        "start_assessment_quiz"   : "ADUNUTESTASSESSMENT",
+        "Basic_assessment"        : "Basic_assessment",
     };
     return message[intentName] ?? "";
 };

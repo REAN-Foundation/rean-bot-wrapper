@@ -305,6 +305,10 @@ export class ServeAssessmentService {
             "Assessment_No5"   : 5,
             "Assessment_No6"   : 6,
             "Assessment_No7"   : 7,
+            "Male"             :1,
+            "Female"           :2,
+            "Intersex"         :3,
+
 
         };
         return message[intentName] ?? intentName;
