@@ -22,9 +22,12 @@ export const AppointmentBookingListner= async ( intent, eventObj ) => {
             const date_time = eventObj.body.queryResult.parameters.Date.date_time;
             const date = new Date(date_time).toDateString();
             const time = (new Date(date_time).toTimeString()).split('G')[0];
-            const location = eventObj.body.queryResult.parameters.Location;
-            const doctor = eventObj.body.queryResult.parameters.Doctor.name;
-            message = `Your request to schedule an appointment with *${doctor}* at *${location}* on *${date}* at  ${time}, has been sent.\n We will get back to you with a confirmation. *You can call at 080-66202020 for more information*\n \n *Disclaimer :* Please note, we may not be able to accommodate your requested time.`;
+            message = `Your request to schedule an appointment on *${date}* at  ${time}, has been sent.\n We will get back to you with a confirmation. \n \n *Disclaimer :* Please note, we might not be able to accommodate your requested time.`;
+            if (parameters.Location) {
+                const location = eventObj.body.queryResult.parameters.Location;
+                const doctor = eventObj.body.queryResult.parameters.Doctor.name;
+                message = `Your request to schedule an appointment with *${doctor}* at *${location}* on *${date}* at  ${time}, has been sent.\n We will get back to you with a confirmation. *You can call at 080-66202020 for more information*\n \n *Disclaimer :* Please note, we may not be able to accommodate your requested time.`;
+            }
         }
         response = await dialoflowMessageFormattingObj.making_response(message);
         kerotoplastyServiceObj.UpdatingAppointmentOnClickup(intent, eventObj);

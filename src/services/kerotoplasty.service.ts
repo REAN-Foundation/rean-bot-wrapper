@@ -173,10 +173,7 @@ export class kerotoplastyService {
 
     async UpdatingAppointmentOnClickup(intent,eventObj){
         const parameters = eventObj.body.queryResult.parameters;
-        let symptomComment = null;
-        if(Object.keys(parameters).length > 0) {
-            symptomComment = await this.appoinmentDetailsByUser(parameters);
-        }
+        const symptomComment = await this.appoinmentDetailsByUser(parameters);
         const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
         const contactList =
         (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
@@ -197,14 +194,12 @@ export class kerotoplastyService {
         }
         else
         {
-            
             const taskID = await this.clickUpTask.createTask(null, EMRNumber , user_details , 1 , ClickupListID,"Appoinment");
             await contactList.update({ cmrCaseTaskID: taskID }, { where: { mobileNumber: userId } });
             await this.clickUpTask.postCommentOnTask(taskID, symptomComment);
             console.log("we are Here");
             await contactList.update({ cmrCaseTaskID: taskID, humanHandoff: "false" }, { where: { mobileNumber: userId } });
         }
-
     }
 
     async getEMRDetails(emr_number, eventObj){
