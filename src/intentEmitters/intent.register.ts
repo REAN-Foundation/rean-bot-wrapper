@@ -276,6 +276,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('delete_reminder_type', GetReminderDetails);
         IntentEmitter.registerListener('delete_reminder_time', DeleteReminder);
         IntentEmitter.registerListener('bookAppointment', AppointmentBookingListner);
+        IntentEmitter.registerListener('Basic_assessment', CommonAssessmentListener);
 
         // Intents for Collecting user information
         IntentEmitter.registerListener('UserInfo', UserInfoListener);
