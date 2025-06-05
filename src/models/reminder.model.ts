@@ -18,6 +18,12 @@ export class ReminderMessage extends Model implements IReminder {
     id?: number;
 
     @Column({
+        type: DataType.STRING(256), // or INTEGER if userId is numeric
+        allowNull: false,
+    })
+    userId: string;    
+
+    @Column({
         type: DataType.STRING(1024),
     })
     MessageId: string;
