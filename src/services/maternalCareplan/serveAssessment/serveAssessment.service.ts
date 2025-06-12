@@ -16,6 +16,8 @@ import { CacheMemory } from '../../../services/cache.memory.service';
 import { CustomModelResponseFormat } from '../../../services/response.format/custom.model.response.format';
 import { sendTelegramButtonService } from '../../../services/telegram.button.service';
 import { Helper } from '../../../common/helper';
+import { SystemGeneratedMessagesService } from '../../../services/system.generated.message.service';
+import { AssessmentIdentifiers } from '../../../models/assessment/assessment.identifiers.model';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ServeAssessmentService {
@@ -27,6 +29,7 @@ export class ServeAssessmentService {
         @inject(translateService) private translate?: translateService,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
+        @inject(SystemGeneratedMessagesService) private systemGeneratedMessageService?: SystemGeneratedMessagesService,
     ){}
 
     async startAssessment (platformUserId:any, channel: any, userTaskData: any) {
@@ -93,6 +96,8 @@ export class ServeAssessmentService {
                     userResponse         : null,
                     userResponseTime     : null,
                     userMessageId        : null,
+                    identifiers          : questionNode.FieldIdentifier,
+                    identifiersUnit      : questionNode.FieldIdentifierUnit,
                 };
 
                 const key = `${platformUserId}:NextQuestionFlag`;
@@ -115,6 +120,9 @@ export class ServeAssessmentService {
             const AssessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
             const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
             const assessmentSession = await AssessmentSessionRepo.findOne({ where: { "userMessageId": userContextMessageId } });
+            const AssessmentIdentifiersRepo = (
+                await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)
+            ).getRepository(AssessmentIdentifiers);
             const apiURL = `clinical/assessments/${assessmentSession.assesmentId}/questions/${assessmentSession.assesmentNodeId}/answer`;
             const userAnswer = await this.getAnswer(userResponse, assessmentSession.assesmentId, assessmentSession.assesmentNodeId);
             // const userAnswer = await this.getAnswerFromIntent(userResponse);
@@ -129,13 +137,15 @@ export class ServeAssessmentService {
 
             // refactor separate it out from here give URL and obj according to that.
             let message: any = "";
+            let messageFlag = "";
             const requestBody = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
             let payload = null;
             let messageType = 'text';
             const questionData = requestBody.Data.AnswerResponse.Next;
+            const nodeType = requestBody.Data.AnswerResponse?.Next?.NodeType ?? null;
 
             //Next question send or complete the assessment
-            if (requestBody.Data.AnswerResponse.Next !== null) {
+            if (requestBody.Data.AnswerResponse.Next !== null && nodeType !== "Message") {
                 let questionRawData = null;
                 if (requestBody.Data.AnswerResponse.Next?.RawData) {
                     questionRawData = JSON.parse(requestBody.Data.AnswerResponse.Next.RawData);
@@ -173,11 +183,25 @@ export class ServeAssessmentService {
                     userResponseTime     : null,
                     userMessageId        : null,
                 };
-                await AssessmentSessionRepo.create(assessmentSessionLogs);
+                messageFlag = "assessment";
+                const assessmentSessionData = await AssessmentSessionRepo.create(assessmentSessionLogs);
+                const assessmentIdentifierObj = {
+                    assessmentSessionId : assessmentSessionData.autoIncrementalID,
+                    identifier          : questionData.FieldIdentifier,
+                    userResponseType    : assessmentSessionData.userResponseType
+                };
+                await AssessmentIdentifiersRepo.create(assessmentIdentifierObj);
                 const key = `${assessmentSession.userPlatformId}:NextQuestionFlag`;
                 CacheMemory.set(key, true);
+            } else if (requestBody.Data.AnswerResponse.Next !== null && nodeType === "Message") {
+                messageFlag = "endassessment";
+                message = requestBody.Data.AnswerResponse.Next.Description;
             } else {
-                message = "The assessment has been completed.";
+                messageFlag = "endassessment";
+                const key = `${assessmentSession.userPlatformId}:NextQuestionFlag`;
+                CacheMemory.set(key, false);
+                const customMessage = await this.systemGeneratedMessageService.getMessage("END_ASSESSMENT_MESSAGE");
+                message = customMessage ?? "The assessment has been completed.";
                 console.log("    inside complete////// question block");
             }
 
@@ -258,17 +282,19 @@ export class ServeAssessmentService {
         }
     };
 
-    public async updateDBChatSessionWithMessageId( userId: string, messageId: any, chatMessageRepository, AssessmentSessionRepo) {
+    public async updateDBChatSessionWithMessageId( userId: string, messageId: any, chatMessageRepository, AssessmentSessionRepo, messageFlag = "assessment") {
         const assessmentSession = await AssessmentSessionRepo.findOne({ where: { "userPlatformId": userId }, order: [['createdAt', 'DESC']] });
         assessmentSession.userMessageId = messageId;
         await assessmentSession.save();
 
         const key = `${assessmentSession.userPlatformId}:Assessment`;
         await CacheMemory.set(key, messageId);
-        if (assessmentSession.userResponseType === "Text") {
-            await this.updateMessageFlag(userId, messageId, chatMessageRepository);
-            console.log("    updated the message flag to assessment");
-        }
+        
+        // if (assessmentSession.userResponseType === "Text") {
+        await this.updateMessageFlag(userId, messageId, chatMessageRepository, messageFlag);
+        console.log("updated the message flag to assessment");
+
+        // }
     }
 
     public async getAnswer( userResponse: string, assessmentId: string, assessmentNodeId: string) {
@@ -310,7 +336,7 @@ export class ServeAssessmentService {
         return message[intentName] ?? intentName;
     }
 
-    public async updateMessageFlag(userId, messageId, chatMessageRepository) {
+    public async updateMessageFlag(userId, messageId, chatMessageRepository, messageFlag = "assessment") {
         const response = await chatMessageRepository.findOne({
             where : {
                 userPlatformId    : userId,
@@ -319,7 +345,7 @@ export class ServeAssessmentService {
         });
         if (response) {
             await chatMessageRepository.update({
-                messageFlag : "assessment"
+                messageFlag : messageFlag
             },
             {
                 where : {

@@ -8,3 +8,11 @@ export interface AssessmentRequest {
         AssessmentTemplateTitle : string
     };
 }
+
+export interface IAssessmentIdentifiers {
+    autoIncrementalID?: number;
+    assessmentSessionId?: number;
+    identifier: string;
+    identifierUnit: string;
+    userResponseType: string;
+}

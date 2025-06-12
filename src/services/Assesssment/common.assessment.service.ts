@@ -14,6 +14,7 @@ import { ChatMessage } from '../../models/chat.message.model';
 import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
 import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
 import { sendTelegramButtonService } from '../telegram.button.service';
+import { AssessmentIdentifiers } from '../../models/assessment/assessment.identifiers.model';
 
 @scoped(Lifecycle.ContainerScoped)
 export class CommonAssessmentService {
@@ -161,7 +162,16 @@ export class CommonAssessmentService {
             await CacheMemory.set(key, assessmentSessionLogs.userMessageId);
 
             const AssessmentSession = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
-            await AssessmentSession.create(assessmentSessionLogs);
+            const assessmentSessionData = await AssessmentSession.create(assessmentSessionLogs);
+            const assessmentIdentifierObj = {
+                assessmentSessionId : assessmentSessionData.autoIncrementalID,
+                identifier          : assessmentSessionLogs.identifiers,
+                userResponseType    : assessmentSessionData.userResponseType
+            };
+            const AssessmentIdentifiersRepo = (
+                await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)
+            ).getRepository(AssessmentIdentifiers);
+            await AssessmentIdentifiersRepo.create(assessmentIdentifierObj);
 
             if (assessmentSessionLogs.userResponseType === "Text" ) {
                 const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);

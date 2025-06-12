@@ -8,6 +8,7 @@ import { AssessmentRequest } from '../../refactor/interface/assessment/assessmen
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { AssessmentService } from './assessment.service';
 import { AssessmentResponseFormat } from '../response.format/assessment.service.response.format';
+import { SystemGeneratedMessagesService } from '../system.generated.message.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class AssessmentHandlingService {
@@ -18,7 +19,8 @@ export class AssessmentHandlingService {
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(Registration) private registration?: Registration,
         @inject(NeedleService) private needleService?: NeedleService,
-        @inject(AssessmentService) private assessmentService?: AssessmentService
+        @inject(AssessmentService) private assessmentService?: AssessmentService,
+        @inject(SystemGeneratedMessagesService) private systemGeneratedMessageService?: SystemGeneratedMessagesService
     ) {}
 
     async initialiseAssessment(input: OutgoingMessage, assessmentDisplayCode, eventObj: platformServiceInterface) {
@@ -56,7 +58,8 @@ export class AssessmentHandlingService {
                     }
                 };
                 this.assessmentService.createAssessment(assessmentBody, eventObj);
-                message = "We are starting an assessment for you please answer few of our questions.";
+                const startAssessmentMessage = await this.systemGeneratedMessageService.getMessage("INITIALIZE_ASSESSMENT_MESSAGE");
+                message = startAssessmentMessage ?? "We are starting an assessment for you please answer few of our questions.";
                 responseMessage = this.getResponseMessage(message, "StartAssessment");
             } else {
                 message = `Sorry for the inconvenience. Please try again or contact the team for further assistance.`;
