@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../../common/logger';
@@ -125,6 +126,7 @@ export class ServeAssessmentService {
             ).getRepository(AssessmentIdentifiers);
             const apiURL = `clinical/assessments/${assessmentSession.assesmentId}/questions/${assessmentSession.assesmentNodeId}/answer`;
             const userAnswer = await this.getAnswer(userResponse, assessmentSession.assesmentId, assessmentSession.assesmentNodeId);
+            
             // const userAnswer = await this.getAnswerFromIntent(userResponse);
             assessmentSession.userResponse = userAnswer;
             assessmentSession.userResponseTime = new Date();
@@ -305,7 +307,7 @@ export class ServeAssessmentService {
         const sequence = options?.length
             ? options.find(
                 (option) =>
-                    option.ProviderGivenCode.toLowerCase() === userResponse.toLowerCase() 
+                    option.ProviderGivenCode.toLowerCase() === userResponse.toLowerCase()
             )?.Sequence ?? userResponse
             : userResponse;
         return sequence;
