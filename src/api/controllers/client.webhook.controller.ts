@@ -372,7 +372,8 @@ export class ClientWebhookController {
                 logMessage = `Handling the ${statuses[0].status} for Meta Whatsapp for message with id: ${statuses[0].id}`;
                 Logger.instance().log(logMessage);
                 if (statuses[0].status === "failed") {
-                    Logger.instance().log(req.body);
+                    console.log(req.body);
+                    console.log(statuses[0].errors[0].title);
                 }
                 await this.sendSuccessMessage(chatMessageRepository, messageStatusRepository, res,statuses);
             }
