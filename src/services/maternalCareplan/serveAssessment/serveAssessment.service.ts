@@ -19,6 +19,7 @@ import { sendTelegramButtonService } from '../../../services/telegram.button.ser
 import { Helper } from '../../../common/helper';
 import { SystemGeneratedMessagesService } from '../../../services/system.generated.message.service';
 import { AssessmentIdentifiers } from '../../../models/assessment/assessment.identifiers.model';
+import { CountryCodeService } from '../../../utils/phone.number.formatting';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ServeAssessmentService {
@@ -31,6 +32,7 @@ export class ServeAssessmentService {
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(SystemGeneratedMessagesService) private systemGeneratedMessageService?: SystemGeneratedMessagesService,
+        @inject(CountryCodeService ) private countryCodeService ?:CountryCodeService
     ){}
 
     async startAssessment (platformUserId:any, channel: any, userTaskData: any) {
@@ -126,7 +128,7 @@ export class ServeAssessmentService {
             ).getRepository(AssessmentIdentifiers);
             const apiURL = `clinical/assessments/${assessmentSession.assesmentId}/questions/${assessmentSession.assesmentNodeId}/answer`;
             const userAnswer = await this.getAnswer(userResponse, assessmentSession.assesmentId, assessmentSession.assesmentNodeId);
-            
+
             // const userAnswer = await this.getAnswerFromIntent(userResponse);
             assessmentSession.userResponse = userAnswer;
             assessmentSession.userResponseTime = new Date();
@@ -202,8 +204,18 @@ export class ServeAssessmentService {
                 messageFlag = "endassessment";
                 const key = `${assessmentSession.userPlatformId}:NextQuestionFlag`;
                 CacheMemory.set(key, false);
+                const assessmentKey = `${assessmentSession.userPlatformId}:Assessment`;
+                CacheMemory.delete(assessmentKey);
                 const customMessage = await this.systemGeneratedMessageService.getMessage("END_ASSESSMENT_MESSAGE");
-                message = customMessage ?? "The assessment has been completed.";
+                const phoneNumber = await this.countryCodeService.formatPhoneNumber(assessmentSession.userPlatformId);
+                const apiURL = `patients/byPhone?phone=${encodeURIComponent(phoneNumber)}`;
+                const result = await this.needleService.needleRequestForREAN("get", apiURL,null,null);
+                const patientData = result.Data.Patients.Items[0];
+                if (customMessage) {
+                    message = await this.fillMessageWithVariables(customMessage, patientData);
+                } else {
+                    message = "The assessment has been completed.";
+                }
                 console.log("    inside complete////// question block");
             }
 
@@ -290,6 +302,7 @@ export class ServeAssessmentService {
         await assessmentSession.save();
 
         const key = `${assessmentSession.userPlatformId}:Assessment`;
+
         await CacheMemory.set(key, messageId);
         
         // if (assessmentSession.userResponseType === "Text") {
@@ -355,6 +368,20 @@ export class ServeAssessmentService {
                 }
             });
         }
+    }
+
+    public async fillMessageWithVariables(template: string, values) {
+        const hasVariable = /{(\w+)}/.test(template);
+
+        if (!hasVariable) {
+            return template; // no placeholder — return as-is
+        }
+
+        return template.replace(/{(\w+)}/g, (_, key) =>
+            key in values && values[key] !== null && values[key] !== undefined
+                ? values[key]
+                : `{${key}}`
+        );
     }
 
 }
