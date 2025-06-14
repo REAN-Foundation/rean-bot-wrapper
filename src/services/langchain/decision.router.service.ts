@@ -14,7 +14,10 @@ import { EmojiFilter } from "../filter.message.for.emoji.service";
 import { DialogflowResponseService } from '../dialogflow.response.service';
 import { CacheMemory } from "../cache.memory.service";
 import { Intents } from "../../models/intents/intents.model";
+import { AssessmentSessionLogs } from "../../models/assessment.session.model";
 import { NeedleService } from "../needle.service";
+import { AssessmentService } from "../Assesssment/assessment.service";
+import { AssessmentIdentifiers } from "../../models/assessment/assessment.identifiers.model";
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -29,7 +32,8 @@ export class DecisionRouter {
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(ClientEnvironmentProviderService) private environmentProviderService?: ClientEnvironmentProviderService,
         @inject(EmojiFilter) private emojiFilter?: EmojiFilter,
-        @inject(NeedleService) private needleService?: NeedleService
+        @inject(NeedleService) private needleService?: NeedleService,
+        @inject(AssessmentService) private assessmentService?: AssessmentService
     ) {
         this.outgoingMessage = {
             PrimaryMessageHandler : MessageHandlerType.Unhandled,
@@ -120,7 +124,10 @@ export class DecisionRouter {
                 CurrentNodeId  : '',
                 Question       : '',
                 AssessmentFlag : false,
-                MetaData       : ''
+                MetaData       : {
+                    "assessmentStart"  : false,
+                    "askQuestionAgain" : false
+                }
             };
 
             // Currently will only support the assessment start through buttons
@@ -150,6 +157,7 @@ export class DecisionRouter {
                     // assessmentData.MetaData = responseFromAssessmentService;
                     assessmentData.AssessmentId = assessmentCode;
                     assessmentData.AssessmentName = matchingIntents.dataValues.name;
+                    assessmentData.MetaData.assessmentStart = true;
                     assessmentData.AssessmentFlag = true;
                 } else {
 
@@ -160,11 +168,46 @@ export class DecisionRouter {
                 if (nextQuestionFlag) {
                     if (nextQuestionFlag === true) {
                         assessmentData.AssessmentFlag = true;
-                        await CacheMemory.set(key, false);
+                        
+                        // await CacheMemory.set(key, false);
                     }
                 } else {
                     assessmentData.AssessmentFlag = false;
                 }
+            }
+
+            if (assessmentData.AssessmentFlag && !assessmentData.MetaData.assessmentStart) {
+                const AssessmentSession =
+                (await this.entityManagerProvider.getEntityManager(this.environmentProviderService))
+                    .getRepository(AssessmentSessionLogs);
+                const AssessmentIdentifiersRepo = (
+                    await this.entityManagerProvider.getEntityManager(this.environmentProviderService)
+                ).getRepository(AssessmentIdentifiers);
+                const assessmentResponse = await AssessmentSession.findOne({
+                    where : {
+                        userPlatformId : messageBody.platformId
+                    },
+                    order : [['createdAt', 'DESC']],
+                });
+                const assessmentIdentifierData = await AssessmentIdentifiersRepo.findOne({
+                    where : {
+                        assessmentSessionId : assessmentResponse.autoIncrementalID
+                    }
+                });
+                const assessmentResponseType = assessmentResponse.userResponseType;
+                const assessmentIdentifierString = assessmentIdentifierData.identifier;
+
+                const validationFlag = await this.assessmentService.validateAssessmentResponse(
+                    assessmentResponseType,
+                    assessmentIdentifierString,
+                    messageBody,
+                    assessmentResponse.dataValues
+                );
+
+                if (!validationFlag) {
+                    assessmentData.AssessmentFlag = false;
+                }
+            
             }
 
             // Check if message is part of assessment

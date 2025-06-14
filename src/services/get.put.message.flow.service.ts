@@ -24,6 +24,8 @@ import { sendTelegramButtonService } from './telegram.button.service';
 import { Logger } from '../common/logger';
 import { MessageHandlerType } from '../refactor/messageTypes/message.types';
 
+// import { AssessmentIdentifiers } from '../models/assessment/assessment.identifiers.model';
+
 @scoped(Lifecycle.ContainerScoped)
 export class MessageFlow{
 
@@ -308,6 +310,7 @@ export class MessageFlow{
         message_to_platform = await platformMessageService.SendMediaMessage(response_format, payload);
 
         if (messageType === "reancareAssessment") {
+            
             // assessmentSession.userMessageId = message_to_platform.body.messages[0].id;
             assessmentSession.userMessageId = message_to_platform.message_id;
             const AssessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);

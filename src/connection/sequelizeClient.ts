@@ -15,6 +15,7 @@ import { Logger } from '../../src/common/logger';
 import WorkflowUserData from '../models/workflow.user.data.model';
 import { Intents } from '../models/intents/intents.model';
 import { SystemGeneratedMessages } from '../models/system.generated.messages.model';
+import { AssessmentIdentifiers } from '../models/assessment/assessment.identifiers.model';
 
 //////////////////////////////////////////////////////////////////////////////////////
 
@@ -55,7 +56,8 @@ export class SequelizeClient {
                     WorkflowUserData,
                     Intents,
                     UserInfo,
-                    SystemGeneratedMessages
+                    SystemGeneratedMessages,
+                    AssessmentIdentifiers
                 ]);
             }
 
