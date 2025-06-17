@@ -4,7 +4,7 @@ import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../../common/logger';
 import needle from "needle";
 import { NeedleService } from '../../needle.service';
-import { sendApiButtonService, templateButtonService, watiTemplateButtonService } from '../../whatsappmeta.button.service';
+import { sendApiButtonService, sendApiInteractiveListService, templateButtonService, watiTemplateButtonService } from '../../whatsappmeta.button.service';
 import { translateService } from '../../translate.service';
 import { ClientEnvironmentProviderService } from '../../set.client/client.environment.provider.service';
 import { Iresponse } from '../../../refactor/interface/message.interface';
@@ -167,8 +167,14 @@ export class ServeAssessmentService {
                         i = i + 1;
                     }
                     if (channel === 'whatsappMeta' || channel === 'whatsappWati') {
-                        payload = await sendApiButtonService(buttonArray);
-                        messageType = 'interactivebuttons';
+                        if (buttonIds.length <= 3) {
+                            payload = await sendApiButtonService(buttonArray);
+                            messageType = 'interactivebuttons';
+                        } else {
+                            payload = await sendApiInteractiveListService(buttonArray);
+                            messageType = 'interactivelist';
+                        }
+
                     } else {
                         payload = await sendTelegramButtonService(buttonArray);
                         messageType = 'inline_keyboard';
