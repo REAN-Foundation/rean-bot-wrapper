@@ -20,6 +20,7 @@ import { Helper } from '../../../common/helper';
 import { SystemGeneratedMessagesService } from '../../../services/system.generated.message.service';
 import { AssessmentIdentifiers } from '../../../models/assessment/assessment.identifiers.model';
 import { CountryCodeService } from '../../../utils/phone.number.formatting';
+import { UserInfoService } from '../../../services/user.info/user.info.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ServeAssessmentService {
@@ -32,7 +33,8 @@ export class ServeAssessmentService {
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(SystemGeneratedMessagesService) private systemGeneratedMessageService?: SystemGeneratedMessagesService,
-        @inject(CountryCodeService ) private countryCodeService ?:CountryCodeService
+        @inject(CountryCodeService ) private countryCodeService ?:CountryCodeService,
+        @inject(UserInfoService) private userInfoService ?: UserInfoService
     ){}
 
     async startAssessment (platformUserId:any, channel: any, userTaskData: any) {
@@ -222,6 +224,16 @@ export class ServeAssessmentService {
                 } else {
                     message = "The assessment has been completed.";
                 }
+                if (result.Data.Patients.Items) {
+                    const userInfoPayload = {
+                        "Name"   : result.Data.Patients.Items[0].DisplayName,
+                        "Age"    : result.Data.Patients.Items[0].Age,
+                        "Gender" : result.Data.Patients.Items[0].Gender
+                    };
+                    await this.userInfoService.updateUserInfo(assessmentSession.userPlatformId, userInfoPayload);
+                }
+
+
                 console.log("    inside complete////// question block");
             }
 
