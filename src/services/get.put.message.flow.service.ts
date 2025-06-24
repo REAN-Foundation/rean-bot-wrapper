@@ -333,6 +333,13 @@ export class MessageFlow{
             await AssessmentSessionRepo.create(assessmentSession);
         }
         if (msg.provider === "REAN_BOT" || msg.provider === "GGHN" && message_to_platform.statusCode === 200) {
+             const previousMessageContextID = message_to_platform.body.messages[0].id;
+            const appRecord = await reminderMessage.findOne({
+                    where: { MessageId: previousMessageContextID },
+                    attributes: ['ParentActionId'],
+                    raw: true
+            });
+            const appointment_id = appRecord ? appRecord.ParentActionId : null;
             const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
             let todayDate = new Date().toISOString()
                 .split('T')[0];
@@ -341,15 +348,16 @@ export class MessageFlow{
             const messageId = await platformMessageService.getMessageIdFromResponse(message_to_platform);
             const phoneNumber = Helper.formatPhoneForDocProcessor(msg.userId);
 
-            const apiUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
+            //const apiUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
+            const apiUrl = `${docProcessBaseURL}appointment-schedules/${appointment_id}/reminder-response`;
             const headers = { headers : {
                 'Content-Type' : 'application/json',
                 Accept         : 'application/json',
             }
             };
             const obj = {
-                "WhatsApp_message_id" : messageId,
-                "Patient_replied"     : "Not replied"
+                channel_message_id : previousMessageContextID,
+                replied_status     : "Not replied"
             };
             await needle("put", apiUrl, obj, headers);
 

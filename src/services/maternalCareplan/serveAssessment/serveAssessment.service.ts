@@ -225,6 +225,7 @@ export class ServeAssessmentService {
                         .split('T')[0];
                     const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
                     const phoneNumber = Helper.formatPhoneForDocProcessor(personPhoneNumber);
+                    const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
                     todayDate = Helper.removeLeadingZerosFromDay(todayDate);
                     const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
 
@@ -235,7 +236,8 @@ export class ServeAssessmentService {
                         {
                             assessment_id   : assessmentSession.assesmentId,
                             patient_user_id : questionData.PatientUserId,
-                            phone_number    : phoneNumber,
+                            phone_number    : formattedPhoneNumber,
+                            appointment_date: todayDate,
                             chosen_option   : {
                                 sequence : userAnswer,
                                 text     : userResponse
