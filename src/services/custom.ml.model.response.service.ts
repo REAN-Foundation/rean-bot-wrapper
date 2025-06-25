@@ -38,7 +38,7 @@ export class CustomMLModelResponseService{
             if (infoProvided.dataValues.infoProvided) {
                 const userInfo = infoProvided.dataValues.userInfo;
                 const addUserInfo = `User information: ${userInfo} || User Question: `;
-                message = addUserInfo + message;
+                message =  message + addUserInfo ;
             } else {
                 message = "User Question: " + message;
             }
