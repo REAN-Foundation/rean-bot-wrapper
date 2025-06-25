@@ -345,8 +345,9 @@ export class MessageFlow{
             });
             const appointment_id = appRecord ? appRecord.ParentActionId : null;
             const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
-            let todayDate = new Date().toISOString()
-                .split('T')[0];
+            
+            //let todayDate = new Date().toISOString()
+            //  .split('T')[0];
             //todayDate = Helper.removeLeadingZerosFromDay(todayDate);
             //const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
             //const messageId = await platformMessageService.getMessageIdFromResponse(message_to_platform);
