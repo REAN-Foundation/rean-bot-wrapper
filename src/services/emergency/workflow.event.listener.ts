@@ -68,13 +68,22 @@ export class WorkflowEventListener {
             console.log("Message ->", message);
             const schemaInstanceStatus = await this.getPreviousMessageFromWorkflow(message.platformId);
             if (schemaInstanceStatus === null) {
-                if (message.messageBody.toLowerCase() === "help")
+                if (message.messageBody.toLowerCase() === "yes, need help")
                 {
                     console.log("Schema instance terminated and clicked help");
                 }
-                else if (message.messageBody.toLowerCase() === "not now")
+                else if (message.messageBody.toLowerCase() === "no, not now")
                 {
-                    console.log("Schema instance terminated and clicked not now");
+                    const response_format: Iresponse = commonResponseMessageFormat();
+                    response_format.messageText = "ALERT VoICE is a Voluntary Community First Responders Network that extends support on a best effort basis. Thank you.";
+                    response_format.message_type = "text";
+                    response_format.platform = message.platform;
+                    const payload = null;
+                    response_format.sessionId = message.platformId;
+                    this._platformMessageService = container.resolve(message.platform);
+                    if (this._platformMessageService) {
+                        await this._platformMessageService.SendMediaMessage(response_format, payload);
+                    }
                     return null;
                 }
                 else {
@@ -84,11 +93,11 @@ export class WorkflowEventListener {
                         const response_format: Iresponse = commonResponseMessageFormat();
                         let payload = null;
                         response_format.sessionId = message.platformId;
-                        const options = ["Help","Help", "Not now", "not_now"];
+                        const options = ["Yes, need help","Yes, need help","No, not now","No, not now"];
                         if (message.platform === 'whatsappMeta' || message.platform === 'whatsappWati') {
                             payload = await sendApiButtonService(options);
                             response_format.message_type  = 'template';
-                            payload["templateName"] = "help_check";
+                            payload["templateName"] = "emergency_ask";
                             payload["languageForSession"] = "en";
 
                         } else {
