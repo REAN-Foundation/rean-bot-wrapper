@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 /* eslint-disable linebreak-style */
 import { Imessage, Iresponse, OutgoingMessage } from '../refactor/interface/message.interface';
