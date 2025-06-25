@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 import { scoped, Lifecycle, inject } from 'tsyringe';
 import { Logger } from '../../../common/logger';
 import needle from "needle";
 import { NeedleService } from '../../needle.service';
-import { sendApiButtonService, templateButtonService, watiTemplateButtonService } from '../../whatsappmeta.button.service';
+import { sendApiButtonService, sendApiInteractiveListService, templateButtonService, watiTemplateButtonService } from '../../whatsappmeta.button.service';
 import { translateService } from '../../translate.service';
 import { ClientEnvironmentProviderService } from '../../set.client/client.environment.provider.service';
 import { Iresponse } from '../../../refactor/interface/message.interface';
@@ -16,6 +17,10 @@ import { CacheMemory } from '../../../services/cache.memory.service';
 import { CustomModelResponseFormat } from '../../../services/response.format/custom.model.response.format';
 import { sendTelegramButtonService } from '../../../services/telegram.button.service';
 import { Helper } from '../../../common/helper';
+import { SystemGeneratedMessagesService } from '../../../services/system.generated.message.service';
+import { AssessmentIdentifiers } from '../../../models/assessment/assessment.identifiers.model';
+import { CountryCodeService } from '../../../utils/phone.number.formatting';
+import { UserInfoService } from '../../../services/user.info/user.info.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ServeAssessmentService {
@@ -27,6 +32,9 @@ export class ServeAssessmentService {
         @inject(translateService) private translate?: translateService,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
+        @inject(SystemGeneratedMessagesService) private systemGeneratedMessageService?: SystemGeneratedMessagesService,
+        @inject(CountryCodeService ) private countryCodeService ?:CountryCodeService,
+        @inject(UserInfoService) private userInfoService ?: UserInfoService
     ){}
 
     async startAssessment (platformUserId:any, channel: any, userTaskData: any) {
@@ -93,6 +101,8 @@ export class ServeAssessmentService {
                     userResponse         : null,
                     userResponseTime     : null,
                     userMessageId        : null,
+                    identifiers          : questionNode.FieldIdentifier,
+                    identifiersUnit      : questionNode.FieldIdentifierUnit,
                 };
 
                 const key = `${platformUserId}:NextQuestionFlag`;
@@ -115,8 +125,13 @@ export class ServeAssessmentService {
             const AssessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
             const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
             const assessmentSession = await AssessmentSessionRepo.findOne({ where: { "userMessageId": userContextMessageId } });
+            const AssessmentIdentifiersRepo = (
+                await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)
+            ).getRepository(AssessmentIdentifiers);
             const apiURL = `clinical/assessments/${assessmentSession.assesmentId}/questions/${assessmentSession.assesmentNodeId}/answer`;
-            const userAnswer = await this.getAnswerFromIntent(userResponse);
+            const userAnswer = await this.getAnswer(userResponse, assessmentSession.assesmentId, assessmentSession.assesmentNodeId);
+
+            // const userAnswer = await this.getAnswerFromIntent(userResponse);
             assessmentSession.userResponse = userAnswer;
             assessmentSession.userResponseTime = new Date();
             await assessmentSession.save();
@@ -128,13 +143,15 @@ export class ServeAssessmentService {
 
             // refactor separate it out from here give URL and obj according to that.
             let message: any = "";
+            let messageFlag = "";
             const requestBody = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
             let payload = null;
             let messageType = 'text';
             const questionData = requestBody.Data.AnswerResponse.Next;
+            const nodeType = requestBody.Data.AnswerResponse?.Next?.NodeType ?? null;
 
             //Next question send or complete the assessment
-            if (requestBody.Data.AnswerResponse.Next !== null) {
+            if (requestBody.Data.AnswerResponse.Next !== null && nodeType !== "Message") {
                 let questionRawData = null;
                 if (requestBody.Data.AnswerResponse.Next?.RawData) {
                     questionRawData = JSON.parse(requestBody.Data.AnswerResponse.Next.RawData);
@@ -152,8 +169,14 @@ export class ServeAssessmentService {
                         i = i + 1;
                     }
                     if (channel === 'whatsappMeta' || channel === 'whatsappWati') {
-                        payload = await sendApiButtonService(buttonArray);
-                        messageType = 'interactivebuttons';
+                        if (buttonIds.length <= 3) {
+                            payload = await sendApiButtonService(buttonArray);
+                            messageType = 'interactivebuttons';
+                        } else {
+                            payload = await sendApiInteractiveListService(buttonArray);
+                            messageType = 'interactivelist';
+                        }
+
                     } else {
                         payload = await sendTelegramButtonService(buttonArray);
                         messageType = 'inline_keyboard';
@@ -172,11 +195,45 @@ export class ServeAssessmentService {
                     userResponseTime     : null,
                     userMessageId        : null,
                 };
-                await AssessmentSessionRepo.create(assessmentSessionLogs);
+                messageFlag = "assessment";
+                const assessmentSessionData = await AssessmentSessionRepo.create(assessmentSessionLogs);
+                const assessmentIdentifierObj = {
+                    assessmentSessionId : assessmentSessionData.autoIncrementalID,
+                    identifier          : questionData.FieldIdentifier,
+                    userResponseType    : assessmentSessionData.userResponseType
+                };
+                await AssessmentIdentifiersRepo.create(assessmentIdentifierObj);
                 const key = `${assessmentSession.userPlatformId}:NextQuestionFlag`;
                 CacheMemory.set(key, true);
+            } else if (requestBody.Data.AnswerResponse.Next !== null && nodeType === "Message") {
+                messageFlag = "endassessment";
+                message = requestBody.Data.AnswerResponse.Next.Description;
             } else {
-                message = "The assessment has been completed.";
+                messageFlag = "endassessment";
+                const key = `${assessmentSession.userPlatformId}:NextQuestionFlag`;
+                CacheMemory.set(key, false);
+                const assessmentKey = `${assessmentSession.userPlatformId}:Assessment`;
+                CacheMemory.delete(assessmentKey);
+                const customMessage = await this.systemGeneratedMessageService.getMessage("END_ASSESSMENT_MESSAGE");
+                const phoneNumber = await this.countryCodeService.formatPhoneNumber(assessmentSession.userPlatformId);
+                const apiURL = `patients/byPhone?phone=${encodeURIComponent(phoneNumber)}`;
+                const result = await this.needleService.needleRequestForREAN("get", apiURL,null,null);
+                const patientData = result.Data.Patients.Items[0];
+                if (customMessage) {
+                    message = await this.fillMessageWithVariables(customMessage, patientData);
+                } else {
+                    message = "The assessment has been completed.";
+                }
+                if (result.Data.Patients.Items) {
+                    const userInfoPayload = {
+                        "Name"   : result.Data.Patients.Items[0].DisplayName,
+                        "Age"    : result.Data.Patients.Items[0].Age,
+                        "Gender" : result.Data.Patients.Items[0].Gender
+                    };
+                    await this.userInfoService.updateUserInfo(assessmentSession.userPlatformId, userInfoPayload);
+                }
+
+
                 console.log("    inside complete////// question block");
             }
 
@@ -260,17 +317,34 @@ export class ServeAssessmentService {
         }
     };
 
-    public async updateDBChatSessionWithMessageId( userId: string, messageId: any, chatMessageRepository, AssessmentSessionRepo) {
+    public async updateDBChatSessionWithMessageId( userId: string, messageId: any, chatMessageRepository, AssessmentSessionRepo, messageFlag = "assessment") {
         const assessmentSession = await AssessmentSessionRepo.findOne({ where: { "userPlatformId": userId }, order: [['createdAt', 'DESC']] });
         assessmentSession.userMessageId = messageId;
         await assessmentSession.save();
 
         const key = `${assessmentSession.userPlatformId}:Assessment`;
+
         await CacheMemory.set(key, messageId);
-        if (assessmentSession.userResponseType === "Text") {
-            await this.updateMessageFlag(userId, messageId, chatMessageRepository);
-            console.log("    updated the message flag to assessment");
-        }
+        
+        // if (assessmentSession.userResponseType === "Text") {
+        await this.updateMessageFlag(userId, messageId, chatMessageRepository, messageFlag);
+        console.log("updated the message flag to assessment");
+
+        // }
+    }
+
+    public async getAnswer( userResponse: string, assessmentId: string, assessmentNodeId: string) {
+        const apiURL = `clinical/assessments/${assessmentId}/questions/${assessmentNodeId}`;
+        const response = await this.needleService.needleRequestForREAN("get", apiURL, null, null);
+        const options = response.Data.Question.Options;
+
+        const sequence = options?.length
+            ? options.find(
+                (option) =>
+                    option.ProviderGivenCode.toLowerCase() === userResponse.toLowerCase()
+            )?.Sequence ?? userResponse
+            : userResponse;
+        return sequence;
     }
 
     public getAnswerFromIntent( intentName ) {
@@ -298,7 +372,7 @@ export class ServeAssessmentService {
         return message[intentName] ?? intentName;
     }
 
-    public async updateMessageFlag(userId, messageId, chatMessageRepository) {
+    public async updateMessageFlag(userId, messageId, chatMessageRepository, messageFlag = "assessment") {
         const response = await chatMessageRepository.findOne({
             where : {
                 userPlatformId    : userId,
@@ -307,7 +381,7 @@ export class ServeAssessmentService {
         });
         if (response) {
             await chatMessageRepository.update({
-                messageFlag : "assessment"
+                messageFlag : messageFlag
             },
             {
                 where : {
@@ -315,6 +389,20 @@ export class ServeAssessmentService {
                 }
             });
         }
+    }
+
+    public async fillMessageWithVariables(template: string, values) {
+        const hasVariable = /{(\w+)}/.test(template);
+
+        if (!hasVariable) {
+            return template; // no placeholder — return as-is
+        }
+
+        return template.replace(/{(\w+)}/g, (_, key) =>
+            key in values && values[key] !== null && values[key] !== undefined
+                ? values[key]
+                : `{${key}}`
+        );
     }
 
 }

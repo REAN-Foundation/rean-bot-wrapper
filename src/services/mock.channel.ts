@@ -8,7 +8,7 @@ import { platformServiceInterface } from '../refactor/interface/platform.interfa
 import { MessageFlow } from './get.put.message.flow.service';
 import { MockCHannelMessageFunctionalities } from './mock.channel.message.funtionalities';
 import { ChatMessage } from '../models/chat.message.model';
-import { WhatsappMessageToDialogflow } from './whatsapp.messagetodialogflow';
+import { ApiMessageToDialogflow } from './api.messagetodialogflow';
 import request from 'request';
 import { EntityManagerProvider } from './entity.manager.provider.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
@@ -23,7 +23,7 @@ export class MockMessageService implements platformServiceInterface {
     constructor(@inject(delay(() => MessageFlow)) public messageFlow,
         @inject( AwsS3manager ) private awsS3manager?: AwsS3manager,
         @inject(MockCHannelMessageFunctionalities) private messageFunctionalitiesmockchannel?: MockCHannelMessageFunctionalities,
-        @inject(WhatsappMessageToDialogflow) public whatsappMessageToDialogflow?: WhatsappMessageToDialogflow,
+        @inject(ApiMessageToDialogflow) public apiMessageToDialogflow?: ApiMessageToDialogflow,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
 
@@ -33,7 +33,7 @@ export class MockMessageService implements platformServiceInterface {
 
     async handleMessage(requestBody: any, channel: string) {
         this.req = requestBody;
-        const generatorMockMessage = this.whatsappMessageToDialogflow.messageToDialogflow(requestBody);
+        const generatorMockMessage = this.apiMessageToDialogflow.messageToDialogflow(requestBody);
         let done = false;
         const mockMessages = [];
         let mockMessagetoDialogflow: Imessage;
@@ -47,7 +47,7 @@ export class MockMessageService implements platformServiceInterface {
         }
         for (mockMessagetoDialogflow of mockMessages){
             if (mockMessagetoDialogflow) {
-                mockMessagetoDialogflow.platform = 'MockChannel';
+                //mockMessagetoDialogflow.platform = 'MockChannel';
                 const response = await this.messageFlow.checkTheFlowRouter(mockMessagetoDialogflow, channel, this);
                 return response;
             }
@@ -133,25 +133,35 @@ export class MockMessageService implements platformServiceInterface {
             };
         }
         else {
-            const mockUri = "http://127.0.0.1:80/listener";
-            try {
-                const response = await request({
-                    method : 'POST',
-                    uri    : mockUri,
-                    body   : {
-                        conversationId : `${respChatMessage[respChatMessage.length - 2].messageId}`,
-                        responses      : [
-                            {
-                                text    : response_format.messageText,
-                                payload : payload
-                            }
-                        ]
-                    },
-                    json : true
-                });
-            } catch (error) {
-                console.log("Error in sending to botium");
-            }
+            return {
+                Status: "success",
+                conversationid: response_format.sessionId,
+                responses: [
+                    {
+                        text: response_format.messageText,
+                        payload: payload
+                    }
+                ]
+            };
+            // const mockUri = "http://127.0.0.1:80/listener";
+            // try {
+            //     const response = await request({
+            //         method : 'POST',
+            //         uri    : mockUri,
+            //         body   : {
+            //             conversationId : `${respChatMessage[respChatMessage.length - 2].messageId}`,
+            //             responses      : [
+            //                 {
+            //                     text    : response_format.messageText,
+            //                     payload : payload
+            //                 }
+            //             ]
+            //         },
+            //         json : true
+            //     });
+            // } catch (error) {
+            //     console.log("Error in sending to botium");
+            // }
         }
         
     };
@@ -161,7 +171,7 @@ export class MockMessageService implements platformServiceInterface {
         if (message.messages[0].type === "text") {
             return await this.messageFunctionalitiesmockchannel.textMessageFormat(message);
         } else if (message.messages[0].type === "interactive-list") {
-            return await this.messageFunctionalitiesmockchannel.interactiveListMessaegFormat(message);
+            return await this.messageFunctionalitiesmockchannel.interactiveListMessageFormat(message);
         }
         else {
             throw new Error("Message is not text");

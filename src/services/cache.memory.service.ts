@@ -44,4 +44,11 @@ export class CacheMemory {
         console.log("Cache cleared");
     }
 
+    static delete(key: string): void {
+        if (key in this.CacheData) {
+            delete this.CacheData[key];
+            console.log(`Deleted cache for key: ${key}`);
+        }
+    }
+
 }

@@ -1,11 +1,14 @@
 /* eslint-disable max-len */
-import { Lifecycle, scoped } from "tsyringe";
+import { Lifecycle, scoped, inject } from "tsyringe";
 import { IserviceResponseFunctionalities } from "./response.interface";
+import { ClientEnvironmentProviderService } from "../set.client/client.environment.provider.service";
 
 @scoped(Lifecycle.ContainerScoped)
 export class CustomModelResponseFormat implements IserviceResponseFunctionalities{
 
-    constructor(private response){}
+    constructor(private response,
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+    ){}
 
     getText() {
 

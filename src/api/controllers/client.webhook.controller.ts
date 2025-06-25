@@ -182,7 +182,7 @@ export class ClientWebhookController {
             else {
                 const consentRequirement =  clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_ACTIVATION");
                 console.log("Consent feature is ", consentRequirement);
-                const validChannels = ["REAN_SUPPORT", "slack", "SNEHA_SUPPORT", "mockChannel"];
+                const validChannels = ["REAN_SUPPORT", "slack", "SNEHA_SUPPORT", "api"];
                 if (!validChannels.includes(req.params.channel)) {
                     this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
                 }
@@ -191,7 +191,7 @@ export class ClientWebhookController {
                     console.log("Processing the consent message for telegram");
                     await this.handleConsentMessage(req, res,req.body,"inline_keyboard",req.params.channel,firstTimeUser );
                 }
-                else if (req.params.channel === "mockChannel"){
+                else if (req.params.channel === "api"){
                     const response = await this._platformMessageService.handleMessage(req.body, req.params.channel);
                     return res.status(200).send(response);
                 }
@@ -371,6 +371,10 @@ export class ClientWebhookController {
             if (statuses) {
                 logMessage = `Handling the ${statuses[0].status} for Meta Whatsapp for message with id: ${statuses[0].id}`;
                 Logger.instance().log(logMessage);
+                if (statuses[0].status === "failed") {
+                    console.log(req.body);
+                    console.log(statuses[0].errors[0].title);
+                }
                 await this.sendSuccessMessage(chatMessageRepository, messageStatusRepository, res,statuses);
             }
             else {
