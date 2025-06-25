@@ -56,7 +56,7 @@ export class SequelizeClient {
                     MessageStatus,
                     WorkflowUserData,
                     UserInfo,
-                    ReminderMessage
+                    ReminderMessage,
                     Intents,
                     SystemGeneratedMessages,
                     AssessmentIdentifiers

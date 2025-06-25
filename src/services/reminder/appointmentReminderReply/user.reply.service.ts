@@ -3,7 +3,7 @@ import needle from "needle";
 import { Logger } from '../../../common/logger';
 import { platformServiceInterface } from '../../../refactor/interface/platform.interface';
 import { ClientEnvironmentProviderService } from '../../set.client/client.environment.provider.service';
-import { Helper } from '../../../common/helper';
+//import { Helper } from '../../../common/helper';
 import { AnswerYesMsgService } from '../../../services/maternalCareplan/serveAssessment/answer.yes.service';
 import { EntityManagerProvider } from '../../entity.manager.provider.service';
 import { ReminderMessage} from '../../../models/reminder.model';
@@ -30,9 +30,9 @@ export class AppointmentUserReplyService {
             //const phoneNumber = Helper.formatPhoneForDocProcessor(personPhoneNumber);
             const previousMessageContextID = eventObj.body.originalDetectIntentRequest.payload.contextId;
             const appRecord = await reminderMessage.findOne({
-                    where: { MessageId: previousMessageContextID },
-                    attributes: ['ParentActionId'],
-                    raw: true
+                where: { MessageId: previousMessageContextID },
+                attributes: ['ParentActionId'],
+                raw: true
             });
             const appointment_id = appRecord ? appRecord.ParentActionId : null;
 
