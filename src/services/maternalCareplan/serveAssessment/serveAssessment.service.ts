@@ -276,41 +276,41 @@ export class ServeAssessmentService {
                     await this.updateDBChatSessionWithMessageId(userId, messageId, chatMessageRepository, AssessmentSessionRepo);
                 }
 
-                if (userResponse === "Work_Commitments" ||
-                    userResponse === "Feeling_Unwell_A" ||
-                    userResponse === "Transit_Issues") {
-                    const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
-                    let todayDate = new Date().toISOString()
-                        .split('T')[0];
-                    const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
-                    const phoneNumber = Helper.formatPhoneForDocProcessor(personPhoneNumber);
-                    const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
-                    todayDate = Helper.removeLeadingZerosFromDay(todayDate);
-                    const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+                // if (userResponse === "Work_Commitments" ||
+                //     userResponse === "Feeling_Unwell_A" ||
+                //     userResponse === "Transit_Issues") {
+                //     const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
+                //     let todayDate = new Date().toISOString()
+                //         .split('T')[0];
+                //     const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
+                //     const phoneNumber = Helper.formatPhoneForDocProcessor(personPhoneNumber);
+                //     const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+                //     todayDate = Helper.removeLeadingZerosFromDay(todayDate);
+                //     const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
 
-                    // const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
-                    const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/assessment-response`;
-                    const res = await needle("put",
-                        getUrl,
-                        {
-                            assessment_id   : assessmentSession.assesmentId,
-                            patient_user_id : questionData.PatientUserId,
-                            phone_number    : formattedPhoneNumber,
-                            appointment_date: todayDate,
-                            chosen_option   : {
-                                sequence : userAnswer,
-                                text     : userResponse
-                            }
-                        },
-                        {
-                            headers : {
-                                'Content-Type' : 'application/json',
-                                Accept         : 'application/json',
-                            },
-                        },
-                    );
-                    console.log(`Object in reply service ${JSON.stringify(res.body,null, 4)}`);
-                }
+                //     // const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
+                //     const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/assessment-response`;
+                //     const res = await needle("put",
+                //         getUrl,
+                //         {
+                //             assessment_id   : assessmentSession.assesmentId,
+                //             patient_user_id : questionData.PatientUserId,
+                //             phone_number    : formattedPhoneNumber,
+                //             appointment_date: todayDate,
+                //             chosen_option   : {
+                //                 sequence : userAnswer,
+                //                 text     : userResponse
+                //             }
+                //         },
+                //         {
+                //             headers : {
+                //                 'Content-Type' : 'application/json',
+                //                 Accept         : 'application/json',
+                //             },
+                //         },
+                //     );
+                //     console.log(`Object in reply service ${JSON.stringify(res.body,null, 4)}`);
+                // }
             }
 
         } catch (error) {
