@@ -55,7 +55,7 @@ export class kerotoplastyService {
         }
         case 'Critical':
         {
-            message = `Your situation seems *critical*.\n Please visit us at the nearest center on the next available.`;
+            message = `Your situation seems *critical*.\n Please visit us at the nearest center on the next available appointment.`;
             severityGrade = 2;
             break;
         }
@@ -89,8 +89,6 @@ export class kerotoplastyService {
         return (symptomComment);
     }
 
-
-
     async postingImage(eventObj){
         try {
             const parameters = eventObj.body.queryResult.parameters;
@@ -118,7 +116,10 @@ export class kerotoplastyService {
         const contactList =
         (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
         const personContactList = await contactList.findOne({ where: { mobileNumber: userId } });
-        const EMRNumber  = personContactList.dataValues.ehrSystemCode;
+        let EMRNumber  = personContactList.dataValues.ehrSystemCode.toUpperCase();
+        if (EMRNumber) {
+            EMRNumber = EMRNumber.toUpperCase();
+        }
         const ClickupListID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_CASE_LIST_ID");
         if (intent === "appointment-followconditionIdentification"){
             await contactList.update({ repetitionFlag: "True" }, { where: { mobileNumber: userId } });
@@ -179,7 +180,10 @@ export class kerotoplastyService {
         (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
         const personContactList = await contactList.findOne({ where: { mobileNumber: userId } });
         const taskId = personContactList.dataValues.cmrCaseTaskID;
-        const EMRNumber  = personContactList.dataValues.ehrSystemCode;
+        let EMRNumber  = personContactList.dataValues.ehrSystemCode;
+        if (EMRNumber) {
+            EMRNumber = EMRNumber.toUpperCase();
+        }
         const user_details = await this.getEMRDetails(EMRNumber,eventObj);
         const ClickupListID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_CASE_LIST_ID");
         if (taskId){

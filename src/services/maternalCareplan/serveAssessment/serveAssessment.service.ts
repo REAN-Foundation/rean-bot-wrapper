@@ -118,7 +118,7 @@ export class ServeAssessmentService {
         }
     }
 
-    answerQuestion = async (eventObj, userId: string, userResponse: string, userContextMessageId: string, channel: string, doSend: boolean ) => {
+    answerQuestion = async (eventObj, userId: string, userResponse: string, userContextMessageId: string, channel: string, doSend: boolean, intent = null ) => {
         // eslint-disable-next-line max-len
         try {
 
@@ -242,6 +242,8 @@ export class ServeAssessmentService {
                 console.log("sending message from handle request");
                 const response = { body: { answer: message }, payload: payload };
                 const customModelResponseFormat = new CustomModelResponseFormat(response);
+                const userPhoneNumber = assessmentSession.userPlatformId;
+                this.checkDocumentProcessor(userPhoneNumber, userResponse, userAnswer, assessmentSession, questionData, intent);
                 return customModelResponseFormat;
 
                 // response = await eventObj.SendMediaMessage(response_format, payload);
@@ -274,38 +276,41 @@ export class ServeAssessmentService {
                     await this.updateDBChatSessionWithMessageId(userId, messageId, chatMessageRepository, AssessmentSessionRepo);
                 }
 
-                if (userResponse === "Work_Commitments" ||
-                    userResponse === "Feeling_Unwell_A" ||
-                    userResponse === "Transit_Issues") {
-                    const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
-                    let todayDate = new Date().toISOString()
-                        .split('T')[0];
-                    const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
-                    const phoneNumber = Helper.formatPhoneForDocProcessor(personPhoneNumber);
-                    todayDate = Helper.removeLeadingZerosFromDay(todayDate);
-                    const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+                // if (userResponse === "Work_Commitments" ||
+                //     userResponse === "Feeling_Unwell_A" ||
+                //     userResponse === "Transit_Issues") {
+                //     const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
+                //     let todayDate = new Date().toISOString()
+                //         .split('T')[0];
+                //     const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
+                //     const phoneNumber = Helper.formatPhoneForDocProcessor(personPhoneNumber);
+                //     const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+                //     todayDate = Helper.removeLeadingZerosFromDay(todayDate);
+                //     const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
 
-                    // const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
-                    const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/follow-up/assessment/reply/${phoneNumber}/date/${todayDate}`;
-                    const res = await needle("put",
-                        getUrl,
-                        {
-                            assessment_id   : assessmentSession.assesmentId,
-                            patient_user_id : questionData.PatientUserId,
-                            chosen_option   : {
-                                sequence : userAnswer,
-                                text     : userResponse
-                            }
-                        },
-                        {
-                            headers : {
-                                'Content-Type' : 'application/json',
-                                Accept         : 'application/json',
-                            },
-                        },
-                    );
-                    console.log(`Object in reply service ${JSON.stringify(res.body,null, 4)}`);
-                }
+                //     // const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
+                //     const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/assessment-response`;
+                //     const res = await needle("put",
+                //         getUrl,
+                //         {
+                //             assessment_id   : assessmentSession.assesmentId,
+                //             patient_user_id : questionData.PatientUserId,
+                //             phone_number    : formattedPhoneNumber,
+                //             appointment_date: todayDate,
+                //             chosen_option   : {
+                //                 sequence : userAnswer,
+                //                 text     : userResponse
+                //             }
+                //         },
+                //         {
+                //             headers : {
+                //                 'Content-Type' : 'application/json',
+                //                 Accept         : 'application/json',
+                //             },
+                //         },
+                //     );
+                //     console.log(`Object in reply service ${JSON.stringify(res.body,null, 4)}`);
+                // }
             }
 
         } catch (error) {
@@ -313,6 +318,45 @@ export class ServeAssessmentService {
                 .log_error(error.message,500,'Answer assessment and get another question service error.');
         }
     };
+
+    public async checkDocumentProcessor(userPhoneNumber, userResponse, userAnswer, assessmentSession, questionData, intent) {
+        if (intent === "Work_Commitments" ||
+            intent === "Feeling_Unwell_A" ||
+            intent === "Transit_Issues") {
+            const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
+            let todayDate = new Date().toISOString()
+                .split('T')[0];
+
+            //const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
+            const phoneNumber = Helper.formatPhoneForDocProcessor(userPhoneNumber);
+            const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+            todayDate = Helper.removeLeadingZerosFromDay(todayDate);
+            const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+
+            // const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
+            const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/assessment-response`;
+            const res = await needle("put",
+                getUrl,
+                {
+                    assessment_id   : assessmentSession.assesmentId,
+                    patient_user_id : questionData.PatientUserId,
+                    phone_number    : formattedPhoneNumber,
+                    appointment_date: todayDate,
+                    chosen_option   : {
+                        sequence : userAnswer,
+                        text     : userResponse
+                    }
+                },
+                {
+                    headers : {
+                        'Content-Type' : 'application/json',
+                        Accept         : 'application/json',
+                    },
+                },
+            );
+            console.log(`Object in reply service ${JSON.stringify(res.body,null, 4)}`);
+        }
+    }
 
     public async updateDBChatSessionWithMessageId( userId: string, messageId: any, chatMessageRepository, AssessmentSessionRepo, messageFlag = "assessment") {
         const assessmentSession = await AssessmentSessionRepo.findOne({ where: { "userPlatformId": userId }, order: [['createdAt', 'DESC']] });
