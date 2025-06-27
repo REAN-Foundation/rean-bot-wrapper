@@ -22,6 +22,7 @@ export class CustomMLModelResponseService{
 
     getCustomModelResponse = async(message: string, platform: string = null, completeMessage:Imessage = null) =>{
         const customModelUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CUSTOM_ML_MODEL_URL");
+        const tenantDisplayCode = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
 
         const repository = await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService);
         const UserInfoRepository = (
@@ -44,7 +45,11 @@ export class CustomMLModelResponseService{
             }
         }
 
-        const obj = { "userID": completeMessage.platformId,"user_query": message };
+        const obj = { 
+            "userID"              : completeMessage.platformId,
+            "user_query"          : message,
+            "tenant_display_code" : tenantDisplayCode
+        };
 
         // send authorisation once enabled for the custom model
         // const requestAuthentication = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REQUEST_AUTHENTICATION");
