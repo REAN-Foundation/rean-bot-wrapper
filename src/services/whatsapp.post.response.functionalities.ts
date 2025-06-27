@@ -116,7 +116,7 @@ export class WhatsappPostResponseFunctionalities{
         if (payload.fields.header){
             header = payload.fields.header.stringValue;
         } else {
-            header = "LIST";
+            header = "Select ";
         }
 
         let count_meta = 0;
