@@ -37,7 +37,7 @@ export class ClickUpTask{
                 topic = postTopic;
                 
             }
-            else if (responseChatMessage.length >= 1 ){
+            else if (responseChatMessage?.length >= 1 ){
                 topic = responseChatMessage[responseChatMessage.length - 1].dataValues.messageContent;
             }
             else {
