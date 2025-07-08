@@ -311,20 +311,21 @@ export class MessageFlow{
         let message_to_platform = null;
         // eslint-disable-next-line max-len
         message_to_platform = await platformMessageService.SendMediaMessage(response_format, payload);
+        
         // const customRemSetting: boolean = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CUSTOM_REM_SETTING") === "true";
         // if (msg.agentName === 'Reancare' && customRemSetting) {
         //     try {
-                const msg_id = message_to_platform.body.messages[0].id;
-                //const msg_id = await platformMessageService.getMessageIdFromResponse(message_to_platform);
-                // const reminder_info = {
-                //     userId: msg.payload?.userId,
-                //     MessageId: msg_id,
-                //     ReminderId: msg.payload?.ReminderId,
-                //     ReminderDate: msg.payload?.ReminderDate,
-                //     ReminderTime: msg.payload?.ReminderTime,
-                //     ParentActionId: msg.payload?.ParentActionId
-                // };
-                // await reminderMessage.create(reminder_info);
+        // const msg_id = message_to_platform.body.messages[0].id;
+        //const msg_id = await platformMessageService.getMessageIdFromResponse(message_to_platform);
+        // const reminder_info = {
+        //     userId: msg.payload?.userId,
+        //     MessageId: msg_id,
+        //     ReminderId: msg.payload?.ReminderId,
+        //     ReminderDate: msg.payload?.ReminderDate,
+        //     ReminderTime: msg.payload?.ReminderTime,
+        //     ParentActionId: msg.payload?.ParentActionId
+        // };
+        // await reminderMessage.create(reminder_info);
         //     } catch (error) {
         //         console.error("Failed to insert into reminderMessage:", error);
         //     }
@@ -347,7 +348,7 @@ export class MessageFlow{
             const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
             
             let todayDate = new Date().toISOString()
-             .split('T')[0];
+                .split('T')[0];
             todayDate = Helper.removeLeadingZerosFromDay(todayDate);
             const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
             const messageId = await platformMessageService.getMessageIdFromResponse(message_to_platform);

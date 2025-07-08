@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { scoped, Lifecycle, inject } from 'tsyringe';
 import needle from "needle";
 import { Logger } from '../../../common/logger';
@@ -24,7 +25,9 @@ export class AppointmentUserReplyService {
     async sendUserResponse (eventObj) {
         try {
             let msg = "";
-            const reminderMessage = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ReminderMessage);
+            const reminderMessage = (
+                await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService))
+                .getRepository(ReminderMessage);
             const intentName = eventObj.body.queryResult ? eventObj.body.queryResult.intent.displayName : null;
             const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
             const phoneNumber = Helper.formatPhoneForDocProcessor(personPhoneNumber);
