@@ -329,19 +329,17 @@ export class ServeAssessmentService {
 
             //const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
             const phoneNumber = Helper.formatPhoneForDocProcessor(userPhoneNumber);
-            const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+            // const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
             todayDate = Helper.removeLeadingZerosFromDay(todayDate);
             const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
 
-            // const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
-            const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/assessment-response`;
+            const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
+            // const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/assessment-response`;
             const res = await needle("put",
                 getUrl,
                 {
                     assessment_id   : assessmentSession.assesmentId,
                     patient_user_id : questionData.PatientUserId,
-                    phone_number    : formattedPhoneNumber,
-                    appointment_date: todayDate,
                     chosen_option   : {
                         sequence : userAnswer,
                         text     : userResponse
