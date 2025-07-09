@@ -15,7 +15,10 @@ WORKDIR /app
 
 COPY package*.json /app/
 RUN npm install -g typescript
-RUN npm install --no-package-lock
+RUN npm cache clean --force
+RUN rm -rf node_modules
+# RUN npm install --no-package-lock
+RUN npm install
 RUN npm run build
 
 # RUN npm run build
