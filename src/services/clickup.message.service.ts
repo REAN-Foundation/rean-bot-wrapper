@@ -12,6 +12,8 @@ import { ContactList } from '../models/contact.list';
 @scoped(Lifecycle.ContainerScoped)
 export class ClickUpMessageService implements platformServiceInterface {
 
+    static processedComments: Map<number, number> = new Map();
+
     constructor(
         @inject(SlackClickupCommonFunctions) private slackClickupCommonFunctions?: SlackClickupCommonFunctions,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
@@ -67,16 +69,26 @@ export class ClickUpMessageService implements platformServiceInterface {
     async clickupEventHandler(requestBody) {
         const validEvents = ["taskCommentPosted", "taskCommentUpdated"];
         if (validEvents.includes(requestBody.event))   {
+            ClickUpMessageService.cleanupOldEntries();
             if (!requestBody.history_items[0].comment) {
                 console.log("Not comment, hanlde later");
             }
             else {
                 console.log("Comment Found");
-                const commentObj = requestBody.history_items[0].comment.comment;
-                for (let i = 0; i < commentObj.length; i++){
-                    if (commentObj[i].type && commentObj[i].text === "@watchers"){
-                        const tag = commentObj[i].text;
-                        this.eventComment(requestBody,tag);
+                const commentId = requestBody.history_items[0].comment.id;
+
+                if (ClickUpMessageService.processedComments.has(commentId)) {
+                    console.log("Duplicate comment ignored:", commentId);
+                } else {
+                    const now = Date.now();
+                    ClickUpMessageService.processedComments.set(commentId, now);
+
+                    const commentObj = requestBody.history_items[0].comment.comment;
+                    for (let i = 0; i < commentObj.length; i++){
+                        if (commentObj[i].type && commentObj[i].text === "@watchers"){
+                            const tag = commentObj[i].text;
+                            this.eventComment(requestBody,tag);
+                        }
                     }
                 }
             }
@@ -123,11 +135,13 @@ export class ClickUpMessageService implements platformServiceInterface {
             const filterText = (requestBody.history_items[0].comment.text_content).replace(tag, '');
             const textToUser = `Response from Expert : ${filterText}`;
             console.log("textToUser", textToUser);
+            const commentId = requestBody.history_items[0].comment.id;
             await this.slackClickupCommonFunctions.sendCustomMessage(platform, userId, textToUser);
     
         } catch (error) {
             console.log(error);
-        }    }
+        }
+    }
 
     async eventStatusUpdated(requestBody) {
         const contactMail = "example@gmail.com";
@@ -143,6 +157,15 @@ export class ClickUpMessageService implements platformServiceInterface {
         }
         console.log("textToUser", textToUser);
         await this.slackClickupCommonFunctions.sendCustomMessage(personContactList.dataValues.platform, personContactList.dataValues.mobileNumber, textToUser);
+    }
+
+    static cleanupOldEntries(ttlMs = 5 * 60 * 1000) {
+        const now = Date.now();
+        for (const [commentId, timestamp] of this.processedComments.entries()) {
+            if (now - timestamp > ttlMs) {
+                this.processedComments.delete(commentId);
+            }
+        }
     }
 
 }
