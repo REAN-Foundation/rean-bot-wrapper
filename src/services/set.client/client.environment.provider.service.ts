@@ -1,4 +1,5 @@
 import { scoped, Lifecycle } from 'tsyringe';
+import { ClientSecretCache } from "../../middleware/client.secret.cache";
 
 @scoped(Lifecycle.ContainerScoped)
 export class ClientEnvironmentProviderService {
@@ -23,7 +24,14 @@ export class ClientEnvironmentProviderService {
     getClientEnvironmentVariable(variablename){
 
         // console.log("getClientEnvironmentVariable",[this.clientName + "_" + variablename]);
-        return process.env[this.clientName + "_" + variablename];
+        const fromCache = ClientSecretCache.get(this.clientName, variablename);
+        if (fromCache === undefined) {
+            return process.env[this.clientName + "_" + variablename];
+        } else {
+            return fromCache;
+        }
+        
+        // return process.env[this.clientName + "_" + variablename];
     }
 
     clientNameMiddleware = (req, res, next) => {
