@@ -97,7 +97,7 @@ export class WorkflowEventListener {
                         if (message.platform === 'whatsappMeta' || message.platform === 'whatsappWati') {
                             payload = await sendApiButtonService(options);
                             response_format.message_type  = 'template';
-                            payload["templateName"] = "emergency_ask";
+                            payload["templateName"] = "emergency_question";
                             payload["languageForSession"] = "en";
 
                         } else {
