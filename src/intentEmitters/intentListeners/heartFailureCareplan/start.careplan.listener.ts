@@ -4,7 +4,7 @@ import { HeartFailureCareplanService } from "../../../services/heartFailureCarep
 export const  SentRegistrationMSGListener = async ( intent, eventObj) => {
     try {
         const careplanService: HeartFailureCareplanService = eventObj.container.resolve(HeartFailureCareplanService);
-        const response = careplanService.sendRegistrationMsg(eventObj);
+        careplanService.sendRegistrationMsg(eventObj);
 
         const data = {
             "fulfillmentMessages" : [
