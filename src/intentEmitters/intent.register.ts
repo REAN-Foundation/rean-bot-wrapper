@@ -245,6 +245,8 @@ export class IntentRegister {
         IntentEmitter.registerListener('Reminder_Reply_Yes', AppointmentReminderReplyListener);
         IntentEmitter.registerListener('Reminder_Reply_No', AppointmentReminderReplyListener);
         IntentEmitter.registerListener('Reminder_Reply_No', CommonAssessmentListener);
+        IntentEmitter.registerListener('Rem_Reply_No', AppointmentReminderReplyListener);
+        IntentEmitter.registerListener('Rem_Reply_No', AppointmentBookingListner);
         IntentEmitter.registerListener('Reminder_Frequency_Once', ReminderFrequencyListener);
         IntentEmitter.registerListener('Reminder_Frequency_Daily', ReminderFrequencyListener);
         IntentEmitter.registerListener('Reminder_Frequency_Weekly', ReminderFrequencyListener);

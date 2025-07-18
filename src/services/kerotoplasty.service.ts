@@ -180,11 +180,24 @@ export class kerotoplastyService {
         (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
         const personContactList = await contactList.findOne({ where: { mobileNumber: userId } });
         const taskId = personContactList.dataValues.cmrCaseTaskID;
+        let user_details = null;
         let EMRNumber  = personContactList.dataValues.ehrSystemCode;
         if (EMRNumber) {
             EMRNumber = EMRNumber.toUpperCase();
+            user_details = await this.getEMRDetails(EMRNumber,eventObj);
+        } else {
+            const shareable_details_raw = this.clientEnvironmentProviderService.getClientEnvironmentVariable("SHAREABLE_DETAILS");
+            if (shareable_details_raw){
+                const shareable_details = JSON.parse(shareable_details_raw);
+                if (shareable_details.Name){
+                    user_details = `Name : ${personContactList.username}`;
+                }
+                if (shareable_details.Mobile){
+                    user_details = user_details + `\n Mobile Number : ${personContactList.mobileNumber}`;
+                }
+            }
         }
-        const user_details = await this.getEMRDetails(EMRNumber,eventObj);
+
         const ClickupListID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_CASE_LIST_ID");
         if (taskId){
             await this.clickUpTask.updateTask(taskId,null,user_details,EMRNumber, "Appointment");
@@ -192,7 +205,6 @@ export class kerotoplastyService {
         }
         else
         {
-            
             const taskID = await this.clickUpTask.createTask(null, EMRNumber , user_details , 1 , ClickupListID,"Appoinment");
             await contactList.update({ cmrCaseTaskID: taskID }, { where: { mobileNumber: userId } });
             await this.clickUpTask.postCommentOnTask(taskID, symptomComment);

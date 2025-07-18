@@ -3,37 +3,47 @@ import { Logger } from "../../common/logger";
 import { dialoflowMessageFormatting } from "../../services/Dialogflow.service";
 import { translateService } from "../../services/translate.service";
 import { sendExtraMessages } from "../../services/send.extra.messages.service";
+import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
 
 export const AppointmentBookingListner = async ( intent, eventObj ) => {
     const dialoflowMessageFormattingObj: dialoflowMessageFormatting = eventObj.container.resolve(dialoflowMessageFormatting);
     const kerotoplastyServiceObj: kerotoplastyService = eventObj.container.resolve(kerotoplastyService);
+    const clientEnvironmentProviderServiceObj: ClientEnvironmentProviderService = eventObj.container.resolve(ClientEnvironmentProviderService);
 
     try {
-        
         console.log("Appointment booking listener is here");
+        const customRemSetting: boolean = clientEnvironmentProviderServiceObj.getClientEnvironmentVariable("CUSTOM_REM_SETTING") === "true";
         let response = null;
+        const parameters =  eventObj.body.queryResult.parameters;
         const date_time = eventObj.body.queryResult.parameters.Date.date_time;
         const date = new Date(date_time).toDateString();
         const time = (new Date(date_time).toTimeString())
             .split('G')[0];
-        const location = eventObj.body.queryResult.parameters.Location;
-        const doctor = eventObj.body.queryResult.parameters.Doctor.name;
         let message = `Your appointment request for *${date}* at * ${time} * has been received.`;
-        if (doctor) {
-            message += `\nDoctor: *${doctor}*`;
+        const hasDoctorParam = 'Doctor' in parameters;
+        const hasLocationParam = 'Location' in parameters;
+        if (!hasDoctorParam && !hasLocationParam) {
+            message += `\nWe will get back to you shortly with a confirmation.`;
+        } else {
+            const location = parameters.Location;
+            const doctor = parameters.Doctor.name;
+            if (doctor) {
+                message += `\nDoctor: *${doctor}*`;
+            }
+            if (location) {
+                message += `\nLocation: *${location}*`;
+            }
+            message += `\n\nWe will get back to you shortly with a confirmation.` +
+            `\nFor any queries or immediate assistance, feel free to call us at *080-66202020*.` +
+            `\n\n*Disclaimer:* While we’ll do our best to accommodate your preferred time, it may not always be possible due to scheduling constraints.`;
         }
-        if (location) {
-            message += `\nLocation: *${location}*`;
-        }
-
-        message += `\n\nWe will get back to you shortly with a confirmation.` +
-           `\nFor any queries or immediate assistance, feel free to call us at *080-66202020*.` +
-           `\n\n*Disclaimer:* While we’ll do our best to accommodate your preferred time, it may not always be possible due to scheduling constraints.`;
         response = await dialoflowMessageFormattingObj.making_response(message);
         kerotoplastyServiceObj.UpdatingAppointmentOnClickup(intent, eventObj);
-        const repetitionFlag  = await kerotoplastyServiceObj.CheckRepetitionFlag(eventObj);
-        if (repetitionFlag !== "False"){
-            keratoplastyNextSteps(intent,eventObj);
+        if (!customRemSetting) {
+            const repetitionFlag  = await kerotoplastyServiceObj.CheckRepetitionFlag(eventObj);
+            if (repetitionFlag !== "False"){
+                keratoplastyNextSteps(intent,eventObj);
+            }
         }
         return response;
     } catch (error) {
@@ -41,7 +51,7 @@ export const AppointmentBookingListner = async ( intent, eventObj ) => {
             .log_error(error.message,500,'Food info listener error');
         throw new Error("Food info listener error");
     }
-};
+}; 
 async function keratoplastyNextSteps(intent,eventObj) {
     try {
         console.log("STEP 4");
