@@ -100,12 +100,12 @@ export class HeartFailureRegistrationService {
         };
         const response = await this.needleService.needleRequestForREAN("post", enrollRoute, null, obj1);
 
-        const communicationRoute = `clinical/donation-communication`;
-        const body = {
-            PatientUserId     : patientUserId,
-            IsRemindersLoaded : true
-        };
-        await this.needleService.needleRequestForREAN("post", communicationRoute, null, body);
+        // const communicationRoute = `clinical/donation-communication`;
+        // const body = {
+        //     PatientUserId     : patientUserId,
+        //     IsRemindersLoaded : true
+        // };
+        // await this.needleService.needleRequestForREAN("post", communicationRoute, null, body);
 
         const enrollmentIdHF = response.Data.Enrollment.id;
         Logger.instance().log(`Enrollment id of Heart failure user ${name} is: ${enrollmentIdHF}`);
