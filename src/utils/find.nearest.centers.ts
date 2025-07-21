@@ -92,7 +92,12 @@ export class NearestLocation {
         } else {
             const address = value;
             const response = await fetch(
-                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`
+                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`,
+                {
+                    headers : {
+                        "User-Agent" : "ReanBotWrapper/1.0 (services@reanfoundation.org)"
+                    }
+                }
             );
             const data = await response.json();
             if (data.length === 0) {

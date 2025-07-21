@@ -53,7 +53,7 @@ export class HeartFailureRegistrationService {
             };
             await this.needleService.needleRequestForREAN("put", patientUpdateUrl, null, patientDomainModel);
             const careplan_reg_msg = await this.systemGeneratedMessages.getMessage("CAREPLAN_REG_MESSAGE");
-            const registrationMessage = `Hi ${personName}, \n`+careplan_reg_msg;
+            const registrationMessage = `Hi ${personName}, \n` + careplan_reg_msg;
             FireAndForgetService.enqueue(body);
             return { fulfillmentMessages: [{ text: { text: [registrationMessage] } }]  };
 
