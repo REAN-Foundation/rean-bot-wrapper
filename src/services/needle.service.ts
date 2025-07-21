@@ -59,7 +59,6 @@ export class NeedleService {
         if (phoneNumber.length > 10 && phoneNumber.indexOf('+') === -1) {
             phoneNumber = '+' + phoneNumber;
         }
-
         // adding "-" if phone number does not contain one.
         const ten_digit = phoneNumber.substr(phoneNumber.length - 10);
         const country_code = phoneNumber.split(ten_digit)[0];
@@ -82,7 +81,6 @@ export class NeedleService {
         let response = null;
         if (method === "get") {
             response = await needle(method, whatsappaApi, options);
-
         } else {
             response = await needle(method, whatsappaApi, postDataMeta, options);
         }
@@ -94,7 +92,6 @@ export class NeedleService {
         } else {
             throw new Error("Needle Request for Whatsapp MetaFailed");
         }
-
         return response.body;
     }
 
@@ -109,7 +106,6 @@ export class NeedleService {
         try {
             if (method === "get") {
                 response = await needle(method, telegramApi, options);
-
             } else {
                 console.log('The body of the request is' + JSON.stringify(obj));
                 response = await needle(method, telegramApi, obj, options);
@@ -118,7 +114,6 @@ export class NeedleService {
         } catch (error) {
             console.log("The error is: ", error);
         }
-
         if (response.statusCode === 200 || response.statusCode === 201) {
             const responseObject = await this.createResponseObject('Telegram', payload);
             await this.saveResponsetoDB(responseObject);
@@ -126,7 +121,6 @@ export class NeedleService {
         } else {
             throw new Error("Failed");
         }
-
         return response.body;
     }
 
