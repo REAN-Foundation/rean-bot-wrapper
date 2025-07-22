@@ -42,11 +42,13 @@ export class getAdditionalInfoSevice {
         try {
             let message = null;
             const clientName = this.clientEnvironment.getClientEnvironmentVariable("NAME");
-            if (clientName === "GGHN_HIVTB" || clientName === "REAN_BOT")
+
+            if (clientName === "GGHN_HIVTB" )
             {
                 message = await this.getMessageForGGHN(EHRNumber,userName);
             }
-            if (clientName === "LVPEI")
+            
+            if (clientName === "LVPEI"|| clientName === "REAN_BOT")
             {
                 message = await this.getMessageForLVPEI(EHRNumber,userId,userName,languageCode,eventObj);
             }

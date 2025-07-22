@@ -217,3 +217,11 @@ export interface OutgoingMessage {
     Alert               ?: AlertDetails;
 }
 
+export interface IReminder {
+    id?: number;
+    MessageId: string;
+    ReminderId: string;
+    ReminderDate: string;
+    ReminderTime: string;
+    ParentActionId: string;
+}

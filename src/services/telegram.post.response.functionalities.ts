@@ -108,68 +108,62 @@ export class TelegramPostResponseFunctionalities {
         return message;
     };
 
-    sendinline_keyboardResponse = async(
-        response_format:Iresponse, telegram, payload) => {
+    sendinline_keyboardResponse = async (
+        response_format: Iresponse,
+        telegram,
+        payload
+    ) => {
         let responseId = 0;
         const message = response_format.messageText;
 
-        //this works but this is not inline keyboard/ this adds a permanent button on the bar
-        // var keyboards = {
-        //     reply_markup : JSON.stringify({
-        //         keyboard          : [['Level 1']],
-        //         resize_keyboard   : true,
-        //         one_time_keyboard : true,
-        //     }),
-        // };
-
         const listOfButtonsFromPayload = payload.fields.buttons.listValue.values;
-        const listOfButtons = [];
-        for (const ele of listOfButtonsFromPayload) {
-            const listOfHorizontalKeyboardFromPayload = ele.listValue.values;
-            const listOfHorizontalKeyboard = [];
-            for (const ele_h of listOfHorizontalKeyboardFromPayload) {
-                const tempButton =
-                {
-                    text          : ele_h.structValue.fields.text.stringValue,
-                    callback_data : ele_h.structValue.fields.callback_data.stringValue
-                };
-                listOfHorizontalKeyboard.push(tempButton);
-            }
-            listOfButtons.push(listOfHorizontalKeyboard);
-        }
-        console.log('listOfVerticalKeyboard',listOfButtons);
 
+        // Horizontal (all in one row) layout
+        const listOfButtons = [[]];
+        for (const ele of listOfButtonsFromPayload) {
+            const replyFields = ele.structValue.fields.reply.structValue.fields;
+
+            const tempButton = {
+                text: replyFields.title.stringValue,
+                callback_data: replyFields.id.stringValue
+            };
+
+            listOfButtons[0].push(tempButton); // push into first row
+        }
+
+        // Vertical layout: each button on a new row
         const listOfVerticalKeyboard = [];
         for (const ele of listOfButtonsFromPayload) {
-            const listOfVerticalKeyboardFromPayload = ele.listValue.values;
-            for (const ele_v of listOfVerticalKeyboardFromPayload) {
-                const tempButton =
-                {
-                    text          : ele_v.structValue.fields.text.stringValue,
-                    callback_data : ele_v.structValue.fields.callback_data.stringValue
-                };
-                listOfVerticalKeyboard.push([tempButton]);
-            }
+            const replyFields = ele.structValue.fields.reply.structValue.fields;
+
+            const tempButton = {
+                text: replyFields.title.stringValue,
+                callback_data: replyFields.id.stringValue
+            };
+
+            listOfVerticalKeyboard.push([tempButton]); // wrap in array to make a row
         }
 
+        // Default to horizontal unless "typeOfButton" is "vertical"
         const keyboard = {
-            inline_keyboard : listOfButtons
+            inline_keyboard: (payload["typeOfButton"] === "vertical")
+                ? listOfVerticalKeyboard
+                : listOfButtons
         };
 
-        if (payload["typeOfButton"] && payload.typeOfButton === "vertical" ) {
-            keyboard.inline_keyboard = listOfVerticalKeyboard;
-        }
-        const keyboard1 = payload.fields.buttons.listValue.values;
+        console.log('Keyboard prepared:', keyboard);
 
-        console.log(keyboard);
-        console.log(keyboard1);
         const opts = {
-            reply_markup : JSON.stringify(keyboard)
+            reply_markup: JSON.stringify(keyboard)
         };
 
-        var responseData = await telegram.sendMessage(response_format.sessionId, message, opts);
+        const responseData = await telegram.sendMessage(
+            response_format.sessionId,
+            message,
+            opts
+        );
         responseId = responseData?.message_id;
-        await this.updateResponseMessageId(responseId,response_format.sessionId);
+        await this.updateResponseMessageId(responseId, response_format.sessionId);
 
         return responseData;
     };

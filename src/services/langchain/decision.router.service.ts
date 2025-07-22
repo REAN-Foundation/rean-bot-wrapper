@@ -1,3 +1,5 @@
+/* eslint-disable max-len */
+/* eslint-disable linebreak-style */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { PromptTemplate } from "langchain/prompts";
 import { ChatOpenAI } from "langchain/chat_models/openai";
@@ -11,6 +13,11 @@ import { MessageHandlerType, NlpProviderType, UserFeedbackType, ChannelType } fr
 import { EmojiFilter } from "../filter.message.for.emoji.service";
 import { DialogflowResponseService } from '../dialogflow.response.service';
 import { CacheMemory } from "../cache.memory.service";
+import { Intents } from "../../models/intents/intents.model";
+import { AssessmentSessionLogs } from "../../models/assessment.session.model";
+import { NeedleService } from "../needle.service";
+import { AssessmentService } from "../Assesssment/assessment.service";
+import { AssessmentIdentifiers } from "../../models/assessment/assessment.identifiers.model";
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -24,7 +31,9 @@ export class DecisionRouter {
         @inject(FeedbackService) private feedbackService?: FeedbackService,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(ClientEnvironmentProviderService) private environmentProviderService?: ClientEnvironmentProviderService,
-        @inject(EmojiFilter) private emojiFilter?: EmojiFilter
+        @inject(EmojiFilter) private emojiFilter?: EmojiFilter,
+        @inject(NeedleService) private needleService?: NeedleService,
+        @inject(AssessmentService) private assessmentService?: AssessmentService
     ) {
         this.outgoingMessage = {
             PrimaryMessageHandler : MessageHandlerType.Unhandled,
@@ -78,7 +87,7 @@ export class DecisionRouter {
         console.log(`Checking feedback for ${channel}`);
         let feedbackType = '';
         let feedback = '';
-        if (messageBody.contextId || messageBody.intent !== null ){
+        if (messageBody.contextId && !messageBody.intent){
             this.feedbackFlag = true;
             feedbackType = UserFeedbackType.General;
             feedback = messageBody.messageBody;
@@ -100,74 +109,137 @@ export class DecisionRouter {
         return feedbackObj;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async checkAssessment(messageBody: Imessage, channel: string) {
+        try {
+            const intent = messageBody.intent;
+            const key = `${messageBody.platformId}:NextQuestionFlag`;
+            const nextQuestionFlag = await CacheMemory.get(key);
 
-        // Check if message is part of assessment
-        // const chatMessageRepository = (
-        //     await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-        // const botMessages = await chatMessageRepository.findAll({
-        //     where : {
-        //         userPlatformId : messageBody.platformId,
-        //         platform       : channel
-        //     },
-        //     order : [ [ 'createdAt', 'ASC' ] ]
-        // });
+            const assessmentData = {
+                AssessmentId   : '',
+                AssessmentName : '',
+                TemplateId     : '',
+                CurrentNodeId  : '',
+                Question       : '',
+                AssessmentFlag : false,
+                MetaData       : {
+                    "assessmentStart"  : false,
+                    "askQuestionAgain" : false
+                }
+            };
 
-        // const lastMessage = await chatMessageRepository.findOne({
-        //     where : {
-        //         userPlatformId : messageBody.platformId,
-        //         platform       : channel
-        //     },
-        //     order : [ [ 'createdAt', 'DESC'] ]
-        // });
+            // Currently will only support the assessment start through buttons
+            if (
+                messageBody.contextId &&
+                messageBody.intent &&
+                !nextQuestionFlag
+            ) {
+                const intentRepository = (
+                    (await this.entityManagerProvider.getEntityManager(this.environmentProviderService))
+                        .getRepository(Intents)
+                );
+        
+                const matchingIntents = await intentRepository.findOne({
+                    where : {
+                        code : intent
+                    }
+                });
 
-        console.log(`Checking assessment for ${channel}`);
-        const key = `${messageBody.platformId}:NextQuestionFlag`;
-        const nextQuestionFlag = await CacheMemory.get(key);
-        if (nextQuestionFlag) {
-            if (nextQuestionFlag === true) {
-                this.assessmentFlag = true;
-                await CacheMemory.set(key, false);
+                if (matchingIntents) {
+
+                    // we will call the reancare api here
+                    const assessmentCode = matchingIntents.dataValues.code;
+                    
+                    // const apiURL = `clinical/assessments/${assessmentCode}/start`;
+                    // const responseFromAssessmentService = await this.needleService.needleRequestForREAN("post", apiURL, null, {});
+                    // assessmentData.MetaData = responseFromAssessmentService;
+                    assessmentData.AssessmentId = assessmentCode;
+                    assessmentData.AssessmentName = matchingIntents.dataValues.name;
+                    assessmentData.MetaData.assessmentStart = true;
+                    assessmentData.AssessmentFlag = true;
+                } else {
+
+                    // here we will create the false flag and return object
+                    assessmentData.AssessmentFlag = false;
+                }
+            } else {
+                if (nextQuestionFlag) {
+                    if (nextQuestionFlag === true) {
+                        assessmentData.AssessmentFlag = true;
+                        
+                        // await CacheMemory.set(key, false);
+                    }
+                } else {
+                    assessmentData.AssessmentFlag = false;
+                }
             }
+
+            if (assessmentData.AssessmentFlag && !assessmentData.MetaData.assessmentStart) {
+                const AssessmentSession =
+                (await this.entityManagerProvider.getEntityManager(this.environmentProviderService))
+                    .getRepository(AssessmentSessionLogs);
+                const AssessmentIdentifiersRepo = (
+                    await this.entityManagerProvider.getEntityManager(this.environmentProviderService)
+                ).getRepository(AssessmentIdentifiers);
+                const assessmentResponse = await AssessmentSession.findOne({
+                    where : {
+                        userPlatformId : messageBody.platformId
+                    },
+                    order : [['createdAt', 'DESC']],
+                });
+                const assessmentIdentifierData = await AssessmentIdentifiersRepo.findOne({
+                    where : {
+                        assessmentSessionId : assessmentResponse.autoIncrementalID
+                    }
+                });
+                const assessmentResponseType = assessmentResponse.userResponseType;
+                const assessmentIdentifierString = assessmentIdentifierData.identifier;
+
+                const validationFlag = await this.assessmentService.validateAssessmentResponse(
+                    assessmentResponseType,
+                    assessmentIdentifierString,
+                    messageBody,
+                    assessmentResponse.dataValues
+                );
+
+                if (!validationFlag) {
+                    assessmentData.AssessmentFlag = false;
+                }
+            
+            }
+
+            // Check if message is part of assessment
+            // const chatMessageRepository = (
+            //     await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+            // const botMessages = await chatMessageRepository.findAll({
+            //     where : {
+            //         userPlatformId : messageBody.platformId,
+            //         platform       : channel
+            //     },
+            //     order : [ [ 'createdAt', 'ASC' ] ]
+            // });
+
+            // const lastMessage = await chatMessageRepository.findOne({
+            //     where : {
+            //         userPlatformId : messageBody.platformId,
+            //         platform       : channel
+            //     },
+            //     order : [ [ 'createdAt', 'DESC'] ]
+            // });
+
+            //const assessmentInProgress = botMessages[botMessages.length - 3].messageFlag
+
+            // Implement further logic for checking if assessment.
+
+            return assessmentData;
+        } catch (error) {
+            console.log(error);
         }
-        //const assessmentInProgress = botMessages[botMessages.length - 3].messageFlag
-
-        // Implement further logic for checking if assessment.
-
-        return this.assessmentFlag;
 
     }
 
     async checkDFIntent(messageBody: Imessage){
-
-        // Get matching intents with score for dialogflow
-        // const userId = messageBody.platformId === null ? v4() : messageBody.platformId;
-        // let options = {};
-        // const dfGCPCredentials = JSON.parse(this.clientEnvironmentProviderService.getClientEnvironmentVariable('DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS'));
-        // const GCPCredenctials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
-        // const dfAppCredentialsObj = dfGCPCredentials ? dfGCPCredentials : GCPCredenctials;
-
-        // options = {
-        //     credentials : {
-        //         client_email : dfAppCredentialsObj.client_email,
-        //         private_key  : dfAppCredentialsObj.private_key,
-        //     },
-        //     projectId : dfAppCredentialsObj.project_id
-        // };
-        // const projectIdFinal = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DIALOGFLOW_PROJECT_ID");
-
-        // const sessionClient = new dialogflow.SessionsClient(options);
-        // const sessionPath = sessionClient.projectAgentSessionPath(projectIdFinal, userId);
-        // const dialogflowLanguage = await this.getDialogflowLanguage();
-        // const requestBody = {
-        //     session    : sessionPath,
-        //     queryInput : {
-        //         text : {
-        //             text         : messageBody.messageBody,
-        //             languageCode : dialogflowLanguage
-        //         }
-        //     }
-        // };
 
         // const dfResponse = await sessionClient.detectIntent(requestBody);
         const dfResponse = await this.dialogflowResponseService.getDialogflowMessage(messageBody.messageBody, messageBody.platform, messageBody.intent, messageBody);
@@ -252,7 +324,7 @@ export class DecisionRouter {
             this.outgoingMessage.MetaData = messageBody;
             if (!resultFeedback.feedbackFlag){
                 const resultAssessment = await this.checkAssessment(messageBody, channel);
-                if (!resultAssessment){
+                if (!resultAssessment.AssessmentFlag){
                     if (messageBody.messageBody.length > 256) {
                         this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.QnA;
                         return this.outgoingMessage;
@@ -277,9 +349,9 @@ export class DecisionRouter {
                     console.log('Skipping intent due to assessment returning true');
                     this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.Assessments;
                     this.outgoingMessage.Assessment = {
-                        AssessmentId   : '123',
-                        AssessmentName : 'Test',
-                        TemplateId     : '111'
+                        AssessmentId   : resultAssessment.AssessmentId,
+                        AssessmentName : resultAssessment.AssessmentName,
+                        TemplateId     : resultAssessment.TemplateId
                     };
                     return this.outgoingMessage;
                 }

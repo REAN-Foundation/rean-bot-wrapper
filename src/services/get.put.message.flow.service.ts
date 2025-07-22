@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 /* eslint-disable linebreak-style */
 import { Imessage, Iresponse, OutgoingMessage } from '../refactor/interface/message.interface';
@@ -10,6 +11,7 @@ import { GoogleTextToSpeech } from './text.to.speech';
 import { SlackMessageService } from "./slack.message.service";
 import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
+import { ReminderMessage} from '../models/reminder.model';
 import { translateService } from './translate.service';
 import { sendApiButtonService, templateButtonService, watiTemplateButtonService } from './whatsappmeta.button.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
@@ -23,6 +25,8 @@ import needle from "needle";
 import { sendTelegramButtonService } from './telegram.button.service';
 import { Logger } from '../common/logger';
 import { MessageHandlerType } from '../refactor/messageTypes/message.types';
+
+// import { AssessmentIdentifiers } from '../models/assessment/assessment.identifiers.model';
 
 @scoped(Lifecycle.ContainerScoped)
 export class MessageFlow{
@@ -188,6 +192,8 @@ export class MessageFlow{
         const defaultLangaugeCode = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
         const contactList = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
         const personContactList = await contactList.findOne({ where: { mobileNumber: msg.userId } });
+        const reminderMessage = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ReminderMessage);
+
         if (personContactList) {
             personName = personContactList.username;
         }
@@ -299,30 +305,59 @@ export class MessageFlow{
         let message_to_platform = null;
         // eslint-disable-next-line max-len
         message_to_platform = await platformMessageService.SendMediaMessage(response_format, payload);
-
+        
+        // const customRemSetting: boolean = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CUSTOM_REM_SETTING") === "true";
+        // if (msg.agentName === 'Reancare' && customRemSetting) {
+        //     try {
+        // const msg_id = message_to_platform.body.messages[0].id;
+        //const msg_id = await platformMessageService.getMessageIdFromResponse(message_to_platform);
+        // const reminder_info = {
+        //     userId: msg.payload?.userId,
+        //     MessageId: msg_id,
+        //     ReminderId: msg.payload?.ReminderId,
+        //     ReminderDate: msg.payload?.ReminderDate,
+        //     ReminderTime: msg.payload?.ReminderTime,
+        //     ParentActionId: msg.payload?.ParentActionId
+        // };
+        // await reminderMessage.create(reminder_info);
+        //     } catch (error) {
+        //         console.error("Failed to insert into reminderMessage:", error);
+        //     }
+        // }
         if (messageType === "reancareAssessment") {
+            
             // assessmentSession.userMessageId = message_to_platform.body.messages[0].id;
             assessmentSession.userMessageId = message_to_platform.message_id;
             const AssessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
             await AssessmentSessionRepo.create(assessmentSession);
         }
         if (msg.provider === "REAN_BOT" || msg.provider === "GGHN" && message_to_platform.statusCode === 200) {
+            const previousMessageContextID = message_to_platform.body.messages[0].id;
+            // const appRecord = await reminderMessage.findOne({
+            //     where: { MessageId: previousMessageContextID },
+            //     attributes: ['ParentActionId'],
+            //     raw: true
+            // });
+            // const appointment_id = appRecord ? appRecord.ParentActionId : null;
             const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
+            
             let todayDate = new Date().toISOString()
                 .split('T')[0];
             todayDate = Helper.removeLeadingZerosFromDay(todayDate);
             const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
             const messageId = await platformMessageService.getMessageIdFromResponse(message_to_platform);
             const phoneNumber = Helper.formatPhoneForDocProcessor(msg.userId);
+
             const apiUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
+            // const apiUrl = `${docProcessBaseURL}appointment-schedules/${appointment_id}/reminder-response`;
             const headers = { headers : {
                 'Content-Type' : 'application/json',
                 Accept         : 'application/json',
             }
             };
             const obj = {
-                "WhatsApp_message_id" : messageId,
-                "Patient_replied"     : "Not replied"
+                channel_message_id : previousMessageContextID,
+                replied_status     : "Not replied"
             };
             await needle("put", apiUrl, obj, headers);
 

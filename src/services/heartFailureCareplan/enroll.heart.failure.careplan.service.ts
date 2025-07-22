@@ -9,6 +9,7 @@ import { Iresponse } from '../../refactor/interface/message.interface';
 import { platformServiceInterface } from '../../refactor/interface/platform.interface';
 import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
 import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
+import { SystemGeneratedMessagesService } from "../system.generated.message.service";
 
 @scoped(Lifecycle.ContainerScoped)
 export class HeartFailureRegistrationService {
@@ -22,6 +23,7 @@ export class HeartFailureRegistrationService {
         @inject(GetPatientInfoService) private getPatientInfoService: GetPatientInfoService,
         @inject(NeedleService) private needleService?: NeedleService,
         @inject(Registration) private registration?: Registration,
+        @inject(SystemGeneratedMessagesService) private systemGeneratedMessages?: SystemGeneratedMessagesService
     ) {}
 
     async registrationService (eventObj): Promise<any> {
@@ -50,8 +52,8 @@ export class HeartFailureRegistrationService {
                     .split("T")[0],
             };
             await this.needleService.needleRequestForREAN("put", patientUpdateUrl, null, patientDomainModel);
-            
-            const registrationMessage = `Hi ${personName}, \nWe're fetching your heart disease care plan details. Please hold on a moment!⏳`;
+            const careplan_reg_msg = await this.systemGeneratedMessages.getMessage("CAREPLAN_REG_MESSAGE");
+            const registrationMessage = `Hi ${personName}, \n` + careplan_reg_msg;
             FireAndForgetService.enqueue(body);
             return { fulfillmentMessages: [{ text: { text: [registrationMessage] } }]  };
 
@@ -72,7 +74,8 @@ export class HeartFailureRegistrationService {
             if (remindersFlag === false) {
                 await this.enrollPatient(patientUserId, name, msg, eventObj);
             } else {
-                msg = `You have already enrolled in the Heart Disease care plan. If you wish to enroll again please contact to REAN support. https://www.reanfoundation.org/`;
+                const careplan_reg_alt_msg = await this.systemGeneratedMessages.getMessage("CAREPLAN_REG_ALT_MESSAGE");
+                msg = careplan_reg_alt_msg;
                 await this.sendMessage(msg, eventObj);
             }
         } else {
