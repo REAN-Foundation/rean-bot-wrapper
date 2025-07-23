@@ -71,7 +71,7 @@
     "needle": "^2.9.1",
     "node-cron": "^2.0.3",
     "node-html-to-image": "^5.0.0",
-    "node-telegram-bot-api": "^0.54.0",
+    "node-telegram-bot-api": "^0.64.0",
     "pb-util": "^1.0.3",
     "pdfkit": "^0.13.0",
     "reflect-metadata": "^0.1.13",
