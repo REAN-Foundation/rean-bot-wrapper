@@ -59,7 +59,7 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
                 const apiUrl_meta = hostname + path;
                 console.log("The request sent to whatsapp has body: ", JSON.stringify(postdata));
                 const response = await needle("post", apiUrl_meta, postdata, options);
-                console.log("Response from whatsapp send message: ", JSON.stringify(response, null, 2));
+                console.log("Response from whatsapp send message: ",response?.body);
                 resolve(response);
             }
             catch (error) {
