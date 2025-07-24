@@ -108,6 +108,7 @@ export class WorkflowEventListener {
                         this._platformMessageService = container.resolve(message.platform);
                         if (this._platformMessageService) {
                             const res = await this._platformMessageService.SendMediaMessage(response_format, payload);
+                            console.log("Response for emergency question send", res);
                         }
                         return null;
                     }
