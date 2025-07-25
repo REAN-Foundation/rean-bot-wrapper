@@ -53,7 +53,13 @@ export class ServeAssessmentService {
             };
             if (responseBody.Data.Next) {
                 const questionNode = responseBody.Data.Next;
-                const questionData = JSON.parse(responseBody.Data.Next.RawData);
+                let questionData = null;
+                if (typeof responseBody.Data.Next.RawData === 'string') {
+                    questionData = JSON.parse(responseBody.Data.Next.RawData);
+                } 
+                else {
+                    questionData = responseBody.Data.Next.RawData;
+                }
                 metaPayload["messageText"] = responseBody.Data.Next.Description;
                 metaPayload["channel"] = channel;
                 metaPayload["templateName"] = questionData.TemplateName;
