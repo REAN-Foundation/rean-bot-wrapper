@@ -1,7 +1,6 @@
 import { dialoflowMessageFormatting } from "./Dialogflow.service";
 import { inject, Lifecycle, scoped } from "tsyringe";
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import path from 'path';
 import needle from 'needle';
 import { EntityManagerProvider } from "./entity.manager.provider.service";
 import { ChatMessage } from '../models/chat.message.model';
@@ -11,7 +10,9 @@ import { UserConsent } from '../models/user.consent.model';
 import { UserInfo } from '../models/user.info.model';
 import { AssessmentSessionLogs } from '../models/assessment.session.model';
 import WorkflowUserDa from '../models/workflow.user.data.model';
+import { GetHeaders } from '../services/biometrics/get.headers';
 import { NeedleService } from "./needle.service";
+import { Logger } from '../common/logger';
 
 @scoped(Lifecycle.ContainerScoped)
 export class userHistoryDeletionService {
@@ -22,7 +23,8 @@ export class userHistoryDeletionService {
         @inject(dialoflowMessageFormatting) private DialogflowServices?: dialoflowMessageFormatting,
         @inject(NeedleService) private needleService?: NeedleService,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
-        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(GetHeaders) private getHeaders?: GetHeaders
     ){}
     async deleteUserProfile(userId){
             try {
@@ -53,12 +55,12 @@ export class userHistoryDeletionService {
                     await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)
                 ).getRepository(AssessmentSessionLogs);
 
-                const workflowUserData = (
-                    await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)
-                ).getRepository(WorkflowUserData);
+                // const workflowUserData = (
+                //     await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)
+                // ).getRepository(WorkflowUserData);
 
-                const personContactList = await contactList.findAll({ where: { mobileNumber: user } });
-                const personChatMessage = await contactList.findAll({ where: { userPlatformId: user } });
+                // const personContactList = await contactList.findAll({ where: { mobileNumber: user } });
+                // const personChatMessage = await contactList.findAll({ where: { userPlatformId: user } });
 
                 await contactList.destroy({
                     where: { mobileNumber: user }
@@ -78,9 +80,9 @@ export class userHistoryDeletionService {
                  await assessmentSessionLogs.destroy({
                     where: { userPlatformId: user }
                 });
-                await workflowUserData.destroy({
-                    where: { UserPlatformId: user }
-                });
+                // await workflowUserData.destroy({
+                //     where: { UserPlatformId: user }
+                // });
 
 
             } catch (error) {
@@ -88,8 +90,36 @@ export class userHistoryDeletionService {
             }
     }
     
-    async deleteReanCareData(user){
-        
+    async deletePatientByUserIdService(user) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                Logger.instance().log(`Delete Patient API - ${this.clientEnvironmentProviderService.getClientName()}`);
+
+                const userId = user;
+                const options = this.getHeaders.getHeaders();
+                const ReanBackendBaseUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
+
+                const apiUrl = `${ReanBackendBaseUrl}patients/${userId}`;
+                Logger.instance().log(`Calling DELETE: ${apiUrl}`);
+
+                const response = await needle("delete", apiUrl, null, options);
+
+                Logger.instance().log(`Response status: ${response.statusCode}`);
+                Logger.instance().log(`Message: ${response.body?.message}`);
+
+                if (response.statusCode !== 200) {
+                    reject("Failed to delete patient.");
+                    return;
+                }
+
+                Logger.instance().log(`Patient deleted successfully for userId: ${userId}`);
+                resolve({ success: true, message: 'Patient deleted successfully.' });
+
+            } catch (error) {
+                Logger.instance().log_error(error.message, 500, "Delete Patient Service Error!");
+                reject(error.message);
+            }
+        });
     }
     
 }
