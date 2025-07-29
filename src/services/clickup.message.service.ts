@@ -144,19 +144,24 @@ export class ClickUpMessageService implements platformServiceInterface {
     }
 
     async eventStatusUpdated(requestBody) {
-        const contactMail = "example@gmail.com";
-        const contactList =
-        (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
-        let personContactList = await contactList.findOne({ where: { cmrCaseTaskID:  requestBody.task_id } });
-        if (!personContactList){
-            personContactList = await contactList.findOne({ where: { cmrChatTaskID:  requestBody.task_id } });
+        const blockSendCloseMessage = this.clientEnvironmentProviderService.getClientEnvironmentVariable("BLOCK_TASK_CLOSE_MESSAGE") === "true";
+        if (!blockSendCloseMessage) {
+            const contactMail = "example@gmail.com";
+            const contactList =
+            (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
+            let personContactList = await contactList.findOne({ where: { cmrCaseTaskID:  requestBody.task_id } });
+            if (!personContactList){
+                personContactList = await contactList.findOne({ where: { cmrChatTaskID:  requestBody.task_id } });
+            }
+            let textToUser = `As our expert have provided their insight, we are closing the ticket. If you are still unsatisfied with the answer provided, contact us at ${contactMail}`;
+            if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_TICKET_CLOSE_RESPONSE_MESSAGE")){
+                textToUser = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_TICKET_CLOSE_RESPONSE_MESSAGE");
+            }
+            console.log("textToUser", textToUser);
+            await this.slackClickupCommonFunctions.sendCustomMessage(personContactList.dataValues.platform, personContactList.dataValues.mobileNumber, textToUser);
+        } else {
+            console.log("NOT SENDING TASK CLOSE MESSAGE");
         }
-        let textToUser = `As our expert have provided their insight, we are closing the ticket. If you are still unsatisfied with the answer provided, contact us at ${contactMail}`;
-        if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_TICKET_CLOSE_RESPONSE_MESSAGE")){
-            textToUser = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_TICKET_CLOSE_RESPONSE_MESSAGE");
-        }
-        console.log("textToUser", textToUser);
-        await this.slackClickupCommonFunctions.sendCustomMessage(personContactList.dataValues.platform, personContactList.dataValues.mobileNumber, textToUser);
     }
 
     static cleanupOldEntries(ttlMs = 5 * 60 * 1000) {

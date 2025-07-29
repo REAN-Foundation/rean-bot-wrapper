@@ -149,5 +149,25 @@ export class ClickUpTask{
         }
         
     }
+
+    async updateTag(taskID: string, intent = '') {
+        try {
+            const clientTags = JSON.parse(this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_TAGS"));
+            if (clientTags) {
+                const exists = clientTags.includes(intent);
+                if (exists) {
+                    const updateTaskUrl = `https://api.clickup.com/api/v2/task/${taskID}/tag/${intent}`;
+                    const options = getRequestOptions();
+                    const CLICKUP_AUTHENTICATION = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
+                    options.headers["Authorization"] =  CLICKUP_AUTHENTICATION;
+                    options.headers["Content-Type"] = `application/json`;
+                    const response = await needle("post", updateTaskUrl, {}, options);
+                    console.log(response);
+                }
+            }
+        } catch (error) {
+            console.log("Error while updating the clickup tags.");
+        }
+    }
     
 }

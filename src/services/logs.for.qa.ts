@@ -43,7 +43,7 @@ export class LogsQAService {
             messageContentIn = responseChatMessage[responseChatMessage.length - 1].messageContent;
             let taskId = await this.postingOnClickup(`Client : ` + messageContentIn,  cmrTaskID , responseChatMessage, userName);
             const messageContentOut = response_format.messageText;
-            taskId = await this.postingOnClickup(`Bot : ` + messageContentOut + `\nIntent Name : ${response_format.intent}`, taskId, responseChatMessage, userName);
+            taskId = await this.postingOnClickup(`Bot : ` + messageContentOut + `\nIntent Name : ${response_format.intent}`, taskId, responseChatMessage, userName, response_format.intent);
             await contactList.update({
                 cmrChatTaskID : taskId
             },
@@ -56,18 +56,20 @@ export class LogsQAService {
         }
     }
 
-    async postingOnClickup(comment,cmrTaskId, responseChatMessage, userName){
-
+    async postingOnClickup(comment,cmrTaskId, responseChatMessage, userName, intent=''){
+        intent = intent.toLocaleLowerCase();
         if (cmrTaskId){
             // eslint-disable-next-line max-len
             await this.clickUpTask.postCommentOnTask(cmrTaskId,comment);
-            await this.clickUpTask.updateTask(cmrTaskId,null,null,userName);
+            await this.clickUpTask.updateTask(cmrTaskId,null,null,userName, intent);
+
+            await this.clickUpTask.updateTag(cmrTaskId, intent);
             console.log("Updating old clickUp task");
             return cmrTaskId;
         }
         else
         {
-            const taskID = await this.clickUpTask.createTask(responseChatMessage, userName, null, null);
+            const taskID = await this.clickUpTask.createTask(responseChatMessage, userName, null, null, intent);
             await this.clickUpTask.postCommentOnTask(taskID,comment);
             console.log("Creating new clickUp task");
             return taskID;
