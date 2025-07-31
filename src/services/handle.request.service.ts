@@ -181,7 +181,7 @@ export class handleRequestservice {
         }
         case MessageHandlerType.WorkflowService: {
             console.log("Workflow service event .....");
-            const result = await this.workflowEventListener.commence(metaData);
+            const result = await this.workflowEventListener.commence(metaData, eventObj);
             if (!result) {
                 console.log("Unable to process Workflow event listener event.");
             }
