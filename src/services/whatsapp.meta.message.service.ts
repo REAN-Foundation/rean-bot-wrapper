@@ -48,6 +48,7 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
     async postRequestMessages(postdata) {
         return new Promise(async(resolve,reject) =>{
             try {
+                console.log("NAME",this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME"));
                 const options = getRequestOptions();
                 const token = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
                 options.headers['Content-Type'] = 'application/json';

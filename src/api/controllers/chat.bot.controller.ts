@@ -156,7 +156,7 @@ export class ChatBotController {
                 Payload              : event.UserMessage.Payload ?? null,
             };
 
-            const entManager = await this._entityProvider.getEntityManager(this.environmentProviderService);
+            const entManager = await this._entityProvider.getEntityManager(clientEnvironmentProviderService);
             const workflowRepository = entManager.getRepository(WorkflowUserData);
             console.log("Storing the workflow event to database", workflowEventEntiry);
             const workflowEventEntityRecord = await workflowRepository.create(workflowEventEntiry);
