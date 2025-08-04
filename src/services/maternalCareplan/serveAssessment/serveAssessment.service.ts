@@ -162,7 +162,12 @@ export class ServeAssessmentService {
             if (requestBody.Data.AnswerResponse.Next !== null && nodeType !== "Message") {
                 let questionRawData = null;
                 if (requestBody.Data.AnswerResponse.Next?.RawData) {
-                    questionRawData = JSON.parse(requestBody.Data.AnswerResponse.Next.RawData);
+                    if (typeof requestBody.Data.AnswerResponse.Next.RawData === 'string') {
+                        questionRawData = JSON.parse(requestBody.Data.AnswerResponse.Next.RawData);
+                    } else {
+                        questionRawData = requestBody.Data.AnswerResponse.Next.RawData;
+                    }
+
                 }
                 message = questionData.Description;
                 console.log("    inside next////// question block");

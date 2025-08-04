@@ -57,7 +57,7 @@ export class LogsQAService {
     }
 
     async postingOnClickup(comment,cmrTaskId, responseChatMessage, userName, intent=''){
-        intent = intent.toLocaleLowerCase();
+        intent = intent?.toLocaleLowerCase();
         if (cmrTaskId){
             // eslint-disable-next-line max-len
             await this.clickUpTask.postCommentOnTask(cmrTaskId,comment);

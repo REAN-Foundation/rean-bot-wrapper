@@ -102,8 +102,8 @@ export class CommonAssessmentService {
             "Category"           : "Assessment",
             "ActionType"         : "Custom",
             "ActionId"           : userTaskData.Data.Assessment.id,
-            "ScheduledStartTime" : assessmentDetails.currentDate,
-            "ScheduledEndTime"   : assessmentDetails.currentDate,
+            "ScheduledStartTime" : assessmentDetails.ScheduledDate,
+            "ScheduledEndTime"   : assessmentDetails.ScheduledDate,
             "IsRecurrent"        : false
         };
         await this.needleService.needleRequestForREAN("post", userTaskApiURL, null, userTaskBody);
