@@ -153,6 +153,7 @@ export class ServeAssessmentService {
             let message: any = "";
             let messageFlag = "";
             const requestBody = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
+            console.log("second request failing",requestBody);
             let payload = null;
             let messageType = 'text';
             const questionData = requestBody.Data.AnswerResponse.Next;
@@ -167,7 +168,6 @@ export class ServeAssessmentService {
                     } else {
                         questionRawData = requestBody.Data.AnswerResponse.Next.RawData;
                     }
-
                 }
                 message = questionData.Description;
                 console.log("    inside next////// question block");
