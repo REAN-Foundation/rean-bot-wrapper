@@ -153,6 +153,7 @@ export class ServeAssessmentService {
             let message: any = "";
             let messageFlag = "";
             const requestBody = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
+            console.log("second request failing",requestBody);
             let payload = null;
             let messageType = 'text';
             const questionData = requestBody.Data.AnswerResponse.Next;
@@ -162,7 +163,12 @@ export class ServeAssessmentService {
             if (requestBody.Data.AnswerResponse.Next !== null && nodeType !== "Message") {
                 let questionRawData = null;
                 if (requestBody.Data.AnswerResponse.Next?.RawData) {
-                    questionRawData = JSON.parse(requestBody.Data.AnswerResponse.Next.RawData);
+                    if (typeof requestBody.Data.AnswerResponse.Next.RawData === "string"){
+                        questionRawData = JSON.parse(requestBody.Data.AnswerResponse.Next.RawData);
+                    }
+                    else {
+                        questionRawData = requestBody.Data.AnswerResponse.Next.RawData;
+                    }
                 }
                 message = questionData.Description;
                 console.log("    inside next////// question block");
