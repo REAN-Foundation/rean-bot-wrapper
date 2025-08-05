@@ -315,9 +315,7 @@ export class MessageFlow{
         const customRemSetting: boolean = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CUSTOM_REM_SETTING") === "true";
         if (msg.agentName === 'Reancare' && customRemSetting) {
             try {
-                const msg_id = message_to_platform.body.messages[0].id;
-
-                //const msg_id = await platformMessageService.getMessageIdFromResponse(message_to_platform);
+                const msg_id = await platformMessageService.getMessageIdFromResponse(message_to_platform);
                 const reminder_info = {
                     userId         : msg.payload?.userId,
                     MessageId      : msg_id,
@@ -333,8 +331,7 @@ export class MessageFlow{
         }
         if (messageType === "reancareAssessment") {
             
-            // assessmentSession.userMessageId = message_to_platform.body.messages[0].id;
-            assessmentSession.userMessageId = message_to_platform.message_id;
+            assessmentSession.userMessageId = platformMessageService.getMessageIdFromResponse(message_to_platform);
             const AssessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
 
             const assessmentSessionData = await AssessmentSessionRepo.create(assessmentSession);
@@ -426,28 +423,20 @@ export class MessageFlow{
         const contactListRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
         const respContactList = await contactListRepository.findAll({ where: { mobileNumber: userId } });
 
-        // console.log("respContactList!!!", respContactList);
         if (respContactList.length === 0) {
             await contactListRepository.create({
                 mobileNumber : messagetoDialogflow.platformId,
                 username     : messagetoDialogflow.name,
                 platform     : messagetoDialogflow.platform,
                 optOut       : "false" });
-
-            // console.log("newContactlistEntry", newContactlistEntry);
-            // await newContactlistEntry.save();
         }
 
         //start or continue a session
         if (respChatSession.length === 0 || respChatSession[respChatSession.length - 1].sessionOpen === "false") {
 
-            // console.log("starting a new session");
             await chatSessionRepository.create({ userPlatformID  : messagetoDialogflow.platformId,
                 platform        : messagetoDialogflow.platform, sessionOpen     : "true",
                 lastMessageDate : lastMessageDate, askForFeedback  : "false" });
-
-            // console.log("newChatsession", newChatsession);
-            // await newChatsession.save();
         }
         else {
             const autoIncrementalID = respChatSession[respChatSession.length - 1].autoIncrementalID;
@@ -487,23 +476,6 @@ export class MessageFlow{
         try {
             this.chatMessageConnection.intent = intent;
             this.chatMessageConnection.save();
-
-            // const lastMessage = await ChatMessage.findAll({
-            //     limit : 1,
-            //     where : {
-            //         userPlatformID : userPlatformID,
-            //         direction      : 'IN'
-            //     },
-            //     order : [ [ 'createdAt', 'DESC' ]]
-            // });
-            // await ChatMessage.update(
-            //     {intent: intent},
-            //     {
-            //         where : {
-            //             id : lastMessage[0].id,
-            //         }
-            //     }
-            // );
         } catch (error) {
             console.log(error);
         }
