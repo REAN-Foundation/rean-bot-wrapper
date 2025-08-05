@@ -113,8 +113,6 @@ export class ServeAssessmentService {
 
                 const key = `${platformUserId}:NextQuestionFlag`;
                 CacheMemory.set(key, true);
-                const Assessmentkey = `${platformUserId}:Assessment`;
-                CacheMemory.set(Assessmentkey,true);
             }
             else {
                 metaPayload["buttonIds"] = [];

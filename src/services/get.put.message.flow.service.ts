@@ -332,6 +332,8 @@ export class MessageFlow{
         if (messageType === "reancareAssessment") {
             
             assessmentSession.userMessageId = platformMessageService.getMessageIdFromResponse(message_to_platform);
+            const Assessmentkey = `${response_format.sessionId}:Assessment`;
+            CacheMemory.set(Assessmentkey,assessmentSession.userMessageId);
             const AssessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
 
             const assessmentSessionData = await AssessmentSessionRepo.create(assessmentSession);
