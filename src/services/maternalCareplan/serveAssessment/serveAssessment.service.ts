@@ -48,7 +48,7 @@ export class ServeAssessmentService {
             const apiURL = `clinical/assessments/${assessmentId}/start`;
             const responseBody = await this.needleService.needleRequestForREAN("post", apiURL, null, {});
             let assessmentSessionLogs = null;
-            const metaPayload = {
+            const updatedPayload = {
                 "buttonIds" : []
             };
             if (responseBody.Data.Next) {
@@ -56,40 +56,52 @@ export class ServeAssessmentService {
                 let questionData = null;
                 if (typeof responseBody.Data.Next.RawData === 'string') {
                     questionData = JSON.parse(responseBody.Data.Next.RawData);
-                } 
+                }
                 else {
                     questionData = responseBody.Data.Next.RawData;
                 }
-                metaPayload["messageText"] = responseBody.Data.Next.Description;
-                metaPayload["channel"] = channel;
-                metaPayload["templateName"] = questionData.TemplateName;
+                updatedPayload["messageText"] = responseBody.Data.Next.Description;
+                updatedPayload["channel"] = channel;
+                updatedPayload["templateName"] = questionData.TemplateName;
                 let languageForSession = await this.translate.detectUsersLanguage( platformUserId );
                 if (questionData.TemplateVariables[`${languageForSession}`]) {
-                    metaPayload["variables"] = questionData.TemplateVariables[`${languageForSession}`];
-                    metaPayload["languageForSession"] = languageForSession;
+                    updatedPayload["variables"] = questionData.TemplateVariables[`${languageForSession}`];
+                    updatedPayload["languageForSession"] = languageForSession;
                 } else {
                     languageForSession = defaultLangaugeCode;
-                    metaPayload["variables"] = questionData.TemplateVariables[defaultLangaugeCode];
-                    metaPayload["languageForSession"] = defaultLangaugeCode;
+                    updatedPayload["variables"] = questionData.TemplateVariables[defaultLangaugeCode];
+                    updatedPayload["languageForSession"] = defaultLangaugeCode;
                 }
 
                 // Update template name for whatsapp wati other than english
                 if (userTask.Channel === "WhatsappWati" && languageForSession !== "en") {
-                    metaPayload["templateName"] = `${questionData.TemplateName}_${languageForSession}`;
+                    updatedPayload["templateName"] = `${questionData.TemplateName}_${languageForSession}`;
                 }
 
                 // Extract buttons
                 if (questionData.ButtonsIds) {
                     if (userTask.Channel === "WhatsappWati"){
-                        metaPayload["buttonIds"] = await watiTemplateButtonService(questionData.ButtonsIds);
-                    } else {
-                        metaPayload["buttonIds"] = await templateButtonService(questionData.ButtonsIds);
+                        updatedPayload["buttonIds"] = await watiTemplateButtonService(questionData.ButtonsIds);
+                    }
+                    else if (userTask.Channel === "telegram" || userTask.Channel === "Telegram"){
+                        const buttonArray = [];
+                        const buttonIds = questionData.ButtonsIds;
+                        const optionsNameArray = responseBody.Data.Next.Options;
+                        let i = 0;
+                        for (const buttonId of buttonIds){
+                            buttonArray.push( optionsNameArray[i].Text, buttonId);
+                            i = i + 1;
+                        }
+                        updatedPayload["buttonIds"] = buttonArray;
+                    }
+                    else {
+                        updatedPayload["buttonIds"] = await templateButtonService(questionData.ButtonsIds);
                     }
                 }
 
                 // Fetch image URL in template message
                 if (questionData.Url) {
-                    metaPayload["headers"] = {
+                    updatedPayload["headers"] = {
                         "type"  : "image",
                         "image" : {
                             "link" : questionData.Url
@@ -115,9 +127,9 @@ export class ServeAssessmentService {
                 CacheMemory.set(key, true);
             }
             else {
-                metaPayload["buttonIds"] = [];
+                updatedPayload["buttonIds"] = [];
             }
-            return { metaPayload, assessmentSessionLogs };
+            return { updatedPayload, assessmentSessionLogs };
         } catch (error) {
             Logger.instance()
                 .log_error(error.message,500,'Start assessment service error.');
@@ -244,7 +256,6 @@ export class ServeAssessmentService {
                     await this.userInfoService.updateUserInfo(assessmentSession.userPlatformId, userInfoPayload);
                 }
 
-
                 console.log("    inside complete////// question block");
             }
 
@@ -349,11 +360,11 @@ export class ServeAssessmentService {
             const res = await needle("put",
                 getUrl,
                 {
-                    assessment_id   : assessmentSession.assesmentId,
-                    patient_user_id : questionData.PatientUserId,
-                    phone_number    : formattedPhoneNumber,
-                    appointment_date: todayDate,
-                    chosen_option   : {
+                    assessment_id    : assessmentSession.assesmentId,
+                    patient_user_id  : questionData.PatientUserId,
+                    phone_number     : formattedPhoneNumber,
+                    appointment_date : todayDate,
+                    chosen_option    : {
                         sequence : userAnswer,
                         text     : userResponse
                     }
