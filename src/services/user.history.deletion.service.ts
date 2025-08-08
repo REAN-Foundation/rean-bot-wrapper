@@ -7,6 +7,7 @@ import { ChatMessage } from '../models/chat.message.model';
 import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
 import { UserConsent } from '../models/user.consent.model';
+import { MessageStatus } from '../models/message.status';
 import { UserInfo } from '../models/user.info.model';
 import { AssessmentSessionLogs } from '../models/assessment.session.model';
 import WorkflowUserDa from '../models/workflow.user.data.model';
@@ -26,6 +27,7 @@ export class userHistoryDeletionService {
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(GetHeaders) private getHeaders?: GetHeaders
     ){}
+
     async deleteUserProfile(userId){
             try {
                 //const parameters = eventObj.body.queryResult.parameters;
@@ -88,6 +90,49 @@ export class userHistoryDeletionService {
             } catch (error) {
                 console.log(error);
             }
+    }
+
+    async deleteChatHistory(user) {
+        try {
+            const entityManager = await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService);
+
+            const chatSessionRepo = entityManager.getRepository(ChatSession);
+            const chatMessageRepo = entityManager.getRepository(ChatMessage);
+            const messageStatusRepo = entityManager.getRepository(MessageStatus);
+
+            const userPlatformID = user;
+
+            const chatSessions = await chatSessionRepo.findAll({
+                where: { userPlatformID }
+            });
+
+            for (const session of chatSessions) {
+                const sessionId = session.autoIncrementalID;
+
+                const messages = await chatMessageRepo.findAll({
+                    where: { chatSessionID: sessionId }
+                });
+
+                const messageIds = messages.map(msg => msg.id);
+
+                if (messageIds.length > 0) {
+                    await messageStatusRepo.destroy({
+                        where: { chatMessageId: messageIds }
+                    });
+
+                    await chatMessageRepo.destroy({
+                        where: { id: messageIds }
+                    });
+                }
+
+                await chatSessionRepo.destroy({
+                    where: { autoIncrementalID: sessionId }
+                });
+            }
+
+        } catch (error) {
+            console.error("Error deleting chat history:", error);
+        }
     }
     
     async deletePatientByUserIdService(user) {
