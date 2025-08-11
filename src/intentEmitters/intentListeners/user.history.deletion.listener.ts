@@ -8,7 +8,7 @@ export const UserChatHistoryDeletionListener = async (intent, eventObj) => {
 
         const userDeletionService = eventObj.container.resolve(userHistoryDeletionService);
 
-        const userPlatformId = eventObj.body.originalDetectIntentRequest.payload;
+        const userPlatformId = eventObj.body.originalDetectIntentRequest.payload.userId;
         if (userPlatformId) {
             await userDeletionService.deleteChatHistory(userPlatformId);
         }

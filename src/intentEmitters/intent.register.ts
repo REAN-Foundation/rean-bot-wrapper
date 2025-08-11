@@ -87,6 +87,7 @@ import { InitiateDeleteReminderListener, GetReminderDetails, DeleteReminder } fr
 import { EnrollHFCareplanListener, SentRegistrationMSGListener } from './intentListeners/heartFailureCareplan/start.careplan.listener';
 import { AssessmentScoringListener } from './intentListeners/assessment/assessemnt.quiz.scoring.listener';
 import { UserInfoListener } from './intentListeners/user.info.listener';
+import { UserChatHistoryDeletionListener } from './intentListeners/user.history.deletion.listener';
 /*
  * Init function (being called during application bootstrap)
  * This is the place to register any new intent and corresponding listeners
@@ -278,6 +279,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('delete_reminder_type', GetReminderDetails);
         IntentEmitter.registerListener('delete_reminder_time', DeleteReminder);
         IntentEmitter.registerListener('bookAppointment', AppointmentBookingListner);
+        IntentEmitter.registerListener('deleteHistory', UserChatHistoryDeletionListener);
 
         // Intents for Collecting user information
         IntentEmitter.registerListener('UserInfo', UserInfoListener);

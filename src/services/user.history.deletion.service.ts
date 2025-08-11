@@ -28,68 +28,45 @@ export class userHistoryDeletionService {
         @inject(GetHeaders) private getHeaders?: GetHeaders
     ){}
 
-    async deleteUserProfile(userId){
-            try {
-                //const parameters = eventObj.body.queryResult.parameters;
-                const user = userId;
+    async deleteUserProfile(userId) {
+        try {
+            const entityManager = await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService);
+            const contactListRepo = entityManager.getRepository(ContactList);
+            const userInfoRepo = entityManager.getRepository(UserInfo);
 
-                const contactList = (
-                    await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)
-                ).getRepository(ContactList);
+            const userPlatformId = userId;
 
-                const chatSession = (
-                    await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)
-                ).getRepository(ChatSession);
+            // Delete user data from Chat Session, Chat Message and Message Status tables
 
-                const chatMessage = (
-                    await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)
-                ).getRepository(ChatMessage);
+            await this.deleteChatHistory(userPlatformId);
 
-                const userConsent = (
-                    await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)
-                ).getRepository(UserConsent);
+            // delete user data from Contact List and User Info table
 
-                const userInfo = (
-                    await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)
-                ).getRepository(UserInfo);
+            const contact = await contactListRepo.findOne({
+                where: { mobileNumber: userPlatformId }
+            });
 
-                const assessmentSessionLogs = (
-                    await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)
-                ).getRepository(AssessmentSessionLogs);
-
-                // const workflowUserData = (
-                //     await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)
-                // ).getRepository(WorkflowUserData);
-
-                // const personContactList = await contactList.findAll({ where: { mobileNumber: user } });
-                // const personChatMessage = await contactList.findAll({ where: { userPlatformId: user } });
-
-                await contactList.destroy({
-                    where: { mobileNumber: user }
+            if (contact) {
+                const contactListId = contact.autoIncrementalID;
+                await userInfoRepo.destroy({
+                    where: { userId: contactListId }
                 });
-                await chatMessage.destroy({
-                    where: { userPlatformId: user }
+                await contactListRepo.destroy({
+                    where: { autoIncrementalID: contactListId }
                 });
-                await chatSession.destroy({
-                    where: { userPlatformId: user }
-                });
-                await userConsent.destroy({
-                    where: { userPlatformId: user }
-                });
-                await userInfo.destroy({
-                    where: { userPlatformId: user }
-                });
-                 await assessmentSessionLogs.destroy({
-                    where: { userPlatformId: user }
-                });
-                // await workflowUserData.destroy({
-                //     where: { UserPlatformId: user }
-                // });
 
-
-            } catch (error) {
-                console.log(error);
+                console.log(`Deleted user profile for userPlatformId: ${userPlatformId}`);
+            } else {
+                console.log(`No ContactList entry found for mobileNumber: ${userPlatformId}`);
             }
+
+            // Delete user from all other services
+
+            await this.deleteUserFromAllServices(userPlatformId)
+
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     async deleteChatHistory(user) {
@@ -129,13 +106,14 @@ export class userHistoryDeletionService {
                     where: { autoIncrementalID: sessionId }
                 });
             }
+            console.log("User chat history deleted successfully.");
 
         } catch (error) {
             console.error("Error deleting chat history:", error);
         }
     }
     
-    async deletePatientByUserIdService(user) {
+    async deleteUserFromAllServices(user) {
         return new Promise(async (resolve, reject) => {
             try {
                 Logger.instance().log(`Delete Patient API - ${this.clientEnvironmentProviderService.getClientName()}`);
