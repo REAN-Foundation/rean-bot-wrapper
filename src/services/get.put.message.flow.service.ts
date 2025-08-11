@@ -253,27 +253,23 @@ export class MessageFlow{
             payload = await sendApiButtonService(msg.payload);
         }
         else if (msg.type === "reancareAssessment") {
-
+            
             // make compatible for telegram also.
-            const { metaPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment( msg.userId,msg.channel, msg.payload);
-            if (metaPayload["channel"] === 'whatsappMeta' || metaPayload["channel"] === 'WhatsappWati') {
+            const { updatedPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment( msg.userId,msg.channel, msg.payload);
+            if (updatedPayload["channel"] === 'whatsappMeta' || updatedPayload["channel"] === 'WhatsappWati') {
                 messageType = msg.type;
                 msg.type = 'template';
-                payload = metaPayload;
-            } else if (metaPayload["channel"] === 'telegram' || metaPayload["channel"] === 'Telegram') {
+                payload = updatedPayload;
+            } else if (updatedPayload["channel"] === 'telegram' || updatedPayload["channel"] === 'Telegram') {
                 messageType = msg.type;
-                msg.message = metaPayload["messageText"];
+                msg.message = updatedPayload["messageText"];
                 msg.type = 'inline_keyboard';
-                msg["payload"] = [ "option_A","option_B","option_C","option_D" ];
+                payload = await sendTelegramButtonService(updatedPayload["buttonIds"]);
             }
             assessmentSession = assessmentSessionLogs;
             console.log(`assessment record ${JSON.stringify(payload)}`);
             
         }
-        if (msg.type === "inline_keyboard") {
-            payload = await sendTelegramButtonService([ "A",msg.payload[0], "B",msg.payload[1],"C",msg.payload[2],"D",msg.payload[3]]);
-        }
-
         if (msg.message.ButtonsIds != null) {
             if (channel === "whatsappWati"){
                 payload["buttonIds"] = await watiTemplateButtonService(msg.message.ButtonsIds);

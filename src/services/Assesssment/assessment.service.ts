@@ -64,7 +64,7 @@ export class AssessmentService {
                 order : [['createdAt', 'DESC']]
             });
             const assessment = JSON.stringify(assessmentData.Data.Assessment);
-            const { metaPayload, assessmentSessionLogs } =
+            const { updatedPayload, assessmentSessionLogs } =
                 await this.serveAssessmentService.startAssessment(
                     input.Body.PersonPhoneNumber,
                     channel,
@@ -77,7 +77,7 @@ export class AssessmentService {
                 if (assessmentSessionLogs.userResponseType === 'Single Choice Selection') {
                     messageType = "inline_keyboard";
 
-                    const buttonArray = metaPayload.buttonIds.flatMap(button => {
+                    const buttonArray = updatedPayload.buttonIds.flatMap(button => {
                         const option = button.parameters[0].payload;
                         return [option.split('_')[1], option];
                     });
@@ -96,17 +96,16 @@ export class AssessmentService {
                         const wasSentRecently = lastMessage.createdAt > twentyFourHoursAgo;
                         messageType = wasSentRecently? 'interactivebuttons' : 'template';
                     }
-                    whatsappPayload = await sendApiButtonService(metaPayload.buttonIds);
+                    whatsappPayload = await sendApiButtonService(updatedPayload.buttonIds);
                 }
             }
 
             const responseFormat: Iresponse = commonResponseMessageFormat();
             responseFormat.platform = channel;
             responseFormat.sessionId = input.Body.PersonPhoneNumber;
-            responseFormat.messageText = metaPayload["messageText"];
+            responseFormat.messageText = updatedPayload["messageText"];
             responseFormat.message_type = messageType;
             let messageToPlatform = null;
-            // let payload = null;
             
             if ((channel === 'telegram' || channel === 'Telegram') &&  messageType === "inline_keyboard" ){
 
