@@ -6,6 +6,7 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 import { EntityManagerProvider } from "./entity.manager.provider.service";
 import { ChatMessage } from "../models/chat.message.model";
 import { ContactList } from "../models/contact.list";
+import { UserInfo } from "../models/user.info.model";
 
 @scoped(Lifecycle.ContainerScoped)
 export class LogsQAService {
@@ -27,18 +28,25 @@ export class LogsQAService {
         const userId = response_format.sessionId;
         const entityManager = await this.entityManagerProvider.getEntityManager(this.EnvironmentProviderService);
         const chatMessageRepository = await entityManager.getRepository(ChatMessage);
+        const userInfoRepository = await entityManager.getRepository(UserInfo)
         const responseChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: userId , direction: 'In' } });
         let messageContentIn = "firstmessage";
 
         const contactList =
         (await this.entityManagerProvider.getEntityManager(this.EnvironmentProviderService)).getRepository(ContactList);
         const personContactList = await contactList.findOne({ where: { mobileNumber: userId } });
+        const personUserInfo = await userInfoRepository.findOne({ where: { userPlatformID: userId } });
         let cmrTaskID = null;
         let userName = null;
+        let userAge = null;
+        let userGender = null;
         if (personContactList){
             cmrTaskID   = personContactList.dataValues.cmrChatTaskID;
             userName = personContactList.dataValues.username;
+            userAge = personUserInfo.dataValues.userAge;
+            userGender = personUserInfo.dataValues.userGender;
         }
+        const description = `**User Details**\n\n- **User Platform ID**: ${userId}\n- **Name**: ${userName}\n- **Age**: ${userAge}\n- **Gender**: ${userGender}`;
         if ( responseChatMessage.length >= 1){
             messageContentIn = responseChatMessage[responseChatMessage.length - 1].messageContent;
             let taskId = await this.postingOnClickup(`Client : ` + messageContentIn,  cmrTaskID , responseChatMessage, userName);
@@ -56,7 +64,7 @@ export class LogsQAService {
         }
     }
 
-    async postingOnClickup(comment,cmrTaskId, responseChatMessage, userName, intent=''){
+    async postingOnClickup(comment,cmrTaskId, responseChatMessage, userName, intent='', description=null){
         intent = intent?.toLocaleLowerCase();
         if (cmrTaskId){
             // eslint-disable-next-line max-len
