@@ -33,6 +33,8 @@ export class userHistoryDeletionService {
             const entityManager = await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService);
             const contactListRepo = entityManager.getRepository(ContactList);
             const userInfoRepo = entityManager.getRepository(UserInfo);
+            const userConsentRepo = entityManager.getRepository(UserConsent);
+            const assessmentSessionLogsRepo = entityManager.getRepository(AssessmentSessionLogs);
 
             const userPlatformId = userId;
 
@@ -59,6 +61,15 @@ export class userHistoryDeletionService {
             } else {
                 console.log(`No ContactList entry found for mobileNumber: ${userPlatformId}`);
             }
+
+            // Delete user data from other tables
+
+            await userConsentRepo.destroy({
+                where: { userPlatformId: userPlatformId }
+            });
+             await assessmentSessionLogsRepo.destroy({
+                where: { userPlatformId: userPlatformId }
+            });
 
             // Delete user from all other services
 
@@ -144,5 +155,5 @@ export class userHistoryDeletionService {
             }
         });
     }
-    
+
 }
