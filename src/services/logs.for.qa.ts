@@ -46,7 +46,7 @@ export class LogsQAService {
             userAge = personUserInfo?.dataValues.userAge;
             userGender = personUserInfo?.dataValues.userGender;
         }
-        const description = `**User Details**\n\n- **User Platform ID**: ${userId}\n- **Name**: ${userName}\n- **Age**: ${userAge}\n- **Gender**: ${userGender}`;
+        const description = `**User Details**\n\n- **User Mobile Number**: ${userId}\n- **Name**: ${userName}\n- **Age**: ${userAge}\n- **Gender**: ${userGender}`;
         if ( responseChatMessage.length >= 1){
             messageContentIn = responseChatMessage[responseChatMessage.length - 1].messageContent;
             let taskId = await this.postingOnClickup(`Client : ` + messageContentIn,  cmrTaskID , responseChatMessage, userName, '', description);
