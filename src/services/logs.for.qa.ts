@@ -43,13 +43,13 @@ export class LogsQAService {
         if (personContactList){
             cmrTaskID   = personContactList.dataValues.cmrChatTaskID;
             userName = personContactList.dataValues.username;
-            userAge = personUserInfo.dataValues.userAge;
-            userGender = personUserInfo.dataValues.userGender;
+            userAge = personUserInfo?.dataValues.userAge;
+            userGender = personUserInfo?.dataValues.userGender;
         }
         const description = `**User Details**\n\n- **User Platform ID**: ${userId}\n- **Name**: ${userName}\n- **Age**: ${userAge}\n- **Gender**: ${userGender}`;
         if ( responseChatMessage.length >= 1){
             messageContentIn = responseChatMessage[responseChatMessage.length - 1].messageContent;
-            let taskId = await this.postingOnClickup(`Client : ` + messageContentIn,  cmrTaskID , responseChatMessage, userName);
+            let taskId = await this.postingOnClickup(`Client : ` + messageContentIn,  cmrTaskID , responseChatMessage, userName, '', description);
             const messageContentOut = response_format.messageText;
             taskId = await this.postingOnClickup(`Bot : ` + messageContentOut + `\nIntent Name : ${response_format.intent}`, taskId, responseChatMessage, userName, response_format.intent);
             await contactList.update({
@@ -69,7 +69,7 @@ export class LogsQAService {
         if (cmrTaskId){
             // eslint-disable-next-line max-len
             await this.clickUpTask.postCommentOnTask(cmrTaskId,comment);
-            await this.clickUpTask.updateTask(cmrTaskId,null,null,userName, intent);
+            await this.clickUpTask.updateTask(cmrTaskId,null,description,userName, intent);
 
             await this.clickUpTask.updateTag(cmrTaskId, intent);
             console.log("Updating old clickUp task");
@@ -77,7 +77,7 @@ export class LogsQAService {
         }
         else
         {
-            const taskID = await this.clickUpTask.createTask(responseChatMessage, userName, null, null, intent);
+            const taskID = await this.clickUpTask.createTask(responseChatMessage, userName, description, null, intent);
             await this.clickUpTask.postCommentOnTask(taskID,comment);
             console.log("Creating new clickUp task");
             return taskID;
