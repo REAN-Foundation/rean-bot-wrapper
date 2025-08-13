@@ -28,7 +28,7 @@ export class LogsQAService {
         const userId = response_format.sessionId;
         const entityManager = await this.entityManagerProvider.getEntityManager(this.EnvironmentProviderService);
         const chatMessageRepository = await entityManager.getRepository(ChatMessage);
-        const userInfoRepository = await entityManager.getRepository(UserInfo)
+        const userInfoRepository = await entityManager.getRepository(UserInfo);
         const responseChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: userId , direction: 'In' } });
         let messageContentIn = "firstmessage";
 
@@ -64,7 +64,7 @@ export class LogsQAService {
         }
     }
 
-    async postingOnClickup(comment,cmrTaskId, responseChatMessage, userName, intent='', description=null){
+    async postingOnClickup(comment,cmrTaskId, responseChatMessage, userName, intent = '', description = null){
         intent = intent?.toLocaleLowerCase();
         if (cmrTaskId){
             // eslint-disable-next-line max-len

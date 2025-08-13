@@ -194,7 +194,7 @@ export  class FeedbackService implements feedbackInterface {
 
     }
 
-    supportChannel = async(preferredSupportChannel, responseChatMessage, messageContent, topic = null,tag = null,description= null, userId=null) => {
+    supportChannel = async(preferredSupportChannel, responseChatMessage, messageContent, topic = null,tag = null,description = null, userId = null) => {
         if (preferredSupportChannel === "ClickUp"){
             const listID = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_ISSUES_LIST_ID");
             const chatMessageRepository = await (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
