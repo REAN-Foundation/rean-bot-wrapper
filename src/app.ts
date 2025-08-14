@@ -13,11 +13,12 @@ import { container, DependencyContainer } from "tsyringe";
 import { IndexCreation } from './models/elasticsearchmodel';
 import { platformServiceInterface } from "./refactor/interface/platform.interface";
 import { ClientEnvironmentProviderService } from "./services/set.client/client.environment.provider.service";
-import { AwsSecretsManager } from "./services/aws.secret.manager.service";
+import { AwsSecretsManager } from "./services/secrets.services/aws.secret.manager.service";
 import { Timer } from "./middleware/timer";
 import { CheckCrossConnection } from "./middleware/check.cross.connection";
 import { Injector } from "./startup/injector";
 import { SequelizeClient } from "./connection/sequelizeClient";
+import { SecretsProviderFactory } from "./factories/secrets.provider.factory";
 
 declare module "express-serve-static-core" {
     interface Request {
@@ -63,7 +64,9 @@ export default class Application {
     async processClientEnvVariables() {
 
         try {
-            const secretObjectList = await this._awsSecretsManager.getSecrets();
+
+            const secretsProvider = SecretsProviderFactory.createProvider();
+            const secretObjectList = await secretsProvider.getSecrets();
 
             for (const ele of secretObjectList) {
                 if (!ele.NAME) {

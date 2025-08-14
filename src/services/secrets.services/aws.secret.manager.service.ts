@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import AWS from 'aws-sdk';
+import { SecretsProvider } from '../../refactor/interface/secrets-provider/secrets.provider.interface';
 
 // import { TempCredentials } from './get.temporary.aws.credentials';
 
 // Load the AWS SDK
 console.log("start---------");
 
-export class AwsSecretsManager {
+export class AwsSecretsManager implements SecretsProvider {
 
     // constructor(private tempCredentials?: TempCredentials){}
 
@@ -31,7 +32,7 @@ export class AwsSecretsManager {
         });
     }
 
-    async getSecrets() {
+    async getSecrets(): Promise<any[]> {
 
         const responseCredentials: any = await this.getCrossAccountCredentials();
         const region = process.env.region;
