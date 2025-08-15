@@ -229,7 +229,11 @@ export class GeneralReminderService {
         }
 
         variables = { en: commonStructure, kn: kannadaVariables, sw: commonStructure };
-        const buttonsIds = jsonFormat.TaskType === 'medication' ? [ "App_Reminder_Yes", "Medication_Taken_No" ] : [ "App_Reminder_Yes", "App_Reminder_No"] ;
+        let buttonsIds = jsonFormat.TaskType === 'medication' ? [ "App_Reminder_Yes", "Medication_Taken_No" ] : [ "App_Reminder_Yes", "App_Reminder_No"] ;
+        
+        if (channel === "telegram" || channel === "Telegram"){
+            buttonsIds = jsonFormat.TaskType === 'medication' ? [ "Yes", "App_Reminder_Yes", "No","Medication_Taken_No" ] : [ "Yes","App_Reminder_Yes", "No","App_Reminder_No"] ;
+        }
 
         return {
             TemplateName : templateName,

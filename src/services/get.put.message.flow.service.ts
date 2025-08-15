@@ -270,6 +270,10 @@ export class MessageFlow{
             console.log(`assessment record ${JSON.stringify(payload)}`);
             
         }
+        if (msg.type === "inline_keyboard") {
+            
+            payload = await sendTelegramButtonService(msg.payload);
+        }
         if (msg.message.ButtonsIds != null) {
             if (channel === "whatsappWati"){
                 payload["buttonIds"] = await watiTemplateButtonService(msg.message.ButtonsIds);
