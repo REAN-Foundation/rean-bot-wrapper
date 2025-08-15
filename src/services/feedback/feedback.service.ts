@@ -3,6 +3,7 @@ import { feedbackInterface } from './feedback.interface';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import { SlackMessageService } from '../slack.message.service';
 import { ChatMessage } from '../../models/chat.message.model';
+import { ContactList } from '../../models/contact.list';
 import { HumanHandoff } from '../../services/human.handoff.service';
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
 import { CalorieInfo } from '../../models/calorie.info.model';
@@ -73,11 +74,11 @@ export  class FeedbackService implements feedbackInterface {
                     const preferredSupportChannel = clientEnvironmentProviderService.getClientEnvironmentVariable("SUPPORT_CHANNEL");
                     if (payload.contextId){
                         responseChatMessage = await chatMessageRepository.findAll({ where: { responseMessageID: payload.contextId } });
-                        await this.supportChannel(preferredSupportChannel,responseChatMessage,messageContent,null,"Negative Feedback",description);
+                        await this.supportChannel(preferredSupportChannel,responseChatMessage,messageContent,null,"Negative Feedback",description, userId);
                     }
                     else {
                         const topic = responseChatMessage[responseChatMessage.length - 2].messageContent;
-                        await this.supportChannel(preferredSupportChannel,responseChatMessage,messageContent,topic,"Negative Feedback",description);
+                        await this.supportChannel(preferredSupportChannel,responseChatMessage,messageContent,topic,"Negative Feedback",description,userId);
                     }
                     if (await humanHandoff.checkTime() === "false"){
                         let reply = "";
@@ -166,11 +167,11 @@ export  class FeedbackService implements feedbackInterface {
                 const description = `**User Details**\n\n- **User Platform ID**: ${userId}\n- **Username**: ${username}`;
                 if (payload.contextId){
                     responseChatMessage = await chatMessageRepository.findAll({ where: { responseMessageID: payload.contextId } });
-                    await this.supportChannel(preferredSupportChannel,responseChatMessage,messageContent,null,"Positive Feedback",description);
+                    await this.supportChannel(preferredSupportChannel,responseChatMessage,messageContent,null,"Positive Feedback",description,userId);
                 }
                 else {
                     const topic = responseChatMessage[responseChatMessage.length - 2].messageContent;
-                    await this.supportChannel(preferredSupportChannel,responseChatMessage,messageContent,topic,"Positive Feedback",description);
+                    await this.supportChannel(preferredSupportChannel,responseChatMessage,messageContent,topic,"Positive Feedback",description,userId);
                 }
                 const data = {
                     "fulfillmentMessages" : [
@@ -193,10 +194,11 @@ export  class FeedbackService implements feedbackInterface {
 
     }
 
-    supportChannel = async(preferredSupportChannel, responseChatMessage, messageContent, topic = null,tag = null,description= null) => {
+    supportChannel = async(preferredSupportChannel, responseChatMessage, messageContent, topic = null,tag = null,description = null, userId = null) => {
         if (preferredSupportChannel === "ClickUp"){
             const listID = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_ISSUES_LIST_ID");
             const chatMessageRepository = await (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+            const ContactListRepository = await (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
 
             const clickUpResponseTaskID:any = await this.clickuptask.createTask(responseChatMessage,topic,description,null, listID,tag);
             console.log(`new ticket has been created with task id ${clickUpResponseTaskID}`);
@@ -208,7 +210,12 @@ export  class FeedbackService implements feedbackInterface {
             }
             const comment = messageContent;
             await this.clickuptask.postCommentOnTask(clickUpResponseTaskID,comment);
-
+            const personContactList = await ContactListRepository.findOne({ where: { mobileNumber: userId } });
+            let cmrTaskId = null;
+            if (personContactList) {
+                cmrTaskId = personContactList.dataValues.cmrChatTaskID;
+            }
+            await this.clickuptask.updateTagInFeedback(cmrTaskId, tag);
         }
         else {
             await this.slackMessageService.postMessage(responseChatMessage,topic);
