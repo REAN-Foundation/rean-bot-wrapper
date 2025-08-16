@@ -429,9 +429,6 @@ export class ClientWebhookController {
                 this._platformMessageService.handleMessage(req.body, req.params.channel);
             } else {
 
-                // Logs have been added to track the status will be removed in next release
-                console.log(req.body.statusString);
-
                 // Will handle the status strings here to update in the DB
                 const statuses = [{
                     "id"        : req.body.whatsappMessageId,
