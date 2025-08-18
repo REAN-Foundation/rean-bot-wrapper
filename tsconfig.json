@@ -18,6 +18,7 @@
         "outDir": "dist/",
         "diagnostics": true,
         "baseUrl": ".",
+        "skipLibCheck": true,
         "paths": {
             "*": [
                 "node_modules/*"
