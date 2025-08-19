@@ -249,7 +249,6 @@ export class ChatBotController {
             else if (event.UserMessage.MessageType === "Question" && event.UserMessage.QuestionText.startsWith("Has any of following condition happened")) {
                 response_format.message_type = "question";
                 response_format.messageText = event.UserMessage.QuestionText;
-                // response_format.buttonMetaData = event.UserMessage.QuestionOptions;
                 const options = event.UserMessage.QuestionOptions;
                 const availabliltyButton = [];
                 let i = 0;
