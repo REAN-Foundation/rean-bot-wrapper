@@ -183,17 +183,34 @@ export class DecisionRouter {
                 const AssessmentIdentifiersRepo = (
                     await this.entityManagerProvider.getEntityManager(this.environmentProviderService)
                 ).getRepository(AssessmentIdentifiers);
+                
                 const assessmentResponse = await AssessmentSession.findOne({
                     where : {
                         userPlatformId : messageBody.platformId
                     },
                     order : [['createdAt', 'DESC']],
                 });
+
+                // Add null check for assessmentResponse
+                if (!assessmentResponse) {
+                    console.log(`No assessment session found for user: ${messageBody.platformId}`);
+                    assessmentData.AssessmentFlag = false;
+                    return assessmentData;
+                }
+
                 const assessmentIdentifierData = await AssessmentIdentifiersRepo.findOne({
                     where : {
                         assessmentSessionId : assessmentResponse.autoIncrementalID
                     }
                 });
+
+                // Add null check for assessmentIdentifierData
+                if (!assessmentIdentifierData) {
+                    console.log(`No assessment identifier found for session: ${assessmentResponse.autoIncrementalID}`);
+                    assessmentData.AssessmentFlag = false;
+                    return assessmentData;
+                }
+
                 const assessmentResponseType = assessmentResponse.userResponseType;
                 const assessmentIdentifierString = assessmentIdentifierData.identifier;
 
@@ -235,7 +252,21 @@ export class DecisionRouter {
 
             return assessmentData;
         } catch (error) {
-            console.log(error);
+            console.log('Error in checkAssessment:', error);
+            
+            // Return default assessment data with flag set to false on error
+            return {
+                AssessmentId   : '',
+                AssessmentName : '',
+                TemplateId     : '',
+                CurrentNodeId  : '',
+                Question       : '',
+                AssessmentFlag : false,
+                MetaData       : {
+                    "assessmentStart"  : false,
+                    "askQuestionAgain" : false
+                }
+            };
         }
 
     }
