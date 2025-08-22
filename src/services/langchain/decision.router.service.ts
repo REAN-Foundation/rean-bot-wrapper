@@ -130,6 +130,10 @@ export class DecisionRouter {
                 }
             };
 
+            if (channel.toLocaleLowerCase() === "telegram" && messageBody.intent) {
+                messageBody.contextId = "true";
+            }
+
             // Currently will only support the assessment start through buttons
             if (
                 messageBody.contextId &&
