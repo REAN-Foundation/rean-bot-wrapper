@@ -36,7 +36,7 @@ export class CountryCodeService {
         const countryCode = await number.getCountryCode();
         const phoneNumber = phone.slice(countryCode.toString().length);
         const formattedPhoneNummber = `+${countryCode}-${phoneNumber }`;
-        return  formattedPhoneNummber ;
+        return  formattedPhoneNummber;
     }
 
 
