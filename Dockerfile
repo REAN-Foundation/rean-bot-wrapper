@@ -44,5 +44,7 @@ RUN npm install pm2 -g
 RUN npm install sharp
 COPY --from=builder ./app/dist/ .
 COPY --from=builder /app/src/libs/  src/libs
+COPY entrypoint.sh /app/entrypoint.sh
+RUN dos2unix /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 ENTRYPOINT ["/bin/bash", "-c", "/app/entrypoint.sh"]
