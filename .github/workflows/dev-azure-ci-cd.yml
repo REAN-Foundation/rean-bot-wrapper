@@ -44,6 +44,7 @@ jobs:
           tags: ${{ secrets.REGISTRY_SERVER }}/rean-bot-wrapper:${{ github.sha }}
 
   deploy:
+    environment: dev-azure
     runs-on: ubuntu-latest
 
     needs: build
