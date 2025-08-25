@@ -29,12 +29,6 @@ jobs:
       - name: Azure Login
         run: az login --service-principal --username ${{ secrets.AZURE_APP_ID }} --password ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
 
-      - name: Copy env file
-        run: |
-          touch .env
-          az storage blob download --file ./.env --container-name ${{ secrets.CONTAINER_NAME }} --name ${{ secrets.BLOB_NAME }} --account-name ${{ secrets.ACCOUNT_NAME }} --account-key ${{ secrets.ACCOUNT_KEY }}
-          ls -a
-
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v2
         with:
