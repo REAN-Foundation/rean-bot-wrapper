@@ -146,6 +146,7 @@ export class handleRequestservice {
             const key = `${metaData.platformId}:Assessment`;
             const userCacheData = await CacheMemory.get(key);
             if (userCacheData) {
+                console.log("user response",metaData.messageBody);
                 message_from_nlp = await this.serveAssessmentService.answerQuestion(eventObj, metaData.platformId, metaData.messageBody, userCacheData, metaData.platform, true,metaData.intent);
                 console.log(`after calling answer question service, message: ${message_from_nlp.getText()}`);
             } else {
