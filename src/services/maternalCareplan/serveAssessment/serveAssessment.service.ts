@@ -238,9 +238,15 @@ export class ServeAssessmentService {
                 const assessmentKey = `${assessmentSession.userPlatformId}:Assessment`;
                 CacheMemory.delete(assessmentKey);
                 const customMessage = await this.systemGeneratedMessageService.getMessage("END_ASSESSMENT_MESSAGE");
-                const phoneNumber = await this.countryCodeService.formatPhoneNumber(assessmentSession.userPlatformId);
-                const apiURL = `patients/byPhone?phone=${encodeURIComponent(phoneNumber)}`;
-                const result = await this.needleService.needleRequestForREAN("get", apiURL,null,null);
+                let userApiUrl = '';
+                if (channel.toLocaleLowerCase() === "telegram") {
+                    userApiUrl = `patients/byPhone?userName=${assessmentSession.userPlatformId}`;
+                } else {
+                    const phoneNumber = await this.countryCodeService.formatPhoneNumber(assessmentSession.userPlatformId);
+                    userApiUrl = `patients/byPhone?phone=${encodeURIComponent(phoneNumber)}`;
+                }
+
+                const result = await this.needleService.needleRequestForREAN("get", userApiUrl, null, null);
                 const patientData = result.Data.Patients.Items[0];
                 if (customMessage) {
                     message = await this.fillMessageWithVariables(customMessage, patientData);
