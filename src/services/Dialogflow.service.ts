@@ -18,6 +18,7 @@ export  class dialoflowMessageFormatting {
                 "parameters"   : eventObj.body.queryResult.parameters
             }
         };
+        return data;
     }
 
     async triggerIntent(triggering_event:string, eventObj){
