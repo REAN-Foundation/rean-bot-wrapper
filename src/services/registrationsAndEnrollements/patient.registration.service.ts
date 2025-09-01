@@ -53,7 +53,7 @@ export class Registration{
                 obj = {
                     FirstName       : platformUserName,
                     UserName        : platformUserId,
-                    TelegramChatId  : platformUserId,
+                    UniqueReferenceId  : platformUserId,
                     DefaultTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
                     CurrentTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
                     TenantCode      : this.EnvironmentProviderService.getClientEnvironmentVariable("NAME"),
