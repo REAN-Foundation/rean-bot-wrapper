@@ -264,17 +264,17 @@ export class MessageFlow{
                 messageType = msg.type;
                 msg.message = updatedPayload["messageText"];
                 msg.type = 'inline_keyboard';
-                payload = await sendTelegramButtonService(updatedPayload["buttonIds"]);
+                msg.payload = updatedPayload["buttonIds"];
+                
             }
             assessmentSession = assessmentSessionLogs;
             console.log(`assessment record ${JSON.stringify(payload)}`);
             
         }
         if (msg.type === "inline_keyboard") {
-            
             payload = await sendTelegramButtonService(msg.payload);
         }
-        if (msg.message.ButtonsIds != null) {
+        if (msg.message.ButtonsIds != null && channel !== "telegram" && channel !== "Telegram") {
             if (channel === "whatsappWati"){
                 payload["buttonIds"] = await watiTemplateButtonService(msg.message.ButtonsIds);
             } else {
