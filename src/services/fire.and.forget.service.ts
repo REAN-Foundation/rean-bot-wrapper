@@ -132,6 +132,7 @@ export class FireAndForgetService {
             // Extract user information
             const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
             const userResponse = eventObj.body.queryResult.queryText;
+            console.log("User response from the assessment: ",userResponse);
 
             // Delay for a brief period
             await FireAndForgetService.delay(1000);

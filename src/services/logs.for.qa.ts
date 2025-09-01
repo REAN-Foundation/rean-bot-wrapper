@@ -6,6 +6,7 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 import { EntityManagerProvider } from "./entity.manager.provider.service";
 import { ChatMessage } from "../models/chat.message.model";
 import { ContactList } from "../models/contact.list";
+import { UserInfo } from "../models/user.info.model";
 
 @scoped(Lifecycle.ContainerScoped)
 export class LogsQAService {
@@ -27,21 +28,28 @@ export class LogsQAService {
         const userId = response_format.sessionId;
         const entityManager = await this.entityManagerProvider.getEntityManager(this.EnvironmentProviderService);
         const chatMessageRepository = await entityManager.getRepository(ChatMessage);
+        const userInfoRepository = await entityManager.getRepository(UserInfo);
         const responseChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: userId , direction: 'In' } });
         let messageContentIn = "firstmessage";
 
         const contactList =
         (await this.entityManagerProvider.getEntityManager(this.EnvironmentProviderService)).getRepository(ContactList);
         const personContactList = await contactList.findOne({ where: { mobileNumber: userId } });
+        const personUserInfo = await userInfoRepository.findOne({ where: { userPlatformID: userId } });
         let cmrTaskID = null;
         let userName = null;
+        let userAge = null;
+        let userGender = null;
         if (personContactList){
             cmrTaskID   = personContactList.dataValues.cmrChatTaskID;
             userName = personContactList.dataValues.username;
+            userAge = personUserInfo?.dataValues.userAge;
+            userGender = personUserInfo?.dataValues.userGender;
         }
+        const description = `**User Details**\n\n- **User Mobile Number**: ${userId}\n- **Name**: ${userName}\n- **Age**: ${userAge}\n- **Gender**: ${userGender}`;
         if ( responseChatMessage.length >= 1){
             messageContentIn = responseChatMessage[responseChatMessage.length - 1].messageContent;
-            let taskId = await this.postingOnClickup(`Client : ` + messageContentIn,  cmrTaskID , responseChatMessage, userName);
+            let taskId = await this.postingOnClickup(`Client : ` + messageContentIn,  cmrTaskID , responseChatMessage, userName, '', description);
             const messageContentOut = response_format.messageText;
             taskId = await this.postingOnClickup(`Bot : ` + messageContentOut + `\nIntent Name : ${response_format.intent}`, taskId, responseChatMessage, userName, response_format.intent);
             await contactList.update({
@@ -56,12 +64,12 @@ export class LogsQAService {
         }
     }
 
-    async postingOnClickup(comment,cmrTaskId, responseChatMessage, userName, intent=''){
+    async postingOnClickup(comment,cmrTaskId, responseChatMessage, userName, intent = '', description = null){
         intent = intent?.toLocaleLowerCase();
         if (cmrTaskId){
             // eslint-disable-next-line max-len
             await this.clickUpTask.postCommentOnTask(cmrTaskId,comment);
-            await this.clickUpTask.updateTask(cmrTaskId,null,null,userName, intent);
+            await this.clickUpTask.updateTask(cmrTaskId,null,description,userName, intent);
 
             await this.clickUpTask.updateTag(cmrTaskId, intent);
             console.log("Updating old clickUp task");
@@ -69,7 +77,7 @@ export class LogsQAService {
         }
         else
         {
-            const taskID = await this.clickUpTask.createTask(responseChatMessage, userName, null, null, intent);
+            const taskID = await this.clickUpTask.createTask(responseChatMessage, userName, description, null, intent);
             await this.clickUpTask.postCommentOnTask(taskID,comment);
             console.log("Creating new clickUp task");
             return taskID;
