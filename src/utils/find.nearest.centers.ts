@@ -44,7 +44,7 @@ export class NearestLocation {
 
     async formatLoctionResponse(locationResponse) {
         try {
-            const formattedResponse = `Here are the nearest eye care centers you can visit:\n\n` +
+            const formattedResponse = `Here are the nearest centers you can visit:\n\n` +
             locationResponse.slice(0, 4).map((loc, i) => {
                 const address = loc.postalAddress.replace(/\n/g, ', ');
                 const distance = (parseFloat(loc.distance)).toFixed(1); // round to 1 decimal
