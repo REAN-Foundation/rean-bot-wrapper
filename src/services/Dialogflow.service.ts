@@ -1,5 +1,25 @@
 export  class dialoflowMessageFormatting {
 
+    triggerIntentWithMessage(intent,message,eventObj){
+         
+        const data = {
+            "fulfillmentMessages" : [
+                {
+                    "text" : {
+                        "text" : [
+                            message
+                        ]
+                    }
+                }
+            ],
+            "followupEventInput" : {
+                "name"         : intent,
+                "languageCode" : "en-US",
+                "parameters"   : eventObj.body.queryResult.parameters
+            }
+        };
+    }
+
     async triggerIntent(triggering_event:string, eventObj){
         return {
             "followupEventInput" : {
