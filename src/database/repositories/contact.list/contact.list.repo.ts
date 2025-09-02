@@ -8,7 +8,7 @@ import { RepositoryHelper } from "../repo.helper";
 export class ContactListRepo {
 
     static findContactByMobileNumber = async (container, mobileNumber: string): Promise<ContactListDto | null> => {
-        try {        
+        try {
             const entityManager = await RepositoryHelper.resolveEntityManager(container);
             const contactListRepository = entityManager.getRepository(ContactList);
             const result: ContactList | null = await contactListRepository.findOne({ where: { mobileNumber } });
@@ -19,5 +19,6 @@ export class ContactListRepo {
             console.error('Error finding contact list by mobile number:', error);
             return null;
         }
-    }
+    };
+
 }

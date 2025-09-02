@@ -40,13 +40,13 @@ export class CacheMap<V> {
     }
 
     findAndClear(searchPattern: string): string[] {
-        let keys: string[] = [];
-        for (let key of this.cache.keys()) {
+        const keys: string[] = [];
+        for (const key of this.cache.keys()) {
             if (key.includes(searchPattern)) {
                 keys.push(key);
             }
         }
-        for (let key of keys) {
+        for (const key of keys) {
             this.cache.delete(key);
         }
         return keys;

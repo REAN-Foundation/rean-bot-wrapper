@@ -76,7 +76,7 @@ export class ClientWebhookController {
             const userConsent: UserConsentDto | null = await UserConsentRepo.findUserConsentByPlatformId(req.container, userId);
             console.log("userConsent", userConsent);
             if (userConsent){
-               return userConsent.consentGiven !== 'true';
+                return userConsent.consentGiven !== 'true';
             }
          
             return true;

@@ -1,27 +1,27 @@
 export interface CacheEntry<T = any> {
-    Data: T; 
-    Timestamp: number; 
-    Ttl: number; 
-    Hits: number; 
-    Size: number; 
-    LastModified?: string; 
+    Data: T;
+    Timestamp: number;
+    Ttl: number;
+    Hits: number;
+    Size: number;
+    LastModified?: string;
   }
   
-  export enum CachePriority {
+export enum CachePriority {
     Low = 'Low',
     Normal = 'Normal',
     High = 'High'
   }
 
-  export interface CacheOptions {
-    Ttl?: number; 
-    Compress?: boolean; 
-    StaleWhileRevalidate?: boolean; 
-    Force?: boolean; 
-    Priority?: CachePriority; 
+export interface CacheOptions {
+    Ttl?: number;
+    Compress?: boolean;
+    StaleWhileRevalidate?: boolean;
+    Force?: boolean;
+    Priority?: CachePriority;
   }
   
-  export interface CacheMetrics {
+export interface CacheMetrics {
     Hits: number;
     Misses: number;
     HitRate: number;
@@ -32,16 +32,16 @@ export interface CacheEntry<T = any> {
     AverageEntrySize: number;
   }
   
-  export interface CacheConfig {
-    DefaultTTL: number; 
-    MaxMemorySize: number; 
-    EnableMetrics: boolean; 
-    EnableCompression: boolean; 
-    CompressionThreshold: number; 
-    CleanupInterval: number; 
+export interface CacheConfig {
+    DefaultTTL: number;
+    MaxMemorySize: number;
+    EnableMetrics: boolean;
+    EnableCompression: boolean;
+    CompressionThreshold: number;
+    CleanupInterval: number;
   }
 
-  export interface CacheStrategy {
+export interface CacheStrategy {
     Name: string;
     Ttl: number;
     Tags: string[];
