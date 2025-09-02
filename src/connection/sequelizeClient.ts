@@ -41,7 +41,6 @@ export class SequelizeClient {
                 logging        : false,
                 repositoryMode : true
             });
-
             if (clientEnvironmentProviderService.getClientEnvironmentVariable('NAME') === "CALORIE_BOT") {
                 // eslint-disable-next-line max-len
                 sequelizeClient.addModels([ChatMessage, ChatSession, ContactList, CalorieInfo, CalorieDatabase,ConsentInfo,UserConsent]);
@@ -79,7 +78,6 @@ export class SequelizeClient {
         else {
             console.log("No DB to connect");
         }
-
     };
 
     // eslint-disable-next-line max-len
@@ -95,5 +93,4 @@ export class SequelizeClient {
             return sequrlizeClients[clientName];
         }
     };
-
 }
