@@ -86,59 +86,59 @@ export const CacheStrategies: Record<string, CacheOptions> = {
 // Strategy management functions
 export class StrategyManager {
 
-  private static strategies = { ...CacheStrategies };
+    private static strategies = { ...CacheStrategies };
 
-  // Get a strategy by name
-  static getStrategy(name: string): CacheOptions | undefined {
-      return this.strategies[name];
-  }
+    // Get a strategy by name
+    static getStrategy(name: string): CacheOptions | undefined {
+        return this.strategies[name];
+    }
 
-  // Get all strategies
-  static getAllStrategies(): Record<string, CacheOptions> {
-      return { ...this.strategies };
-  }
+    // Get all strategies
+    static getAllStrategies(): Record<string, CacheOptions> {
+        return { ...this.strategies };
+    }
 
-  // Add or update a strategy
-  static setStrategy(name: string, options: CacheOptions): void {
-      this.strategies[name] = options;
-  }
+    // Add or update a strategy
+    static setStrategy(name: string, options: CacheOptions): void {
+        this.strategies[name] = options;
+    }
 
-  // Remove a strategy
-  static removeStrategy(name: string): boolean {
-      if (this.strategies[name]) {
-          delete this.strategies[name];
-          return true;
-      }
-      return false;
-  }
+    // Remove a strategy
+    static removeStrategy(name: string): boolean {
+        if (this.strategies[name]) {
+            delete this.strategies[name];
+            return true;
+        }
+        return false;
+    }
 
-  // Reset to default strategies
-  static resetToDefaults(): void {
-      this.strategies = { ...CacheStrategies };
-  }
+    // Reset to default strategies
+    static resetToDefaults(): void {
+        this.strategies = { ...CacheStrategies };
+    }
 
-  // Get strategy names
-  static getStrategyNames(): string[] {
-      return Object.keys(this.strategies);
-  }
+    // Get strategy names
+    static getStrategyNames(): string[] {
+        return Object.keys(this.strategies);
+    }
 
-  // Validate strategy options
-  static validateStrategy(options: CacheOptions): { valid: boolean; errors: string[] } {
-      const errors: string[] = [];
+    // Validate strategy options
+    static validateStrategy(options: CacheOptions): { valid: boolean; errors: string[] } {
+        const errors: string[] = [];
 
-      if (!options.Ttl || options.Ttl <= 0) {
-          errors.push('Ttl must be a positive number');
-      }
+        if (!options.Ttl || options.Ttl <= 0) {
+            errors.push('Ttl must be a positive number');
+        }
 
-      if (options.Priority && !['low', 'normal', 'high'].includes(options.Priority)) {
-          errors.push('Priority must be low, normal, or high');
-      }
+        if (options.Priority && !['low', 'normal', 'high'].includes(options.Priority)) {
+            errors.push('Priority must be low, normal, or high');
+        }
 
-      return {
-          valid : errors.length === 0,
-          errors
-      };
-  }
+        return {
+            valid : errors.length === 0,
+            errors
+        };
+    }
 
 }
 
