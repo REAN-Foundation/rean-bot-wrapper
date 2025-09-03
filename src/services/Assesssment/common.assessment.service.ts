@@ -102,8 +102,8 @@ export class CommonAssessmentService {
             "Category"           : "Assessment",
             "ActionType"         : "Custom",
             "ActionId"           : userTaskData.Data.Assessment.id,
-            "ScheduledStartTime" : assessmentDetails.currentDate,
-            "ScheduledEndTime"   : assessmentDetails.currentDate,
+            "ScheduledStartTime" : assessmentDetails.ScheduledDate,
+            "ScheduledEndTime"   : assessmentDetails.ScheduledDate,
             "IsRecurrent"        : false
         };
         await this.needleService.needleRequestForREAN("post", userTaskApiURL, null, userTaskBody);
@@ -127,11 +127,11 @@ export class CommonAssessmentService {
         let telegramPayload = null;
         if (assessmentData.Data.Assessment) {
             const assessment = JSON.stringify(assessmentData.Data.Assessment);
-            const { metaPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment(  personPhoneNumber,  channel, assessment);
+            const { updatedPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment(  personPhoneNumber,  channel, assessment);
             let messageType = "template";
             if (assessmentSessionLogs.userResponseType === 'Single Choice Selection' && (channel.toLowerCase() === 'telegram' )) {
                 messageType = "inline_keyboard";
-                const buttonArray = metaPayload.buttonIds.flatMap(button => {
+                const buttonArray = updatedPayload.buttonIds.flatMap(button => {
                     const option = button.parameters[0].payload;
                     return [option.split('_')[1],option ];
                 });
@@ -148,14 +148,14 @@ export class CommonAssessmentService {
             const response_format: Iresponse = commonResponseMessageFormat();
             response_format.platform = channel;
             response_format.sessionId = personPhoneNumber;
-            response_format.messageText = metaPayload["messageText"];
+            response_format.messageText = updatedPayload["messageText"];
             response_format.message_type = messageType;
             let message_to_platform = null;
             if ((channel === 'telegram' || channel === 'Telegram') &&  messageType === "inline_keyboard" ){
                 message_to_platform = await this._platformMessageService.SendMediaMessage(response_format, telegramPayload);
             }
             else {
-                message_to_platform = await this._platformMessageService.SendMediaMessage(response_format, metaPayload);
+                message_to_platform = await this._platformMessageService.SendMediaMessage(response_format, updatedPayload);
             }
             assessmentSessionLogs.userMessageId = await this._platformMessageService.getMessageIdFromResponse(message_to_platform);
             const key = `${personPhoneNumber}:Assessment`;

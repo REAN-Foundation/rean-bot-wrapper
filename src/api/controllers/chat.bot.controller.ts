@@ -12,7 +12,7 @@ import WorkflowUserData from '../../models/workflow.user.data.model';
 import { QuestionResponseType, WorkflowEvent } from '../../services/emergency/workflow.event.types';
 import { EntityManagerProvider } from '../../services/entity.manager.provider.service';
 import { ChatSession } from '../../models/chat.session';
-import { sendApiButtonService, templateButtonService, whatsappSingleMetaButtonService } from '../../services/whatsappmeta.button.service';
+import { sendApiButtonService, sendApiInteractiveListService, templateButtonService, whatsappSingleMetaButtonService } from '../../services/whatsappmeta.button.service';
 import { sendTelegramButtonService } from '../../services/telegram.button.service';
 import { ChatMessage } from '../../models/chat.message.model';
 import { WhatsappMetaMessageService } from '../../services/whatsapp.meta.message.service';
@@ -27,7 +27,7 @@ export class ChatBotController {
 
     private _platformMessageService :  platformServiceInterface ;
 
-    constructor(@inject(delay(() => WhatsappMetaMessageService)) 
+    constructor(@inject(delay(() => WhatsappMetaMessageService))
         public whatsappNewMessageService?: WhatsappMetaMessageService,
         @inject(ClientEnvironmentProviderService) private environmentProviderService?: ClientEnvironmentProviderService,
         @inject(EntityManagerProvider) private _entityProvider?: EntityManagerProvider,
@@ -156,7 +156,7 @@ export class ChatBotController {
                 Payload              : event.UserMessage.Payload ?? null,
             };
 
-            const entManager = await this._entityProvider.getEntityManager(this.environmentProviderService);
+            const entManager = await this._entityProvider.getEntityManager(clientEnvironmentProviderService);
             const workflowRepository = entManager.getRepository(WorkflowUserData);
             console.log("Storing the workflow event to database", workflowEventEntiry);
             const workflowEventEntityRecord = await workflowRepository.create(workflowEventEntiry);
@@ -245,6 +245,28 @@ export class ChatBotController {
                     payload = await sendTelegramButtonService(availabliltyButton);
                     response_format.message_type = 'inline_keyboard';
                 }
+            }
+            else if (event.UserMessage.MessageType === "Question" && event.UserMessage.QuestionText.startsWith("Has any of following condition happened")) {
+                response_format.message_type = "question";
+                response_format.messageText = event.UserMessage.QuestionText;
+                const options = event.UserMessage.QuestionOptions;
+                const availabliltyButton = [];
+                let i = 0;
+                for (const option of options){
+                    const buttonId = option.Sequence;
+                    availabliltyButton.push(option.Text, buttonId);
+                    i = i + 1;
+                }
+                if (event.UserMessage.MessageChannel === 'WhatsApp' ||
+                event.UserMessage.MessageChannel === 'whatsappWati') {
+                    payload = await sendApiInteractiveListService(availabliltyButton);
+                    response_format.message_type = 'interactivelist';
+                  
+                } else {
+                    payload = await sendTelegramButtonService(availabliltyButton);
+                    response_format.message_type = 'inline_keyboard';
+                }
+                
             }
         
             else if (event.UserMessage.MessageType === "Question" && !event.UserMessage.QuestionText.startsWith("Will you be available")) {

@@ -135,18 +135,22 @@ export class TelegramMessageService implements platformServiceInterface{
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     SendMediaMessage = async (response_format:Iresponse, payload:any) => {
-        const type = response_format.message_type;
-        if (type) {
-            const classmethod = `send${type}Response`;
-            const telegram = new TelegramBot(this.environmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
-            console.log(`QA_SERVICE Flag: ${this.environmentProviderService.getClientEnvironmentVariable("QA_SERVICE")}`);
-            if (this.environmentProviderService.getClientEnvironmentVariable("QA_SERVICE")) {
-                if (response_format.name !== "ReanCare") {
-                    console.log("Providing QA service through clickUp");
-                    await this.logsQAService.logMesssages(response_format);
+        try {
+            const type = response_format.message_type;
+            if (type) {
+                const classmethod = `send${type}Response`;
+                const telegram = new TelegramBot(this.environmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
+                console.log(`QA_SERVICE Flag: ${this.environmentProviderService.getClientEnvironmentVariable("QA_SERVICE")}`);
+                if (this.environmentProviderService.getClientEnvironmentVariable("QA_SERVICE")) {
+                    if (response_format.name !== "ReanCare") {
+                        console.log("Providing QA service through clickUp");
+                        await this.logsQAService.logMesssages(response_format);
+                    }
                 }
+                return await this.telegramPostResponseFunctionalities[classmethod](response_format,telegram,payload);
             }
-            return await this.telegramPostResponseFunctionalities[classmethod](response_format,telegram,payload);
+        } catch (error) {
+            console.log("errroooooooooooorrrrrr is here ",error);
         }
     };
 

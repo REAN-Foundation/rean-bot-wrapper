@@ -48,6 +48,7 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
     async postRequestMessages(postdata) {
         return new Promise(async(resolve,reject) =>{
             try {
+                console.log("NAME",this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME"));
                 const options = getRequestOptions();
                 const token = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
                 options.headers['Content-Type'] = 'application/json';
@@ -57,8 +58,10 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
                 const whatsappPhoneNumberID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_PHONE_NUMBER_ID");
                 const path = `/${version}/${whatsappPhoneNumberID}/messages`;
                 const apiUrl_meta = hostname + path;
+                console.log("The request sent to whatsapp has body: ", JSON.stringify(postdata));
                 const response = await needle("post", apiUrl_meta, postdata, options);
-                console.log(response.body);
+                console.log("Response from whatsapp send message status code: ",response?.statusCode);
+                console.log("Response from whatsapp send message: ",response?.body);
                 resolve(response);
             }
             catch (error) {

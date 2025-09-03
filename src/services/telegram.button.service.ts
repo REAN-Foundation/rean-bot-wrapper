@@ -1,42 +1,43 @@
-
 export const sendTelegramButtonService = async (buttons) => {
     const objects = [];
+
     for (let i = 0; i < buttons.length; i += 2) {
         const buttonObject = {
-            structValue : {
-                fields : {
-                    text : {
-                        stringValue : buttons[i],
-                        kind: "stringValue",
-                    },
-                    callback_data : {
-                        stringValue : buttons[i + 1],
-                        kind : "stringValue",
+            structValue: {
+                fields: {
+                    reply: {
+                        structValue: {
+                            fields: {
+                                title: {
+                                    stringValue: buttons[i],
+                                    kind: "stringValue",
+                                },
+                                id: {
+                                    stringValue: buttons[i + 1],
+                                    kind: "stringValue",
+                                },
+                            },
+                        },
+                        kind: "structValue",
                     },
                 },
             },
-            kind : "structValue",
+            kind: "structValue",
         };
         objects.push(buttonObject);
     }
-    const payload =  {
-        fields : {
-            messagetype : {
-                stringValue : "interactive-buttons",
-                kind        : "stringValue",
+
+    const payload = {
+        fields: {
+            messagetype: {
+                stringValue: "interactive-buttons",
+                kind: "stringValue",
             },
-            buttons : {
-                listValue : {
-                    values : [
-                        {
-                            listValue : {
-                                values : objects,
-                            },
-                            kind : "listValue",
-                        }
-                    ]
+            buttons: {
+                listValue: {
+                    values: objects,
                 },
-                kind : "listValue",
+                kind: "listValue",
             },
         },
     };

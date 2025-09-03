@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import { ResponseHandler } from '../../utils/response.handler';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';

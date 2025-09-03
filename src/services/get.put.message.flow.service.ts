@@ -11,7 +11,7 @@ import { GoogleTextToSpeech } from './text.to.speech';
 import { SlackMessageService } from "./slack.message.service";
 import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
-import { ReminderMessage} from '../models/reminder.model';
+import { ReminderMessage } from '../models/reminder.model';
 import { translateService } from './translate.service';
 import { sendApiButtonService, templateButtonService, watiTemplateButtonService } from './whatsappmeta.button.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
@@ -25,6 +25,7 @@ import needle from "needle";
 import { sendTelegramButtonService } from './telegram.button.service';
 import { Logger } from '../common/logger';
 import { MessageHandlerType } from '../refactor/messageTypes/message.types';
+import { AssessmentIdentifiers } from '../models/assessment/assessment.identifiers.model';
 
 // import { AssessmentIdentifiers } from '../models/assessment/assessment.identifiers.model';
 
@@ -193,7 +194,6 @@ export class MessageFlow{
         const contactList = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
         const personContactList = await contactList.findOne({ where: { mobileNumber: msg.userId } });
         const reminderMessage = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ReminderMessage);
-
         if (personContactList) {
             personName = personContactList.username;
         }
@@ -247,26 +247,27 @@ export class MessageFlow{
             payload = await sendApiButtonService(msg.payload);
         }
         else if (msg.type === "reancareAssessment") {
-
+            
             // make compatible for telegram also.
-            const { metaPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment( msg.userId,msg.channel, msg.payload);
-            if (metaPayload["channel"] === 'whatsappMeta' || metaPayload["channel"] === 'WhatsappWati') {
+            const { updatedPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment( msg.userId,msg.channel, msg.payload);
+            if (updatedPayload["channel"] === 'whatsappMeta' || updatedPayload["channel"] === 'WhatsappWati') {
                 messageType = msg.type;
                 msg.type = 'template';
-                payload = metaPayload;
-            } else if (metaPayload["channel"] === 'telegram' || metaPayload["channel"] === 'Telegram') {
+                payload = updatedPayload;
+            } else if (updatedPayload["channel"] === 'telegram' || updatedPayload["channel"] === 'Telegram') {
                 messageType = msg.type;
-                msg.message = metaPayload["messageText"];
+                msg.message = updatedPayload["messageText"];
                 msg.type = 'inline_keyboard';
-                msg["payload"] = [ "option_A","option_B","option_C","option_D" ];
+                payload = await sendTelegramButtonService(updatedPayload["buttonIds"]);
             }
             assessmentSession = assessmentSessionLogs;
             console.log(`assessment record ${JSON.stringify(payload)}`);
+            
         }
         if (msg.type === "inline_keyboard") {
-            payload = await sendTelegramButtonService([ "Option A",msg.payload[0], "Option B",msg.payload[1],"Option C",msg.payload[2],"Option D",msg.payload[3]]);
+            
+            payload = await sendTelegramButtonService(msg.payload);
         }
-
         if (msg.message.ButtonsIds != null) {
             if (channel === "whatsappWati"){
                 payload["buttonIds"] = await watiTemplateButtonService(msg.message.ButtonsIds);
@@ -305,51 +306,60 @@ export class MessageFlow{
         let message_to_platform = null;
         // eslint-disable-next-line max-len
         message_to_platform = await platformMessageService.SendMediaMessage(response_format, payload);
-        
-        // const customRemSetting: boolean = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CUSTOM_REM_SETTING") === "true";
-        // if (msg.agentName === 'Reancare' && customRemSetting) {
-        //     try {
-        // const msg_id = message_to_platform.body.messages[0].id;
-        //const msg_id = await platformMessageService.getMessageIdFromResponse(message_to_platform);
-        // const reminder_info = {
-        //     userId: msg.payload?.userId,
-        //     MessageId: msg_id,
-        //     ReminderId: msg.payload?.ReminderId,
-        //     ReminderDate: msg.payload?.ReminderDate,
-        //     ReminderTime: msg.payload?.ReminderTime,
-        //     ParentActionId: msg.payload?.ParentActionId
-        // };
-        // await reminderMessage.create(reminder_info);
-        //     } catch (error) {
-        //         console.error("Failed to insert into reminderMessage:", error);
-        //     }
-        // }
+        const customRemSetting: boolean = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CUSTOM_REM_SETTING") === "true";
+        if (msg.agentName === 'Reancare' && customRemSetting) {
+            try {
+                const msg_id = await platformMessageService.getMessageIdFromResponse(message_to_platform);
+                const reminder_info = {
+                    userId         : msg.payload?.userId,
+                    MessageId      : msg_id,
+                    ReminderId     : msg.payload?.ReminderId,
+                    ReminderDate   : msg.payload?.ReminderDate,
+                    ReminderTime   : msg.payload?.ReminderTime,
+                    ParentActionId : msg.payload?.ParentActionId
+                };
+                await reminderMessage.create(reminder_info);
+            } catch (error) {
+                console.error("Failed to insert into reminderMessage:", error);
+            }
+        }
         if (messageType === "reancareAssessment") {
             
-            // assessmentSession.userMessageId = message_to_platform.body.messages[0].id;
-            assessmentSession.userMessageId = message_to_platform.message_id;
+            assessmentSession.userMessageId = platformMessageService.getMessageIdFromResponse(message_to_platform);
+            const Assessmentkey = `${response_format.sessionId}:Assessment`;
+            CacheMemory.set(Assessmentkey,assessmentSession.userMessageId);
             const AssessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
-            await AssessmentSessionRepo.create(assessmentSession);
+
+            const assessmentSessionData = await AssessmentSessionRepo.create(assessmentSession);
+            const assessmentIdentifierObj = {
+                assessmentSessionId : assessmentSessionData.autoIncrementalID,
+                identifier          : assessmentSession.identifiers,
+                userResponseType    : assessmentSessionData.userResponseType
+            };
+            const AssessmentIdentifiersRepo = (
+                await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)
+            ).getRepository(AssessmentIdentifiers);
+            await AssessmentIdentifiersRepo.create(assessmentIdentifierObj);
         }
         if (msg.provider === "REAN_BOT" || msg.provider === "GGHN" && message_to_platform.statusCode === 200) {
             const previousMessageContextID = message_to_platform.body.messages[0].id;
-            // const appRecord = await reminderMessage.findOne({
-            //     where: { MessageId: previousMessageContextID },
-            //     attributes: ['ParentActionId'],
-            //     raw: true
-            // });
-            // const appointment_id = appRecord ? appRecord.ParentActionId : null;
+            const appRecord = await reminderMessage.findOne({
+                where      : { MessageId: previousMessageContextID },
+                attributes : ['ParentActionId'],
+                raw        : true
+            });
+            const appointment_id = appRecord ? appRecord.ParentActionId : null;
             const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
             
-            let todayDate = new Date().toISOString()
-                .split('T')[0];
-            todayDate = Helper.removeLeadingZerosFromDay(todayDate);
-            const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-            const messageId = await platformMessageService.getMessageIdFromResponse(message_to_platform);
-            const phoneNumber = Helper.formatPhoneForDocProcessor(msg.userId);
+            //let todayDate = new Date().toISOString()
+            //  .split('T')[0];
+            //todayDate = Helper.removeLeadingZerosFromDay(todayDate);
+            //const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            //const messageId = await platformMessageService.getMessageIdFromResponse(message_to_platform);
+            //const phoneNumber = Helper.formatPhoneForDocProcessor(msg.userId);
 
-            const apiUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
-            // const apiUrl = `${docProcessBaseURL}appointment-schedules/${appointment_id}/reminder-response`;
+            //const apiUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
+            const apiUrl = `${docProcessBaseURL}appointment-schedules/${appointment_id}/reminder-response`;
             const headers = { headers : {
                 'Content-Type' : 'application/json',
                 Accept         : 'application/json',
@@ -409,27 +419,20 @@ export class MessageFlow{
         const contactListRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
         const respContactList = await contactListRepository.findAll({ where: { mobileNumber: userId } });
 
-        // console.log("respContactList!!!", respContactList);
         if (respContactList.length === 0) {
             await contactListRepository.create({
                 mobileNumber : messagetoDialogflow.platformId,
                 username     : messagetoDialogflow.name,
                 platform     : messagetoDialogflow.platform,
                 optOut       : "false" });
-            // console.log("newContactlistEntry", newContactlistEntry);
-            // await newContactlistEntry.save();
         }
 
         //start or continue a session
         if (respChatSession.length === 0 || respChatSession[respChatSession.length - 1].sessionOpen === "false") {
 
-            // console.log("starting a new session");
             await chatSessionRepository.create({ userPlatformID  : messagetoDialogflow.platformId,
                 platform        : messagetoDialogflow.platform, sessionOpen     : "true",
                 lastMessageDate : lastMessageDate, askForFeedback  : "false" });
-
-            // console.log("newChatsession", newChatsession);
-            // await newChatsession.save();
         }
         else {
             const autoIncrementalID = respChatSession[respChatSession.length - 1].autoIncrementalID;
@@ -468,23 +471,6 @@ export class MessageFlow{
         try {
             this.chatMessageConnection.intent = intent;
             this.chatMessageConnection.save();
-
-            // const lastMessage = await ChatMessage.findAll({
-            //     limit : 1,
-            //     where : {
-            //         userPlatformID : userPlatformID,
-            //         direction      : 'IN'
-            //     },
-            //     order : [ [ 'createdAt', 'DESC' ]]
-            // });
-            // await ChatMessage.update(
-            //     {intent: intent},
-            //     {
-            //         where : {
-            //             id : lastMessage[0].id,
-            //         }
-            //     }
-            // );
         } catch (error) {
             console.log(error);
         }

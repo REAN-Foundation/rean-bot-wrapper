@@ -43,11 +43,12 @@ export class NearestLocation {
 
     async formatLoctionResponse(locationResponse) {
         try {
-            const address_1 = locationResponse[0].postalAddress.replace(/\n/g, ', ');
-            const address_2 = locationResponse[1].postalAddress.replace(/\n/g, ', ');
-            const address_3 = locationResponse[2].postalAddress.replace(/\n/g, ', ');
-            const address_4 = locationResponse[3].postalAddress.replace(/\n/g, ', ');
-            const formattedResponse = `Your Possible nearest centers are: \n\n 1. ${address_1}  \n 2. ${address_2} \n 3. ${address_3} \n 4. ${address_4}`;
+            const formattedResponse = `Here are the nearest centers you can visit:\n\n` +
+            locationResponse.slice(0, 4).map((loc, i) => {
+                const address = loc.postalAddress.replace(/\n/g, ', ');
+                const distance = (parseFloat(loc.distance)).toFixed(1); // round to 1 decimal
+                return `${i + 1}️⃣ *${loc.centerName}* \n📍 ${address}\n📏 Distance: ~${distance} km\n`;
+            }).join('\n') +`\n✨ You may call ahead to confirm timings and availability before visiting.`;
             return formattedResponse;
         } catch (error) {
             console.log(error);
@@ -92,7 +93,12 @@ export class NearestLocation {
         } else {
             const address = value;
             const response = await fetch(
-                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`
+                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`,
+                {
+                    headers : {
+                        "User-Agent" : "ReanBotWrapper/1.0 (services@reanfoundation.org)"
+                    }
+                }
             );
             const data = await response.json();
             if (data.length === 0) {
@@ -130,7 +136,7 @@ export class NearestLocation {
             return {
                 postalAddress  : location_B.postalAddress,
                 centerName     : location_B.centerName,
-                distance       : distance / 1609.34, // convert meters to miles
+                distance       : distance / 1000, // convert meters to kms
                 severity       : location_B.severity,
                 preferedCenter : location_B.preferedCenter,
                 priority       : location_B.priority,

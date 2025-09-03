@@ -63,9 +63,10 @@ export class WorkflowEventListener {
         return previousMessage;
     };
 
-    async commence(message: Imessage) {
+    async commence(message: Imessage, platformMessageService) {
         try {
             console.log("Message ->", message);
+            console.log("Client name", this.environmentProviderService.getClientEnvironmentVariable("NAME"));
             const schemaInstanceStatus = await this.getPreviousMessageFromWorkflow(message.platformId);
             if (schemaInstanceStatus === null) {
                 if (message.messageBody.toLowerCase() === "yes, need help")
@@ -80,9 +81,8 @@ export class WorkflowEventListener {
                     response_format.platform = message.platform;
                     const payload = null;
                     response_format.sessionId = message.platformId;
-                    this._platformMessageService = container.resolve(message.platform);
-                    if (this._platformMessageService) {
-                        await this._platformMessageService.SendMediaMessage(response_format, payload);
+                    if (platformMessageService) {
+                        await platformMessageService.SendMediaMessage(response_format, payload);
                     }
                     return null;
                 }
@@ -105,9 +105,9 @@ export class WorkflowEventListener {
                             response_format.message_type = 'inline_keyboard';
                         }
                         console.log("PAYLOAD", JSON.stringify(payload, null, 2));
-                        this._platformMessageService = container.resolve(message.platform);
-                        if (this._platformMessageService) {
-                            const res = await this._platformMessageService.SendMediaMessage(response_format, payload);
+                        if (platformMessageService) {
+                            const res = await platformMessageService.SendMediaMessage(response_format, payload);
+                            console.log("Response for emergency question send",res?.body);
                         }
                         return null;
                     }
