@@ -125,7 +125,7 @@ export class InMemoryCache implements ICache {
     }
 
     async cleanup(): Promise<void> {
-        const now = Date.now();
+        // const now = Date.now();
         const expiredKeys: string[] = [];
         const validEntries: Array<{ key: string; entry: CacheEntry }> = [];
 

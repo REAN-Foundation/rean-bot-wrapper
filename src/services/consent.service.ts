@@ -143,7 +143,8 @@ export class ConsentService {
             const clientEnvironmentProviderService = await req.container.resolve(ClientEnvironmentProviderService);
             const clientName = await  clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
             console.log(clientName);
-            const entityManagerProvider = req.container.resolve(EntityManagerProvider);
+
+            // const entityManagerProvider = req.container.resolve(EntityManagerProvider);
             
             this._platformMessageService = req.container.resolve(req.params.channel);
             this._platformMessageService.res = res;
