@@ -195,10 +195,12 @@ export class MessageFlow{
         let messageType = "";
         let assessmentSession = null;
         let personName = " ";
-        const defaultLangaugeCode = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
         const contactList = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
         const personContactList = await contactList.findOne({ where: { mobileNumber: msg.userId } });
         const reminderMessage = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ReminderMessage);
+        const defaultLangaugeCode = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+        const languageCode = msg.payload?.Language ? msg.payload?.Language : defaultLangaugeCode || "en";
+        payload["languageForSession"] = languageCode;
         if (personContactList) {
             personName = personContactList.username;
         }
@@ -210,9 +212,8 @@ export class MessageFlow{
                 msg.message = JSON.parse(msg.message);
             }
             payload["variables"] = msg.message.Variables;
-            payload["languageForSession"] = "en";
             if (msg.provider !== "REAN_BW") {
-                let languageForSession = await this.translate.detectUsersLanguage( msg.userId);
+                let languageForSession = languageCode;
                 if (msg.agentName !== 'postman') {
                     if (typeof msg.message.Variables === "string") {
                         msg.message.Variables = JSON.parse(msg.message.Variables);
@@ -220,11 +221,9 @@ export class MessageFlow{
                 }
                 if (msg.message.Variables[`${languageForSession}`]) {
                     payload["variables"] = msg.message.Variables[`${languageForSession}`];
-                    payload["languageForSession"] = languageForSession;
                 } else {
                     languageForSession = defaultLangaugeCode;
                     payload["variables"] = msg.message.Variables[defaultLangaugeCode];
-                    payload["languageForSession"] = defaultLangaugeCode;
                 }
 
                 // Fetch image URL in template message
@@ -255,7 +254,7 @@ export class MessageFlow{
         else if (msg.type === "reancareAssessment") {
             
             // make compatible for telegram also.
-            const { updatedPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment( msg.userId,msg.channel, msg.payload);
+            const { updatedPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment( msg.userId,msg.channel, msg.payload, languageCode);
             if (updatedPayload["channel"] === 'whatsappMeta' || updatedPayload["channel"] === 'WhatsappWati') {
                 messageType = msg.type;
                 msg.type = 'template';
@@ -264,7 +263,7 @@ export class MessageFlow{
                 messageType = msg.type;
                 msg.message = updatedPayload["messageText"];
                 msg.type = 'inline_keyboard';
-                payload = await sendTelegramButtonService(updatedPayload["buttonIds"]);
+                msg.payload = updatedPayload["buttonIds"];
             }
             assessmentSession = assessmentSessionLogs;
             console.log(`assessment record ${JSON.stringify(payload)}`);
@@ -274,7 +273,7 @@ export class MessageFlow{
             
             payload = await sendTelegramButtonService(msg.payload);
         }
-        if (msg.message.ButtonsIds != null) {
+        if (msg.message.ButtonsIds != null && channel !== "telegram" && channel !== "Telegram") {
             if (channel === "whatsappWati"){
                 payload["buttonIds"] = await watiTemplateButtonService(msg.message.ButtonsIds);
             } else {
