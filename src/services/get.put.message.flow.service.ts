@@ -212,17 +212,19 @@ export class MessageFlow{
                 msg.message = JSON.parse(msg.message);
             }
             payload["variables"] = msg.message.Variables;
-            let languageForSession = languageCode;
+
+            // let languageForSession = languageCode;
             if (msg.agentName !== 'postman') {
                 if (typeof msg.message.Variables === "string") {
                     msg.message.Variables = JSON.parse(msg.message.Variables);
                 }
             }
-            if (msg.message.Variables[`${languageForSession}`]) {
-                payload["variables"] = msg.message.Variables[`${languageForSession}`];
+            if (msg.message.Variables[`${languageCode}`]) {
+                payload["variables"] = msg.message.Variables[`${languageCode}`];
             } else {
-                languageForSession = defaultLangaugeCode;
-                payload["variables"] = msg.message.Variables[defaultLangaugeCode];
+
+                // languageForSession = languageCode;
+                payload["variables"] = msg.message.Variables[languageCode];
             }
 
             // Fetch image URL in template message
@@ -235,8 +237,8 @@ export class MessageFlow{
             }
 
             // Update template name for whatsapp wati other than english
-            if (channel === "whatsappWati" && languageForSession !== "en") {
-                payload["templateName"] = `${msg.templateName}_${languageForSession}`;
+            if (channel === "whatsappWati" && languageCode !== "en") {
+                payload["templateName"] = `${msg.templateName}_${languageCode}`;
             }
             payload["variables"] = await this.updatePatientName(payload["variables"], personName);
         }

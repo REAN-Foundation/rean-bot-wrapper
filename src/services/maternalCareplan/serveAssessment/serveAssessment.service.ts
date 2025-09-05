@@ -66,9 +66,9 @@ export class ServeAssessmentService {
                 updatedPayload["channel"] = channel;
                 updatedPayload["templateName"] = questionData.TemplateName;
                 let languageForSession = await this.translate.detectUsersLanguage( platformUserId );
-                if (questionData.TemplateVariables[`${languageForSession}`]) {
-                    updatedPayload["variables"] = questionData.TemplateVariables[`${languageForSession}`];
-                    updatedPayload["languageForSession"] = languageForSession;
+                if (questionData.TemplateVariables[`${assessmentLanguage}`]) {
+                    updatedPayload["variables"] = questionData.TemplateVariables[`${assessmentLanguage}`];
+                    updatedPayload["languageForSession"] = assessmentLanguage;
                 } else {
                     languageForSession = assessmentLanguage;
                     updatedPayload["variables"] = questionData.TemplateVariables[assessmentLanguage];
@@ -76,8 +76,8 @@ export class ServeAssessmentService {
                 }
 
                 // Update template name for whatsapp wati other than english
-                if (userTask.Channel === "WhatsappWati" && languageForSession !== "en") {
-                    updatedPayload["templateName"] = `${questionData.TemplateName}_${languageForSession}`;
+                if (userTask.Channel === "WhatsappWati" && assessmentLanguage !== "en") {
+                    updatedPayload["templateName"] = `${questionData.TemplateName}_${assessmentLanguage}`;
                 }
 
                 // Extract buttons
