@@ -212,35 +212,33 @@ export class MessageFlow{
                 msg.message = JSON.parse(msg.message);
             }
             payload["variables"] = msg.message.Variables;
-            if (msg.provider !== "REAN_BW") {
-                let languageForSession = languageCode;
-                if (msg.agentName !== 'postman') {
-                    if (typeof msg.message.Variables === "string") {
-                        msg.message.Variables = JSON.parse(msg.message.Variables);
-                    }
+            let languageForSession = languageCode;
+            if (msg.agentName !== 'postman') {
+                if (typeof msg.message.Variables === "string") {
+                    msg.message.Variables = JSON.parse(msg.message.Variables);
                 }
-                if (msg.message.Variables[`${languageForSession}`]) {
-                    payload["variables"] = msg.message.Variables[`${languageForSession}`];
-                } else {
-                    languageForSession = defaultLangaugeCode;
-                    payload["variables"] = msg.message.Variables[defaultLangaugeCode];
-                }
-
-                // Fetch image URL in template message
-                if (msg.message.Url) {
-                    payload["headers"] = {
-                        "type"  : "image",
-                        "image" : {
-                            "link" : msg.message.Url
-                        } };
-                }
-
-                // Update template name for whatsapp wati other than english
-                if (channel === "whatsappWati" && languageForSession !== "en") {
-                    payload["templateName"] = `${msg.templateName}_${languageForSession}`;
-                }
-                payload["variables"] = await this.updatePatientName(payload["variables"], personName);
             }
+            if (msg.message.Variables[`${languageForSession}`]) {
+                payload["variables"] = msg.message.Variables[`${languageForSession}`];
+            } else {
+                languageForSession = defaultLangaugeCode;
+                payload["variables"] = msg.message.Variables[defaultLangaugeCode];
+            }
+
+            // Fetch image URL in template message
+            if (msg.message.Url) {
+                payload["headers"] = {
+                    "type"  : "image",
+                    "image" : {
+                        "link" : msg.message.Url
+                    } };
+            }
+
+            // Update template name for whatsapp wati other than english
+            if (channel === "whatsappWati" && languageForSession !== "en") {
+                payload["templateName"] = `${msg.templateName}_${languageForSession}`;
+            }
+            payload["variables"] = await this.updatePatientName(payload["variables"], personName);
         }
         else if (msg.type === "text") {
 
