@@ -37,11 +37,13 @@ export class ServeAssessmentService {
         @inject(UserInfoService) private userInfoService ?: UserInfoService
     ){}
 
-    async startAssessment (platformUserId:any, channel: any, userTaskData: any) {
+    async startAssessment (platformUserId:any, channel: any, userTaskData: any, assessmentLanguage: string = null) {
         try {
 
             const userTask = JSON.parse(userTaskData);
-            const defaultLangaugeCode = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+            if (!assessmentLanguage) {
+                assessmentLanguage = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+            }
 
             // const assessmentId = userTask.Action.Assessment.id;
             const assessmentId = userTask.Action ? userTask.Action.Assessment.id : userTask.id;
@@ -68,9 +70,9 @@ export class ServeAssessmentService {
                     updatedPayload["variables"] = questionData.TemplateVariables[`${languageForSession}`];
                     updatedPayload["languageForSession"] = languageForSession;
                 } else {
-                    languageForSession = defaultLangaugeCode;
-                    updatedPayload["variables"] = questionData.TemplateVariables[defaultLangaugeCode];
-                    updatedPayload["languageForSession"] = defaultLangaugeCode;
+                    languageForSession = assessmentLanguage;
+                    updatedPayload["variables"] = questionData.TemplateVariables[assessmentLanguage];
+                    updatedPayload["languageForSession"] = assessmentLanguage;
                 }
 
                 // Update template name for whatsapp wati other than english
