@@ -198,8 +198,11 @@ export class MessageFlow{
         const contactList = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
         const personContactList = await contactList.findOne({ where: { mobileNumber: msg.userId } });
         const reminderMessage = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ReminderMessage);
-        const defaultLangaugeCode = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
-        const languageCode = msg.payload?.Language ? msg.payload?.Language : defaultLangaugeCode || "en";
+        const defaultLangaugeCode = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE") ?? "en";
+        const payloadObj = typeof msg.payload === "string"
+            ? JSON.parse(msg.payload)
+            : msg.payload;
+        const languageCode = payloadObj?.Language ?? defaultLangaugeCode;
         payload["languageForSession"] = languageCode;
         if (personContactList) {
             personName = personContactList.username;
