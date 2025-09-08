@@ -12,6 +12,7 @@ import { Registration } from '../registrationsAndEnrollements/patient.registrati
 import { SystemGeneratedMessagesService } from "../system.generated.message.service";
 
 @scoped(Lifecycle.ContainerScoped)
+
 export class HeartFailureRegistrationService {
 
     private _platformMessageService :  platformServiceInterface = null;
@@ -89,15 +90,22 @@ export class HeartFailureRegistrationService {
         const buttonId: string = eventObj.body.queryResult.queryText ?? null;
         const enrollRoute = `care-plans/patients/${patientUserId}/enroll`;
         const startDate = this.calculateStartDateByButtonId(buttonId, new Date());
+
+        const planCode = this.getSelectedCareplan(buttonId);
+        const careplanLanguage = this.getCareplanLanguage(planCode);
+
         const obj1 = {
             Provider   : "REAN",
             PlanName   : "Heart Failure",
-            PlanCode   : this.getSelectedCareplan(buttonId),
+            PlanCode   : planCode,
+            Language   : careplanLanguage,
             StartDate  : startDate.toISOString().split('T')[0],
             DayOffset  : 0,
             Channel    : this.getPatientInfoService.getReminderType(channel),
             TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
         };
+
+        console.log("enrollPatient Body Object", obj1);
         const response = await this.needleService.needleRequestForREAN("post", enrollRoute, null, obj1);
 
         // const communicationRoute = `clinical/donation-communication`;
@@ -136,9 +144,24 @@ export class HeartFailureRegistrationService {
             "Start_Careplan_HeartF5" : "RF_HTN_Smoker",
             "Start_Careplan_HeartF6" : "RF_HTN_Non-smoker",
             "Start_Careplan_HeartF7" : "RF_No_HTN_Smoker",
-            "Start_Careplan_HeartF8" : "RF_No_HTN_Non-smoker"
+            "Start_Careplan_HeartF8" : "RF_No_HTN_Non-smoker",
+            "Saath_Health_EN"        : "Saathealth_careplan_en",
+            "Saath_Health_HI"        : "Saathealth_careplan_hi",
+            "Saath_Health_MR"        : "Saathealth_careplan_mr",
         };
         return careplanCodeMapping[buttonId] ?? "Heart-Failure";
+    }
+
+    getCareplanLanguage(planCode: string): string {
+        if (!planCode) {
+            return "en";
+        }
+        const languageCodeMapping = {
+            "Saathealth_careplan_en" : "en",
+            "Saathealth_careplan_hi" : "hi",
+            "Saathealth_careplan_mr" : "mr",
+        };
+        return languageCodeMapping[planCode] ?? "en";
     }
     
     calculateStartDateByButtonId(buttonId: string, todayDate: Date): Date {

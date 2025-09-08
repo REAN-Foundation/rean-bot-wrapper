@@ -87,6 +87,7 @@ import { InitiateDeleteReminderListener, GetReminderDetails, DeleteReminder } fr
 import { EnrollHFCareplanListener, SentRegistrationMSGListener } from './intentListeners/heartFailureCareplan/start.careplan.listener';
 import { AssessmentScoringListener } from './intentListeners/assessment/assessemnt.quiz.scoring.listener';
 import { UserInfoListener } from './intentListeners/user.info.listener';
+
 /*
  * Init function (being called during application bootstrap)
  * This is the place to register any new intent and corresponding listeners
@@ -271,6 +272,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('Feeling_Unwell_A', AssessmentAnswerNoListener);
         IntentEmitter.registerListener('Transit_Issues', AssessmentAnswerNoListener);
         IntentEmitter.registerListener('Start_Careplan_HeartF_Select', EnrollHFCareplanListener);
+        IntentEmitter.registerListener('Start_Careplan_Anemia_Select', EnrollHFCareplanListener);
         IntentEmitter.registerListener('Assessment_Yes', AssessmentAnswerYesListener);
         IntentEmitter.registerListener('Assessment_No', AssessmentAnswerNoListener);
         IntentEmitter.registerListener('start_assessment_quiz', CommonAssessmentListener);
