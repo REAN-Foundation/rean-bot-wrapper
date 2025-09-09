@@ -203,7 +203,7 @@ export class AssessmentService {
                 flag = options?.length
                     ? options.some(
                         (option) =>
-                            option.ProviderGivenCode.toLowerCase() === messageBody.messageBody.toLowerCase()
+                            option.ProviderGivenCode.toLowerCase() === messageBody.originalMessage.toLowerCase()
                     )
                     : false;
                 break;

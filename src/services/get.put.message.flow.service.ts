@@ -113,6 +113,7 @@ export class MessageFlow{
             const translate_message = await this.translate.translateMessage(message.type, message.messageBody, message.platformId);
             translate_message["original_message"] = message.messageBody;
             message.messageBody = translate_message.message;
+            message.originalMessage = message.messageBody;
             return { message, translate_message };
         } catch (error) {
             console.log(error);

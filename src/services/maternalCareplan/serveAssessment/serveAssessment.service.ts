@@ -233,6 +233,8 @@ export class ServeAssessmentService {
             } else if (requestBody.Data.AnswerResponse.Next !== null && nodeType === "Message") {
                 messageFlag = "endassessment";
                 message = requestBody.Data.AnswerResponse.Next.Description;
+                const key = `${assessmentSession.userPlatformId}:NextQuestionFlag`;
+                CacheMemory.set(key, false);
             } else {
                 messageFlag = "endassessment";
                 const key = `${assessmentSession.userPlatformId}:NextQuestionFlag`;
