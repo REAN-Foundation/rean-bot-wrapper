@@ -94,7 +94,7 @@ export class AssessmentService {
                     } else {
                         const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
                         const wasSentRecently = lastMessage.createdAt > twentyFourHoursAgo;
-                        messageType = wasSentRecently? 'interactivebuttons' : 'template';
+                        messageType = wasSentRecently ? 'interactivebuttons' : 'template';
                     }
                     whatsappPayload = await sendApiButtonService(updatedPayload.buttonIds);
                 }
@@ -159,27 +159,38 @@ export class AssessmentService {
                 flag = typeof messageBody.messageBody === 'string';
                 if (flag) {
                     const promptTemplate = PromptTemplate.fromTemplate(
-                        `You would be provided with a user message and a field identifier.
-                        You need to check if the user message is relevant to the field identifier and provide true or false with a short explanation.
+                        `Validate if user input matches the field identifier.
+
+                        For medical measurements:
+                        Blood Pressure: "120/80", "120/80 mmHg", "120/80mmhg", "120/80 mm Hg"
+                        Pulse Rate: "72", "72 bpm", "72bpm", "72 BPM", "72 beats per minute"  
+                        Weight: "68.5", "68.5 kg", "68.5kg", "68.5 KG", "68.5 kilograms"
+
+                        Numeric values without units are valid (assume: kg for weight, bpm for pulse, mmHg for blood pressure).
+
+                        For other fields: Check if user message is relevant to the field identifier and provide true or false with a short explanation.
 
                         The format of the output should be a JSON with the keys and values as text only. Below is format of the JSON
-                        ONLY PROVIDE THE JSON AND NOTHING ELSE IN THE OUTPUT
+                            ONLY PROVIDE THE JSON AND NOTHING ELSE IN THE OUTPUT
                         {{
-                            "flag" : "true or false",
-                            "reason" : "add the explanation here"
-                        }}
+                                "flag" : "true or false",
+                                "reason" : "add the explanation here"
+                            }}
 
-                        The user message is {user_message}
-                        The field identifier is {field_identifier}
-                        `
+                            The user message is {user_message}
+                            The field identifier is {field_identifier}
+                            `
                     );
+                    
                     const model = new ChatOpenAI({ temperature: 0, modelName: "gpt-4o-mini" });
                     const chain = promptTemplate.pipe(model);
 
-                    const result = await chain.invoke({ 
+                    const result = await chain.invoke({
                         user_message     : messageBody.messageBody,
                         field_identifier : identifier
                     });
+
+                    console.log('AI Response:', result.lc_kwargs.content);
 
                     const parsed = JSON.parse(result.lc_kwargs.content);
                     parsed.flag = parsed.flag.toLowerCase() === 'true';
