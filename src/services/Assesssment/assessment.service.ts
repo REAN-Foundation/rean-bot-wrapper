@@ -158,40 +158,21 @@ export class AssessmentService {
             case 'Text': {
                 flag = typeof messageBody.messageBody === 'string';
                 if (flag) {
-                    const isMedicalMeasurement = identifier.includes('BloodPressure') ||
-                                               identifier.includes('Pulse') ||
-                                               identifier.includes('Weight');
-                    
-                    let promptTemplate = undefined;
-                    
-                    if (isMedicalMeasurement) {
-                        promptTemplate = PromptTemplate.fromTemplate(
-                            `Validate medical measurement input for field identifier.
+                    const promptTemplate = PromptTemplate.fromTemplate(
+                        `Validate if user input matches the field identifier.
 
-                            Blood Pressure: "120/80", "120/80 mmHg", "120/80mmhg", "120/80 mm Hg"
-                            Pulse Rate: "72", "72 bpm", "72bpm", "72 BPM", "72 beats per minute"  
-                            Weight: "68.5", "68.5 kg", "68.5kg", "68.5 KG", "68.5 kilograms"
+                        For medical measurements:
+                        Blood Pressure: "120/80", "120/80 mmHg", "120/80mmhg", "120/80 mm Hg"
+                        Pulse Rate: "72", "72 bpm", "72bpm", "72 BPM", "72 beats per minute"  
+                        Weight: "68.5", "68.5 kg", "68.5kg", "68.5 KG", "68.5 kilograms"
 
-                            Numeric values without units are valid (assume: kg for weight, bpm for pulse, mmHg for blood pressure).
+                        Numeric values without units are valid (assume: kg for weight, bpm for pulse, mmHg for blood pressure).
 
-                            Return JSON only:
-                            {{
-                                "flag" : "true or false",
-                                "reason" : "explanation - if false, provide format guidance"
-                            }}
+                        For other fields: Check if user message is relevant to the field identifier and provide true or false with a short explanation.
 
-                            User message: {user_message}
-                            Field identifier: {field_identifier}
-                            `
-                        );
-                    } else {
-                        promptTemplate = PromptTemplate.fromTemplate(
-                            `You would be provided with a user message and a field identifier.
-                            You need to check if the user message is relevant to the field identifier and provide true or false with a short explanation.
-
-                            The format of the output should be a JSON with the keys and values as text only. Below is format of the JSON
+                        The format of the output should be a JSON with the keys and values as text only. Below is format of the JSON
                             ONLY PROVIDE THE JSON AND NOTHING ELSE IN THE OUTPUT
-                            {{
+                        {{
                                 "flag" : "true or false",
                                 "reason" : "add the explanation here"
                             }}
@@ -199,8 +180,7 @@ export class AssessmentService {
                             The user message is {user_message}
                             The field identifier is {field_identifier}
                             `
-                        );
-                    }
+                    );
                     
                     const model = new ChatOpenAI({ temperature: 0, modelName: "gpt-4o-mini" });
                     const chain = promptTemplate.pipe(model);
