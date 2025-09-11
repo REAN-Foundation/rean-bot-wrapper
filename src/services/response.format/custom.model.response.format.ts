@@ -65,8 +65,8 @@ export class CustomModelResponseFormat implements IserviceResponseFunctionalitie
     }
 
     getSensitivity() {
-        if (this.response.body && this.response.body.sensitivity) {
-            return this.response.body.sensitivity;
+        if (this.response.body && this.response.body.sensitivity_flag) {
+            return this.response.body.sensitivity_flag;
         } else {
             return null;
         }
