@@ -10,6 +10,8 @@ import { platformServiceInterface } from '../../refactor/interface/platform.inte
 import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
 import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
 import { SystemGeneratedMessagesService } from "../system.generated.message.service";
+import { TimeHelper } from '../../common/time.helper';
+import { DurationType } from '../../common/time.helper';
 
 @scoped(Lifecycle.ContainerScoped)
 
@@ -173,6 +175,12 @@ export class HeartFailureRegistrationService {
          */
     
         // Use `getSelectedCareplan` to check if the button ID exists in the mapping
+        if (buttonId?.startsWith("Saath_Health")) {
+            const startDate = TimeHelper.addDuration(todayDate, 1, DurationType.Day);
+            console.log(`Careplan Registration start date ${startDate}`);
+            return startDate;
+        }
+
         const careplan = this.getSelectedCareplan(buttonId);
     
         if (careplan !== "Heart-Failure") {
