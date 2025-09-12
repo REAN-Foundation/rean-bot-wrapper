@@ -32,6 +32,7 @@ export interface Iresponse{
     messageImageUrl     : string;
     messageImageCaption : string;
     similarDoc          : string;
+    sensitivity        ?: string;
     platformId          : string;
     buttonMetaData     ?: any;
     location ?: {

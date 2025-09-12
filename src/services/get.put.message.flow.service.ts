@@ -123,6 +123,7 @@ export class MessageFlow{
     async processOutgoingMessage(messageToLlmRouter: Imessage, channel: string, platformMessageService: platformServiceInterface, processedResponse){
         try {
             const response_format: Iresponse = await platformMessageService.postResponse(messageToLlmRouter, processedResponse);
+            response_format.sensitivity = processedResponse.message_from_nlp.getSensitivity();
 
             await this.saveResponseDataToUser(response_format, processedResponse);
 
