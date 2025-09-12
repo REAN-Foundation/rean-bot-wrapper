@@ -121,4 +121,12 @@ export class DialogflowResponseFormat implements IserviceResponseFunctionalities
         return null;
     }
 
+    getSensitivity() {
+        if (this.response.body && this.response.body.sensitivity_flag) {
+            return this.response.body.sensitivity_flag;
+        } else {
+            return null;
+        }
+    }
+
 }

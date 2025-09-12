@@ -87,7 +87,7 @@ export class handleRequestservice {
 
         // this.getTranslatedResponse(message_from_dialoglow, translate_message.languageForSession);
         // process the message from dialogflow before sending it to whatsapp
-        const processed_message = await this.processMessage(message_from_nlp, UserPlatformID);
+        const processed_message = await this.processMessage(message_from_nlp, UserPlatformID, null);
 
         return { processed_message, message_from_nlp };
     }
@@ -103,7 +103,7 @@ export class handleRequestservice {
         return customTranslations;
     }
 
-    async processMessage(message_from_nlp, platformId) {
+    async processMessage(message_from_nlp, platformId, messageHandler = null) {
         const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
         const languagefromdb = await chatSessionRepository.findAll({
             where : {
@@ -114,7 +114,13 @@ export class handleRequestservice {
         const languageForSession = languagefromdb[languagefromdb.length - 1].preferredLanguage;
         const customTranslations = [this.getTranslatedResponse(message_from_nlp, languageForSession)];
         if (customTranslations[0] === null) {
-            const googleTranslate = await this.translateService.processdialogflowmessage(message_from_nlp, languageForSession);
+            let googleTranslate;
+            if (messageHandler === "Assessments") {
+                googleTranslate = message_from_nlp.getText();
+            } else {
+                googleTranslate = await this.translateService.processdialogflowmessage(message_from_nlp, languageForSession);
+            }
+
             console.log("googleTranslate", googleTranslate);
             return googleTranslate;
         }
@@ -190,7 +196,7 @@ export class handleRequestservice {
         }
         }
         if (outgoingMessage.PrimaryMessageHandler !== MessageHandlerType.WorkflowService) {
-            processed_message = await this.processMessage(message_from_nlp, metaData.platformId);
+            processed_message = await this.processMessage(message_from_nlp, metaData.platformId, messageHandler);
         }
 
         return { message_from_nlp, processed_message };

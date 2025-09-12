@@ -16,5 +16,6 @@ export interface IserviceResponseFunctionalities {
     getPayload()
     getParseMode()
     getSimilarDoc()
+    getSensitivity()
 
 }
