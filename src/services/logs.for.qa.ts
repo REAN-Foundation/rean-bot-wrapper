@@ -51,7 +51,7 @@ export class LogsQAService {
             messageContentIn = responseChatMessage[responseChatMessage.length - 1].messageContent;
             let taskId = await this.postingOnClickup(`Client : ` + messageContentIn,  cmrTaskID , responseChatMessage, userName, '', description);
             const messageContentOut = response_format.messageText;
-            taskId = await this.postingOnClickup(`Bot : ` + messageContentOut + `\nIntent Name : ${response_format.intent}`, taskId, responseChatMessage, userName, response_format.intent);
+            taskId = await this.postingOnClickup(`Bot : ` + messageContentOut + `\nIntent Name : ${response_format.intent}`, taskId, responseChatMessage, userName, response_format.intent, null, response_format.sensitivity);
             await contactList.update({
                 cmrChatTaskID : taskId
             },
@@ -64,13 +64,16 @@ export class LogsQAService {
         }
     }
 
-    async postingOnClickup(comment,cmrTaskId, responseChatMessage, userName, intent = '', description = null){
+    async postingOnClickup(comment,cmrTaskId, responseChatMessage, userName, intent = '', description = null, sensitivity = null){
         intent = intent?.toLocaleLowerCase();
         if (cmrTaskId){
             // eslint-disable-next-line max-len
             await this.clickUpTask.postCommentOnTask(cmrTaskId,comment);
-            await this.clickUpTask.updateTask(cmrTaskId,null,description,userName, intent);
-
+            let sensitivity_value = null;
+            if (sensitivity){
+                sensitivity_value = await this.sensitivityMapper(sensitivity);
+            }
+            await this.clickUpTask.updateTask(cmrTaskId,sensitivity_value,description,userName, intent);
             await this.clickUpTask.updateTag(cmrTaskId, intent);
             console.log("Updating old clickUp task");
             return cmrTaskId;
@@ -83,6 +86,18 @@ export class LogsQAService {
             return taskID;
         }
 
+    }
+    async sensitivityMapper(sensitivity_flag: string) {
+        const sensitivityPriorityMap: Record<string, number> = {
+            "Critical / Urgent" : 1,
+            "High Sensitivity"  : 2,
+            "Sensitive but Safe": 3,
+            "Not sensitive"     : 4
+        };
+
+        const normalizedFlag = sensitivity_flag?.trim();
+
+        return sensitivityPriorityMap[normalizedFlag] ?? null;
     }
 
 }
