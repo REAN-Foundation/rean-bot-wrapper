@@ -42,12 +42,41 @@ export class ConsentService {
             await this.registrationService.wrapperRegistration(this.entityManagerProvider,userPlatformId, platformUserName,sourceChannel,results.patientUserId);
             this.updateConsentStatus(userPlatformId,EnvironmentProviderService);
             const additionalInfoRequired =  EnvironmentProviderService.getClientEnvironmentVariable("ADDITIONAL_INFO_REQUIRED");
+            const careplanEnrollmentRequired = EnvironmentProviderService.getClientEnvironmentVariable("CAREPLAN_ENROLLMENT_REQUIRED");
             if (additionalInfoRequired){
                 this.triggerAdditionalInfoIntent(sourceChannel,eventObj,userPlatformId,EnvironmentProviderService);
+            }
+            if (careplanEnrollmentRequired) {
+                this.triggerCareplanEnrollmentIntent(sourceChannel,eventObj,userPlatformId,EnvironmentProviderService);
             }
         } catch (error) {
             Logger.instance()
                 .log_error(error.message,500,'Consent Yes error');
+        }
+    }
+
+    async triggerCareplanEnrollmentIntent(sourceChannel,eventObj,userPlatformId,EnvironmentProviderService){
+        try {
+            console.log("CareplanEnrollment");
+            const languageCode = eventObj.body.queryResult.languageCode;
+            let payload = null;
+            let messageType = null;
+            const button_yes = await this.translate.translatestring("Yes",languageCode);
+            const button_no = await this.translate.translatestring("No",languageCode);
+            const buttonArray = [button_yes, "Start_Careplan" ,button_no,"Welcome"];
+            const careplanEnrollmentMessage =  EnvironmentProviderService.getClientEnvironmentVariable("CAREPLAN_ENROLLMENT_MESSAGE");
+            if (sourceChannel === "whatsappMeta"){
+                payload = await sendApiButtonService(buttonArray);
+                messageType = "interactivebuttons";
+            }
+            else {
+                payload = await sendTelegramButtonService(buttonArray);
+                messageType = "inline_keyboard";
+            }
+            this.sendCustomMessage(this._platformMessageService,careplanEnrollmentMessage, messageType, userPlatformId ,payload);
+        }
+        catch (error) {
+            console.log("While triggering additional info intent", error);
         }
     }
 
