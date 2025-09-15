@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { GetHeaders } from '../../services/biometrics/get.headers';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 import { inject, Lifecycle, scoped } from 'tsyringe';
@@ -12,7 +13,7 @@ import { Registration } from '../registrationsAndEnrollements/patient.registrati
 import { SystemGeneratedMessagesService } from "../system.generated.message.service";
 import { TimeHelper } from '../../common/time.helper';
 import { DurationType } from '../../common/time.helper';
-import {translateService} from '../translate.service';
+import { translateService } from '../translate.service';
 
 @scoped(Lifecycle.ContainerScoped)
 
