@@ -12,6 +12,7 @@ import { Registration } from '../registrationsAndEnrollements/patient.registrati
 import { SystemGeneratedMessagesService } from "../system.generated.message.service";
 import { TimeHelper } from '../../common/time.helper';
 import { DurationType } from '../../common/time.helper';
+import {translateService} from '../translate.service';
 
 @scoped(Lifecycle.ContainerScoped)
 
@@ -26,7 +27,8 @@ export class HeartFailureRegistrationService {
         @inject(GetPatientInfoService) private getPatientInfoService: GetPatientInfoService,
         @inject(NeedleService) private needleService?: NeedleService,
         @inject(Registration) private registration?: Registration,
-        @inject(SystemGeneratedMessagesService) private systemGeneratedMessages?: SystemGeneratedMessagesService
+        @inject(SystemGeneratedMessagesService) private systemGeneratedMessages?: SystemGeneratedMessagesService,
+        @inject(translateService) private translateService?: translateService
     ) {}
 
     async registrationService (eventObj): Promise<any> {
@@ -72,6 +74,10 @@ export class HeartFailureRegistrationService {
         const communicationResponse = await this.needleService.needleRequestForREAN("get", communicationSearchUrl);
 
         let msg = `Welcome! ${name}, \nWe're excited to have you as part of our community. Congratulations on successfully enrolling in the care plan! You will receive reminders about lifestyle changes, medication tips, and updates on your condition to help you stay on track. We're here to assist you every step of the way! \nLet’s take this journey to better heart health together. 🌟`;
+        const careplan_welcome_msg = await this.systemGeneratedMessages.getMessage("CAREPLAN_WELCOME_MESSAGE");
+        if (careplan_welcome_msg) {
+            msg = careplan_welcome_msg;
+        }
         if (communicationResponse.Data.DonationCommunication.Items.length !== 0) {
             const remindersFlag = communicationResponse.Data.DonationCommunication.Items[0].IsRemindersLoaded;
             if (remindersFlag === false) {
@@ -96,6 +102,13 @@ export class HeartFailureRegistrationService {
         const planCode = this.getSelectedCareplan(buttonId);
         const careplanLanguage = this.getCareplanLanguage(planCode);
 
+        if (careplanLanguage !== "en") {
+            const translatedMsg = await this.translateService.translatestring(msg, careplanLanguage);
+            if (translatedMsg) {
+                msg = translatedMsg;
+            }
+        }
+       
         const obj1 = {
             Provider   : "REAN",
             PlanName   : "Heart Failure",
