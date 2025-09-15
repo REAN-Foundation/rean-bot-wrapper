@@ -171,6 +171,10 @@ export class ServeAssessmentService {
             const questionData = requestBody.Data.AnswerResponse.Next;
             const nodeType = requestBody.Data.AnswerResponse?.Next?.NodeType ?? null;
 
+            // Creating the cache keys
+            const key = `${assessmentSession.userPlatformId}:NextQuestionFlag`;
+            const assessmentKey = `${assessmentSession.userPlatformId}:Assessment`;
+
             //Next question send or complete the assessment
             if (requestBody.Data.AnswerResponse.Next !== null && nodeType !== "Message") {
                 let questionRawData = null;
@@ -233,13 +237,11 @@ export class ServeAssessmentService {
             } else if (requestBody.Data.AnswerResponse.Next !== null && nodeType === "Message") {
                 messageFlag = "endassessment";
                 message = requestBody.Data.AnswerResponse.Next.Description;
-                const key = `${assessmentSession.userPlatformId}:NextQuestionFlag`;
                 CacheMemory.set(key, false);
+                CacheMemory.delete(assessmentKey);
             } else {
                 messageFlag = "endassessment";
-                const key = `${assessmentSession.userPlatformId}:NextQuestionFlag`;
                 CacheMemory.set(key, false);
-                const assessmentKey = `${assessmentSession.userPlatformId}:Assessment`;
                 CacheMemory.delete(assessmentKey);
                 const customMessage = await this.systemGeneratedMessageService.getMessage("END_ASSESSMENT_MESSAGE");
                 const phoneNumber = await this.countryCodeService.formatPhoneNumber(assessmentSession.userPlatformId);
