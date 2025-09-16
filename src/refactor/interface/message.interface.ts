@@ -15,6 +15,7 @@ export interface Imessage{
     intent           : string;
     responseMessageID: string;
     contextId        : string;
+    originalMessage ?: string;
 }
 
 export interface Iresponse{
@@ -31,6 +32,7 @@ export interface Iresponse{
     messageImageUrl     : string;
     messageImageCaption : string;
     similarDoc          : string;
+    sensitivity        ?: string;
     platformId          : string;
     buttonMetaData     ?: any;
     location ?: {
@@ -178,6 +180,7 @@ export interface AssessmentDetails {
     Question       ?: string;
     Hint           ?: string;
     UserResponse   ?: string | number | boolean | unknown;
+    AssessmentFlag ?: boolean;
 }
 
 export interface Feedback {

@@ -37,11 +37,13 @@ export class ServeAssessmentService {
         @inject(UserInfoService) private userInfoService ?: UserInfoService
     ){}
 
-    async startAssessment (platformUserId:any, channel: any, userTaskData: any) {
+    async startAssessment (platformUserId:any, channel: any, userTaskData: any, assessmentLanguage: string = null) {
         try {
 
             const userTask = JSON.parse(userTaskData);
-            const defaultLangaugeCode = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+            if (!assessmentLanguage) {
+                assessmentLanguage = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+            }
 
             // const assessmentId = userTask.Action.Assessment.id;
             const assessmentId = userTask.Action ? userTask.Action.Assessment.id : userTask.id;
@@ -64,18 +66,18 @@ export class ServeAssessmentService {
                 updatedPayload["channel"] = channel;
                 updatedPayload["templateName"] = questionData.TemplateName;
                 let languageForSession = await this.translate.detectUsersLanguage( platformUserId );
-                if (questionData.TemplateVariables[`${languageForSession}`]) {
-                    updatedPayload["variables"] = questionData.TemplateVariables[`${languageForSession}`];
-                    updatedPayload["languageForSession"] = languageForSession;
+                if (questionData.TemplateVariables[`${assessmentLanguage}`]) {
+                    updatedPayload["variables"] = questionData.TemplateVariables[`${assessmentLanguage}`];
+                    updatedPayload["languageForSession"] = assessmentLanguage;
                 } else {
-                    languageForSession = defaultLangaugeCode;
-                    updatedPayload["variables"] = questionData.TemplateVariables[defaultLangaugeCode];
-                    updatedPayload["languageForSession"] = defaultLangaugeCode;
+                    languageForSession = assessmentLanguage;
+                    updatedPayload["variables"] = questionData.TemplateVariables[assessmentLanguage];
+                    updatedPayload["languageForSession"] = assessmentLanguage;
                 }
 
                 // Update template name for whatsapp wati other than english
-                if (userTask.Channel === "WhatsappWati" && languageForSession !== "en") {
-                    updatedPayload["templateName"] = `${questionData.TemplateName}_${languageForSession}`;
+                if (userTask.Channel === "WhatsappWati" && assessmentLanguage !== "en") {
+                    updatedPayload["templateName"] = `${questionData.TemplateName}_${assessmentLanguage}`;
                 }
 
                 // Extract buttons
@@ -169,6 +171,10 @@ export class ServeAssessmentService {
             const questionData = requestBody.Data.AnswerResponse.Next;
             const nodeType = requestBody.Data.AnswerResponse?.Next?.NodeType ?? null;
 
+            // Creating the cache keys
+            const key = `${assessmentSession.userPlatformId}:NextQuestionFlag`;
+            const assessmentKey = `${assessmentSession.userPlatformId}:Assessment`;
+
             //Next question send or complete the assessment
             if (requestBody.Data.AnswerResponse.Next !== null && nodeType !== "Message") {
                 let questionRawData = null;
@@ -231,11 +237,11 @@ export class ServeAssessmentService {
             } else if (requestBody.Data.AnswerResponse.Next !== null && nodeType === "Message") {
                 messageFlag = "endassessment";
                 message = requestBody.Data.AnswerResponse.Next.Description;
+                CacheMemory.set(key, false);
+                CacheMemory.delete(assessmentKey);
             } else {
                 messageFlag = "endassessment";
-                const key = `${assessmentSession.userPlatformId}:NextQuestionFlag`;
                 CacheMemory.set(key, false);
-                const assessmentKey = `${assessmentSession.userPlatformId}:Assessment`;
                 CacheMemory.delete(assessmentKey);
                 const customMessage = await this.systemGeneratedMessageService.getMessage("END_ASSESSMENT_MESSAGE");
                 const phoneNumber = await this.countryCodeService.formatPhoneNumber(assessmentSession.userPlatformId);

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { GetHeaders } from '../../services/biometrics/get.headers';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 import { inject, Lifecycle, scoped } from 'tsyringe';
@@ -10,8 +11,12 @@ import { platformServiceInterface } from '../../refactor/interface/platform.inte
 import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
 import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
 import { SystemGeneratedMessagesService } from "../system.generated.message.service";
+import { TimeHelper } from '../../common/time.helper';
+import { DurationType } from '../../common/time.helper';
+import { translateService } from '../translate.service';
 
 @scoped(Lifecycle.ContainerScoped)
+
 export class HeartFailureRegistrationService {
 
     private _platformMessageService :  platformServiceInterface = null;
@@ -23,7 +28,8 @@ export class HeartFailureRegistrationService {
         @inject(GetPatientInfoService) private getPatientInfoService: GetPatientInfoService,
         @inject(NeedleService) private needleService?: NeedleService,
         @inject(Registration) private registration?: Registration,
-        @inject(SystemGeneratedMessagesService) private systemGeneratedMessages?: SystemGeneratedMessagesService
+        @inject(SystemGeneratedMessagesService) private systemGeneratedMessages?: SystemGeneratedMessagesService,
+        @inject(translateService) private translateService?: translateService
     ) {}
 
     async registrationService (eventObj): Promise<any> {
@@ -69,6 +75,10 @@ export class HeartFailureRegistrationService {
         const communicationResponse = await this.needleService.needleRequestForREAN("get", communicationSearchUrl);
 
         let msg = `Welcome! ${name}, \nWe're excited to have you as part of our community. Congratulations on successfully enrolling in the care plan! You will receive reminders about lifestyle changes, medication tips, and updates on your condition to help you stay on track. We're here to assist you every step of the way! \nLet’s take this journey to better heart health together. 🌟`;
+        const careplan_welcome_msg = await this.systemGeneratedMessages.getMessage("CAREPLAN_WELCOME_MESSAGE");
+        if (careplan_welcome_msg) {
+            msg = careplan_welcome_msg;
+        }
         if (communicationResponse.Data.DonationCommunication.Items.length !== 0) {
             const remindersFlag = communicationResponse.Data.DonationCommunication.Items[0].IsRemindersLoaded;
             if (remindersFlag === false) {
@@ -89,15 +99,29 @@ export class HeartFailureRegistrationService {
         const buttonId: string = eventObj.body.queryResult.queryText ?? null;
         const enrollRoute = `care-plans/patients/${patientUserId}/enroll`;
         const startDate = this.calculateStartDateByButtonId(buttonId, new Date());
+
+        const planCode = this.getSelectedCareplan(buttonId);
+        const careplanLanguage = this.getCareplanLanguage(planCode);
+
+        if (careplanLanguage !== "en") {
+            const translatedMsg = await this.translateService.translatestring(msg, careplanLanguage);
+            if (translatedMsg) {
+                msg = translatedMsg;
+            }
+        }
+       
         const obj1 = {
             Provider   : "REAN",
             PlanName   : "Heart Failure",
-            PlanCode   : this.getSelectedCareplan(buttonId),
+            PlanCode   : planCode,
+            Language   : careplanLanguage,
             StartDate  : startDate.toISOString().split('T')[0],
             DayOffset  : 0,
             Channel    : this.getPatientInfoService.getReminderType(channel),
             TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
         };
+
+        console.log("enrollPatient Body Object", obj1);
         const response = await this.needleService.needleRequestForREAN("post", enrollRoute, null, obj1);
 
         // const communicationRoute = `clinical/donation-communication`;
@@ -136,9 +160,24 @@ export class HeartFailureRegistrationService {
             "Start_Careplan_HeartF5" : "RF_HTN_Smoker",
             "Start_Careplan_HeartF6" : "RF_HTN_Non-smoker",
             "Start_Careplan_HeartF7" : "RF_No_HTN_Smoker",
-            "Start_Careplan_HeartF8" : "RF_No_HTN_Non-smoker"
+            "Start_Careplan_HeartF8" : "RF_No_HTN_Non-smoker",
+            "Saath_Health_EN"        : "Saathealth_careplan_en",
+            "Saath_Health_HI"        : "Saathealth_careplan_hi",
+            "Saath_Health_MR"        : "Saathealth_careplan_mr",
         };
         return careplanCodeMapping[buttonId] ?? "Heart-Failure";
+    }
+
+    getCareplanLanguage(planCode: string): string {
+        if (!planCode) {
+            return "en";
+        }
+        const languageCodeMapping = {
+            "Saathealth_careplan_en" : "en",
+            "Saathealth_careplan_hi" : "hi",
+            "Saathealth_careplan_mr" : "mr",
+        };
+        return languageCodeMapping[planCode] ?? "en";
     }
     
     calculateStartDateByButtonId(buttonId: string, todayDate: Date): Date {
@@ -150,6 +189,12 @@ export class HeartFailureRegistrationService {
          */
     
         // Use `getSelectedCareplan` to check if the button ID exists in the mapping
+        if (buttonId?.startsWith("Saath_Health")) {
+            const startDate = TimeHelper.addDuration(todayDate, 1, DurationType.Day);
+            console.log(`Careplan Registration start date ${startDate}`);
+            return startDate;
+        }
+
         const careplan = this.getSelectedCareplan(buttonId);
     
         if (careplan !== "Heart-Failure") {

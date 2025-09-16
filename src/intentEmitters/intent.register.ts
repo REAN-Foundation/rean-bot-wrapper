@@ -271,6 +271,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('Feeling_Unwell_A', AssessmentAnswerNoListener);
         IntentEmitter.registerListener('Transit_Issues', AssessmentAnswerNoListener);
         IntentEmitter.registerListener('Start_Careplan_HeartF_Select', EnrollHFCareplanListener);
+        IntentEmitter.registerListener('Start_Careplan_Anemia_Select', EnrollHFCareplanListener);
         IntentEmitter.registerListener('Assessment_Yes', AssessmentAnswerYesListener);
         IntentEmitter.registerListener('Assessment_No', AssessmentAnswerNoListener);
         IntentEmitter.registerListener('start_assessment_quiz', CommonAssessmentListener);

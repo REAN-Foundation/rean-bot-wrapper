@@ -26,6 +26,7 @@ export const  SentRegistrationMSGListener = async ( intent, eventObj) => {
 
 export const EnrollHFCareplanListener = async ( intent, eventObj) => {
     try {
+        console.log("EnrollHFCareplanListener intent", intent);
         const enrollService: HeartFailureRegistrationService =
             eventObj.container.resolve(HeartFailureRegistrationService);
         const response = await enrollService.registrationService(eventObj);
