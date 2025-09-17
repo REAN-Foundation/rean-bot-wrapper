@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/parser */
 import { Iresponse } from "../../../refactor/interface/message.interface";
 import { commonResponseMessageFormat } from "../../../services/common.response.format.object";
 import { MessageType } from "../../../domain.types/common.types";
@@ -47,7 +46,7 @@ export const FlowListener = async (intent: string, eventObj: any) => {
     }
 };
 
-export const ProcessWhatsAppFormResponsesListener = async (intent: string, eventObj: any) => {
+export const ProcessWhatsAppFormResponsesListener = async (intent: string) => {
     try {
 
         // TODO: Implement the logic to process the WhatsApp form responses
