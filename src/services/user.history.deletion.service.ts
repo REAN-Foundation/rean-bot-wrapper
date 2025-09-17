@@ -10,6 +10,7 @@ import { UserConsent } from '../models/user.consent.model';
 import { MessageStatus } from '../models/message.status';
 import { UserInfo } from '../models/user.info.model';
 import { AssessmentSessionLogs } from '../models/assessment.session.model';
+import { AssessmentIdentifiers } from '../models/assessment/assessment.identifiers.model';
 import WorkflowUserDa from '../models/workflow.user.data.model';
 import { GetHeaders } from '../services/biometrics/get.headers';
 import { NeedleService } from "./needle.service";
@@ -42,6 +43,10 @@ export class userHistoryDeletionService {
 
             await this.deleteChatHistory(userPlatformId);
 
+            // Delete user data from assessment identifier and assessment session logs tables
+
+            await this.deleteAssessmentHistory(userPlatformId)
+
             // delete user data from Contact List and User Info table
 
             const contact = await contactListRepo.findOne({
@@ -67,13 +72,7 @@ export class userHistoryDeletionService {
             await userConsentRepo.destroy({
                 where: { userPlatformId: userPlatformId }
             });
-             await assessmentSessionLogsRepo.destroy({
-                where: { userPlatformId: userPlatformId }
-            });
 
-            // Delete user from all other services
-
-            await this.deleteUserFromAllServices(userPlatformId)
 
         } catch (error) {
             console.log(error);
@@ -123,6 +122,39 @@ export class userHistoryDeletionService {
             console.error("Error deleting chat history:", error);
         }
     }
+
+    async deleteAssessmentHistory(userPlatformID: string) {
+        try {
+            const entityManager = await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService);
+
+            const assessmentSessionLogsRepo = entityManager.getRepository(AssessmentSessionLogs);
+            const assessmentIdentifiersRepo = entityManager.getRepository(AssessmentIdentifiers);
+
+            // Find all sessions for this user
+            const sessions = await assessmentSessionLogsRepo.findAll({
+                where: { userPlatformId: userPlatformID }
+            });
+
+            for (const session of sessions) {
+                const sessionId = session.autoIncrementalID;
+
+                // Delete identifiers for this session
+                await assessmentIdentifiersRepo.destroy({
+                    where: { assessmentSessionId: sessionId }
+                });
+
+                // Delete the session itself
+                await assessmentSessionLogsRepo.destroy({
+                    where: { autoIncrementalID: sessionId }
+                });
+            }
+
+            console.log("User assessment history deleted successfully.");
+        } catch (error) {
+            console.error("Error deleting assessment history:", error);
+        }
+    }
+
     
     async deleteUserFromAllServices(user) {
         return new Promise(async (resolve, reject) => {
