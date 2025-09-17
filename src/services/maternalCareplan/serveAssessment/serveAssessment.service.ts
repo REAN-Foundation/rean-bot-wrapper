@@ -125,7 +125,7 @@ export class ServeAssessmentService {
                     identifiersUnit      : questionNode.FieldIdentifierUnit,
                 };
 
-                const key = `${platformUserId}:NextQuestionFlag`;
+                const key = `${platformUserId}:NextQuestionFlag:${assessmentId}`;
                 CacheMemory.set(key, true);
             }
             else {
@@ -172,8 +172,8 @@ export class ServeAssessmentService {
             const nodeType = requestBody.Data.AnswerResponse?.Next?.NodeType ?? null;
 
             // Creating the cache keys
-            const key = `${assessmentSession.userPlatformId}:NextQuestionFlag`;
-            const assessmentKey = `${assessmentSession.userPlatformId}:Assessment`;
+            const key = `${assessmentSession.userPlatformId}:NextQuestionFlag:${assessmentSession.assesmentId}`;
+            const assessmentKey = `${assessmentSession.userPlatformId}:Assessment:${assessmentSession.assesmentId}`;
 
             //Next question send or complete the assessment
             if (requestBody.Data.AnswerResponse.Next !== null && nodeType !== "Message") {
@@ -232,7 +232,7 @@ export class ServeAssessmentService {
                     userResponseType    : assessmentSessionData.userResponseType
                 };
                 await AssessmentIdentifiersRepo.create(assessmentIdentifierObj);
-                const key = `${assessmentSession.userPlatformId}:NextQuestionFlag`;
+                const key = `${assessmentSession.userPlatformId}:NextQuestionFlag:${assessmentSession.assesmentId}`;
                 CacheMemory.set(key, true);
             } else if (requestBody.Data.AnswerResponse.Next !== null && nodeType === "Message") {
                 messageFlag = "endassessment";
@@ -391,7 +391,7 @@ export class ServeAssessmentService {
         assessmentSession.userMessageId = messageId;
         await assessmentSession.save();
 
-        const key = `${assessmentSession.userPlatformId}:Assessment`;
+        const key = `${assessmentSession.userPlatformId}:Assessment:${assessmentSession.assesmentId}`;
 
         await CacheMemory.set(key, messageId);
         

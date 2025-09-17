@@ -119,7 +119,7 @@ export class AssessmentService {
             }
             assessmentSessionLogs.userMessageId =
                 await platformMessageService.getMessageIdFromResponse(messageToPlatform);
-            const key = `${input.Body.PersonPhoneNumber}:Assessment`;
+            const key = `${input.Body.PersonPhoneNumber}:Assessment:${assessmentSessionLogs.assesmentId}`;
             await CacheMemory.set(key, assessmentSessionLogs.userMessageId);
 
             const AssessmentSession =
