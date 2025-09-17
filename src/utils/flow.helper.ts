@@ -19,7 +19,7 @@ export const flowConfigs: Record<string, FlowMessageParts> = {
         Screen        : "WELCOME"
     },
 
-    feedback_form : {
+    Feedback_Form : {
         Header : {
             type  : "image",
             image : { link: "https://example.com/feedback-banner.png" }
@@ -29,21 +29,6 @@ export const flowConfigs: Record<string, FlowMessageParts> = {
         ActionVersion : "3",
         Cta           : "Open Form",
         Screen        : "FEEDBACK"
-    },
-  
-    survey_form : {
-        Header : {
-            type     : "document",
-            document : {
-                link     : "https://example.com/survey-guide.pdf",
-                filename : "Survey Guide.pdf"
-            }
-        },
-        Body          : { text: "📊 Please participate in our quick survey." },
-        Footer        : { text: "⏱️ Takes less than 2 minutes!" },
-        ActionVersion : "3",
-        Cta           : "Open Form",
-        Screen        : "SURVEY"
     }
 };
   
