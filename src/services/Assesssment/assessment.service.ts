@@ -168,6 +168,8 @@ export class AssessmentService {
 
                         Numeric values without units are valid (assume: kg for weight, bpm for pulse, mmHg for blood pressure).
 
+                        IMPORTANT: Only accept actual measurement values or relevant responses.Do NOT accept generic confirmation responses like "ok", "yes", "correct", "right", "that's right", "sounds good", "looks good", "fine", "good", "alright", "sure", "yep", "yeah" as valid responses. Users must provide actual measurement values. 
+
                         For other fields: Check if user message is relevant to the field identifier and provide true or false with a short explanation.
 
                         The format of the output should be a JSON with the keys and values as text only. Below is format of the JSON
