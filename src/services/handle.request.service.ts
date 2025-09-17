@@ -149,7 +149,7 @@ export class handleRequestservice {
             break;
         }
         case 'Assessments': {
-            const key = `${metaData.platformId}:Assessment`;
+            const key = `${metaData.platformId}:Assessment:${outgoingMessage.Assessment.AssessmentId}`;
             const userCacheData = await CacheMemory.get(key);
             if (userCacheData) {
                 console.log("user response",metaData.messageBody);
