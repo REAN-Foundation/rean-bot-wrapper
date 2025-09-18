@@ -31,53 +31,57 @@ export class userHistoryDeletionService {
 
     async deleteUserProfile(userId) {
         try {
-            const entityManager = await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService);
-            const contactListRepo = entityManager.getRepository(ContactList);
-            const userInfoRepo = entityManager.getRepository(UserInfo);
-            const userConsentRepo = entityManager.getRepository(UserConsent);
-            const assessmentSessionLogsRepo = entityManager.getRepository(AssessmentSessionLogs);
-
             const userPlatformId = userId;
-
-            // Delete user data from Chat Session, Chat Message and Message Status tables
 
             await this.deleteChatHistory(userPlatformId);
 
-            // Delete user data from assessment identifier and assessment session logs tables
-
             await this.deleteAssessmentHistory(userPlatformId)
 
-            // delete user data from Contact List and User Info table
+            await this.deleteUserData(userPlatformId)
 
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async deleteUserData(userPlatformId: string) {
+        try {
+            const entityManager = await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService);
+
+            const contactListRepo = entityManager.getRepository(ContactList);
+            const userInfoRepo = entityManager.getRepository(UserInfo);
+            const userConsentRepo = entityManager.getRepository(UserConsent);
+
+            // delete from Contact List & User Info
             const contact = await contactListRepo.findOne({
                 where: { mobileNumber: userPlatformId }
             });
 
             if (contact) {
                 const contactListId = contact.autoIncrementalID;
+
                 await userInfoRepo.destroy({
                     where: { userId: contactListId }
                 });
+
                 await contactListRepo.destroy({
                     where: { autoIncrementalID: contactListId }
                 });
-
-                console.log(`Deleted user profile for userPlatformId: ${userPlatformId}`);
             } else {
                 console.log(`No ContactList entry found for mobileNumber: ${userPlatformId}`);
             }
 
-            // Delete user data from other tables
-
+            // delete from User Consent
             await userConsentRepo.destroy({
-                where: { userPlatformId: userPlatformId }
+                where: { userPlatformId }
             });
 
-
+            console.log("User data deleted successfully.");
         } catch (error) {
-            console.log(error);
+            console.error("Error deleting user data:", error);
         }
     }
+
 
     async deleteChatHistory(user) {
         try {
@@ -153,39 +157,6 @@ export class userHistoryDeletionService {
         } catch (error) {
             console.error("Error deleting assessment history:", error);
         }
-    }
-
-    
-    async deleteUserFromAllServices(user) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                Logger.instance().log(`Delete Patient API - ${this.clientEnvironmentProviderService.getClientName()}`);
-
-                const userId = user;
-                const options = this.getHeaders.getHeaders();
-                const ReanBackendBaseUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
-
-                const apiUrl = `${ReanBackendBaseUrl}patients/${userId}`;
-                Logger.instance().log(`Calling DELETE: ${apiUrl}`);
-
-                const response = await needle("delete", apiUrl, null, options);
-
-                Logger.instance().log(`Response status: ${response.statusCode}`);
-                Logger.instance().log(`Message: ${response.body?.message}`);
-
-                if (response.statusCode !== 200) {
-                    reject("Failed to delete patient.");
-                    return;
-                }
-
-                Logger.instance().log(`Patient deleted successfully for userId: ${userId}`);
-                resolve({ success: true, message: 'Patient deleted successfully.' });
-
-            } catch (error) {
-                Logger.instance().log_error(error.message, 500, "Delete Patient Service Error!");
-                reject(error.message);
-            }
-        });
     }
 
 }
