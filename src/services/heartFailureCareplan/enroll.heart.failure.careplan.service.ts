@@ -11,8 +11,6 @@ import { platformServiceInterface } from '../../refactor/interface/platform.inte
 import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
 import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
 import { SystemGeneratedMessagesService } from "../system.generated.message.service";
-import { TimeHelper } from '../../common/time.helper';
-import { DurationType } from '../../common/time.helper';
 import { translateService } from '../translate.service';
 
 @scoped(Lifecycle.ContainerScoped)
@@ -181,44 +179,18 @@ export class HeartFailureRegistrationService {
     }
     
     calculateStartDateByButtonId(buttonId: string, todayDate: Date): Date {
-
-        /**
-         * Calculate the start date based on the button ID.
-         * If the button ID matches a key in the careplanCodeMapping object, calculate the next Sunday.
-         * Otherwise, return the current date.
-         */
-    
-        // Use `getSelectedCareplan` to check if the button ID exists in the mapping
-        if (buttonId?.startsWith("Saath_Health")) {
-            const startDate = TimeHelper.addDuration(todayDate, 1, DurationType.Day);
-            console.log(`Careplan Registration start date ${startDate}`);
-            return startDate;
-        }
-
-        const careplan = this.getSelectedCareplan(buttonId);
-    
-        if (careplan !== "Heart-Failure") {
-
-            // Calculate the next Sunday
-            const dayOfWeek = todayDate.getDay(); // Get the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
-    
+        if (buttonId?.startsWith("Start_Careplan_HeartF")) {
+            const dayOfWeek = todayDate.getDay();
             if (dayOfWeek === 0) {
-
-                // If today is Sunday
                 return todayDate;
             } else {
-
-                // Calculate the days to the next Sunday
                 const daysUntilNextSunday = 7 - dayOfWeek;
                 const startDate = new Date(todayDate);
                 startDate.setDate(todayDate.getDate() + daysUntilNextSunday);
                 return startDate;
             }
-        } else {
-
-            // If the button ID does not match, return the current date
-            return todayDate;
         }
+        return todayDate;
     }
 
 }
