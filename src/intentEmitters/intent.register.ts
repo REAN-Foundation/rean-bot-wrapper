@@ -87,6 +87,7 @@ import { InitiateDeleteReminderListener, GetReminderDetails, DeleteReminder } fr
 import { EnrollHFCareplanListener, SentRegistrationMSGListener } from './intentListeners/heartFailureCareplan/start.careplan.listener';
 import { AssessmentScoringListener } from './intentListeners/assessment/assessemnt.quiz.scoring.listener';
 import { UserInfoListener } from './intentListeners/user.info.listener';
+import { FlowListener, ProcessWhatsAppFormResponsesListener } from './intentListeners/whatsapp.form/flow.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -280,6 +281,8 @@ export class IntentRegister {
         IntentEmitter.registerListener('delete_reminder_type', GetReminderDetails);
         IntentEmitter.registerListener('delete_reminder_time', DeleteReminder);
         IntentEmitter.registerListener('bookAppointment', AppointmentBookingListner);
+        IntentEmitter.registerListener('Start_WhatsApp_Form_Select', FlowListener);
+        IntentEmitter.registerListener('Process_WhatsApp_Form_Responses', ProcessWhatsAppFormResponsesListener);
 
         // Intents for Collecting user information
         IntentEmitter.registerListener('UserInfo', UserInfoListener);
