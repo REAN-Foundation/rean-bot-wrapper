@@ -19,6 +19,7 @@
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-comprehendmedical": "^3.13.0",
+    "@aws-sdk/client-sqs": "^3.890.0",
     "@google-cloud/dialogflow": "^6.0.0",
     "@google-cloud/speech": "^5.0.0",
     "@google-cloud/text-to-speech": "^4.0.0",
@@ -28,6 +29,7 @@
     "@types/bcryptjs": "^2.4.2",
     "@types/sequelize": "^4.28.9",
     "actions-on-google": "^3.0",
+    "amqplib": "^0.10.9",
     "ansi-regex": "^6.0.1",
     "approx-string-match": "^1.1.0",
     "async-request": "^1.0.0",

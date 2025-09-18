@@ -1,3 +1,4 @@
+import { MessagingConfig, MessagingProvider } from '../domain.types/events/provider.types';
 import * as configuration from '../../reancare.config.json';
 import {
     Configurations,
@@ -29,6 +30,16 @@ export class ConfigurationManager {
             Ehr : {
                 Specification : configuration.Ehr.Specification as EHRSpecification,
                 Provider      : configuration.Ehr.Provider as EHRProvider,
+            },
+            Messaging : {
+                Provider : configuration?.Messaging?.Provider as MessagingProvider,
+                Events   : {
+                    Enabled                : configuration?.Messaging?.Events?.Enabled,
+                    RetryPolicy            : configuration?.Messaging?.Events?.RetryPolicy,
+                    DeadLetterQueue        : configuration?.Messaging?.Events?.DeadLetterQueue,
+                    MessageRetentionPeriod : configuration?.Messaging?.Events?.MessageRetentionPeriod,
+                    VisibilityTimeout      : configuration?.Messaging?.Events?.VisibilityTimeout,
+                },
             },
             MaxUploadFileSize : configuration.MaxUploadFileSize,
         };
@@ -66,6 +77,14 @@ export class ConfigurationManager {
 
     public static MaxUploadFileSize = (): number => {
         return ConfigurationManager._config.MaxUploadFileSize;
+    };
+
+    public static MessagingProvider = (): MessagingProvider => {
+        return ConfigurationManager._config.Messaging.Provider;
+    };
+
+    public static MessagingConfig = (): MessagingConfig => {
+        return ConfigurationManager._config.Messaging;
     };
 
     private static checkConfigSanity() {
