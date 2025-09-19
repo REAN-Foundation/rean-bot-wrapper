@@ -74,7 +74,7 @@ export class LogsQAService {
             if (sensitivity){
                 sensitivityValue = await this.sensitivityMapper(sensitivity);
                 prevSensitivityValue = await this.clickUpTask.getTaskPriority(cmrTaskId);
-                if (sensitivityValue && prevSensitivityValue && sensitivityValue < prevSensitivityValue) {
+                if (sensitivityValue && prevSensitivityValue && sensitivityValue > prevSensitivityValue) {
                     sensitivityValue = prevSensitivityValue;
                 }
             }

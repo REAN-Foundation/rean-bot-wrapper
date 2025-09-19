@@ -130,7 +130,6 @@ export class ClickUpTask{
             options.headers["Content-Type"] = `application/json`;
             const obj = {
                 "status"               : "TO DO",
-                "priority"             : priority,
                 "due_date"             : null,
                 "due_date_time"        : false,
                 "start_date_time"      : false,
@@ -140,7 +139,10 @@ export class ClickUpTask{
                 "tags"                 : [tag],
                 "markdown_description" : user_details,
                 "name"                 : topic
-            };
+            } as any;
+            if (priority != null) {
+                obj.priority = priority;
+            }
     
             await needle("put", updateTaskUrl, obj, options);
         }
@@ -188,7 +190,6 @@ export class ClickUpTask{
         try {
             const getTaskUrl = `https://api.clickup.com/api/v2/task/${taskID}`;
             const options = getRequestOptions();
-            options.json = true;
             const CLICKUP_AUTHENTICATION = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
             options.headers["Authorization"] = CLICKUP_AUTHENTICATION;
             options.headers["Content-Type"] = "application/json";
