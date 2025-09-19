@@ -183,5 +183,29 @@ export class ClickUpTask{
             console.log("Error while updating the clickup tags.");
         }
     }
-    
+
+    async getTaskPriority(taskID: string): Promise<number | null> {
+        try {
+            const getTaskUrl = `https://api.clickup.com/api/v2/task/${taskID}`;
+            const options = getRequestOptions();
+            options.json = true;
+            const CLICKUP_AUTHENTICATION = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
+            options.headers["Authorization"] = CLICKUP_AUTHENTICATION;
+            options.headers["Content-Type"] = "application/json";
+
+            const response = await needle("get", getTaskUrl, options);
+
+            if (response.statusCode !== 200) {
+                console.log("Error fetching task from ClickUp", response.body);
+                return null;
+            }
+
+            const priority = response.body?.priority?.id;
+            return priority ? Number(priority) : null;
+        } catch (error) {
+            console.log("Error while fetching task priority from ClickUp", error);
+            return null;
+        }
+    }
+
 }

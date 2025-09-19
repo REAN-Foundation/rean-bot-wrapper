@@ -69,11 +69,16 @@ export class LogsQAService {
         if (cmrTaskId){
             // eslint-disable-next-line max-len
             await this.clickUpTask.postCommentOnTask(cmrTaskId,comment);
-            let sensitivity_value = null;
+            let sensitivityValue = null;
+            let prevSensitivityValue = null;
             if (sensitivity){
-                sensitivity_value = await this.sensitivityMapper(sensitivity);
+                sensitivityValue = await this.sensitivityMapper(sensitivity);
+                prevSensitivityValue = await this.clickUpTask.getTaskPriority(cmrTaskId);
+                if (sensitivityValue && prevSensitivityValue && sensitivityValue < prevSensitivityValue) {
+                    sensitivityValue = prevSensitivityValue;
+                }
             }
-            await this.clickUpTask.updateTask(cmrTaskId,sensitivity_value,description,userName, intent);
+            await this.clickUpTask.updateTask(cmrTaskId,sensitivityValue,description,userName, intent);
             await this.clickUpTask.updateTag(cmrTaskId, intent);
             console.log("Updating old clickUp task");
             return cmrTaskId;
