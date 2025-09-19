@@ -171,12 +171,13 @@ export class ClientWebhookController {
             if (req.params.channel === "telegram"){
                 [userPlatformId ,platformUserName] = await this.getTelegramUserID(req.body);
             }
-            else if (req.params.channel === "REAN_SUPPORT"||
+            else if (req.params.channel === "REAN_SUPPORT" ||
                     req.params.channel === "SNEHA_SUPPORT"){
                 userPlatformId = req.body.phoneNumber.toString();
             }
             if (req.body.statuses) {
                 this.sendSuccessMessage(chatMessageRepository, messageStatusRepostiory, res,req.body.statuses);
+
                 // console.log("request.body", req.body);
             }
             else {
@@ -283,8 +284,11 @@ export class ClientWebhookController {
             if (channel === "whatsappMeta"){
                 if (reqBody.messages[0].type === 'interactive'){
                     const interactiveType = reqBody.messages[0].interactive.type;
-                    consentReply = reqBody.messages[0].interactive[interactiveType].id;
-                    languageCode = consentReply.split("-")[1];
+                    consentReply = reqBody.messages[0]?.interactive[interactiveType]?.id;
+                    if (consentReply) {
+                        consentReply = reqBody.messages[0]?.interactive[interactiveType]?.id;
+                        languageCode = consentReply.split("-")[1];
+                    }
                     if (!languageCode){
                         languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
                     }

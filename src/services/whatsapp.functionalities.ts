@@ -142,6 +142,15 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         return messagetoDialogflow;
     }
 
+    async nfm_replyMessageFormat(messageObj: Message){
+        const messagetoDialogflow = this.inputMessageFormat(messageObj);
+        messagetoDialogflow.messageBody = messageObj.getNfmReply().body;
+        console.log("NFM Response Message", messageObj.getNfmReply().body);
+        messagetoDialogflow.intent = "Process_WhatsApp_Form_Responses";
+        console.log("NFM Response Message", messageObj);
+        return messagetoDialogflow;
+    }
+
     /*retrive whatsapp media */
     GetWhatsappMedia = async (type, mediaId, extension) => {
         return new Promise<string>((resolve, reject) => {
