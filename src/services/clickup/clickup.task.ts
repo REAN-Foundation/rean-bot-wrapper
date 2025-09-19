@@ -130,7 +130,6 @@ export class ClickUpTask{
             options.headers["Content-Type"] = `application/json`;
             const obj = {
                 "status"               : "TO DO",
-                "priority"             : priority,
                 "due_date"             : null,
                 "due_date_time"        : false,
                 "start_date_time"      : false,
@@ -140,7 +139,10 @@ export class ClickUpTask{
                 "tags"                 : [tag],
                 "markdown_description" : user_details,
                 "name"                 : topic
-            };
+            } as any;
+            if (priority != null) {
+                obj.priority = priority;
+            }
     
             await needle("put", updateTaskUrl, obj, options);
         }
@@ -183,5 +185,28 @@ export class ClickUpTask{
             console.log("Error while updating the clickup tags.");
         }
     }
-    
+
+    async getTaskPriority(taskID: string): Promise<number | null> {
+        try {
+            const getTaskUrl = `https://api.clickup.com/api/v2/task/${taskID}`;
+            const options = getRequestOptions();
+            const CLICKUP_AUTHENTICATION = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
+            options.headers["Authorization"] = CLICKUP_AUTHENTICATION;
+            options.headers["Content-Type"] = "application/json";
+
+            const response = await needle("get", getTaskUrl, options);
+
+            if (response.statusCode !== 200) {
+                console.log("Error fetching task from ClickUp", response.body);
+                return null;
+            }
+
+            const priority = response.body?.priority?.id;
+            return priority ? Number(priority) : null;
+        } catch (error) {
+            console.log("Error while fetching task priority from ClickUp", error);
+            return null;
+        }
+    }
+
 }
