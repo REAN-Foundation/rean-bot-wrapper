@@ -77,7 +77,6 @@ export class DecisionRouter {
     public model = new ChatOpenAI({ temperature: 0, modelName: "gpt-3.5-turbo" });
 
     public feedbackFlag = false;
-
     public assessmentFlag = false;
 
     public intentFlag = false;

@@ -19,7 +19,6 @@ export class ChatMessage extends Model implements IchatMessage {
         allowNull : false
     })
         id?: number;
-
     @ForeignKey(() => ChatSession)
     @Column({
         type      : DataType.INTEGER,
@@ -109,7 +108,7 @@ export class ChatMessage extends Model implements IchatMessage {
         type : DataType.STRING
     })
         supportChannelTaskID : string;
-
+        
     @Column({
         type : DataType.BOOLEAN
     })

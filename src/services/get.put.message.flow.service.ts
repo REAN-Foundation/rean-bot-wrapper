@@ -33,7 +33,7 @@ import { AssessmentIdentifiers } from '../models/assessment/assessment.identifie
 export class MessageFlow{
 
     private chatMessageConnection;
-
+    
     constructor(
         @inject(delay(() => SlackMessageService)) private slackMessageService,
         @inject(handleRequestservice) private handleRequestservice?: handleRequestservice,
@@ -53,7 +53,6 @@ export class MessageFlow{
 
         //initialising MySQL DB tables
         const chatMessageObj = await this.engageMySQL(messagetoDialogflow);
-
         const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         const resp = await chatMessageRepository.findAll({ where: { userPlatformID: chatMessageObj.userPlatformID } });
         const humanHandoff = resp[resp.length - 1].humanHandoff;
@@ -63,12 +62,10 @@ export class MessageFlow{
             const client = this.slackMessageService.client;
             const channelID = this.slackMessageService.channelID;
             await client.chat.postMessage({ channel: channelID, text: chatMessageObj.messageContent, thread_ts: ts });
-
         }
         else {
             this.processMessage(messagetoDialogflow, channel, platformMessageService);
         }
-
     }
 
     async checkTheFlowRouter(messageToLlmRouter: Imessage, channel: string, platformMessageService: platformServiceInterface){
@@ -108,7 +105,6 @@ export class MessageFlow{
 
     async preprocessOutgoingMessage(message: Imessage){
         try {
-
             await this.engageMySQL(message);
             const translate_message = await this.translate.translateMessage(message.type, message.messageBody, message.platformId);
             translate_message["original_message"] = message.messageBody;
@@ -451,7 +447,6 @@ export class MessageFlow{
                 .catch(error => console.log("error on update", error));
         }
         return chatMessageObj;
-
     }
 
     saveResponseDataToUser = async(response_format,processedResponse) => {
