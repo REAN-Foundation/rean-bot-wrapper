@@ -33,6 +33,7 @@ import { AssessmentIdentifiers } from '../models/assessment/assessment.identifie
 export class MessageFlow{
 
     private chatMessageConnection;
+    
     constructor(
         @inject(delay(() => SlackMessageService)) private slackMessageService,
         @inject(handleRequestservice) private handleRequestservice?: handleRequestservice,
@@ -89,7 +90,7 @@ export class MessageFlow{
                 // Update the DB using message Id only if outgoing meesage is related with assessment
                 const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
                 const assessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
-                const key = `${messageToLlmRouter.platformId}:NextQuestionFlag`;
+                const key = `${messageToLlmRouter.platformId}:NextQuestionFlag:${outgoingMessage.Assessment.AssessmentId}`;
                 const nextQuestionFlag = await CacheMemory.get(key);
                 if (nextQuestionFlag === true && outgoingMessage.PrimaryMessageHandler === "Assessments") {
                     const messageId = platformMessageService.getMessageIdFromResponse(response);
@@ -331,7 +332,7 @@ export class MessageFlow{
         if (messageType === "reancareAssessment") {
             
             assessmentSession.userMessageId = platformMessageService.getMessageIdFromResponse(message_to_platform);
-            const Assessmentkey = `${response_format.sessionId}:Assessment`;
+            const Assessmentkey = `${response_format.sessionId}:Assessment:${assessmentSession.assesmentId}`;
             CacheMemory.set(Assessmentkey,assessmentSession.userMessageId);
             const AssessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
 

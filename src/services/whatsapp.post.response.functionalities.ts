@@ -6,6 +6,9 @@ import { translateService } from "./translate.service";
 import { HandleMessagetypePayload } from './handle.messagetype.payload';
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 import { inject, Lifecycle, scoped } from "tsyringe";
+import { MessageType } from "../domain.types/common.types";
+import { getFlowMessageParts } from "../utils/flow.helper";
+import { FlowActionType } from "../domain.types/message.type/flow.message.types";
 
 @scoped(Lifecycle.ContainerScoped)
 export class WhatsappPostResponseFunctionalities{
@@ -272,6 +275,57 @@ export class WhatsappPostResponseFunctionalities{
         };
         
         return postDataMeta;
+    };
+
+    flowResponseFormat = async(response_format:Iresponse,payload) =>{
+        console.log(`........From flowResponseFormat ${response_format} payload: ${JSON.stringify(payload, null, 2)}`, );
+        const requestBody = this.postDataFormatWhatsapp(response_format.sessionId);
+        requestBody.type = MessageType.INTERACTIVE;
+
+        console.log(`Payload Flow Name:`, payload?.flowName);
+        const flowMessageParts = getFlowMessageParts(payload?.flowName);
+        console.log(`Flow Message Parts:`, flowMessageParts);
+
+        requestBody["interactive"] = {
+            "type"   : MessageType.FLOW,
+            "action" : {
+                "name"       : "flow",
+                "parameters" : {
+                    "flow_message_version" : "3",
+                    "flow_action"          : payload?.flowAction || FlowActionType.Navigate,
+                    "flow_name"            : payload.flowName,
+                    "flow_cta"             : "Click Here!",
+                    "flow_action_payload"  : {
+                        "screen" : flowMessageParts.Screen ?? "QUESTION_ONE"
+                    }
+                }
+            }
+        };
+
+        if (flowMessageParts) {
+            if (flowMessageParts.Header) {
+                requestBody["interactive"]["header"] = flowMessageParts.Header;
+            }
+            if (flowMessageParts.Body) {
+                requestBody["interactive"]["body"] = flowMessageParts.Body;
+            }
+            if (flowMessageParts.Footer) {
+                requestBody["interactive"]["footer"] = flowMessageParts.Footer;
+            }
+            if (flowMessageParts.ActionVersion) {
+                requestBody["interactive"]["action"]["parameters"]["flow_message_version"] = flowMessageParts.ActionVersion;
+            }
+            if (flowMessageParts.Cta) {
+                requestBody["interactive"]["action"]["parameters"]["flow_cta"] = flowMessageParts.Cta;
+            }
+        }
+
+        if (payload?.flowActionPayload) {
+            requestBody["interactive"]["action"]["parameters"]["flow_action_payload"]["data"] = payload.flowActionPayload;
+        }
+
+        console.log(`Flow RequestBody:`, JSON.stringify(requestBody, null, 2));
+        return requestBody;
     };
 
     custom_payloadResponseFormat = async(response_format:Iresponse,payload) =>{

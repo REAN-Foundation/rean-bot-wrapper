@@ -119,7 +119,7 @@ export class AssessmentService {
             }
             assessmentSessionLogs.userMessageId =
                 await platformMessageService.getMessageIdFromResponse(messageToPlatform);
-            const key = `${input.Body.PersonPhoneNumber}:Assessment`;
+            const key = `${input.Body.PersonPhoneNumber}:Assessment:${assessmentSessionLogs.assesmentId}`;
             await CacheMemory.set(key, assessmentSessionLogs.userMessageId);
 
             const AssessmentSession =
@@ -167,6 +167,8 @@ export class AssessmentService {
                         Weight: "68.5", "68.5 kg", "68.5kg", "68.5 KG", "68.5 kilograms"
 
                         Numeric values without units are valid (assume: kg for weight, bpm for pulse, mmHg for blood pressure).
+
+                        IMPORTANT: Only accept actual measurement values or relevant responses.Do NOT accept generic confirmation responses like "ok", "yes", "correct", "right", "that's right", "sounds good", "looks good", "fine", "good", "alright", "sure", "yep", "yeah" as valid responses. Users must provide actual measurement values. 
 
                         For other fields: Check if user message is relevant to the field identifier and provide true or false with a short explanation.
 

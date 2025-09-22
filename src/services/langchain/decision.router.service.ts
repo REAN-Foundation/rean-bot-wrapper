@@ -112,10 +112,7 @@ export class DecisionRouter {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async checkAssessment(messageBody: Imessage, channel: string) {
         try {
-            const intent = messageBody.intent;
-            const key = `${messageBody.platformId}:NextQuestionFlag`;
-            const nextQuestionFlag = await CacheMemory.get(key);
-
+            
             const assessmentData = {
                 AssessmentId   : '',
                 AssessmentName : '',
@@ -128,6 +125,37 @@ export class DecisionRouter {
                     "askQuestionAgain" : false
                 }
             };
+            let messageContextId: string | null = null;
+            if (channel === "telegram" || channel === "Telegram") {
+                messageContextId = messageBody.chat_message_id;
+            } else {
+                messageContextId = messageBody.contextId;
+            }
+            const intent = messageBody.intent;
+            const AssessmentSession =
+            (await this.entityManagerProvider.getEntityManager(this.environmentProviderService))
+                .getRepository(AssessmentSessionLogs);
+
+            let assessmentResponse = await AssessmentSession.findOne({
+                where : {
+                    userMessageId : messageContextId
+                },
+                order : [['createdAt', 'DESC']],
+            });
+
+            // Add null check for assessmentResponse
+            if (!assessmentResponse){
+                assessmentResponse = await AssessmentSession.findOne({
+                    where : {
+                        userPlatformId : messageBody.platformId
+                    },
+                    order : [['createdAt', 'DESC']],
+                });
+          
+            }
+          
+            const key = `${messageBody.platformId}:NextQuestionFlag:${assessmentResponse.assesmentId}`;
+            const nextQuestionFlag = await CacheMemory.get(key);
 
             // Currently will only support the assessment start through buttons
             if (
@@ -167,7 +195,8 @@ export class DecisionRouter {
                 if (nextQuestionFlag) {
                     if (nextQuestionFlag === true) {
                         assessmentData.AssessmentFlag = true;
-                        
+                        assessmentData.AssessmentId = assessmentResponse.assesmentId;
+                
                         // await CacheMemory.set(key, false);
                     }
                 } else {
@@ -176,19 +205,19 @@ export class DecisionRouter {
             }
 
             if (assessmentData.AssessmentFlag && !assessmentData.MetaData.assessmentStart) {
-                const AssessmentSession =
-                (await this.entityManagerProvider.getEntityManager(this.environmentProviderService))
-                    .getRepository(AssessmentSessionLogs);
+                // const AssessmentSession =
+                // (await this.entityManagerProvider.getEntityManager(this.environmentProviderService))
+                //     .getRepository(AssessmentSessionLogs);
                 const AssessmentIdentifiersRepo = (
                     await this.entityManagerProvider.getEntityManager(this.environmentProviderService)
                 ).getRepository(AssessmentIdentifiers);
                 
-                const assessmentResponse = await AssessmentSession.findOne({
-                    where : {
-                        userPlatformId : messageBody.platformId
-                    },
-                    order : [['createdAt', 'DESC']],
-                });
+                // const assessmentResponse = await AssessmentSession.findOne({
+                //     where : {
+                //         userPlatformId : messageBody.platformId
+                //     },
+                //     order : [['createdAt', 'DESC']],
+                // });
 
                 // Add null check for assessmentResponse
                 if (!assessmentResponse) {
@@ -356,6 +385,8 @@ export class DecisionRouter {
             if (!resultFeedback.feedbackFlag){
                 const resultAssessment = await this.checkAssessment(messageBody, channel);
                 if (!resultAssessment.AssessmentFlag){
+
+                    //TODO: In WhatsApp form submission response length may greater than 256, so it is going to the QnA handler.
                     if (messageBody.messageBody.length > 256) {
                         this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.QnA;
                         return this.outgoingMessage;

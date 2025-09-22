@@ -87,7 +87,7 @@ export class LogsQAService {
         }
 
     }
-
+    
     async sensitivityMapper(sensitivity_flag: string) {
         const sensitivityPriorityMap: Record<string, number> = {
             "Critical / Urgent"  : 1,

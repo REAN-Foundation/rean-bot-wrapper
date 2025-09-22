@@ -17,6 +17,13 @@ export class Message implements IWhatsappRequestMessageEntities {
         }
     }
 
+    getNfmReply() {
+        const nfmReply = {
+            body : this.list.interactive.nfm_reply.response_json
+        };
+        return nfmReply;
+    }
+
     getContextId() {
         console.log(this.list);
         if (this.list.context){
