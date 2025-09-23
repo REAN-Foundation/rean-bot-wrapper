@@ -29,9 +29,19 @@ export class userHistoryDeletionService {
         @inject(GetHeaders) private getHeaders?: GetHeaders
     ){}
 
-    async deleteUserProfile(userId) {
+    async deleteUserProfile(patientUserId) {
         try {
-            const userPlatformId = userId;
+            const entityManager = await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService);
+            const contactListRepo = entityManager.getRepository(ContactList);
+             const contact = await contactListRepo.findOne({
+                where: { patientUserId }
+            });
+
+            if (!contact) {
+                console.log(`No ContactList entry found for patientUserId: ${patientUserId}`);
+                return;
+            }
+            const userPlatformId = contact.mobileNumber;
 
             await this.deleteChatHistory(userPlatformId);
 
