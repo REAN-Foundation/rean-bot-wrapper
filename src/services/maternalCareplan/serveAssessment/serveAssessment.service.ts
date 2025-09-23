@@ -245,12 +245,19 @@ export class ServeAssessmentService {
                 CacheMemory.delete(assessmentKey);
                 const customMessage = await this.systemGeneratedMessageService.getMessage("END_ASSESSMENT_MESSAGE");
                 const phoneNumber = await this.countryCodeService.formatPhoneNumber(assessmentSession.userPlatformId);
-                const apiURL = `patients/byPhone?phone=${encodeURIComponent(phoneNumber)}`;
+                let apiURL = `patients/byPhone?phone=${encodeURIComponent(phoneNumber)}`;
+                if (channel === 'telegram' || channel === 'Telegram') {
+                    apiURL = `patients/search?username=${encodeURIComponent(assessmentSession.userPlatformId)}`;
+                }
                 const result = await this.needleService.needleRequestForREAN("get", apiURL,null,null);
                 const patientData = result.Data.Patients.Items[0];
-                if (customMessage) {
+                const assessmentScore = requestBody.Data.AnswerResponse.AssessmentScore;
+                if (assessmentScore) {
+                    message =  `✅ Assessment Completed\nYou answered ${assessmentScore.CorrectAnswerCount} out of ${assessmentScore.PosedQuestionCount} questions correctly.\nTotal Score: ${assessmentScore.TotalScore} points.\nWell done.`;                }
+                else if (customMessage) {
                     message = await this.fillMessageWithVariables(customMessage, patientData);
-                } else {
+                }
+                else {
                     message = "The assessment has been completed.";
                 }
                 if (result.Data.Patients.Items) {
