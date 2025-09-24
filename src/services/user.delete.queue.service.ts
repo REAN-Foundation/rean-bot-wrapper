@@ -23,9 +23,9 @@ export class UserDeleteQueueService {
         this.childContainer = container.createChildContainer();
         this.registerInjections();  // <- Add this line
     }
-    private childContainer = null;
-    private clientEnvironmentProviderService: ClientEnvironmentProviderService = null;
-    private entityManagerProvider: EntityManagerProvider = null;
+    private childContainer: import("tsyringe").DependencyContainer;
+    private clientEnvironmentProviderService: ClientEnvironmentProviderService | null = null;
+    private entityManagerProvider: EntityManagerProvider | null = null;
 
     private registerInjections = () => {
         this.childContainer.register(ClientEnvironmentProviderService, { useClass: ClientEnvironmentProviderService });
