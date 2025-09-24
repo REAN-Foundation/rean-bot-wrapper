@@ -1,4 +1,4 @@
-import { container, inject, injectable } from 'tsyringe';
+import { container, injectable } from 'tsyringe';
 import * as asyncLib from 'async';
 import { Logger } from '../common/logger';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
