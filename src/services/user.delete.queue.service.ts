@@ -11,7 +11,6 @@ import { MessageStatus } from '../models/message.status';
 import { UserInfo } from '../models/user.info.model';
 import { AssessmentSessionLogs } from '../models/assessment.session.model';
 import { AssessmentIdentifiers } from '../models/assessment/assessment.identifiers.model';
-import WorkflowUserDa from '../models/workflow.user.data.model';
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
