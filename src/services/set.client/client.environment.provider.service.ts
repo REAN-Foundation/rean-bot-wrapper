@@ -1,18 +1,19 @@
+import { RequestResponseCacheService } from '../../modules/cache/request.response.cache.service';
 import { scoped, Lifecycle } from 'tsyringe';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ClientEnvironmentProviderService {
 
     private clientName;
-    
+
     constructor() {
         console.log("***ClientEnvironmentProviderService*** instance is created by DI container");
     }
-      
+
     setClientName(clientName){
         this.clientName = clientName;
     }
-    
+
     getClientName(){
         if (!this.clientName){
             throw new Error("No client name provided");
@@ -20,10 +21,15 @@ export class ClientEnvironmentProviderService {
         return this.clientName;
     }
 
-    getClientEnvironmentVariable(variablename){
+    async getClientEnvironmentVariable(variablename){
 
         // console.log("getClientEnvironmentVariable",[this.clientName + "_" + variablename]);
-        return process.env[this.clientName + "_" + variablename];
+        const key = `${this.clientName}-variables`;
+        const clientVariables = await RequestResponseCacheService.get(key, "config");
+        if (clientVariables && clientVariables.Secrets && clientVariables.Secrets[variablename]){
+            return clientVariables.Secrets[variablename];
+        }
+        return undefined;
     }
 
     clientNameMiddleware = (req, res, next) => {

@@ -18,6 +18,8 @@ import { Timer } from "./middleware/timer";
 import { CheckCrossConnection } from "./middleware/check.cross.connection";
 import { Injector } from "./startup/injector";
 import { SequelizeClient } from "./connection/sequelizeClient";
+import { RequestResponseCacheService } from "./modules/cache/request.response.cache.service";
+import { TenantSettingService } from "./services/tenant.setting/tenant.setting.service";
 
 declare module "express-serve-static-core" {
     interface Request {
@@ -59,36 +61,13 @@ export default class Application {
     public app(): express.Application {
         return this._app;
     }
-    
+
     async processClientEnvVariables() {
 
         try {
             const secretObjectList = await this._awsSecretsManager.getSecrets();
+            await this.storeVariablesInCache(secretObjectList);
 
-            for (const ele of secretObjectList) {
-                if (!ele.NAME) {
-                    for (const k in ele) {
-                        if (typeof ele[k] === "object"){
-                            process.env[k.toUpperCase()] = JSON.stringify(ele[k]);
-                        }
-                        else {
-                            process.env[k.toUpperCase()] = ele[k];
-                        }
-                        console.log("loading this key", k.toUpperCase());
-                    }
-                }
-                else {
-                    this.clientsList.push(ele.NAME);
-                    for (const k in ele) {
-                        if (typeof ele[k] === "object"){
-                            process.env[ele.NAME + "_" + k.toUpperCase()] = JSON.stringify(ele[k]);
-                        }
-                        else {
-                            process.env[ele.NAME + "_" + k.toUpperCase()] = ele[k];
-                        }
-                    }
-                }
-            }
         } catch (e) {
             console.log(e);
         }
@@ -110,7 +89,7 @@ export default class Application {
             } else {
                 console.log("Telegram webhook need not to be set");
             }
-            
+
             if (clientEnvironmentProviderService.getClientEnvironmentVariable('WHATSAPP_LIVE_API_KEY') || clientEnvironmentProviderService.getClientEnvironmentVariable('META_API_TOKEN')) {
                 whatsapp.setWebhook(clientName);
             }
@@ -118,6 +97,69 @@ export default class Application {
                 console.log("whatsapp webhook need not to be set");
             }
 
+        }
+
+    }
+
+    async storeVariablesInCache(secretObjectList: any[]) {
+        try {
+
+            for (const ele of secretObjectList) {
+                if (!ele.NAME) {
+                    const derivedTenantName = ele.split('-')[1].toUpperCase();
+                    if (!this.clientsList.includes(derivedTenantName)) {
+                        this.clientsList.push(derivedTenantName);
+                    }
+                    const tenantSecrets = [];
+                    for (const k in ele) {
+                        if (typeof ele[k] === "object"){
+                            tenantSecrets.push({ Key: k.toUpperCase(), Value: JSON.stringify(ele[k]) });
+                        }
+                        else {
+                            tenantSecrets.push({ Key: k.toUpperCase(), Value: JSON.stringify(ele[k]) });
+                        }
+                        console.log("loading this key", `${derivedTenantName}_${k.toUpperCase()}`);
+                    }
+
+                    const apiKey = process.env["REANCARE_API_KEY"];
+                    const baseUrl = process.env["REAN_APP_BACKEND_BASE_URL"];
+
+                    if (apiKey && baseUrl) {
+                        const tenantSettings = await TenantSettingService.getTenantSettingByCode(derivedTenantName, apiKey, baseUrl);
+                        if (tenantSettings) {
+                            await RequestResponseCacheService.set(`${derivedTenantName}-variables`,
+                                { Secrets: tenantSecrets, Settings: tenantSettings },
+                                "config"
+                            );
+                        }
+                    } else {
+                        console.warn(`Missing REANCARE_API_KEY or REAN_APP_BACKEND_BASE_URL. Skipping tenant settings fetch.`);
+                    }
+                }
+                else {
+                    this.clientsList.push(ele.NAME);
+                    const tenantSecrets = [];
+                    for (const k in ele) {
+                        if (typeof ele[k] === "object"){
+                            tenantSecrets.push({ Key: k.toUpperCase(), Value: JSON.stringify(ele[k]) });
+
+                            // await RequestResponseCacheService.set(`${ele.NAME}_${k.toUpperCase()}`, JSON.stringify(ele[k]), "config");
+                        }
+                        else {
+                            tenantSecrets.push({ Key: k.toUpperCase(), Value: JSON.stringify(ele[k]) });
+
+                            // await RequestResponseCacheService.set(`${ele.NAME}_${k.toUpperCase()}`, ele[k], "config");
+                        }
+                        console.log("loading this key", `${ele.NAME}_${k.toUpperCase()}`);
+                    }
+                    await RequestResponseCacheService.set(`${ele.NAME}-variables`,
+                        { Secrets: tenantSecrets },
+                        "config"
+                    );
+                }
+            }
+        } catch (e) {
+            console.log(e);
         }
 
     }
@@ -186,7 +228,7 @@ export default class Application {
                 this._app.use(this._checkCrossConnection.checkCrossConnection);
 
                 // this._app.use(this.limiter);
-                
+
                 const MAX_UPLOAD_FILE_SIZE = ConfigurationManager.MaxUploadFileSize();
 
                 this._app.use(fileUpload({
@@ -210,7 +252,7 @@ export default class Application {
             try {
                 const port = process.env.PORT;
                 const server = this._app.listen(port, () => {
-                    const serviceName = 'REANCare api' + '-' + process.env.NODE_ENV;
+                    const serviceName = 'Rean-Bot-Wrapper' + '-' + process.env.NODE_ENV;
                     Logger.instance().log(serviceName + ' is up and listening on port ' + process.env.PORT.toString());
                     this._app.emit("server_started");
                 });
