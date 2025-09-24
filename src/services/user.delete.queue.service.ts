@@ -19,20 +19,21 @@ const ASYNC_TASK_COUNT = 4;
 @injectable()
 export class UserDeleteQueueService {
 
-    constructor() {
-        this.childContainer = container.createChildContainer();
-        this.registerInjections();  // <- Add this line
-    }
     private childContainer: import("tsyringe").DependencyContainer;
     private clientEnvironmentProviderService: ClientEnvironmentProviderService | null = null;
     private entityManagerProvider: EntityManagerProvider | null = null;
 
-    private registerInjections = () => {
+    constructor() {
+        this.childContainer = container.createChildContainer();
+        this.registerInjections();
+    }
+
+    private registerInjections(): void {
         this.childContainer.register(ClientEnvironmentProviderService, { useClass: ClientEnvironmentProviderService });
         this.childContainer.register(EntityManagerProvider, { useClass: EntityManagerProvider });
     }
 
-    public register = (client: any) => {
+    public register(client: any): void {
         try {
             this.childContainer.register("Client", { useValue: client });
 
@@ -50,7 +51,6 @@ export class UserDeleteQueueService {
         }
     }
 
-
     public _q = asyncLib.queue(async (patientUserId: string, onCompleted) => {
         try {
             await this.deleteUser(patientUserId);
@@ -59,7 +59,6 @@ export class UserDeleteQueueService {
             onCompleted(error);
         }
     }, ASYNC_TASK_COUNT);
-
 
     public enqueueDeleteUser = async (patientUserId: string, client) => {
         try {
@@ -70,7 +69,7 @@ export class UserDeleteQueueService {
         }
     };
 
-    private enqueue = (patientUserId: string) => {
+    private enqueue(patientUserId: string): void {
         this._q.push(patientUserId, (error) => {
             if (error) {
                 Logger.instance().log(
@@ -79,17 +78,16 @@ export class UserDeleteQueueService {
                 Logger.instance().log(
                     `Stack: ${JSON.stringify(error.stack, null, 2)}`
                 );
-        }   else {
+            } else {
                 Logger.instance().log(
                     `Successfully deleted user history for PatientUserId=${patientUserId}`
                 );
             }
         });
-    };
+    }
 
     private deleteUser = async (patientUserId: string) => {
         try {
-
             await this.deleteUserProfile(patientUserId);
         } catch (error) {
             Logger.instance().log(`Delete error for PatientUserId=${patientUserId}: ${JSON.stringify(error.message, null, 2)}`);
@@ -98,72 +96,67 @@ export class UserDeleteQueueService {
 
     async deleteUserProfile(patientUserId) {
         try {
-            console.log("Inside delete user profile function.");
+            Logger.instance().log("Inside delete user profile function.");
             const entityManager = await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService);
             const contactListRepo = entityManager.getRepository(ContactList);
             const contact = await contactListRepo.findOne({
                 where: { patientUserId }
             });
-    
+
             if (!contact) {
-                console.log(`No ContactList entry found for patientUserId: ${patientUserId}`);
+                Logger.instance().log(`No ContactList entry found for patientUserId: ${patientUserId}`);
                 return;
             }
             const userPlatformId = contact.mobileNumber;
-            console.log("Deleting data for ", userPlatformId);
-    
+            Logger.instance().log("Deleting data for " + userPlatformId);
+
             await this.deleteChatHistory(userPlatformId);
-    
             await this.deleteAssessmentHistory(userPlatformId);
-    
             await this.deleteUserData(userPlatformId);
 
-            console.log("User deletion complete");
-    
+            Logger.instance().log("User deletion complete");
+
         } catch (error) {
-            console.log(error);
+            Logger.instance().log(JSON.stringify(error, null, 2));
         }
     }
-    
+
     async deleteUserData(userPlatformId: string) {
         try {
             const entityManager = await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService);
-    
+
             const contactListRepo = entityManager.getRepository(ContactList);
             const userInfoRepo = entityManager.getRepository(UserInfo);
             const userConsentRepo = entityManager.getRepository(UserConsent);
-    
-            // delete from Contact List & User Info
+
             const contact = await contactListRepo.findOne({
                 where: { mobileNumber: userPlatformId }
             });
-    
+
             if (contact) {
                 const contactListId = contact.autoIncrementalID;
-    
+
                 await userInfoRepo.destroy({
                     where: { userId: contactListId }
                 });
-    
+
                 await contactListRepo.destroy({
                     where: { autoIncrementalID: contactListId }
                 });
             } else {
-                console.log(`No ContactList entry found for mobileNumber: ${userPlatformId}`);
+                Logger.instance().log(`No ContactList entry found for mobileNumber: ${userPlatformId}`);
             }
-    
-            // delete from User Consent
+
             await userConsentRepo.destroy({
                 where: { userPlatformId }
             });
-    
-            console.log("User data deleted successfully.");
+
+            Logger.instance().log("User data deleted successfully.");
         } catch (error) {
-            console.error("Error deleting user data:", error);
+            Logger.instance().log("Error deleting user data: " + JSON.stringify(error, null, 2));
         }
     }
-    
-    
+
     async deleteChatHistory(user) {
         try {
             const entityManager = await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService);
@@ -201,13 +194,13 @@ export class UserDeleteQueueService {
                     where: { autoIncrementalID: sessionId }
                 });
             }
-            console.log("User chat history deleted successfully.");
+            Logger.instance().log("User chat history deleted successfully.");
 
         } catch (error) {
-            console.error("Error deleting chat history:", error);
+            Logger.instance().log("Error deleting chat history: " + JSON.stringify(error, null, 2));
         }
     }
-    
+
     async deleteAssessmentHistory(userPlatformID: string) {
         try {
             const entityManager = await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService);
@@ -215,7 +208,6 @@ export class UserDeleteQueueService {
             const assessmentSessionLogsRepo = entityManager.getRepository(AssessmentSessionLogs);
             const assessmentIdentifiersRepo = entityManager.getRepository(AssessmentIdentifiers);
 
-            // Find all sessions for this user
             const sessions = await assessmentSessionLogsRepo.findAll({
                 where: { userPlatformId: userPlatformID }
             });
@@ -223,22 +215,18 @@ export class UserDeleteQueueService {
             for (const session of sessions) {
                 const sessionId = session.autoIncrementalID;
 
-                // Delete identifiers for this session
                 await assessmentIdentifiersRepo.destroy({
                     where: { assessmentSessionId: sessionId }
                 });
 
-                // Delete the session itself
                 await assessmentSessionLogsRepo.destroy({
                     where: { autoIncrementalID: sessionId }
                 });
             }
 
-            console.log("User assessment history deleted successfully.");
+            Logger.instance().log("User assessment history deleted successfully.");
         } catch (error) {
-            console.error("Error deleting assessment history:", error);
+            Logger.instance().log("Error deleting assessment history: " + JSON.stringify(error, null, 2));
         }
     }
-    
-
 }
