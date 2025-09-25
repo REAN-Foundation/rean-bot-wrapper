@@ -136,7 +136,7 @@ export default class Application {
                                     tenantSecrets[key.toUpperCase()] = botSettings[key];
                                 }
                             }
-                            await RequestResponseCacheService.set(`${derivedTenantName}-bot-variables`,
+                            await RequestResponseCacheService.set(`bot-secrets-${derivedTenantName}`,
                                 tenantSecrets,
                                 "config"
                             );
@@ -151,14 +151,13 @@ export default class Application {
                     for (const k in ele) {
                         if (typeof ele[k] === "object"){
                             tenantSecrets[k.toUpperCase()] = JSON.stringify(ele[k]);
-
                         }
                         else {
                             tenantSecrets[k.toUpperCase()] = ele[k];
                         }
                         console.log("loading this key", `${ele.NAME}_${k.toUpperCase()}`);
                     }
-                    await RequestResponseCacheService.set(`${ele.NAME}-bot-variables`,
+                    await RequestResponseCacheService.set(`bot-secrets-${ele.NAME}`,
                         tenantSecrets,
                         "config"
                     );
