@@ -110,13 +110,13 @@ export default class Application {
                     if (!this.clientsList.includes(derivedTenantName)) {
                         this.clientsList.push(derivedTenantName);
                     }
-                    const tenantSecrets = [];
+                    const tenantSecrets = {};
                     for (const k in ele) {
                         if (typeof ele[k] === "object"){
-                            tenantSecrets.push({ Key: k.toUpperCase(), Value: JSON.stringify(ele[k]) });
+                            tenantSecrets[k.toUpperCase()] = JSON.stringify(ele[k]);
                         }
                         else {
-                            tenantSecrets.push({ Key: k.toUpperCase(), Value: JSON.stringify(ele[k]) });
+                            tenantSecrets[k.toUpperCase()] = ele[k];
                         }
                         console.log("loading this key", `${derivedTenantName}_${k.toUpperCase()}`);
                     }
@@ -127,8 +127,17 @@ export default class Application {
                     if (apiKey && baseUrl) {
                         const tenantSettings = await TenantSettingService.getTenantSettingByCode(derivedTenantName, apiKey, baseUrl);
                         if (tenantSettings) {
-                            await RequestResponseCacheService.set(`${derivedTenantName}-variables`,
-                                { Secrets: tenantSecrets, Settings: tenantSettings },
+                            const botSettings = tenantSettings.ChatBot;
+                            for (const key in botSettings){
+                                if (typeof tenantSettings.ChatBot[key] === "object"){
+                                    tenantSecrets[key.toUpperCase()] = JSON.stringify(botSettings[key]);
+                                }
+                                else {
+                                    tenantSecrets[key.toUpperCase()] = botSettings[key];
+                                }
+                            }
+                            await RequestResponseCacheService.set(`${derivedTenantName}-bot-variables`,
+                                tenantSecrets,
                                 "config"
                             );
                         }
@@ -138,22 +147,19 @@ export default class Application {
                 }
                 else {
                     this.clientsList.push(ele.NAME);
-                    const tenantSecrets = [];
+                    const tenantSecrets = {};
                     for (const k in ele) {
                         if (typeof ele[k] === "object"){
-                            tenantSecrets.push({ Key: k.toUpperCase(), Value: JSON.stringify(ele[k]) });
+                            tenantSecrets[k.toUpperCase()] = JSON.stringify(ele[k]);
 
-                            // await RequestResponseCacheService.set(`${ele.NAME}_${k.toUpperCase()}`, JSON.stringify(ele[k]), "config");
                         }
                         else {
-                            tenantSecrets.push({ Key: k.toUpperCase(), Value: JSON.stringify(ele[k]) });
-
-                            // await RequestResponseCacheService.set(`${ele.NAME}_${k.toUpperCase()}`, ele[k], "config");
+                            tenantSecrets[k.toUpperCase()] = ele[k];
                         }
                         console.log("loading this key", `${ele.NAME}_${k.toUpperCase()}`);
                     }
-                    await RequestResponseCacheService.set(`${ele.NAME}-variables`,
-                        { Secrets: tenantSecrets },
+                    await RequestResponseCacheService.set(`${ele.NAME}-bot-variables`,
+                        tenantSecrets,
                         "config"
                     );
                 }

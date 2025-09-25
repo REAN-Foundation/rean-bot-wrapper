@@ -305,9 +305,9 @@ export interface FormsIntegrations {
 }
 
 export interface FormsSettings {
-        Integrations  : FormsIntegrations,
-        OfflineSupport: boolean,
-        FieldApp      : boolean
+    Integrations  : FormsIntegrations,
+    OfflineSupport: boolean,
+    FieldApp      : boolean
 }
 
 export interface ConsentSettings {

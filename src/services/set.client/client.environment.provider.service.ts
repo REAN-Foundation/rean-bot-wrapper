@@ -24,10 +24,10 @@ export class ClientEnvironmentProviderService {
     async getClientEnvironmentVariable(variablename){
 
         // console.log("getClientEnvironmentVariable",[this.clientName + "_" + variablename]);
-        const key = `${this.clientName}-variables`;
+        const key = `${this.clientName}-bot-variables`;
         const clientVariables = await RequestResponseCacheService.get(key, "config");
-        if (clientVariables && clientVariables.Secrets && clientVariables.Secrets[variablename]){
-            return clientVariables.Secrets[variablename];
+        if (clientVariables && clientVariables[variablename]){
+            return clientVariables[variablename];
         }
         return undefined;
     }
