@@ -110,7 +110,7 @@ export class WhatsappPostResponseFunctionalities{
 
     };
 
-    interactivelistResponseFormat = (response_format:Iresponse,payload) =>{
+    interactivelistResponseFormat = async (response_format:Iresponse,payload) =>{
         console.log(`........From interactivelistResponseFormat ${response_format} payload: ${JSON.stringify(payload, null, 2)}`, );
         const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
         const rows_meta = [];
@@ -121,8 +121,10 @@ export class WhatsappPostResponseFunctionalities{
         } else {
             header = "Select ";
         }
+        const languageForSession = await this.userLanguage.getPreferredLanguageofSession(response_format.sessionId);
 
         let count_meta = 0;
+        let buttonText = ["Select"];
         for (const lit of list_meta){
             let id_meta = count_meta;
             let description_meta = "";
@@ -132,9 +134,18 @@ export class WhatsappPostResponseFunctionalities{
             if (lit.structValue.fields.id){
                 id_meta = lit.structValue.fields.id.stringValue;
             }
+            const title = lit.structValue.fields.title.stringValue;
+            let translatedTitle = [title];
+            let translatedDescription = [description_meta];
+            if (languageForSession) {
+                translatedTitle = await this._translateService.translateResponse([title],languageForSession);
+                translatedDescription = await this._translateService.translateResponse([description_meta], languageForSession);
+                buttonText = await this._translateService.translateResponse(buttonText, languageForSession);
+            }
+
             const temp_meta = {
                 "id"          : id_meta,
-                "title"       : lit.structValue.fields.title.stringValue,
+                "title"       : translatedTitle[0],
                 "description" : description_meta
             };
             rows_meta.push(temp_meta);
@@ -150,7 +161,7 @@ export class WhatsappPostResponseFunctionalities{
                 "text" : response_format.messageText
             },
             "action" : {
-                "button"   : "Select From Here",
+                "button"   : buttonText[0],
                 "sections" : [
                     {
                         "rows" : rows_meta

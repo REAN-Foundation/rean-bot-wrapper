@@ -114,12 +114,12 @@ export class handleRequestservice {
         const languageForSession = languagefromdb[languagefromdb.length - 1].preferredLanguage;
         const customTranslations = [this.getTranslatedResponse(message_from_nlp, languageForSession)];
         if (customTranslations[0] === null) {
-            let googleTranslate;
-            if (messageHandler === "Assessments") {
-                googleTranslate = message_from_nlp.getText();
-            } else {
-                googleTranslate = await this.translateService.processdialogflowmessage(message_from_nlp, languageForSession);
-            }
+            // let googleTranslate;
+            // if (messageHandler === "Assessments") {
+            // googleTranslate = message_from_nlp.getText();
+            // } else {
+            const googleTranslate = await this.translateService.processdialogflowmessage(message_from_nlp, languageForSession);
+            // }
 
             console.log("googleTranslate", googleTranslate);
             return googleTranslate;
@@ -153,7 +153,7 @@ export class handleRequestservice {
             const userCacheData = await CacheMemory.get(key);
             if (userCacheData) {
                 console.log("user response",metaData.messageBody);
-                message_from_nlp = await this.serveAssessmentService.answerQuestion(eventObj, metaData.platformId, metaData.originalMessage, userCacheData, metaData.platform, true,metaData.intent);
+                message_from_nlp = await this.serveAssessmentService.answerQuestion(eventObj, metaData.platformId, metaData.originalMessage, userCacheData, metaData.platform, true,metaData.intent, metaData);
                 console.log(`after calling answer question service, message: ${message_from_nlp.getText()}`);
             } else {
                 outgoingMessage.MetaData["eventObj"] = eventObj;

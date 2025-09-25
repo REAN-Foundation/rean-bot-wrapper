@@ -137,25 +137,41 @@ export class DecisionRouter {
             (await this.entityManagerProvider.getEntityManager(this.environmentProviderService))
                 .getRepository(AssessmentSessionLogs);
 
-            let assessmentResponse = await AssessmentSession.findOne({
-                where : {
-                    userMessageId : messageContextId
-                },
-                order : [['createdAt', 'DESC']],
-            });
+            let assessmentResponse = null;
+            if (messageContextId) {
+                assessmentResponse = await AssessmentSession.findOne({
+                    where : {
+                        userMessageId : messageContextId
+                    },
+                    order : [['createdAt', 'DESC']],
+                });
 
-            // Add null check for assessmentResponse
-            if (!assessmentResponse){
+                // Add null check for assessmentResponse
+                if (!assessmentResponse){
+                    assessmentResponse = await AssessmentSession.findOne({
+                        where : {
+                            userPlatformId : messageBody.platformId
+                        },
+                        order : [['createdAt', 'DESC']],
+                    });
+                }
+            } else {
                 assessmentResponse = await AssessmentSession.findOne({
                     where : {
                         userPlatformId : messageBody.platformId
                     },
-                    order : [['createdAt', 'DESC']],
+                    order : [['createdAt', 'DESC']]
                 });
-          
+            }
+
+
+            let key;
+            if (assessmentResponse) {
+                key = `${messageBody.platformId}:NextQuestionFlag:${assessmentResponse.assesmentId}`;
+            } else {
+                key = '';
             }
           
-            const key = `${messageBody.platformId}:NextQuestionFlag:${assessmentResponse.assesmentId}`;
             const nextQuestionFlag = await CacheMemory.get(key);
 
             // Currently will only support the assessment start through buttons

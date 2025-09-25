@@ -171,6 +171,7 @@ export class AssessmentService {
                         IMPORTANT: Only accept actual measurement values or relevant responses.Do NOT accept generic confirmation responses like "ok", "yes", "correct", "right", "that's right", "sounds good", "looks good", "fine", "good", "alright", "sure", "yep", "yeah" as valid responses. Users must provide actual measurement values. 
 
                         For other fields: Check if user message is relevant to the field identifier and provide true or false with a short explanation.
+                        The field identifier is of the following structure "General:PersonalProfile:Name". The ":" represents seperation and be intelligent to validate accordingly.
 
                         The format of the output should be a JSON with the keys and values as text only. Below is format of the JSON
                             ONLY PROVIDE THE JSON AND NOTHING ELSE IN THE OUTPUT
@@ -219,6 +220,14 @@ export class AssessmentService {
                             option.ProviderGivenCode.toLowerCase() === messageBody.originalMessage.toLowerCase()
                     )
                     : false;
+                if (!flag) {
+                    flag = options?.length
+                        ? options.some(
+                            (option) =>
+                                option.ProviderGivenCode.toLowerCase() === messageBody.messageBody.toLowerCase()
+                        )
+                        : false;
+                }
                 break;
             }
             default:
