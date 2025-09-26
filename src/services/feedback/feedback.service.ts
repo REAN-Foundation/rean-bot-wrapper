@@ -10,6 +10,7 @@ import { CalorieInfo } from '../../models/calorie.info.model';
 import { Op } from 'sequelize';
 import { ClickUpTask } from '../clickup/clickup.task';
 import { EntityManagerProvider } from '../entity.manager.provider.service';
+import { SystemGeneratedMessagesService } from '../system.generated.message.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export  class FeedbackService implements feedbackInterface {
@@ -18,7 +19,8 @@ export  class FeedbackService implements feedbackInterface {
         @inject(SlackMessageService) private slackMessageService?: SlackMessageService,
         @inject(ClickUpTask) private clickuptask?: ClickUpTask,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
-        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(SystemGeneratedMessagesService) private systemGeneratedMessageService?: SystemGeneratedMessagesService
     ){}
 
     async recordFeedback(message,contextID,tag)
@@ -82,7 +84,10 @@ export  class FeedbackService implements feedbackInterface {
                     }
                     if (await humanHandoff.checkTime() === "false"){
                         let reply = "";
-                        if (clientEnvironmentProviderService.getClientEnvironmentVariable("NEGATIVE_FEEDBACK_MESSAGE")) {
+                        const customNegativeFeedbackMessage = await this.systemGeneratedMessageService.getMessage("NEGATIVE_FEEDBACK_MESSAGE");
+                        if (customNegativeFeedbackMessage) {
+                            reply = customNegativeFeedbackMessage;
+                        } else if (clientEnvironmentProviderService.getClientEnvironmentVariable("NEGATIVE_FEEDBACK_MESSAGE")) {
                             reply = clientEnvironmentProviderService.getClientEnvironmentVariable("NEGATIVE_FEEDBACK_MESSAGE");
                         } else {
                             reply = "We're genuinely sorry to hear that you weren't satisfied with the assistance provided by our chatbot. Your feedback is invaluable in helping us improve our services. our team of experts will provide you with a satisfactory resolution as quickly as possible.";
@@ -155,7 +160,14 @@ export  class FeedbackService implements feedbackInterface {
                 const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(ChatMessage);
                 const listOfUserRequestdata = await chatMessageRepository.findAll({ where: { userPlatformID: userId } });
                 await chatMessageRepository.update({ feedbackType: "Positive Feedback" },{ where: { id: listOfUserRequestdata[listOfUserRequestdata.length - 1].id } });
-                const replyToSend = this.clientEnvironmentProviderService.getClientEnvironmentVariable("POSITIVE_FEEDBACK_MESSAGE");
+                const customPositiveFeedbackMessage = await this.systemGeneratedMessageService.getMessage("POSITIVE_FEEDBACK_MESSAGE");
+                let replyToSend;
+                if (customPositiveFeedbackMessage) {
+                    replyToSend = customPositiveFeedbackMessage;
+                } else {
+                    replyToSend = this.clientEnvironmentProviderService.getClientEnvironmentVariable("POSITIVE_FEEDBACK_MESSAGE");
+                }
+                
                 let reply;
                 if (replyToSend) {
                     reply = replyToSend;
