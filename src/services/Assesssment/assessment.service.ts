@@ -166,6 +166,8 @@ export class AssessmentService {
                         Pulse Rate: "72", "72 bpm", "72bpm", "72 BPM", "72 beats per minute"  
                         Weight: "68.5", "68.5 kg", "68.5kg", "68.5 KG", "68.5 kilograms"
 
+                        For General:PersonalProfile:Name, JUST VALIDATE IF THE USER INPUT IS A VALID NAME. (ESPECIALLY INDIAN NAMES)
+
                         Numeric values without units are valid (assume: kg for weight, bpm for pulse, mmHg for blood pressure).
 
                         IMPORTANT: Only accept actual measurement values or relevant responses.Do NOT accept generic confirmation responses like "ok", "yes", "correct", "right", "that's right", "sounds good", "looks good", "fine", "good", "alright", "sure", "yep", "yeah" as valid responses. Users must provide actual measurement values. 
@@ -224,7 +226,7 @@ export class AssessmentService {
                     flag = options?.length
                         ? options.some(
                             (option) =>
-                                option.ProviderGivenCode.toLowerCase() === messageBody.messageBody.toLowerCase()
+                                option.ProviderGivenCode.toLowerCase() === messageBody.intent.toLowerCase()
                         )
                         : false;
                 }

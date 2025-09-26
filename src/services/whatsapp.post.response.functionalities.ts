@@ -9,6 +9,7 @@ import { inject, Lifecycle, scoped } from "tsyringe";
 import { MessageType } from "../domain.types/common.types";
 import { getFlowMessageParts } from "../utils/flow.helper";
 import { FlowActionType } from "../domain.types/message.type/flow.message.types";
+import { SystemGeneratedMessagesService } from "./system.generated.message.service";
 
 @scoped(Lifecycle.ContainerScoped)
 export class WhatsappPostResponseFunctionalities{
@@ -17,7 +18,8 @@ export class WhatsappPostResponseFunctionalities{
         @inject(HandleMessagetypePayload) private handleMessagetypePayload?: HandleMessagetypePayload,
         @inject(UserLanguage) private userLanguage?: UserLanguage,
         @inject(translateService) private _translateService?: translateService,
-        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(SystemGeneratedMessagesService) private systemGeneratedMessages?: SystemGeneratedMessagesService
     ) {}
 
     textResponseFormat = (response_format:Iresponse,payload) =>{
@@ -119,28 +121,34 @@ export class WhatsappPostResponseFunctionalities{
         if (payload.fields.header){
             header = payload.fields.header.stringValue;
         } else {
-            header = "Select ";
+            header = "Select";
+        }
+        
+        let buttonText = ["Please Choose"];
+        if (payload.fields.selectButtonText) {
+            buttonText = [payload.fields.selectButtonText.stringValue];
         }
         const languageForSession = await this.userLanguage.getPreferredLanguageofSession(response_format.sessionId);
 
         let count_meta = 0;
-        let buttonText = ["Select"];
+        buttonText = await this._translateService.translateResponse(buttonText, languageForSession);
         for (const lit of list_meta){
             let id_meta = count_meta;
             let description_meta = "";
             if (lit.structValue.fields.description){
                 description_meta = lit.structValue.fields.description.stringValue;
+                let translatedDescription = [description_meta];
+                translatedDescription = await this._translateService.translateResponse([description_meta], languageForSession);
             }
             if (lit.structValue.fields.id){
                 id_meta = lit.structValue.fields.id.stringValue;
             }
             const title = lit.structValue.fields.title.stringValue;
             let translatedTitle = [title];
-            let translatedDescription = [description_meta];
             if (languageForSession) {
                 translatedTitle = await this._translateService.translateResponse([title],languageForSession);
-                translatedDescription = await this._translateService.translateResponse([description_meta], languageForSession);
-                buttonText = await this._translateService.translateResponse(buttonText, languageForSession);
+                
+
             }
 
             const temp_meta = {

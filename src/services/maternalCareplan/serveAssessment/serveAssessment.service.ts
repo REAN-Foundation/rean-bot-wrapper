@@ -435,8 +435,8 @@ export class ServeAssessmentService {
                 ? options.find(
                     (option) =>
                         option.ProviderGivenCode.toLowerCase() === metaData.intent.toLowerCase()
-                )?.Sequence ?? null
-                : null;
+                )?.Sequence ?? userResponse
+                : userResponse;
         }
         return sequence;
     }
