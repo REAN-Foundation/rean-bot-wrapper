@@ -92,12 +92,13 @@ export class LogsQAService {
         }
 
     }
+    
     async sensitivityMapper(sensitivity_flag: string) {
         const sensitivityPriorityMap: Record<string, number> = {
-            "Critical / Urgent" : 1,
-            "High Sensitivity"  : 2,
-            "Sensitive but Safe": 3,
-            "Not sensitive"     : 4
+            "Critical / Urgent"  : 1,
+            "High Sensitivity"   : 2,
+            "Sensitive but Safe" : 3,
+            "Not sensitive"      : 4
         };
 
         const normalizedFlag = sensitivity_flag?.trim();

@@ -121,7 +121,7 @@ export class WhatsappPostResponseFunctionalities{
         if (payload.fields.header){
             header = payload.fields.header.stringValue;
         } else {
-            header = "Select";
+            header = "Please Select";
         }
         
         let buttonText = ["Please Choose"];
@@ -132,6 +132,8 @@ export class WhatsappPostResponseFunctionalities{
 
         let count_meta = 0;
         buttonText = await this._translateService.translateResponse(buttonText, languageForSession);
+        const translatedHeader = await this._translateService.translateResponse([header], languageForSession);
+        header = translatedHeader[0];
         for (const lit of list_meta){
             let id_meta = count_meta;
             let description_meta = "";

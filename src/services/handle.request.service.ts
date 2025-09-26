@@ -114,12 +114,17 @@ export class handleRequestservice {
         const languageForSession = languagefromdb[languagefromdb.length - 1].preferredLanguage;
         const customTranslations = [this.getTranslatedResponse(message_from_nlp, languageForSession)];
         if (customTranslations[0] === null) {
-            // let googleTranslate;
-            // if (messageHandler === "Assessments") {
-            // googleTranslate = message_from_nlp.getText();
-            // } else {
-            const googleTranslate = await this.translateService.processdialogflowmessage(message_from_nlp, languageForSession);
-            // }
+            let googleTranslate;
+            if (messageHandler === "QnA") {
+                if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_TRANSLATE_SERVICE") === "llm") {
+                    googleTranslate = message_from_nlp.getText();
+                }
+                else {
+                    googleTranslate = await this.translateService.processdialogflowmessage(message_from_nlp, languageForSession);
+                }
+            } else {
+                googleTranslate = await this.translateService.processdialogflowmessage(message_from_nlp, languageForSession);
+            }
 
             console.log("googleTranslate", googleTranslate);
             return googleTranslate;
