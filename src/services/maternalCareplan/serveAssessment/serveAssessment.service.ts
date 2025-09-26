@@ -21,6 +21,7 @@ import { SystemGeneratedMessagesService } from '../../../services/system.generat
 import { AssessmentIdentifiers } from '../../../models/assessment/assessment.identifiers.model';
 import { CountryCodeService } from '../../../utils/phone.number.formatting';
 import { UserInfoService } from '../../../services/user.info/user.info.service';
+import { UserLanguage } from '../../../services/set.language';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ServeAssessmentService {
@@ -34,7 +35,8 @@ export class ServeAssessmentService {
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(SystemGeneratedMessagesService) private systemGeneratedMessageService?: SystemGeneratedMessagesService,
         @inject(CountryCodeService ) private countryCodeService ?:CountryCodeService,
-        @inject(UserInfoService) private userInfoService ?: UserInfoService
+        @inject(UserInfoService) private userInfoService ?: UserInfoService,
+        @inject(UserLanguage) private userLanguage ?: UserLanguage
     ){}
 
     async startAssessment (platformUserId:any, channel: any, userTaskData: any, assessmentLanguage: string = null) {
@@ -43,6 +45,8 @@ export class ServeAssessmentService {
             const userTask = JSON.parse(userTaskData);
             if (!assessmentLanguage) {
                 assessmentLanguage = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+            } else {
+                await this.userLanguage.updateUserPreferredLanguage(platformUserId, assessmentLanguage.toLocaleLowerCase());
             }
 
             // const assessmentId = userTask.Action.Assessment.id;
@@ -66,6 +70,12 @@ export class ServeAssessmentService {
                 updatedPayload["channel"] = channel;
                 updatedPayload["templateName"] = questionData.TemplateName;
                 let languageForSession = await this.translate.detectUsersLanguage( platformUserId );
+                if (assessmentLanguage !== languageForSession) {
+                    updatedPayload["messageText"] = await this.translate.translatestring(
+                        updatedPayload["messageText"],
+                        languageForSession
+                    );
+                }
                 if (questionData.TemplateVariables[`${assessmentLanguage}`]) {
                     updatedPayload["variables"] = questionData.TemplateVariables[`${assessmentLanguage}`];
                     updatedPayload["languageForSession"] = assessmentLanguage;
@@ -138,7 +148,7 @@ export class ServeAssessmentService {
         }
     }
 
-    answerQuestion = async (eventObj, userId: string, userResponse: string, userContextMessageId: string, channel: string, doSend: boolean, intent = null ) => {
+    answerQuestion = async (eventObj, userId: string, userResponse: string, userContextMessageId: string, channel: string, doSend: boolean, intent = null, metaData = null) => {
         // eslint-disable-next-line max-len
         try {
 
@@ -149,7 +159,7 @@ export class ServeAssessmentService {
                 await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)
             ).getRepository(AssessmentIdentifiers);
             const apiURL = `clinical/assessments/${assessmentSession.assesmentId}/questions/${assessmentSession.assesmentNodeId}/answer`;
-            const userAnswer = await this.getAnswer(userResponse, assessmentSession.assesmentId, assessmentSession.assesmentNodeId);
+            const userAnswer = await this.getAnswer(userResponse, assessmentSession.assesmentId, assessmentSession.assesmentNodeId, metaData);
 
             // const userAnswer = await this.getAnswerFromIntent(userResponse);
             assessmentSession.userResponse = userAnswer;
@@ -409,17 +419,25 @@ export class ServeAssessmentService {
         // }
     }
 
-    public async getAnswer( userResponse: string, assessmentId: string, assessmentNodeId: string) {
+    public async getAnswer( userResponse: string, assessmentId: string, assessmentNodeId: string, metaData = null) {
         const apiURL = `clinical/assessments/${assessmentId}/questions/${assessmentNodeId}`;
         const response = await this.needleService.needleRequestForREAN("get", apiURL, null, null);
         const options = response.Data.Question.Options;
 
-        const sequence = options?.length
+        let sequence = options?.length
             ? options.find(
                 (option) =>
                     option.ProviderGivenCode.toLowerCase() === userResponse.toLowerCase()
-            )?.Sequence ?? userResponse
-            : userResponse;
+            )?.Sequence ?? null
+            : null;
+        if (!sequence) {
+            sequence = options?.length
+                ? options.find(
+                    (option) =>
+                        option.ProviderGivenCode.toLowerCase() === metaData.intent.toLowerCase()
+                )?.Sequence ?? userResponse
+                : userResponse;
+        }
         return sequence;
     }
 

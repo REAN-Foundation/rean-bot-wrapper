@@ -36,7 +36,7 @@ import { kerotoplastyConditionIdentificationListener } from './intentListeners/k
 import { kerotoplastyEyeQualityListener } from './intentListeners/kerotoplasty.imageQuality.listener';
 import { BloodWarriorMenu } from './intentListeners/bloodWarrior/menu.listener';
 import { RaiseBloodDonationRequest } from './intentListeners/bloodWarrior/raise.request.listener';
-import { CustomWelcomeIntent } from './intentListeners/custom.welcome.listener';
+import { CustomWelcomeIntent, WelcomeWithBasicAssessmentListener } from './intentListeners/custom.welcome.listener';
 import { CustomLanguageListener } from './intentListeners/custom.language.listener';
 import { BloodWarriorVolunteer } from './intentListeners/bloodWarrior/volunteer.listener';
 import { BloodBridgeStatusListener } from './intentListeners/bloodWarrior/blood.bridge.status.listener';
@@ -113,6 +113,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('Custom Welcome Intent', CustomWelcomeIntent);
         IntentEmitter.registerListener('Default Welcome Intent', WelcomeIntentListener);
         IntentEmitter.registerListener('Custom Language - custom', CustomLanguageListener);
+        IntentEmitter.registerListener('Welcome With Basic Assessment', WelcomeWithBasicAssessmentListener);
         IntentEmitter.registerListener('Change Language', LanguageChangeListener);
 
         IntentEmitter.registerListener('life - no', getSymptomAssessment);
