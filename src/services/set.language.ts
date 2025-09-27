@@ -104,12 +104,24 @@ export class UserLanguage {
         let detected_language:string;
         if (messageType !== "location"){
             detected_language = await this._translateService.detectLanguage(message);
+            if (detected_language === "hi-Latn") {
+                detected_language = "hi";
+            }
         }
         else {
             console.log("it was latlong");
             detected_language = "en";
         }
         return detected_language;
+    }
+
+    async updateUserPreferredLanguage (userPlatformId: string, languageCode: string) {
+        const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
+        await chatSessionRepository.update({ preferredLanguage: languageCode }, {
+            where : {
+                userPlatformID : userPlatformId
+            }
+        });
     }
 
 }
