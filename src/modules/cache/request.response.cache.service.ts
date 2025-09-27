@@ -23,7 +23,7 @@ export class RequestResponseCacheService {
     static async get(key: string, strategy?: string): Promise<any | undefined> {
         try {
             console.log('CacheService.get', key, strategy);
-        
+
             const entry = await RequestResponseCacheService._cache.get(key);
             if (!entry) return undefined;
 
@@ -56,6 +56,7 @@ export class RequestResponseCacheService {
     // Enhanced set with strategy support
     static async set(key: string, value: any, strategy?: string, customOptions?: CacheOptions): Promise<void> {
         try {
+            console.log('Value to be chached:', value);
             const strategyOptions = strategy ? StrategyManager.getStrategy(strategy) || {} : {};
             const options: CacheOptions = { ...strategyOptions, ...(customOptions || {}) };
             await RequestResponseCacheService._cache.set(key, value, options);
@@ -149,7 +150,7 @@ export class RequestResponseCacheService {
                 const finalOptions = { ...strategyOptions, ...options };
                 return { key, value, options: finalOptions };
             });
-        
+
             await RequestResponseCacheService._cache.setMany(cacheEntries);
         } catch (error) {
             console.error('Error in CacheService.setMany:', error);
@@ -218,7 +219,7 @@ export class RequestResponseCacheService {
     }> {
         try {
             const metrics = await RequestResponseCacheService.getMetrics();
-        
+
             return {
                 metrics,
                 strategies       : StrategyManager.getAllStrategies(),

@@ -106,7 +106,14 @@ export default class Application {
 
             for (const ele of secretObjectList) {
                 if (!ele.NAME) {
-                    const derivedTenantName = ele.split('-')[1].toUpperCase();
+                    const parts = ele.split("-");
+
+                    // Always skip the first and last
+                    const tenantParts = parts.slice(1, -1);
+
+                    // Join back with "-" and uppercase
+                    const derivedTenantName = tenantParts.join("-").toUpperCase();
+
                     if (!this.clientsList.includes(derivedTenantName)) {
                         this.clientsList.push(derivedTenantName);
                     }
