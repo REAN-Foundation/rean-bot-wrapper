@@ -41,3 +41,47 @@ export const CustomWelcomeIntent = async (intent, eventObj) => {
         throw new Error("Custom welcome listener error");
     }
 };
+
+export const WelcomeWithBasicAssessmentListener = async (Intent, eventObj) => {
+    try {
+        Logger.instance()
+            .log('Welcome With Basic Assessment Listener');
+
+        let response = null;
+
+        const welcomeService = eventObj.container.resolve(CustomWelcomeService);
+
+        const payload = eventObj.body.originalDetectIntentRequest.payload;
+        const checkSession = await welcomeService.checkSession(payload.userId);
+
+        // if (checkSession.sessionFlag === "nosession") {
+        //     response = {
+        //         "followupEventInput" : {
+        //             "name"         : "customlanguage",
+        //             "languageCode" : "en-US"
+        //         }
+        //     };
+        // } else if (checkSession.sessionFlag === "noinfo") {
+        if (checkSession.sessionFlag === "nosession" || checkSession.sessionFlag === "noinfo"){
+            response = {
+                "followupEventInput" : {
+                    "name"         : "DefaultWelcomeIntent",
+                    "languageCode" : "en-US"
+                }
+            };
+        } else {
+            response = {
+                "followupEventInput" : {
+                    "name"         : "WelcomeMessage",
+                    "langiageCode" : "en-US" 
+                }
+            };
+        }
+
+        return response;
+    } catch (error) {
+        Logger.instance()
+            .log_error(error.message, 500, 'Welcome With Basic Assessment Listener Error');
+        throw new Error("Welcome with Basic Assessment Error");
+    }
+};

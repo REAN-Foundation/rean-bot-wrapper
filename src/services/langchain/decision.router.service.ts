@@ -137,25 +137,46 @@ export class DecisionRouter {
             (await this.entityManagerProvider.getEntityManager(this.environmentProviderService))
                 .getRepository(AssessmentSessionLogs);
 
-            let assessmentResponse = await AssessmentSession.findOne({
-                where : {
-                    userMessageId : messageContextId
-                },
-                order : [['createdAt', 'DESC']],
-            });
+            const intentRepository = (
+                (await this.entityManagerProvider.getEntityManager(this.environmentProviderService))
+                    .getRepository(Intents)
+            );
 
-            // Add null check for assessmentResponse
-            if (!assessmentResponse){
+            let assessmentResponse = null;
+            if (messageContextId) {
+                assessmentResponse = await AssessmentSession.findOne({
+                    where : {
+                        userMessageId : messageContextId
+                    },
+                    order : [['createdAt', 'DESC']],
+                });
+
+                // Add null check for assessmentResponse
+                if (!assessmentResponse){
+                    assessmentResponse = await AssessmentSession.findOne({
+                        where : {
+                            userPlatformId : messageBody.platformId
+                        },
+                        order : [['createdAt', 'DESC']],
+                    });
+                }
+            } else {
                 assessmentResponse = await AssessmentSession.findOne({
                     where : {
                         userPlatformId : messageBody.platformId
                     },
-                    order : [['createdAt', 'DESC']],
+                    order : [['createdAt', 'DESC']]
                 });
-          
+            }
+
+
+            let key;
+            if (assessmentResponse) {
+                key = `${messageBody.platformId}:NextQuestionFlag:${assessmentResponse.assesmentId}`;
+            } else {
+                key = '';
             }
           
-            const key = `${messageBody.platformId}:NextQuestionFlag:${assessmentResponse.assesmentId}`;
             const nextQuestionFlag = await CacheMemory.get(key);
 
             // Currently will only support the assessment start through buttons
@@ -164,10 +185,6 @@ export class DecisionRouter {
                 messageBody.intent &&
                 !nextQuestionFlag
             ) {
-                const intentRepository = (
-                    (await this.entityManagerProvider.getEntityManager(this.environmentProviderService))
-                        .getRepository(Intents)
-                );
         
                 const matchingIntents = await intentRepository.findOne({
                     where : {
@@ -179,10 +196,6 @@ export class DecisionRouter {
 
                     // we will call the reancare api here
                     const assessmentCode = matchingIntents.dataValues.code;
-                    
-                    // const apiURL = `clinical/assessments/${assessmentCode}/start`;
-                    // const responseFromAssessmentService = await this.needleService.needleRequestForREAN("post", apiURL, null, {});
-                    // assessmentData.MetaData = responseFromAssessmentService;
                     assessmentData.AssessmentId = assessmentCode;
                     assessmentData.AssessmentName = matchingIntents.dataValues.name;
                     assessmentData.MetaData.assessmentStart = true;
@@ -206,19 +219,9 @@ export class DecisionRouter {
             }
 
             if (assessmentData.AssessmentFlag && !assessmentData.MetaData.assessmentStart) {
-                // const AssessmentSession =
-                // (await this.entityManagerProvider.getEntityManager(this.environmentProviderService))
-                //     .getRepository(AssessmentSessionLogs);
                 const AssessmentIdentifiersRepo = (
                     await this.entityManagerProvider.getEntityManager(this.environmentProviderService)
                 ).getRepository(AssessmentIdentifiers);
-                
-                // const assessmentResponse = await AssessmentSession.findOne({
-                //     where : {
-                //         userPlatformId : messageBody.platformId
-                //     },
-                //     order : [['createdAt', 'DESC']],
-                // });
 
                 // Add null check for assessmentResponse
                 if (!assessmentResponse) {
@@ -252,32 +255,34 @@ export class DecisionRouter {
 
                 if (!validationFlag) {
                     assessmentData.AssessmentFlag = false;
+
+                    if (
+                        messageBody.contextId && 
+                        messageBody.intent
+                    ) {
+                        const matchingIntents = await intentRepository.findOne({
+                            where : {
+                                code : intent
+                            }
+                        });
+
+                        if (matchingIntents) {
+
+                            // we will call the reancare api here
+                            const assessmentCode = matchingIntents.dataValues.code;
+                            assessmentData.AssessmentId = assessmentCode;
+                            assessmentData.AssessmentName = matchingIntents.dataValues.name;
+                            assessmentData.MetaData.assessmentStart = true;
+                            assessmentData.AssessmentFlag = true;
+                        } else {
+
+                            // here we will create the false flag and return object
+                            assessmentData.AssessmentFlag = false;
+                        }
+                    }
                 }
             
             }
-
-            // Check if message is part of assessment
-            // const chatMessageRepository = (
-            //     await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-            // const botMessages = await chatMessageRepository.findAll({
-            //     where : {
-            //         userPlatformId : messageBody.platformId,
-            //         platform       : channel
-            //     },
-            //     order : [ [ 'createdAt', 'ASC' ] ]
-            // });
-
-            // const lastMessage = await chatMessageRepository.findOne({
-            //     where : {
-            //         userPlatformId : messageBody.platformId,
-            //         platform       : channel
-            //     },
-            //     order : [ [ 'createdAt', 'DESC'] ]
-            // });
-
-            //const assessmentInProgress = botMessages[botMessages.length - 3].messageFlag
-
-            // Implement further logic for checking if assessment.
 
             return assessmentData;
         } catch (error) {

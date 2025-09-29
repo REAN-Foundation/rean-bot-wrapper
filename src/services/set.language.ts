@@ -112,4 +112,13 @@ export class UserLanguage {
         return detected_language;
     }
 
+    async updateUserPreferredLanguage (userPlatformId: string, languageCode: string) {
+        const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
+        await chatSessionRepository.update({ preferredLanguage: languageCode }, {
+            where : {
+                userPlatformID : userPlatformId
+            }
+        });
+    }
+
 }

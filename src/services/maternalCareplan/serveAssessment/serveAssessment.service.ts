@@ -138,7 +138,7 @@ export class ServeAssessmentService {
         }
     }
 
-    answerQuestion = async (eventObj, userId: string, userResponse: string, userContextMessageId: string, channel: string, doSend: boolean, intent = null ) => {
+    answerQuestion = async (eventObj, userId: string, userResponse: string, userContextMessageId: string, channel: string, doSend: boolean, intent = null, metaData = null) => {
         // eslint-disable-next-line max-len
         try {
 
@@ -149,7 +149,7 @@ export class ServeAssessmentService {
                 await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)
             ).getRepository(AssessmentIdentifiers);
             const apiURL = `clinical/assessments/${assessmentSession.assesmentId}/questions/${assessmentSession.assesmentNodeId}/answer`;
-            const userAnswer = await this.getAnswer(userResponse, assessmentSession.assesmentId, assessmentSession.assesmentNodeId);
+            const userAnswer = await this.getAnswer(userResponse, assessmentSession.assesmentId, assessmentSession.assesmentNodeId, metaData);
 
             // const userAnswer = await this.getAnswerFromIntent(userResponse);
             assessmentSession.userResponse = userAnswer;
@@ -409,17 +409,25 @@ export class ServeAssessmentService {
         // }
     }
 
-    public async getAnswer( userResponse: string, assessmentId: string, assessmentNodeId: string) {
+    public async getAnswer( userResponse: string, assessmentId: string, assessmentNodeId: string, metaData = null) {
         const apiURL = `clinical/assessments/${assessmentId}/questions/${assessmentNodeId}`;
         const response = await this.needleService.needleRequestForREAN("get", apiURL, null, null);
         const options = response.Data.Question.Options;
 
-        const sequence = options?.length
+        let sequence = options?.length
             ? options.find(
                 (option) =>
                     option.ProviderGivenCode.toLowerCase() === userResponse.toLowerCase()
-            )?.Sequence ?? userResponse
-            : userResponse;
+            )?.Sequence ?? null
+            : null;
+        if (!sequence) {
+            sequence = options?.length
+                ? options.find(
+                    (option) =>
+                        option.ProviderGivenCode.toLowerCase() === metaData.intent.toLowerCase()
+                )?.Sequence ?? userResponse
+                : userResponse;
+        }
         return sequence;
     }
 
