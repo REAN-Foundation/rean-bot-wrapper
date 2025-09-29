@@ -191,7 +191,7 @@ export class AssessmentService {
                     const chain = promptTemplate.pipe(model);
 
                     const result = await chain.invoke({
-                        user_message     : messageBody.messageBody,
+                        user_message     : messageBody.originalMessage,
                         field_identifier : identifier
                     });
 
