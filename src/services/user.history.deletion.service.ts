@@ -52,6 +52,9 @@ export class UserHistoryDeletionService {
                     where: { autoIncrementalID: sessionId }
                 });
             }
+            await chatMessageRepo.destroy({
+                where: { chatSessionID: null, userPlatformID }
+            });
             await userInfoRepo.destroy({
                 where: { userPlatformID: userPlatformID }
             });
