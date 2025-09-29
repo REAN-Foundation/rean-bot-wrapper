@@ -28,11 +28,12 @@ export class WhatsappWatiPostResponseFunctionalities {
             const baseUrl = `${watiUrl}/api/v1/sendSessionMessage/${phoneNumber}?messageText=`;
             console.log("Sending Wati Text Response");
             const url = encodeURI(baseUrl + response_format.messageText);
+            const watiToken = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_TOKEN");
             const options = {
                 method  : 'POST',
                 url     : url,
                 headers : {
-                    Authorization : this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_TOKEN")
+                    Authorization : watiToken
                 }
             };
             const response = await axios.request(options).then(function (response){
@@ -305,5 +306,5 @@ export class WhatsappWatiPostResponseFunctionalities {
         const base64Data = Buffer.from(response.data, 'binary').toString('base64');
         return base64Data;
     };
-    
+
 }

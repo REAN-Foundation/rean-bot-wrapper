@@ -31,12 +31,13 @@ export class AwsSecretsManager {
         });
     }
 
-    async getSecrets() {
+    async getSecrets(ele) {
 
         const responseCredentials: any = await this.getCrossAccountCredentials();
         const region = process.env.region;
-        const secretNameList = process.env.SECRET_NAME_LIST.split(',');
-        const secretObjectList = [];
+
+        // const secretNameList = process.env.SECRET_NAME_LIST.split(',');
+        // const secretObjectList = [];
 
         // eslint-disable-next-line max-len
         const client = new AWS.SecretsManager({ region: region, accessKeyId: responseCredentials.accessKeyId, secretAccessKey: responseCredentials.secretAccessKey, sessionToken: responseCredentials.sessionToken });
@@ -71,15 +72,15 @@ export class AwsSecretsManager {
         //------------------------------------------------------
 
         // For the list of secrets, get the respective values and store as list of objects
-        for (const ele of secretNameList) {
-            // eslint-disable-next-line max-len
-            const responseSecretValue = await client.getSecretValue({ SecretId: ele }).promise()
-                .catch(err => (error = err));
-            const secretStringToObj = JSON.parse(responseSecretValue.SecretString);
-            secretObjectList.push(secretStringToObj);
-        }
+        // for (const ele of secretNameList) {
+        // eslint-disable-next-line max-len
+        const responseSecretValue = await client.getSecretValue({ SecretId: ele }).promise()
+            .catch(err => (error = err));
+        const secretStringToObj = JSON.parse(responseSecretValue.SecretString);
+        // secretObjectList.push(secretStringToObj);
+        // }
 
-        return secretObjectList;
+        return secretStringToObj;
     }
-    
+
 }

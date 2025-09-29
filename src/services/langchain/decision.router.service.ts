@@ -113,7 +113,7 @@ export class DecisionRouter {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async checkAssessment(messageBody: Imessage, channel: string) {
         try {
-            
+
             const assessmentData = {
                 AssessmentId   : '',
                 AssessmentName : '',
@@ -171,7 +171,7 @@ export class DecisionRouter {
             } else {
                 key = '';
             }
-          
+
             const nextQuestionFlag = await CacheMemory.get(key);
 
             // Currently will only support the assessment start through buttons
@@ -184,7 +184,7 @@ export class DecisionRouter {
                     (await this.entityManagerProvider.getEntityManager(this.environmentProviderService))
                         .getRepository(Intents)
                 );
-        
+
                 const matchingIntents = await intentRepository.findOne({
                     where : {
                         code : intent
@@ -195,7 +195,7 @@ export class DecisionRouter {
 
                     // we will call the reancare api here
                     const assessmentCode = matchingIntents.dataValues.code;
-                    
+
                     // const apiURL = `clinical/assessments/${assessmentCode}/start`;
                     // const responseFromAssessmentService = await this.needleService.needleRequestForREAN("post", apiURL, null, {});
                     // assessmentData.MetaData = responseFromAssessmentService;
@@ -213,7 +213,7 @@ export class DecisionRouter {
                     if (nextQuestionFlag === true) {
                         assessmentData.AssessmentFlag = true;
                         assessmentData.AssessmentId = assessmentResponse.assesmentId;
-                
+
                         // await CacheMemory.set(key, false);
                     }
                 } else {
@@ -228,7 +228,7 @@ export class DecisionRouter {
                 const AssessmentIdentifiersRepo = (
                     await this.entityManagerProvider.getEntityManager(this.environmentProviderService)
                 ).getRepository(AssessmentIdentifiers);
-                
+
                 // const assessmentResponse = await AssessmentSession.findOne({
                 //     where : {
                 //         userPlatformId : messageBody.platformId
@@ -269,7 +269,7 @@ export class DecisionRouter {
                 if (!validationFlag) {
                     assessmentData.AssessmentFlag = false;
                 }
-            
+
             }
 
             // Check if message is part of assessment
@@ -298,7 +298,7 @@ export class DecisionRouter {
             return assessmentData;
         } catch (error) {
             console.log('Error in checkAssessment:', error);
-            
+
             // Return default assessment data with flag set to false on error
             return {
                 AssessmentId   : '',
@@ -390,7 +390,7 @@ export class DecisionRouter {
 
     async getDecision(messageBody: Imessage, channel: string){
         try {
-            const workflowMode = this.environmentProviderService.getClientEnvironmentVariable("WORK_FLOW_MODE");
+            const workflowMode = await this.environmentProviderService.getClientEnvironmentVariable("WORK_FLOW_MODE");
             if (workflowMode === 'TRUE')
             {
                 this.outgoingMessage.MetaData = messageBody;

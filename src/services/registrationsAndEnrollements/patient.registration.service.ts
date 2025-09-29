@@ -38,7 +38,7 @@ export class Registration{
     ): Promise<string> {
         try {
             let obj: Record<string, any> | null = null;
-    
+
             // Build the object based on creation method
             if (creationMethod === "phoneNumber") {
                 obj = {
@@ -62,24 +62,24 @@ export class Registration{
             } else {
                 throw new Error(`Invalid creation method: ${creationMethod}`);
             }
-    
+
             // API Call
             const apiURL = `patients`;
             const response = await this.needleService.needleRequestForREAN("post", apiURL, null, obj,api_key);
-    
+
             // Return the User ID
             if (response?.Data?.Patient?.UserId) {
                 return response.Data.Patient.UserId;
             } else {
                 throw new Error(`Failed to register user. Invalid response format: ${JSON.stringify(response)}`);
             }
-            
+
         } catch (error: any) {
             console.error("Error in registerUserOnReanCare:", error.message || error);
             throw new Error(`Error in registerUserOnReanCare: ${error.message || error}`);
         }
     }
-    
+
     async wrapperRegistration(entityManagerProvider,userPlatformId,userPlatformName,platform,patientUserId){
         const contactListRepository =
         (await entityManagerProvider.getEntityManager(this.EnvironmentProviderService)).getRepository(ContactList);
@@ -103,11 +103,13 @@ export class Registration{
         channel: any,
         PlatformUserId: string,
         platformUserName: string,
-        password: string = process.env.USER_REGISTRATION_PASSWORD,
-        api_key:string = this.EnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY")
+        password: string = process.env.USER_REGISTRATION_PASSWORD
     ): Promise<{ patientUserId: string | null; statusCode: number; errorMessage?: string }> {
         try {
             let patientUserId = null;
+
+            const api_key = await this.EnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY");
+
             if (channel === "telegram" || channel === "Telegram") {
                 const result = await this.checkPatientExist(PlatformUserId, null);
                 if (result.Data.Patients.Items.length === 0) {
@@ -135,16 +137,20 @@ export class Registration{
             } else {
                 throw new Error("Channel not integrated");
             }
-    
+
             return { patientUserId, statusCode: 200 }; // Success case
         } catch (error: any) {
 
             // Log the error if necessary
             console.error(`Error in getPatientUserId: ${error.message}`);
-    
+
             // Re-throw the error to propagate it to the caller
             throw error;
         }
+    }
+
+    async getApiKey(){
+        return await this.EnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY");
     }
 
 }

@@ -58,7 +58,7 @@ export class demoBotService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async createIntent(excelData, userSessionId){
         console.log('Creating intents');
-        const dfBotGCPCredentials = JSON.parse(this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS"));
+        const dfBotGCPCredentials = JSON.parse(await this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS"));
         const GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
         const dialogflowApplicationCredentialsobj = dfBotGCPCredentials ? dfBotGCPCredentials : GCPCredentials;
         const options = {
@@ -66,9 +66,9 @@ export class demoBotService {
                 client_email : dialogflowApplicationCredentialsobj.client_email,
                 private_key  : dialogflowApplicationCredentialsobj.private_key,
             },
-            projectId : this.clientEnvironment.getClientEnvironmentVariable('DIALOGFLOW_PROJECT_ID')
+            projectId : await this.clientEnvironment.getClientEnvironmentVariable('DIALOGFLOW_PROJECT_ID')
         };
-        const projectIdFinal = this.clientEnvironment.getClientEnvironmentVariable('DIALOGFLOW_PROJECT_ID');
+        const projectIdFinal = await this.clientEnvironment.getClientEnvironmentVariable('DIALOGFLOW_PROJECT_ID');
 
         const intentsClient = new dialogflow.IntentsClient(options);
         const projectAgentPath = intentsClient.projectAgentPath(projectIdFinal);
@@ -107,12 +107,12 @@ export class demoBotService {
                     const part = {
                         text : messages[phrase]
                     };
-        
+
                     const trainingPhrase = {
                         type  : 'EXAMPLE',
                         parts : [part],
                     };
-        
+
                     trainingPhrases.push(trainingPhrase);
                 }
 
@@ -155,11 +155,11 @@ export class demoBotService {
         response_format.sessionId = sessionId;
         response_format.messageText = data;
         response_format.message_type = "text";
-        
+
         this._platformMessageService = eventObj.container.resolve(client);
         await this._platformMessageService.SendMediaMessage(response_format,null);
     }
-    
+
     async sleep(ms) {
         return new Promise((resolve) => {
             setTimeout(resolve, ms);

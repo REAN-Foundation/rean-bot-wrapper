@@ -35,7 +35,7 @@ export class ClickUpTask{
             let topic:any = null;
             if (postTopic){
                 topic = postTopic;
-                
+
             }
             else if (responseChatMessage?.length >= 1 ){
                 topic = responseChatMessage[responseChatMessage.length - 1].dataValues.messageContent;
@@ -82,13 +82,13 @@ export class ClickUpTask{
         try {
             const form = new FormData();
             const filename = crypto.randomBytes(16).toString('hex');
-            
+
             form.append(filename, '');
             form.append('attachment', fs.createReadStream(imageLink));
-            
+
             const headers = form.getHeaders();
             headers.Authorization = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
-            
+
             await axios({
                 method : 'post',
                 url    : `https://api.clickup.com/api/v2/task/${taskID}/attachment`,
@@ -143,18 +143,18 @@ export class ClickUpTask{
             if (priority != null) {
                 obj.priority = priority;
             }
-    
+
             await needle("put", updateTaskUrl, obj, options);
         }
         catch (error){
             console.log(error);
         }
-        
+
     }
 
     async updateTag(taskID: string, intent = '') {
         try {
-            const clientTags = JSON.parse(this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_TAGS"));
+            const clientTags = JSON.parse(await this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_TAGS"));
             if (clientTags) {
                 const exists = clientTags.includes(intent);
                 if (exists) {
@@ -171,7 +171,7 @@ export class ClickUpTask{
             console.log("Error while updating the clickup tags.");
         }
     }
-    
+
     async updateTagInFeedback(taskID: string, intent = '') {
         try {
             const updateTaskUrl = `https://api.clickup.com/api/v2/task/${taskID}/tag/${intent}`;

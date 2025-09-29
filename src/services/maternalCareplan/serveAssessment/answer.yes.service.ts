@@ -49,7 +49,7 @@ export class AnswerYesMsgService {
         } else {
             chatMessageId = eventObj.body.originalDetectIntentRequest.payload.contextId;
         }
-        const userReplyJsonUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("ASSESSMENT_USER_REPLY_JSON_URL");
+        const userReplyJsonUrl = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("ASSESSMENT_USER_REPLY_JSON_URL");
         if (userReplyJsonUrl)
         {
             const userResponses = await this.fetchJsonFile(userReplyJsonUrl);
@@ -80,7 +80,7 @@ export class AnswerYesMsgService {
         else {
             message = null;
         }
-        
+
         return message;
     }
 
@@ -104,7 +104,7 @@ export class AnswerYesMsgService {
         const seed = now.getTime();
         const min = 0;
         const max = maxNumber - 1; // 10 + 1 (to include 10)
-          
+
         // Use the seed to generate a random number
         const random = (seed % (max - min)) + min;
         return random;

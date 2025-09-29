@@ -34,9 +34,10 @@ export class WhatsappMessageService extends CommonWhatsappService {
         return this.messageFlow.send_manual_msg(msg, this);
     }
 
-    createRequestforWebhook(resolve, reject, apiKey) {
+    async createRequestforWebhook(resolve, reject, apiKey) {
+        const hostName = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST");
         const options = {
-            hostname : this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST"),
+            hostname : hostName,
             path     : '/v1/configs/webhook',
             method   : 'POST',
             headers  : {
@@ -113,7 +114,8 @@ export class WhatsappMessageService extends CommonWhatsappService {
     };
 
     SendWhatsappMessageOldNumber = async (contact, message) => {
-
+        const hostName = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST");
+        const apiKey = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY_OLD_NUMBER");
         return new Promise((resolve, reject) => {
             const postData = JSON.stringify({
                 'recipient_type' : 'individual',
@@ -125,12 +127,12 @@ export class WhatsappMessageService extends CommonWhatsappService {
             });
 
             const options = {
-                hostname : this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST"),
+                hostname : hostName,
                 path     : '/v1/messages',
                 method   : 'POST',
                 headers  : {
                     'Content-Type' : 'application/json',
-                    'D360-Api-Key' : this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY_OLD_NUMBER")
+                    'D360-Api-Key' : apiKey
                 }
             };
             const request = http.request(options, (response) => {
@@ -181,7 +183,7 @@ export class WhatsappMessageService extends CommonWhatsappService {
                     console.log("resp", resp.body);
                     resolve(resp.body);
                 });
-                
+
             }
             catch (error) {
                 console.log("error", error);
@@ -208,7 +210,7 @@ export class WhatsappMessageService extends CommonWhatsappService {
                     .catch(error => console.log("error on update", error));
                 return needleResp;
             }
-            
+
         }
     }
 

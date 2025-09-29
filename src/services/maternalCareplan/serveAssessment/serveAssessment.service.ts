@@ -44,7 +44,7 @@ export class ServeAssessmentService {
 
             const userTask = JSON.parse(userTaskData);
             if (!assessmentLanguage) {
-                assessmentLanguage = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+                assessmentLanguage = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
             } else {
                 await this.userLanguage.updateUserPreferredLanguage(platformUserId, assessmentLanguage.toLocaleLowerCase());
             }
@@ -411,7 +411,7 @@ export class ServeAssessmentService {
         const key = `${assessmentSession.userPlatformId}:Assessment:${assessmentSession.assesmentId}`;
 
         await CacheMemory.set(key, messageId);
-        
+
         // if (assessmentSession.userResponseType === "Text") {
         await this.updateMessageFlag(userId, messageId, chatMessageRepository, messageFlag);
         console.log("updated the message flag to assessment");

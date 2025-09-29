@@ -51,8 +51,8 @@ export class handleRequestservice {
         const translate_message = await this.translateService.translateMessage(message.type, message.messageBody, UserPlatformID);
 
         let message_from_nlp: IserviceResponseFunctionalities = null;
-        const nlpService = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_SERVICE");
-        const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+        const nlpService = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_SERVICE");
+        const clientName = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
 
         if (nlpService && nlpService === "openai") {
             message_from_nlp = await this.openAIResponseService.getOpenaiMessage(clientName, translate_message.message);
@@ -116,7 +116,7 @@ export class handleRequestservice {
         if (customTranslations[0] === null) {
             let googleTranslate;
             if (messageHandler === "QnA") {
-                if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_TRANSLATE_SERVICE") === "llm") {
+                if (await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_TRANSLATE_SERVICE") === "llm") {
                     googleTranslate = message_from_nlp.getText();
                 }
                 else {

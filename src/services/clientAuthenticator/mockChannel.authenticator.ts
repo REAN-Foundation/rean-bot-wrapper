@@ -10,7 +10,7 @@ export class MockChannelAuthenticator implements clientAuthenticator {
     ) {}
 
     get apiKey(): string {
-        return this.clientEnvironmentProviderService.getClientEnvironmentVariable("WEBHOOK_MOCK_CHANNEL_CLIENT_API_KEY");
+        return await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WEBHOOK_MOCK_CHANNEL_CLIENT_API_KEY");
     }
 
     authenticate(req: any) {
@@ -57,7 +57,7 @@ export class MockChannelAuthenticator implements clientAuthenticator {
 //             return;
 //         }
 //         throw new Error('Unable to authenticate.');
-        
+
 //     }
-    
+
 // }

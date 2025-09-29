@@ -31,13 +31,13 @@ export class DialogflowResponseService {
 
     getDialogflowMessage = async (message: string, platform: string = null, intent: string = null, completeMessage:Imessage = null ) => {
         try {
-            
-            const env_name = this.clientEnvironment.getClientEnvironmentVariable("NAME");
+
+            const env_name = await this.clientEnvironment.getClientEnvironmentVariable("NAME");
             if (env_name === "UNION"){
                 dialogflow = dialogflowv2;
             }
             const dialogflow_language = await this.getDialogflowLanguage();
-            
+
             const userId: string = completeMessage.platformId === null ? v4() : completeMessage.platformId;
             const location = completeMessage.latlong === null ? v4() : completeMessage.latlong;
 
@@ -47,7 +47,7 @@ export class DialogflowResponseService {
             let projectIdFinal = null;
 
             if (platform === "REAN_SUPPORT") {
-                const ReanAppGcpCredentials = JSON.parse(this.clientEnvironment.getClientEnvironmentVariable("REAN_APP_SUPPORT_GCP_PROJ_CREDENTIALS"));
+                const ReanAppGcpCredentials = JSON.parse(await this.clientEnvironment.getClientEnvironmentVariable("REAN_APP_SUPPORT_GCP_PROJ_CREDENTIALS"));
                 options = {
                     credentials : {
                         client_email : ReanAppGcpCredentials.client_email,
@@ -58,7 +58,7 @@ export class DialogflowResponseService {
                 projectIdFinal = this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_PROJECT_ID_REAN_APP");
 
             } else {
-                const dfBotGCPCredentials = JSON.parse(this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS"));
+                const dfBotGCPCredentials = JSON.parse(await this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS"));
                 const GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
                 const dialogflowApplicationCredentialsobj = dfBotGCPCredentials ? dfBotGCPCredentials : GCPCredentials;
                 options = {

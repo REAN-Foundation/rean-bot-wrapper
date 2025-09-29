@@ -28,7 +28,7 @@ export class CustomMLModelResponseService{
         const UserInfoRepository = (
             await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)
         ).getRepository(UserInfo);
-        
+
         const infoProvided = await UserInfoRepository.findOne({
             where : {
                 userPlatformID : completeMessage.platformId
@@ -45,7 +45,7 @@ export class CustomMLModelResponseService{
             }
         }
 
-        const obj = { 
+        const obj = {
             "userID"              : completeMessage.platformId,
             "user_query"          : message,
             "tenant_display_code" : tenantDisplayCode
@@ -65,7 +65,7 @@ export class CustomMLModelResponseService{
         //call the model
         const callCustomModel = await needle("post",customModelUrl,obj,options);
 
-        const feedbackAdded: boolean = this.clientEnvironmentProviderService.getClientEnvironmentVariable("ADD_FEEDBACK_MESSAGE") === "true";
+        const feedbackAdded: boolean = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("ADD_FEEDBACK_MESSAGE") === "true";
         if (feedbackAdded && callCustomModel.body?.answer){
             const feedbackMessageToBeAdded = await this.systemGeneratedMessages.getMessage("FEEDBACK_MESSAGE");
             const messageAfterFeedback = callCustomModel.body.answer +  `

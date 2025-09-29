@@ -84,7 +84,7 @@ export class SequelizeClient {
 
     // eslint-disable-next-line max-len
     getSequelizeClient = async(clientEnvironmentVariable: ClientEnvironmentProviderService):Promise<Sequelize> => {
-        const clientName = clientEnvironmentVariable.getClientEnvironmentVariable("NAME");
+        const clientName = await clientEnvironmentVariable.getClientEnvironmentVariable("NAME");
         if (sequrlizeClients[clientName]) {
             Logger.instance().log(`Returning existing client DB for: ${clientName}`);
             return sequrlizeClients[clientName];

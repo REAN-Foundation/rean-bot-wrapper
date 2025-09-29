@@ -15,7 +15,7 @@ export const AnemiaBotListener = async (intent, eventObj) => {
     try {
         Logger.instance()
             .log('Calling Anemia Bot Service !!!!!!');
-        const useAwsRekognitionAnemiaModel = clientEnvironmentProviderService.getClientEnvironmentVariable('USE_AWS_REKOGNITION_ANEMIA_MODEL');
+        const useAwsRekognitionAnemiaModel = await clientEnvironmentProviderService.getClientEnvironmentVariable('USE_AWS_REKOGNITION_ANEMIA_MODEL');
         let messageToPlatform = '';
         if (useAwsRekognitionAnemiaModel === 'true') {
             messageToPlatform = await rekognitionService.detectAnemia(eventObj.body.queryResult.queryText);

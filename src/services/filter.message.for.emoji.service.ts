@@ -13,13 +13,13 @@ export class EmojiFilter{
         const regex = emojiRegex();
         let emojiObj;
         if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("EMOJI")){
-            emojiObj = JSON.parse(this.clientEnvironmentProviderService.getClientEnvironmentVariable("EMOJI"));
+            emojiObj = JSON.parse(await this.clientEnvironmentProviderService.getClientEnvironmentVariable("EMOJI"));
         }
         else {
             emojiObj = JSON.parse(process.env.EMOJI);
         }
         const emojiObjKeys = Object.keys(emojiObj);
-        
+
         // console.log("emojiKeys", emojiObjKeys);
         let filteredMessage: string = message;
         for (const match of message.matchAll(regex)) {
