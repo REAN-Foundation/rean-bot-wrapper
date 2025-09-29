@@ -194,6 +194,9 @@ export class UserDeleteQueueService {
                     where: { autoIncrementalID: sessionId }
                 });
             }
+            await chatMessageRepo.destroy({
+                where: { chatSessionID: null, userPlatformID }
+            });
             Logger.instance().log("User chat history deleted successfully.");
 
         } catch (error) {
