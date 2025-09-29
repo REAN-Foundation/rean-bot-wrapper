@@ -35,11 +35,11 @@ export class UserDeleteQueueService {
 
     public register(client: any): void {
         try {
-            this.childContainer.register("Client", { useValue: client });
+            // this.childContainer.register("Client", { useValue: client });
 
             this.clientEnvironmentProviderService = this.childContainer.resolve(ClientEnvironmentProviderService);
             this.entityManagerProvider = this.childContainer.resolve(EntityManagerProvider);
-
+            this.clientEnvironmentProviderService.setClientName(client);
             Logger.instance().log(
                 `Registered client-specific services for client=${client?.name || client?.id || "unknown"}`
             );
