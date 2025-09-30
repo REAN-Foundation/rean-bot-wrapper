@@ -54,14 +54,15 @@ export const WelcomeWithBasicAssessmentListener = async (Intent, eventObj) => {
         const payload = eventObj.body.originalDetectIntentRequest.payload;
         const checkSession = await welcomeService.checkSession(payload.userId);
 
-        if (checkSession.sessionFlag === "nosession") {
-            response = {
-                "followupEventInput" : {
-                    "name"         : "customlanguage",
-                    "languageCode" : "en-US"
-                }
-            };
-        } else if (checkSession.sessionFlag === "noinfo") {
+        // if (checkSession.sessionFlag === "nosession") {
+        //     response = {
+        //         "followupEventInput" : {
+        //             "name"         : "customlanguage",
+        //             "languageCode" : "en-US"
+        //         }
+        //     };
+        // } else if (checkSession.sessionFlag === "noinfo") {
+        if (checkSession.sessionFlag === "nosession" || checkSession.sessionFlag === "noinfo"){
             response = {
                 "followupEventInput" : {
                     "name"         : "DefaultWelcomeIntent",

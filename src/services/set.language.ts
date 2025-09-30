@@ -104,9 +104,6 @@ export class UserLanguage {
         let detected_language:string;
         if (messageType !== "location"){
             detected_language = await this._translateService.detectLanguage(message);
-            if (detected_language === "hi-Latn") {
-                detected_language = "hi";
-            }
         }
         else {
             console.log("it was latlong");
