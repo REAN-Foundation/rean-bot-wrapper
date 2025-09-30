@@ -19,7 +19,7 @@ export class ReancareAssessmentService {
             throw new Error("Failed to submit form");
         }
         return response.data;
-    }
+    };
 
     private getOptions = () => {
         const apiKey = this._clientEnvironmentProviderService?.getClientEnvironmentVariable("REANCARE_API_KEY");
@@ -29,6 +29,6 @@ export class ReancareAssessmentService {
                 "x-api-key"    : apiKey
             }
         };
-    }
+    };
     
 }

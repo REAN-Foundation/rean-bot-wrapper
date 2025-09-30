@@ -42,7 +42,7 @@ export class FormHandler {
         } catch (error) {
             console.log("Error handling form submission", error);
         }
-    }
+    };
    
     private async getBotUser(platformId: string) {
         const user = await ContactListRepo.findContactByMobileNumber(this._childContainer, platformId);
@@ -67,7 +67,7 @@ export class FormHandler {
         }
         const submissionData = JSON.parse(formSubmissionDataString);
         return submissionData;
-    }
+    };
 
     private validateFormSubmissionData = (submissionData: any) => {
         if (!submissionData || typeof submissionData !== "object") {
@@ -90,7 +90,7 @@ export class FormHandler {
             throw new Error(`In Assessment With Form Submission, TenantId is not found: ${submissionData}`);
         }
         
-    }
+    };
 
     private registerInjections = () => {
         try {
@@ -101,6 +101,6 @@ export class FormHandler {
             console.log("Error registering injections", error);
         }
 
-    }
+    };
 
 }
