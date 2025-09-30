@@ -5,7 +5,6 @@ import { Logger } from "./logger";
 
 export class EventHandler {
 
-    private static _userDeleteQueueService = container.resolve(UserDeleteQueueService);
     static async handleUserDeletion(event: EventMessage) {
         try {
             const payload: UserDeleteEvent = event.Payload as UserDeleteEvent;
@@ -15,7 +14,8 @@ export class EventHandler {
                 return;
             }
             if (payload?.PatientUserId) {
-                await EventHandler._userDeleteQueueService.enqueueDeleteUser(
+                const userDeleteQueueService = container.resolve(UserDeleteQueueService);
+                await userDeleteQueueService.enqueueDeleteUser(
                     payload?.PatientUserId,
                     payload?.TenantName
                 );
