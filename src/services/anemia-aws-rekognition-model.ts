@@ -15,7 +15,7 @@ export class RekognitionService {
         await this.awsS3manager.getCrossAccountCredentials();
         const rekognition = new AWS.Rekognition({ region: 'us-west-2' });
         const bucketName = process.env.BUCKET_NAME;
-        const projectVersionArn = this.clientEnvironmentProviderService.getClientEnvironmentVariable("ANEMIA_PROJECT_VERSION_ARN");
+        const projectVersionArn = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("ANEMIA_PROJECT_VERSION_ARN");
         const imageName = new URL(imagePathFromDF).pathname.split('/')[2];
         const key = "dev/" + imageName;
         const params = {

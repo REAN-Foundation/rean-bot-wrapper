@@ -43,7 +43,7 @@ export class WorkflowEventListener {
                 ['CreatedAt', 'DESC']
             ]
         });
-        
+
         if (previousMessage?.SchemaInstanceId) {
             const url = '/engine/schema-instances/' + previousMessage.SchemaInstanceId;
             const response = await this.callWorkflowApi('get', url);
@@ -113,10 +113,10 @@ export class WorkflowEventListener {
                     }
                     catch (error) {
                         console.log("While Sending button response", error);
-    
+
                     }
                 }
-                
+
             }
 
             const schemaList = await this.getAllSchemaForTenant();
@@ -131,7 +131,7 @@ export class WorkflowEventListener {
             var nodeId: string = null;
             var actionId: string = null;
             const tenantId = this.environmentProviderService.getClientEnvironmentVariable("WORKFLOW_TENANT_ID");
-           
+
             const prevMessage: WorkflowUserData = await this.getPreviousMessageFromWorkflow(message.platformId);
             if (!prevMessage) {
                 var baseSchema = schemaList.find((schema) => schema.ParentSchemaId === null);
@@ -344,17 +344,17 @@ export class WorkflowEventListener {
     getWorkflowApiAccessToken = async () => {
         try {
 
-            const tenantId = this.environmentProviderService.getClientEnvironmentVariable("WORKFLOW_TENANT_ID");
+            const tenantId = await this.environmentProviderService.getClientEnvironmentVariable("WORKFLOW_TENANT_ID");
             const token = WorkflowCache.get(`${tenantId}-WorkflowApiAccessToken`);
             if (token && token.ExpiresIn > new Date()) {
                 return token.AccessToken;
             }
 
-            const WorkflowBaseUrl = this.environmentProviderService.getClientEnvironmentVariable("WORKFLOW_URL");
+            const WorkflowBaseUrl = await this.environmentProviderService.getClientEnvironmentVariable("WORKFLOW_URL");
             const loginUrl = `${WorkflowBaseUrl}/users/login-password`;
-            const WorkflowAPIkey = this.environmentProviderService.getClientEnvironmentVariable("WORK_FLOW_API_KEY");
-            const Username = this.environmentProviderService.getClientEnvironmentVariable("WORK_FLOW_USERNAME");
-            const Password = this.environmentProviderService.getClientEnvironmentVariable("WORK_FLOW_PASSWORD");
+            const WorkflowAPIkey = await this.environmentProviderService.getClientEnvironmentVariable("WORK_FLOW_API_KEY");
+            const Username = await this.environmentProviderService.getClientEnvironmentVariable("WORK_FLOW_USERNAME");
+            const Password = await this.environmentProviderService.getClientEnvironmentVariable("WORK_FLOW_PASSWORD");
 
             const messageContent = {
                 UserName : Username,
@@ -389,8 +389,8 @@ export class WorkflowEventListener {
 
     callWorkflowApi = async (method:string, url:string, obj?: any): Promise<any> => {
         try {
-            const WorkflowBaseUrl = this.environmentProviderService.getClientEnvironmentVariable("WORKFLOW_URL");
-            const WorkflowAPIkey = this.environmentProviderService.getClientEnvironmentVariable("WORK_FLOW_API_KEY");
+            const WorkflowBaseUrl = await this.environmentProviderService.getClientEnvironmentVariable("WORKFLOW_URL");
+            const WorkflowAPIkey = await this.environmentProviderService.getClientEnvironmentVariable("WORK_FLOW_API_KEY");
             const accessToken = await this.getWorkflowApiAccessToken();
             if (!accessToken) {
                 console.log("Failed to get access token from workflow API.");

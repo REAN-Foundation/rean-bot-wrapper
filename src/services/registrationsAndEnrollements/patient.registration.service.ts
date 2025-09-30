@@ -103,17 +103,20 @@ export class Registration{
         channel: any,
         PlatformUserId: string,
         platformUserName: string,
-        password: string = process.env.USER_REGISTRATION_PASSWORD
+        password: string = process.env.USER_REGISTRATION_PASSWORD,
+        apiKey: string | null = null
     ): Promise<{ patientUserId: string | null; statusCode: number; errorMessage?: string }> {
         try {
             let patientUserId = null;
 
-            const api_key = await this.EnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY");
+            if (!apiKey){
+                apiKey = await this.EnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY");
+            }
 
             if (channel === "telegram" || channel === "Telegram") {
                 const result = await this.checkPatientExist(PlatformUserId, null);
                 if (result.Data.Patients.Items.length === 0) {
-                    patientUserId = await this.registerUserOnReanCare(platformUserName, PlatformUserId, "userName", password,api_key);
+                    patientUserId = await this.registerUserOnReanCare(platformUserName, PlatformUserId, "userName", password, apiKey);
                 } else {
                     patientUserId = result.Data.Patients.Items[0].UserId;
                 }
@@ -128,9 +131,9 @@ export class Registration{
                 const PhoneNumber = await this.countryCodeService.formatPhoneNumber(PlatformUserId);
                 Logger.instance().log(`Fetching patient details for phone number: ${PhoneNumber}`);
                 const apiURL = `patients/byPhone?phone=${encodeURIComponent(PhoneNumber)}`;
-                const result = await this.needleService.needleRequestForREAN("get", apiURL,null,null,api_key);
+                const result = await this.needleService.needleRequestForREAN("get", apiURL, null, null, apiKey);
                 if (result.Data.Patients.Items.length === 0) {
-                    patientUserId = await this.registerUserOnReanCare(platformUserName, PlatformUserId, "phoneNumber", password,api_key);
+                    patientUserId = await this.registerUserOnReanCare(platformUserName, PlatformUserId, "phoneNumber", password, apiKey);
                 } else {
                     patientUserId = result.Data.Patients.Items[0].UserId;
                 }

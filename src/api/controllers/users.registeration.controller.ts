@@ -40,6 +40,7 @@ export class UserRegistrationController{
                 userDetails.platform,
                 userDetails.phoneNumber,
                 userDetails.userName,
+                null,
                 authenticationKey
             );
             if (result.statusCode === 200) {
@@ -118,7 +119,7 @@ export class UserRegistrationController{
             return undefined;
         }
     }
-    
+
 
     unenrollFromCareplan = async(request, response)=>{
         try {
