@@ -62,19 +62,19 @@ export class WhatsappMessageService extends CommonWhatsappService {
         return request;
     }
 
-    setWebhook(clientName: string){
+    async setWebhook(clientName: string){
 
-        return new Promise((resolve, reject) => {
-            const webhookUrl = `${this.clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL")}/v1/${clientName}/whatsapp/${this.clientAuthenticator.urlToken}/receive`;
+        return new Promise(async (resolve, reject) => {
+            const webhookUrl = `${ await this.clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL")}/v1/${clientName}/whatsapp/${this.clientAuthenticator.urlToken}/receive`;
             const postData = JSON.stringify({
                 'url'     : webhookUrl,
                 "headers" : {
                     "authentication" : this.clientAuthenticator.headerToken
                 }
             });
-            const apiKey = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY");
+            const apiKey = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY");
 
-            const request = this.createRequestforWebhook(resolve, reject, apiKey);
+            const request = await this.createRequestforWebhook(resolve, reject, apiKey);
 
             // request.on('error', (e) => {
             //     console.error(`problem with request: ${e.message}`);
@@ -89,17 +89,17 @@ export class WhatsappMessageService extends CommonWhatsappService {
 
     SetWebHookOldNumber = async (clientName: string) => {
 
-        return new Promise((resolve, reject) => {
-            const webhookUrl = `${this.clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL")}/v1/${clientName}/whatsapp/${this.clientAuthenticator.urlToken}/receive`;
+        return new Promise(async (resolve, reject) => {
+            const webhookUrl = `${await this.clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL")}/v1/${clientName}/whatsapp/${this.clientAuthenticator.urlToken}/receive`;
             if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY_OLD_NUMBER")) {
 
                 const postData = JSON.stringify({
                     'url' : webhookUrl,
                 });
 
-                const apiKey = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY_OLD_NUMBER");
+                const apiKey = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY_OLD_NUMBER");
 
-                const request = this.createRequestforWebhook(resolve, reject, apiKey);
+                const request = await this.createRequestforWebhook(resolve, reject, apiKey);
 
                 // request.on('error', (e) => {
                 //     console.error(`problem with request: ${e.message}`);

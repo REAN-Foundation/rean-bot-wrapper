@@ -9,13 +9,14 @@ export class MockChannelAuthenticator implements clientAuthenticator {
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
     ) {}
 
-    get apiKey(): string {
+    async apiKey(): Promise<string> {
         return await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WEBHOOK_MOCK_CHANNEL_CLIENT_API_KEY");
     }
 
-    authenticate(req: any) {
+    async authenticate(req: any) {
         const requestApiKey = req.headers['x-api-key'];
-        if (requestApiKey && requestApiKey === this.apiKey) {
+        const apiKey = await this.apiKey();
+        if (requestApiKey && requestApiKey === apiKey) {
             return;
         }
         throw new Error('Unable to authenticate. Invalid or missing x-api-key.');
