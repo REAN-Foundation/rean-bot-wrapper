@@ -3,7 +3,7 @@
 import { DialogflowResponseService } from './dialogflow.response.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { translateService } from './translate.service';
-import { inject, Lifecycle, scoped } from 'tsyringe';
+import { container, inject, Lifecycle, scoped } from 'tsyringe';
 import { Imessage } from '../refactor/interface/message.interface';
 import { ChatSession } from '../models/chat.session';
 import { EntityManagerProvider } from './entity.manager.provider.service';
@@ -21,6 +21,7 @@ import { WorkflowEventListener } from './emergency/workflow.event.listener';
 import { MessageHandlerType } from '../refactor/messageTypes/message.types';
 import { CommonAssessmentService } from './Assesssment/common.assessment.service';
 import { AssessmentHandlingService } from './Assesssment/assessment.handling.service';
+import { FormHandler } from './form/form.handler';
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -166,6 +167,16 @@ export class handleRequestservice {
             }
             break;
         }
+        case MessageHandlerType.AssessmentWithFormSubmission: {
+            try {
+                console.log("Handling case AssessmentWithFormSubmission", outgoingMessage);
+                const formHandle = container.resolve(FormHandler);
+                await formHandle.handleFormSubmission(outgoingMessage);
+            } catch (error) {
+                console.log("Error handling form submission", error);
+            }
+            break;
+        }
         case 'Feedback': {
             let messageToMlModel = null;
             if (metaData.contextId && !metaData.intent) {
@@ -200,7 +211,7 @@ export class handleRequestservice {
             break;
         }
         }
-        if (outgoingMessage.PrimaryMessageHandler !== MessageHandlerType.WorkflowService) {
+        if (outgoingMessage.PrimaryMessageHandler !== MessageHandlerType.WorkflowService && message_from_nlp) {
             processed_message = await this.processMessage(message_from_nlp, metaData.platformId, messageHandler);
         }
 
