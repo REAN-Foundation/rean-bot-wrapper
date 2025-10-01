@@ -29,5 +29,9 @@
                 "VisibilityTimeout": 300
         }
     },
+    "SecretsManager":
+    {
+        "Provider": "AWS-Secrets-Manager"
+    },
     "MaxUploadFileSize": 104857600
 }

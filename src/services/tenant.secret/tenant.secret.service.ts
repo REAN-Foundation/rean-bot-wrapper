@@ -1,13 +1,15 @@
-import { AwsSecretsManager } from "../aws.secret.manager.service";
+import { AwsSecretsManager } from "../../modules/secrets/providers/aws.secret.manager.service";
 import { TenantSettingService } from "../tenant.setting/tenant.setting.service";
 import { RequestResponseCacheService } from "../../modules/cache/request.response.cache.service";
 import { inject } from 'tsyringe';
 
 export class TenantSecretsService {
 
-    constructor(
-        @inject(AwsSecretsManager) private _awsSecretsManager?: AwsSecretsManager,
-    ) {}
+    private _awsSecretsManager: AwsSecretsManager = null;
+
+    constructor() {
+        this._awsSecretsManager = new AwsSecretsManager();
+    }
 
      loadClientEnvVariables = async() => {
 

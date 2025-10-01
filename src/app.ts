@@ -13,7 +13,7 @@ import { container, DependencyContainer } from "tsyringe";
 import { IndexCreation } from './models/elasticsearchmodel';
 import { platformServiceInterface } from "./refactor/interface/platform.interface";
 import { ClientEnvironmentProviderService } from "./services/set.client/client.environment.provider.service";
-import { AwsSecretsManager } from "./services/aws.secret.manager.service";
+import { AwsSecretsManager } from "./modules/secrets/providers/aws.secret.manager.service";
 import { Timer } from "./middleware/timer";
 import { CheckCrossConnection } from "./middleware/check.cross.connection";
 import { Injector } from "./startup/injector";
