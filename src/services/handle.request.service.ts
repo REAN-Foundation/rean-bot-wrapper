@@ -123,6 +123,9 @@ export class handleRequestservice {
                 else {
                     googleTranslate = await this.translateService.processdialogflowmessage(message_from_nlp, languageForSession);
                 }
+            }
+            else if (messageHandler === "Assessments") {
+                googleTranslate = message_from_nlp.getText();
             } else {
                 googleTranslate = await this.translateService.processdialogflowmessage(message_from_nlp, languageForSession);
             }
