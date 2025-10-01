@@ -399,7 +399,12 @@ export class DecisionRouter {
             if (!resultFeedback.feedbackFlag){
                 const resultAssessment = await this.checkAssessment(messageBody, channel);
                 if (!resultAssessment.AssessmentFlag){
-
+                    console.log(`Checking for assessment with form submission: ${messageBody.intent}`);
+                    if (messageBody.intent === MessageHandlerType.AssessmentWithFormSubmission){
+                        this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.AssessmentWithFormSubmission;
+                        return this.outgoingMessage;
+                    }
+                    
                     //TODO: In WhatsApp form submission response length may greater than 256, so it is going to the QnA handler.
                     if (messageBody.messageBody.length > 256) {
                         this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.QnA;

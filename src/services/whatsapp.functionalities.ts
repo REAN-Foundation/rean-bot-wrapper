@@ -12,6 +12,7 @@ import { UserLanguage } from "./set.language";
 import needle from 'needle';
 import { Message } from './request.format/whatsapp.message.format';
 import { getRequestOptions } from "../utils/helper";
+import { MessageHandlerType } from "../refactor/messageTypes/message.types";
 
 @scoped(Lifecycle.ContainerScoped)
 export class MessageFunctionalities implements getMessageFunctionalities {
@@ -146,7 +147,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         const messagetoDialogflow = this.inputMessageFormat(messageObj);
         messagetoDialogflow.messageBody = messageObj.getNfmReply().body;
         console.log("NFM Response Message", messageObj.getNfmReply().body);
-        messagetoDialogflow.intent = "Process_WhatsApp_Form_Responses";
+        messagetoDialogflow.intent = MessageHandlerType.AssessmentWithFormSubmission;
         console.log("NFM Response Message", messageObj);
         return messagetoDialogflow;
     }
