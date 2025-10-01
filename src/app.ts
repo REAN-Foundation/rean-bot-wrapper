@@ -18,8 +18,7 @@ import { Timer } from "./middleware/timer";
 import { CheckCrossConnection } from "./middleware/check.cross.connection";
 import { Injector } from "./startup/injector";
 import { SequelizeClient } from "./connection/sequelizeClient";
-import { RequestResponseCacheService } from "./modules/cache/request.response.cache.service";
-import { TenantSettingService } from "./services/tenant.setting/tenant.setting.service";
+import { TenantSecretsService } from "./services/tenant.secret/tenant.secret.service";
 
 declare module "express-serve-static-core" {
     interface Request {
@@ -45,7 +44,9 @@ export default class Application {
 
     private _checkCrossConnection: CheckCrossConnection = null;
 
-    private clientsList = [];
+    private _secretsService: TenantSecretsService = null
+
+    // private clientsList = [];
 
     private constructor() {
         this._app = express();
@@ -62,38 +63,27 @@ export default class Application {
         return this._app;
     }
 
-    async processClientEnvVariables() {
 
-        try {
-            const secretNameList = process.env.SECRET_NAME_LIST.split(',');
-            for (const ele of secretNameList) {
-                const secretObject = await this._awsSecretsManager.getSecrets(ele);
-                await this.storeVariablesInCache(secretObject, ele);
-            }
-
-        } catch (e) {
-            console.log(e);
-        }
-    }
-
-    async setWebhooksForClients() {
+    async setWebhooksForClients(clientsList: string[]) {
         const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
         const sequelizeClient: SequelizeClient = container.resolve(SequelizeClient);
         const telegram: platformServiceInterface = container.resolve('telegram');
         const whatsapp: platformServiceInterface = container.resolve('whatsapp');
-        for (const clientName of this.clientsList) {
+        for (const clientName of clientsList) {
             console.log(clientName);
             clientEnvironmentProviderService.setClientName(clientName);
             sequelizeClient.getSequelizeClient(clientEnvironmentProviderService);
-            console.log(await clientEnvironmentProviderService.getClientEnvironmentVariable('TELEGRAM_BOT_TOKEN'));
-            if (await clientEnvironmentProviderService.getClientEnvironmentVariable('TELEGRAM_BOT_TOKEN')) {
+            const telegramToken = await clientEnvironmentProviderService.getClientEnvironmentVariable('TELEGRAM_BOT_TOKEN');
+            const whatsappToken = await clientEnvironmentProviderService.getClientEnvironmentVariable('WHATSAPP_LIVE_API_KEY') || await clientEnvironmentProviderService.getClientEnvironmentVariable('META_API_TOKEN');
+            console.log(telegramToken);
+            if (telegramToken) {
                 telegram.setWebhook(clientName);
                 console.log("Telegram webhook is set");
             } else {
                 console.log("Telegram webhook need not to be set");
             }
 
-            if (await clientEnvironmentProviderService.getClientEnvironmentVariable('WHATSAPP_LIVE_API_KEY') || clientEnvironmentProviderService.getClientEnvironmentVariable('META_API_TOKEN')) {
+            if (whatsappToken) {
                 whatsapp.setWebhook(clientName);
             }
             else {
@@ -104,82 +94,11 @@ export default class Application {
 
     }
 
-    async storeVariablesInCache(secretObject, ele) {
-        try {
-
-            if (!secretObject.NAME) {
-                const parts = ele.split("-");
-
-                // Always skip the first and last
-                const tenantParts = parts.slice(1, -1);
-
-                // Join back with "-" and uppercase
-                const derivedTenantName = tenantParts.join("-").toUpperCase();
-
-                if (!this.clientsList.includes(derivedTenantName)) {
-                    this.clientsList.push(derivedTenantName);
-                }
-                const tenantSecrets = {};
-                for (const k in secretObject) {
-                    if (typeof secretObject[k] === "object"){
-                        tenantSecrets[k.toUpperCase()] = JSON.stringify(secretObject[k]);
-                    }
-                    else {
-                        tenantSecrets[k.toUpperCase()] = secretObject[k];
-                    }
-                    console.log("loading this key", `${derivedTenantName}_${k.toUpperCase()}`);
-                }
-
-                const apiKey = process.env["REANCARE_API_KEY"];
-                const baseUrl = process.env["REAN_APP_BACKEND_BASE_URL"];
-
-                if (apiKey && baseUrl) {
-                    const tenantSettings = await TenantSettingService.getTenantSettingByCode(derivedTenantName, apiKey, baseUrl);
-                    if (tenantSettings) {
-                        const botSettings = tenantSettings.ChatBot;
-                        for (const key in botSettings){
-                            if (typeof tenantSettings.ChatBot[key] === "object"){
-                                tenantSecrets[key.toUpperCase()] = JSON.stringify(botSettings[key]);
-                            }
-                            else {
-                                tenantSecrets[key.toUpperCase()] = botSettings[key];
-                            }
-                        }
-                    }
-                } else {
-                    console.warn(`Missing REANCARE_API_KEY or REAN_APP_BACKEND_BASE_URL. Skipping tenant settings fetch.`);
-                }
-                await RequestResponseCacheService.set(`bot-secrets-${derivedTenantName}`,
-                    tenantSecrets,
-                    "config"
-                );
-            }
-            else {
-                this.clientsList.push(secretObject.NAME);
-                const tenantSecrets = {};
-                for (const k in secretObject) {
-                    if (typeof secretObject[k] === "object"){
-                        tenantSecrets[k.toUpperCase()] = JSON.stringify(secretObject[k]);
-                    }
-                    else {
-                        tenantSecrets[k.toUpperCase()] = secretObject[k];
-                    }
-                    console.log("loading this key", `${secretObject.NAME}_${k.toUpperCase()}`);
-                }
-                await RequestResponseCacheService.set(`bot-secrets-${secretObject.NAME}`,
-                    tenantSecrets,
-                    "config"
-                );
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    }
-
 
     public start = async (): Promise<void> => {
         try {
-            await this.processClientEnvVariables();
+
+            const clientList = await this._secretsService.loadClientEnvVariables();
 
             //Load configurations
             ConfigurationManager.loadConfigurations();
@@ -199,7 +118,7 @@ export default class Application {
             this._IndexCreation.createIndexes();
 
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            await this.setWebhooksForClients();
+            await this.setWebhooksForClients(clientList);
 
             await Loader.scheduler.schedule();
 
