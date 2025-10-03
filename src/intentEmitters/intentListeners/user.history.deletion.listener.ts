@@ -1,5 +1,6 @@
 import { Logger } from '../../common/logger';
 import { userHistoryDeletionService } from '../../services/user.history.deletion.service';
+import { SystemGeneratedMessagesService } from "../../services/system.generated.message.service";
 
 export const UserChatHistoryDeletionListener = async (intent, eventObj) => {
     try {
@@ -7,17 +8,44 @@ export const UserChatHistoryDeletionListener = async (intent, eventObj) => {
             .log('User Chat History Deletion Listener!!!');
 
         const userDeletionService = eventObj.container.resolve(userHistoryDeletionService);
+        const systemGeneratedMessages = eventObj.container.resolve(SystemGeneratedMessagesService);
 
         const userPlatformId = eventObj.body.originalDetectIntentRequest.payload.userId;
         if (userPlatformId) {
             let userReply = eventObj.body.queryResult.parameters.UserResponse;
+            let reply = null;
             if (!eventObj.body.queryResult.parameters.Language) {
-                userReply = eventObj.body.queryResult.queryText
+                userReply = eventObj.body.queryResult.queryText.toLowerCase();
             }
-            if (userReply === "Yes") {
+            if (userReply.toLowerCase() === "yes") {
                 await userDeletionService.deleteUserFromAllServices(userPlatformId);
-                Logger.instance()
-                    .log(`User with platform ID ${userPlatformId} has been deleted from all services.`);
+                reply = await systemGeneratedMessages.systemGeneratedMessages.getMessage("DELETE_YES_MESSAGE");
+                const data = {
+                    "fulfillmentMessages" : [
+                        {
+                            "text" : {
+                                "text" : [
+                                    reply
+                                ]
+                            }
+                        }
+                    ]
+                };
+                return data;
+            } else {
+                reply = await systemGeneratedMessages.systemGeneratedMessages.getMessage("DELETE_NO_MESSAGE");
+                const data = {
+                    "fulfillmentMessages" : [
+                        {
+                            "text" : {
+                                "text" : [
+                                    reply
+                                ]
+                            }
+                        }
+                    ]
+                };
+                return data;
             }
         }
         else {
