@@ -19,7 +19,10 @@ export const UserChatHistoryDeletionListener = async (intent, eventObj) => {
             }
             if (userReply.toLowerCase() === "yes") {
                 await userDeletionService.deleteUserFromAllServices(userPlatformId);
-                reply = await systemGeneratedMessages.systemGeneratedMessages.getMessage("DELETE_YES_MESSAGE");
+                reply = await systemGeneratedMessages.getMessage("DELETE_YES_MESSAGE");
+                if (!reply) {
+                    reply = "User History Deleted Successfully";
+                }
                 const data = {
                     "fulfillmentMessages" : [
                         {
@@ -33,7 +36,10 @@ export const UserChatHistoryDeletionListener = async (intent, eventObj) => {
                 };
                 return data;
             } else {
-                reply = await systemGeneratedMessages.systemGeneratedMessages.getMessage("DELETE_NO_MESSAGE");
+                reply = await systemGeneratedMessages.getMessage("DELETE_NO_MESSAGE");
+                if (!reply) {
+                    reply = "User History Deletion Cancelled";
+                }
                 const data = {
                     "fulfillmentMessages" : [
                         {

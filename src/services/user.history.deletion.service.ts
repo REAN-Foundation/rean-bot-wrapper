@@ -3,17 +3,15 @@ import { ClientEnvironmentProviderService } from './set.client/client.environmen
 import needle from 'needle';
 import { EntityManagerProvider } from "./entity.manager.provider.service";
 import { ContactList } from '../models/contact.list';
-import { GetHeaders } from '../services/biometrics/get.headers';
 import { NeedleService } from "./needle.service";
 
 @scoped(Lifecycle.ContainerScoped)
 export class userHistoryDeletionService {
 
     constructor(
-        @inject(NeedleService) private needleService?: NeedleService,
-        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
-        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
-        @inject(GetHeaders) private getHeaders?: GetHeaders
+        @inject(NeedleService) private needleService: NeedleService,
+        @inject(EntityManagerProvider) private entityManagerProvider: EntityManagerProvider,
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService: ClientEnvironmentProviderService,
     ){}
 
     async deleteUserFromAllServices(userPlatformId) {
@@ -34,7 +32,7 @@ export class userHistoryDeletionService {
                 console.log(`No patientUserId found for userPlatformId: ${userPlatformId}`);
                 return;
             }
-            const deletion_endpoint = `api/v1/patients/${patientUserId}`;
+            const deletion_endpoint = `patients/${patientUserId}`;
             const deleteResponse = await this.needleService.needleRequestForREAN("delete", deletion_endpoint, null, null);
             console.log(`Deletion response for patientUserId ${userPlatformId}:`, deleteResponse);
 
