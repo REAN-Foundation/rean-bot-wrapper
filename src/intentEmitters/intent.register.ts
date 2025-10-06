@@ -32,7 +32,7 @@ import { BloodWarriorDonor } from './intentListeners/bloodWarrior/donor.listener
 import { BloodWarriorNewUser } from './intentListeners/bloodWarrior/new.userlistener';
 import { BloodWarriorPatientEnroll } from './intentListeners/bloodWarrior/patient.enroll.listener';
 import { ChangeTransfusionDate, GiveTransfusionDate, VolunteerChangeTransfusionDate } from './intentListeners/bloodWarrior/change.tf.date.listener';
-import { kerotoplastyConditionIdentificationListener } from './intentListeners/kerotoplasty.bot.condition.Identification.listener';
+import { kerotoplastySymptomAnalysisListener } from './intentListeners/kerotoplasty.bot.condition.Identification.listener';
 import { kerotoplastyEyeQualityListener } from './intentListeners/kerotoplasty.imageQuality.listener';
 import { BloodWarriorMenu } from './intentListeners/bloodWarrior/menu.listener';
 import { RaiseBloodDonationRequest } from './intentListeners/bloodWarrior/raise.request.listener';
@@ -190,8 +190,10 @@ export class IntentRegister {
         IntentEmitter.registerListener('New_User', BloodWarriorNewUser);
         IntentEmitter.registerListener('Patient_Confirm', BloodWarriorPatientEnroll);
         IntentEmitter.registerListener('Change_TF_Date_Input', ChangeTransfusionDate);
-        IntentEmitter.registerListener('appointment-followconditionIdentification', kerotoplastyConditionIdentificationListener);
-        IntentEmitter.registerListener('conditionIdentification', kerotoplastyConditionIdentificationListener);
+        IntentEmitter.registerListener('appointment-followconditionIdentification', kerotoplastySymptomAnalysisListener);
+        IntentEmitter.registerListener('symptomAnalysis', kerotoplastySymptomAnalysisListener);
+        IntentEmitter.registerListener('MoreSymptoms', kerotoplastySymptomAnalysisListener);
+        IntentEmitter.registerListener('KerotoplastyFollowUp', kerotoplastySymptomAnalysisListener);
         IntentEmitter.registerListener('eyeImage', kerotoplastyEyeQualityListener);
         IntentEmitter.registerListener('Menu', BloodWarriorMenu);
         IntentEmitter.registerListener('Raise_Request_Yes', RaiseBloodDonationRequest);
@@ -204,7 +206,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('Schedule_Donation', ScheduleDonation);
         IntentEmitter.registerListener('Schedule_Donation_Eligibity', ScheduleDonationElligible);
         IntentEmitter.registerListener('Blood_Bridge_Verify', VerifyBloodBridge);
-        IntentEmitter.registerListener('Blood_Bridge_Verify_Take_Values', ScheduleDonationTakeValues);
+        IntentEmitter.registerListener('Blood_BrionditionIdentificationdge_Verify_Take_Values', ScheduleDonationTakeValues);
         IntentEmitter.registerListener('Donation_Request_BloodBridge', BloodBridgeStatusListener);
         IntentEmitter.registerListener('Donation_Request_Yes', DonationRequestYesListener);
         IntentEmitter.registerListener('Accept_Volunteer_Request', AcceptVolunteerRequestListener);
@@ -254,7 +256,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('Reminder_Frequency_Daily', ReminderFrequencyListener);
         IntentEmitter.registerListener('Reminder_Frequency_Weekly', ReminderFrequencyListener);
         IntentEmitter.registerListener('Reminder_Ask_Frequency', SendFrequencyButtonsListener);
-        IntentEmitter.registerListener('Medication_Stopped', StopMedicationReasonListener);
+        IntentEmitter.registerListener('Medication_Taken_No', StopMedicationReasonListener);
         IntentEmitter.registerListener('Reminder_Delete', DeleteReminderListener);
         IntentEmitter.registerListener('PatientDonationConfirmationYes', PatientDonationConfirmationListener.yesReply);
         IntentEmitter.registerListener('PatientDonationConfirmationNo', PatientDonationConfirmationListener.noReply);
