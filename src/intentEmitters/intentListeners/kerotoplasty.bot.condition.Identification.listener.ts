@@ -2,6 +2,7 @@ import { sendExtraMessages } from "../../services/send.extra.messages.service";
 import { Logger } from "../../common/logger";
 import { kerotoplastyService } from "../../services/kerotoplasty.service";
 import { dialoflowMessageFormatting } from "../../services/Dialogflow.service";
+import { CacheMemory } from "../../services/cache.memory.service";
 
 export const kerotoplastySymptomAnalysisListener = async (intent, eventObj) => {
     try {
@@ -12,10 +13,11 @@ export const kerotoplastySymptomAnalysisListener = async (intent, eventObj) => {
         
         kerotoplastyServiceObj.postingOnClickup(intent, eventObj, priority);
         let outputMessage = "To better understand your condition, we’ll ask you a few quick questions. This will help us guide you effectively.";
-        if (priority <=1){
+        let data;
+        if (priority <= 1){
             outputMessage =  message;
-        }
-        else if (priority > 1 && intent === "symptomAnalysis") {
+        } else if (priority > 1 && intent === "symptomAnalysis") {
+
             // Format symptoms list naturally (comma + "and")
 
             const formattedSymptoms =
@@ -25,9 +27,13 @@ export const kerotoplastySymptomAnalysisListener = async (intent, eventObj) => {
 
             outputMessage = `Thanks for sharing your symptoms: *${formattedSymptoms}*`;
 
+        } else {
+            outputMessage = message;
+            data = await dialogflowService.making_response(outputMessage);
+            return data;
         }
         followUpStep(intent, symptoms, eventObj, priority, message);
-        const data = await dialogflowService.making_response(outputMessage);
+        data = await dialogflowService.making_response(outputMessage);
         return data;
     }
     catch (error: any) {
@@ -45,6 +51,10 @@ async function followUpStep(intent: string, symptoms: string[], eventObj: any, p
         let yesIntentName: string;
         let noIntentName: string;
 
+        // Variables for cache
+        const userPlatformId = eventObj.body.originalDetectIntentRequest.payload.userId;
+        const cacheKey = `SymptomsStorage:${userPlatformId}`;
+
         // Format symptoms list naturally (comma + "and")
         const formattedSymptoms =
             symptoms.length > 1
@@ -55,6 +65,9 @@ async function followUpStep(intent: string, symptoms: string[], eventObj: any, p
             inputMessage = "Would you be able to provide an *image of the affected area of your eye* for the doctor’s assessment?";
             yesIntentName = "EyeImage";
             noIntentName = "responseNo";
+
+            // Delete the cache key as this is the final step
+            await CacheMemory.delete(cacheKey);
         } else {
             inputMessage = `Could you let me know if you have any other symptoms?`;
             yesIntentName = "MoreSymptoms";

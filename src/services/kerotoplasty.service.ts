@@ -7,6 +7,7 @@ import needle from 'needle';
 import { EntityManagerProvider } from "./entity.manager.provider.service";
 import { ContactList } from '../models/contact.list';
 import { NeedleService } from "./needle.service";
+import { CacheMemory } from "./cache.memory.service";
 
 @scoped(Lifecycle.ContainerScoped)
 export class kerotoplastyService {
@@ -23,9 +24,15 @@ export class kerotoplastyService {
 
     identifyCondition = async (eventObj) => {
         if (eventObj) {
-            const symptoms: string[] = eventObj.body.queryResult.parameters.symptoms;
+            let symptoms: string[] = eventObj.body.queryResult.parameters.symptoms;
             const Addition_info = this.clientEnvironmentProviderService.getClientEnvironmentVariable("ADDITIONAL_INFO");
             const parsedInfo = JSON.parse(Addition_info);
+
+            // Variables set for cache
+            const userPlatformId = eventObj.body.originalDetectIntentRequest.payload.userId;
+            const cacheKey = `SymptomsStorage:${userPlatformId}`;
+
+            const symptomsInCache = await CacheMemory.get(cacheKey);
 
             const Normal_risk: string[] = parsedInfo.RISK_CLASSIFICATION.NORMAL.SYMPTOMS;
             const Emergency_risk: string[] = parsedInfo.RISK_CLASSIFICATION.EMERGENCY.SYMPTOMS;
@@ -35,8 +42,11 @@ export class kerotoplastyService {
             let priority: number;
             let message: any;
 
-            // Check Emergency first
-            if (symptoms.some(symptom => Emergency_risk.includes(symptom))) {
+            if (!symptoms) {
+                symptoms = [];
+                priority = symptomsInCache['priority'];
+                message = symptomsInCache['message'];
+            } else if (symptoms.some(symptom => Emergency_risk.includes(symptom))) {
                 riskLevel = "EMERGENCY";
                 message = parsedInfo.RISK_CLASSIFICATION.EMERGENCY.MESSAGE;
                 priority = 1;
@@ -54,6 +64,19 @@ export class kerotoplastyService {
                 riskLevel = "NORMAL";
                 message = parsedInfo.RISK_CLASSIFICATION.NORMAL.MESSAGE;
                 priority = 3;
+            }
+
+            if (!symptomsInCache) {
+                const cacheObj = {
+                    "priority" : priority,
+                    "message"  : message
+                };
+                await CacheMemory.set(cacheKey, cacheObj);
+            } else {
+                if (priority >= parseInt(symptomsInCache["priority"])) {
+                    priority = symptomsInCache["priority"];
+                    message = symptomsInCache["message"];
+                }
             }
  
             return [ symptoms,message, priority];
