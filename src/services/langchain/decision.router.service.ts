@@ -180,7 +180,7 @@ export class DecisionRouter {
 
             // Currently will only support the assessment start through buttons
             if (
-                messageBody.contextId &&
+                messageContextId &&
                 messageBody.intent &&
                 !nextQuestionFlag
             ) {
