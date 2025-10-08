@@ -150,8 +150,6 @@ export class ServeAssessmentService {
             ).getRepository(AssessmentIdentifiers);
             const apiURL = `clinical/assessments/${assessmentSession.assesmentId}/questions/${assessmentSession.assesmentNodeId}/answer`;
             const userAnswer = await this.getAnswer(userResponse, assessmentSession.assesmentId, assessmentSession.assesmentNodeId, metaData);
-
-            // const userAnswer = await this.getAnswerFromIntent(userResponse);
             assessmentSession.userResponse = userAnswer;
             assessmentSession.userResponseTime = new Date();
             await assessmentSession.save();
@@ -161,7 +159,6 @@ export class ServeAssessmentService {
                 Answer       : userAnswer
             };
 
-            // refactor separate it out from here give URL and obj according to that.
             let message: any = "";
             let messageFlag = "";
             const requestBody = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
@@ -177,66 +174,11 @@ export class ServeAssessmentService {
 
             //Next question send or complete the assessment
             if (requestBody.Data.AnswerResponse.Next !== null && nodeType !== "Message") {
-
-                // let questionRawData = null;
-                // if (requestBody.Data.AnswerResponse.Next?.RawData) {
-                //     if (typeof requestBody.Data.AnswerResponse.Next.RawData === 'string') {
-                //         questionRawData = JSON.parse(requestBody.Data.AnswerResponse.Next.RawData);
-                //     } else {
-                //         questionRawData = requestBody.Data.AnswerResponse.Next.RawData;
-                //     }
-                // }
-                // message = questionData.Description;
-                // console.log("    inside next////// question block");
-
-                // const buttonArray = [];
-                // if (questionData.ExpectedResponseType === "Single Choice Selection") {
-                //     const buttonIds = questionRawData.ButtonsIds;
-                //     const optionsNameArray = requestBody.Data.AnswerResponse.Next.Options;
-                //     let i = 0;
-                //     for (const buttonId of buttonIds){
-                //         buttonArray.push( optionsNameArray[i].Text, buttonId);
-                //         i = i + 1;
-                //     }
-                //     if (channel === 'whatsappMeta' || channel === 'whatsappWati') {
-                //         if (buttonIds.length <= 3) {
-                //             payload = await sendApiButtonService(buttonArray);
-                //             messageType = 'interactivebuttons';
-                //         } else {
-                //             payload = await sendApiInteractiveListService(buttonArray);
-                //             messageType = 'interactivelist';
-                //         }
-
-                //     } else {
-                //         payload = await sendTelegramButtonService(buttonArray);
-                //         messageType = 'inline_keyboard';
-                //     }
-                // }
                 const nextQuestionResult = await this.handleButtonCreation(questionData, channel);
                 message = nextQuestionResult.message;
                 payload = nextQuestionResult.payload;
                 messageType = nextQuestionResult.messageType;
 
-                //save entry into DB
-                // const assessmentSessionLogs = {
-                //     patientUserId        : questionData.PatientUserId,
-                //     userPlatformId       : assessmentSession.userPlatformId,
-                //     assessmentTemplateId : questionData.AssessmentTemplateId,
-                //     assesmentId          : questionData.AssessmentId,
-                //     assesmentNodeId      : questionData.id,
-                //     userResponseType     : questionData.ExpectedResponseType,
-                //     userResponse         : null,
-                //     userResponseTime     : null,
-                //     userMessageId        : null,
-                // };
-                // messageFlag = "assessment";
-                // const assessmentSessionData = await AssessmentSessionRepo.create(assessmentSessionLogs);
-                // const assessmentIdentifierObj = {
-                //     assessmentSessionId : assessmentSessionData.autoIncrementalID,
-                //     identifier          : questionData.FieldIdentifier,
-                //     userResponseType    : assessmentSessionData.userResponseType
-                // };
-                // await AssessmentIdentifiersRepo.create(assessmentIdentifierObj);
                 messageFlag = "assessment";
                 const { assessmentSessionData } = await this.createAssessmentSessionAndIdentifier(
                     questionData,
@@ -255,9 +197,9 @@ export class ServeAssessmentService {
     
                 const nextApiURL = `clinical/assessments/${assessmentSession.assesmentId}/questions/${questionData.id}/answer`;
                 const nextObj = {
-                    ResponseType : questionData.ExpectedResponseType,
-                    Answer       : "Ok"
+                    ResponseType : questionData.ExpectedResponseType
                 };
+                
                 const nextRequestBody = await this.needleService.needleRequestForREAN("post", nextApiURL, null, nextObj);
                     
                 if (nextRequestBody.Data.AnswerResponse.Next !== null) {
@@ -354,83 +296,6 @@ export class ServeAssessmentService {
 
                 console.log("    inside complete////// question block");
             }
-
-            // let messageId = null;
-            // if (doSend === true) {
-            //     console.log("sending message from handle request");
-            //     const response = { body: { answer: message }, payload: payload };
-            //     const customModelResponseFormat = new CustomModelResponseFormat(response);
-            //     const userPhoneNumber = assessmentSession.userPlatformId;
-            //     this.checkDocumentProcessor(userPhoneNumber, userResponse, userAnswer, assessmentSession, questionData, intent);
-            //     return customModelResponseFormat;
-
-            //     // response = await eventObj.SendMediaMessage(response_format, payload);
-            // } else {
-            //     if (channel === "telegram" || channel === "Telegram") {
-            //         channel = "telegram";
-            //     }
-            //     console.log("sending message from fulllfillment request");
-            //     this._platformMessageService = eventObj.container.resolve(channel);
-            //     const response_format: Iresponse = commonResponseMessageFormat();
-            //     response_format.sessionId = assessmentSession.userPlatformId;
-            //     response_format.messageText = message;
-            //     response_format.message_type = messageType;
-            //     const response = await this._platformMessageService.SendMediaMessage(response_format, payload);
-            //     messageId = await this._platformMessageService.getMessageIdFromResponse(response);
-            //     const chatMessageObj = {
-            //         chatSessionID  : null,
-            //         platform       : channel,
-            //         direction      : "Out",
-            //         messageType    : response_format.message_type,
-            //         messageContent : response_format.messageText,
-            //         userPlatformID : response_format.sessionId,
-            //         intent         : "assessmentQuestion",
-            //         messageId      : messageId,
-            //     };
-            //     await chatMessageRepository.create(chatMessageObj);
-            //     console.log("    saved the question into DB");
-
-            //     if (requestBody.Data.AnswerResponse.Next) {
-            //         await this.updateDBChatSessionWithMessageId(userId, messageId, chatMessageRepository, AssessmentSessionRepo);
-            //     }
-
-            //     // if (userResponse === "Work_Commitments" ||
-            //     //     userResponse === "Feeling_Unwell_A" ||
-            //     //     userResponse === "Transit_Issues") {
-            //     //     const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
-            //     //     let todayDate = new Date().toISOString()
-            //     //         .split('T')[0];
-            //     //     const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
-            //     //     const phoneNumber = Helper.formatPhoneForDocProcessor(personPhoneNumber);
-            //     //     const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
-            //     //     todayDate = Helper.removeLeadingZerosFromDay(todayDate);
-            //     //     const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-
-            //     //     // const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
-            //     //     const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/assessment-response`;
-            //     //     const res = await needle("put",
-            //     //         getUrl,
-            //     //         {
-            //     //             assessment_id   : assessmentSession.assesmentId,
-            //     //             patient_user_id : questionData.PatientUserId,
-            //     //             phone_number    : formattedPhoneNumber,
-            //     //             appointment_date: todayDate,
-            //     //             chosen_option   : {
-            //     //                 sequence : userAnswer,
-            //     //                 text     : userResponse
-            //     //             }
-            //     //         },
-            //     //         {
-            //     //             headers : {
-            //     //                 'Content-Type' : 'application/json',
-            //     //                 Accept         : 'application/json',
-            //     //             },
-            //     //         },
-            //     //     );
-            //     //     console.log(`Object in reply service ${JSON.stringify(res.body,null, 4)}`);
-            //     // }
-            // }
-
             return await this.sendAssessmentMessage(
                 doSend,
                 eventObj,
@@ -658,6 +523,9 @@ export class ServeAssessmentService {
             const AssessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
             const AssessmentIdentifiersRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentIdentifiers);
 
+            const isMessageNode = questionData.NodeType === "Message";
+            const userResponseTime = isMessageNode ? new Date() : null;
+            
             const assessmentSessionLogs = {
                 patientUserId        : questionData.PatientUserId,
                 userPlatformId       : userPlatformId,
@@ -666,7 +534,7 @@ export class ServeAssessmentService {
                 assesmentNodeId      : questionData.id,
                 userResponseType     : questionData.ExpectedResponseType,
                 userResponse         : null,
-                userResponseTime     : null,
+                userResponseTime     : userResponseTime,
                 userMessageId        : null,
             };
 
@@ -687,7 +555,6 @@ export class ServeAssessmentService {
         } catch (error) {
             Logger.instance()
                 .log_error(error.message, 500, 'Create assessment session and identifier error.');
-            throw error;
         }
     }
    
@@ -713,7 +580,7 @@ export class ServeAssessmentService {
                 const response = { body: { answer: message }, payload: payload };
                 const customModelResponseFormat = new CustomModelResponseFormat(response);
                 const userPhoneNumber = assessmentSession.userPlatformId;
-                this.checkDocumentProcessor(userPhoneNumber, userResponse, userAnswer, assessmentSession, questionData, intent);
+                await this.checkDocumentProcessor(userPhoneNumber, userResponse, userAnswer, assessmentSession, questionData, intent);
                 return customModelResponseFormat;
             } else {
                 if (channel === "telegram" || channel === "Telegram") {
@@ -744,7 +611,7 @@ export class ServeAssessmentService {
                 };
                 await chatMessageRepository.create(chatMessageObj);
                 console.log("saved the question into DB");
-                this.checkDocumentProcessor(response_format.sessionId, userResponse, userAnswer, assessmentSession, questionData, intent);
+                await this.checkDocumentProcessor(response_format.sessionId, userResponse, userAnswer, assessmentSession, questionData, intent);
                 if (requestBody.Data.AnswerResponse.Next) {
                     await this.updateDBChatSessionWithMessageId(userId, messageId, chatMessageRepository, AssessmentSessionRepo);
                 }
@@ -756,7 +623,6 @@ export class ServeAssessmentService {
         } catch (error) {
             Logger.instance()
                 .log_error(error.message, 500, 'Send assessment message error.');
-            throw error;
         }
     }
 
