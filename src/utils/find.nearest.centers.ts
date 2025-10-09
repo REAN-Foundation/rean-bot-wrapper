@@ -1,6 +1,5 @@
 import csv from 'csv-parser';
 import streamifier from 'streamifier';
-
 // import fetch from 'node-fetch';
 import haversine from 'haversine-distance';
 import { AwsS3manager } from '../services/aws.file.upload.service';
