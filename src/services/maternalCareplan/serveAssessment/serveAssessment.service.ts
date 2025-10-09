@@ -138,7 +138,7 @@ export class ServeAssessmentService {
         }
     }
 
-    answerQuestion = async (eventObj, userId: string, userResponse: string, userContextMessageId: string, channel: string, doSend: boolean, intent = null ) => {
+    answerQuestion = async (eventObj, userId: string, userResponse: string, userContextMessageId: string, channel: string, doSend: boolean, intent = null, metaData = null) => {
         // eslint-disable-next-line max-len
         try {
 
@@ -149,7 +149,7 @@ export class ServeAssessmentService {
                 await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)
             ).getRepository(AssessmentIdentifiers);
             const apiURL = `clinical/assessments/${assessmentSession.assesmentId}/questions/${assessmentSession.assesmentNodeId}/answer`;
-            const userAnswer = await this.getAnswer(userResponse, assessmentSession.assesmentId, assessmentSession.assesmentNodeId);
+            const userAnswer = await this.getAnswer(userResponse, assessmentSession.assesmentId, assessmentSession.assesmentNodeId, metaData);
 
             // const userAnswer = await this.getAnswerFromIntent(userResponse);
             assessmentSession.userResponse = userAnswer;
@@ -245,12 +245,19 @@ export class ServeAssessmentService {
                 CacheMemory.delete(assessmentKey);
                 const customMessage = await this.systemGeneratedMessageService.getMessage("END_ASSESSMENT_MESSAGE");
                 const phoneNumber = await this.countryCodeService.formatPhoneNumber(assessmentSession.userPlatformId);
-                const apiURL = `patients/byPhone?phone=${encodeURIComponent(phoneNumber)}`;
+                let apiURL = `patients/byPhone?phone=${encodeURIComponent(phoneNumber)}`;
+                if (channel === 'telegram' || channel === 'Telegram') {
+                    apiURL = `patients/search?username=${encodeURIComponent(assessmentSession.userPlatformId)}`;
+                }
                 const result = await this.needleService.needleRequestForREAN("get", apiURL,null,null);
                 const patientData = result.Data.Patients.Items[0];
-                if (customMessage) {
+                const assessmentScore = requestBody.Data.AnswerResponse.AssessmentScore;
+                if (assessmentScore) {
+                    message =  `✅ Assessment Completed\nYou answered ${assessmentScore.CorrectAnswerCount} out of ${assessmentScore.PosedQuestionCount} questions correctly.\nTotal Score: ${assessmentScore.TotalScore} points.\nWell done.`;                }
+                else if (customMessage) {
                     message = await this.fillMessageWithVariables(customMessage, patientData);
-                } else {
+                }
+                else {
                     message = "The assessment has been completed.";
                 }
                 if (result.Data.Patients.Items) {
@@ -402,17 +409,25 @@ export class ServeAssessmentService {
         // }
     }
 
-    public async getAnswer( userResponse: string, assessmentId: string, assessmentNodeId: string) {
+    public async getAnswer( userResponse: string, assessmentId: string, assessmentNodeId: string, metaData = null) {
         const apiURL = `clinical/assessments/${assessmentId}/questions/${assessmentNodeId}`;
         const response = await this.needleService.needleRequestForREAN("get", apiURL, null, null);
         const options = response.Data.Question.Options;
 
-        const sequence = options?.length
+        let sequence = options?.length
             ? options.find(
                 (option) =>
                     option.ProviderGivenCode.toLowerCase() === userResponse.toLowerCase()
-            )?.Sequence ?? userResponse
-            : userResponse;
+            )?.Sequence ?? null
+            : null;
+        if (!sequence) {
+            sequence = options?.length
+                ? options.find(
+                    (option) =>
+                        option.ProviderGivenCode.toLowerCase() === metaData.intent.toLowerCase()
+                )?.Sequence ?? userResponse
+                : userResponse;
+        }
         return sequence;
     }
 

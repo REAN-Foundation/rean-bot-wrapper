@@ -33,7 +33,6 @@ import { AssessmentIdentifiers } from '../models/assessment/assessment.identifie
 export class MessageFlow{
 
     private chatMessageConnection;
-    
     constructor(
         @inject(delay(() => SlackMessageService)) private slackMessageService,
         @inject(handleRequestservice) private handleRequestservice?: handleRequestservice,

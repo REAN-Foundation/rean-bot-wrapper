@@ -1,4 +1,6 @@
 import { EventMessage, UserDeleteEvent } from "../domain.types/event.types";
+import { UserDeleteQueueService } from "../services/user.delete.queue.service";
+import { container } from "tsyringe";
 import { Logger } from "./logger";
 
 export class EventHandler {
@@ -12,14 +14,11 @@ export class EventHandler {
                 return;
             }
             if (payload?.PatientUserId) {
-
-                //TODO: Implement user deletion service
-                
-                // await EventHandler._userDeleteService.delete(
-                //     payload?.PatientUserId,
-                //     payload?.TenantId,
-                //     payload?.TenantName
-                // );
+                const userDeleteQueueService = container.resolve(UserDeleteQueueService);
+                await userDeleteQueueService.enqueueDeleteUser(
+                    payload?.PatientUserId,
+                    payload?.TenantName
+                );
             }
             
         } catch (error) {

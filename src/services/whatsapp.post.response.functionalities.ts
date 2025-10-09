@@ -9,6 +9,7 @@ import { inject, Lifecycle, scoped } from "tsyringe";
 import { MessageType } from "../domain.types/common.types";
 import { getFlowMessageParts } from "../utils/flow.helper";
 import { FlowActionType } from "../domain.types/message.type/flow.message.types";
+import { SystemGeneratedMessagesService } from "./system.generated.message.service";
 
 @scoped(Lifecycle.ContainerScoped)
 export class WhatsappPostResponseFunctionalities{
@@ -17,7 +18,8 @@ export class WhatsappPostResponseFunctionalities{
         @inject(HandleMessagetypePayload) private handleMessagetypePayload?: HandleMessagetypePayload,
         @inject(UserLanguage) private userLanguage?: UserLanguage,
         @inject(translateService) private _translateService?: translateService,
-        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(SystemGeneratedMessagesService) private systemGeneratedMessages?: SystemGeneratedMessagesService
     ) {}
 
     textResponseFormat = (response_format:Iresponse,payload) =>{
@@ -110,7 +112,7 @@ export class WhatsappPostResponseFunctionalities{
 
     };
 
-    interactivelistResponseFormat = (response_format:Iresponse,payload) =>{
+    interactivelistResponseFormat = async (response_format:Iresponse,payload) =>{
         console.log(`........From interactivelistResponseFormat ${response_format} payload: ${JSON.stringify(payload, null, 2)}`, );
         const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
         const rows_meta = [];
@@ -119,22 +121,41 @@ export class WhatsappPostResponseFunctionalities{
         if (payload.fields.header){
             header = payload.fields.header.stringValue;
         } else {
-            header = "Select ";
+            header = "Please Select";
         }
+        
+        let buttonText = ["Please Choose"];
+        if (payload.fields.selectButtonText) {
+            buttonText = [payload.fields.selectButtonText.stringValue];
+        }
+        const languageForSession = await this.userLanguage.getPreferredLanguageofSession(response_format.sessionId);
 
         let count_meta = 0;
+        buttonText = await this._translateService.translateResponse(buttonText, languageForSession);
+        const translatedHeader = await this._translateService.translateResponse([header], languageForSession);
+        header = translatedHeader[0];
         for (const lit of list_meta){
             let id_meta = count_meta;
             let description_meta = "";
             if (lit.structValue.fields.description){
                 description_meta = lit.structValue.fields.description.stringValue;
+                let translatedDescription = [description_meta];
+                translatedDescription = await this._translateService.translateResponse([description_meta], languageForSession);
             }
             if (lit.structValue.fields.id){
                 id_meta = lit.structValue.fields.id.stringValue;
             }
+            const title = lit.structValue.fields.title.stringValue;
+            let translatedTitle = [title];
+            if (languageForSession) {
+                translatedTitle = await this._translateService.translateResponse([title],languageForSession);
+                
+
+            }
+
             const temp_meta = {
                 "id"          : id_meta,
-                "title"       : lit.structValue.fields.title.stringValue,
+                "title"       : translatedTitle[0],
                 "description" : description_meta
             };
             rows_meta.push(temp_meta);
@@ -150,7 +171,7 @@ export class WhatsappPostResponseFunctionalities{
                 "text" : response_format.messageText
             },
             "action" : {
-                "button"   : "Select From Here",
+                "button"   : buttonText[0],
                 "sections" : [
                     {
                         "rows" : rows_meta
