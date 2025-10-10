@@ -30,7 +30,7 @@ export class ClickUpMessageService implements platformServiceInterface {
 
     async handleMessage(requestBody: any) {
         this.clickupEventHandler(requestBody);
-        
+
     }
 
     sendManualMesage(msg: any) {
@@ -142,14 +142,14 @@ export class ClickUpMessageService implements platformServiceInterface {
             console.log("textToUser", textToUser);
             const commentId = requestBody.history_items[0].comment.id;
             await this.slackClickupCommonFunctions.sendCustomMessage(platform, userId, textToUser);
-    
+
         } catch (error) {
             console.log(error);
         }
     }
 
     async eventStatusUpdated(requestBody) {
-        const blockSendCloseMessage = this.clientEnvironmentProviderService.getClientEnvironmentVariable("BLOCK_TASK_CLOSE_MESSAGE") === "true";
+        const blockSendCloseMessage = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("BLOCK_TASK_CLOSE_MESSAGE") === "true";
         if (!blockSendCloseMessage) {
             const contactMail = "example@gmail.com";
             const contactList =
@@ -160,7 +160,7 @@ export class ClickUpMessageService implements platformServiceInterface {
             }
             let textToUser = `As our expert have provided their insight, we are closing the ticket. If you are still unsatisfied with the answer provided, contact us at ${contactMail}`;
             if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_TICKET_CLOSE_RESPONSE_MESSAGE")){
-                textToUser = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_TICKET_CLOSE_RESPONSE_MESSAGE");
+                textToUser = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_TICKET_CLOSE_RESPONSE_MESSAGE");
             }
             console.log("textToUser", textToUser);
             await this.slackClickupCommonFunctions.sendCustomMessage(personContactList.dataValues.platform, personContactList.dataValues.mobileNumber, textToUser);

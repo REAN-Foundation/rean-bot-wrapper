@@ -12,7 +12,7 @@ export const AppointmentBookingListner = async ( intent, eventObj ) => {
 
     try {
         console.log("Appointment booking listener is here");
-        const customRemSetting: boolean = clientEnvironmentProviderServiceObj.getClientEnvironmentVariable("CUSTOM_REM_SETTING") === "true";
+        const customRemSetting: boolean = await clientEnvironmentProviderServiceObj.getClientEnvironmentVariable("CUSTOM_REM_SETTING") === "true";
         let response = null;
         const parameters =  eventObj.body.queryResult.parameters;
         const date_time = eventObj.body.queryResult.parameters.Date.date_time;
@@ -51,7 +51,7 @@ export const AppointmentBookingListner = async ( intent, eventObj ) => {
             .log_error(error.message,500,'Food info listener error');
         throw new Error("Food info listener error");
     }
-}; 
+};
 async function keratoplastyNextSteps(intent,eventObj) {
     try {
         console.log("STEP 4");

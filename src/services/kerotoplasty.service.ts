@@ -70,15 +70,15 @@ export class kerotoplastyService {
         return [message, severityGrade];
 
     }
-    
+
     async symptomByUser(parameters){
         var symptomComment = "Patient is suffering from \n";
-        
+
         if (parameters.complexNormalSymptoms.length !== 0){
             for (let i = 0; i < parameters.complexNormalSymptoms.length; i++){
                 symptomComment += ` - ${parameters.complexNormalSymptoms[i].name} \n`;
             }
-            
+
         }
         if (parameters.complexSeverePain.name === "Yes"){
             symptomComment += " - Severe pain \n";
@@ -140,7 +140,7 @@ export class kerotoplastyService {
             await contactList.update({ cmrCaseTaskID: taskID }, { where: { mobileNumber: userId } });
             await this.clickUpTask.postCommentOnTask(taskID, symptomComment);
             await contactList.update({ cmrCaseTaskID: taskID, humanHandoff: "false" }, { where: { mobileNumber: userId } });
-    
+
         }
 
     }
@@ -186,7 +186,7 @@ export class kerotoplastyService {
             EMRNumber = EMRNumber.toUpperCase();
             user_details = await this.getEMRDetails(EMRNumber,eventObj);
         } else {
-            const shareable_details_raw = this.clientEnvironmentProviderService.getClientEnvironmentVariable("SHAREABLE_DETAILS");
+            const shareable_details_raw = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("SHAREABLE_DETAILS");
             if (shareable_details_raw){
                 const shareable_details = JSON.parse(shareable_details_raw);
                 if (shareable_details.Name){
@@ -335,5 +335,5 @@ export class kerotoplastyService {
             setTimeout(resolve, ms);
         });
     }
-    
+
 }

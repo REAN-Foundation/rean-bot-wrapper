@@ -69,8 +69,8 @@ export class WhatsappPostResponseFunctionalities{
         const buttons = [];
         const numberOfButtons = (payload.fields.buttons.listValue.values).length;
         const languageForSession = await this.userLanguage.getPreferredLanguageofSession(response_format.sessionId);
-        const customTranslateSetting: boolean = this.clientEnvironmentProviderService.getClientEnvironmentVariable("FIX_LANGUAGE") === "true";
-        const listOfNoTranslateIntents = this.clientEnvironmentProviderService.getClientEnvironmentVariable("FIX_LANGUAGE_INTENTS") ?? [];
+        const customTranslateSetting: boolean = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("FIX_LANGUAGE") === "true";
+        const listOfNoTranslateIntents = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("FIX_LANGUAGE_INTENTS") ?? [];
         const intent = response_format.intent;
         for (let i = 0; i < numberOfButtons; i++){
             const id = payload.fields.buttons.listValue.values[i].structValue.fields.reply.structValue.fields.id.stringValue;
@@ -123,7 +123,7 @@ export class WhatsappPostResponseFunctionalities{
         } else {
             header = "Please Select";
         }
-        
+
         let buttonText = ["Please Choose"];
         if (payload.fields.selectButtonText) {
             buttonText = [payload.fields.selectButtonText.stringValue];
@@ -149,7 +149,7 @@ export class WhatsappPostResponseFunctionalities{
             let translatedTitle = [title];
             if (languageForSession) {
                 translatedTitle = await this._translateService.translateResponse([title],languageForSession);
-                
+
 
             }
 
@@ -210,7 +210,7 @@ export class WhatsappPostResponseFunctionalities{
 
     templateResponseFormat = (response_format, payload) => {
         console.log(`........From templateResponseFormat ${response_format} payload: ${JSON.stringify(payload, null, 2)}`);
-    
+
         const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
         postDataMeta.type = response_format.message_type;
         postDataMeta["template"] = {
@@ -232,29 +232,29 @@ export class WhatsappPostResponseFunctionalities{
                             "address"   : payload.location.address ?? "Location details"
                         } }]
                 }] : []),
-    
+
                 ...(payload.headers ? [{
                     "type"       : "header",
                     "parameters" : [
                         payload.headers
                     ]
                 }] : []),
-    
+
                 // Body parameters
                 {
                     "type"       : "body",
                     "parameters" : payload.variables
                 },
-    
+
                 // Buttons (if any)
                 ...(payload.buttonIds || []).filter(Boolean)
             ]
         };
-    
+
         // console.log(`******payload: ${JSON.stringify(postDataMeta, null, 2)}`);
         return postDataMeta;
     };
-    
+
     locationResponseFormat = async(response_format:Iresponse,payload) => {
         console.log(`........From locationResponseFormat ${response_format} payload: ${JSON.stringify(payload, null, 2)}`, );
         const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
@@ -264,7 +264,7 @@ export class WhatsappPostResponseFunctionalities{
             "latitude"  : response_format.location.latitude,
             "longitude" : response_format.location.longitude,
         };
-        
+
         return postDataMeta;
     };
 
@@ -292,9 +292,9 @@ export class WhatsappPostResponseFunctionalities{
                     ...buttons
                 ]
             }
-          
+
         };
-        
+
         return postDataMeta;
     };
 
@@ -363,7 +363,7 @@ export class WhatsappPostResponseFunctionalities{
             else if (payloadContentMessageTypeMeta === "image") {
                 const postDataMeta = this.imageResponseFormat(response_format,payloadContent[i]);
                 listOfPostDataMeta.push(postDataMeta);
-        
+
             }
             else {
                 const payloadMessageMeta = await this._translateService.translateResponse([payloadContent[i].fields.content], languageForSession);

@@ -9,6 +9,7 @@ export type OpenEHRProvider = 'OpenEHRBase';
 export type EHRProvider = FHIRProvider | OpenEHRProvider;
 export type AuthorizationType = 'Custom'; //TBD: Other options need to be supported
 export type AuthenticationType = 'Custom'; //TBD: Other options need to be supported
+export type SecretsProvider = 'AWS-Secrets-Manager' | 'Azure-Key-Vault';
 
 export interface AuthConfig {
     Authentication: AuthenticationType;
@@ -26,10 +27,15 @@ export interface EHRConfig {
     Provider: EHRProvider;
 }
 
+export interface SecretsManagerConfig {
+    Provider: SecretsProvider;
+}
+
 export interface Configurations {
     Auth: AuthConfig;
     Database: DatabaseConfig;
     Ehr: EHRConfig;
     Messaging : MessagingConfig;
     MaxUploadFileSize: number;
+    SecretsManager: SecretsManagerConfig;
 }

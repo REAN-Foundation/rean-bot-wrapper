@@ -41,13 +41,13 @@ export class getAdditionalInfoSevice {
     async SendValidEHRResponse(EHRNumber,userId,userName,languageCode,eventObj){
         try {
             let message = null;
-            const clientName = this.clientEnvironment.getClientEnvironmentVariable("NAME");
+            const clientName = await this.clientEnvironment.getClientEnvironmentVariable("NAME");
 
             if (clientName === "GGHN_HIVTB" )
             {
                 message = await this.getMessageForGGHN(EHRNumber,userName);
             }
-            
+
             if (clientName === "LVPEI"|| clientName === "REAN_BOT")
             {
                 message = await this.getMessageForLVPEI(EHRNumber,userId,userName,languageCode,eventObj);
@@ -97,7 +97,7 @@ export class getAdditionalInfoSevice {
                 }
                 message = message + ` \n \n Is the above provided information correct?`;
             }
-            else 
+            else
             {
                 message = null;
             }
@@ -120,7 +120,7 @@ export class getAdditionalInfoSevice {
         return message;
     }
 
-   
+
 
     async getUserInfo(authenticationToken,userID){
         try {
@@ -146,7 +146,7 @@ export class getAdditionalInfoSevice {
             console.log("While getting user info", error);
 
         }
-        
+
     }
 
     async getauthenticationToken(){
@@ -174,7 +174,7 @@ export class getAdditionalInfoSevice {
             console.log("While getting authentication token", error);
 
         }
-  
+
     }
 
     async SaveEHRNumber(ehrSystemCode,userId){
@@ -194,7 +194,7 @@ export class getAdditionalInfoSevice {
             else {
                 console.log("while updating the EHR number");
             }
-    
+
         }
         catch (error) {
             console.log("in error", error);

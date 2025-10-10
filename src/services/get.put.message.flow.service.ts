@@ -79,7 +79,7 @@ export class MessageFlow{
             const outgoingMessage: OutgoingMessage = await this.decisionRouter.getDecision(preprocessedOutgoingMessage.message, channel);
             console.log("The outgoing message is being handled in routing");
             if (
-                this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_TRANSLATE_SERVICE") === "llm"
+                await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_TRANSLATE_SERVICE") === "llm"
             &&
                 outgoingMessage.QnA.NLPProvider === "LLM"
             ) {
@@ -200,7 +200,7 @@ export class MessageFlow{
         const contactList = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
         const personContactList = await contactList.findOne({ where: { mobileNumber: msg.userId } });
         const reminderMessage = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ReminderMessage);
-        const defaultLangaugeCode = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE") ?? "en";
+        const defaultLangaugeCode = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE") ?? "en";
         const payloadObj = typeof msg.payload === "string"
             ? JSON.parse(msg.payload)
             : msg.payload;
@@ -257,7 +257,7 @@ export class MessageFlow{
             payload = await sendApiButtonService(msg.payload);
         }
         else if (msg.type === "reancareAssessment") {
-            
+
             // make compatible for telegram also.
             const { updatedPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment( msg.userId,msg.channel, msg.payload, languageCode);
             if (updatedPayload["channel"] === 'whatsappMeta' || updatedPayload["channel"] === 'WhatsappWati') {
@@ -272,10 +272,10 @@ export class MessageFlow{
             }
             assessmentSession = assessmentSessionLogs;
             console.log(`assessment record ${JSON.stringify(payload)}`);
-            
+
         }
         if (msg.type === "inline_keyboard") {
-            
+
             payload = await sendTelegramButtonService(msg.payload);
         }
         if (msg.message.ButtonsIds != null && channel !== "telegram" && channel !== "Telegram") {
@@ -316,7 +316,7 @@ export class MessageFlow{
         let message_to_platform = null;
         // eslint-disable-next-line max-len
         message_to_platform = await platformMessageService.SendMediaMessage(response_format, payload);
-        const customRemSetting: boolean = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CUSTOM_REM_SETTING") === "true";
+        const customRemSetting: boolean = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("CUSTOM_REM_SETTING") === "true";
         if (msg.agentName === 'Reancare' && customRemSetting) {
             try {
                 const msg_id = await platformMessageService.getMessageIdFromResponse(message_to_platform);
@@ -334,7 +334,7 @@ export class MessageFlow{
             }
         }
         if (messageType === "reancareAssessment") {
-            
+
             assessmentSession.userMessageId = platformMessageService.getMessageIdFromResponse(message_to_platform);
             const Assessmentkey = `${response_format.sessionId}:Assessment:${assessmentSession.assesmentId}`;
             CacheMemory.set(Assessmentkey,assessmentSession.userMessageId);
@@ -360,7 +360,7 @@ export class MessageFlow{
             });
             const appointment_id = appRecord ? appRecord.ParentActionId : null;
             const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
-            
+
             //let todayDate = new Date().toISOString()
             //  .split('T')[0];
             //todayDate = Helper.removeLeadingZerosFromDay(todayDate);

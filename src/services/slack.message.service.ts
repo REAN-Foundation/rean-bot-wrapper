@@ -65,7 +65,7 @@ export class SlackMessageService implements platformServiceInterface {
                 const channel = data.platform;
                 if (humanHandoff === "true"){
                     console.log("child message HH On");
-                    
+
                     //if message.event.bot_id then we don't want to trigger a slack event
                     if (message.event.client_msg_id){
 
@@ -83,7 +83,7 @@ export class SlackMessageService implements platformServiceInterface {
                             // eslint-disable-next-line max-len
                             await this.slackClickupCommonFunctions.sendCustomMessage(channel, contact, message.event.text);
                         }
-                        
+
                     }
                     else {
                         console.log("User posted message: ", message.event.text);
@@ -94,7 +94,7 @@ export class SlackMessageService implements platformServiceInterface {
                     const textToUser = `Our Experts have responded to your query. \nYour Query: ${data.messageContent} \nExpert: ${message.event.text}`;
                     await this.slackClickupCommonFunctions.sendCustomMessage(channel, contact, textToUser);
                 }
-                
+
             }
         }
         else {
@@ -113,7 +113,7 @@ export class SlackMessageService implements platformServiceInterface {
         messageContent = (topic !== null) ? topic : messageContent;
         // eslint-disable-next-line max-len
         const objID = (topic !== null) ? response[response.length - 2].dataValues.id : response[response.length - 1].dataValues.id;
-        
+
         this.delayedInitialisation();
         const message = await this.client.chat.postMessage({ channel: this.channelID, text: messageContent });
         // eslint-disable-next-line max-len
@@ -123,19 +123,19 @@ export class SlackMessageService implements platformServiceInterface {
             .catch(error => console.log("error on update", error));
     }
 
-    delayedInitialisation(){
+    async delayedInitialisation(){
         if (!this.isInitialised){
             console.log("SMS delayedInitialisation");
-            this.client = new WebClient(this.clientEnvironmentProviderService.getClientEnvironmentVariable("SLACK_TOKEN_FEEDBACK"));
-            this.channelID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("SLACK_FEEDBACK_CHANNEL_ID");
-            const slackSecret = this.clientEnvironmentProviderService.getClientEnvironmentVariable("SLACK_SECRET_FEEDBACK");
+            this.client = new WebClient(await this.clientEnvironmentProviderService.getClientEnvironmentVariable("SLACK_TOKEN_FEEDBACK"));
+            this.channelID = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("SLACK_FEEDBACK_CHANNEL_ID");
+            const slackSecret = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("SLACK_SECRET_FEEDBACK");
             this.slackEvent = createEventAdapter(slackSecret);
             this.isInitialised = true;
 
         }
-        
+
     }
-    
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     sendManualMesage(msg: any) {
         throw new Error('Method not implemented.');

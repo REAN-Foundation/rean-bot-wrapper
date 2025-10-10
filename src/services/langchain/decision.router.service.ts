@@ -113,7 +113,7 @@ export class DecisionRouter {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async checkAssessment(messageBody: Imessage, channel: string) {
         try {
-            
+
             const assessmentData = {
                 AssessmentId   : '',
                 AssessmentName : '',
@@ -176,7 +176,7 @@ export class DecisionRouter {
             } else {
                 key = '';
             }
-          
+
             const nextQuestionFlag = await CacheMemory.get(key);
 
             // Currently will only support the assessment start through buttons
@@ -185,7 +185,7 @@ export class DecisionRouter {
                 messageBody.intent &&
                 !nextQuestionFlag
             ) {
-        
+
                 const matchingIntents = await intentRepository.findOne({
                     where : {
                         code : intent
@@ -210,7 +210,7 @@ export class DecisionRouter {
                     if (nextQuestionFlag === true) {
                         assessmentData.AssessmentFlag = true;
                         assessmentData.AssessmentId = assessmentResponse.assesmentId;
-                
+
                         // await CacheMemory.set(key, false);
                     }
                 } else {
@@ -257,7 +257,7 @@ export class DecisionRouter {
                     assessmentData.AssessmentFlag = false;
 
                     if (
-                        messageBody.contextId && 
+                        messageBody.contextId &&
                         messageBody.intent
                     ) {
                         const matchingIntents = await intentRepository.findOne({
@@ -281,13 +281,13 @@ export class DecisionRouter {
                         }
                     }
                 }
-            
+
             }
 
             return assessmentData;
         } catch (error) {
             console.log('Error in checkAssessment:', error);
-            
+
             // Return default assessment data with flag set to false on error
             return {
                 AssessmentId   : '',
@@ -379,7 +379,7 @@ export class DecisionRouter {
 
     async getDecision(messageBody: Imessage, channel: string){
         try {
-            const workflowMode = this.environmentProviderService.getClientEnvironmentVariable("WORK_FLOW_MODE");
+            const workflowMode = await this.environmentProviderService.getClientEnvironmentVariable("WORK_FLOW_MODE");
             if (workflowMode === 'TRUE')
             {
                 this.outgoingMessage.MetaData = messageBody;

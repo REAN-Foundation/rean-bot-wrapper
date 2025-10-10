@@ -47,8 +47,8 @@ export class HeartFailureRegistrationService {
                 }
             };
             const patientUpdateUrl = `patients/${patientIDArray.patientUserId}`;
-            const defaultDOB = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_DOB");
-            const defaultGender = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_GENDER");
+            const defaultDOB = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_DOB");
+            const defaultGender = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_GENDER");
 
             const patientDomainModel = {
                 Gender    : defaultGender,
@@ -107,7 +107,7 @@ export class HeartFailureRegistrationService {
                 msg = translatedMsg;
             }
         }
-       
+
         const obj1 = {
             Provider   : "REAN",
             PlanName   : "Heart Failure",
@@ -177,7 +177,7 @@ export class HeartFailureRegistrationService {
         };
         return languageCodeMapping[planCode] ?? "en";
     }
-    
+
     calculateStartDateByButtonId(buttonId: string, todayDate: Date): Date {
         if (buttonId?.startsWith("Start_Careplan_HeartF")) {
             const dayOfWeek = todayDate.getDay();

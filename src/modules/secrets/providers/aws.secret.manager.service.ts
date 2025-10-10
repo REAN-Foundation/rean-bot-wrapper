@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import AWS from 'aws-sdk';
+import { ISecretsService } from '../interfaces/secrets.provider.interface';
 
 // import { TempCredentials } from './get.temporary.aws.credentials';
 
 // Load the AWS SDK
 console.log("start---------");
 
-export class AwsSecretsManager {
+export class AwsSecretsManager implements ISecretsService {
 
     // constructor(private tempCredentials?: TempCredentials){}
 
@@ -31,34 +32,19 @@ export class AwsSecretsManager {
         });
     }
 
-    async getSecrets() {
+    async getSecrets(secretName) {
 
         const responseCredentials: any = await this.getCrossAccountCredentials();
         const region = process.env.region;
-        const secretNameList = process.env.SECRET_NAME_LIST.split(',');
-        const secretObjectList = [];
+
+        // const secretNameList = process.env.SECRET_NAME_LIST.split(',');
+        // const secretObjectList = [];
 
         // eslint-disable-next-line max-len
         const client = new AWS.SecretsManager({ region: region, accessKeyId: responseCredentials.accessKeyId, secretAccessKey: responseCredentials.secretAccessKey, sessionToken: responseCredentials.sessionToken });
 
-        // var params = {
-        //     Filters: [
-        //         {
-        //             Key: "tag-key",
-        //             Values: [
-        //                 'rean'
-        //             ]
-        //         },
-        //         {
-        //             Key: "tag-value",
-        //             Values: [
-        //                 'SaaS'
-        //             ]
-        //         }
-        //     ]
-        // };
         // eslint-disable-next-line init-declarations
-        let error: any;
+        // let error: any;
 
         // eslint-disable-next-line max-len
         //--------Once the limitation of Duplo os resolved, we will apply this block of code below to get the list of secrests--------
@@ -71,15 +57,33 @@ export class AwsSecretsManager {
         //------------------------------------------------------
 
         // For the list of secrets, get the respective values and store as list of objects
-        for (const ele of secretNameList) {
-            // eslint-disable-next-line max-len
-            const responseSecretValue = await client.getSecretValue({ SecretId: ele }).promise()
-                .catch(err => (error = err));
-            const secretStringToObj = JSON.parse(responseSecretValue.SecretString);
-            secretObjectList.push(secretStringToObj);
-        }
+        // for (const ele of secretNameList) {
+        // eslint-disable-next-line max-len
+        // const responseSecretValue = await client.getSecretValue({ SecretId: secretName }).promise()
+        //     .catch(err => (error = err));
+        // const secretStringToObj = JSON.parse(responseSecretValue.SecretString);
+        // return secretStringToObj;
 
-        return secretObjectList;
+        try {
+            const response = await client.getSecretValue({ SecretId: secretName }).promise();
+
+            if (!response || !response.SecretString) {
+
+                // Secret exists but no value
+                return null;
+            }
+            return JSON.parse(response.SecretString);
+        } catch (error: any) {
+
+            // If secret not found or other AWS error
+            if (error.code === 'ResourceNotFoundException') {
+                console.warn(`Secret "${secretName}" not found.`);
+                return null;
+            }
+
+            console.error(`Error retrieving secret "${secretName}":`, error);
+            return null;
+        }
     }
-    
+
 }
