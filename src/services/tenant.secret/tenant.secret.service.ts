@@ -1,101 +1,160 @@
-import { AwsSecretsManager } from "../../modules/secrets/providers/aws.secret.manager.service";
 import { TenantSettingService } from "../tenant.setting/tenant.setting.service";
 import { RequestResponseCacheService } from "../../modules/cache/request.response.cache.service";
-import { inject } from 'tsyringe';
+import { inject, injectable } from 'tsyringe';
+import { ISecretsService } from '../../modules/secrets/interfaces/secrets.provider.interface';
+import { TenantService } from "../tenant/tenant.service";
+import { ApiError } from "../../common/api.error";
+import { Environment } from "../../domain.types/tenant.setting/tenant.setting.types";
 
+@injectable()
 export class TenantSecretsService {
 
-    private _awsSecretsManager: AwsSecretsManager = null;
+    constructor(
+        @inject('ISecretsService') private _secretsManager: ISecretsService
+    ) {}
 
-    constructor() {
-        this._awsSecretsManager = new AwsSecretsManager();
+    apiKey = process.env["REANCARE_API_KEY"];
+
+    baseUrl = process.env["REAN_APP_BACKEND_BASE_URL"];
+
+
+    public loadClientEnvVariables = async() => {
+        try {
+            const tenantObjectList = await TenantService.getAllTenants(this.apiKey, this.baseUrl);
+            if (!tenantObjectList || tenantObjectList.length === 0) {
+                console.warn("No tenants found to load secrets for.");
+                return;
+            }
+            const clientsList = [];
+            for (const tenant of tenantObjectList) {
+                const tenantCode = tenant.Code;
+                clientsList.push(tenantCode);
+                const secretName = await this.getSecretName(tenantCode);
+                let secretObject = null;
+                secretObject = await this._secretsManager.getSecrets(secretName);
+
+                //  if (!secretObject) {
+                //      const oldSecretName = this.getOldSecretName(tenantCode);
+                //      console.log(`No secret found for ${secretName}. Trying old secret name ${oldSecretName}`);
+                //      secretObject = await this._secretsManager.getSecrets(oldSecretName);
+                //      if (!secretObject) {
+                //          console.warn(`No secret found for tenant ${tenantCode} with names ${secretName} or ${oldSecretName}. Skipping...`);
+                //          continue;
+                //      }
+                //  }
+                if (!secretObject) {
+                    console.warn(`No secret found for tenant ${tenantCode} with name ${secretName}. Skipping...`);
+                    continue;
+                }
+                await this.storeVariablesInCache(secretObject, tenantCode);
+            }
+            return clientsList;
+
+        } catch (e) {
+            console.log(e);
+        }
+    };
+
+    // Private region
+
+    private async storeVariablesInCache(secretObject, tenantCode) {
+        try {
+
+            if (!secretObject.NAME) {
+
+                //  const parts = secretName.split("-");
+
+                //  // Always skip the first and last
+                //  const tenantParts = parts.slice(1, -1);
+
+                //  // Join back with "-" and uppercase
+                //  const derivedTenantName = tenantParts.join("-").toUpperCase();
+
+                const tenantSecrets = {};
+                for (const k in secretObject) {
+                    if (typeof secretObject[k] === "object"){
+                        tenantSecrets[k.toUpperCase()] = JSON.stringify(secretObject[k]);
+                    }
+                    else {
+                        tenantSecrets[k.toUpperCase()] = secretObject[k];
+                    }
+                    console.log("loading this key", `${tenantCode}_${k.toUpperCase()}`);
+                }
+
+                if (this.apiKey && this.baseUrl) {
+                    const botSettings = await TenantSettingService.getChatBotSettings(
+                        tenantCode,
+                        this.apiKey,
+                        this.baseUrl);
+
+                    if (botSettings) {
+                        for (const key in botSettings){
+                            if (typeof botSettings[key] === "object"){
+                                tenantSecrets[key.toUpperCase()] = JSON.stringify(botSettings[key]);
+                            }
+                            else {
+                                tenantSecrets[key.toUpperCase()] = botSettings[key];
+                            }
+                        }
+                    }
+                } else {
+                    console.warn(`Missing REANCARE_API_KEY or REAN_APP_BACKEND_BASE_URL. Skipping tenant settings fetch.`);
+                }
+                await RequestResponseCacheService.set(`bot-secrets-${tenantCode}`,
+                    tenantSecrets,
+                    "config"
+                );
+                return;
+            }
+            else {
+                const tenantSecrets = {};
+                for (const k in secretObject) {
+                    if (typeof secretObject[k] === "object"){
+                        tenantSecrets[k.toUpperCase()] = JSON.stringify(secretObject[k]);
+                    }
+                    else {
+                        tenantSecrets[k.toUpperCase()] = secretObject[k];
+                    }
+                    console.log("loading this key", `${secretObject.NAME}_${k.toUpperCase()}`);
+                }
+                await RequestResponseCacheService.set(`bot-secrets-${secretObject.NAME}`,
+                    tenantSecrets,
+                    "config"
+                );
+                return;
+            }
+        } catch (e) {
+            console.log(e);
+        }
     }
 
-     loadClientEnvVariables = async() => {
+    private getEnvironment = async () => {
+        const env = process.env.NODE_ENV;
+        if (!env) {
+            throw new ApiError(500, 'NODE_ENV is not set.');
+        }
 
-         try {
-             const secretNameList = process.env.SECRET_NAME_LIST.split(',');
-             const clientsList = [];
-             for (const secretName of secretNameList) {
-                 const secretObject = await this._awsSecretsManager.getSecrets(secretName);
-                 const clientname = await this.storeVariablesInCache(secretObject, secretName);
-                 clientsList.push(clientname);
-             }
-             return clientsList;
+        switch (env) {
+        case Environment.Development:
+            return 'dev';
+        case Environment.Production:
+            return 'prod';
+        case Environment.Uat:
+            return 'uat';
+        default:
+            throw new ApiError(500, `Invalid NODE_ENV value: ${env}`);
+        }
+    };
 
-         } catch (e) {
-             console.log(e);
-         }
-     }
+    private getSecretName = async (tenantCode: string) => {
+        const environment = await this.getEnvironment();
+        const code = tenantCode.toLowerCase().replace(/_/g, "-");
+        return `${environment}-${code}-v1`;
+    };
 
-     async storeVariablesInCache(secretObject, secretName) {
-         try {
-
-             if (!secretObject.NAME) {
-                 const parts = secretName.split("-");
-
-                 // Always skip the first and last
-                 const tenantParts = parts.slice(1, -1);
-
-                 // Join back with "-" and uppercase
-                 const derivedTenantName = tenantParts.join("-").toUpperCase();
-
-                 const tenantSecrets = {};
-                 for (const k in secretObject) {
-                     if (typeof secretObject[k] === "object"){
-                         tenantSecrets[k.toUpperCase()] = JSON.stringify(secretObject[k]);
-                     }
-                     else {
-                         tenantSecrets[k.toUpperCase()] = secretObject[k];
-                     }
-                     console.log("loading this key", `${derivedTenantName}_${k.toUpperCase()}`);
-                 }
-
-                 const apiKey = process.env["REANCARE_API_KEY"];
-                 const baseUrl = process.env["REAN_APP_BACKEND_BASE_URL"];
-
-                 if (apiKey && baseUrl) {
-                     const tenantSettings = await TenantSettingService.getTenantSettingByCode(derivedTenantName, apiKey, baseUrl);
-                     if (tenantSettings) {
-                         const botSettings = tenantSettings.ChatBot;
-                         for (const key in botSettings){
-                             if (typeof tenantSettings.ChatBot[key] === "object"){
-                                 tenantSecrets[key.toUpperCase()] = JSON.stringify(botSettings[key]);
-                             }
-                             else {
-                                 tenantSecrets[key.toUpperCase()] = botSettings[key];
-                             }
-                         }
-                     }
-                 } else {
-                     console.warn(`Missing REANCARE_API_KEY or REAN_APP_BACKEND_BASE_URL. Skipping tenant settings fetch.`);
-                 }
-                 await RequestResponseCacheService.set(`bot-secrets-${derivedTenantName}`,
-                     tenantSecrets,
-                     "config"
-                 );
-                 return derivedTenantName;
-             }
-             else {
-                 const tenantname = secretObject.NAME;
-                 const tenantSecrets = {};
-                 for (const k in secretObject) {
-                     if (typeof secretObject[k] === "object"){
-                         tenantSecrets[k.toUpperCase()] = JSON.stringify(secretObject[k]);
-                     }
-                     else {
-                         tenantSecrets[k.toUpperCase()] = secretObject[k];
-                     }
-                     console.log("loading this key", `${secretObject.NAME}_${k.toUpperCase()}`);
-                 }
-                 await RequestResponseCacheService.set(`bot-secrets-${secretObject.NAME}`,
-                     tenantSecrets,
-                     "config"
-                 );
-                 return tenantname;
-             }
-         } catch (e) {
-             console.log(e);
-         }
-     }
+    private getOldSecretName = async (tenantCode: string) => {
+        const environment = await this.getEnvironment();
+        const code = tenantCode.toLowerCase().replace(/_/g, "-");
+        return `duploservices-${environment}-${code}-v1`;
+    };
 }

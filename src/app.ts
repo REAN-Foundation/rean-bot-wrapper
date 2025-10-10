@@ -19,6 +19,8 @@ import { CheckCrossConnection } from "./middleware/check.cross.connection";
 import { Injector } from "./startup/injector";
 import { SequelizeClient } from "./connection/sequelizeClient";
 import { TenantSecretsService } from "./services/tenant.secret/tenant.secret.service";
+import { ModuleInjector } from "./modules/module.injector";
+import { Module } from "module";
 
 declare module "express-serve-static-core" {
     interface Request {
@@ -44,7 +46,6 @@ export default class Application {
 
     private _checkCrossConnection: CheckCrossConnection = null;
 
-    private _secretsService: TenantSecretsService = null
 
     // private clientsList = [];
 
@@ -77,14 +78,14 @@ export default class Application {
             const whatsappToken = await clientEnvironmentProviderService.getClientEnvironmentVariable('WHATSAPP_LIVE_API_KEY') || await clientEnvironmentProviderService.getClientEnvironmentVariable('META_API_TOKEN');
             console.log(telegramToken);
             if (telegramToken) {
-                telegram.setWebhook(clientName);
+                await telegram.setWebhook(clientName);
                 console.log("Telegram webhook is set");
             } else {
                 console.log("Telegram webhook need not to be set");
             }
 
             if (whatsappToken) {
-                whatsapp.setWebhook(clientName);
+                await whatsapp.setWebhook(clientName);
             }
             else {
                 console.log("whatsapp webhook need not to be set");
@@ -98,10 +99,15 @@ export default class Application {
     public start = async (): Promise<void> => {
         try {
 
-            const clientList = await this._secretsService.loadClientEnvVariables();
-
             //Load configurations
             ConfigurationManager.loadConfigurations();
+
+            ModuleInjector.registerInjections(container);
+
+            const secretsService = container.resolve(TenantSecretsService);
+
+            const clientList = await secretsService.loadClientEnvVariables();
+
 
             //Load the modules
             await Loader.init();

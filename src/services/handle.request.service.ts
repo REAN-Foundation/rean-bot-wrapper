@@ -76,7 +76,8 @@ export class handleRequestservice {
         } else {
             // eslint-disable-next-line max-len
             message_from_nlp = await this.DialogflowResponseService.getDialogflowMessage(translate_message.message, channel, message.intent, message);
-            if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("OPENAI_API_KEY")) {
+            const openaiApiKey = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("OPENAI_API_KEY");
+            if (openaiApiKey) {
                 if (message_from_nlp.getIntent() === "Default Fallback Intent") {
                     message_from_nlp = await this.openAIResponseService.getOpenaiMessage(clientName, translate_message.message);
                 }
@@ -116,7 +117,8 @@ export class handleRequestservice {
         if (customTranslations[0] === null) {
             let googleTranslate;
             if (messageHandler === "QnA") {
-                if (await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_TRANSLATE_SERVICE") === "llm") {
+                const nlpService = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_TRANSLATE_SERVICE");
+                if (nlpService === "llm") {
                     googleTranslate = message_from_nlp.getText();
                 }
                 else {
@@ -172,8 +174,8 @@ export class handleRequestservice {
                 let tag = "null";
                 tag = (metaData.type === "reaction") ? "reaction" : "Feedback";
                 await this.feedbackService.recordFeedback(outgoingMessage.Feedback.FeedbackContent, metaData.contextId, tag);
-                if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("FEEDBACK_PROMPT")) {
-                    const feedbackPrompt = this.clientEnvironmentProviderService.getClientEnvironmentVariable("FEEDBACK_PROMPT");
+                const feedbackPrompt = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("FEEDBACK_PROMPT");
+                if (feedbackPrompt) {
                     messageToMlModel = feedbackPrompt + outgoingMessage.Feedback.FeedbackContent;
                 } else {
                     messageToMlModel = "I have sent feedback to your message tell me that : we have acknowledged your feedback out team of experts will come back to you";

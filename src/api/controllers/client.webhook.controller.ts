@@ -40,6 +40,10 @@ export class ClientWebhookController {
 
     }
 
+    apiKey = process.env.REANCARE_API_KEY;
+
+    reanBackendUrl = process.env.REAN_APP_BACKEND_BASE_URL;
+
     sendMessage = async (req, res) => {
         try {
             this._platformMessageService = req.container.resolve(req.params.channel);
@@ -67,7 +71,7 @@ export class ClientWebhookController {
         if (contactList){
             patientUserId  = contactList.patientUserId;
             firstTimeUser = false;
-        } 
+        }
         return [firstTimeUser , patientUserId ];
     }
 
@@ -78,12 +82,12 @@ export class ClientWebhookController {
             if (userConsent){
                 return userConsent.consentGiven !== 'true';
             }
-         
+
             return true;
-            
+
         } catch (error) {
             console.error('Error in checkConsentRequired:', error);
-            return true; 
+            return true;
         }
     }
 
@@ -177,9 +181,9 @@ export class ClientWebhookController {
             }
             else {
                 const consentRequirement = await TenantSettingService.isConsentEnabled(
-                    clientName, 
-                    clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"), 
-                    clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL")
+                    clientName,
+                    this.apiKey,
+                    this.reanBackendUrl
                 );
                 console.log("Consent feature is ", consentRequirement);
                 const validChannels = ["REAN_SUPPORT", "slack", "SNEHA_SUPPORT", "api"];
@@ -367,9 +371,9 @@ export class ClientWebhookController {
             const statuses = req.body.entry[0].changes[0].value.statuses;
             this._platformMessageService = req.container.resolve(req.params.channel);
             const consentActivation = await TenantSettingService.isConsentEnabled(
-                clientName, 
-                clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"), 
-                clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL")
+                clientName,
+                this.apiKey,
+                this.reanBackendUrl
             );
             let userPlatformId = null;
             let platformUserName = null;
@@ -414,7 +418,7 @@ export class ClientWebhookController {
         try {
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
-            const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
             const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(ChatMessage);
             const messageStatusRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(MessageStatus);
             console.log("Wati Client Name:", clientName);

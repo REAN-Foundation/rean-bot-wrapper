@@ -104,14 +104,10 @@ export class Registration{
         PlatformUserId: string,
         platformUserName: string,
         password: string = process.env.USER_REGISTRATION_PASSWORD,
-        apiKey: string | null = null
+        apiKey: string = process.env.REANCARE_API_KEY
     ): Promise<{ patientUserId: string | null; statusCode: number; errorMessage?: string }> {
         try {
             let patientUserId = null;
-
-            if (!apiKey){
-                apiKey = await this.EnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY");
-            }
 
             if (channel === "telegram" || channel === "Telegram") {
                 const result = await this.checkPatientExist(PlatformUserId, null);
@@ -150,10 +146,6 @@ export class Registration{
             // Re-throw the error to propagate it to the caller
             throw error;
         }
-    }
-
-    async getApiKey(){
-        return await this.EnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY");
     }
 
 }

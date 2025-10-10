@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import { ConfigurationManager } from '../../configs/configuration.manager';
 import { DependencyContainer } from 'tsyringe';
 import { AwsSecretsManager } from './providers/aws.secret.manager.service';
-import { AzureStorageFileStorageService } from './providers/azure.storage.file.storage.service';
+import { AzureSecretsProvider } from './providers/azure.key.vault.service';
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -15,7 +15,7 @@ export class SecretsManagerInjector {
             container.register('ISecretsService', AwsSecretsManager);
         }
         else if (provider === 'Azure-Key-Vault') {
-            container.register('ISecretsService', AzureStorageFileStorageService);
+            container.register('ISecretsService', AzureSecretsProvider);
         }
     }
 
