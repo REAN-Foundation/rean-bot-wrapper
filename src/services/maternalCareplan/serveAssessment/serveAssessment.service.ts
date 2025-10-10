@@ -62,7 +62,7 @@ export class ServeAssessmentService {
                 else {
                     questionData = responseBody.Data.Next.RawData;
                 }
-                updatedPayload["messageText"] = responseBody.Data.Next.Title;
+                updatedPayload["messageText"] = responseBody.Data.Next.Description;
                 updatedPayload["channel"] = channel;
                 updatedPayload["templateName"] = questionData.TemplateName;
                 let languageForSession = await this.translate.detectUsersLanguage( platformUserId );
@@ -460,7 +460,7 @@ export class ServeAssessmentService {
     }> {
         try {
             let questionRawData = null;
-            const message = questionData.Title;
+            const message = questionData.Description;
             let payload = null;
             let messageType = 'text';
 
