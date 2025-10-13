@@ -40,7 +40,7 @@ export class sendExtraMessages{
 
     async sendResponsebyButton(message, eventObj, userId, buttonArray){
         try {
-            const sourceChannel = eventObj.body.originalDetectIntentRequest.payload.source;
+            let sourceChannel = eventObj.body.originalDetectIntentRequest.payload.source;
             let payload = null;
             let messageType = null;
             if (sourceChannel === "whatsappMeta"){
@@ -48,6 +48,7 @@ export class sendExtraMessages{
                 messageType = "interactivebuttons";
             }
             else {
+                sourceChannel = sourceChannel.toLowerCase();
                 payload = await sendTelegramButtonService(buttonArray);
                 messageType = "inline_keyboard";
             }

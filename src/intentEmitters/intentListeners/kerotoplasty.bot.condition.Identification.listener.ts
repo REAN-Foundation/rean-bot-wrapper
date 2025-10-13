@@ -13,7 +13,6 @@ export const kerotoplastySymptomAnalysisListener = async (intent, eventObj) => {
         
         kerotoplastyServiceObj.postingOnClickup(intent, eventObj, priority);
         let outputMessage = "To better understand your condition, we’ll ask you a few quick questions. This will help us guide you effectively.";
-        let data;
         if (priority <= 1){
             outputMessage =  message;
         } else if (priority > 1 && intent === "symptomAnalysis") {
@@ -29,11 +28,11 @@ export const kerotoplastySymptomAnalysisListener = async (intent, eventObj) => {
 
         } else {
             outputMessage = message;
-            data = await dialogflowService.making_response(outputMessage);
-            return data;
+            // data = await dialogflowService.making_response(outputMessage);
+            // return data;
         }
         followUpStep(intent, symptoms, eventObj, priority, message);
-        data = await dialogflowService.making_response(outputMessage);
+        const data = await dialogflowService.making_response(outputMessage);
         return data;
     }
     catch (error: any) {
@@ -55,13 +54,7 @@ async function followUpStep(intent: string, symptoms: string[], eventObj: any, p
         const userPlatformId = eventObj.body.originalDetectIntentRequest.payload.userId;
         const cacheKey = `SymptomsStorage:${userPlatformId}`;
 
-        // Format symptoms list naturally (comma + "and")
-        const formattedSymptoms =
-            symptoms.length > 1
-                ? symptoms.slice(0, -1).join(", ") + " and " + symptoms.slice(-1)
-                : symptoms[0] || "";
-
-        if (priority <= 1 || intent === "MoreSymptoms") {
+        if (priority <= 1 || intent === "MoreSymptoms" || intent === "KerotoplastyFollowUp") {
             inputMessage = "Would you be able to provide an *image of the affected area of your eye* for the doctor’s assessment?";
             yesIntentName = "EyeImage";
             noIntentName = "responseNo";

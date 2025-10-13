@@ -8,12 +8,12 @@ export const kerotoplastyEyeQualityListener = async (intent:string, eventObj) =>
     // const message = "We are checking the quality of image";
     const message = "✅ We’ve successfully received your photo. The *quality looks good* for further assessment";
     const to_send = await dialogflowMsgFormatObj.making_response(message);
-    eyeImageQuality(eventObj,intent);
+    eyeImageQuality(eventObj);
     return to_send;
  
 };
 
-async function eyeImageQuality(eventObj,intent){
+async function eyeImageQuality(eventObj){
     try {
         const kerotoplastyServiceObj: kerotoplastyService = eventObj.container.resolve(kerotoplastyService);
         const sendExtraMessagesobj: sendExtraMessages = eventObj.container.resolve(sendExtraMessages);
@@ -34,7 +34,7 @@ async function eyeImageQuality(eventObj,intent){
         "Are you taking your prescribed medications regularly?\n\n";
         const yesIntentName = "responseYes";
         const noIntentName = "responseNo";
-        // sendExtraMessagesobj.sendSecondaryButtonMessage(message, yesIntentName, noIntentName,  eventObj);
+        sendExtraMessagesobj.sendSecondaryButtonMessage(message, yesIntentName, noIntentName,  eventObj);
         // kerotoplastyServiceObj.postingOnClickup(intent,eventObj,1);
         const repetitionFlag = await kerotoplastyServiceObj.postingImage(eventObj);
         // if (repetitionFlag !== "True"){
