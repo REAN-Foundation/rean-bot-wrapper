@@ -31,7 +31,7 @@ export const kerotoplastySymptomAnalysisListener = async (intent, eventObj) => {
             // data = await dialogflowService.making_response(outputMessage);
             // return data;
         }
-        followUpStep(intent, symptoms, eventObj, priority, message);
+        followUpStep(intent, eventObj, priority);
         const data = await dialogflowService.making_response(outputMessage);
         return data;
     }
@@ -42,7 +42,7 @@ export const kerotoplastySymptomAnalysisListener = async (intent, eventObj) => {
     }
 };
 
-async function followUpStep(intent: string, symptoms: string[], eventObj: any, priority: number,message: string) {
+async function followUpStep(intent: string, eventObj: any, priority: number) {
     try {
         const sendExtraMessagesObj: sendExtraMessages = eventObj.container.resolve(sendExtraMessages);
 

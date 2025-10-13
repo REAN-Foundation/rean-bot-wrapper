@@ -1,6 +1,6 @@
 import { kerotoplastyService } from "../../services/kerotoplasty.service";
 import { dialoflowMessageFormatting } from "../../services/Dialogflow.service";
-import { CallEyeImageQualityCheckModel } from '../../services/call.eye.image.quality.check';
+// import { CallEyeImageQualityCheckModel } from '../../services/call.eye.image.quality.check';
 import { sendExtraMessages } from "../../services/send.extra.messages.service";
 
 export const kerotoplastyEyeQualityListener = async (intent:string, eventObj) => {
@@ -36,7 +36,7 @@ async function eyeImageQuality(eventObj){
         const noIntentName = "responseNo";
         sendExtraMessagesobj.sendSecondaryButtonMessage(message, yesIntentName, noIntentName,  eventObj);
         // kerotoplastyServiceObj.postingOnClickup(intent,eventObj,1);
-        const repetitionFlag = await kerotoplastyServiceObj.postingImage(eventObj);
+        // const repetitionFlag = await kerotoplastyServiceObj.postingImage(eventObj);
         // if (repetitionFlag !== "True"){
         //     const inputMessage = `Would you like to request an appointment?`;
         //     const yesIntentName = "BookAppointment";

@@ -38,7 +38,6 @@ export class kerotoplastyService {
             const Emergency_risk: string[] = parsedInfo.RISK_CLASSIFICATION.EMERGENCY.SYMPTOMS;
             const Attention_needed_risk: string[] = parsedInfo.RISK_CLASSIFICATION.ATTENTION_NEEDED.SYMPTOMS;
 
-            let riskLevel: string;
             let priority: number;
             let message: any;
 
@@ -47,21 +46,18 @@ export class kerotoplastyService {
                 priority = symptomsInCache['priority'];
                 message = symptomsInCache['message'];
             } else if (symptoms.some(symptom => Emergency_risk.includes(symptom))) {
-                riskLevel = "EMERGENCY";
                 message = parsedInfo.RISK_CLASSIFICATION.EMERGENCY.MESSAGE;
                 priority = 1;
             }
             
             // Then Attention Needed
             else if (symptoms.some(symptom => Attention_needed_risk.includes(symptom))) {
-                riskLevel = "ATTENTION_NEEDED";
                 message = parsedInfo.RISK_CLASSIFICATION.ATTENTION_NEEDED.MESSAGE;
                 priority = 2;
             }
             
             // Then Normal
             else if (symptoms.some(symptom => Normal_risk.includes(symptom))) {
-                riskLevel = "NORMAL";
                 message = parsedInfo.RISK_CLASSIFICATION.NORMAL.MESSAGE;
                 priority = 3;
             }
