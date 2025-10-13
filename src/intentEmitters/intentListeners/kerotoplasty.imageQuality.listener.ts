@@ -1,4 +1,4 @@
-import { kerotoplastyService } from "../../services/kerotoplasty.service";
+// import { kerotoplastyService } from "../../services/kerotoplasty.service";
 import { dialoflowMessageFormatting } from "../../services/Dialogflow.service";
 // import { CallEyeImageQualityCheckModel } from '../../services/call.eye.image.quality.check';
 import { sendExtraMessages } from "../../services/send.extra.messages.service";
@@ -15,7 +15,7 @@ export const kerotoplastyEyeQualityListener = async (intent:string, eventObj) =>
 
 async function eyeImageQuality(eventObj){
     try {
-        const kerotoplastyServiceObj: kerotoplastyService = eventObj.container.resolve(kerotoplastyService);
+        // const kerotoplastyServiceObj: kerotoplastyService = eventObj.container.resolve(kerotoplastyService);
         const sendExtraMessagesobj: sendExtraMessages = eventObj.container.resolve(sendExtraMessages);
         // const EyeImgQultyModel: CallEyeImageQualityCheckModel =
         //  eventObj.container.resolve(CallEyeImageQualityCheckModel);
