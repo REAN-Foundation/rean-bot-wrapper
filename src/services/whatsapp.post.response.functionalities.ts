@@ -317,7 +317,7 @@ export class WhatsappPostResponseFunctionalities{
                     "flow_name"            : payload.flowName,
                     "flow_cta"             : "Click Here!",
                     "flow_action_payload"  : {
-                        "screen" : flowMessageParts.Screen ?? "QUESTION_ONE"
+                        "screen" : flowMessageParts?.Screen ?? "WELCOME"
                     }
                 }
             }
