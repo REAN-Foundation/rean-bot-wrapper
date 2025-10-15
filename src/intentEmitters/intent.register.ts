@@ -88,6 +88,7 @@ import { EnrollHFCareplanListener, SentRegistrationMSGListener } from './intentL
 import { AssessmentScoringListener } from './intentListeners/assessment/assessemnt.quiz.scoring.listener';
 import { UserInfoListener } from './intentListeners/user.info.listener';
 import { FlowListener, ProcessWhatsAppFormResponsesListener } from './intentListeners/whatsapp.form/flow.listener';
+import { UserChatHistoryDeletionListener } from './intentListeners/user.history.deletion.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -286,6 +287,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('bookAppointment', AppointmentBookingListner);
         IntentEmitter.registerListener('Start_WhatsApp_Form_Select', FlowListener);
         IntentEmitter.registerListener('Process_WhatsApp_Form_Responses', ProcessWhatsAppFormResponsesListener);
+        IntentEmitter.registerListener('deleteHistory - custom', UserChatHistoryDeletionListener);
 
         // Intents for Collecting user information
         IntentEmitter.registerListener('UserInfo', UserInfoListener);
