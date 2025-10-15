@@ -163,7 +163,7 @@ export class handleRequestservice {
             if (userCacheData) {
                 console.log("user response",metaData.messageBody);
                 message_from_nlp = await this.serveAssessmentService.answerQuestion(eventObj, metaData.platformId, metaData.originalMessage, userCacheData, metaData.platform, true,metaData.intent, metaData);
-                console.log(`after calling answer question service, message: ${message_from_nlp.getText()}`);
+                console.log(`after calling answer question service, message: ${message_from_nlp?.getText()}`);
             } else {
                 outgoingMessage.MetaData["eventObj"] = eventObj;
                 message_from_nlp = await this.assessmentHandlingService.initialiseAssessment(outgoingMessage, outgoingMessage.Assessment.AssessmentId, eventObj);
