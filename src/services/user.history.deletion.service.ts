@@ -1,6 +1,5 @@
 import { inject, Lifecycle, scoped } from "tsyringe";
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import needle from 'needle';
 import { EntityManagerProvider } from "./entity.manager.provider.service";
 import { ContactList } from '../models/contact.list';
 import { NeedleService } from "./needle.service";
