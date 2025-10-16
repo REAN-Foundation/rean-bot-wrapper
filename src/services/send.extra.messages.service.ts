@@ -66,7 +66,7 @@ export class sendExtraMessages{
             response_format.sessionId = sessionId;
             response_format.messageText = message;
             response_format.message_type = messageType;
-            this.delay(2500);
+            await this.delay(250);
             _platformMessageService.SendMediaMessage(response_format, payload );
         }
 
@@ -83,6 +83,7 @@ export class sendExtraMessages{
         payload.completeMessage.messageType = 'text';
         payload.completeMessage.messageBody = messageFromModel;
         payload.completeMessage.intent = intent;
+        await this.delay(250);
         if (channel === "whatsappMeta") {
             const endPoint = 'messages';
             const postData = {
@@ -94,14 +95,14 @@ export class sendExtraMessages{
                     "body" : messageFromModel
                 }
             };
-            this.delay(2500);
+
             await this.needleService.needleRequestForWhatsappMeta("post", endPoint, JSON.stringify(postData), payload);
         } else if (channel === "telegram") {
             const postData = {
                 chat_id : userId,
                 text    : messageFromModel
             };
-            this.delay(2500);
+           
             await this.needleService.needleRequestForTelegram("post", "sendMessage", postData, payload);
         } else {
             throw new Error("Invalid Channel");
