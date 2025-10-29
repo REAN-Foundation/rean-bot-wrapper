@@ -95,7 +95,6 @@ export class sendExtraMessages{
                     "body" : messageFromModel
                 }
             };
-
             await this.needleService.needleRequestForWhatsappMeta("post", endPoint, JSON.stringify(postData), payload);
         } else if (channel === "telegram") {
             const postData = {
