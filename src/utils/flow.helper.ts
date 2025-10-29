@@ -19,6 +19,15 @@ export const flowConfigs: Record<string, FlowMessageParts> = {
         Screen        : "WELCOME"
     },
 
+    Nayi_Disha_Registration_Form : {
+        Header        : { type: "text", text: "📝 Registration" },
+        Body          : { text: "✨ Please complete your registration to get started!" },
+        Footer        : { text: "🙏 Thank you for choosing us!" },
+        ActionVersion : "3",
+        Cta           : "Open Form",
+        Screen        : "WELCOME"
+    },
+
     Feedback_Form : {
         Header : {
             type  : "image",

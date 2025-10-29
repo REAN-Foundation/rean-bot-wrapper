@@ -168,7 +168,6 @@ export class DecisionRouter {
                 });
             }
 
-
             let key;
             if (assessmentResponse) {
                 key = `${messageBody.platformId}:NextQuestionFlag:${assessmentResponse.assesmentId}`;
@@ -180,7 +179,7 @@ export class DecisionRouter {
 
             // Currently will only support the assessment start through buttons
             if (
-                messageBody.contextId &&
+                messageContextId &&
                 messageBody.intent &&
                 !nextQuestionFlag
             ) {
@@ -245,38 +244,47 @@ export class DecisionRouter {
                 const assessmentResponseType = assessmentResponse.userResponseType;
                 const assessmentIdentifierString = assessmentIdentifierData.identifier;
 
-                const validationFlag = await this.assessmentService.validateAssessmentResponse(
-                    assessmentResponseType,
-                    assessmentIdentifierString,
-                    messageBody,
-                    assessmentResponse.dataValues
-                );
+                let validationFlag = false;
 
-                if (!validationFlag) {
-                    assessmentData.AssessmentFlag = false;
+                if (assessmentIdentifierString === null) {
+                    validationFlag = true;
 
-                    if (
-                        messageBody.contextId && 
+                }
+                else {
+
+                    validationFlag = await this.assessmentService.validateAssessmentResponse(
+                        assessmentResponseType,
+                        assessmentIdentifierString,
+                        messageBody,
+                        assessmentResponse.dataValues
+                    );
+
+                    if (!validationFlag) {
+                        assessmentData.AssessmentFlag = false;
+
+                        if (
+                            messageBody.contextId &&
                         messageBody.intent
-                    ) {
-                        const matchingIntents = await intentRepository.findOne({
-                            where : {
-                                code : intent
+                        ) {
+                            const matchingIntents = await intentRepository.findOne({
+                                where : {
+                                    code : intent
+                                }
+                            });
+
+                            if (matchingIntents) {
+
+                                // we will call the reancare api here
+                                const assessmentCode = matchingIntents.dataValues.code;
+                                assessmentData.AssessmentId = assessmentCode;
+                                assessmentData.AssessmentName = matchingIntents.dataValues.name;
+                                assessmentData.MetaData.assessmentStart = true;
+                                assessmentData.AssessmentFlag = true;
+                            } else {
+
+                                // here we will create the false flag and return object
+                                assessmentData.AssessmentFlag = false;
                             }
-                        });
-
-                        if (matchingIntents) {
-
-                            // we will call the reancare api here
-                            const assessmentCode = matchingIntents.dataValues.code;
-                            assessmentData.AssessmentId = assessmentCode;
-                            assessmentData.AssessmentName = matchingIntents.dataValues.name;
-                            assessmentData.MetaData.assessmentStart = true;
-                            assessmentData.AssessmentFlag = true;
-                        } else {
-
-                            // here we will create the false flag and return object
-                            assessmentData.AssessmentFlag = false;
                         }
                     }
                 }
@@ -390,7 +398,12 @@ export class DecisionRouter {
             if (!resultFeedback.feedbackFlag){
                 const resultAssessment = await this.checkAssessment(messageBody, channel);
                 if (!resultAssessment.AssessmentFlag){
-
+                    console.log(`Checking for assessment with form submission: ${messageBody.intent}`);
+                    if (messageBody.intent === MessageHandlerType.AssessmentWithFormSubmission){
+                        this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.AssessmentWithFormSubmission;
+                        return this.outgoingMessage;
+                    }
+                    
                     //TODO: In WhatsApp form submission response length may greater than 256, so it is going to the QnA handler.
                     if (messageBody.messageBody.length > 256) {
                         this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.QnA;

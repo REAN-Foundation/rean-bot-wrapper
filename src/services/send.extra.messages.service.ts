@@ -1,7 +1,4 @@
-import { AwsS3manager } from './aws.file.upload.service';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { autoInjectable, inject } from 'tsyringe';
-import { ResponseHandler } from '../utils/response.handler';
 import { NeedleService } from './needle.service';
 import { translateService } from './translate.service';
 import { Iresponse } from '../refactor/interface/message.interface';
@@ -15,12 +12,13 @@ export class sendExtraMessages{
     private _platformMessageService?: platformServiceInterface;
 
     constructor(
-        @inject(ResponseHandler) private responseHandler?: ResponseHandler,
-        @inject(ClientEnvironmentProviderService) private clientEnvironment?: ClientEnvironmentProviderService,
-        @inject(AwsS3manager) private awss3manager?: AwsS3manager,
         @inject(NeedleService) private needleService?: NeedleService,
         @inject(translateService) private translationServiceObj?: translateService,
     ){}
+
+    private async delay(ms: number) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
     async sendSecondaryButtonMessage(inputMessage, yesIntentName, noIntentName,  eventObj) {
         try {
@@ -40,7 +38,7 @@ export class sendExtraMessages{
 
     async sendResponsebyButton(message, eventObj, userId, buttonArray){
         try {
-            const sourceChannel = eventObj.body.originalDetectIntentRequest.payload.source;
+            let sourceChannel = eventObj.body.originalDetectIntentRequest.payload.source;
             let payload = null;
             let messageType = null;
             if (sourceChannel === "whatsappMeta"){
@@ -48,6 +46,7 @@ export class sendExtraMessages{
                 messageType = "interactivebuttons";
             }
             else {
+                sourceChannel = sourceChannel.toLowerCase();
                 payload = await sendTelegramButtonService(buttonArray);
                 messageType = "inline_keyboard";
             }
@@ -56,9 +55,9 @@ export class sendExtraMessages{
         }
         catch (error) {
             console.log("While formulating button response", error);
-
+        
         }
-
+    
     }
 
     async sendButton(_platformMessageService , message, messageType, sessionId, payload){
@@ -67,12 +66,12 @@ export class sendExtraMessages{
             response_format.sessionId = sessionId;
             response_format.messageText = message;
             response_format.message_type = messageType;
-    
+            await this.delay(250);
             _platformMessageService.SendMediaMessage(response_format, payload );
         }
+
         catch (error) {
             console.log("While Sending button response", error);
-
         }
 
     }
@@ -84,6 +83,7 @@ export class sendExtraMessages{
         payload.completeMessage.messageType = 'text';
         payload.completeMessage.messageBody = messageFromModel;
         payload.completeMessage.intent = intent;
+        await this.delay(250);
         if (channel === "whatsappMeta") {
             const endPoint = 'messages';
             const postData = {
@@ -101,6 +101,7 @@ export class sendExtraMessages{
                 chat_id : userId,
                 text    : messageFromModel
             };
+           
             await this.needleService.needleRequestForTelegram("post", "sendMessage", postData, payload);
         } else {
             throw new Error("Invalid Channel");
