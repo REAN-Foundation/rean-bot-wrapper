@@ -158,8 +158,14 @@ export class AssessmentService {
             case 'Text': {
                 flag = typeof messageBody.messageBody === 'string';
                 if (flag) {
-                    const promptTemplate = PromptTemplate.fromTemplate(
-                        `Validate if user input matches the field identifier.
+                    if (identifier.toLowerCase().includes('emrid')) {
+                        flag = /^[a-zA-Z0-9]+$/.test(messageBody.messageBody.trim());
+                        if (!flag) {
+                            console.log('EMRId validation failed: input must be alphanumeric');
+                        }
+                    } else {
+                        const promptTemplate = PromptTemplate.fromTemplate(
+                            `Validate if user input matches the field identifier.
 
                         For medical measurements:
                         Blood Pressure: "120/80", "120/80 mmHg", "120/80mmhg", "120/80 mm Hg"
@@ -185,25 +191,25 @@ export class AssessmentService {
                             The user message is {user_message}
                             The field identifier is {field_identifier}
                             `
-                    );
-                    
-                    const model = new ChatOpenAI({ temperature: 0, modelName: "gpt-4o-mini" });
-                    const chain = promptTemplate.pipe(model);
+                        );
+                        
+                        const model = new ChatOpenAI({ temperature: 0, modelName: "gpt-4o-mini" });
+                        const chain = promptTemplate.pipe(model);
 
-                    const result = await chain.invoke({
-                        user_message     : messageBody.originalMessage,
-                        field_identifier : identifier
-                    });
+                        const result = await chain.invoke({
+                            user_message     : messageBody.originalMessage,
+                            field_identifier : identifier
+                        });
 
-                    console.log('AI Response:', result.lc_kwargs.content);
+                        console.log('AI Response:', result.lc_kwargs.content);
 
-                    const parsed = JSON.parse(result.lc_kwargs.content);
-                    parsed.flag = parsed.flag.toLowerCase() === 'true';
+                        const parsed = JSON.parse(result.lc_kwargs.content);
+                        parsed.flag = parsed.flag.toLowerCase() === 'true';
 
-                    if (!parsed.flag) {
-                        flag = false;
+                        if (!parsed.flag) {
+                            flag = false;
+                        }
                     }
-
                 }
                 break;
             }
