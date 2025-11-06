@@ -1,4 +1,4 @@
-import dfff from '../libs/dialogflow-fulfillment';
+import { WebhookClient } from '../libs/dialogflow-fulfillment/src/dialogflow-fulfillment.js';
 import axios from 'axios';
 const genericPediaUrl = 'https://genericpedia.lamne.com/api/brands?page=1&perPage=10&agg%5B%5D=prepType&query=';
 const genericPediaChemistUrl = 'https://genericpedia.lamne.com/api/pharmacies?perPage=10&';
@@ -25,7 +25,7 @@ export const getGenericpediaservice = async (req, res) => {
             return -1;
         }
     }
-    const agent = new dfff.WebhookClient({
+    const agent = new WebhookClient({
         request  : req,
         response : res
     });
@@ -67,7 +67,7 @@ export const getGenericpediaChemistservice = async (req, res) => {
             return -1;
         }
     }
-    const agent = new dfff.WebhookClient({
+    const agent = new WebhookClient({
         request  : req,
         response : res
     });
