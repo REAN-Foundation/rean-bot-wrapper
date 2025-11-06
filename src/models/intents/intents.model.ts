@@ -1,7 +1,7 @@
 /* eslint-disable indent */
 import { Table, Column, Model, DataType, PrimaryKey, IsUUID } from 'sequelize-typescript';
-import { IIntents } from '../../refactor/interface/intents/intents.interface';
-import { IntentType } from '../../refactor/messageTypes/intents/intents.message.types';
+import type { IIntents } from '../../refactor/interface/intents/intents.interface.js';
+import { IntentType } from '../../refactor/messageTypes/intents/intents.message.types.js';
 import { v4 } from 'uuid';
 @Table(
     {
@@ -22,7 +22,7 @@ export class Intents extends Model implements IIntents {
         },
         allowNull : false
     })
-        id: string;
+        declare id: string;
 
     @Column({
         type : DataType.STRING(64),
@@ -45,5 +45,5 @@ export class Intents extends Model implements IIntents {
         type : DataType.TEXT()
     })
         Metadata: string;
-    
+
 }

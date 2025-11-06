@@ -1,4 +1,4 @@
-import { GenerateCertificateYesService } from "../../../services/bloodWrrior/generate.certificate.yes.service";
+import { GenerateCertificateYesService } from "../../../services/bloodWrrior/generate.certificate.yes.service.js";
 
 
 export const GenerateCertificateYesListener = async (intent, eventObj) => {

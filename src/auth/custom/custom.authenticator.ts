@@ -1,6 +1,6 @@
-import { Logger } from '../../common/logger';
-import { IAuthenticator } from '../authenticator.interface';
-import { AuthenticationResult } from '../../domain.types/auth/auth.domain.types';
+import { Logger } from '../../common/logger.js';
+import type { IAuthenticator } from '../authenticator.interface.js';
+import type { AuthenticationResult } from '../../domain.types/auth/auth.domain.types.js';
 
 export class CustomAuthenticator implements IAuthenticator {
 

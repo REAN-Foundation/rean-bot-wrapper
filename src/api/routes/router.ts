@@ -1,13 +1,13 @@
 import express from "express";
-import { Logger } from "../../common/logger";
-import { ChatBotRoutes } from './chat.bot.routes';
+import { Logger } from "../../common/logger.js";
+import { ChatBotRoutes } from './chat.bot.routes.js';
 import { autoInjectable } from 'tsyringe';
-import { PlatformWebhookRoutes } from './platform.webhook.routes';
-import { SystemGeneratedMessagesRoutes } from "./system.generated.messages.routes";
-import { IntentRoutes } from "./intents.routes";
-import { FrontendRoutes } from "./Frontend.routes";
-import { ConsentRoutes } from "./consent.routes";
-import { UserRegistrationRoutes } from "./user.registration.routes";
+import { PlatformWebhookRoutes } from './platform.webhook.routes.js';
+import { SystemGeneratedMessagesRoutes } from "./system.generated.messages.routes.js";
+import { IntentRoutes } from "./intents.routes.js";
+import { FrontendRoutes } from "./Frontend.routes.js";
+import { ConsentRoutes } from "./consent.routes.js";
+import { UserRegistrationRoutes } from "./user.registration.routes.js";
 
 // import { ClientEnvironmentProviderService } from "../../services/set.client/client.environment.provider.service";
 

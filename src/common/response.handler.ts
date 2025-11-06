@@ -1,8 +1,8 @@
 import express from 'express';
-import { Logger } from './logger';
-import { ActivityRecorder } from './activity.recorder';
-import { InputValidationError } from './input.validation.error';
-import { ResponseDto } from '../domain.types/miscellaneous/response.dto';
+import { Logger } from './logger.js';
+import { ActivityRecorder } from './activity.recorder.js';
+import { InputValidationError } from './input.validation.error.js';
+import type { ResponseDto } from '../domain.types/miscellaneous/response.dto.js';
 
 export class ResponseHandler {
 

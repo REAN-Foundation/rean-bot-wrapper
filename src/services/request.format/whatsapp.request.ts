@@ -1,5 +1,5 @@
-import { Contacts } from "./whatsapp.contact.format";
-import { Message } from "./whatsapp.message.format";
+import { Contacts } from "./whatsapp.contact.format.js";
+import { Message } from "./whatsapp.message.format.js";
 
 export class WhatsappRequest {
 

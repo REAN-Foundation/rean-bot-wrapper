@@ -1,13 +1,13 @@
 /* eslint-disable init-declarations */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
-import { AwsS3manager } from './aws.file.upload.service';
+import { AwsS3manager } from './aws.file.upload.service.js';
 import { inject, delay, scoped, Lifecycle } from 'tsyringe';
-import { Iresponse, Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface';
-import { platformServiceInterface } from '../refactor/interface/platform.interface';
-import { MessageFlow } from './get.put.message.flow.service';
-import { WhatsappMessageToDialogflow } from './whatsapp.messagetodialogflow';
-import { WhatsappPostResponseFunctionalities } from './whatsapp.post.response.functionalities';
+import type { Iresponse, Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface.js';
+import type { platformServiceInterface } from '../refactor/interface/platform.interface.js';
+import { MessageFlow } from './get.put.message.flow.service.js';
+import { WhatsappMessageToDialogflow } from './whatsapp.messagetodialogflow.js';
+import { WhatsappPostResponseFunctionalities } from './whatsapp.post.response.functionalities.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class CommonWhatsappService implements platformServiceInterface {
@@ -39,7 +39,7 @@ export class CommonWhatsappService implements platformServiceInterface {
         } catch (error) {
             console.log(error);
         }
-    
+
     }
 
     async sendManualMesage(msg: any) {
@@ -102,7 +102,7 @@ export class CommonWhatsappService implements platformServiceInterface {
                         message_type = "interactivelist";
                     }
                 }
-                
+
                 reaponse_message = { name: user_name, platform: platform, platformId: platformId, chat_message_id: chat_message_id, direction: "Out", message_type: message_type, intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[0], similarDoc: similar_doc };
             }
         }
@@ -132,5 +132,5 @@ export class CommonWhatsappService implements platformServiceInterface {
     getMessageIdFromResponse(response: any) {
         return response.body?.messages[0].id;
     }
-    
+
 }

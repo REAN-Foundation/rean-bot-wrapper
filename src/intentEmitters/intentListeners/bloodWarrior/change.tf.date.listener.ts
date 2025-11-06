@@ -1,4 +1,4 @@
-import { ChangeTransfusionDateService } from "../../../services/bloodWrrior/chnage.transfusion.date.service";
+import { ChangeTransfusionDateService } from "../../../services/bloodWrrior/chnage.transfusion.date.service.js";
 
 export const ChangeTransfusionDate = async (intent, eventObj) => {
     // eslint-disable-next-line max-len

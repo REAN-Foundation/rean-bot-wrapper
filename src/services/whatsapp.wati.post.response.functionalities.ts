@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
-import { Iresponse } from "../refactor/interface/message.interface";
-import { UserLanguage } from "./set.language";
-import { translateService } from "./translate.service";
-import { HandleMessagetypePayload } from "./handle.messagetype.payload";
+import type { Iresponse } from "../refactor/interface/message.interface.js";
+import { UserLanguage } from "./set.language.js";
+import { translateService } from "./translate.service.js";
+import { HandleMessagetypePayload } from "./handle.messagetype.payload.js";
 import { inject, Lifecycle, scoped } from "tsyringe";
 import axios from 'axios';
-import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
+import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service.js";
 import stream from 'stream';
 import FormData from 'form-data';
 

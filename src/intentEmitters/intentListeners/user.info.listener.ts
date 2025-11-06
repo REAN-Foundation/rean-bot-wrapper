@@ -1,5 +1,5 @@
-import { Logger } from '../../common/logger';
-import { UserInfoService } from '../../services/user.info/user.info.service';
+import { Logger } from '../../common/logger.js';
+import { UserInfoService } from '../../services/user.info/user.info.service.js';
 
 export const UserInfoListener = async (intent, eventObj) => {
     try {
@@ -10,7 +10,7 @@ export const UserInfoListener = async (intent, eventObj) => {
 
         const payload = eventObj.body.originalDetectIntentRequest.payload;
         const parameters = eventObj.body.queryResult.parameters;
-        
+
         if (parameters.Name?.name) {
             parameters.Name = parameters.Name.name;
         }

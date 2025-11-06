@@ -2,17 +2,17 @@
 /* eslint-disable init-declarations */
 /* eslint-disable max-len */
 
-import { AwsS3manager } from './aws.file.upload.service';
-import { Imessage, IprocessedDialogflowResponseFormat, Iresponse } from '../refactor/interface/message.interface';
+import { AwsS3manager } from './aws.file.upload.service.js';
+import type { Imessage, IprocessedDialogflowResponseFormat, Iresponse } from '../refactor/interface/message.interface.js';
 import { inject, delay, scoped, Lifecycle } from 'tsyringe';
 import  TelegramBot  from 'node-telegram-bot-api';
-import { MessageFlow } from './get.put.message.flow.service';
-import { platformServiceInterface } from '../refactor/interface/platform.interface';
-import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { TelegramMessageToDialogflow } from './telegram.messagetodialogflow';
-import { TelegramPostResponseFunctionalities } from './telegram.post.response.functionalities';
-import { LogsQAService } from './logs.for.qa';
+import { MessageFlow } from './get.put.message.flow.service.js';
+import type { platformServiceInterface } from '../refactor/interface/platform.interface.js';
+import type { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface.js';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
+import { TelegramMessageToDialogflow } from './telegram.messagetodialogflow.js';
+import { TelegramPostResponseFunctionalities } from './telegram.post.response.functionalities.js';
+import { LogsQAService } from './logs.for.qa.js';
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 

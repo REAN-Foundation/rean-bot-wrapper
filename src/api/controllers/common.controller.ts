@@ -1,4 +1,4 @@
-import { ResponseHandler } from '../../utils/response.handler';
+import { ResponseHandler } from '../../utils/response.handler.js';
 import { autoInjectable } from 'tsyringe';
 
 @autoInjectable()

@@ -1,4 +1,4 @@
-import { RequestResponseCacheService } from '../../modules/cache/request.response.cache.service';
+import { RequestResponseCacheService } from '../../modules/cache/request.response.cache.service.js';
 import { scoped, Lifecycle } from 'tsyringe';
 
 @scoped(Lifecycle.ContainerScoped)

@@ -1,13 +1,13 @@
 import 'reflect-metadata';
 import express from 'express';
-import { IAuthenticator } from './authenticator.interface';
+import type { IAuthenticator } from './authenticator.interface.js';
 import { injectable, inject } from "tsyringe";
-import { ResponseHandler } from '../common/response.handler';
-import { Logger } from '../common/logger';
+import { ResponseHandler } from '../common/response.handler.js';
+import { Logger } from '../common/logger.js';
 
 @injectable()
 export class Authenticator {
-    
+
     constructor(
         @inject('IAuthenticator') private _authenticator: IAuthenticator
     ) {}

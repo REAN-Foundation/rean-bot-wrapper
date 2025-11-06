@@ -1,12 +1,12 @@
-import { ResponseHandler } from '../../utils/response.handler';
+import { ResponseHandler } from '../../utils/response.handler.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
-import { AwsS3manager } from '../../services/aws.file.upload.service';
-import { commonResponseMessageFormat } from '../../services/common.response.format.object';
-import { EntityManagerProvider } from '../../services/entity.manager.provider.service';
-import { Registration } from '../../services/registrationsAndEnrollements/patient.registration.service';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { Iresponse } from '../../refactor/interface/message.interface';
+import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service.js';
+import { AwsS3manager } from '../../services/aws.file.upload.service.js';
+import { commonResponseMessageFormat } from '../../services/common.response.format.object.js';
+import { EntityManagerProvider } from '../../services/entity.manager.provider.service.js';
+import { Registration } from '../../services/registrationsAndEnrollements/patient.registration.service.js';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
+import type { Iresponse } from '../../refactor/interface/message.interface.js';
 
 // @autoInjectable()
 @scoped(Lifecycle.ContainerScoped)

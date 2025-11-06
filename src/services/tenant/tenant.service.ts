@@ -1,6 +1,6 @@
 import needle from "needle";
-import { ApiError } from "../../common/api.error";
-import { TenantsDomainModel } from "../../domain.types/tenant/tenant.types";
+import { ApiError } from "../../common/api.error.js";
+import type { TenantsDomainModel } from "../../domain.types/tenant/tenant.types.js";
 
 ///////////////////////////////////////////////////////////////////////////////
 

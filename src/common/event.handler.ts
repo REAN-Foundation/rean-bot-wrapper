@@ -1,7 +1,7 @@
-import { EventMessage, UserDeleteEvent } from "../domain.types/event.types";
-import { UserDeleteQueueService } from "../services/user.delete.queue.service";
+import type { EventMessage, UserDeleteEvent } from "../domain.types/event.types.js";
+import { UserDeleteQueueService } from "../services/user.delete.queue.service.js";
 import { container } from "tsyringe";
-import { Logger } from "./logger";
+import { Logger } from "./logger.js";
 
 export class EventHandler {
 
@@ -20,7 +20,7 @@ export class EventHandler {
                     payload?.TenantName
                 );
             }
-            
+
         } catch (error) {
             Logger.instance().log('Error handling user deletion event: ' + error.message);
         }

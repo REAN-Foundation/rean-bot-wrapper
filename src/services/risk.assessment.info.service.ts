@@ -1,5 +1,5 @@
 import { isEmpty } from 'lodash';
-import { SignedUrls } from './signed.urls.service';
+import { SignedUrls } from './signed.urls.service.js';
 export const getRiskAssessmentInfo = async (req) => {
 
     return new Promise(async (resolve, reject) => {
@@ -87,7 +87,7 @@ export const getRiskAssessmentInfo = async (req) => {
                                 imagePath = image[riskData.risk_level.toLocaleLowerCase()];
                                 const data = getEndofConvData(imagePath,response,req);
                                 console.log(imagePath);
-                                
+
                                 resolve(data);
                             } else {
                                 json_data[params.complication[i]] = 0;
@@ -118,7 +118,7 @@ export const getRiskAssessmentInfo = async (req) => {
                 imagePath = image[riskData.risk_level.toLocaleLowerCase()];
                 const data = getEndofConvData(imagePath,response,req);
                 console.log(imagePath);
-                
+
                 resolve(data);
             }
         }

@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import { Lifecycle, scoped, inject } from "tsyringe";
-import { IserviceResponseFunctionalities } from "./response.interface";
-import { ClientEnvironmentProviderService } from "../set.client/client.environment.provider.service";
+import type { IserviceResponseFunctionalities } from "./response.interface.js";
+import { ClientEnvironmentProviderService } from "../set.client/client.environment.provider.service.js";
 
 @scoped(Lifecycle.ContainerScoped)
 export class CustomModelResponseFormat implements IserviceResponseFunctionalities{

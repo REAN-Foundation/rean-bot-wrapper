@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from 'sequelize-typescript';
-import { consentInfo } from '../refactor/interface/message.interface';
+import type { consentInfo } from '../refactor/interface/message.interface.js';
 
 @Table({
     timestamps : true,
@@ -9,14 +9,14 @@ import { consentInfo } from '../refactor/interface/message.interface';
 })
 
 export class ConsentInfo extends Model implements consentInfo {
-  
+
     @AutoIncrement
     @PrimaryKey
     @Column({
         type : DataType.INTEGER
     })
         autoIncrementalID: number;
-    
+
     @Column({
         type : DataType.STRING,
         allowNull : true

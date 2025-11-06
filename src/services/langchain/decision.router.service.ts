@@ -5,19 +5,19 @@ import { PromptTemplate } from "langchain/prompts";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { CommaSeparatedListOutputParser } from "langchain/schema/output_parser";
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { Imessage, OutgoingMessage } from "../../refactor/interface/message.interface";
-import { FeedbackService } from "../feedback/feedback.service";
-import { EntityManagerProvider } from "../entity.manager.provider.service";
-import { ClientEnvironmentProviderService } from "../set.client/client.environment.provider.service";
-import { MessageHandlerType, NlpProviderType, UserFeedbackType, ChannelType } from "../../refactor/messageTypes/message.types";
-import { EmojiFilter } from "../filter.message.for.emoji.service";
-import { DialogflowResponseService } from '../dialogflow.response.service';
-import { CacheMemory } from "../cache.memory.service";
-import { Intents } from "../../models/intents/intents.model";
-import { AssessmentSessionLogs } from "../../models/assessment.session.model";
-import { NeedleService } from "../needle.service";
-import { AssessmentService } from "../Assesssment/assessment.service";
-import { AssessmentIdentifiers } from "../../models/assessment/assessment.identifiers.model";
+import type { Imessage, OutgoingMessage } from "../../refactor/interface/message.interface.js";
+import { FeedbackService } from "../feedback/feedback.service.js";
+import { EntityManagerProvider } from "../entity.manager.provider.service.js";
+import { ClientEnvironmentProviderService } from "../set.client/client.environment.provider.service.js";
+import { MessageHandlerType, NlpProviderType, UserFeedbackType, ChannelType } from "../../refactor/messageTypes/message.types.js";
+import { EmojiFilter } from "../filter.message.for.emoji.service.js";
+import { DialogflowResponseService } from '../dialogflow.response.service.js';
+import { CacheMemory } from "../cache.memory.service.js";
+import { Intents } from "../../models/intents/intents.model.js";
+import { AssessmentSessionLogs } from "../../models/assessment.session.model.js";
+import { NeedleService } from "../needle.service.js";
+import { AssessmentService } from "../Assesssment/assessment.service.js";
+import { AssessmentIdentifiers } from "../../models/assessment/assessment.identifiers.model.js";
 
 ////////////////////////////////////////////////////////////////////////////////////
 

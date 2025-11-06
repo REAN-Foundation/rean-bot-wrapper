@@ -1,7 +1,7 @@
 /* eslint-disable indent */
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from "sequelize-typescript";
-import { IAssessmentResponses } from "../../refactor/interface/assessment/assessment.responses.interface";
-import { AssessmentResponseType } from "../../refactor/messageTypes/assessment/assessment.responses.types";
+import type { IAssessmentResponses } from "../../refactor/interface/assessment/assessment.responses.interface.js";
+import { AssessmentResponseType } from "../../refactor/messageTypes/assessment/assessment.responses.types.js";
 
 
 @Table(
@@ -20,7 +20,7 @@ export class AssessmentResponses extends Model implements IAssessmentResponses {
         type : DataType.INTEGER,
         allowNull : false
     })
-        id: number;
+        declare id: number;
 
     @Column({
         type : DataType.STRING(128)

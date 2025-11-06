@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 import { Table, Column, Model, DataType, PrimaryKey, IsUUID } from 'sequelize-typescript';
-import { ISystemGeneratedMessages } from '../refactor/interface/system.generated.messages';
+import type { ISystemGeneratedMessages } from '../refactor/interface/system.generated.messages.js';
 import { v4 } from 'uuid';
 
 @Table(
@@ -22,14 +22,14 @@ export class SystemGeneratedMessages extends Model implements ISystemGeneratedMe
         },
         allowNull : false
     })
-        id: string;
+        declare id: string;
 
     @Column({
         type : DataType.STRING(256),
         allowNull : false
     })
         messageName: string;
-    
+
     @Column({
         type: DataType.TEXT,
         allowNull : false

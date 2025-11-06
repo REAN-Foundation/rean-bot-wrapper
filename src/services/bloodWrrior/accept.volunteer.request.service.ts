@@ -1,12 +1,12 @@
 import { scoped, Lifecycle, inject } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { NeedleService } from '../needle.service';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { sendApiButtonService } from '../whatsappmeta.button.service';
-import { RaiseDonationRequestService } from './raise.request.service';
-import { BloodWarriorCommonService } from './common.service';
-import { Iresponse } from '../../refactor/interface/message.interface';
-import { commonResponseMessageFormat } from '../common.response.format.object';
+import { Logger } from '../../common/logger.js';
+import { NeedleService } from '../needle.service.js';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
+import { sendApiButtonService } from '../whatsappmeta.button.service.js';
+import { RaiseDonationRequestService } from './raise.request.service.js';
+import { BloodWarriorCommonService } from './common.service.js';
+import type { Iresponse } from '../../refactor/interface/message.interface.js';
+import { commonResponseMessageFormat } from '../common.response.format.object.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class AcceptVolunteerRequestService {
@@ -36,9 +36,9 @@ export class AcceptVolunteerRequestService {
                 }
                 const dffMessage = `Thank you for accepting the request. We are in the process of scheduling a donation. \nRegards \nTeam Blood Warriors`;
                 resolve( { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } });
-                
+
                 //update donation record with acceptance
-                
+
                 const obj = {
                     DonorAcceptedDate : new Date().toISOString()
                 };

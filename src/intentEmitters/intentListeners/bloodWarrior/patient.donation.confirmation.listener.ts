@@ -1,6 +1,6 @@
 import { scoped, Lifecycle } from 'tsyringe';
-import { Logger } from '../../../common/logger';
-import { dialoflowMessageFormatting } from '../../../services/Dialogflow.service';
+import { Logger } from '../../../common/logger.js';
+import { dialoflowMessageFormatting } from '../../../services/Dialogflow.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class PatientDonationConfirmationListener {

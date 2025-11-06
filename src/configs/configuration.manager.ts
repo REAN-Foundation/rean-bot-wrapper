@@ -1,6 +1,6 @@
-import { MessagingConfig, MessagingProvider } from '../domain.types/events/provider.types';
-import * as configuration from '../../reancare.config.json';
-import {
+import type { MessagingConfig, MessagingProvider } from '../domain.types/events/provider.types.js';
+import * as configuration from '../../reancare.config.json' with { type: "json" };
+import type {
     Configurations,
     DatabaseType,
     DatabaseORM,
@@ -10,7 +10,7 @@ import {
     AuthenticationType,
     AuthorizationType,
     SecretsProvider
-} from './configs';
+} from './configs.js';
 
 export class ConfigurationManager {
 
@@ -20,32 +20,32 @@ export class ConfigurationManager {
 
         ConfigurationManager._config = {
             Auth : {
-                Authentication : configuration.Auth.Authentication as AuthenticationType,
-                Authorization  : configuration.Auth.Authorization as AuthorizationType,
+                Authentication : configuration.default.Auth.Authentication as AuthenticationType,
+                Authorization  : configuration.default.Auth.Authorization as AuthorizationType,
             },
             Database : {
-                Type    : configuration.Database.Type as DatabaseType,
-                ORM     : configuration.Database.ORM as DatabaseORM,
-                Flavour : configuration.Database.Flavour as DatabaseFlavour,
+                Type    : configuration.default.Database.Type as DatabaseType,
+                ORM     : configuration.default.Database.ORM as DatabaseORM,
+                Flavour : configuration.default.Database.Flavour as DatabaseFlavour,
             },
             Ehr : {
-                Specification : configuration.Ehr.Specification as EHRSpecification,
-                Provider      : configuration.Ehr.Provider as EHRProvider,
+                Specification : configuration.default.Ehr.Specification as EHRSpecification,
+                Provider      : configuration.default.Ehr.Provider as EHRProvider,
             },
             Messaging : {
-                Provider : configuration?.Messaging?.Provider as MessagingProvider,
+                Provider : configuration?.default.Messaging?.Provider as MessagingProvider,
                 Events   : {
-                    Enabled                : configuration?.Messaging?.Events?.Enabled,
-                    RetryPolicy            : configuration?.Messaging?.Events?.RetryPolicy,
-                    DeadLetterQueue        : configuration?.Messaging?.Events?.DeadLetterQueue,
-                    MessageRetentionPeriod : configuration?.Messaging?.Events?.MessageRetentionPeriod,
-                    VisibilityTimeout      : configuration?.Messaging?.Events?.VisibilityTimeout,
+                    Enabled                : configuration?.default.Messaging?.Events?.Enabled,
+                    RetryPolicy            : configuration?.default.Messaging?.Events?.RetryPolicy,
+                    DeadLetterQueue        : configuration?.default.Messaging?.Events?.DeadLetterQueue,
+                    MessageRetentionPeriod : configuration?.default.Messaging?.Events?.MessageRetentionPeriod,
+                    VisibilityTimeout      : configuration?.default.Messaging?.Events?.VisibilityTimeout,
                 },
             },
             SecretsManager : {
-                Provider : configuration?.SecretsManager?.Provider as SecretsProvider,
+                Provider : configuration?.default.SecretsManager?.Provider as SecretsProvider,
             },
-            MaxUploadFileSize : configuration.MaxUploadFileSize,
+            MaxUploadFileSize : configuration.default.MaxUploadFileSize,
 
         };
 

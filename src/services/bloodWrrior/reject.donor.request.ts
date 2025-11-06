@@ -1,12 +1,12 @@
-import { Logger } from '../../common/logger';
-import { NeedleService } from '../needle.service';
-import { BloodWarriorCommonService } from './common.service';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
+import { Logger } from '../../common/logger.js';
+import { NeedleService } from '../needle.service.js';
+import { BloodWarriorCommonService } from './common.service.js';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { RaiseDonationRequestService } from './raise.request.service';
-import { Iresponse } from '../../refactor/interface/message.interface';
-import { commonResponseMessageFormat } from '../common.response.format.object';
-import { sendApiButtonService } from '../whatsappmeta.button.service';
+import { RaiseDonationRequestService } from './raise.request.service.js';
+import type { Iresponse } from '../../refactor/interface/message.interface.js';
+import { commonResponseMessageFormat } from '../common.response.format.object.js';
+import { sendApiButtonService } from '../whatsappmeta.button.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class RejectDonorRequestService {

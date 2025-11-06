@@ -1,10 +1,10 @@
 import { scoped, Lifecycle, inject } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { NeedleService } from '../needle.service';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { Iresponse } from '../../refactor/interface/message.interface';
-import { commonResponseMessageFormat } from '../common.response.format.object';
-import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
+import { Logger } from '../../common/logger.js';
+import { NeedleService } from '../needle.service.js';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
+import type { Iresponse } from '../../refactor/interface/message.interface.js';
+import { commonResponseMessageFormat } from '../common.response.format.object.js';
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class RegisterAllProfileService {

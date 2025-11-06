@@ -1,11 +1,11 @@
-import { Logger } from '../../common/logger';
-import { FeedbackService } from '../../services/feedback/feedback.service';
+import { Logger } from '../../common/logger.js';
+import { FeedbackService } from '../../services/feedback/feedback.service.js';
 
 export const PositiveFeedbackListener = async (intent, eventObj) => {
     try {
         Logger.instance()
             .log('Positive Feedback received!!!!!');
-        
+
         let response = null;
         const feedbackService = eventObj.container.resolve(FeedbackService);
         response = await feedbackService.PositiveFeedback(eventObj);

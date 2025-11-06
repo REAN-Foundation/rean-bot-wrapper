@@ -1,24 +1,24 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 import http from 'https';
-import { AwsS3manager } from './aws.file.upload.service';
+import { AwsS3manager } from './aws.file.upload.service.js';
 import { inject, delay, scoped, Lifecycle } from 'tsyringe';
-import { MessageFlow } from './get.put.message.flow.service';
-import { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { MessageFlow } from './get.put.message.flow.service.js';
+import type { clientAuthenticator } from './clientAuthenticator/client.authenticator.interface.js';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
 import needle from 'needle';
-import { getRequestOptions } from '../utils/helper';
-import { ChatMessage } from '../models/chat.message.model';
-import { WhatsappMessageToDialogflow } from './whatsapp.messagetodialogflow';
-import { CommonWhatsappService } from './whatsapp.common.service';
-import { Iresponse } from '../refactor/interface/message.interface';
-import { WhatsappPostResponseFunctionalities } from './whatsapp.post.response.functionalities';
-import { EntityManagerProvider } from './entity.manager.provider.service';
+import { getRequestOptions } from '../utils/helper.js';
+import { ChatMessage } from '../models/chat.message.model.js';
+import { WhatsappMessageToDialogflow } from './whatsapp.messagetodialogflow.js';
+import { CommonWhatsappService } from './whatsapp.common.service.js';
+import type { Iresponse } from '../refactor/interface/message.interface.js';
+import { WhatsappPostResponseFunctionalities } from './whatsapp.post.response.functionalities.js';
+import { EntityManagerProvider } from './entity.manager.provider.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class WhatsappMessageService extends CommonWhatsappService {
 
-    public res;
+    // public res; // Removed redundant declaration to avoid overwriting base property
 
     constructor(@inject(delay(() => MessageFlow)) public messageFlow,
         @inject(AwsS3manager) awsS3manager?: AwsS3manager,

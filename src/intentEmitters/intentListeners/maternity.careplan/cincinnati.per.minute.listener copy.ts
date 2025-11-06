@@ -1,4 +1,4 @@
-import { CincinnatiPerMinMsgService } from "../../../services/maternalCareplan/cincannati.demo";
+import { CincinnatiPerMinMsgService } from "../../../services/maternalCareplan/cincannati.demo.js";
 
 export const  CincinnatiPerMinuteMsgListener = async (_intent, eventObj) => {
     try {

@@ -1,5 +1,5 @@
-import { Logger } from '../../common/logger';
-import { InitiateDeleteReminderService } from '../../services/reminder/initiate.delete.reminder.service';
+import { Logger } from '../../common/logger.js';
+import { InitiateDeleteReminderService } from '../../services/reminder/initiate.delete.reminder.service.js';
 export const InitiateDeleteReminderListener = async (intent, eventObj) => {
     try {
         Logger.instance()

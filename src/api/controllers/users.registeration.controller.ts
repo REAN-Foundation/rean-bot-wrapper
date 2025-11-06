@@ -1,17 +1,18 @@
 /* eslint-disable max-len */
-import { ResponseHandler } from '../../utils/response.handler';
+import { ResponseHandler } from '../../utils/response.handler.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
-import { EntityManagerProvider } from '../../services/entity.manager.provider.service';
-import { ErrorHandler } from '../../utils/error.handler';
-import { UserDetailsValidator } from '../validator/user.registration.validator';
-import { UserDetailsDomainModel } from '../../domain.types/userAction/user.enrollment.domain.models';
-import { CareplanEnrollmentDomainModel } from '../../domain.types/userAction/user.enrollment.domain.models';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { Iresponse } from '../../refactor/interface/message.interface';
-import { commonResponseMessageFormat } from '../../services/common.response.format.object';
-import { Registration } from '../../services/registrationsAndEnrollements/patient.registration.service';
-import { careplanEnrollment } from '../../services/registrationsAndEnrollements/careplan.enrollement.service';
+import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service.js';
+import { AwsS3manager } from '../../services/aws.file.upload.service.js';
+import { commonResponseMessageFormat } from '../../services/common.response.format.object.js';
+import { EntityManagerProvider } from '../../services/entity.manager.provider.service.js';
+import { Registration } from '../../services/registrationsAndEnrollements/patient.registration.service.js';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
+import type { Iresponse } from '../../refactor/interface/message.interface.js';
+import { UserDetailsValidator } from '../validator/user.registration.validator.js';
+import type { UserDetailsDomainModel } from '../../domain.types/userAction/user.enrollment.domain.models.js';
+import type { CareplanEnrollmentDomainModel } from '../../domain.types/userAction/user.enrollment.domain.models.js';
+import { careplanEnrollment } from '../../services/registrationsAndEnrollements/careplan.enrollement.service.js';
+import { ErrorHandler } from '../../utils/error.handler.js';
 @scoped(Lifecycle.ContainerScoped)
 export class UserRegistrationController{
 

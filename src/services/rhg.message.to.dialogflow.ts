@@ -1,5 +1,5 @@
 /* eslint-disable init-declarations */
-import { RHGRequest } from "./request.format/rhg.mobile.app";
+import { RHGRequest } from "./request.format/rhg.mobile.app.js";
 
 export class RHGMessageToDialogflow{
 
@@ -36,5 +36,5 @@ export class RHGMessageToDialogflow{
             yield messagetoDialogflow;
         }
     }
-    
+
 }

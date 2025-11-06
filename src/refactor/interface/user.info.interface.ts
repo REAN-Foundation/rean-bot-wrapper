@@ -1,4 +1,4 @@
-import { Gender } from '../messageTypes/user.info.types';
+import { Gender } from '../messageTypes/user.info.types.js';
 
 export interface IuserInfo {
     autoIncrementalID: number;

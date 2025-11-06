@@ -1,13 +1,13 @@
 import { scoped, Lifecycle, inject } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { NeedleService } from '../needle.service';
-import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { sendApiInteractiveListService } from '../whatsappmeta.button.service';
-import { commonResponseMessageFormat } from '../common.response.format.object';
-import { sendTelegramButtonService } from '../telegram.button.service';
-import { Iresponse } from '../../refactor/interface/message.interface';
-import { CacheMemory } from '../cache.memory.service';
+import { Logger } from '../../common/logger.js';
+import { NeedleService } from '../needle.service.js';
+import { Registration } from '../registrationsAndEnrollements/patient.registration.service.js';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
+import { sendApiInteractiveListService } from '../whatsappmeta.button.service.js';
+import { commonResponseMessageFormat } from '../common.response.format.object.js';
+import { sendTelegramButtonService } from '../telegram.button.service.js';
+import type { Iresponse } from '../../refactor/interface/message.interface.js';
+import { CacheMemory } from '../cache.memory.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class InitiateDeleteReminderService {
@@ -124,7 +124,7 @@ export class InitiateDeleteReminderService {
                             buttonArray.push(reminder.WhenTime);
                         }
                     }
-                    
+
                 }
                 CacheMemory.set(sessionId,{ reminderName: messageBodyList[0] });
                 const uniqueuttonArrays = [];

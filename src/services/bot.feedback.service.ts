@@ -1,13 +1,14 @@
 /* eslint-disable max-len */
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { ChatSession } from "../models/chat.session";
+import { ChatSession } from "../models/chat.session.js";
 import  TelegramBot  from 'node-telegram-bot-api';
-import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
+import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service.js";
 import { container } from "tsyringe";
-import { getRequestOptions } from "../utils/helper";
+import { getRequestOptions } from "../utils/helper.js";
 import needle from 'needle';
-import { ChatMessage } from "../models/chat.message.model";
-var CronJob = require('cron').CronJob;
+import { ChatMessage } from "../models/chat.message.model.js";
+import { CronJob } from 'cron';
+import { EntityManagerProvider } from "./entity.manager.provider.service.js";
 
 //Functionality of the cronjob is ready but not implemented yet
 export class BotFeedback{
@@ -19,8 +20,9 @@ export class BotFeedback{
                 console.log("inside");
                 async function testSettimeout(userId){
                     const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
-                    const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(ChatSession);
-                    const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(ChatMessage);
+                    const entityManagerProvider: EntityManagerProvider = container.resolve(EntityManagerProvider);
+                    const chatSessionRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(ChatSession);
+                    const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(ChatMessage);
                     const respOfChatSession = await chatSessionRepository.findAll({ where: { userPlatformID: userId } });
                     const timeOfLastMessage = respOfChatSession[respOfChatSession.length - 1].lastMessageDate;
                     const askForFeedback = respOfChatSession[respOfChatSession.length - 1].askForFeedback;
@@ -70,7 +72,7 @@ export class BotFeedback{
                                     'type'           : "text",
                                     'text'           : { 'body': message }
                                 };
-                                
+
                                 const options = getRequestOptions();
                                 options.headers['Content-Type'] = 'application/json';
                                 options.headers['D360-Api-Key'] = clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY");
@@ -109,10 +111,11 @@ export class BotFeedback{
                     else {
                         console.log("time diff needs to be > 1 minute for aksing feedback");
                     }
-                    
+
                 }
                 const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
-                const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(ChatSession);
+                const entityManagerProvider: EntityManagerProvider = container.resolve(EntityManagerProvider);
+                const chatSessionRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(ChatSession);
                 const respOfChatSession = await chatSessionRepository.findAll();
 
                 // console.log("respOfChatSession!!!!!!!!!!!", respOfChatSession);
@@ -123,7 +126,7 @@ export class BotFeedback{
                     console.log("userID", userId);
                     await testSettimeout(userId);
                 }
-            
+
             },
             null,
             true,

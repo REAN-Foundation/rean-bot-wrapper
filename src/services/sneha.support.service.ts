@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Imessage, IprocessedDialogflowResponseFormat, Iresponse } from '../refactor/interface/message.interface';
+import type { Imessage, IprocessedDialogflowResponseFormat, Iresponse } from '../refactor/interface/message.interface.js';
 import { autoInjectable, inject, Lifecycle, scoped, singleton } from 'tsyringe';
-import { platformServiceInterface } from '../refactor/interface/platform.interface';
-import { MessageFlow } from './get.put.message.flow.service';
-import { ResponseHandler } from '../utils/response.handler';
-import { RHGMessageToDialogflow } from './rhg.message.to.dialogflow';
+import type { platformServiceInterface } from '../refactor/interface/platform.interface.js';
+import { MessageFlow } from './get.put.message.flow.service.js';
+import { ResponseHandler } from '../utils/response.handler.js';
+import { RHGMessageToDialogflow } from './rhg.message.to.dialogflow.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class snehaMessagePlatformService implements platformServiceInterface{
@@ -42,7 +42,7 @@ export class snehaMessagePlatformService implements platformServiceInterface{
         const generatorRHGMessage = await this.rhgMessageToDialogflow.messageToDialogflow(msg);
         let done = false;
         const snehaMessages = [];
-        
+
         // eslint-disable-next-line init-declarations
         let snehaMessagetoDialogflow: Imessage;
         while (done === false) {

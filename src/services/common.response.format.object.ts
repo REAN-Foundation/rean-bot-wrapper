@@ -1,4 +1,4 @@
-import { Iresponse } from "../refactor/interface/message.interface";
+import type { Iresponse } from "../refactor/interface/message.interface.js";
 
 export const commonResponseMessageFormat = () => {
     const response_message: Iresponse = {

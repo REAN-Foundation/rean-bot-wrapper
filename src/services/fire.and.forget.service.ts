@@ -1,19 +1,19 @@
 import * as asyncLib from 'async';
 import { Lifecycle, scoped } from 'tsyringe';
-import { RegistrationService } from './maternalCareplan/registration.service';
-import { NeedBloodService } from './bloodWrrior/need.blood.service';
-import { CreateReminderService } from './reminder/create.reminder.service';
-import { EnrollPatientService } from './bloodWrrior/enroll.service';
-import { GenerateCertificateService } from './bloodWrrior/generate.certificate.flow.service';
-import { GenerateCertificateYesService } from './bloodWrrior/generate.certificate.yes.service';
-import { RegistrationPerMinMsgService } from './maternalCareplan/registration.per.minute.sercice';
-import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
-import { ChecklistDateValidationService } from './bloodWrrior/checklist.date.validation.service';
-import { CommonAssessmentService } from './Assesssment/common.assessment.service';
-import { CincinnatiPerMinMsgService } from './maternalCareplan/cincannati.demo';
-import { AcceptDonationRequestService } from './bloodWrrior/accept.donation.request.service';
-import { ChangeTransfusionDateService } from './bloodWrrior/chnage.transfusion.date.service';
-import { HeartFailureRegistrationService } from './heartFailureCareplan/enroll.heart.failure.careplan.service';
+import { RegistrationService } from './maternalCareplan/registration.service.js';
+import { NeedBloodService } from './bloodWrrior/need.blood.service.js';
+import { CreateReminderService } from './reminder/create.reminder.service.js';
+import { EnrollPatientService } from './bloodWrrior/enroll.service.js';
+import { GenerateCertificateService } from './bloodWrrior/generate.certificate.flow.service.js';
+import { GenerateCertificateYesService } from './bloodWrrior/generate.certificate.yes.service.js';
+import { RegistrationPerMinMsgService } from './maternalCareplan/registration.per.minute.sercice.js';
+import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service.js';
+import { ChecklistDateValidationService } from './bloodWrrior/checklist.date.validation.service.js';
+import { CommonAssessmentService } from './Assesssment/common.assessment.service.js';
+import { CincinnatiPerMinMsgService } from './maternalCareplan/cincannati.demo.js';
+import { AcceptDonationRequestService } from './bloodWrrior/accept.donation.request.service.js';
+import { ChangeTransfusionDateService } from './bloodWrrior/chnage.transfusion.date.service.js';
+import { HeartFailureRegistrationService } from './heartFailureCareplan/enroll.heart.failure.careplan.service.js';
 
 export interface QueueDoaminModel {
     Intent : string;
@@ -35,7 +35,7 @@ export class FireAndForgetService {
             onCompleted(model);
         })();
     }, ASYNC_TASK_COUNT);
-  
+
     public static enqueue = (model: QueueDoaminModel) => {
         FireAndForgetService._q.push(model, (model, error) => {
             if (error) {
@@ -167,7 +167,7 @@ export class FireAndForgetService {
         if (model.Intent === "StartAssessment") {
             const eventObj = model.Body.EventObj;
             await FireAndForgetService.delay(2000);
-            const commonAssessmentService:  CommonAssessmentService = 
+            const commonAssessmentService:  CommonAssessmentService =
                 eventObj.container.resolve(CommonAssessmentService);
             await commonAssessmentService.startAssessmentAndUpdateDb(eventObj, model.Body.PatientUserId,
                 model.Body.PersonPhoneNumber, model.Body.AssessmentTemplateId,
@@ -200,5 +200,5 @@ export class FireAndForgetService {
     };
 
     //#endregion
-    
+
 }

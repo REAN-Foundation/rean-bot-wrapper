@@ -1,10 +1,11 @@
 /* eslint-disable max-len */
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { FireAndForgetService, QueueDoaminModel } from '../../fire.and.forget.service';
-import { Logger } from '../../../common/logger';
-import { ClientEnvironmentProviderService } from '../../../services/set.client/client.environment.provider.service';
-import { EntityManagerProvider } from '../../../services/entity.manager.provider.service';
-import { ChatMessage } from '../../../models/chat.message.model';
+import { FireAndForgetService } from '../../fire.and.forget.service.js';
+import type { QueueDoaminModel} from '../../fire.and.forget.service.js';
+import { Logger } from '../../../common/logger.js';
+import { ClientEnvironmentProviderService } from '../../../services/set.client/client.environment.provider.service.js';
+import { EntityManagerProvider } from '../../../services/entity.manager.provider.service.js';
+import { ChatMessage } from '../../../models/chat.message.model.js';
 import axios from 'axios';
 
 @scoped(Lifecycle.ContainerScoped)

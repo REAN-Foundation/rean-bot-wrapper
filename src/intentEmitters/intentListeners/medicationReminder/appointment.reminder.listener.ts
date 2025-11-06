@@ -1,5 +1,5 @@
-import { AppointmentUserReplyService } from "../../../services/reminder/appointmentReminderReply/user.reply.service";
-import { AppointmentReminderService } from "../../../services/reminder/appointment.reminder.service";
+import { AppointmentUserReplyService } from "../../../services/reminder/appointmentReminderReply/user.reply.service.js";
+import { AppointmentReminderService } from "../../../services/reminder/appointment.reminder.service.js";
 
 export const AppointmentReminderListener = async (intent, eventObj) => {
     // eslint-disable-next-line max-len

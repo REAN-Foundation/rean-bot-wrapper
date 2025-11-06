@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable init-declarations */
-import { ChatMessage } from "../models/chat.message.model";
-import { Iresponse } from "../refactor/interface/message.interface";
+import { ChatMessage } from "../models/chat.message.model.js";
+import type { Iresponse } from "../refactor/interface/message.interface.js";
 import needle from 'needle';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
 import { inject, Lifecycle, scoped } from "tsyringe";
-import { EntityManagerProvider } from "./entity.manager.provider.service";
+import { EntityManagerProvider } from "./entity.manager.provider.service.js";
 
 @scoped(Lifecycle.ContainerScoped)
 export class TelegramPostResponseFunctionalities {

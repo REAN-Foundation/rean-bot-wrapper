@@ -1,9 +1,9 @@
 /* eslint-disable lines-around-comment */
 
 /* eslint-disable @typescript-eslint/no-var-requires */
-const cfsign = require('aws-cloudfront-sign');
+import cfsign from 'aws-cloudfront-sign';
 import { inject, Lifecycle, scoped } from "tsyringe";
-import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
+import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service.js";
 
 @scoped(Lifecycle.ContainerScoped)
 export class SignedUrls{

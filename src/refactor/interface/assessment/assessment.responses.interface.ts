@@ -1,4 +1,4 @@
-import { AssessmentResponseType } from "../../../refactor/messageTypes/assessment/assessment.responses.types";
+import { AssessmentResponseType } from "../../../refactor/messageTypes/assessment/assessment.responses.types.js";
 
 export interface IAssessmentResponses {
     id: number;

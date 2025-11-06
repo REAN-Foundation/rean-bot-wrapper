@@ -1,8 +1,8 @@
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { whatsappMetaButtonService } from '../whatsappmeta.button.service';
-import { BloodWarriorCommonService } from './common.service';
-import { BloodWarriorWelcomeService } from './welcome.service';
+import { Logger } from '../../common/logger.js';
+import { whatsappMetaButtonService } from '../whatsappmeta.button.service.js';
+import { BloodWarriorCommonService } from './common.service.js';
+import { BloodWarriorWelcomeService } from './welcome.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class DonateBloodService {
@@ -40,5 +40,5 @@ export class DonateBloodService {
                 .log_error(error.message,500,'Donate blood service error');
         }
     }
-    
+
 }

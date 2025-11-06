@@ -1,20 +1,21 @@
 /* eslint-disable max-len */
 import { scoped, Lifecycle, inject } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { NeedleService } from '../needle.service';
-import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
-import { Iresponse } from '../../refactor/interface/message.interface';
-import { AssessmentSessionLogs } from '../../models/assessment.session.model';
-import { EntityManagerProvider } from '../entity.manager.provider.service';
-import { commonResponseMessageFormat } from '../common.response.format.object';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { ServeAssessmentService } from '../maternalCareplan/serveAssessment/serveAssessment.service';
-import { CacheMemory } from '../cache.memory.service';
-import { ChatMessage } from '../../models/chat.message.model';
-import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
-import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
-import { sendTelegramButtonService } from '../telegram.button.service';
-import { AssessmentIdentifiers } from '../../models/assessment/assessment.identifiers.model';
+import { Logger } from '../../common/logger.js';
+import { NeedleService } from '../needle.service.js';
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service.js';
+import type { Iresponse } from '../../refactor/interface/message.interface.js';
+import { AssessmentSessionLogs } from '../../models/assessment.session.model.js';
+import { EntityManagerProvider } from '../entity.manager.provider.service.js';
+import { commonResponseMessageFormat } from '../common.response.format.object.js';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
+import { ServeAssessmentService } from '../maternalCareplan/serveAssessment/serveAssessment.service.js';
+import { CacheMemory } from '../cache.memory.service.js';
+import { ChatMessage } from '../../models/chat.message.model.js';
+import type { QueueDoaminModel } from '../fire.and.forget.service.js';
+import { FireAndForgetService } from '../fire.and.forget.service.js';
+import { Registration } from '../registrationsAndEnrollements/patient.registration.service.js';
+import { sendTelegramButtonService } from '../telegram.button.service.js';
+import { AssessmentIdentifiers } from '../../models/assessment/assessment.identifiers.model.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class CommonAssessmentService {
@@ -28,7 +29,7 @@ export class CommonAssessmentService {
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(Registration) private registration?: Registration,
     ){}
-    
+
     async triggerAssessment (eventObj, assessmentDisplayCode) {
         try {
             let channel = eventObj.body.originalDetectIntentRequest.payload.source;
@@ -71,7 +72,7 @@ export class CommonAssessmentService {
         } catch (error) {
             Logger.instance()
                 .log_error(error.message,500,'Register patient with blood warrior messaging service error');
-        
+
         }
 
     }
@@ -121,7 +122,7 @@ export class CommonAssessmentService {
             "AssessmentTemplateId" : assessmentTemplateId,
             "ScheduledDate"        : currentDate
         };
-        
+
         const assessmentData = await this.createAssessment(AssessmentDetails);
         await this.getAssessmentUserTasks(AssessmentDetails,assessmentData);
         let telegramPayload = null;

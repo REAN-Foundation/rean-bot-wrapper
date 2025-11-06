@@ -1,7 +1,7 @@
 import { scoped, Lifecycle, inject } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { NeedleService } from '../needle.service';
-import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
+import { Logger } from '../../common/logger.js';
+import { NeedleService } from '../needle.service.js';
+import { Registration } from '../registrationsAndEnrollements/patient.registration.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class DeleteReminderService {

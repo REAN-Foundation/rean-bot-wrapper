@@ -1,12 +1,12 @@
-import { GetLocation } from "./find.nearest.location.service";
-import { dialoflowMessageFormatting } from "./Dialogflow.service";
+import { GetLocation } from "./find.nearest.location.service.js";
+import { dialoflowMessageFormatting } from "./Dialogflow.service.js";
 import { inject, Lifecycle, scoped } from "tsyringe";
-import { ClickUpTask } from "./clickup/clickup.task";
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { EntityManagerProvider } from "./entity.manager.provider.service";
-import { ChatMessage } from "../models/chat.message.model";
-import { ContactList } from "../models/contact.list";
-import { UserInfo } from "../models/user.info.model";
+import { ClickUpTask } from "./clickup/clickup.task.js";
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
+import { EntityManagerProvider } from "./entity.manager.provider.service.js";
+import { ChatMessage } from "../models/chat.message.model.js";
+import { ContactList } from "../models/contact.list.js";
+import { UserInfo } from "../models/user.info.model.js";
 
 @scoped(Lifecycle.ContainerScoped)
 export class LogsQAService {
@@ -92,7 +92,7 @@ export class LogsQAService {
         }
 
     }
-    
+
     async sensitivityMapper(sensitivity_flag: string) {
         const sensitivityPriorityMap: Record<string, number> = {
             "Critical / Urgent"  : 1,

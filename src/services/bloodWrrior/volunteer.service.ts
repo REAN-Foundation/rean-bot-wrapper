@@ -1,7 +1,7 @@
 import { scoped, Lifecycle, inject } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { NeedleService } from '../needle.service';
-import { whatsappMetaButtonService } from '../whatsappmeta.button.service';
+import { Logger } from '../../common/logger.js';
+import { NeedleService } from '../needle.service.js';
+import { whatsappMetaButtonService } from '../whatsappmeta.button.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class VolunteerService {

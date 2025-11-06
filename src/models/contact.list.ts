@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from 'sequelize-typescript';
-import { contactList } from '../refactor/interface/message.interface';
+import type { contactList } from '../refactor/interface/message.interface.js';
 
 @Table({
     timestamps : true,
@@ -8,7 +8,7 @@ import { contactList } from '../refactor/interface/message.interface';
     tableName  : 'contact_list'
 })
 export class ContactList extends Model implements contactList {
-    
+
     @AutoIncrement
     @PrimaryKey
     @Column({
@@ -60,7 +60,7 @@ export class ContactList extends Model implements contactList {
         type : DataType.STRING
     })
         emailID: string;
-    
+
     @Column({
         type : DataType.STRING
     })

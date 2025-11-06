@@ -1,4 +1,4 @@
-import { ScheduleOneTimeTakeValuesService } from "../../../services/bloodWrrior/schedule.one.time.take.values.service";
+import { ScheduleOneTimeTakeValuesService } from "../../../services/bloodWrrior/schedule.one.time.take.values.service.js";
 
 export const ScheduleOneTimeTakeValuesListener = async (intent, eventObj) => {
     // eslint-disable-next-line max-len

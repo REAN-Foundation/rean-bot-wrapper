@@ -1,7 +1,7 @@
 import express from 'express';
-import { Logger } from '../../common/logger';
+import { Logger } from '../../common/logger.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { IntentsController } from '../controllers/intents.controller';
+import { IntentsController } from '../controllers/intents.controller.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class IntentRoutes {
@@ -24,5 +24,5 @@ export class IntentRoutes {
 
         app.use('/v1', router);
     }
-    
+
 }

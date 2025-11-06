@@ -1,5 +1,5 @@
-import { IserviceResponseFunctionalities } from "../../services/response.format/response.interface";
-import { MessageHandlerType, NlpProviderType, UserFeedbackType, ChannelType,} from "../messageTypes/message.types";
+import type { IserviceResponseFunctionalities } from "../../services/response.format/response.interface.js";
+import { MessageHandlerType, NlpProviderType, UserFeedbackType, ChannelType,} from "../messageTypes/message.types.js";
 
 export interface Imessage{
     name             : string;

@@ -1,16 +1,16 @@
-import { BloodGlucoseService } from "../../services/biometrics/blood.glucose.service";
-import { BloodPressureService } from "../../services/biometrics/blood.pressure.service";
-import { BloodOxygenSaturationService } from "../../services/biometrics/blood.oxygen.saturation.service";
-import { BodyHeightService } from "../../services/biometrics/body.height.service";
-import { BodyTemperatureService } from "../../services/biometrics/body.temperature.service";
-import { BodyWeightService } from "../../services/biometrics/body.weight.service";
-import { PulseService } from "../../services/biometrics/pulse.service";
+import { BloodGlucoseService } from "../../services/biometrics/blood.glucose.service.js";
+import { BloodPressureService } from "../../services/biometrics/blood.pressure.service.js";
+import { BloodOxygenSaturationService } from "../../services/biometrics/blood.oxygen.saturation.service.js";
+import { BodyHeightService } from "../../services/biometrics/body.height.service.js";
+import { BodyTemperatureService } from "../../services/biometrics/body.temperature.service.js";
+import { BodyWeightService } from "../../services/biometrics/body.weight.service.js";
+import { PulseService } from "../../services/biometrics/pulse.service.js";
 
 export class AppSupportListener {
 
     public static handleIntent = async (intent, eventObj) => {
         var response = null;
-        
+
         try {
             switch (intent) {
             case 'BloodGlucose.update': {
@@ -90,7 +90,7 @@ export class AppSupportListener {
                 response = await pulseService.createPulseInfoService(eventObj);
                 break;
             }
-            
+
             }
             if (!response) {
                 throw new Error('Biometrics Info Listener Error!');

@@ -1,23 +1,24 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
-import { getMessageFunctionalities  } from "../refactor/interface/message.service.functionalities.interface";
-import { Imessage } from '../refactor/interface/message.interface';
-import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
-import { Speechtotext } from "./speech.to.text.service";
+import { getMessageFunctionalities  } from "../refactor/interface/message.service.functionalities.interface.js";
+import { Imessage } from '../refactor/interface/message.interface.js';
+import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service.js";
+import { Speechtotext } from "./speech.to.text.service.js";
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { EmojiFilter } from "./filter.message.for.emoji.service";
-import { AwsS3manager } from "./aws.file.upload.service";
-import { UserLanguage } from "./set.language";
+import { EmojiFilter } from "./filter.message.for.emoji.service.js";
+import { AwsS3manager } from "./aws.file.upload.service.js";
+import { UserLanguage } from "./set.language.js";
 import needle from 'needle';
-import { Message } from "./request.format/whatsapp.wati.message.format";
-import { getRequestOptions } from "../utils/helper";
-import { EntityManagerProvider } from "./entity.manager.provider.service";
-import { ChatMessage } from "../models/chat.message.model";
-import axios, { AxiosRequestConfig } from 'axios';
+import { Message } from "./request.format/whatsapp.wati.message.format.js";
+import { getRequestOptions } from "../utils/helper.js";
+import { EntityManagerProvider } from "./entity.manager.provider.service.js";
+import { ChatMessage } from "../models/chat.message.model.js";
+import type { AxiosRequestConfig } from 'axios';
 import fs from 'fs';
 import FormData from 'form-data';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const https = require('follow-redirects').https;
+import { https } from 'follow-redirects';
+import { parse as parseUrl } from 'url';
 
 @scoped(Lifecycle.ContainerScoped)
 export class WatiMessageFunctionalities implements getMessageFunctionalities {
@@ -82,9 +83,7 @@ export class WatiMessageFunctionalities implements getMessageFunctionalities {
         else if (emojiFilteredMessage === "PositiveFeedback"){
             messageToDialogflow.intent = "PositiveFeedback";
         }
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const url = require('url');
-        const urlParse = url.parse(location);
+        const urlParse = parseUrl(location);
         const imageUrl = (urlParse.protocol + urlParse.hostname + urlParse.pathname);
         messageToDialogflow.type = 'image';
         messageToDialogflow.imageUrl = location;
@@ -167,6 +166,7 @@ export class WatiMessageFunctionalities implements getMessageFunctionalities {
             data         : data,
             responseType : 'stream',
         };
+        const { default: axios } = await import('axios');
         const response = await axios.request(options);
 
         response.data.pipe(writer);

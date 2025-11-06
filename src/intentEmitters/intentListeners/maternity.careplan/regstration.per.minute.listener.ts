@@ -1,4 +1,4 @@
-import { RegistrationPerMinMsgService } from "../../../services/maternalCareplan/registration.per.minute.sercice";
+import { RegistrationPerMinMsgService } from "../../../services/maternalCareplan/registration.per.minute.sercice.js";
 
 export const  RegistrationPerMinuteMsgListener = async (_intent, eventObj) => {
     try {

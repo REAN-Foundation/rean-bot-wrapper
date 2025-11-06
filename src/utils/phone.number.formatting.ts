@@ -1,4 +1,4 @@
-import {countryMapping} from '../assets/static.data/phone.number.codes';
+import {countryMapping} from '../assets/static.data/phone.number.codes.js';
 import { PhoneNumberUtil } from 'google-libphonenumber';
 import { injectable } from 'tsyringe';
 

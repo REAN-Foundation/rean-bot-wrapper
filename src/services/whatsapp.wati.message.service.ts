@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 import { inject, delay, scoped, Lifecycle } from 'tsyringe';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { MessageFlow } from './get.put.message.flow.service';
-import { WhatsappWatiMessageToDialogflow } from './whatsapp.wati.messagetodialogflow';
-import { platformServiceInterface } from '../refactor/interface/platform.interface';
-import { Iresponse, Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface';
-import { AwsS3manager } from './aws.file.upload.service';
-import { WhatsappWatiPostResponseFunctionalities } from './whatsapp.wati.post.response.functionalities';
-import { LogsQAService } from './logs.for.qa';
-import { EntityManagerProvider } from './entity.manager.provider.service';
-import { ChatMessage } from '../models/chat.message.model';
-import { Logger } from '../common/logger';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
+import { MessageFlow } from './get.put.message.flow.service.js';
+import { WhatsappWatiMessageToDialogflow } from './whatsapp.wati.messagetodialogflow.js';
+import type { platformServiceInterface } from '../refactor/interface/platform.interface.js';
+import type { Iresponse, Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface.js';
+import { AwsS3manager } from './aws.file.upload.service.js';
+import { WhatsappWatiPostResponseFunctionalities } from './whatsapp.wati.post.response.functionalities.js';
+import { LogsQAService } from './logs.for.qa.js';
+import { EntityManagerProvider } from './entity.manager.provider.service.js';
+import { ChatMessage } from '../models/chat.message.model.js';
+import { Logger } from '../common/logger.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class WhatsappWatiMessageService implements platformServiceInterface{
@@ -61,7 +61,7 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
     async setWebhook(clientName: string){
         return;
     }
-    
+
     async SendMediaMessage(response_format: Iresponse, payload: any) {
         let whatsappMessageId;
         const type = response_format.message_type;
@@ -169,5 +169,5 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
     async getMessageIdFromResponse(responseBody: any) {
         throw new Error("Method not implemented.");
     }
-    
+
 }

@@ -1,5 +1,4 @@
-import { UserDetailsDomainModel } from "../../domain.types/userAction/user.enrollment.domain.models";
-import { CareplanEnrollmentDomainModel } from "../../domain.types/userAction/user.enrollment.domain.models";
+import type { UserDetailsDomainModel, CareplanEnrollmentDomainModel } from "../../domain.types/userAction/user.enrollment.domain.models.js";
 export class UserDetailsValidator{
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -19,7 +18,7 @@ export class UserDetailsValidator{
     };
 
     validateCareplanEnrollmentDetails = (request): CareplanEnrollmentDomainModel =>{
-        
+
         const careplanEnrollmentDetails : CareplanEnrollmentDomainModel = {
             platform : request.body.platform,
             lmpstr   : request.body.lmp

@@ -1,11 +1,11 @@
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { NeedleService } from '../needle.service';
-import { BloodWarriorCommonService } from './common.service';
-import { RaiseDonationRequestService } from './raise.request.service';
-import { Iresponse } from '../../refactor/interface/message.interface';
-import { commonResponseMessageFormat } from '../common.response.format.object';
+import { Logger } from '../../common/logger.js';
+import { NeedleService } from '../needle.service.js';
+import { BloodWarriorCommonService } from './common.service.js';
+import { RaiseDonationRequestService } from './raise.request.service.js';
+import type { Iresponse } from '../../refactor/interface/message.interface.js';
+import { commonResponseMessageFormat } from '../common.response.format.object.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ScheduleDonationTakeValuesService {
@@ -31,7 +31,7 @@ export class ScheduleDonationTakeValuesService {
                 let dffMessage = "";
                 const apiURL = `clinical/patient-donors/search?name=${bridgeId}&onlyElligible=true`;
                 result = await this.needleService.needleRequestForREAN("get", apiURL);
-    
+
                 //We need to iterate here if i want to send reminders to all donors having same blood bridge
                 if (result.Data.PatientDonors.Items.length > 0) {
 
@@ -51,7 +51,7 @@ export class ScheduleDonationTakeValuesService {
                         RequestedDate     : new Date().toISOString()
                             .split('T')[0]
                     };
-    
+
                     //yaha pe pehle donation record nikalo from db agar nahi mile to create new one
                     await this.raiseDonationRequestService.createDonationRecord(obj);
                     dffMessage = `Congratulations! \nThe donation has been successfully scheduled.`;
@@ -63,12 +63,12 @@ export class ScheduleDonationTakeValuesService {
                 Patient name: ${patient.User.Person.DisplayName},
                 Maps: ${location}`;
                     resolve( { message: { fulfillmentMessages: [{ text: { text: [dffMessage + commonMessage] } }] } });
-    
+
                     //Fetch donation reminders for donors
                     const nextDonationDate = new Date(donation_Date.split("T")[0]);
                     // eslint-disable-next-line max-len
                     await this.bloodWarriorCommonService.fetchDonorDonationReminders(patientDonors.DonorUserId,nextDonationDate, channel);
-    
+
                     //Message sent to patient
                     const heading = `Hi ${patient.User.Person.DisplayName}, `;
                     const previousPayload = eventObj.body.originalDetectIntentRequest.payload;
@@ -110,7 +110,7 @@ export class ScheduleDonationTakeValuesService {
                     const previousIntentPayload = eventObj.body.originalDetectIntentRequest.payload;
                     this._platformMessageService = eventObj.container.resolve(previousIntentPayload.source);
                     await this._platformMessageService.SendMediaMessage(response_format, payload);
-    
+
                     //Message sent to donor
                     const heading1 = `Hi ${patientDonors.DonorName}, \nThe donation request has been created by volunteer.`;
                     const donorPhone =
@@ -123,7 +123,7 @@ export class ScheduleDonationTakeValuesService {
                     dffMessage = `Sorry for the inconvenience, something went wrong.`;
                     resolve( { message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } });
                 }
-                
+
             } catch (error) {
                 Logger.instance()
                     .log_error(error.message,500,'Schedule donation service error');

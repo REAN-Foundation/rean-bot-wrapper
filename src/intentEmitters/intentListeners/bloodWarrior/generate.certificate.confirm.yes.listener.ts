@@ -1,4 +1,4 @@
-import { GenerateCertificateConfirmYesService } from "../../../services/bloodWrrior/generate.certificate.confirm.yes.service";
+import { GenerateCertificateConfirmYesService } from "../../../services/bloodWrrior/generate.certificate.confirm.yes.service.js";
 
 export const GenerateCertificateConfirmYesListener = async (intent, eventObj) => {
     // eslint-disable-next-line max-len

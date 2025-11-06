@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-const pdf = require('html-pdf');
-const fs = require('fs');
+import pdf from 'html-pdf';
+import fs from 'fs';
 
 async function htmlToPDF(){
     const example = fs.readFileSync('./src/html.tables/example.html', 'utf8');

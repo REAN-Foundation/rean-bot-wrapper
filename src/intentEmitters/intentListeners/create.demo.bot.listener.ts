@@ -1,4 +1,4 @@
-import { demoBotService } from '../../services/demoBot.service';
+import { demoBotService } from '../../services/demoBot.service.js';
 
 export const createDemoBot = async (intent, eventObj) => {
     const DemoBotService:demoBotService = eventObj.container.resolve(demoBotService);

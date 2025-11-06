@@ -1,9 +1,9 @@
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { getRequestOptions } from '../utils/helper';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
+import { getRequestOptions } from '../utils/helper.js';
 import needle from "needle";
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { ChatMessage } from '../models/chat.message.model';
-import { EntityManagerProvider } from './entity.manager.provider.service';
+import { ChatMessage } from '../models/chat.message.model.js';
+import { EntityManagerProvider } from './entity.manager.provider.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class CallAnemiaModel {

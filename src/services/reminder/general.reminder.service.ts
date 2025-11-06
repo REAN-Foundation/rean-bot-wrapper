@@ -1,16 +1,18 @@
 /* eslint-disable max-len */
 import { scoped, Lifecycle, inject } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { NeedleService } from '../needle.service';
-import { dialoflowMessageFormatting } from '../Dialogflow.service';
-import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { GetPatientInfoService } from '../support.app.service';
-import { DateStringFormat, DurationType, TimeHelper } from '../../common/time.helper';
-import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
-import { CacheMemory } from '../cache.memory.service';
-import { ReminderBody, ReminderDomainModel, ReminderType, RepeatAfterEveryNUnit } from '../../domain.types/reminder/reminder.domain.model';
-import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
+import { Logger } from '../../common/logger.js';
+import { NeedleService } from '../needle.service.js';
+import { dialoflowMessageFormatting } from '../Dialogflow.service.js';
+import { FireAndForgetService } from '../fire.and.forget.service.js';
+import type { QueueDoaminModel } from '../fire.and.forget.service.js';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
+import { GetPatientInfoService } from '../support.app.service.js';
+import { DateStringFormat, DurationType, TimeHelper } from '../../common/time.helper.js';
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service.js';
+import { CacheMemory } from '../cache.memory.service.js';
+import { ReminderType, RepeatAfterEveryNUnit } from '../../domain.types/reminder/reminder.domain.model.js';
+import type { ReminderBody, ReminderDomainModel } from '../../domain.types/reminder/reminder.domain.model.js';
+import { Registration } from '../registrationsAndEnrollements/patient.registration.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class GeneralReminderService {
@@ -76,7 +78,7 @@ export class GeneralReminderService {
 
             // extract whentime and whenday from schedule timestamp
             // const { whenDay, whenTime } = await this.extractWhenDateTime(jsonFormat.StartDateTime);
-            
+
             if (jsonFormat.TaskType === 'medication' && frequency === "" ) {
                 console.log(`trigerring the ${jsonFormat.TaskType} reminder event`);
                 return await this.dialoflowMessageFormattingService.triggerIntent("Reminder_Ask_Frequency",eventObj);
@@ -148,27 +150,27 @@ export class GeneralReminderService {
                 apiURL = `reminders/repeat-every-hour`;
                 obj.ReminderType = ReminderType.RepeatEveryHour;
                 obj.EndAfterNRepetitions = 10;
-                
+
             } else if (frequency === "Yearly"){
                 apiURL = `reminders/repeat-after-every-n`;
                 obj.ReminderType = ReminderType.RepeatAfterEveryN;
                 obj.EndAfterNRepetitions = 3;
                 obj.RepeatAfterEvery = 1;
                 obj.RepeatAfterEveryNUnit = RepeatAfterEveryNUnit.Year;
-                
+
             } else if (frequency === "Quarterly"){
                 apiURL = `reminders/repeat-every-quarter-on`;
                 obj.ReminderType = ReminderType.RepeatEveryQuarterOn;
                 obj.EndAfterNRepetitions = 5;
-                
+
             } else if (frequency === "WeekDays"){
                 apiURL = `reminders/repeat-every-weekday`;
                 obj.EndAfterNRepetitions = 8;
-                
+
             } else if (frequency === "Monthly"){
                 apiURL = `reminders/repeat-every-month-on`;
                 obj.EndAfterNRepetitions = 6;
-                
+
             }
             obj.StartDate = whenDay;
             const data = await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
@@ -230,7 +232,7 @@ export class GeneralReminderService {
 
         variables = { en: commonStructure, kn: kannadaVariables, sw: commonStructure };
         let buttonsIds = jsonFormat.TaskType === 'medication' ? [ "App_Reminder_Yes", "Medication_Taken_No" ] : [ "App_Reminder_Yes", "App_Reminder_No"] ;
-        
+
         if (channel === "telegram" || channel === "Telegram"){
             buttonsIds = jsonFormat.TaskType === 'medication' ? [ "Yes", "App_Reminder_Yes", "No","Medication_Taken_No" ] : [ "Yes","App_Reminder_Yes", "No","App_Reminder_No"] ;
         }

@@ -1,16 +1,17 @@
-import { Logger } from '../../common/logger';
-import { GetPatientInfoService } from '../support.app.service';
-import { NeedleService } from '../needle.service';
+import { Logger } from '../../common/logger.js';
+import { GetPatientInfoService } from '../support.app.service.js';
+import { NeedleService } from '../needle.service.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { BloodWarriorCommonService } from './common.service';
-import { EnrollPatientService } from './enroll.service';
-import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
-import { BloodWarriorWelcomeService } from './welcome.service';
-import { commonResponseMessageFormat } from '../common.response.format.object';
-import { Iresponse } from '../../refactor/interface/message.interface';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { sendApiInteractiveListService } from '../whatsappmeta.button.service';
-import { CacheMemory } from '../cache.memory.service';
+import { BloodWarriorCommonService } from './common.service.js';
+import { EnrollPatientService } from './enroll.service.js';
+import type { QueueDoaminModel } from '../fire.and.forget.service.js';
+import { FireAndForgetService } from '../fire.and.forget.service.js';
+import { BloodWarriorWelcomeService } from './welcome.service.js';
+import { commonResponseMessageFormat } from '../common.response.format.object.js';
+import type { Iresponse } from '../../refactor/interface/message.interface.js';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
+import { sendApiInteractiveListService } from '../whatsappmeta.button.service.js';
+import { CacheMemory } from '../cache.memory.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ChangeTransfusionDateService {
@@ -32,10 +33,10 @@ export class ChangeTransfusionDateService {
             const dayDiffrence = await this.bloodWarriorCommonService.differenceBetweenTwoDates(new Date(transfusionDate.split("T")[0]), new Date());
             if (dayDiffrence > -1) {
                 result = await this.getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
-    
+
                 const patientUserId = result.message[0].UserId;
                 const accessToken = result.message[0].accessToken;
-           
+
                 //Update patient health profile
                 const apiURL = `patient-health-profiles/${patientUserId}`;
                 const obj = {
@@ -69,9 +70,9 @@ export class ChangeTransfusionDateService {
         try {
             let result = null;
             result = await this.getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
-            
+
             if (result.message.length > 0) {
-    
+
                 const patientUserId = result.message[0].UserId;
                 const apiURL = `patient-health-profiles/${patientUserId}`;
                 result = await this.needleService.needleRequestForREAN("get", apiURL);
@@ -162,7 +163,7 @@ export class ChangeTransfusionDateService {
         if (dayDiffrence > -1) {
             const key = this.extractPatientId(name);
             const patientUserId = await CacheMemory.get(key);
-        
+
             //Update patient health profile
             const apiURL = `patient-health-profiles/${patientUserId}`;
             const obj = {
@@ -190,13 +191,13 @@ export class ChangeTransfusionDateService {
     extractUniquePatientInfo = (data) => {
         const patientDonors = data.Data.PatientDonors.Items;
         const uniquePatients = new Map<string, { Name: string, NextDonationDate: string }>();
-    
+
         patientDonors.forEach((item) => {
             if (!uniquePatients.has(item.PatientUserId)) {
                 uniquePatients.set(item.PatientUserId, { Name: item.Name, NextDonationDate: item.NextDonationDate });
             }
         });
-    
+
         return Array.from(uniquePatients.entries()).map(([PatientUserId, { Name, NextDonationDate }]) =>
             ({ PatientUserId, Name, NextDonationDate }));
     };

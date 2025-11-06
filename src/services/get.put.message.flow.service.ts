@@ -1,31 +1,31 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 /* eslint-disable linebreak-style */
-import { Imessage, Iresponse, OutgoingMessage } from '../refactor/interface/message.interface';
+import type { Imessage, Iresponse, OutgoingMessage } from '../refactor/interface/message.interface.js';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { handleRequestservice } from './handle.request.service';
+import { handleRequestservice } from './handle.request.service.js';
 import { delay, inject, Lifecycle, scoped } from 'tsyringe';
-import { platformServiceInterface } from '../refactor/interface/platform.interface';
-import { ChatMessage } from '../models/chat.message.model';
-import { GoogleTextToSpeech } from './text.to.speech';
-import { SlackMessageService } from "./slack.message.service";
-import { ChatSession } from '../models/chat.session';
-import { ContactList } from '../models/contact.list';
-import { ReminderMessage } from '../models/reminder.model';
-import { translateService } from './translate.service';
-import { sendApiButtonService, templateButtonService, watiTemplateButtonService } from './whatsappmeta.button.service';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { EntityManagerProvider } from './entity.manager.provider.service';
-import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
-import { AssessmentSessionLogs } from '../models/assessment.session.model';
-import { DecisionRouter } from './langchain/decision.router.service';
-import { CacheMemory } from './cache.memory.service';
-import { Helper } from '../common/helper';
+import type { platformServiceInterface } from '../refactor/interface/platform.interface.js';
+import { ChatMessage } from '../models/chat.message.model.js';
+import { GoogleTextToSpeech } from './text.to.speech.js';
+import { SlackMessageService } from "./slack.message.service.js";
+import { ChatSession } from '../models/chat.session.js';
+import { ContactList } from '../models/contact.list.js';
+import { ReminderMessage } from '../models/reminder.model.js';
+import { translateService } from './translate.service.js';
+import { sendApiButtonService, templateButtonService, watiTemplateButtonService } from './whatsappmeta.button.service.js';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
+import { EntityManagerProvider } from './entity.manager.provider.service.js';
+import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service.js';
+import { AssessmentSessionLogs } from '../models/assessment.session.model.js';
+import { DecisionRouter } from './langchain/decision.router.service.js';
+import { CacheMemory } from './cache.memory.service.js';
+import { Helper } from '../common/helper.js';
 import needle from "needle";
-import { sendTelegramButtonService } from './telegram.button.service';
-import { Logger } from '../common/logger';
-import { MessageHandlerType } from '../refactor/messageTypes/message.types';
-import { AssessmentIdentifiers } from '../models/assessment/assessment.identifiers.model';
+import { sendTelegramButtonService } from './telegram.button.service.js';
+import { Logger } from '../common/logger.js';
+import { MessageHandlerType } from '../refactor/messageTypes/message.types.js';
+import { AssessmentIdentifiers } from '../models/assessment/assessment.identifiers.model.js';
 
 // import { AssessmentIdentifiers } from '../models/assessment/assessment.identifiers.model';
 

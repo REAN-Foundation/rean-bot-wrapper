@@ -1,5 +1,5 @@
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from 'sequelize-typescript';
-import { IuserConsent } from '../refactor/interface/message.interface';
+import type { IuserConsent } from '../refactor/interface/message.interface.js';
 
 @Table(
     {
@@ -15,7 +15,7 @@ export class UserConsent extends Model implements IuserConsent {
     @Column({
         type : DataType.INTEGER
     })
-        id?: number;
+        declare id?: number;
 
     @Column({
         type : DataType.STRING

@@ -1,4 +1,4 @@
-import { ScheduleDonationElligibleService } from "../../../services/bloodWrrior/schedule.donation.elligible.service";
+import { ScheduleDonationElligibleService } from "../../../services/bloodWrrior/schedule.donation.elligible.service.js";
 
 export const ScheduleDonationElligible = async (intent, eventObj) => {
     const scheduleDOnationElligibleService = eventObj.container.resolve(ScheduleDonationElligibleService);

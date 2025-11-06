@@ -1,14 +1,14 @@
-import { AwsS3manager } from './aws.file.upload.service';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { AwsS3manager } from './aws.file.upload.service.js';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
 import { autoInjectable, inject } from 'tsyringe';
-import { ResponseHandler } from '../utils/response.handler';
-import { NeedleService } from './needle.service';
-import { translateService } from './translate.service';
-import { Iresponse } from '../refactor/interface/message.interface';
-import { sendApiButtonService } from './whatsappmeta.button.service';
-import { sendTelegramButtonService } from '../services/telegram.button.service';
-import { commonResponseMessageFormat } from '../services/common.response.format.object';
-import { platformServiceInterface } from '../refactor/interface/platform.interface';
+import { ResponseHandler } from '../utils/response.handler.js';
+import { NeedleService } from './needle.service.js';
+import { translateService } from './translate.service.js';
+import type { Iresponse } from '../refactor/interface/message.interface.js';
+import { sendApiButtonService } from './whatsappmeta.button.service.js';
+import { sendTelegramButtonService } from '../services/telegram.button.service.js';
+import { commonResponseMessageFormat } from '../services/common.response.format.object.js';
+import type { platformServiceInterface } from '../refactor/interface/platform.interface.js';
 
 @autoInjectable()
 export class sendExtraMessages{
@@ -67,7 +67,7 @@ export class sendExtraMessages{
             response_format.sessionId = sessionId;
             response_format.messageText = message;
             response_format.message_type = messageType;
-    
+
             _platformMessageService.SendMediaMessage(response_format, payload );
         }
         catch (error) {
@@ -107,6 +107,6 @@ export class sendExtraMessages{
         }
     }
 
-    
+
 
 }

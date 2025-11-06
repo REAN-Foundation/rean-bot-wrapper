@@ -1,4 +1,4 @@
-import { GenerateCertificateService } from "../../../services/bloodWrrior/generate.certificate.flow.service";
+import { GenerateCertificateService } from "../../../services/bloodWrrior/generate.certificate.flow.service.js";
 
 
 export const GenerateCertificateListener = async (intent, eventObj) => {

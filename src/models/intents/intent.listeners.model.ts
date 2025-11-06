@@ -1,7 +1,7 @@
 /* eslint-disable indent */
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, ForeignKey, BelongsTo } from 'sequelize-typescript';
-import { IIntentListeners } from '../../refactor/interface/intents/intents.interface';
-import { Intents } from './intents.model';
+import type { IIntentListeners } from '../../refactor/interface/intents/intents.interface.js';
+import { Intents } from './intents.model.js';
 @Table(
     {
         timestamps: true,
@@ -18,7 +18,7 @@ export class IntentListeners extends Model implements IIntentListeners {
         type : DataType.INTEGER,
         allowNull : false
     })
-        id: number;
+        declare id: number;
 
     @ForeignKey(() => Intents)
     @Column({
@@ -26,7 +26,7 @@ export class IntentListeners extends Model implements IIntentListeners {
         allowNull : false
     })
         intentId: number;
-    
+
     @BelongsTo(() => Intents)
         Intents: Intents;
 

@@ -1,6 +1,6 @@
 /* eslint-disable init-declarations */
-import { ApiRequest } from "./request.format/api.request";
-import { MockCHannelMessageFunctionalities } from './mock.channel.message.funtionalities';
+import { ApiRequest } from "./request.format/api.request.js";
+import { MockCHannelMessageFunctionalities } from './mock.channel.message.funtionalities.js';
 import { inject, Lifecycle, scoped } from "tsyringe";
 
 @scoped(Lifecycle.ContainerScoped)

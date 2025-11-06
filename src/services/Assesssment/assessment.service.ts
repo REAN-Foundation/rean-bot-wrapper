@@ -1,23 +1,22 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Lifecycle, scoped, inject } from 'tsyringe';
-import { CommonAssessmentService } from './common.assessment.service';
-import { AssessmentRequest } from '../../refactor/interface/assessment/assessment.interface';
-import { ServeAssessmentService } from '../maternalCareplan/serveAssessment/serveAssessment.service';
-import { sendTelegramButtonService } from '../telegram.button.service';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { Iresponse } from '../../refactor/interface/message.interface';
-import { commonResponseMessageFormat } from '../common.response.format.object';
-import { CacheMemory } from '../cache.memory.service';
-import { EntityManagerProvider } from '../entity.manager.provider.service';
-import { AssessmentSessionLogs } from '../../models/assessment.session.model';
-import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
-import { ChatMessage } from '../../models/chat.message.model';
-import { sendApiButtonService } from '../whatsappmeta.button.service';
-import { AssessmentIdentifiers } from '../../models/assessment/assessment.identifiers.model';
-import { NeedleService } from '../needle.service';
-import { IAssessmentIdentifiers } from '../../refactor/interface/assessment/assessment.interface';
-import { PromptTemplate } from "langchain/prompts";
-import { ChatOpenAI } from "langchain/chat_models/openai";
+import { CommonAssessmentService } from './common.assessment.service.js';
+import type { AssessmentRequest } from '../../refactor/interface/assessment/assessment.interface.js';
+import { ServeAssessmentService } from '../maternalCareplan/serveAssessment/serveAssessment.service.js';
+import { sendTelegramButtonService } from '../telegram.button.service.js';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
+import type { Iresponse } from '../../refactor/interface/message.interface.js';
+import { commonResponseMessageFormat } from '../common.response.format.object.js';
+import { CacheMemory } from '../cache.memory.service.js';
+import { EntityManagerProvider } from '../entity.manager.provider.service.js';
+import { AssessmentSessionLogs } from '../../models/assessment.session.model.js';
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service.js';
+import { ChatMessage } from '../../models/chat.message.model.js';
+import { sendApiButtonService } from '../whatsappmeta.button.service.js';
+import { AssessmentIdentifiers } from '../../models/assessment/assessment.identifiers.model.js';
+import { NeedleService } from '../needle.service.js';
+import type { IAssessmentIdentifiers } from '../../refactor/interface/assessment/assessment.interface.js';
+// ESM-only modules (langchain) are loaded dynamically within methods to work under CJS build
 
 @scoped(Lifecycle.ContainerScoped)
 export class AssessmentService {
@@ -158,6 +157,8 @@ export class AssessmentService {
             case 'Text': {
                 flag = typeof messageBody.messageBody === 'string';
                 if (flag) {
+                    const { PromptTemplate } = await import("langchain/prompts");
+                    const { ChatOpenAI } = await import("langchain/chat_models/openai");
                     const promptTemplate = PromptTemplate.fromTemplate(
                         `Validate if user input matches the field identifier.
 

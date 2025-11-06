@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
-import { Logger } from '../../common/logger';
-import { CallEyeImageQualityCheckModel } from '../../services/call.eye.image.quality.check';
+import { Logger } from '../../common/logger.js';
+import { CallEyeImageQualityCheckModel } from '../../services/call.eye.image.quality.check.js';
 
 // import { container } from 'tsyringe';
 
@@ -11,7 +11,7 @@ export const eyeImageQualityCheckListener = async (intent, eventObj) => {
             .log('Calling Eye Image Quality Check Service !!!!!!');
 
         callEyeImageQualityCheckModel.getEyeImageQualityCheckModelResponse(eventObj.body.queryResult.queryText,eventObj);
-        
+
         // console.log(message);
         // console.log(goodQuality);
         const data = {

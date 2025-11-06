@@ -1,12 +1,12 @@
 /* eslint-disable max-len */
-import { ResponseHandler } from '../../utils/response.handler';
+import { ResponseHandler } from '../../utils/response.handler.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
-import { AwsS3manager } from '../../services/aws.file.upload.service';
-import { ConsentInfo } from '../../models/consent.info.model';
-import { EntityManagerProvider } from '../../services/entity.manager.provider.service';
-import { ErrorHandler } from '../../utils/error.handler';
-import {CountryCodeService } from '../../utils/phone.number.formatting';
+import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service.js';
+import { AwsS3manager } from '../../services/aws.file.upload.service.js';
+import { ConsentInfo } from '../../models/consent.info.model.js';
+import { EntityManagerProvider } from '../../services/entity.manager.provider.service.js';
+import { ErrorHandler } from '../../utils/error.handler.js';
+import {CountryCodeService } from '../../utils/phone.number.formatting.js';
 
 // Get an instance of PhoneNumberUtil.
 

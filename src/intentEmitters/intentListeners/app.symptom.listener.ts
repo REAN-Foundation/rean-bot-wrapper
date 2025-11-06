@@ -1,5 +1,5 @@
-import { HowDoYouFeelService } from "../../services/symptom/how.do.you.feel";
-import { HowDoYouFeelWorseService } from "../../services/symptom/how.do.you.feel.worse";
+import { HowDoYouFeelService } from "../../services/symptom/how.do.you.feel.js";
+import { HowDoYouFeelWorseService } from "../../services/symptom/how.do.you.feel.worse.js";
 
 export class AppSymptomListener {
 

@@ -1,5 +1,5 @@
-import { ContactListDto } from "../../../domain.types/contact.list/contact.list.domain.model";
-import { ContactList } from "../../../models/contact.list";
+import type { ContactListDto } from "../../../domain.types/contact.list/contact.list.domain.model.js";
+import { ContactList } from "../../../models/contact.list.js";
 
 ///////////////////////////////////////////////////////////////////////////////
 

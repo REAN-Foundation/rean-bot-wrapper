@@ -1,9 +1,9 @@
-import { kerotoplastyService } from "../../services/kerotoplasty.service";
-import { Logger } from "../../common/logger";
-import { dialoflowMessageFormatting } from "../../services/Dialogflow.service";
-import { translateService } from "../../services/translate.service";
-import { sendExtraMessages } from "../../services/send.extra.messages.service";
-import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
+import { kerotoplastyService } from "../../services/kerotoplasty.service.js";
+import { Logger } from "../../common/logger.js";
+import { dialoflowMessageFormatting } from "../../services/Dialogflow.service.js";
+import { translateService } from "../../services/translate.service.js";
+import { sendExtraMessages } from "../../services/send.extra.messages.service.js";
+import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service.js';
 
 export const AppointmentBookingListner = async ( intent, eventObj ) => {
     const dialoflowMessageFormattingObj: dialoflowMessageFormatting = eventObj.container.resolve(dialoflowMessageFormatting);

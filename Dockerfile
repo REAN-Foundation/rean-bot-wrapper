@@ -1,11 +1,23 @@
-FROM node:18.20.8-alpine3.21 AS builder
+FROM node:24-alpine3.20 AS builder
 RUN apk add bash
 RUN apk add --no-cache \
+        bash \
         python3 \
-    && rm -rf /var/cache/apk/*
+        make \
+        g++ \
+        libc6-compat \
+        vips-dev \
+        pkgconfig \
+        chromium \
+        nss \
+        freetype \
+        ttf-freefont \
+        ca-certificates \
+        dumb-init \
+        && rm -rf /var/cache/apk/*
 RUN apk add --update alpine-sdk
-RUN apk add chromium \
-    harfbuzz
+# RUN apk add chromium \
+#     harfbuzz
 
 RUN apk update
 RUN apk upgrade
@@ -13,7 +25,7 @@ RUN apk upgrade
 ADD . /app
 WORKDIR /app
 
-COPY package*.json /app/
+COPY package.json /app/
 RUN npm install -g typescript
 RUN npm cache clean --force
 RUN rm -rf node_modules
@@ -23,14 +35,22 @@ RUN npm run build
 
 # RUN npm run build
 
-FROM node:18.20.8-alpine3.21
+FROM node:24-alpine3.20
 RUN apk add bash
 RUN apk add --no-cache \
-        python3 \
-    && rm -rf /var/cache/apk/*
+        bash \
+        vips-dev \
+        chromium \
+        nss \
+        freetype \
+        ttf-freefont \
+        ca-certificates \
+        dumb-init \
+        libc6-compat \
+        && rm -rf /var/cache/apk/*
 RUN apk add --update alpine-sdk
-RUN apk add chromium \
-    harfbuzz
+# RUN apk add chromium \
+#     harfbuzz
 
 RUN apk update
 RUN apk upgrade
@@ -38,7 +58,7 @@ RUN apk upgrade
 ADD . /app
 WORKDIR /app
 
-COPY package*.json /app/
+COPY package.json /app/
 RUN npm install --production
 RUN npm install pm2 -g
 RUN npm install sharp

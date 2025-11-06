@@ -1,10 +1,10 @@
 /* eslint-disable lines-around-comment */
 /* eslint-disable max-len */
-import { ChatSession } from '../models/chat.session';
-import { translateService } from './translate.service';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { ChatSession } from '../models/chat.session.js';
+import { translateService } from './translate.service.js';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
 import { delay, inject, Lifecycle, scoped } from 'tsyringe';
-import { EntityManagerProvider } from './entity.manager.provider.service';
+import { EntityManagerProvider } from './entity.manager.provider.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class UserLanguage {

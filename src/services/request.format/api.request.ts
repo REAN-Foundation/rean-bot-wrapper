@@ -1,5 +1,5 @@
-import { Contacts } from "./api.contact.format";
-import { Message } from "./api.message.format";
+import { Contacts } from "./api.contact.format.js";
+import { Message } from "./api.message.format.js";
 
 export class ApiRequest {
 

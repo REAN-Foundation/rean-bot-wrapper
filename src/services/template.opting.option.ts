@@ -1,7 +1,7 @@
-import { ContactList } from "../models/contact.list";
-import { EntityManagerProvider } from "./entity.manager.provider.service";
+import { ContactList } from "../models/contact.list.js";
+import { EntityManagerProvider } from "./entity.manager.provider.service.js";
 import { scoped, Lifecycle, inject } from "tsyringe";
-import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
+import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service.js";
 
 @scoped(Lifecycle.ContainerScoped)
 export class WhatsAppOptingOption{
@@ -38,7 +38,7 @@ export class WhatsAppOptingOption{
                 await contactListRepository.update({ optOut: "false" }, { where: { mobileNumber: payload.userId } })
                     .then(() => { console.log("updated"); })
                     .catch(error =>console.log("error on update", error));
-        
+
                 const data = {
                     "fulfillmentMessages" : [
                         {
@@ -52,7 +52,7 @@ export class WhatsAppOptingOption{
                 };
                 resolve(data);
             }
-        
+
         });
 
     }

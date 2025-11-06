@@ -1,4 +1,4 @@
-import { ChecklistDateValidationService } from "../../../services/bloodWrrior/checklist.date.validation.service";
+import { ChecklistDateValidationService } from "../../../services/bloodWrrior/checklist.date.validation.service.js";
 
 export const ChecklistDateValidation = async (intent, eventObj) => {
     // eslint-disable-next-line max-len

@@ -1,7 +1,7 @@
 import { Lifecycle, scoped, inject } from "tsyringe";
-import dialogflow = require('@google-cloud/dialogflow');
-import { ClientEnvironmentProviderService } from "../set.client/client.environment.provider.service";
-import { AwsS3manager } from "../aws.file.upload.service";
+import dialogflow from '@google-cloud/dialogflow';
+import { ClientEnvironmentProviderService } from "../set.client/client.environment.provider.service.js";
+import { AwsS3manager } from "../aws.file.upload.service.js";
 
 @scoped(Lifecycle.ContainerScoped)
 export class DFBackup {
@@ -19,12 +19,12 @@ export class DFBackup {
         for (const intent of intent_list[0]) {
             intents.push(JSON.stringify(intent));
         }
-    
+
         const today = new Date();
         const dd = String(today.getDate()).padStart(2, '0');
         const mm = String(today.getMonth() + 1).padStart(2, '0');
         const yyyy = today.getFullYear();
-        
+
         const date = mm + '-' + dd + '-' + yyyy;
         const fileName = date + "_" + project_id;
         const key = `${clientName}/df_backups/data/${fileName}.json`;

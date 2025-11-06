@@ -1,5 +1,5 @@
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from 'sequelize-typescript';
-import { feedbackmessage } from '../refactor/interface/message.interface';
+import type { feedbackmessage } from '../refactor/interface/message.interface.js';
 
 @Table(
     {
@@ -15,7 +15,7 @@ export class UserFeedback extends Model implements feedbackmessage {
     @Column({
         type : DataType.INTEGER
     })
-        id?: number;
+        declare id?: number;
 
     @Column({
         type : DataType.STRING
@@ -41,7 +41,7 @@ export class UserFeedback extends Model implements feedbackmessage {
         type : DataType.STRING
     })
         ts: string;
-    
+
     @Column({
         type : DataType.STRING
     })

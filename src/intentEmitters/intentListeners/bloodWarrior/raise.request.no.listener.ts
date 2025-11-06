@@ -1,4 +1,4 @@
-import { RaiseDonationRequestNoService } from "../../../services/bloodWrrior/raise.request.no.service";
+import { RaiseDonationRequestNoService } from "../../../services/bloodWrrior/raise.request.no.service.js";
 
 export const RaiseRequestNoNotifyVolunteer = async (intent, eventObj) => {
     // eslint-disable-next-line max-len

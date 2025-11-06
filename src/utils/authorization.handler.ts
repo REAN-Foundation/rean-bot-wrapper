@@ -1,6 +1,6 @@
-import { Logger } from '../common/logger';
+import { Logger } from '../common/logger.js';
 import { injectable } from 'tsyringe';
-import { ResponseHandler } from './response.handler';
+import { ResponseHandler } from './response.handler.js';
 
 @injectable()
 export class AuthorizationHandler {

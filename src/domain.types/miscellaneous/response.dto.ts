@@ -1,6 +1,6 @@
-import { CurrentClient } from "./current.client";
-import { CurrentUser } from "./current.user";
-import { RequestDto } from "./request.dto";
+import { CurrentClient } from "./current.client.js";
+import { CurrentUser } from "./current.user.js";
+import { RequestDto } from "./request.dto.js";
 
 export interface ResponseDto {
     Status: string;

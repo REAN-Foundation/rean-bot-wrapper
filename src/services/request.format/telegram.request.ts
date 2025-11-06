@@ -1,4 +1,4 @@
-import { Message } from "./telegram.message.format";
+import { Message } from "./telegram.message.format.js";
 
 export class TelegramRequest {
 

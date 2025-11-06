@@ -1,4 +1,4 @@
-import { BloodBridgeStatusService } from "../../../services/bloodWrrior/blood.bridge.status.service";
+import { BloodBridgeStatusService } from "../../../services/bloodWrrior/blood.bridge.status.service.js";
 
 export const BloodBridgeStatusListener = async (intent, eventObj) => {
     // eslint-disable-next-line max-len

@@ -1,12 +1,12 @@
 import needle from 'needle';
-import { getRequestOptions } from '../../utils/helper';
-import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
+import { getRequestOptions } from '../../utils/helper.js';
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import FormData from 'form-data';
 import fs from 'fs';
 import axios from 'axios';
 import crypto from 'crypto';
-import { EntityManagerProvider } from '../entity.manager.provider.service';
+import { EntityManagerProvider } from '../entity.manager.provider.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ClickUpTask{

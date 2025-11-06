@@ -1,17 +1,17 @@
 /* eslint-disable init-declarations */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
-import { AwsS3manager } from './aws.file.upload.service';
+import { AwsS3manager } from './aws.file.upload.service.js';
 import { inject, delay, scoped, Lifecycle } from 'tsyringe';
-import { Iresponse, Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface';
-import { platformServiceInterface } from '../refactor/interface/platform.interface';
-import { MessageFlow } from './get.put.message.flow.service';
-import { MockCHannelMessageFunctionalities } from './mock.channel.message.funtionalities';
-import { ChatMessage } from '../models/chat.message.model';
-import { ApiMessageToDialogflow } from './api.messagetodialogflow';
+import type { Iresponse, Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface.js';
+import type { platformServiceInterface } from '../refactor/interface/platform.interface.js';
+import { MessageFlow } from './get.put.message.flow.service.js';
+import { MockCHannelMessageFunctionalities } from './mock.channel.message.funtionalities.js';
+import { ChatMessage } from '../models/chat.message.model.js';
+import { ApiMessageToDialogflow } from './api.messagetodialogflow.js';
 import request from 'request';
-import { EntityManagerProvider } from './entity.manager.provider.service';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { EntityManagerProvider } from './entity.manager.provider.service.js';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class MockMessageService implements platformServiceInterface {
@@ -37,7 +37,7 @@ export class MockMessageService implements platformServiceInterface {
         let done = false;
         const mockMessages = [];
         let mockMessagetoDialogflow: Imessage;
-        
+
         // Checking Mock messages
         while (done === false) {
             const nextgeneratorObj = generatorMockMessage.next();
@@ -85,7 +85,7 @@ export class MockMessageService implements platformServiceInterface {
         //     console.log("message to dialogflow", messagetoDialogflow);
         //     await this.messageFlow.checkTheFlow(messagetoDialogflow, channel, this);
         // }
-        
+
     }
 
     sendManualMesage(msg: any) {
@@ -116,7 +116,7 @@ export class MockMessageService implements platformServiceInterface {
     };
 
     async postRequestMessages(postdata) {
-        
+
         //Not required
     }
 
@@ -163,7 +163,7 @@ export class MockMessageService implements platformServiceInterface {
             //     console.log("Error in sending to botium");
             // }
         }
-        
+
     };
 
     getMessage = async (message: any) => {

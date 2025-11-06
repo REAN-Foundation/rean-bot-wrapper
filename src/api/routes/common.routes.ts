@@ -1,5 +1,5 @@
 import express from 'express';
-import { CommonController } from '../controllers/common.controller';
+import { CommonController } from '../controllers/common.controller.js';
 import { injectable } from 'tsyringe';
 
 @injectable()

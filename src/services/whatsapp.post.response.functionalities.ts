@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
-import { Iresponse } from "../refactor/interface/message.interface";
-import { UserLanguage } from "./set.language";
-import { translateService } from "./translate.service";
-import { HandleMessagetypePayload } from './handle.messagetype.payload';
-import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
+import type { Iresponse } from "../refactor/interface/message.interface.js";
+import { UserLanguage } from "./set.language.js";
+import { translateService } from "./translate.service.js";
+import { HandleMessagetypePayload } from './handle.messagetype.payload.js';
+import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service.js";
 import { inject, Lifecycle, scoped } from "tsyringe";
-import { MessageType } from "../domain.types/common.types";
-import { getFlowMessageParts } from "../utils/flow.helper";
-import { FlowActionType } from "../domain.types/message.type/flow.message.types";
-import { SystemGeneratedMessagesService } from "./system.generated.message.service";
+import { MessageType } from "../domain.types/common.types.js";
+import { getFlowMessageParts } from "../utils/flow.helper.js";
+import { FlowActionType } from "../domain.types/message.type/flow.message.types.js";
+import { SystemGeneratedMessagesService } from "./system.generated.message.service.js";
 
 @scoped(Lifecycle.ContainerScoped)
 export class WhatsappPostResponseFunctionalities{

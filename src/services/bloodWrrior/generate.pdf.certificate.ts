@@ -1,4 +1,4 @@
-import { Logger } from "../../common/logger";
+import { Logger } from "../../common/logger.js";
 import fs from 'fs';
 import path from 'path';
 import pDFDocument from 'pdfkit';

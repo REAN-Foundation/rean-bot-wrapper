@@ -1,6 +1,6 @@
 import { autoInjectable, Lifecycle, scoped } from "tsyringe";
-import { ClientEnvironmentProviderService } from "../services/set.client/client.environment.provider.service";
-import { ResponseHandler } from '../utils/response.handler';
+import { ClientEnvironmentProviderService } from "../services/set.client/client.environment.provider.service.js";
+import { ResponseHandler } from '../utils/response.handler.js';
 
 @autoInjectable()
 @scoped(Lifecycle.ContainerScoped)
@@ -47,7 +47,7 @@ export class CheckCrossConnection {
             next();
             // }
         }
-        
+
     };
 
 }

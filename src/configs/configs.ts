@@ -1,4 +1,4 @@
-import { MessagingConfig } from "../domain.types/events/provider.types";
+import type { MessagingConfig } from "../domain.types/events/provider.types.js";
 
 export type DatabaseType = 'SQL' | 'NoSQL';
 export type DatabaseORM = 'Sequelize' | 'Knex' | 'Mongoose';

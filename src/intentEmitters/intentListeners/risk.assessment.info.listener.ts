@@ -1,5 +1,5 @@
-import { Logger } from '../../common/logger';
-import { getRiskAssessmentInfo as getRiskAssessmentInfos } from '../../services/risk.assessment.info.service';
+import { Logger } from '../../common/logger.js';
+import { getRiskAssessmentInfo as getRiskAssessmentInfos } from '../../services/risk.assessment.info.service.js';
 
 export const getRiskAssessmentInfo = async (intent, eventObj) => {
     try {

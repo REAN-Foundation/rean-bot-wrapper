@@ -3,18 +3,21 @@
         "declaration": true,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
-        "module": "commonjs",
+        "module": "NodeNext",
         "esModuleInterop": true,
-        "target": "es2020",
+        "target": "ES2022",
         "listFiles":true,
         "noImplicitAny": false,
-        "moduleResolution": "node",
+        "moduleResolution": "NodeNext",
+        // "verbatimModuleSyntax": true,
+        "skipLibCheck": true,
         "sourceMap": true,
         "noEmitHelpers":false,
         "alwaysStrict": true,
         "suppressImplicitAnyIndexErrors": false,
         "forceConsistentCasingInFileNames": true,
         "resolveJsonModule" : true,
+        "allowSyntheticDefaultImports": true,
         "outDir": "dist/",
         "diagnostics": true,
         "baseUrl": ".",
@@ -23,7 +26,8 @@
                 "node_modules/*"
             ]
         },
-        "typeRoots": ["@types", "node_modules/@types"]
+        "typeRoots": ["@types", "node_modules/@types"],
+        "types": ["node"]
     },
     "include": [
         "src/**/*"

@@ -1,6 +1,6 @@
 
-import { Logger } from '../../common/logger';
-import { NutritionalValue } from '../../services/get.nutritional.value.service';
+import { Logger } from '../../common/logger.js';
+import { NutritionalValue } from '../../services/get.nutritional.value.service.js';
 
 export const GetNutritionalValue = async (intent, eventObj) => {
     try {
@@ -21,7 +21,7 @@ export const GetNutritionalValue = async (intent, eventObj) => {
             ]
         };
         return data;
-        
+
     } catch (error) {
         Logger.instance()
             .log_error(error.message, 500, 'GetNutritionalValue Listener Error!');

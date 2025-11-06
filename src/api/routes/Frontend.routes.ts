@@ -1,5 +1,5 @@
 import express from 'express';
-import { FrontendController } from '../controllers/Frontend.Controller';
+import { FrontendController } from '../controllers/Frontend.Controller.js';
 import { inject, injectable, Lifecycle, scoped } from 'tsyringe';
 
 @injectable()

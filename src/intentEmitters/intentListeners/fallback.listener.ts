@@ -1,5 +1,5 @@
-import { Logger } from '../../common/logger';
-import { send_message } from '../../services/slack.service';
+import { Logger } from '../../common/logger.js';
+import { send_message } from '../../services/slack.service.js';
 
 export const handleIntentFufillmentError = async (_intent, eventObj) => {
     // eslint-disable-next-line init-declarations

@@ -1,4 +1,4 @@
-import { CreateReminderService } from "../../../services/reminder/create.reminder.service";
+import { CreateReminderService } from "../../../services/reminder/create.reminder.service.js";
 
 export const CreateReminderListener = async (intent, eventObj) => {
     // eslint-disable-next-line max-len

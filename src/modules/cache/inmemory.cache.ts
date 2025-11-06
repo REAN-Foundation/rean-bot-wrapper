@@ -1,6 +1,6 @@
-import type { ICache } from "./cache.interface";
-import { CacheMap } from "./cache.map";
-import { type CacheConfig, type CacheEntry, type CacheMetrics, type CacheOptions } from "./cache.types";
+import type { ICache } from "./cache.interface.js";
+import { CacheMap } from "./cache.map.js";
+import { type CacheConfig, type CacheEntry, type CacheMetrics, type CacheOptions } from "./cache.types.js";
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -45,11 +45,11 @@ export class InMemoryCache implements ICache {
         const ttl = options.Ttl || this.config.DefaultTTL;
         const size = this.calculateSize(value);
         const timestamp = Date.now();
-        
+
         // Check memory limits before adding
         // if (this.metrics.TotalSize + size > this.config.MaxMemorySize) {
         //   await this.cleanup();
-        
+
         //   // If still over limit after cleanup, reject based on priority
         //   if (this.metrics.TotalSize + size > this.config.MaxMemorySize && options.Priority !== CachePriority.High) {
         //     console.warn(`Cache memory limit exceeded for key: ${key}`);
@@ -78,7 +78,7 @@ export class InMemoryCache implements ICache {
 
     async get(key: string): Promise<CacheEntry | undefined> {
         const entry = this.cache.get(key);
-        
+
         if (!entry) {
             this.recordMiss();
             return undefined;

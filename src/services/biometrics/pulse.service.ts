@@ -1,6 +1,6 @@
-import { GetHeaders } from '../../services/biometrics/get.headers';
-import { GetPatientInfoService } from "../../services/support.app.service";
-import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
+import { GetHeaders } from '../../services/biometrics/get.headers.js';
+import { GetPatientInfoService } from "../../services/support.app.service.js";
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import needle from "needle";
 
@@ -35,11 +35,11 @@ export class PulseService {
 
             const ReanBackendBaseUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
             const url = `${ReanBackendBaseUrl}clinical/biometrics/pulse/search?patientUserId=${patientUserId}`;
-            
+
             const options = this.getHeaders.getHeaders(accessToken);
             const resp = await needle("get", url, options);
             const pulseId = resp.body.Data.PulseRecords.Items[0].id;
-            
+
             const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/Pulse/${pulseId}`;
 
             const obj = {
@@ -70,7 +70,7 @@ export class PulseService {
 
         if (eventObj) {
             var { patientUserId, accessToken, Pulse_Unit, Pulse } = await this.checkEntry(eventObj);
-            
+
             const ReanBackendBaseUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
             const options = this.getHeaders.getHeaders(accessToken);
             const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/Pulse`;

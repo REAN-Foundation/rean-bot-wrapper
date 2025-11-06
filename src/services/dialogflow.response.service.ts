@@ -2,15 +2,14 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { v4 } from 'uuid';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { Imessage } from '../refactor/interface/message.interface';
-let dialogflow = require('@google-cloud/dialogflow');
-const dialogflowv2 = require('@google-cloud/dialogflow').v2beta1;
-const { struct } = require('pb-util');
-import { DialogflowResponseFormat } from './response.format/dialogflow.response.format';
-import { NeedleService } from './needle.service';
-import { GetPatientInfoService } from './support.app.service';
-import { TimeHelper } from '../common/time.helper';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
+import type { Imessage } from '../refactor/interface/message.interface.js';
+import dialogflow, { v2beta1 as dialogflowv2 } from '@google-cloud/dialogflow';
+import { struct } from 'pb-util';
+import { DialogflowResponseFormat } from './response.format/dialogflow.response.format.js';
+import { NeedleService } from './needle.service.js';
+import { GetPatientInfoService } from './support.app.service.js';
+import { TimeHelper } from '../common/time.helper.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class DialogflowResponseService {
@@ -34,8 +33,9 @@ export class DialogflowResponseService {
         try {
 
             const env_name = await this.clientEnvironment.getClientEnvironmentVariable("NAME");
+            let dialogflowNs: typeof dialogflow | typeof dialogflowv2 = dialogflow;
             if (env_name === "UNION"){
-                dialogflow = dialogflowv2;
+                dialogflowNs = dialogflowv2;
             }
             const dialogflow_language = await this.getDialogflowLanguage();
 
@@ -77,7 +77,7 @@ export class DialogflowResponseService {
 
             const timeZoneOffset = await this.getUserTimeZoneOffset(completeMessage);
             const timezoneName = TimeHelper.getUserTimeZone(timeZoneOffset);
-            sessionClient = new dialogflow.SessionsClient(options);
+            sessionClient = new dialogflowNs.SessionsClient(options);
             sessionPath = sessionClient.projectAgentSessionPath(projectIdFinal, userId);
             console.log("Message to be sent to DF: ", message);
             const request = {
@@ -89,7 +89,14 @@ export class DialogflowResponseService {
                     },
                 },
                 queryParams : {
-                    payload  : struct.encode({ source: platform, userId: userId, userName: completeMessage.name,location: location, contextId: completeMessage.contextId, completeMessage: completeMessage }),
+                    payload  : struct.encode({
+                        source         : platform,
+                        userId         : userId,
+                        userName       : completeMessage.name,
+                        location       : location,
+                        contextId      : completeMessage.contextId,
+                        completeMessage: completeMessage as unknown as Record<string, unknown>
+                    } as unknown as any),
                     timeZone : timezoneName
                 },
             };
@@ -104,7 +111,14 @@ export class DialogflowResponseService {
                         },
                     },
                     queryParams : {
-                        payload  : struct.encode({ source: platform, userId: userId, userName: completeMessage.name,location: location, contextId: completeMessage.contextId, completeMessage: completeMessage }),
+                        payload  : struct.encode({
+                            source         : platform,
+                            userId         : userId,
+                            userName       : completeMessage.name,
+                            location       : location,
+                            contextId      : completeMessage.contextId,
+                            completeMessage: completeMessage as unknown as Record<string, unknown>
+                        } as unknown as any),
                         timeZone : timezoneName
                     },
                 };

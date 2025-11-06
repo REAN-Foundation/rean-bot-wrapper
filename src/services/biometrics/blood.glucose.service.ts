@@ -1,6 +1,6 @@
-import { GetHeaders } from '../../services/biometrics/get.headers';
-import { GetPatientInfoService } from "../../services/support.app.service";
-import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
+import { GetHeaders } from '../../services/biometrics/get.headers.js';
+import { GetPatientInfoService } from "../../services/support.app.service.js";
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service.js';
 import { scoped, Lifecycle, inject } from 'tsyringe';
 import needle from "needle";
 

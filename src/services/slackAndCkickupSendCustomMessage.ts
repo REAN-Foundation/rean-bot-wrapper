@@ -1,14 +1,14 @@
 /* eslint-disable max-len */
-import { Iresponse } from "../refactor/interface/message.interface";
-import { commonResponseMessageFormat } from "./common.response.format.object";
-import { WhatsappMessageService } from './whatsapp.message.service';
-import { WhatsappMetaMessageService } from './whatsapp.meta.message.service';
-import { TelegramMessageService } from './telegram.message.service';
+import type { Iresponse } from "../refactor/interface/message.interface.js";
+import { commonResponseMessageFormat } from "./common.response.format.object.js";
+import { WhatsappMessageService } from './whatsapp.message.service.js';
+import { WhatsappMetaMessageService } from './whatsapp.meta.message.service.js';
+import { TelegramMessageService } from './telegram.message.service.js';
 import { delay, inject, Lifecycle, scoped } from "tsyringe";
-import { ChatMessage } from "../models/chat.message.model";
-import { EntityManagerProvider } from "./entity.manager.provider.service";
-import { ChatSession } from "../models/chat.session";
-import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
+import { ChatMessage } from "../models/chat.message.model.js";
+import { EntityManagerProvider } from "./entity.manager.provider.service.js";
+import { ChatSession } from "../models/chat.session.js";
+import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service.js";
 
 @scoped(Lifecycle.ContainerScoped)
 export class SlackClickupCommonFunctions {

@@ -1,10 +1,10 @@
-import { WhatsappWatiRequest } from "./request.format/whatsapp.wati.request";
-import { WatiMessageFunctionalities } from "./whatsapp.wati.functionalities";
+import { WhatsappWatiRequest } from "./request.format/whatsapp.wati.request.js";
+import { WatiMessageFunctionalities } from "./whatsapp.wati.functionalities.js";
 import { inject, Lifecycle, scoped } from "tsyringe";
 
 @scoped(Lifecycle.ContainerScoped)
 export class WhatsappWatiMessageToDialogflow {
-    
+
     constructor (
         @inject(WatiMessageFunctionalities) private watiMessageFunctionalities?: WatiMessageFunctionalities
     ){}

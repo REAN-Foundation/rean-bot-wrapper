@@ -1,26 +1,26 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
 import { scoped, Lifecycle, inject } from 'tsyringe';
-import { Logger } from '../../../common/logger';
+import { Logger } from '../../../common/logger.js';
 import needle from "needle";
-import { NeedleService } from '../../needle.service';
-import { sendApiButtonService, sendApiInteractiveListService, templateButtonService, watiTemplateButtonService } from '../../whatsappmeta.button.service';
-import { translateService } from '../../translate.service';
-import { ClientEnvironmentProviderService } from '../../set.client/client.environment.provider.service';
-import { Iresponse } from '../../../refactor/interface/message.interface';
-import { AssessmentSessionLogs } from '../../../models/assessment.session.model';
-import { EntityManagerProvider } from '../../entity.manager.provider.service';
-import { commonResponseMessageFormat } from '../../common.response.format.object';
-import { platformServiceInterface } from '../../../refactor/interface/platform.interface';
-import { ChatMessage } from '../../../models/chat.message.model';
-import { CacheMemory } from '../../../services/cache.memory.service';
-import { CustomModelResponseFormat } from '../../../services/response.format/custom.model.response.format';
-import { sendTelegramButtonService } from '../../../services/telegram.button.service';
-import { Helper } from '../../../common/helper';
-import { SystemGeneratedMessagesService } from '../../../services/system.generated.message.service';
-import { AssessmentIdentifiers } from '../../../models/assessment/assessment.identifiers.model';
-import { CountryCodeService } from '../../../utils/phone.number.formatting';
-import { UserInfoService } from '../../../services/user.info/user.info.service';
+import { NeedleService } from '../../needle.service.js';
+import { sendApiButtonService, sendApiInteractiveListService, templateButtonService, watiTemplateButtonService } from '../../whatsappmeta.button.service.js';
+import { translateService } from '../../translate.service.js';
+import { ClientEnvironmentProviderService } from '../../set.client/client.environment.provider.service.js';
+import type { Iresponse } from '../../../refactor/interface/message.interface.js';
+import { AssessmentSessionLogs } from '../../../models/assessment.session.model.js';
+import { EntityManagerProvider } from '../../entity.manager.provider.service.js';
+import { commonResponseMessageFormat } from '../../common.response.format.object.js';
+import type { platformServiceInterface } from '../../../refactor/interface/platform.interface.js';
+import { ChatMessage } from '../../../models/chat.message.model.js';
+import { CacheMemory } from '../../../services/cache.memory.service.js';
+import { CustomModelResponseFormat } from '../../../services/response.format/custom.model.response.format.js';
+import { sendTelegramButtonService } from '../../../services/telegram.button.service.js';
+import { Helper } from '../../../common/helper.js';
+import { SystemGeneratedMessagesService } from '../../../services/system.generated.message.service.js';
+import { AssessmentIdentifiers } from '../../../models/assessment/assessment.identifiers.model.js';
+import { CountryCodeService } from '../../../utils/phone.number.formatting.js';
+import { UserInfoService } from '../../../services/user.info/user.info.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ServeAssessmentService {

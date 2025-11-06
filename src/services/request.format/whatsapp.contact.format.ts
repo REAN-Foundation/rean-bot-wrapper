@@ -1,4 +1,4 @@
-import { IWhatsappRequestContactsEntities } from './whatsapp.request.interface';
+import type { IWhatsappRequestContactsEntities } from './whatsapp.request.interface.js';
 export class Contacts implements IWhatsappRequestContactsEntities{
 
     constructor(list) { this.list = list; }

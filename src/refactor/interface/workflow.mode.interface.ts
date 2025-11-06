@@ -1,5 +1,5 @@
-import { uuid } from "../../services/emergency/workflow.event.types";
-import { MessageChannelType, MetaParamsType, UserMessageType } from "../messageTypes/workflow.mode.message.types";
+import type { uuid } from "../../services/emergency/workflow.event.types.js";
+import { MessageChannelType, MetaParamsType, UserMessageType } from "../messageTypes/workflow.mode.message.types.js";
 
 //////////////////////////////////////////////////////////////////////////////
 

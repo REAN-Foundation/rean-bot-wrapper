@@ -1,4 +1,4 @@
-import { IntentType } from "../../messageTypes/intents/intents.message.types";
+import { IntentType } from "../../messageTypes/intents/intents.message.types.js";
 
 export interface IIntents {
     id: string | undefined | null;

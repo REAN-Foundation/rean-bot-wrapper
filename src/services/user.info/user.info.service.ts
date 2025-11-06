@@ -1,10 +1,10 @@
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { ContactList } from '../../models/contact.list';
-import { UserInfo } from '../../models/user.info.model';
-import { userInfoPayload } from '../../refactor/interface/user.info.interface';
-import { EntityManagerProvider } from '../entity.manager.provider.service';
-import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
+import { ContactList } from '../../models/contact.list.js';
+import { UserInfo } from '../../models/user.info.model.js';
+import type { userInfoPayload } from '../../refactor/interface/user.info.interface.js';
+import { EntityManagerProvider } from '../entity.manager.provider.service.js';
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class UserInfoService {
@@ -14,7 +14,7 @@ export class UserInfoService {
     private _platformMessageService : platformServiceInterface = null;
 
     constructor(
-        @inject(ClientEnvironmentProviderService) 
+        @inject(ClientEnvironmentProviderService)
             private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider
     ){}
@@ -63,7 +63,7 @@ export class UserInfoService {
             ).getRepository(ContactList);
 
             const userInfoExists = await UserInfoRepository.findOne(
-                { 
+                {
                     where : {
                         userPlatformID : userPlatformID
                     }

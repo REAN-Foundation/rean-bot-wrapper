@@ -1,7 +1,7 @@
 /* eslint-disable indent */
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, Index, HasMany } from 'sequelize-typescript';
-import { calorieInfo } from '../refactor/interface/message.interface';
-import { CalorieDatabase } from './calorie.db.model';
+import type { calorieInfo } from '../refactor/interface/message.interface.js';
+import { CalorieDatabase } from './calorie.db.model.js';
 
 @Table({
     timestamps : true,
@@ -17,7 +17,7 @@ export class CalorieInfo extends Model implements calorieInfo {
         type : DataType.INTEGER
     })
         autoIncrementalID: number;
-    
+
     @Column({
         type : DataType.STRING,
         allowNull : true
@@ -29,7 +29,7 @@ export class CalorieInfo extends Model implements calorieInfo {
         type : DataType.STRING(256)
     })
         user_message: string;
-    
+
     @Column({
         type : DataType.STRING(512)
     })
@@ -76,7 +76,7 @@ export class CalorieInfo extends Model implements calorieInfo {
         allowNull : true
     })
         meta_data: string;
-    
+
     @Column({
         type : DataType.DATE,
     })

@@ -1,5 +1,5 @@
-import { HeartFailureRegistrationService } from "../../../services/heartFailureCareplan/enroll.heart.failure.careplan.service";
-import { HeartFailureCareplanService } from "../../../services/heartFailureCareplan/start.careplan";
+import { HeartFailureRegistrationService } from "../../../services/heartFailureCareplan/enroll.heart.failure.careplan.service.js";
+import { HeartFailureCareplanService } from "../../../services/heartFailureCareplan/start.careplan.js";
 
 export const  SentRegistrationMSGListener = async ( intent, eventObj) => {
     try {

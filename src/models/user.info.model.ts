@@ -1,8 +1,8 @@
 /* eslint-disable indent */
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, ForeignKey, BelongsTo } from 'sequelize-typescript';
-import { ContactList } from './contact.list';
-import { Gender } from '../refactor/messageTypes/user.info.types';
-import { IuserInfo } from '../refactor/interface/user.info.interface';
+import { ContactList } from './contact.list.js';
+import { Gender } from '../refactor/messageTypes/user.info.types.js';
+import type { IuserInfo } from '../refactor/interface/user.info.interface.js';
 
 @Table(
     {
@@ -28,7 +28,7 @@ export class UserInfo extends Model implements IuserInfo {
         allowNull   : false
     })
         userID: number;
-    
+
     @BelongsTo(() => ContactList)
         ContactList: ContactList;
 
@@ -36,7 +36,7 @@ export class UserInfo extends Model implements IuserInfo {
         type    : DataType.STRING(256)
     })
         userPlatformID: string;
-        
+
     @Column({
         type    : DataType.STRING(256)
     })

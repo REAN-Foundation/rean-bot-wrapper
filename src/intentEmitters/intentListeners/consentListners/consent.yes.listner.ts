@@ -1,4 +1,4 @@
-import { ConsentService } from "../../../services/consent.service";
+import { ConsentService } from "../../../services/consent.service.js";
 
 export class ConsentYesListner {
 

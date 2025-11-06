@@ -1,13 +1,13 @@
 import { WebClient } from '@slack/web-api';
 import { createEventAdapter } from '@slack/events-api';
-import { platformServiceInterface } from '../refactor/interface/platform.interface';
-import { Imessage, Iresponse } from '../refactor/interface/message.interface';
+import type { platformServiceInterface } from '../refactor/interface/platform.interface.js';
+import type { Imessage, Iresponse } from '../refactor/interface/message.interface.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { ResponseHandler } from '../utils/response.handler';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { SlackClickupCommonFunctions } from './slackAndCkickupSendCustomMessage';
-import { EntityManagerProvider } from './entity.manager.provider.service';
-import { ChatMessage } from '../models/chat.message.model';
+import { ResponseHandler } from '../utils/response.handler.js';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
+import { SlackClickupCommonFunctions } from './slackAndCkickupSendCustomMessage.js';
+import { EntityManagerProvider } from './entity.manager.provider.service.js';
+import { ChatMessage } from '../models/chat.message.model.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class SlackMessageService implements platformServiceInterface {

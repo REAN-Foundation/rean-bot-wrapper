@@ -1,26 +1,26 @@
 /* eslint-disable max-len */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { DialogflowResponseService } from './dialogflow.response.service';
+import { DialogflowResponseService } from './dialogflow.response.service.js';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { translateService } from './translate.service';
+import { translateService } from './translate.service.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { Imessage } from '../refactor/interface/message.interface';
-import { ChatSession } from '../models/chat.session';
-import { EntityManagerProvider } from './entity.manager.provider.service';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { OpenAIResponseService } from './openai.response.service';
-import { IserviceResponseFunctionalities } from "./response.format/response.interface";
-import { CustomMLModelResponseService } from './custom.ml.model.response.service';
-import { EmojiFilter } from './filter.message.for.emoji.service';
-import { FeedbackService } from "./feedback/feedback.service";
-import { OutgoingMessage } from '../refactor/interface/message.interface';
-import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service';
-import { CacheMemory } from './cache.memory.service';
-import { platformServiceInterface } from '../refactor/interface/platform.interface';
-import { WorkflowEventListener } from './emergency/workflow.event.listener';
-import { MessageHandlerType } from '../refactor/messageTypes/message.types';
-import { CommonAssessmentService } from './Assesssment/common.assessment.service';
-import { AssessmentHandlingService } from './Assesssment/assessment.handling.service';
+import { Imessage } from '../refactor/interface/message.interface.js';
+import { ChatSession } from '../models/chat.session.js';
+import { EntityManagerProvider } from './entity.manager.provider.service.js';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
+import { OpenAIResponseService } from './openai.response.service.js';
+import { IserviceResponseFunctionalities } from "./response.format/response.interface.js";
+import { CustomMLModelResponseService } from './custom.ml.model.response.service.js';
+import { EmojiFilter } from './filter.message.for.emoji.service.js';
+import { FeedbackService } from "./feedback/feedback.service.js";
+import { OutgoingMessage } from '../refactor/interface/message.interface.js';
+import { ServeAssessmentService } from './maternalCareplan/serveAssessment/serveAssessment.service.js';
+import { CacheMemory } from './cache.memory.service.js';
+import { platformServiceInterface } from '../refactor/interface/platform.interface.js';
+import { WorkflowEventListener } from './emergency/workflow.event.listener.js';
+import { MessageHandlerType } from '../refactor/messageTypes/message.types.js';
+import { CommonAssessmentService } from './Assesssment/common.assessment.service.js';
+import { AssessmentHandlingService } from './Assesssment/assessment.handling.service.js';
 
 ///////////////////////////////////////////////////////////////////////////////////////
 

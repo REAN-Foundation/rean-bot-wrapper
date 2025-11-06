@@ -1,4 +1,4 @@
-import { CommonAssessmentService } from "../../../services/Assesssment/common.assessment.service";
+import { CommonAssessmentService } from "../../../services/Assesssment/common.assessment.service.js";
 
 export const CommonAssessmentListener = async (intent, eventObj) => {
     // eslint-disable-next-line max-len

@@ -1,5 +1,5 @@
-import { Logger } from '../../common/logger';
-import { GetPatientInfoService } from "../../services/support.app.service";
+import { Logger } from '../../common/logger.js';
+import { GetPatientInfoService } from "../../services/support.app.service.js";
 
 export const getMedicationInfo = async (intent, eventObj) => {
     try {

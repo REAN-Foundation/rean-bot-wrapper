@@ -1,4 +1,4 @@
-import { RegistrationService } from "../../services/maternalCareplan/registration.service";
+import { RegistrationService } from "../../services/maternalCareplan/registration.service.js";
 
 export class MaternityCareplanListener {
 
@@ -28,9 +28,9 @@ export class MaternityCareplanListener {
 
     //         if (!response) {
     //             throw new Error('Maternity careplan enrollment service error!');
-                
+
     //         }
-            
+
     //         return response.message;
     //     } catch (error) {
     //         throw new Error(`Handle maternity careplan enrollment intent error: ${error}`);

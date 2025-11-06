@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import { Lifecycle, scoped } from "tsyringe";
-import { IserviceResponseFunctionalities } from "./response.interface";
+import type { IserviceResponseFunctionalities } from "./response.interface.js";
 
 @scoped(Lifecycle.ContainerScoped)
 export class OpenAIResponseFormat implements IserviceResponseFunctionalities{
@@ -40,7 +40,7 @@ export class OpenAIResponseFormat implements IserviceResponseFunctionalities{
     }
 
     getSimilarDoc(){
-        
+
         //not implemented
         return null;
     }

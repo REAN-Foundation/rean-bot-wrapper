@@ -1,4 +1,4 @@
-import { RHGAppRequestBody } from "./rhg.mobile.app.requestbody";
+import { RHGAppRequestBody } from "./rhg.mobile.app.requestbody.js";
 
 export class RHGRequest {
 

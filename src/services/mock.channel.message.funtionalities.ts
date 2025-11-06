@@ -1,15 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
-import { getMessageFunctionalities } from "../refactor/interface/message.service.functionalities.interface";
-import { Imessage } from '../refactor/interface/message.interface';
+import type { getMessageFunctionalities } from "../refactor/interface/message.service.functionalities.interface.js";
+import type { Imessage } from '../refactor/interface/message.interface.js';
 import { Lifecycle, inject, scoped } from "tsyringe";
-import { EmojiFilter } from './filter.message.for.emoji.service';
-import { Message } from './request.format/api.message.format';
-import { MessageFunctionalities } from "./whatsapp.functionalities";
-import { AwsS3manager } from "./aws.file.upload.service";
+import { EmojiFilter } from './filter.message.for.emoji.service.js';
+import { Message } from './request.format/api.message.format.js';
+import { MessageFunctionalities } from "./whatsapp.functionalities.js";
+import { AwsS3manager } from "./aws.file.upload.service.js";
 import * as fs from "fs";
 import needle from "needle";
 import path from "path";
+import { parse as parseUrl } from 'url';
 
 
 
@@ -133,9 +134,7 @@ export class MockCHannelMessageFunctionalities implements getMessageFunctionalit
         // }
         const imageFilePath = this.getMediaFromRequest(imageUrl, 'photo', '.jpg');
         const location = await this.awsS3manager.uploadFile(imageFilePath);
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const url = require('url');
-        const urlParse = url.parse(location);
+        const urlParse = parseUrl(location);
         const imageUrlInResponse = (urlParse.protocol + urlParse.hostname + urlParse.pathname);
         if (imageFilePath){
             const messagetoDialogflow = this.inputMessageFormat(messageObj);
@@ -146,7 +145,7 @@ export class MockCHannelMessageFunctionalities implements getMessageFunctionalit
         } else {
             throw new Error("Unable to find the image file path");
         }
-        
+
     }
 
     async getMediaFromRequest(mediaUrl: string, type: string, extension: string): Promise<string> {
@@ -154,20 +153,20 @@ export class MockCHannelMessageFunctionalities implements getMessageFunctionalit
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, { recursive: true });
         }
-    
+
         const filename = `${Date.now()}${extension}`;
         const fullPath = path.join(dir, filename);
         const writeStream = fs.createWriteStream(fullPath);
-    
+
         await new Promise((resolve, reject) => {
             needle.get(mediaUrl)
                 .pipe(writeStream)
                 .on('finish', resolve)
                 .on('error', reject);
         });
-    
+
         return fullPath;
-    }    
+    }
 
     inputMessageFormat (messageObj){
         const messagetoDialogflow: Imessage = {

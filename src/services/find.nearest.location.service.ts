@@ -1,11 +1,11 @@
 import { inject, Lifecycle, scoped } from "tsyringe";
 import needle from "needle";
-import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
-import { NeedleService } from "./needle.service";
+import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service.js";
+import { NeedleService } from "./needle.service.js";
 
 @scoped(Lifecycle.ContainerScoped)
 export class GetLocation{
-    
+
     constructor(
         // eslint-disable-next-line max-len
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService

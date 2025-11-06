@@ -1,8 +1,8 @@
 import { scoped, Lifecycle, inject } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { GeneralReminderService } from './general.reminder.service';
-import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
+import { Logger } from '../../common/logger.js';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
+import { GeneralReminderService } from './general.reminder.service.js';
+import { Registration } from '../registrationsAndEnrollements/patient.registration.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class AppointmentReminderService {
@@ -44,7 +44,7 @@ export class AppointmentReminderService {
                 DayName       : null,
                 WhenTime      : whenTime,
             };
-            
+
             await this.generalReminderService.createCommonReminders(eventObj, "Once", jsonFormat, patientIDArray.patientUserId, whenDay, whenTime, personName, personPhoneNumber, null );
 
             const data = {

@@ -1,5 +1,5 @@
-import { Logger } from '../../common/logger';
-import { HumanHandoff } from '../../services/human.handoff.service';
+import { Logger } from '../../common/logger.js';
+import { HumanHandoff } from '../../services/human.handoff.service.js';
 
 export const HumanHandoverListener = async (intent, eventObj) => {
     try {

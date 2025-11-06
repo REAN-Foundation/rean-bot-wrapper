@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { Logger } from '../../common/logger';
-import { CustomWelcomeService } from '../../services/custom.welcome.service';
+import { Logger } from '../../common/logger.js';
+import { CustomWelcomeService } from '../../services/custom.welcome.service.js';
 
 export const CustomWelcomeIntent = async (intent, eventObj) => {
     try {
@@ -73,7 +73,7 @@ export const WelcomeWithBasicAssessmentListener = async (Intent, eventObj) => {
             response = {
                 "followupEventInput" : {
                     "name"         : "WelcomeMessage",
-                    "langiageCode" : "en-US" 
+                    "langiageCode" : "en-US"
                 }
             };
         }

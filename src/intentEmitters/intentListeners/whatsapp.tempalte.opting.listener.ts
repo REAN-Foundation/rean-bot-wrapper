@@ -1,5 +1,5 @@
-import { Logger } from '../../common/logger';
-import { WhatsAppOptingOption } from '../../services/template.opting.option';
+import { Logger } from '../../common/logger.js';
+import { WhatsAppOptingOption } from '../../services/template.opting.option.js';
 
 export const WhatsAppTemplateOpting = async (intent, eventObj) => {
     try {

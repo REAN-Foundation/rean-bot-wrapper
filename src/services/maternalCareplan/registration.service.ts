@@ -1,14 +1,14 @@
-import { GetHeaders } from '../../services/biometrics/get.headers';
-import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
+import { GetHeaders } from '../../services/biometrics/get.headers.js';
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import needle from 'needle';
-import { Logger } from '../../common/logger';
-import { NeedleService } from '../needle.service';
-import { GetPatientInfoService } from '../support.app.service';
-import { commonResponseMessageFormat } from '../common.response.format.object';
-import { Iresponse } from '../../refactor/interface/message.interface';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
+import { Logger } from '../../common/logger.js';
+import { NeedleService } from '../needle.service.js';
+import { GetPatientInfoService } from '../support.app.service.js';
+import { commonResponseMessageFormat } from '../common.response.format.object.js';
+import { Iresponse } from '../../refactor/interface/message.interface.js';
+import { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
+import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class RegistrationService {
@@ -28,9 +28,9 @@ export class RegistrationService {
             const name : string = eventObj.body.queryResult.parameters.Name.name;
             const lmp : string = eventObj.body.queryResult.parameters.LMP;
             const birthdate : string = eventObj.body.queryResult.parameters.Birthdate;
-    
+
             const phoneNumber = await this.needleService.getPhoneNumber(eventObj);
-            
+
             const options = await this.getHeaders.getHeaders();
             const ReanBackendBaseUrl =
                 this.clientEnvironmentProviderService.getClientEnvironmentVariable('REAN_APP_BACKEND_BASE_URL');
@@ -45,7 +45,7 @@ export class RegistrationService {
                 BirthDate  : birthdate.split("T")[0],
                 TenantCode : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
             };
-    
+
             const patientUserId = null;
 
             const body : QueueDoaminModel =  {
@@ -65,7 +65,7 @@ export class RegistrationService {
                 const dffMessage = `Hi ${name}, \nYour phone number already registered with us.`;
                 FireAndForgetService.enqueue(body);
                 return { fulfillmentMessages: [{ text: { text: [dffMessage] } }]  };
-    
+
             } else if (registrationResponse.statusCode === 201) {
                 body.Body.PatientUserId = registrationResponse.body.Data.Patient.UserId;
                 const registrationMessage = `Hi ${name}, \nYour Last Mensuration Period(LMP) date is ${new Date(lmp.split("T")[0]).toDateString()}.\nYou will get periodic notifications based on your LMP.`;

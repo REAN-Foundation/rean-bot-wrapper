@@ -1,21 +1,21 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Logger } from '../../common/logger';
-import { ResponseHandler } from '../../utils/response.handler';
+import { Logger } from '../../common/logger.js';
+import { ResponseHandler } from '../../utils/response.handler.js';
 import { autoInjectable, delay, inject, Lifecycle, scoped } from 'tsyringe';
-import { IntentEmitter } from '../../intentEmitters/intent.emitter';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { Iresponse } from '../../refactor/interface/message.interface';
-import { commonResponseMessageFormat } from '../../services/common.response.format.object';
-import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
-import { TelegramMessageService } from '../../services/telegram.message.service';
-import WorkflowUserData from '../../models/workflow.user.data.model';
-import { QuestionResponseType, WorkflowEvent } from '../../services/emergency/workflow.event.types';
-import { EntityManagerProvider } from '../../services/entity.manager.provider.service';
-import { ChatSession } from '../../models/chat.session';
-import { sendApiButtonService, sendApiInteractiveListService, templateButtonService, whatsappSingleMetaButtonService } from '../../services/whatsappmeta.button.service';
-import { sendTelegramButtonService } from '../../services/telegram.button.service';
-import { ChatMessage } from '../../models/chat.message.model';
-import { WhatsappMetaMessageService } from '../../services/whatsapp.meta.message.service';
+import { IntentEmitter } from '../../intentEmitters/intent.emitter.js';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
+import type { Iresponse } from '../../refactor/interface/message.interface.js';
+import { commonResponseMessageFormat } from '../../services/common.response.format.object.js';
+import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service.js';
+import { TelegramMessageService } from '../../services/telegram.message.service.js';
+import WorkflowUserData from '../../models/workflow.user.data.model.js';
+import { QuestionResponseType, WorkflowEvent } from '../../services/emergency/workflow.event.types.js';
+import { EntityManagerProvider } from '../../services/entity.manager.provider.service.js';
+import { ChatSession } from '../../models/chat.session.js';
+import { sendApiButtonService, sendApiInteractiveListService, templateButtonService, whatsappSingleMetaButtonService } from '../../services/whatsappmeta.button.service.js';
+import { sendTelegramButtonService } from '../../services/telegram.button.service.js';
+import { ChatMessage } from '../../models/chat.message.model.js';
+import { WhatsappMetaMessageService } from '../../services/whatsapp.meta.message.service.js';
 
 ///////////////////////////////////////////////////////////////////////////////////
 

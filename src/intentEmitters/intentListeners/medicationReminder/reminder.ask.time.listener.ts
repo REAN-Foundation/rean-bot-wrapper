@@ -1,4 +1,4 @@
-import { ReminderAskTimeService } from "../../../services/reminder/reminder.ask.time.service";
+import { ReminderAskTimeService } from "../../../services/reminder/reminder.ask.time.service.js";
 
 export const ReminderAskTimeListener = async (intent, eventObj) => {
     // eslint-disable-next-line max-len

@@ -1,13 +1,14 @@
-import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { commonResponseMessageFormat } from '../common.response.format.object';
-import { Iresponse } from '../../refactor/interface/message.interface';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
-import * as CincinnatiMessages from './cincinnati.message.json';
-import { translateService } from '../translate.service';
-import { sendTelegramButtonService } from '../telegram.button.service';
+import { Logger } from '../../common/logger.js';
+import { commonResponseMessageFormat } from '../common.response.format.object.js';
+import type { Iresponse } from '../../refactor/interface/message.interface.js';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
+import { FireAndForgetService } from '../fire.and.forget.service.js';
+import type { QueueDoaminModel } from '../fire.and.forget.service.js';
+import * as CincinnatiMessages from './cincinnati.message.json' with {type: 'json'};
+import { translateService } from '../translate.service.js';
+import { sendTelegramButtonService } from '../telegram.button.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class CincinnatiPerMinMsgService {
@@ -68,7 +69,7 @@ export class CincinnatiPerMinMsgService {
         const buttonPayload = await sendTelegramButtonService(msg.ButtonArray);
         await this._platformMessageService.SendMediaMessage(response_format,  buttonPayload);
     }
-    
+
 }
 
 export interface MessageDomainModel {

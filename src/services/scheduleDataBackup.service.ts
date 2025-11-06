@@ -1,7 +1,7 @@
-import { AwsS3manager } from './aws.file.upload.service';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { AwsS3manager } from './aws.file.upload.service.js';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
 import { autoInjectable, inject } from 'tsyringe';
-import { ResponseHandler } from '../utils/response.handler';
+import { ResponseHandler } from '../utils/response.handler.js';
 import needle from "needle";
 
 
@@ -44,7 +44,7 @@ export class databackup{
         return datastructure;
     }
 
-    async restructuring(rawData,datastructure,formName){ 
+    async restructuring(rawData,datastructure,formName){
         const keys = Object.keys(datastructure);
         const length = Object.keys(datastructure).length;
         for (let i = 0 ; i < rawData.length; i ++){

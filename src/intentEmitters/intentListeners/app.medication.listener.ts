@@ -1,4 +1,4 @@
-import { GetPatientInfoService } from "../../services/support.app.service";
+import { GetPatientInfoService } from "../../services/support.app.service.js";
 
 export class AppMedicationListener {
 
@@ -9,9 +9,9 @@ export class AppMedicationListener {
 
             if (!response) {
                 throw new Error('Add medication Info Listener Error!');
-                
+
             }
-            
+
             return response.message;
         } catch (error) {
             throw new Error(`Handle add medication intent ${error}`);

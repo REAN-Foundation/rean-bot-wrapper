@@ -1,4 +1,4 @@
-import { EnrollPatientService } from "../../../services/bloodWrrior/enroll.service";
+import { EnrollPatientService } from "../../../services/bloodWrrior/enroll.service.js";
 
 export const BloodWarriorPatientEnroll = async (intent, eventObj) => {
     const enrollPatient: EnrollPatientService = eventObj.container.resolve(EnrollPatientService);

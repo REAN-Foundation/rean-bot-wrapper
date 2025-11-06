@@ -1,4 +1,4 @@
-import { CachePriority, type CacheOptions } from './cache.types';
+import { CachePriority, type CacheOptions } from './cache.types.js';
 
 ///////////////////////////////////////////////////////////////////////////////
 

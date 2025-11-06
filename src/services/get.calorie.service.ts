@@ -1,9 +1,9 @@
 import { Lifecycle, inject, scoped } from "tsyringe";
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { CalorieInfo } from "../models/calorie.info.model";
-import { CalorieDatabase } from "../models/calorie.db.model";
-import requestCalorie = require('request');
-import { EntityManagerProvider } from "./entity.manager.provider.service";
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
+import { CalorieInfo } from "../models/calorie.info.model.js";
+import { CalorieDatabase } from "../models/calorie.db.model.js";
+import requestCalorie from 'request';
+import { EntityManagerProvider } from "./entity.manager.provider.service.js";
 
 @scoped(Lifecycle.ContainerScoped)
 export class GetCalories {

@@ -1,17 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { GetHeaders } from '../../services/biometrics/get.headers';
-import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
+import { GetHeaders } from '../../services/biometrics/get.headers.js';
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { NeedleService } from '../needle.service';
-import { GetPatientInfoService } from '../support.app.service';
-import { commonResponseMessageFormat } from '../common.response.format.object';
-import { Iresponse } from '../../refactor/interface/message.interface';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
-import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
-import { SystemGeneratedMessagesService } from "../system.generated.message.service";
-import { translateService } from '../translate.service';
+import { Logger } from '../../common/logger.js';
+import { NeedleService } from '../needle.service.js';
+import { GetPatientInfoService } from '../support.app.service.js';
+import { commonResponseMessageFormat } from '../common.response.format.object.js';
+import type { Iresponse } from '../../refactor/interface/message.interface.js';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
+import { FireAndForgetService } from '../fire.and.forget.service.js';
+import type { QueueDoaminModel} from '../fire.and.forget.service.js';
+import { Registration } from '../registrationsAndEnrollements/patient.registration.service.js';
+import { SystemGeneratedMessagesService } from "../system.generated.message.service.js";
+import { translateService } from '../translate.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 

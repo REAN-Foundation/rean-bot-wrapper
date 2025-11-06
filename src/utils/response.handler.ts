@@ -1,4 +1,4 @@
-import { Logger } from '../common/logger';
+import { Logger } from '../common/logger.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 
 @scoped(Lifecycle.ContainerScoped)

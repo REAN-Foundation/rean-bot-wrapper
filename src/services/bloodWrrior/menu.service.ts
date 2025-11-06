@@ -1,8 +1,8 @@
 import { scoped, Lifecycle, inject } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { dialoflowMessageFormatting } from '../Dialogflow.service';
-import { BloodWarriorWelcomeService } from './welcome.service';
-import { BloodWarriorCommonService } from './common.service';
+import { Logger } from '../../common/logger.js';
+import { dialoflowMessageFormatting } from '../Dialogflow.service.js';
+import { BloodWarriorWelcomeService } from './welcome.service.js';
+import { BloodWarriorCommonService } from './common.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class BloodWarriorMenuService {

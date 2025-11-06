@@ -1,24 +1,24 @@
 /* eslint-disable init-declarations */
 /* eslint-disable max-len */
-import { AwsS3manager } from './aws.file.upload.service';
+import { AwsS3manager } from './aws.file.upload.service.js';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { inject, delay, scoped, Lifecycle } from 'tsyringe';
-import { MessageFlow } from './get.put.message.flow.service';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { MessageFlow } from './get.put.message.flow.service.js';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
 import needle from 'needle';
-import { getRequestOptions } from '../utils/helper';
-import { ChatMessage } from '../models/chat.message.model';
-import { WhatsappMessageToDialogflow } from './whatsapp.messagetodialogflow';
-import { CommonWhatsappService } from './whatsapp.common.service';
-import { Iresponse } from '../refactor/interface/message.interface';
-import { WhatsappPostResponseFunctionalities } from './whatsapp.post.response.functionalities';
-import { EntityManagerProvider } from './entity.manager.provider.service';
-import { LogsQAService } from './logs.for.qa';
+import { getRequestOptions } from '../utils/helper.js';
+import { ChatMessage } from '../models/chat.message.model.js';
+import { WhatsappMessageToDialogflow } from './whatsapp.messagetodialogflow.js';
+import { CommonWhatsappService } from './whatsapp.common.service.js';
+import type { Iresponse } from '../refactor/interface/message.interface.js';
+import { WhatsappPostResponseFunctionalities } from './whatsapp.post.response.functionalities.js';
+import { EntityManagerProvider } from './entity.manager.provider.service.js';
+import { LogsQAService } from './logs.for.qa.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class WhatsappMetaMessageService extends CommonWhatsappService {
 
-    public res;
+    // public res;
 
     constructor(@inject(delay(() => MessageFlow)) public messageFlow,
         @inject(AwsS3manager) awsS3manager?: AwsS3manager,
@@ -77,11 +77,11 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
             if (type === "Location") {
                 type = 'location';
             }
-           
+
             if (type) {
                 const classmethod = `${type}ResponseFormat`;
                 const postDataMeta = await this.whatsappPostResponseFunctionalities[classmethod](response_format,payload);
-    
+
                 //custom payload helps in sending multiple response to a single request. The multiple response are handled in an array
                 if (Array.isArray(postDataMeta)){
                     for (let i = 0; i < postDataMeta.length; i++){
@@ -97,7 +97,7 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
                 else {
                     const postDataString = JSON.stringify(postDataMeta);
                     const needleResp:any = await this.postRequestMessages(postDataString);
-    
+
                     //improve this DB query
                     if (needleResp.statusCode === 200) {
                         console.log(`QA_SERVICE Flag: ${this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE")}`);
@@ -114,7 +114,7 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
                             await chatMessageRepository.update({ responseMessageID: needleResp.body.messages[0].id }, { where: { id: id } } )
                                 .then(() => { console.log("updated"); })
                                 .catch(error => console.log("error on update", error));
-    
+
                             //Added else for those who haven't send any message on bot(blood warrior)
                         } else {
                             const chatMessageObj = {
@@ -136,13 +136,13 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
                         return needleResp;
                     }
                 }
-                
+
             }
         } catch (error) {
             console.log("error", error);
             return null;
         }
-        
+
     };
 
     delay = async() => {
@@ -157,5 +157,5 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
         await delay(delayClientPreference);
 
     };
-    
+
 }

@@ -1,17 +1,18 @@
 /* eslint-disable max-len */
-import { getMessageFunctionalities } from "../refactor/interface/message.service.functionalities.interface";
+import { getMessageFunctionalities } from "../refactor/interface/message.service.functionalities.interface.js";
 import http from  'https';
 import fs from 'fs';
-import { Imessage } from '../refactor/interface/message.interface';
-import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
-import { Speechtotext } from './speech.to.text.service';
+import { Imessage } from '../refactor/interface/message.interface.js';
+import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service.js";
+import { Speechtotext } from './speech.to.text.service.js';
 import { inject, Lifecycle, scoped } from "tsyringe";
-import { EmojiFilter } from './filter.message.for.emoji.service';
-import { AwsS3manager } from "./aws.file.upload.service";
-import { UserLanguage } from "./set.language";
+import { EmojiFilter } from './filter.message.for.emoji.service.js';
+import { AwsS3manager } from "./aws.file.upload.service.js";
+import { UserLanguage } from "./set.language.js";
 import needle from 'needle';
-import { Message } from './request.format/whatsapp.message.format';
-import { getRequestOptions } from "../utils/helper";
+import { Message } from './request.format/whatsapp.message.format.js';
+import { getRequestOptions } from "../utils/helper.js";
+import { parse as parseUrl } from 'url';
 
 @scoped(Lifecycle.ContainerScoped)
 export class MessageFunctionalities implements getMessageFunctionalities {
@@ -88,9 +89,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
             imageFilePath = await this.GetWhatsappMetaMedia('photo', imageUrlSentByMeta, '.jpg');
         }
         const location = await this.awsS3manager.uploadFile(imageFilePath);
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const url = require('url');
-        const urlParse = url.parse(location);
+        const urlParse = parseUrl(location);
         const imageUrl = (urlParse.protocol + urlParse.hostname + urlParse.pathname);
         if (imageFilePath){
             const messagetoDialogflow = this.inputMessageFormat(messageObj);

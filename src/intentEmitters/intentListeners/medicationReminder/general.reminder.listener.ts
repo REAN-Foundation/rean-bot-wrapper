@@ -1,4 +1,4 @@
-import { GeneralReminderService } from "../../../services/reminder/general.reminder.service";
+import { GeneralReminderService } from "../../../services/reminder/general.reminder.service.js";
 
 export const GeneralReminderListener = async (intent, eventObj) => {
     // eslint-disable-next-line max-len

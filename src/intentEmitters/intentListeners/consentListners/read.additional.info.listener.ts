@@ -1,8 +1,8 @@
-import { getAdditionalInfoSevice } from "../../../services/get.additional.info.service";
+import { getAdditionalInfoSevice } from "../../../services/get.additional.info.service.js";
 export const AdditionalInfoReadListener = async (intent, eventObj) => {
 
     try {
-        
+
         const InfoService: getAdditionalInfoSevice = eventObj.container.resolve(getAdditionalInfoSevice);
         const response = await InfoService.readEHR(eventObj );
         return response;

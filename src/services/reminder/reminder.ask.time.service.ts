@@ -1,11 +1,11 @@
 import { scoped, Lifecycle, inject } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { NeedleService } from '../needle.service';
-import { dialoflowMessageFormatting } from '../Dialogflow.service';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { CacheMemory } from '../cache.memory.service';
-import { GeneralReminderService } from './general.reminder.service';
-import { OpenAIResponseService } from '../openai.response.service';
+import { Logger } from '../../common/logger.js';
+import { NeedleService } from '../needle.service.js';
+import { dialoflowMessageFormatting } from '../Dialogflow.service.js';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
+import { CacheMemory } from '../cache.memory.service.js';
+import { GeneralReminderService } from './general.reminder.service.js';
+import { OpenAIResponseService } from '../openai.response.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ReminderAskTimeService {
@@ -48,7 +48,7 @@ export class ReminderAskTimeService {
 
             // extract whentime and whenday from schedule timestamp
             const { whenDay, whenTime } = await this.generalReminderService.extractWhenDateTime(time);
-            
+
             if (jsonFormat.TaskType === 'medication' || jsonFormat.TaskType === 'appointment') {
                 console.log("trigerring the medication reminder intent");
                 return await this.dialoflowMessageFormattingService.triggerIntent("M_Medication_Data",eventObj);

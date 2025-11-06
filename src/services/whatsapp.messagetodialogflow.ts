@@ -1,6 +1,6 @@
 /* eslint-disable init-declarations */
-import { WhatsappRequest } from "./request.format/whatsapp.request";
-import { MessageFunctionalities } from './whatsapp.functionalities';
+import { WhatsappRequest } from "./request.format/whatsapp.request.js";
+import { MessageFunctionalities } from './whatsapp.functionalities.js';
 import { inject, Lifecycle, scoped } from "tsyringe";
 
 @scoped(Lifecycle.ContainerScoped)

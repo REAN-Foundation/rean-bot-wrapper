@@ -1,7 +1,7 @@
-import { ScheduleDonationService } from "../../../services/bloodWrrior/schedule.donation.service";
+import { ScheduleDonationService } from "../../../services/bloodWrrior/schedule.donation.service.js";
 
 export const ScheduleDonation = async (intent, eventObj) => {
-    const scheduleDonationService = eventObj.container.resolve(ScheduleDonationService); 
+    const scheduleDonationService = eventObj.container.resolve(ScheduleDonationService);
     try {
         let result = null;
         result = await scheduleDonationService.ScheduleDonation(eventObj);

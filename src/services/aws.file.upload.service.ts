@@ -3,9 +3,9 @@ import fs from 'fs';
 import nodeHtmlToImage from 'node-html-to-image';
 import path from 'path';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { SignedUrls } from './signed.urls.service';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { Helper } from '../common/helper';
+import { SignedUrls } from './signed.urls.service.js';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
+import { Helper } from '../common/helper.js';
 import * as csv from 'fast-csv';
 
 @scoped(Lifecycle.ContainerScoped)

@@ -2,15 +2,15 @@
 /* eslint-disable max-len */
 import needle from "needle";
 import { inject, scoped, Lifecycle } from "tsyringe";
-import { getRequestOptions } from "../utils/helper";
-import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
-import { CustomModelResponseFormat } from "./response.format/custom.model.response.format";
-import { DialogflowResponseService } from "./dialogflow.response.service";
-import { Imessage } from "../refactor/interface/message.interface";
-import { EntityManagerProvider } from "./entity.manager.provider.service";
-import { UserInfo } from "../models/user.info.model";
-import { SystemGeneratedMessages } from "../models/system.generated.messages.model";
-import { SystemGeneratedMessagesService } from "./system.generated.message.service";
+import { getRequestOptions } from "../utils/helper.js";
+import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service.js";
+import { CustomModelResponseFormat } from "./response.format/custom.model.response.format.js";
+import { DialogflowResponseService } from "./dialogflow.response.service.js";
+import type { Imessage } from "../refactor/interface/message.interface.js";
+import { EntityManagerProvider } from "./entity.manager.provider.service.js";
+import { UserInfo } from "../models/user.info.model.js";
+import { SystemGeneratedMessages } from "../models/system.generated.messages.model.js";
+import { SystemGeneratedMessagesService } from "./system.generated.message.service.js";
 
 @scoped(Lifecycle.ContainerScoped)
 export class CustomMLModelResponseService{

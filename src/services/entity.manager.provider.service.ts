@@ -1,5 +1,5 @@
 import {container, Lifecycle, scoped } from "tsyringe";
-import { SequelizeClient } from "../connection/sequelizeClient";
+import { SequelizeClient } from "../connection/sequelizeClient.js";
 
 @scoped(Lifecycle.ContainerScoped)
 export  class EntityManagerProvider{

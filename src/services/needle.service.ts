@@ -1,12 +1,12 @@
 
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import needle from "needle";
-import { GetHeaders } from './biometrics/get.headers';
-import { getRequestOptions } from '../utils/helper';
-import { EntityManagerProvider } from './entity.manager.provider.service';
-import { ChatSession } from '../models/chat.session';
-import { ChatMessage } from '../models/chat.message.model';
+import { GetHeaders } from './biometrics/get.headers.js';
+import { getRequestOptions } from '../utils/helper.js';
+import { EntityManagerProvider } from './entity.manager.provider.service.js';
+import { ChatSession } from '../models/chat.session.js';
+import { ChatMessage } from '../models/chat.message.model.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class NeedleService {

@@ -1,6 +1,6 @@
 import { SecretClient } from "@azure/keyvault-secrets";
 import { DefaultAzureCredential } from "@azure/identity";
-import { ISecretsService } from '../interfaces/secrets.provider.interface';
+import type { ISecretsService } from '../interfaces/secrets.provider.interface.js';
 
 export class AzureSecretsProvider implements ISecretsService {
 

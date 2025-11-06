@@ -1,5 +1,5 @@
-import { UserConsentDto } from '../../domain.types/user.consent/user.consent.domain.model';
-import { UserConsent } from '../../models/user.consent.model';
+import type { UserConsentDto } from '../../domain.types/user.consent/user.consent.domain.model.js';
+import { UserConsent } from '../../models/user.consent.model.js';
 
 ///////////////////////////////////////////////////////////////////////////////////
 

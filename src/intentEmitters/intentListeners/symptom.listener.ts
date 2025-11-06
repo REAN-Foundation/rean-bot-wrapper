@@ -1,5 +1,5 @@
-import { Logger } from '../../common/logger';
-import { getSymptoms } from '../../services/covid.symptom.service';
+import { Logger } from '../../common/logger.js';
+import { getSymptoms } from '../../services/covid.symptom.service.js';
 
 export const getSymptomAssessment = async (intent, eventObj) => {
     try {

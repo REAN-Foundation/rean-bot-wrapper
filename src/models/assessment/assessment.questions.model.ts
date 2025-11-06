@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from 'sequelize-typescript';
-import { IAssessmentQuestions } from '../../refactor/interface/assessment/assessment.questions.interface';
+import type { IAssessmentQuestions } from '../../refactor/interface/assessment/assessment.questions.interface.js';
 
 @Table(
     {
@@ -18,7 +18,7 @@ export class AssessmentQuestions extends Model implements IAssessmentQuestions {
         type : DataType.INTEGER,
         allowNull : false
     })
-        id: number;
+        declare id: number;
 
     @Column({
         type : DataType.STRING(64),
@@ -31,7 +31,7 @@ export class AssessmentQuestions extends Model implements IAssessmentQuestions {
         allowNull : false
     })
         assessmentId: string;
-    
+
     @Column({
         type : DataType.STRING(64)
     })

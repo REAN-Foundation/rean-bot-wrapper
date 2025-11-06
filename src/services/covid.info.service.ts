@@ -1,6 +1,6 @@
 import needle from 'needle';
-import { Logger } from '../common/logger';
-import { getRequestOptions } from '../utils/helper';
+import { Logger } from '../common/logger.js';
+import { getRequestOptions } from '../utils/helper.js';
 
 export class getCovidInfoResources{
 

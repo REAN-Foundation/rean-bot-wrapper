@@ -1,7 +1,7 @@
 /* eslint-disable indent */
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, ForeignKey, BelongsTo } from 'sequelize-typescript';
-import { IMessageStatus } from '../refactor/interface/message.interface';
-import { ChatMessage } from './chat.message.model';
+import type { IMessageStatus } from '../refactor/interface/message.interface.js';
+import { ChatMessage } from './chat.message.model.js';
 
 @Table(
     {
@@ -66,5 +66,5 @@ export class MessageStatus extends Model implements IMessageStatus {
         allowNull : true
     })
         messageRepliedTimestamp: Date;
-    
+
 }

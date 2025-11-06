@@ -1,7 +1,7 @@
 import express from 'express';
-import { Logger } from '../../common/logger';
+import { Logger } from '../../common/logger.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { SystemGeneratedMessagesController } from '../controllers/system.generated.messages.controller';
+import { SystemGeneratedMessagesController } from '../controllers/system.generated.messages.controller.js';
 
 
 @scoped(Lifecycle.ContainerScoped)
@@ -9,7 +9,7 @@ export class SystemGeneratedMessagesRoutes {
 
     constructor(
         private logger?: Logger,
-        @inject(SystemGeneratedMessagesController) 
+        @inject(SystemGeneratedMessagesController)
             private _systemMessagesController?: SystemGeneratedMessagesController,
     ){
         this.logger.log("Inside the System Generated Routes...");

@@ -1,6 +1,6 @@
-import { GetHeaders } from '../../services/biometrics/get.headers';
-import { GetPatientInfoService } from "../../services/support.app.service";
-import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
+import { GetHeaders } from '../../services/biometrics/get.headers.js';
+import { GetPatientInfoService } from "../../services/support.app.service.js";
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import needle from "needle";
 
@@ -70,7 +70,7 @@ export class BloodPressureService {
             const ReanBackendBaseUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
 
             const url = `${ReanBackendBaseUrl}clinical/biometrics/blood-pressures/search?patientUserId=${patientUserId}`;
-            
+
             const options = this.getHeaders.getHeaders(accessToken);
             const resp = await needle("get", url, options);
             const bloodPressureId = resp.body.Data.BloodPressureRecords.Items[0].id;

@@ -1,4 +1,4 @@
-import { AcceptDonationRequestService } from "../../../services/bloodWrrior/accept.donation.request.service";
+import { AcceptDonationRequestService } from "../../../services/bloodWrrior/accept.donation.request.service.js";
 
 export const AcceptDonationRequestListener = async (intent, eventObj) => {
     // eslint-disable-next-line max-len

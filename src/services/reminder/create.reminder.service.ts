@@ -1,12 +1,13 @@
 import { scoped, Lifecycle, inject } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { NeedleService } from '../needle.service';
-import { dialoflowMessageFormatting } from '../Dialogflow.service';
-import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
-import { commonResponseMessageFormat } from '../common.response.format.object';
-import { Iresponse } from '../../refactor/interface/message.interface';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { sendApiButtonService } from '../whatsappmeta.button.service';
+import { Logger } from '../../common/logger.js';
+import { NeedleService } from '../needle.service.js';
+import { dialoflowMessageFormatting } from '../Dialogflow.service.js';
+import { FireAndForgetService } from '../fire.and.forget.service.js';
+import type {  QueueDoaminModel } from '../fire.and.forget.service.js';
+import { commonResponseMessageFormat } from '../common.response.format.object.js';
+import type { Iresponse } from '../../refactor/interface/message.interface.js';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
+import { sendApiButtonService } from '../whatsappmeta.button.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class CreateReminderService {
@@ -74,7 +75,7 @@ export class CreateReminderService {
 
             this._platformMessageService = eventObj.container.resolve(previousPayload.source);
             await this._platformMessageService.SendMediaMessage(response_format, payload);
-            
+
         } catch (error) {
             Logger.instance()
                 .log_error(error.message,500,'Ask question medication reminder service error');

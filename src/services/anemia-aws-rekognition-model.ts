@@ -1,6 +1,6 @@
-import { AwsS3manager } from './aws.file.upload.service';
+import { AwsS3manager } from './aws.file.upload.service.js';
 import AWS from 'aws-sdk';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
 import { URL } from 'url';
 import { autoInjectable } from 'tsyringe';
 

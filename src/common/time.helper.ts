@@ -1,8 +1,8 @@
 
 import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import weekday from 'dayjs/plugin/weekday';
-import { Logger } from './logger';
+import utc from 'dayjs/plugin/utc.js';
+import weekday from 'dayjs/plugin/weekday.js';
+import { Logger } from './logger.js';
 import moment from 'moment-timezone';
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -526,7 +526,7 @@ export class TimeHelper {
         const localDateTime = TimeHelper.addDuration(new Date(timeString), offset, DurationType.Minute);
         console.log(`local date time ${localDateTime}`);
         console.log(`local date time string ${localDateTime.toString()}`);
-        return localDateTime; 
+        return localDateTime;
     }
 
     static getUserTimeZone(timeZoneOffset) {

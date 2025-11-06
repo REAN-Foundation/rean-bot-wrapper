@@ -1,7 +1,8 @@
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { FireAndForgetService, QueueDoaminModel } from '../../fire.and.forget.service';
-import { Logger } from '../../../common/logger';
-import { AnswerYesMsgService } from './answer.yes.service';
+import { FireAndForgetService } from '../../fire.and.forget.service.js';
+import type { QueueDoaminModel} from '../../fire.and.forget.service.js';
+import { Logger } from '../../../common/logger.js';
+import { AnswerYesMsgService } from './answer.yes.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class AnswerNoMsgService {

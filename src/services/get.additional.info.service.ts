@@ -1,12 +1,12 @@
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { translateService } from '../services/translate.service';
-import { EntityManagerProvider } from './entity.manager.provider.service';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { translateService } from '../services/translate.service.js';
+import { EntityManagerProvider } from './entity.manager.provider.service.js';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
 import needle from 'needle';
-import { ContactList } from '../models/contact.list';
-import { NeedleService } from './needle.service';
-import { kerotoplastyService } from './kerotoplasty.service';
-import { sendExtraMessages } from './send.extra.messages.service';
+import { ContactList } from '../models/contact.list.js';
+import { NeedleService } from './needle.service.js';
+import { kerotoplastyService } from './kerotoplasty.service.js';
+import { sendExtraMessages } from './send.extra.messages.service.js';
 @scoped(Lifecycle.ContainerScoped)
 export class getAdditionalInfoSevice {
 

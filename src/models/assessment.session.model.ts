@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from 'sequelize-typescript';
-import { assessmentSessionLogs } from '../refactor/interface/message.interface';
+import type { assessmentSessionLogs } from '../refactor/interface/message.interface.js';
 
 @Table({
     timestamps : true,
@@ -8,7 +8,7 @@ import { assessmentSessionLogs } from '../refactor/interface/message.interface';
     tableName  : 'assessment_session_logs',
     })
 export class AssessmentSessionLogs extends Model implements assessmentSessionLogs {
-    
+
     @AutoIncrement
     @PrimaryKey
     @Column({
@@ -40,7 +40,7 @@ export class AssessmentSessionLogs extends Model implements assessmentSessionLog
         type : DataType.STRING
     })
         assesmentNodeId: string;
-    
+
     @Column({
         type : DataType.STRING
     })
@@ -50,7 +50,7 @@ export class AssessmentSessionLogs extends Model implements assessmentSessionLog
         type : DataType.STRING
     })
         userResponse: string;
-    
+
     @Column({
         type : DataType.DATE
     })

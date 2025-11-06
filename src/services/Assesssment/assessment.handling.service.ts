@@ -1,14 +1,14 @@
 import { Lifecycle, scoped, inject } from 'tsyringe';
-import { NeedleService } from '../needle.service';
-import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
-import { EntityManagerProvider } from '../entity.manager.provider.service';
-import { OutgoingMessage } from '../../refactor/interface/message.interface';
-import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
-import { AssessmentRequest } from '../../refactor/interface/assessment/assessment.interface';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { AssessmentService } from './assessment.service';
-import { AssessmentResponseFormat } from '../response.format/assessment.service.response.format';
-import { SystemGeneratedMessagesService } from '../system.generated.message.service';
+import { NeedleService } from '../needle.service.js';
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service.js';
+import { EntityManagerProvider } from '../entity.manager.provider.service.js';
+import type { OutgoingMessage } from '../../refactor/interface/message.interface.js';
+import { Registration } from '../registrationsAndEnrollements/patient.registration.service.js';
+import type { AssessmentRequest } from '../../refactor/interface/assessment/assessment.interface.js';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
+import { AssessmentService } from './assessment.service.js';
+import { AssessmentResponseFormat } from '../response.format/assessment.service.response.format.js';
+import { SystemGeneratedMessagesService } from '../system.generated.message.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class AssessmentHandlingService {

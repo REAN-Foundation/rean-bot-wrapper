@@ -1,6 +1,6 @@
 import { container } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { LiveAgent } from '../../services/request.live.agent.service';
+import { Logger } from '../../common/logger.js';
+import { LiveAgent } from '../../services/request.live.agent.service.js';
 
 const liveAgent: LiveAgent = container.resolve(LiveAgent);
 

@@ -1,14 +1,14 @@
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { getRequestOptions } from '../utils/helper';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
+import { getRequestOptions } from '../utils/helper.js';
 import needle from "needle";
 import path from 'path';
-import { dialoflowMessageFormatting } from "./Dialogflow.service";
+import { dialoflowMessageFormatting } from "./Dialogflow.service.js";
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { AwsS3manager } from "./aws.file.upload.service";
-import { ChatMessage } from '../models/chat.message.model';
-import { EntityManagerProvider } from './entity.manager.provider.service';
-import { NeedleService } from '../services/needle.service';
-import { Logger } from '../common/logger';
+import { AwsS3manager } from "./aws.file.upload.service.js";
+import { ChatMessage } from '../models/chat.message.model.js';
+import { EntityManagerProvider } from './entity.manager.provider.service.js';
+import { NeedleService } from '../services/needle.service.js';
+import { Logger } from '../common/logger.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class CallEyeImageQualityCheckModel {
@@ -41,7 +41,7 @@ export class CallEyeImageQualityCheckModel {
         let message = null;
         if (response.statusCode === 200) {
             console.log("got results successfully");
-            
+
             if (response.body.result)
             {
                 message = "It is a *Good Quality* image as " + response.body.message  ;
@@ -83,7 +83,7 @@ export class CallEyeImageQualityCheckModel {
             Logger.instance()
                 .log_error(error.message, 500, 'error in sending message to telegram');
         }
-    
+
     };
 
 }

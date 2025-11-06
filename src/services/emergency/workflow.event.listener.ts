@@ -1,22 +1,23 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { EntityManagerProvider } from "../entity.manager.provider.service";
+import { EntityManagerProvider } from "../entity.manager.provider.service.js";
 import { container, inject, Lifecycle, scoped } from "tsyringe";
-import { ClientEnvironmentProviderService } from "../set.client/client.environment.provider.service";
-import WorkflowUserData from "../../models/workflow.user.data.model";
-import { NeedleService } from "../needle.service";
-import { Imessage, Iresponse } from "../../refactor/interface/message.interface";
-import { QuestionResponseType, UserMessageType, WorkflowEvent } from "./workflow.event.types";
-import { ChatSession } from "../../models/chat.session";
-import { ChatMessage } from "../../models/chat.message.model";
-import { WorkflowCache } from "./workflow.cache";
+import { ClientEnvironmentProviderService } from "../set.client/client.environment.provider.service.js";
+import WorkflowUserData from "../../models/workflow.user.data.model.js";
+import { NeedleService } from "../needle.service.js";
+import type { Imessage, Iresponse } from "../../refactor/interface/message.interface.js";
+import { QuestionResponseType, UserMessageType } from "./workflow.event.types.js";
+import type { WorkflowEvent } from "./workflow.event.types.js";
+import { ChatSession } from "../../models/chat.session.js";
+import { ChatMessage } from "../../models/chat.message.model.js";
+import { WorkflowCache } from "./workflow.cache.js";
 import needle from "needle";
 import axios from "axios";
 import http from 'http';
-import { sendApiButtonService } from '../whatsappmeta.button.service';
-import { commonResponseMessageFormat } from "../common.response.format.object";
-import { platformServiceInterface } from "../../refactor/interface/platform.interface";
-import { requestStatistics } from "../../refactor/interface/statistics.interface";
-import { sendTelegramButtonService } from "../telegram.button.service";
+import { sendApiButtonService } from '../whatsappmeta.button.service.js';
+import { commonResponseMessageFormat } from "../common.response.format.object.js";
+import type { platformServiceInterface } from "../../refactor/interface/platform.interface.js";
+import type { requestStatistics } from "../../refactor/interface/statistics.interface.js";
+import { sendTelegramButtonService } from "../telegram.button.service.js";
 
 //////////////////////////////////////////////////////////////////////////////
 

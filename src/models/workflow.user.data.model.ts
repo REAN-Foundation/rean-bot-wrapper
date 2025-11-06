@@ -26,7 +26,7 @@ export default class WorkflowUserData extends Model {
         type      : DataType.INTEGER,
         allowNull : false
     })
-    id?: number;
+    declare id?: number;
 
     @Column({
         type : DataType.STRING(256),

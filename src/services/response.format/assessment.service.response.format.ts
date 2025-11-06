@@ -1,5 +1,5 @@
 import { Lifecycle, scoped } from "tsyringe";
-import { IserviceResponseFunctionalities } from "./response.interface";
+import type { IserviceResponseFunctionalities } from "./response.interface.js";
 
 @scoped(Lifecycle.ContainerScoped)
 export class AssessmentResponseFormat implements IserviceResponseFunctionalities{
@@ -44,7 +44,7 @@ export class AssessmentResponseFormat implements IserviceResponseFunctionalities
 
         //method to be implemented
     }
-    
+
     getSensitivity() {
         if (this.response.body && this.response.body.sensitivity_flag) {
             return this.response.body.sensitivity_flag;

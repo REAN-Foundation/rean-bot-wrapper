@@ -1,10 +1,10 @@
-import { TenantSettingService } from "../tenant.setting/tenant.setting.service";
-import { RequestResponseCacheService } from "../../modules/cache/request.response.cache.service";
+import { TenantSettingService } from "../tenant.setting/tenant.setting.service.js";
+import { RequestResponseCacheService } from "../../modules/cache/request.response.cache.service.js";
 import { inject, injectable } from 'tsyringe';
-import { ISecretsService } from '../../modules/secrets/interfaces/secrets.provider.interface';
-import { TenantService } from "../tenant/tenant.service";
-import { ApiError } from "../../common/api.error";
-import { Environment } from "../../domain.types/tenant.setting/tenant.setting.types";
+import type { ISecretsService } from '../../modules/secrets/interfaces/secrets.provider.interface.js';
+import { TenantService } from "../tenant/tenant.service.js";
+import { ApiError } from "../../common/api.error.js";
+import { Environment } from "../../domain.types/tenant.setting/tenant.setting.types.js";
 
 @injectable()
 export class TenantSecretsService {

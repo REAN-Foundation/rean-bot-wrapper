@@ -1,6 +1,6 @@
-import { clientAuthenticator } from './client.authenticator.interface';
+import type { clientAuthenticator } from './client.authenticator.interface.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service.js';
 
 // @injectable()
 @scoped(Lifecycle.ContainerScoped)
@@ -25,7 +25,7 @@ export class WhatsappMetaAuthenticator implements clientAuthenticator{
             return;
         }
         throw new Error('Unable to authenticate.');
-        
+
     }
-    
+
 }

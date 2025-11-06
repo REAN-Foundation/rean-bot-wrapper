@@ -1,5 +1,5 @@
 /* eslint-disable init-declarations */
-import { ItelegramMessageEntities } from './telegram.request.interface';
+import type { ItelegramMessageEntities } from './telegram.request.interface.js';
 
 export class Message implements ItelegramMessageEntities {
 
@@ -127,5 +127,5 @@ export class Message implements ItelegramMessageEntities {
         }
         return inLineKeyBoardReplyButton;
     }
-    
+
 }

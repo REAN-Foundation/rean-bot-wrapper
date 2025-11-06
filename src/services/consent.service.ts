@@ -1,27 +1,27 @@
 /* eslint-disable max-len */
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { UserConsent } from '../models/user.consent.model';
-import { Logger } from '../common/logger';
-import { ErrorHandler } from '../utils/error.handler';
-import { translateService } from '../services/translate.service';
-import { dialoflowMessageFormatting } from "./Dialogflow.service";
-import { EntityManagerProvider } from './entity.manager.provider.service';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { sendTelegramButtonService } from '../services/telegram.button.service';
-import { commonResponseMessageFormat } from '../services/common.response.format.object';
-import { Iresponse } from '../refactor/interface/message.interface';
-import { platformServiceInterface } from '../refactor/interface/platform.interface';
-import { sendApiButtonService } from './whatsappmeta.button.service';
-import { Registration } from './registrationsAndEnrollements/patient.registration.service';
-import { TenantSettingService } from './tenant.setting/tenant.setting.service';
-import { ConsentMessage } from '../domain.types/tenant.setting/tenant.setting.types';
-import { UserConsentRepo } from '../database/repositories/consent/consent.repo';
+import { UserConsent } from '../models/user.consent.model.js';
+import { Logger } from '../common/logger.js';
+import { ErrorHandler } from '../utils/error.handler.js';
+import { translateService } from '../services/translate.service.js';
+import { dialoflowMessageFormatting } from "./Dialogflow.service.js";
+import { EntityManagerProvider } from './entity.manager.provider.service.js';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
+import { sendTelegramButtonService } from '../services/telegram.button.service.js';
+import { commonResponseMessageFormat } from '../services/common.response.format.object.js';
+import type { Iresponse } from '../refactor/interface/message.interface.js';
+import type { platformServiceInterface } from '../refactor/interface/platform.interface.js';
+import { sendApiButtonService } from './whatsappmeta.button.service.js';
+import { Registration } from './registrationsAndEnrollements/patient.registration.service.js';
+import { TenantSettingService } from './tenant.setting/tenant.setting.service.js';
+import type { ConsentMessage } from '../domain.types/tenant.setting/tenant.setting.types.js';
+import { UserConsentRepo } from '../database/repositories/consent/consent.repo.js';
 
 ///////////////////////////////////////////////////////////////////////////////
 
 @scoped(Lifecycle.ContainerScoped)
 export class ConsentService {
-    
+
     private _platformMessageService?: platformServiceInterface;
 
     constructor(
@@ -136,7 +136,7 @@ export class ConsentService {
             console.log("While updating Consent Status", error);
 
         }
-        
+
     }
 
     async handleConsentNoreply(userId,req): Promise<any> {
@@ -174,7 +174,7 @@ export class ConsentService {
             console.log(clientName);
 
             // const entityManagerProvider = req.container.resolve(EntityManagerProvider);
-            
+
             this._platformMessageService = req.container.resolve(req.params.channel);
             this._platformMessageService.res = res;
             let payload = null;

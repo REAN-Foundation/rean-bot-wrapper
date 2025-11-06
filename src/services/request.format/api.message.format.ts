@@ -1,4 +1,4 @@
-import { IApiRequestMessageEntities } from './api.request.interface';
+import type { IApiRequestMessageEntities } from './api.request.interface.js';
 
 export class Message implements IApiRequestMessageEntities {
 

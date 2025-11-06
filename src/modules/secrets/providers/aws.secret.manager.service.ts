@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import AWS from 'aws-sdk';
-import { ISecretsService } from '../interfaces/secrets.provider.interface';
+import type { ISecretsService } from '../interfaces/secrets.provider.interface.js';
 
 // import { TempCredentials } from './get.temporary.aws.credentials';
 

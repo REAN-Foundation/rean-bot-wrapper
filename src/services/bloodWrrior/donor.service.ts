@@ -1,8 +1,8 @@
-import { GetPatientInfoService } from '../support.app.service';
+import { GetPatientInfoService } from '../support.app.service.js';
 import { Lifecycle, scoped, inject } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { NeedleService } from '../needle.service';
-import { whatsappMetaButtonService } from '../whatsappmeta.button.service';
+import { Logger } from '../../common/logger.js';
+import { NeedleService } from '../needle.service.js';
+import { whatsappMetaButtonService } from '../whatsappmeta.button.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class DonorService {
@@ -35,7 +35,7 @@ export class DonorService {
 
             const proceedButtonId = donorType === "One time" ? "Donor_Confirm_Emergency" : "Donor_Confirm_Bridge";
             const payloadButtons = await whatsappMetaButtonService("Proceed",proceedButtonId,"Register as a Donor","Register_Donor");
-            
+
             const data = {
                 "fulfillmentMessages" : [
                     {

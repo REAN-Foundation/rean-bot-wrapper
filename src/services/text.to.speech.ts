@@ -1,14 +1,14 @@
 /* eslint-disable lines-around-comment */
 import textToSpeech from '@google-cloud/text-to-speech';
-import * as protos from "@google-cloud/text-to-speech/build/protos/protos";
+import * as protos from "@google-cloud/text-to-speech/build/protos/protos.js";
 import util from 'util';
 import fs from 'fs';
 import crypto from 'crypto';
-import { AwsS3manager } from './aws.file.upload.service';
+import { AwsS3manager } from './aws.file.upload.service.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { ChatSession } from '../models/chat.session';
-import { EntityManagerProvider } from './entity.manager.provider.service';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { ChatSession } from '../models/chat.session.js';
+import { EntityManagerProvider } from './entity.manager.provider.service.js';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class GoogleTextToSpeech {
@@ -29,7 +29,7 @@ export class GoogleTextToSpeech {
             resolve(location);
         });
     }
-    
+
     // For saving the auido in S3 bucket
     async callGoogleTextToSpeech(text, id) {
         return new Promise<string>(async (resolve) => {
@@ -73,8 +73,8 @@ export class GoogleTextToSpeech {
             catch (err) {
                 console.log("failed to convert text to speech", err);
             }
-            
+
         });
     }
-    
+
 }

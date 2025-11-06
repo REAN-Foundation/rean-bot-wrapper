@@ -1,4 +1,4 @@
-import { RegisterAllProfileService } from "../../../services/bloodWrrior/register.all.profile.service";
+import { RegisterAllProfileService } from "../../../services/bloodWrrior/register.all.profile.service.js";
 
 export const RegisterAllProfileListener = async (intent, eventObj) => {
     try {

@@ -1,12 +1,12 @@
 import 'reflect-metadata';
-import { DependencyContainer } from 'tsyringe';
-import { RabbitMqEventConsumer } from './providers/rabbitmq/rabbitmq.event.consumer';
-import { AwsSqsEventConsumer } from './providers/aws.sqs/sqs.event.consumer';
-import { ConfigurationManager } from '../../configs/configuration.manager';
-import { MessagingProvider } from '../../domain.types/events/provider.types';
+import type { DependencyContainer } from 'tsyringe';
+import { RabbitMqEventConsumer } from './providers/rabbitmq/rabbitmq.event.consumer.js';
+import { AwsSqsEventConsumer } from './providers/aws.sqs/sqs.event.consumer.js';
+import { ConfigurationManager } from '../../configs/configuration.manager.js';
+import { MessagingProvider } from '../../domain.types/events/provider.types.js';
 
 export class EventInjector {
-    
+
     static registerInjections(container: DependencyContainer) {
         const provider = ConfigurationManager.MessagingProvider();
         if (provider === MessagingProvider.RABBITMQ) {

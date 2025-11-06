@@ -1,9 +1,9 @@
 /* eslint-disable lines-around-comment */
 /* eslint-disable max-len */
 import { v2, TranslationServiceClient } from '@google-cloud/translate';
-import { UserLanguage } from './set.language';
-import { DialogflowResponseFormat } from './response.format/dialogflow.response.format';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { UserLanguage } from './set.language.js';
+import { DialogflowResponseFormat } from './response.format/dialogflow.response.format.js';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 
 let detected_language = 'en';

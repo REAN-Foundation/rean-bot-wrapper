@@ -1,10 +1,10 @@
 /* eslint-disable max-len */
-import { CalorieDatabase } from '../../models/calorie.db.model';
-import { CalorieInfo } from '../../models/calorie.info.model';
+import { CalorieDatabase } from '../../models/calorie.db.model.js';
+import { CalorieInfo } from '../../models/calorie.info.model.js';
 import { Op } from 'sequelize';
-import { EntityManagerProvider } from "../entity.manager.provider.service";
+import { EntityManagerProvider } from "../entity.manager.provider.service.js";
 import { Lifecycle, inject, scoped } from 'tsyringe';
-import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class CalorieFeedback {
@@ -13,7 +13,7 @@ export class CalorieFeedback {
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
     ){}
-    
+
     async updateCalories(req,sessionId){
         try {
             var new_calorie_value = 0;

@@ -1,8 +1,8 @@
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { dialoflowMessageFormatting } from '../Dialogflow.service';
-import { NeedleService } from '../needle.service';
-import { whatsappMetaButtonService } from '../whatsappmeta.button.service';
+import { Logger } from '../../common/logger.js';
+import { dialoflowMessageFormatting } from '../Dialogflow.service.js';
+import { NeedleService } from '../needle.service.js';
+import { whatsappMetaButtonService } from '../whatsappmeta.button.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ScheduleDonationElligibleService {
@@ -33,5 +33,5 @@ export class ScheduleDonationElligibleService {
                 .log_error(error.message,500,'Schedule donation service error');
         }
     }
-    
+
 }

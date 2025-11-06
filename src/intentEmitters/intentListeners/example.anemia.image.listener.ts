@@ -1,5 +1,5 @@
-import { Logger } from '../../common/logger';
-import { ExampleAnemiaImage } from '../../services/example.anemia.image';
+import { Logger } from '../../common/logger.js';
+import { ExampleAnemiaImage } from '../../services/example.anemia.image.js';
 
 export const ExampleAnemiaImageListener = async (intent, eventObj) => {
     try {

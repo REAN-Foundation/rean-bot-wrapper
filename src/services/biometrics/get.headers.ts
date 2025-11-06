@@ -1,5 +1,5 @@
-import { getRequestOptions } from '../../utils/helper';
-import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
+import { getRequestOptions } from '../../utils/helper.js';
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 
 @scoped(Lifecycle.ContainerScoped)

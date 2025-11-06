@@ -1,4 +1,4 @@
-import { DonateBloodService } from "../../../services/bloodWrrior/donate.blood.service";
+import { DonateBloodService } from "../../../services/bloodWrrior/donate.blood.service.js";
 
 export const DonateBloodListener = async (intent, eventObj) => {
     const donateBloodService: DonateBloodService = eventObj.container.resolve(DonateBloodService);

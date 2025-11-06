@@ -1,7 +1,7 @@
 import needle from "needle";
-import { RequestResponseCacheService } from "../../modules/cache/request.response.cache.service";
-import { ChatBotSettings, ConsentMessage, TenantSettingsDomainModel } from "../../domain.types/tenant.setting/tenant.setting.types";
-import { ApiError } from "../../common/api.error";
+import { RequestResponseCacheService } from "../../modules/cache/request.response.cache.service.js";
+import type { ChatBotSettings, ConsentMessage, TenantSettingsDomainModel } from "../../domain.types/tenant.setting/tenant.setting.types.js";
+import { ApiError } from "../../common/api.error.js";
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -36,7 +36,7 @@ export class TenantSettingService {
             console.error('Error in TenantSettingService.getTenantSettingByCode:', error);
             return null;
         }
-        
+
     }
 
     static async isConsentEnabled(tenantCode: string, apiKey: string, baseUrl: string): Promise<boolean> {

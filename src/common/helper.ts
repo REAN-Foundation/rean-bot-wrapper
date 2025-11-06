@@ -1,17 +1,17 @@
 /* eslint-disable valid-typeof */
 import * as fs from 'fs';
 import child_process from 'child_process';
-import { InputValidationError } from './input.validation.error';
-import { Gender } from '../domain.types/miscellaneous/system.types';
+import { InputValidationError } from './input.validation.error.js';
+import { Gender } from '../domain.types/miscellaneous/system.types.js';
 import { generate } from 'generate-password';
 import { hashSync, compareSync, genSaltSync } from 'bcryptjs';
 import * as crypto from 'crypto';
 import express from 'express';
-import mime = require('mime-types');
+import mime from 'mime-types';
 
 export class Helper {
 
-    
+
 
     static getResourceOwner = (request: express.Request): string => {
         if (request.params.userId) {
@@ -405,7 +405,7 @@ export class Helper {
     public static removeLeadingZerosFromDay(dateString: string): string {
         const [year, month, day] = dateString.split('-');
         const formattedDay = parseInt(day).toString(); // Remove leading zeros
-    
+
         return `${year}-${month}-${formattedDay}`;
     }
 

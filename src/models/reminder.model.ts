@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from 'sequelize-typescript';
-import { IReminder } from '../refactor/interface/message.interface';
+import type { IReminder } from '../refactor/interface/message.interface.js';
 
 @Table({
     timestamps: true,
@@ -15,13 +15,13 @@ export class ReminderMessage extends Model implements IReminder {
         type: DataType.INTEGER,
         allowNull: false,
     })
-    id?: number;
+    declare id?: number;
 
     @Column({
         type: DataType.STRING(256), // or INTEGER if userId is numeric
         allowNull: false,
     })
-    userId: string;    
+    userId: string;
 
     @Column({
         type: DataType.STRING(1024),

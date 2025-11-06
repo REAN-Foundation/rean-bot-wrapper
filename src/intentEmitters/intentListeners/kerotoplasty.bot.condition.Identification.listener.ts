@@ -1,7 +1,7 @@
 
-import { sendExtraMessages } from "../../services/send.extra.messages.service";
-import { Logger } from "../../common/logger";
-import { kerotoplastyService } from "../../services/kerotoplasty.service";
+import { sendExtraMessages } from "../../services/send.extra.messages.service.js";
+import { Logger } from "../../common/logger.js";
+import { kerotoplastyService } from "../../services/kerotoplasty.service.js";
 
 export const kerotoplastyConditionIdentificationListener = async (intent, eventObj) => {
 

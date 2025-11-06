@@ -1,4 +1,4 @@
-import { RejectDonorRequestService } from "../../../services/bloodWrrior/reject.donor.request";
+import { RejectDonorRequestService } from "../../../services/bloodWrrior/reject.donor.request.js";
 
 export const RejectDonorRequest = async (intent, eventObj) => {
     const rejectDonorRequestService: RejectDonorRequestService = eventObj.container.resolve(RejectDonorRequestService);

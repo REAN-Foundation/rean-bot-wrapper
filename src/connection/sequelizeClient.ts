@@ -1,22 +1,22 @@
 import { Sequelize } from 'sequelize-typescript';
 import { autoInjectable, singleton } from 'tsyringe';
-import { ChatMessage } from '../models/chat.message.model';
-import { ChatSession } from '../models/chat.session';
-import { ContactList } from '../models/contact.list';
-import { MessageStatus } from '../models/message.status';
-import { ClientEnvironmentProviderService } from '../services/set.client/client.environment.provider.service';
-import { CalorieInfo } from '../models/calorie.info.model';
-import { CalorieDatabase } from '../models/calorie.db.model';
-import { AssessmentSessionLogs } from '../models/assessment.session.model';
-import { ConsentInfo } from '../models/consent.info.model';
-import { UserConsent } from '../models/user.consent.model';
-import { UserInfo } from '../models/user.info.model';
-import { Logger } from '../../src/common/logger';
-import WorkflowUserData from '../models/workflow.user.data.model';
-import { ReminderMessage } from '../models/reminder.model';
-import { Intents } from '../models/intents/intents.model';
-import { SystemGeneratedMessages } from '../models/system.generated.messages.model';
-import { AssessmentIdentifiers } from '../models/assessment/assessment.identifiers.model';
+import { ChatMessage } from '../models/chat.message.model.js';
+import { ChatSession } from '../models/chat.session.js';
+import { ContactList } from '../models/contact.list.js';
+import { MessageStatus } from '../models/message.status.js';
+import { ClientEnvironmentProviderService } from '../services/set.client/client.environment.provider.service.js';
+import { CalorieInfo } from '../models/calorie.info.model.js';
+import { CalorieDatabase } from '../models/calorie.db.model.js';
+import { AssessmentSessionLogs } from '../models/assessment.session.model.js';
+import { ConsentInfo } from '../models/consent.info.model.js';
+import { UserConsent } from '../models/user.consent.model.js';
+import { UserInfo } from '../models/user.info.model.js';
+import { Logger } from '../../src/common/logger.js';
+import WorkflowUserData from '../models/workflow.user.data.model.js';
+import { ReminderMessage } from '../models/reminder.model.js';
+import { Intents } from '../models/intents/intents.model.js';
+import { SystemGeneratedMessages } from '../models/system.generated.messages.model.js';
+import { AssessmentIdentifiers } from '../models/assessment/assessment.identifiers.model.js';
 
 //////////////////////////////////////////////////////////////////////////////////////
 

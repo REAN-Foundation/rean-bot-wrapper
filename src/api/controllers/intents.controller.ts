@@ -1,9 +1,9 @@
 import { inject, scoped, Lifecycle } from "tsyringe";
-import { EntityManagerProvider } from "../../services/entity.manager.provider.service";
-import { ErrorHandler } from "../../utils/error.handler";
-import { ResponseHandler } from "../../utils/response.handler";
-import { Intents } from "../../models/intents/intents.model";
-import { ClientEnvironmentProviderService } from "../../services/set.client/client.environment.provider.service";
+import { EntityManagerProvider } from "../../services/entity.manager.provider.service.js";
+import { ErrorHandler } from "../../utils/error.handler.js";
+import { ResponseHandler } from "../../utils/response.handler.js";
+import { Intents } from "../../models/intents/intents.model.js";
+import { ClientEnvironmentProviderService } from "../../services/set.client/client.environment.provider.service.js";
 
 @scoped(Lifecycle.ContainerScoped)
 export class IntentsController {

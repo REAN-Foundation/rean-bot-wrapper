@@ -1,8 +1,8 @@
-import { CalorieInfo } from '../models/calorie.info.model';
-import { OpenAIResponseService } from '../services/openai.response.service';
-import { EntityManagerProvider } from '../services/entity.manager.provider.service';
-import { ClientEnvironmentProviderService } from '../services/set.client/client.environment.provider.service';
-import { NeedleService } from '../services/needle.service';
+import { CalorieInfo } from '../models/calorie.info.model.js';
+import { OpenAIResponseService } from '../services/openai.response.service.js';
+import { EntityManagerProvider } from '../services/entity.manager.provider.service.js';
+import { ClientEnvironmentProviderService } from '../services/set.client/client.environment.provider.service.js';
+import { NeedleService } from '../services/needle.service.js';
 
 export class NutritionalValue{
 
@@ -53,7 +53,7 @@ export class NutritionalValue{
         };
         console.log("postData Telegam", postData);
         const endPoint = `sendMessage`;
-    
+
         const payload = eventObj.body.originalDetectIntentRequest.payload;
         payload.completeMessage.messageType = 'text';
         payload.completeMessage.messageBody = messageToPlatform;

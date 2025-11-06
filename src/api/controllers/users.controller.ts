@@ -1,7 +1,7 @@
 // import Config from  ('../config/config')
-import { Logger } from '../../common/logger';
-import { ResponseHandler } from '../../utils/response.handler';
-import { elasticsearchUserstat } from '../../services/statistics/user.stat.service';
+import { Logger } from '../../common/logger.js';
+import { ResponseHandler } from '../../utils/response.handler.js';
+import { elasticsearchUserstat } from '../../services/statistics/user.stat.service.js';
 
 const instance = new ResponseHandler(new Logger);
 const esinstance = new elasticsearchUserstat();

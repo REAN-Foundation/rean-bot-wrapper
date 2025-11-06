@@ -1,6 +1,6 @@
-import { Iresponse } from "../../../refactor/interface/message.interface";
-import { commonResponseMessageFormat } from "../../../services/common.response.format.object";
-import { MessageType } from "../../../domain.types/common.types";
+import type { Iresponse } from "../../../refactor/interface/message.interface.js";
+import { commonResponseMessageFormat } from "../../../services/common.response.format.object.js";
+import { MessageType } from "../../../domain.types/common.types.js";
 
 export const FlowListener = async (intent: string, eventObj: any) => {
     try {
@@ -37,7 +37,7 @@ export const FlowListener = async (intent: string, eventObj: any) => {
 
         //TODO: Can set custom flow action payload data here
         payload['flowActionPayloadData'] = null;
-        
+
         platformMessageService.SendMediaMessage(response_format, payload);
 
     } catch (error) {

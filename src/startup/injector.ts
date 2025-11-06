@@ -1,24 +1,24 @@
 import 'reflect-metadata';
-import { DependencyContainer } from 'tsyringe';
-import { AuthInjector } from '../auth/auth.injector';
-import { WhatsappMetaMessageService } from '../services/whatsapp.meta.message.service';
-import { WhatsappWatiMessageService } from '../services/whatsapp.wati.message.service';
-import { WhatsappMessageService } from '../services/whatsapp.message.service';
-import { TelegramMessageService as telegramPlatformservice } from '../services/telegram.message.service';
-import { platformMessageService as rean_SUPPORT_Platformservice } from '../services/app.support.service';
-import { snehaMessagePlatformService as sneha_SUPPORT_Platformservice } from '../services/sneha.support.service';
-import { TelegramAuthenticator } from '../services/clientAuthenticator/telegram.authenticator';
-import { WhatsappAuthenticator } from '../services/clientAuthenticator/whatsapp.authenticator';
-import { WatiWhatsappAuthenticator } from '../services/clientAuthenticator/wati.whatsapp.authenticator';
-import { ReanAppAuthenticator } from '../services/clientAuthenticator/reanapp.authenticator';
-import { SlackAuthenticator } from '../services/clientAuthenticator/slack.authenticator.servie';
-import { SlackMessageService } from '../services/slack.message.service';
-import { WhatsappMetaAuthenticator } from '../services/clientAuthenticator/whatsapp.meta.authenticator';
-import { MockMessageService } from '../services/mock.channel';
-import { ClickUpMessageService } from '../services/clickup.message.service';
-import { MockChannelAuthenticator } from '../services/clientAuthenticator/mockChannel.authenticator';
-import { ClickUpAuthenticator } from '../services/clientAuthenticator/clickup.authenticator';
-import { SnehaAuthenticator } from '../services/clientAuthenticator/sneha.authenticator';
+import type { DependencyContainer } from 'tsyringe';
+import { AuthInjector } from '../auth/auth.injector.js';
+import { WhatsappMetaMessageService } from '../services/whatsapp.meta.message.service.js';
+import { WhatsappWatiMessageService } from '../services/whatsapp.wati.message.service.js';
+import { WhatsappMessageService } from '../services/whatsapp.message.service.js';
+import { TelegramMessageService as telegramPlatformservice } from '../services/telegram.message.service.js';
+import { platformMessageService as rean_SUPPORT_Platformservice } from '../services/app.support.service.js';
+import { snehaMessagePlatformService as sneha_SUPPORT_Platformservice } from '../services/sneha.support.service.js';
+import { TelegramAuthenticator } from '../services/clientAuthenticator/telegram.authenticator.js';
+import { WhatsappAuthenticator } from '../services/clientAuthenticator/whatsapp.authenticator.js';
+import { WatiWhatsappAuthenticator } from '../services/clientAuthenticator/wati.whatsapp.authenticator.js';
+import { ReanAppAuthenticator } from '../services/clientAuthenticator/reanapp.authenticator.js';
+import { SlackAuthenticator } from '../services/clientAuthenticator/slack.authenticator.servie.js';
+import { SlackMessageService } from '../services/slack.message.service.js';
+import { WhatsappMetaAuthenticator } from '../services/clientAuthenticator/whatsapp.meta.authenticator.js';
+import { MockMessageService } from '../services/mock.channel.js';
+import { ClickUpMessageService } from '../services/clickup.message.service.js';
+import { MockChannelAuthenticator } from '../services/clientAuthenticator/mockChannel.authenticator.js';
+import { ClickUpAuthenticator } from '../services/clientAuthenticator/clickup.authenticator.js';
+import { SnehaAuthenticator } from '../services/clientAuthenticator/sneha.authenticator.js';
 
 
 export class Injector {

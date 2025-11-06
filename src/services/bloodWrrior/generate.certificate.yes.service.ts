@@ -1,19 +1,20 @@
 /* eslint-disable max-len */
 import { scoped, Lifecycle, inject } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { NeedleService } from '../needle.service';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { RaiseDonationRequestService } from './raise.request.service';
-import { BloodWarriorCommonService } from './common.service';
-import { Iresponse } from '../../refactor/interface/message.interface';
-import { commonResponseMessageFormat } from '../common.response.format.object';
-import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
-import { DateStringFormat, DurationType, TimeHelper } from '../../common/time.helper';
-import { AwsS3manager } from '../aws.file.upload.service';
-import { generatePdfCertificate } from './generate.pdf.certificate';
-import { CacheMemory } from '../cache.memory.service';
-import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
-import { GetPatientInfoService } from '../support.app.service';
+import { Logger } from '../../common/logger.js';
+import { NeedleService } from '../needle.service.js';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
+import { RaiseDonationRequestService } from './raise.request.service.js';
+import { BloodWarriorCommonService } from './common.service.js';
+import type { Iresponse } from '../../refactor/interface/message.interface.js';
+import { commonResponseMessageFormat } from '../common.response.format.object.js';
+import type { QueueDoaminModel } from '../fire.and.forget.service.js';
+import { FireAndForgetService } from '../fire.and.forget.service.js';
+import { DateStringFormat, DurationType, TimeHelper } from '../../common/time.helper.js';
+import { AwsS3manager } from '../aws.file.upload.service.js';
+import { generatePdfCertificate } from './generate.pdf.certificate.js';
+import { CacheMemory } from '../cache.memory.service.js';
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service.js';
+import { GetPatientInfoService } from '../support.app.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class GenerateCertificateYesService {

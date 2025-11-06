@@ -1,4 +1,4 @@
-import { Message } from "./whatsapp.wati.message.format";
+import { Message } from "./whatsapp.wati.message.format.js";
 
 export class WhatsappWatiRequest {
 

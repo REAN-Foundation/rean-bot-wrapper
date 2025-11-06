@@ -1,10 +1,10 @@
-import { GetPatientInfoService } from '../support.app.service';
+import { GetPatientInfoService } from '../support.app.service.js';
 import { scoped, Lifecycle, inject } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { NeedleService } from '../needle.service';
-import { BloodWarriorCommonService } from './common.service';
-import { whatsappMetaButtonService } from '../whatsappmeta.button.service';
-import { BloodWarriorWelcomeService } from './welcome.service';
+import { Logger } from '../../common/logger.js';
+import { NeedleService } from '../needle.service.js';
+import { BloodWarriorCommonService } from './common.service.js';
+import { whatsappMetaButtonService } from '../whatsappmeta.button.service.js';
+import { BloodWarriorWelcomeService } from './welcome.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class BloodBridgeStatusService {

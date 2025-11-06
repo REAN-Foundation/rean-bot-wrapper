@@ -1,5 +1,5 @@
-import { Logger } from "../../common/logger";
-import { CalorieFeedback } from "../../services/calories/calorie.feedback.service";
+import { Logger } from "../../common/logger.js";
+import { CalorieFeedback } from "../../services/calories/calorie.feedback.service.js";
 
 export const CalorieUpdate = async ( intent, eventObj ) => {
     const calorie_Feedback:CalorieFeedback = eventObj.container.resolve(CalorieFeedback);

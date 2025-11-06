@@ -1,8 +1,8 @@
 import express from 'express';
-import { Logger } from '../../common/logger';
+import { Logger } from '../../common/logger.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { ClientWebhookController } from '../controllers/client.webhook.controller';
-import { kobotoolboxController } from '../controllers/kobotoolbox.controller';
+import { ClientWebhookController } from '../controllers/client.webhook.controller.js';
+import { kobotoolboxController } from '../controllers/kobotoolbox.controller.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class PlatformWebhookRoutes{

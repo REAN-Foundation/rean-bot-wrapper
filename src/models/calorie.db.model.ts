@@ -1,7 +1,7 @@
 /* eslint-disable indent */
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, Index, ForeignKey, BelongsTo } from 'sequelize-typescript';
-import { calorieDatabase } from '../refactor/interface/message.interface';
-import { CalorieInfo } from './calorie.info.model';
+import type { calorieDatabase } from '../refactor/interface/message.interface.js';
+import { CalorieInfo } from './calorie.info.model.js';
 
 @Table({
     timestamps : true,
@@ -17,7 +17,7 @@ export class CalorieDatabase extends Model implements calorieDatabase {
         type : DataType.INTEGER
     })
         autoIncrementalID: number;
-    
+
     @ForeignKey(() => CalorieInfo)
     @Column({
         type : DataType.INTEGER,
@@ -32,7 +32,7 @@ export class CalorieDatabase extends Model implements calorieDatabase {
         type : DataType.STRING
     })
         food_name: string;
-    
+
     @Column({
         type : DataType.STRING
     })

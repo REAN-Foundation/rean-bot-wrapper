@@ -1,24 +1,24 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
-import { ResponseHandler } from '../../utils/response.handler';
-import { ErrorHandler } from '../../utils/error.handler';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
+import { ResponseHandler } from '../../utils/response.handler.js';
+import { ErrorHandler } from '../../utils/error.handler.js';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
 import { scoped, Lifecycle, inject } from 'tsyringe';
-import { clientAuthenticator } from '../../services/clientAuthenticator/client.authenticator.interface';
-import { ChatMessage } from '../../models/chat.message.model';
-import { MessageStatus } from '../../models/message.status';
-import { EntityManagerProvider } from '../../services/entity.manager.provider.service';
-import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
-import { ContactList } from '../../models/contact.list';
-import { ConsentInfo } from '../../models/consent.info.model';
-import { UserConsent } from '../../models/user.consent.model';
-import { ConsentService } from '../../services/consent.service';
-import { Registration } from '../../services/registrationsAndEnrollements/patient.registration.service';
-import { Logger } from '../../common/logger';
-import { UserConsentRepo } from '../../database/repositories/consent/consent.repo';
-import { ContactListRepo } from '../../database/repositories/contact.list/contact.list.repo';
-import { UserConsentDto } from '../../domain.types/user.consent/user.consent.domain.model';
-import { TenantSettingService } from '../../services/tenant.setting/tenant.setting.service';
+import type { clientAuthenticator } from '../../services/clientAuthenticator/client.authenticator.interface.js';
+import { ChatMessage } from '../../models/chat.message.model.js';
+import { MessageStatus } from '../../models/message.status.js';
+import { EntityManagerProvider } from '../../services/entity.manager.provider.service.js';
+import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service.js';
+import { ContactList } from '../../models/contact.list.js';
+import { ConsentInfo } from '../../models/consent.info.model.js';
+import { UserConsent } from '../../models/user.consent.model.js';
+import { ConsentService } from '../../services/consent.service.js';
+import { Registration } from '../../services/registrationsAndEnrollements/patient.registration.service.js';
+import { Logger } from '../../common/logger.js';
+import { UserConsentRepo } from '../../database/repositories/consent/consent.repo.js';
+import { ContactListRepo } from '../../database/repositories/contact.list/contact.list.repo.js';
+import type { UserConsentDto } from '../../domain.types/user.consent/user.consent.domain.model.js';
+import { TenantSettingService } from '../../services/tenant.setting/tenant.setting.service.js';
 
 ///////////////////////////////////////////////////////////////////////////////////////
 

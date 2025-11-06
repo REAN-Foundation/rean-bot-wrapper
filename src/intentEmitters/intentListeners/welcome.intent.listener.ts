@@ -1,11 +1,11 @@
-import { Logger } from '../../common/logger';
-import { WelcomeIntentService } from '../../services/welcome.intent.service';
+import { Logger } from '../../common/logger.js';
+import { WelcomeIntentService } from '../../services/welcome.intent.service.js';
 
 export const WelcomeIntentListener = async (intent, eventObj) => {
     try {
         Logger.instance()
             .log('Default Welcome Instance!!!!!');
-        
+
         let response = null;
         const welcomeService = eventObj.container.resolve(WelcomeIntentService);
         response = await welcomeService.welcomeUser(eventObj);

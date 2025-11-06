@@ -1,6 +1,6 @@
-import { CalorieService } from "../../services/calorie.service";
-import { Logger } from "../../common/logger";
-import { GetCalories } from "../../services/get.calorie.service";
+import { CalorieService } from "../../services/calorie.service.js";
+import { Logger } from "../../common/logger.js";
+import { GetCalories } from "../../services/get.calorie.service.js";
 
 export const calorieDetection = async ( intent, eventObj ) => {
     const calorieservice:CalorieService = eventObj.container.resolve(CalorieService);

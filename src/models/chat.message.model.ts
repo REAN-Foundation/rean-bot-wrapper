@@ -1,7 +1,7 @@
 /* eslint-disable indent */
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, ForeignKey, BelongsTo } from 'sequelize-typescript';
-import { IchatMessage } from '../refactor/interface/message.interface';
-import { ChatSession } from './chat.session';
+import type { IchatMessage } from '../refactor/interface/message.interface.js';
+import { ChatSession } from './chat.session.js';
 
 @Table(
     {
@@ -18,7 +18,7 @@ export class ChatMessage extends Model implements IchatMessage {
         type      : DataType.INTEGER,
         allowNull : false
     })
-        id?: number;
+        declare id?: number;
 
     @ForeignKey(() => ChatSession)
     @Column({

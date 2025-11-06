@@ -1,12 +1,12 @@
 /* eslint-disable init-declarations */
-import { Imessage, IprocessedDialogflowResponseFormat, Iresponse } from '../refactor/interface/message.interface';
+import type { Imessage, IprocessedDialogflowResponseFormat, Iresponse } from '../refactor/interface/message.interface.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { platformServiceInterface } from '../refactor/interface/platform.interface';
-import { MessageFlow } from './get.put.message.flow.service';
-import { ResponseHandler } from '../utils/response.handler';
-import { RHGMessageToDialogflow } from './rhg.message.to.dialogflow';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { LogsQAService } from './logs.for.qa';
+import type { platformServiceInterface } from '../refactor/interface/platform.interface.js';
+import { MessageFlow } from './get.put.message.flow.service.js';
+import { ResponseHandler } from '../utils/response.handler.js';
+import { RHGMessageToDialogflow } from './rhg.message.to.dialogflow.js';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
+import { LogsQAService } from './logs.for.qa.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class platformMessageService implements platformServiceInterface{
@@ -62,7 +62,7 @@ export class platformMessageService implements platformServiceInterface{
                 await this.messageFlow.checkTheFlowRouter(rhgMessagetoDialogflow, client, this);
             }
         }
-        
+
     }
 
     postResponse (message, response: IprocessedDialogflowResponseFormat ){

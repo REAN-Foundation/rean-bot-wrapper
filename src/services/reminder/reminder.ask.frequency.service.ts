@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { scoped, Lifecycle, inject } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { NeedleService } from '../needle.service';
-import { dialoflowMessageFormatting } from '../Dialogflow.service';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { sendApiButtonService } from '../whatsappmeta.button.service';
-import { sendWhatsappWatiButtonService } from '../whtasapp.wati.button.service';
-import { GetPatientInfoService } from '../support.app.service';
-import { GeneralReminderService } from './general.reminder.service';
-import { CacheMemory } from '../cache.memory.service';
-import { TimeHelper } from '../../common/time.helper';
-import { commonResponseMessageFormat } from '../common.response.format.object';
-import { sendTelegramButtonService } from '../telegram.button.service';
-import { Iresponse } from '../../refactor/interface/message.interface';
+import { Logger } from '../../common/logger.js';
+import { NeedleService } from '../needle.service.js';
+import { dialoflowMessageFormatting } from '../Dialogflow.service.js';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
+import { sendApiButtonService } from '../whatsappmeta.button.service.js';
+import { sendWhatsappWatiButtonService } from '../whtasapp.wati.button.service.js';
+import { GetPatientInfoService } from '../support.app.service.js';
+import { GeneralReminderService } from './general.reminder.service.js';
+import { CacheMemory } from '../cache.memory.service.js';
+import { TimeHelper } from '../../common/time.helper.js';
+import { commonResponseMessageFormat } from '../common.response.format.object.js';
+import { sendTelegramButtonService } from '../telegram.button.service.js';
+import type { Iresponse } from '../../refactor/interface/message.interface.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ReminderFrequencyService {
@@ -47,7 +47,7 @@ export class ReminderFrequencyService {
             // }
             const whenDay = jsonFormat.StartDateTime.split("T")[0];
             const whenTime = jsonFormat.StartDateTime.split("T")[1];
-            
+
             // const { whenDay, whenTime } =
             //     await this.generalReminderService.extractWhenDateTime(jsonFormat.StartDateTime);
             jsonFormat.WhenTime = TimeHelper.formatTimeTo_AM_PM(whenTime);
@@ -105,7 +105,7 @@ export class ReminderFrequencyService {
                 channelName = "telegram";
             }
             payload["typeOfButton"] = "vertical";
-            
+
             this._platformMessageService = eventObj.container.resolve(channelName);
             const response_format: Iresponse = commonResponseMessageFormat();
             response_format.sessionId = sessionId;

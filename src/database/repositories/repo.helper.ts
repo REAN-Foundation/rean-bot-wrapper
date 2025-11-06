@@ -1,6 +1,6 @@
-import { ClientEnvironmentProviderService } from "../../services/set.client/client.environment.provider.service";
-import { EntityManagerProvider } from "../../services/entity.manager.provider.service";
-import { ApiError } from "../../common/api.error";
+import { ClientEnvironmentProviderService } from "../../services/set.client/client.environment.provider.service.js";
+import { EntityManagerProvider } from "../../services/entity.manager.provider.service.js";
+import { ApiError } from "../../common/api.error.js";
 
 ///////////////////////////////////////////////////////////////////////////////
 

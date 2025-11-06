@@ -1,7 +1,7 @@
-import type { ICache } from './cache.interface';
-import type { CacheEntry, CacheMetrics, CacheOptions } from './cache.types';
-import { InMemoryCache } from './inmemory.cache';
-import { StrategyManager } from './cache.strategies';
+import type { ICache } from './cache.interface.js';
+import type { CacheEntry, CacheMetrics, CacheOptions } from './cache.types.js';
+import { InMemoryCache } from './inmemory.cache.js';
+import { StrategyManager } from './cache.strategies.js';
 const REQUEST_CACHE_TYPE = 'InMemory';
 
 ///////////////////////////////////////////////////////////////////////////////

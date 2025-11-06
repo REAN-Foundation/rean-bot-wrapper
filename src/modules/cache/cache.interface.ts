@@ -1,4 +1,4 @@
-import type { CacheEntry, CacheMetrics, CacheOptions } from "./cache.types";
+import type { CacheEntry, CacheMetrics, CacheOptions } from "./cache.types.js";
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -9,14 +9,14 @@ export interface ICache {
   has(key: string): Promise<boolean>;
   delete(key: string): Promise<boolean>;
   clear(): Promise<void>;
-  
+
   // Advanced operations
   findAndClear(searchPattern: string): Promise<string[]>;
-  
+
   // Metrics and monitoring
   getMetrics(): Promise<CacheMetrics>;
   cleanup(): Promise<void>;
-  
+
   // Bulk operations
   setMany(entries: Array<{ key: string; value: unknown; options?: CacheOptions }>): Promise<void>;
   getMany(keys: string[]): Promise<Array<CacheEntry | undefined>>;

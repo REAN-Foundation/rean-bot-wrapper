@@ -1,6 +1,6 @@
 import express from 'express';
-import { Loader } from '../../startup/loader';
-import { ChatBotController } from '../controllers/chat.bot.controller';
+import { Loader } from '../../startup/loader.js';
+import { ChatBotController } from '../controllers/chat.bot.controller.js';
 import { injectable } from 'tsyringe';
 
 @injectable()

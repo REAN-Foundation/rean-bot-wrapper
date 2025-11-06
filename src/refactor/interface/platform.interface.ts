@@ -1,4 +1,4 @@
-import { Imessage, Iresponse } from "./message.interface";
+import type { Imessage, Iresponse } from "./message.interface.js";
 
 export interface platformServiceInterface {
 

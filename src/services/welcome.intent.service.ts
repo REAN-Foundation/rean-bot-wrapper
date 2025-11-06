@@ -1,10 +1,10 @@
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { Logger } from '../common/logger';
-import { EntityManagerProvider } from './entity.manager.provider.service';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { ChatMessage } from '../models/chat.message.model';
-import { CustomMLModelResponseService } from './custom.ml.model.response.service';
-import { IserviceResponseFunctionalities } from "./response.format/response.interface";
+import { Logger } from '../common/logger.js';
+import { EntityManagerProvider } from './entity.manager.provider.service.js';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
+import { ChatMessage } from '../models/chat.message.model.js';
+import { CustomMLModelResponseService } from './custom.ml.model.response.service.js';
+import type { IserviceResponseFunctionalities } from "./response.format/response.interface.js";
 
 @scoped(Lifecycle.ContainerScoped)
 export  class WelcomeIntentService {
@@ -24,7 +24,7 @@ export  class WelcomeIntentService {
             const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
             // eslint-disable-next-line max-len
             const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: messageObject.platformId } });
-            
+
             if (respChatMessage.length > 10){
                 // eslint-disable-next-line max-len
                 message_from_nlp = await this.customMLModelResponseService.getCustomModelResponse(messageObject.messageBody, messageObject.platform, messageObject);

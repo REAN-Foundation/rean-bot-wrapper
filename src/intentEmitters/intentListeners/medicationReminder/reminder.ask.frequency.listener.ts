@@ -1,5 +1,5 @@
-import { ReminderFrequencyService } from "../../../services/reminder/reminder.ask.frequency.service";
-import { MedicationStoppedReasonService } from "../../../services/reminder/medication.not.taken.followup.service";
+import { ReminderFrequencyService } from "../../../services/reminder/reminder.ask.frequency.service.js";
+import { MedicationStoppedReasonService } from "../../../services/reminder/medication.not.taken.followup.service.js";
 
 export const ReminderFrequencyListener = async (intent, eventObj) => {
     // eslint-disable-next-line max-len

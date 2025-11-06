@@ -1,6 +1,6 @@
-import { elasticsearchUtilities } from '../../utils/elasticsearch.utility';
+import { elasticsearchUtilities } from '../../utils/elasticsearch.utility.js';
 import { Lifecycle, inject, scoped } from 'tsyringe';
-import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class elasticsearchUserstat{

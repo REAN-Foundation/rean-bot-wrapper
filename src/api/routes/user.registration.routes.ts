@@ -1,7 +1,7 @@
 import express from 'express';
-import { Logger } from '../../common/logger';
+import { Logger } from '../../common/logger.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { UserRegistrationController } from '../controllers/users.registeration.controller';
+import { UserRegistrationController } from '../controllers/users.registeration.controller.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class UserRegistrationRoutes{

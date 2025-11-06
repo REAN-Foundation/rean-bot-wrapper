@@ -1,10 +1,10 @@
 import { Lifecycle, inject, scoped } from "tsyringe";
-import XLSX = require('xlsx');
-import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
-import { platformServiceInterface } from "../refactor/interface/platform.interface";
-import dialogflow = require('@google-cloud/dialogflow');
-import { Iresponse } from "../refactor/interface/message.interface";
-import { commonResponseMessageFormat } from "./common.response.format.object";
+import XLSX from 'xlsx';
+import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service.js";
+import { platformServiceInterface } from "../refactor/interface/platform.interface.js";
+import dialogflow from '@google-cloud/dialogflow';
+import { Iresponse } from "../refactor/interface/message.interface.js";
+import { commonResponseMessageFormat } from "./common.response.format.object.js";
 
 @scoped(Lifecycle.ContainerScoped)
 export class demoBotService {

@@ -1,12 +1,12 @@
 import { scoped, Lifecycle, inject } from 'tsyringe';
 import needle from "needle";
-import { Logger } from '../../../common/logger';
-import { platformServiceInterface } from '../../../refactor/interface/platform.interface';
-import { ClientEnvironmentProviderService } from '../../set.client/client.environment.provider.service';
+import { Logger } from '../../../common/logger.js';
+import type { platformServiceInterface } from '../../../refactor/interface/platform.interface.js';
+import { ClientEnvironmentProviderService } from '../../set.client/client.environment.provider.service.js';
 //import { Helper } from '../../../common/helper';
-import { AnswerYesMsgService } from '../../../services/maternalCareplan/serveAssessment/answer.yes.service';
-import { EntityManagerProvider } from '../../entity.manager.provider.service';
-import { ReminderMessage} from '../../../models/reminder.model';
+import { AnswerYesMsgService } from '../../../services/maternalCareplan/serveAssessment/answer.yes.service.js';
+import { EntityManagerProvider } from '../../entity.manager.provider.service.js';
+import { ReminderMessage} from '../../../models/reminder.model.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class AppointmentUserReplyService {

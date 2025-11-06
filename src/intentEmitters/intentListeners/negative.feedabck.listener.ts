@@ -1,5 +1,5 @@
-import { Logger } from '../../common/logger';
-import { FeedbackService } from '../../services/feedback/feedback.service';
+import { Logger } from '../../common/logger.js';
+import { FeedbackService } from '../../services/feedback/feedback.service.js';
 
 export const NegativeFeedbackListener = async (intent, eventObj) => {
     try {

@@ -1,4 +1,4 @@
-import { AnswerYesMsgService } from "../../../services/maternalCareplan/serveAssessment/answer.yes.service";
+import { AnswerYesMsgService } from "../../../services/maternalCareplan/serveAssessment/answer.yes.service.js";
 
 export const  AssessmentAnswerYesListener = async (_intent, eventObj) => {
     try {

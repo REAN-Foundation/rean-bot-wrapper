@@ -1,6 +1,6 @@
 import 'reflect-metadata';
-import { DependencyContainer } from 'tsyringe';
-import { SecretsManagerInjector } from './secrets/secrets.manager.injector';
+import type { DependencyContainer } from 'tsyringe';
+import { SecretsManagerInjector } from './secrets/secrets.manager.injector.js';
 
 ////////////////////////////////////////////////////////////////////////////////
 

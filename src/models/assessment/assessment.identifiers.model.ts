@@ -1,7 +1,7 @@
 /* eslint-disable indent */
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, ForeignKey, BelongsTo } from 'sequelize-typescript';
-import { IAssessmentIdentifiers } from '../../refactor/interface/assessment/assessment.interface';
-import { AssessmentSessionLogs } from '../assessment.session.model';
+import type { IAssessmentIdentifiers } from '../../refactor/interface/assessment/assessment.interface.js';
+import { AssessmentSessionLogs } from '../assessment.session.model.js';
 
 @Table(
     {
@@ -20,7 +20,7 @@ export class AssessmentIdentifiers extends Model implements IAssessmentIdentifie
         allowNull : false
     })
         autoIncrementalID?: number;
-    
+
     @ForeignKey(() => AssessmentSessionLogs)
     @Column({
         type : DataType.INTEGER,

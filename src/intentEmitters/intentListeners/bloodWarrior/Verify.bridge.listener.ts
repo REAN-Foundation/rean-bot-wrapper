@@ -1,4 +1,4 @@
-import { VerifyBridgeService } from "../../../services/bloodWrrior/verify.bridge.service";
+import { VerifyBridgeService } from "../../../services/bloodWrrior/verify.bridge.service.js";
 
 export const VerifyBloodBridge = async (intent, eventObj) => {
     const verifyBridgeService: VerifyBridgeService = eventObj.container.resolve(VerifyBridgeService);

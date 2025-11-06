@@ -1,6 +1,6 @@
-import { Logger } from '../../common/logger';
-import { ChangeLanguage } from '../../services/language.change.service';
-import { CustomWelcomeService } from '../../services/custom.welcome.service';
+import { Logger } from '../../common/logger.js';
+import { ChangeLanguage } from '../../services/language.change.service.js';
+import { CustomWelcomeService } from '../../services/custom.welcome.service.js';
 
 export const CustomLanguageListener = async (intent, eventObj) => {
     try {
@@ -15,7 +15,7 @@ export const CustomLanguageListener = async (intent, eventObj) => {
 
         response = await changeLanguage.askForLanguage(eventObj);
         const imageUrl = await WelcomeService.getImageUrl();
-        
+
         console.log('Inside listener: ', response);
 
         if (!response) {

@@ -1,5 +1,5 @@
-import { getAdditionalInfoSevice } from "../../../services/get.additional.info.service";
-import {dialoflowMessageFormatting} from "../../../services/Dialogflow.service";
+import { getAdditionalInfoSevice } from "../../../services/get.additional.info.service.js";
+import {dialoflowMessageFormatting} from "../../../services/Dialogflow.service.js";
 
 export const AdditionalInfoEditListener = async (intent:string, eventObj) => {
     // eslint-disable-next-line max-len

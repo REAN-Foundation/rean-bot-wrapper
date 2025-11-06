@@ -1,13 +1,13 @@
 /* eslint-disable max-len */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
 
 import OpenAI from 'openai';
 
 // import { Configuration, OpenAIApi } from "openai";
-import { OpenAIResponseFormat } from './response.format/openai.response.format';
-import { EntityManagerProvider } from './entity.manager.provider.service';
+import { OpenAIResponseFormat } from './response.format/openai.response.format.js';
+import { EntityManagerProvider } from './entity.manager.provider.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -42,7 +42,7 @@ export class OpenAIResponseService {
             //         { role: "assistant", "content": chatMessageResponse[0].messageContent },
             //         { role: "user", "content": message }]
             // });
-            
+
             //currently this implementation is for nutrition bot. To make it general, move the nutrtion bot specific prompt to its service
             const prompt = this.getPrompt(key, message);
             if (prompt == null) {
@@ -60,7 +60,7 @@ export class OpenAIResponseService {
             console.log(createCompletion.choices[0]?.message?.content);
             const response = new OpenAIResponseFormat(createCompletion);
             return response;
-            
+
         }
         catch (e) {
             console.log(e);
@@ -104,8 +104,8 @@ export class OpenAIResponseService {
             prompt = {
                 model    : "gpt-3.5-turbo",
                 messages : [{ role    : 'user', content : `${message} Provide the reminders details in json. Do not give older year date. The json format should be:
-                { "TaskName": 
-                  "TaskType": "medication" or "exercise" or "appointment" or "other" 
+                { "TaskName":
+                  "TaskType": "medication" or "exercise" or "appointment" or "other"
                   "Frequency": "Daily" or "Monthly" or "Weekly" or "Once" or "Hourly" or "Quarterly" or "Yearly"
                   "DayName": "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
                   "StartDateTime": iso format date time

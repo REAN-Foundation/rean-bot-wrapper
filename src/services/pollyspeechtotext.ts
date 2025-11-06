@@ -2,7 +2,7 @@
 import AWS from 'aws-sdk';
 import fs from 'fs';
 import crypto from 'crypto';
-import { AwsS3manager } from './aws.file.upload.service';
+import { AwsS3manager } from './aws.file.upload.service.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 
 @scoped(Lifecycle.ContainerScoped)
@@ -60,7 +60,7 @@ export class AWSPolly {
                         });
                     }
                 });
-                
+
             }
             catch (error) {
                 console.log("polly catch err", error.message);
@@ -104,5 +104,5 @@ export class AWSPolly {
             }
         });
     }
-    
+
 }

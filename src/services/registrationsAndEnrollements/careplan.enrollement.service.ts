@@ -1,5 +1,5 @@
-import { NeedleService } from '../needle.service';
-import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
+import { NeedleService } from '../needle.service.js';
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service.js';
 import { inject, Lifecycle, scoped,  } from 'tsyringe';
 
 @scoped(Lifecycle.ContainerScoped)
@@ -24,7 +24,7 @@ export class careplanEnrollment{
             TenantName : tenantName,
             Channel    : channelName
         };
-    
+
         try {
             const response = await this.needleService.needleRequestForREAN("post", enrollmentUrl, null, dataObj, authenticationKey);
             return response;

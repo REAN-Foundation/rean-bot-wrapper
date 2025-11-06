@@ -1,12 +1,12 @@
-import { GetHeaders } from '../../services/biometrics/get.headers';
-import { GetPatientInfoService } from "../../services/support.app.service";
-import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
+import { GetHeaders } from '../../services/biometrics/get.headers.js';
+import { GetPatientInfoService } from "../../services/support.app.service.js";
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import needle from "needle";
 
 @scoped(Lifecycle.ContainerScoped)
 export class BodyTemperatureService {
-    
+
     constructor(
         @inject(GetHeaders) private getHeaders: GetHeaders,
         @inject(GetPatientInfoService) private getPatientInfoService: GetPatientInfoService,
@@ -40,7 +40,7 @@ export class BodyTemperatureService {
 
             const ReanBackendBaseUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
             const url = `${ReanBackendBaseUrl}clinical/biometrics/body-temperatures/search?patientUserId=${patientUserId}`;
-            
+
             const options = this.getHeaders.getHeaders(accessToken);
             const resp = await needle("get", url, options);
             const bodyTemperatureId = resp.body.Data.BodyTemperatureRecords.Items[0].id;
@@ -77,7 +77,7 @@ export class BodyTemperatureService {
 
         if (eventObj) {
             var { patientUserId, accessToken, BodyTemperature_Unit, BodyTemperature } = await this.checkEntry(eventObj);
-            
+
             let unitmsg = null;
             ({ unitmsg, BodyTemperature_Unit } = this.getUnit(BodyTemperature_Unit,BodyTemperature));
             const ReanBackendBaseUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");

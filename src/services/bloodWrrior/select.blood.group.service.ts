@@ -1,12 +1,12 @@
-import { Logger } from '../../common/logger';
-import { NeedleService } from '../needle.service';
-import { RaiseDonationRequestService } from './raise.request.service';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { templateButtonService } from '../whatsappmeta.button.service';
+import { Logger } from '../../common/logger.js';
+import { NeedleService } from '../needle.service.js';
+import { RaiseDonationRequestService } from './raise.request.service.js';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
+import { templateButtonService } from '../whatsappmeta.button.service.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { Iresponse } from '../../refactor/interface/message.interface';
-import { commonResponseMessageFormat } from '../common.response.format.object';
-import { BloodWarriorCommonService } from './common.service';
+import type { Iresponse } from '../../refactor/interface/message.interface.js';
+import { commonResponseMessageFormat } from '../common.response.format.object.js';
+import { BloodWarriorCommonService } from './common.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class SelectBloodGroupService {
@@ -75,7 +75,7 @@ export class SelectBloodGroupService {
 
                         const previousIntentPayload = eventObj.body.originalDetectIntentRequest.payload;
                         this._platformMessageService = eventObj.container.resolve(previousIntentPayload.source);
-                        
+
                         const payload = {};
                         payload["variables"] = [
                             {

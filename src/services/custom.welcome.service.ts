@@ -1,17 +1,17 @@
 import { inject, Lifecycle, scoped } from "tsyringe";
-import { platformServiceInterface } from "../refactor/interface/platform.interface";
-import { ChatMessage } from '../models/chat.message.model';
-import { UserInfo } from '../models/user.info.model';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { Iresponse } from "../refactor/interface/message.interface";
-import { commonResponseMessageFormat } from "./common.response.format.object";
-import { EntityManagerProvider } from "./entity.manager.provider.service";
+import type { platformServiceInterface } from "../refactor/interface/platform.interface.js";
+import { ChatMessage } from '../models/chat.message.model.js';
+import { UserInfo } from '../models/user.info.model.js';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
+import type { Iresponse } from "../refactor/interface/message.interface.js";
+import { commonResponseMessageFormat } from "./common.response.format.object.js";
+import { EntityManagerProvider } from "./entity.manager.provider.service.js";
 
 @scoped(Lifecycle.ContainerScoped)
 export class CustomWelcomeService {
 
     public res;
-    
+
     private _platformMessageService :  platformServiceInterface = null;
 
     constructor(
@@ -67,7 +67,7 @@ export class CustomWelcomeService {
 
     async postResponseCustom(userId: any, client: any, data: any) {
         console.log("Sending calorie data to client");
-        
+
         // this._platformMessageService = container.resolve(client);
         const response_format: Iresponse = commonResponseMessageFormat();
         response_format.platform = client;
@@ -76,5 +76,5 @@ export class CustomWelcomeService {
         response_format.message_type = "image";
         await this._platformMessageService.SendMediaMessage(response_format,null);
     }
-    
+
 }

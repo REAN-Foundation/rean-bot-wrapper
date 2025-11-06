@@ -1,5 +1,5 @@
-import { Logger } from '../../common/logger';
-import { getCovidInfoResources } from '../../services/covid.info.service';
+import { Logger } from '../../common/logger.js';
+import { getCovidInfoResources } from '../../services/covid.info.service.js';
 
 export const getCovidInfo1s = async (intent, eventObj) => {
     const getCovidInfoResourcesobj:getCovidInfoResources = eventObj.container.resolve(getCovidInfoResources);

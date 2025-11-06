@@ -1,4 +1,4 @@
-import { SelectBloodGroupService } from "../../../services/bloodWrrior/select.blood.group.service";
+import { SelectBloodGroupService } from "../../../services/bloodWrrior/select.blood.group.service.js";
 
 export const SelectBloodGroupListener = async (intent, eventObj) => {
     const selectBloodGroupService: SelectBloodGroupService = eventObj.container.resolve(SelectBloodGroupService);

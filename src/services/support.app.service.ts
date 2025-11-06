@@ -1,12 +1,13 @@
-import { Logger } from '../common/logger';
-import { getRequestOptions } from '../utils/helper';
+import { Logger } from '../common/logger.js';
+import { getRequestOptions } from '../utils/helper.js';
 import needle from "needle";
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
 import { inject, Lifecycle, scoped,  } from 'tsyringe';
-import { GetHeaders } from '../services/biometrics/get.headers';
-import { Dose,Duration,MedicationAdministrationRoutes,MedicationDomainModel,MedicineName } from '../refactor/interface/medication.interface';
-import { NeedleService } from './needle.service';
-import { NotificationType } from '../domain.types/reminder/reminder.domain.model';
+import { GetHeaders } from '../services/biometrics/get.headers.js';
+import type { Dose,Duration,MedicationDomainModel,MedicineName } from '../refactor/interface/medication.interface.js';
+import { MedicationAdministrationRoutes} from '../refactor/interface/medication.interface.js';
+import { NeedleService } from './needle.service.js';
+import { NotificationType } from '../domain.types/reminder/reminder.domain.model.js';
 
 // eslint-disable-next-line max-len
 @scoped(Lifecycle.ContainerScoped)
@@ -216,7 +217,7 @@ export class GetPatientInfoService{
                 break;
             }
             case "Night":{
-                    
+
                 obj1.TimeSchedules = ["Night"];
                 obj1.Frequency = 1;
                 break;
@@ -225,7 +226,7 @@ export class GetPatientInfoService{
                 obj1.TimeSchedules = ["Evening"];
                 obj1.Frequency = 1;
                 break;
-                    
+
             }
             case "Empty Stomach":
             case "Once": {

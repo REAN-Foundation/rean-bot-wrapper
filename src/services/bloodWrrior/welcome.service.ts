@@ -1,9 +1,9 @@
-import { GetPatientInfoService } from '../support.app.service';
+import { GetPatientInfoService } from '../support.app.service.js';
 import { scoped, Lifecycle, inject } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { NeedleService } from '../needle.service';
-import { whatsappMetaButtonService } from '../whatsappmeta.button.service';
-import { dialoflowMessageFormatting } from '../Dialogflow.service';
+import { Logger } from '../../common/logger.js';
+import { NeedleService } from '../needle.service.js';
+import { whatsappMetaButtonService } from '../whatsappmeta.button.service.js';
+import { dialoflowMessageFormatting } from '../Dialogflow.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class BloodWarriorWelcomeService {
@@ -13,7 +13,7 @@ export class BloodWarriorWelcomeService {
         @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,
         @inject(dialoflowMessageFormatting) private dialoflowMessageFormattingService?: dialoflowMessageFormatting,
     ){}
-    
+
     async registrationService (eventObj) {
         // eslint-disable-next-line max-len
         try {
@@ -68,7 +68,7 @@ export class BloodWarriorWelcomeService {
             *Blood Group:* ${bloodGroup},
             *Expected Next Blood Transfusion Date:* ${transfusionDate}\nIf the details are correct, please click *proceed* to get reminders or if you can register as a new patient.`;
             console.log(dffMessage);
-            
+
             const payloadButtons = await whatsappMetaButtonService("Proceed","Patient_Confirm","Change Donation Date","Change_TF_Date");
             const data = {
                 "fulfillmentMessages" : [

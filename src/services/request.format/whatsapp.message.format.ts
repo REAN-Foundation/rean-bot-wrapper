@@ -1,4 +1,4 @@
-import { IWhatsappRequestMessageEntities } from './whatsapp.request.interface';
+import type { IWhatsappRequestMessageEntities } from './whatsapp.request.interface.js';
 
 export class Message implements IWhatsappRequestMessageEntities {
 

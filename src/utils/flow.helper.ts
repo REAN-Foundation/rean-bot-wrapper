@@ -1,4 +1,4 @@
-import { FlowMessageParts } from "../domain.types/message.type/flow.message.types";
+import type { FlowMessageParts } from "../domain.types/message.type/flow.message.types.js";
 
 export const flowConfigs: Record<string, FlowMessageParts> = {
     Survey_Form : {
@@ -9,7 +9,7 @@ export const flowConfigs: Record<string, FlowMessageParts> = {
         Cta           : "Open Form",
         Screen        : "QUESTION_ONE"
     },
-  
+
     Registration_Form : {
         Header        : { type: "text", text: "📝 Registration" },
         Body          : { text: "✨ Please complete your registration to get started!" },
@@ -31,11 +31,11 @@ export const flowConfigs: Record<string, FlowMessageParts> = {
         Screen        : "FEEDBACK"
     }
 };
-  
+
 export function getFlowMessageParts(flowName: string): FlowMessageParts | null {
     if (!flowName) {
         return null;
     }
     return flowConfigs[flowName] || null;
 }
-  
+

@@ -1,10 +1,10 @@
-import { CountryCodeService } from '../../utils/phone.number.formatting';
-import { NeedleService } from '../needle.service';
-import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
+import { CountryCodeService } from '../../utils/phone.number.formatting.js';
+import { NeedleService } from '../needle.service.js';
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service.js';
 import { inject, Lifecycle, scoped,  } from 'tsyringe';
-import { Logger } from '../../common/logger';
+import { Logger } from '../../common/logger.js';
 
-import { ContactList } from '../../models/contact.list';
+import { ContactList } from '../../models/contact.list.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class Registration{

@@ -1,7 +1,7 @@
 import { Lifecycle, scoped } from "tsyringe";
-import { platformServiceInterface } from "../refactor/interface/platform.interface";
-import { Iresponse } from "../refactor/interface/message.interface";
-import { commonResponseMessageFormat } from "./common.response.format.object";
+import type { platformServiceInterface } from "../refactor/interface/platform.interface.js";
+import type { Iresponse } from "../refactor/interface/message.interface.js";
+import { commonResponseMessageFormat } from "./common.response.format.object.js";
 
 @scoped(Lifecycle.ContainerScoped)
 export class CalorieService {
@@ -25,7 +25,7 @@ export class CalorieService {
         response_format.messageBody = data;
         response_format.message_type = "text";
         response_format.messageText = data;
-        
+
         this._platformMessageService = eventObj.container.resolve(client);
         await this._platformMessageService.SendMediaMessage(response_format,null);
     }

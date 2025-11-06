@@ -1,7 +1,7 @@
-import { kerotoplastyService } from "../../services/kerotoplasty.service";
-import { dialoflowMessageFormatting } from "../../services/Dialogflow.service";
-import { CallEyeImageQualityCheckModel } from '../../services/call.eye.image.quality.check';
-import { sendExtraMessages } from "../../services/send.extra.messages.service";
+import { kerotoplastyService } from "../../services/kerotoplasty.service.js";
+import { dialoflowMessageFormatting } from "../../services/Dialogflow.service.js";
+import { CallEyeImageQualityCheckModel } from '../../services/call.eye.image.quality.check.js';
+import { sendExtraMessages } from "../../services/send.extra.messages.service.js";
 
 export const kerotoplastyEyeQualityListener = async (intent:string, eventObj) => {
     const dialogflowMsgFormatObj: dialoflowMessageFormatting = eventObj.container.resolve(dialoflowMessageFormatting);
@@ -9,7 +9,7 @@ export const kerotoplastyEyeQualityListener = async (intent:string, eventObj) =>
     const to_send = await dialogflowMsgFormatObj.making_response(message);
     eyeImageQuality(eventObj,intent);
     return to_send;
- 
+
 };
 
 async function eyeImageQuality(eventObj,intent){

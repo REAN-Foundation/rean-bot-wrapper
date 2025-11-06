@@ -2,17 +2,17 @@
 import http from  'https';
 import http_tp from 'http';
 import needle from 'needle';
-import { getMessageFunctionalities } from "../refactor/interface/message.service.functionalities.interface";
-import { Imessage } from '../refactor/interface/message.interface';
-import { EmojiFilter } from './filter.message.for.emoji.service';
-import { Speechtotext } from './speech.to.text.service';
+import type { getMessageFunctionalities } from "../refactor/interface/message.service.functionalities.interface.js";
+import type { Imessage } from '../refactor/interface/message.interface.js';
+import { EmojiFilter } from './filter.message.for.emoji.service.js';
+import { Speechtotext } from './speech.to.text.service.js';
 import { inject, Lifecycle, scoped } from "tsyringe";
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { AwsS3manager } from "./aws.file.upload.service";
-import { UserLanguage } from './set.language';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
+import { AwsS3manager } from "./aws.file.upload.service.js";
+import { UserLanguage } from './set.language.js';
 import path from 'path';
 import fs from 'fs';
-import { Message } from './request.format/telegram.message.format';
+import { Message } from './request.format/telegram.message.format.js';
 import axios from 'axios';
 import * as url from 'url';
 
@@ -104,15 +104,15 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
                 "photo"
             );
             const location = await this.awsS3manager.uploadFile(filePath);
-    
+
             const urlParse = url.parse(location);
             const imageUrl = `${urlParse.protocol}//${urlParse.hostname}${urlParse.pathname}`;
-    
+
             const messagetoDialogflow = this.inputMessageFormat(messageObj);
             messagetoDialogflow.type = 'image';
             messagetoDialogflow.messageBody = imageUrl;
             messagetoDialogflow.imageUrl = location;
-    
+
             return messagetoDialogflow;
         } catch (error) {
             console.error('Error processing photo message:', error.message);
@@ -169,22 +169,22 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
 
         try {
             const response = await axios.get(fileUrl, { responseType: 'stream' });
-    
+
             if (response.status !== 200) {
                 throw new Error(`Failed to download media. Status code: ${response.status}`);
             }
-    
+
             const filename = path.basename(fileUrl);
             const uploadpath = `./${media}/` + filename;
             const filePath = fs.createWriteStream(uploadpath);
-    
+
             response.data.pipe(filePath);
-    
+
             await new Promise<void>((resolve, reject) => {
                 filePath.on('finish', () => resolve());
                 filePath.on('error', (error) => reject(error));
             });
-    
+
             return uploadpath;
         } catch (error) {
             console.error('Error downloading media:', error.message);

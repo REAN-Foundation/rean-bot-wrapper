@@ -1,11 +1,11 @@
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { NeedleService } from '../needle.service';
-import { BloodWarriorCommonService } from './common.service';
-import { RaiseDonationRequestService } from './raise.request.service';
-import { commonResponseMessageFormat } from '../common.response.format.object';
-import { Iresponse } from '../../refactor/interface/message.interface';
+import { Logger } from '../../common/logger.js';
+import { NeedleService } from '../needle.service.js';
+import { BloodWarriorCommonService } from './common.service.js';
+import { RaiseDonationRequestService } from './raise.request.service.js';
+import { commonResponseMessageFormat } from '../common.response.format.object.js';
+import type { Iresponse } from '../../refactor/interface/message.interface.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ScheduleOneTimeTakeValuesService {
@@ -41,7 +41,7 @@ export class ScheduleOneTimeTakeValuesService {
                         DonationDate : donation_Date.split("T")[0]
                     };
                     await this.raiseDonationRequestService.createDonationRecord(obj);
-    
+
                     dffMessage = `Congratulations! \nThe donation has been successfully scheduled.`;
                     const commonMessage = `
                 Donor name: ${donor.DisplayName},
@@ -50,12 +50,12 @@ export class ScheduleOneTimeTakeValuesService {
                 Donation Type: ${donor.DonorType},
                 Maps: ${location}`;
                     resolve( { message: { fulfillmentMessages: [{ text: { text: [dffMessage + commonMessage] } }] } });
-    
+
                     //Fetch donation reminders for donors
                     const nextDonationDate = new Date(donation_Date.split("T")[0]);
                     await this.bloodWarriorCommonService.fetchDonorDonationReminders(donor.UserId,
                         nextDonationDate, channel);
-    
+
                     //Message sent to donor
                     const heading1 = `Hi ${donor.DisplayName}, \nThe donation request has been created by volunteer.`;
                     const donorPhone =
@@ -65,7 +65,7 @@ export class ScheduleOneTimeTakeValuesService {
                     response_format.sessionId = donorPhone;
                     response_format.messageText = heading1 + commonMessage;
                     response_format.message_type = "text";
-    
+
                     const previousIntentPayload = eventObj.body.originalDetectIntentRequest.payload;
                     this._platformMessageService = eventObj.container.resolve(previousIntentPayload.source);
                     await this._platformMessageService.SendMediaMessage(response_format, null);
@@ -73,7 +73,7 @@ export class ScheduleOneTimeTakeValuesService {
                     dffMessage = `One time donor not found with this ${volunteer.SelectedPhoneNumber} phone number.`;
                     resolve( { message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } });
                 }
-                
+
             } catch (error) {
                 Logger.instance()
                     .log_error(error.message,500,'Schedule one time donation service error');

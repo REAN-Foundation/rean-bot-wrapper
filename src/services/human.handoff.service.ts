@@ -1,9 +1,9 @@
 /* eslint-disable max-len */
 import { delay, inject, Lifecycle, scoped } from "tsyringe";
-import { SlackMessageService } from "./slack.message.service";
-import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
-import { EntityManagerProvider } from "./entity.manager.provider.service";
-import { ChatMessage } from "../models/chat.message.model";
+import { SlackMessageService } from "./slack.message.service.js";
+import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service.js";
+import { EntityManagerProvider } from "./entity.manager.provider.service.js";
+import { ChatMessage } from "../models/chat.message.model.js";
 
 @scoped(Lifecycle.ContainerScoped)
 export class HumanHandoff {

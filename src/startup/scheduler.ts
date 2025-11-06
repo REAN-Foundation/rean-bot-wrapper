@@ -1,7 +1,7 @@
-import { Logger } from '../common/logger';
+import { Logger } from '../common/logger.js';
 import * as cron from 'node-cron';
-import * as CronSchedules from '../assets/seed.data/cron.schedules.json';
-import {databackup} from '../services/scheduleDataBackup.service';
+import CronSchedules from '../assets/seed.data/cron.schedules.json' with { type: "json" };
+import {databackup} from '../services/scheduleDataBackup.service.js';
 
 export class Scheduler {
 

@@ -1,16 +1,16 @@
 /* eslint-disable max-len */
-import { feedbackInterface } from './feedback.interface';
+import type { feedbackInterface } from './feedback.interface.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { SlackMessageService } from '../slack.message.service';
-import { ChatMessage } from '../../models/chat.message.model';
-import { ContactList } from '../../models/contact.list';
-import { HumanHandoff } from '../../services/human.handoff.service';
-import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
-import { CalorieInfo } from '../../models/calorie.info.model';
+import { SlackMessageService } from '../slack.message.service.js';
+import { ChatMessage } from '../../models/chat.message.model.js';
+import { ContactList } from '../../models/contact.list.js';
+import { HumanHandoff } from '../../services/human.handoff.service.js';
+import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service.js';
+import { CalorieInfo } from '../../models/calorie.info.model.js';
 import { Op } from 'sequelize';
-import { ClickUpTask } from '../clickup/clickup.task';
-import { EntityManagerProvider } from '../entity.manager.provider.service';
-import { SystemGeneratedMessagesService } from '../system.generated.message.service';
+import { ClickUpTask } from '../clickup/clickup.task.js';
+import { EntityManagerProvider } from '../entity.manager.provider.service.js';
+import { SystemGeneratedMessagesService } from '../system.generated.message.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export  class FeedbackService implements feedbackInterface {
@@ -138,9 +138,9 @@ export  class FeedbackService implements feedbackInterface {
                         resolve(data);
                     }
                 }
-                
+
             }
-                
+
             catch (error) {
                 console.log(error, 500, "Negative Feedback Service Error!");
                 reject(error.message);
@@ -167,7 +167,7 @@ export  class FeedbackService implements feedbackInterface {
                 } else {
                     replyToSend = this.clientEnvironmentProviderService.getClientEnvironmentVariable("POSITIVE_FEEDBACK_MESSAGE");
                 }
-                
+
                 let reply;
                 if (replyToSend) {
                     reply = replyToSend;

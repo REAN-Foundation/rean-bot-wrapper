@@ -1,7 +1,7 @@
-import { ContactList } from "../../../models/contact.list";
-import { ContactListDto } from "../../../domain.types/contact.list/contact.list.domain.model";
-import { ContactListMapper } from "../../mapper/contact.list/contact.list.mapper";
-import { RepositoryHelper } from "../repo.helper";
+import { ContactList } from "../../../models/contact.list.js";
+import type { ContactListDto } from "../../../domain.types/contact.list/contact.list.domain.model.js";
+import { ContactListMapper } from "../../mapper/contact.list/contact.list.mapper.js";
+import { RepositoryHelper } from "../repo.helper.js";
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -1,4 +1,4 @@
-import { elasticsearchUtilities } from '../utils/elasticsearch.utility';
+import { elasticsearchUtilities } from '../utils/elasticsearch.utility.js';
 
 const esinstance = new elasticsearchUtilities();
 export class IndexCreation {

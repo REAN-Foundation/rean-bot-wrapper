@@ -1,6 +1,6 @@
 import emojiRegex from 'emoji-regex';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class EmojiFilter{

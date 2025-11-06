@@ -1,11 +1,11 @@
-import { Logger } from '../../common/logger';
+import { Logger } from '../../common/logger.js';
 
 export class NewUserService {
 
     async newUserService () {
         try {
-            const dffMessage = `Welcome Dear Blood Warrior, \nYou can chat here to know more about Thalassemia and Blood Donation 
-                        or \nYou could also sign up to support Thalassemia patients as a Blood Donor. \nThis is your home menu, Click on any of them 
+            const dffMessage = `Welcome Dear Blood Warrior, \nYou can chat here to know more about Thalassemia and Blood Donation
+                        or \nYou could also sign up to support Thalassemia patients as a Blood Donor. \nThis is your home menu, Click on any of them
                         or \nwherever you are just type "MENU" to access the Home Menu.`;
             console.log(dffMessage);
 

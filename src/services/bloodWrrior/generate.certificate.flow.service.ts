@@ -1,15 +1,16 @@
 import { scoped, Lifecycle, inject } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { NeedleService } from '../needle.service';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { templateButtonService } from '../whatsappmeta.button.service';
-import { RaiseDonationRequestService } from './raise.request.service';
-import { BloodWarriorCommonService } from './common.service';
-import { Iresponse } from '../../refactor/interface/message.interface';
-import { commonResponseMessageFormat } from '../common.response.format.object';
-import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.service';
-import { TimeHelper } from '../../common/time.helper';
-import { CacheMemory } from '../cache.memory.service';
+import { Logger } from '../../common/logger.js';
+import { NeedleService } from '../needle.service.js';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
+import { templateButtonService } from '../whatsappmeta.button.service.js';
+import { RaiseDonationRequestService } from './raise.request.service.js';
+import { BloodWarriorCommonService } from './common.service.js';
+import type { Iresponse } from '../../refactor/interface/message.interface.js';
+import { commonResponseMessageFormat } from '../common.response.format.object.js';
+import type { QueueDoaminModel } from '../fire.and.forget.service.js';
+import { FireAndForgetService } from '../fire.and.forget.service.js';
+import { TimeHelper } from '../../common/time.helper.js';
+import { CacheMemory } from '../cache.memory.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class GenerateCertificateService {
@@ -36,14 +37,14 @@ export class GenerateCertificateService {
             // } else {
             const volunteerUserId = requestBody.Data.Donation.Items[0].DonationDetails.VolunteerUserId;
             const patientUserId = requestBody.Data.Donation.Items[0].DonationDetails.PatientUserId;
-    
+
             // }
             const dffMessage = `Thank you for confirming. You are a real life Super Hero helping save lives. \nRegards \nTeam Blood Warriors`;
 
             //Set donation record to cache memory
             const key = `${volunteerUserId}:DonationRecord`;
             CacheMemory.set(key, donationRecord);
-               
+
             //Inform volunteer to generate certificate
             const body : QueueDoaminModel =  {
                 Intent : "Generate_Certificate_Inform_Volunteer",

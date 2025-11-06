@@ -1,9 +1,9 @@
 /* eslint-disable max-len */
-import { Logger } from '../../common/logger';
-import { CallAnemiaModel } from '../../services/call.anemia.model';
-import { NeedleService } from '../../services/needle.service';
-import { RekognitionService } from '../../services/anemia-aws-rekognition-model';
-import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
+import { Logger } from '../../common/logger.js';
+import { CallAnemiaModel } from '../../services/call.anemia.model.js';
+import { NeedleService } from '../../services/needle.service.js';
+import { RekognitionService } from '../../services/anemia-aws-rekognition-model.js';
+import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service.js';
 
 // import { container } from 'tsyringe';
 

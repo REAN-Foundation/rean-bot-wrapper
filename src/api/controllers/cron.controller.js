@@ -1,4 +1,4 @@
-import { Logger } from  '../../common/logger';
+import { Logger } from  '../../common/logger.js';
 import { cron } from 'node-cron';
 
 Logger.instance().log('Enabling Cron process for Rean Bot.');

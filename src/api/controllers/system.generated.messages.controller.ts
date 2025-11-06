@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { inject, scoped, Lifecycle } from "tsyringe";
-import { EntityManagerProvider } from "../../services/entity.manager.provider.service";
-import { SystemGeneratedMessages } from "../../models/system.generated.messages.model";
-import { ErrorHandler } from "../../utils/error.handler";
-import { ResponseHandler } from "../../utils/response.handler";
-import { ClientEnvironmentProviderService } from "../../services/set.client/client.environment.provider.service";
+import { EntityManagerProvider } from "../../services/entity.manager.provider.service.js";
+import { SystemGeneratedMessages } from "../../models/system.generated.messages.model.js";
+import { ErrorHandler } from "../../utils/error.handler.js";
+import { ResponseHandler } from "../../utils/response.handler.js";
+import { ClientEnvironmentProviderService } from "../../services/set.client/client.environment.provider.service.js";
 
 @scoped(Lifecycle.ContainerScoped)
 export class SystemGeneratedMessagesController {

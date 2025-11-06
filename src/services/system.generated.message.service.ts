@@ -1,7 +1,7 @@
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { SystemGeneratedMessages } from '../models/system.generated.messages.model';
-import { EntityManagerProvider } from './entity.manager.provider.service';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { SystemGeneratedMessages } from '../models/system.generated.messages.model.js';
+import { EntityManagerProvider } from './entity.manager.provider.service.js';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class SystemGeneratedMessagesService {

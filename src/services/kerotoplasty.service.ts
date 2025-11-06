@@ -1,12 +1,12 @@
-import { dialoflowMessageFormatting } from "./Dialogflow.service";
+import { dialoflowMessageFormatting } from "./Dialogflow.service.js";
 import { inject, Lifecycle, scoped } from "tsyringe";
-import { ClickUpTask } from "./clickup/clickup.task";
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { ClickUpTask } from "./clickup/clickup.task.js";
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
 import path from 'path';
 import needle from 'needle';
-import { EntityManagerProvider } from "./entity.manager.provider.service";
-import { ContactList } from '../models/contact.list';
-import { NeedleService } from "./needle.service";
+import { EntityManagerProvider } from "./entity.manager.provider.service.js";
+import { ContactList } from '../models/contact.list.js';
+import { NeedleService } from "./needle.service.js";
 
 @scoped(Lifecycle.ContainerScoped)
 export class kerotoplastyService {

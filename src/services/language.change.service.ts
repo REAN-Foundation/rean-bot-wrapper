@@ -1,8 +1,8 @@
 /* eslint-disable init-declarations */
 import { inject, Lifecycle, scoped } from "tsyringe";
-import { ChatSession } from "../models/chat.session";
-import { EntityManagerProvider } from "./entity.manager.provider.service";
-import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
+import { ChatSession } from "../models/chat.session.js";
+import { EntityManagerProvider } from "./entity.manager.provider.service.js";
+import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service.js";
 import { v2 } from '@google-cloud/translate';
 
 @scoped(Lifecycle.ContainerScoped)
@@ -69,7 +69,7 @@ export class ChangeLanguage{
                 reject(error.message);
             }
         });
-    
+
     }
 
     async getCodeByName(inputlanguage: string, data) {
@@ -85,7 +85,7 @@ export class ChangeLanguage{
                     console.log("newlanguage", newLanguage);
                     resolve(newLanguage);
                 }
-                 
+
             }
 
         });

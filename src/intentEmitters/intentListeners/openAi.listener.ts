@@ -1,6 +1,6 @@
-import { NeedleService } from '../../services/needle.service';
-import { Logger } from '../../common/logger';
-import { OpenAIResponseService } from '../../services/openai.response.service';
+import { NeedleService } from '../../services/needle.service.js';
+import { Logger } from '../../common/logger.js';
+import { OpenAIResponseService } from '../../services/openai.response.service.js';
 
 const sendMessageToTelegram = async(messageToPlatform,eventObj) => {
     const needleService: NeedleService = eventObj.container.resolve(NeedleService);

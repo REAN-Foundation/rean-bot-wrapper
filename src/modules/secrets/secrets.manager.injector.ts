@@ -1,8 +1,8 @@
 import 'reflect-metadata';
-import { ConfigurationManager } from '../../configs/configuration.manager';
-import { DependencyContainer } from 'tsyringe';
-import { AwsSecretsManager } from './providers/aws.secret.manager.service';
-import { AzureSecretsProvider } from './providers/azure.key.vault.service';
+import { ConfigurationManager } from '../../configs/configuration.manager.js';
+import type { DependencyContainer } from 'tsyringe';
+import { AwsSecretsManager } from './providers/aws.secret.manager.service.js';
+import { AzureSecretsProvider } from './providers/azure.key.vault.service.js';
 
 ////////////////////////////////////////////////////////////////////////////////
 

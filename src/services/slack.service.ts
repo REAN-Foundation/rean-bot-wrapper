@@ -1,4 +1,4 @@
-import { Logger } from '../common/logger';
+import { Logger } from '../common/logger.js';
 import { WebClient } from '@slack/web-api';
 
 // Slack Service to Send Message to Slack Channel

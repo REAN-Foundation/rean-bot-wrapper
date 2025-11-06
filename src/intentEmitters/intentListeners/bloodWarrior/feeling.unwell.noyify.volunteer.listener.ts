@@ -1,4 +1,4 @@
-import { FeelingUnwellService } from "../../../services/bloodWrrior/feeling.unwell.notify.volunteer.service";
+import { FeelingUnwellService } from "../../../services/bloodWrrior/feeling.unwell.notify.volunteer.service.js";
 
 export const FeelingUnwellNotifyVolunteer = async (intent, eventObj) => {
     // eslint-disable-next-line max-len

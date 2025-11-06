@@ -1,4 +1,4 @@
-import { Logger } from '../common/logger';
+import { Logger } from '../common/logger.js';
 
 export const someHelper = () => {
     Logger.instance().log("Hello some helper");

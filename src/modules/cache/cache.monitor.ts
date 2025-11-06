@@ -1,5 +1,5 @@
-import { RequestResponseCacheService } from './request.response.cache.service';
-import { CachePriority, type CacheMetrics } from './cache.types';
+import { RequestResponseCacheService } from './request.response.cache.service.js';
+import { CachePriority, type CacheMetrics } from './cache.types.js';
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -41,7 +41,7 @@ export class CacheMonitor {
 
     async recordRequest(key: string, hit: boolean, responseTime: number): Promise<void> {
         const timestamp = Date.now();
-    
+
         // Update performance data
         const existing = this.performanceData.get(key) || {
             hits         : 0,

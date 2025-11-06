@@ -1,7 +1,7 @@
 /* eslint-disable indent */
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, HasMany } from 'sequelize-typescript';
-import { chatSession } from '../refactor/interface/message.interface';
-import { ChatMessage } from './chat.message.model';
+import type { chatSession } from '../refactor/interface/message.interface.js';
+import { ChatMessage } from './chat.message.model.js';
 
 @Table({
     timestamps : true,
@@ -9,7 +9,7 @@ import { ChatMessage } from './chat.message.model';
     tableName  : 'chat_session'
 })
 export class ChatSession extends Model implements chatSession {
-    
+
     @AutoIncrement
     @PrimaryKey
     @Column({
@@ -37,7 +37,7 @@ export class ChatSession extends Model implements chatSession {
         type : DataType.STRING
     })
         platform: string;
-    
+
     @Column({
         type : DataType.DATE
     })

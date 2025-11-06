@@ -1,4 +1,4 @@
-import { IApiRequestContactsEntities } from './api.request.interface';
+import type { IApiRequestContactsEntities } from './api.request.interface.js';
 export class Contacts implements IApiRequestContactsEntities{
 
     constructor(list) { this.list = list; }

@@ -1,5 +1,5 @@
-import { Logger } from '../../common/logger';
-import { ChangeLanguage } from '../../services/language.change.service';
+import { Logger } from '../../common/logger.js';
+import { ChangeLanguage } from '../../services/language.change.service.js';
 
 export const LanguageChangeListener = async (intent, eventObj) => {
     try {

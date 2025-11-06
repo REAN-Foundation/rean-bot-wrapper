@@ -1,16 +1,16 @@
 import { container, injectable } from 'tsyringe';
 import * as asyncLib from 'async';
-import { Logger } from '../common/logger';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { EntityManagerProvider } from './entity.manager.provider.service';
-import { ChatMessage } from '../models/chat.message.model';
-import { ChatSession } from '../models/chat.session';
-import { ContactList } from '../models/contact.list';
-import { UserConsent } from '../models/user.consent.model';
-import { MessageStatus } from '../models/message.status';
-import { UserInfo } from '../models/user.info.model';
-import { AssessmentSessionLogs } from '../models/assessment.session.model';
-import { AssessmentIdentifiers } from '../models/assessment/assessment.identifiers.model';
+import { Logger } from '../common/logger.js';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
+import { EntityManagerProvider } from './entity.manager.provider.service.js';
+import { ChatMessage } from '../models/chat.message.model.js';
+import { ChatSession } from '../models/chat.session.js';
+import { ContactList } from '../models/contact.list.js';
+import { UserConsent } from '../models/user.consent.model.js';
+import { MessageStatus } from '../models/message.status.js';
+import { UserInfo } from '../models/user.info.model.js';
+import { AssessmentSessionLogs } from '../models/assessment.session.model.js';
+import { AssessmentIdentifiers } from '../models/assessment/assessment.identifiers.model.js';
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 

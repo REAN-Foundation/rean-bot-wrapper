@@ -1,5 +1,5 @@
 import { injectable } from 'tsyringe';
-import { ResponseHandler } from './response.handler';
+import { ResponseHandler } from './response.handler.js';
 
 @injectable()
 export class ErrorHandler {

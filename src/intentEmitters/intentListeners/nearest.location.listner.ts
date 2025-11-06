@@ -1,5 +1,5 @@
-import { NearestLocation } from "../.././utils/find.nearest.centers";
-import { dialoflowMessageFormatting } from "../.././services/Dialogflow.service";
+import { NearestLocation } from "../.././utils/find.nearest.centers.js";
+import { dialoflowMessageFormatting } from "../.././services/Dialogflow.service.js";
 
 export const NearestLocationListner = async (intent:string, eventObj) => {
     const  LocationService:  NearestLocation = eventObj.container.resolve( NearestLocation);
@@ -22,6 +22,6 @@ export const NearestLocationListner = async (intent:string, eventObj) => {
     const message =  await LocationService.formatLoctionResponse(locationResponse);
     const response = await dialoflowMessageFormattingObj.making_response(message);
     return  response;
-    
+
 };
 

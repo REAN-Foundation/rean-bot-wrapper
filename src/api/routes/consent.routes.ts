@@ -1,7 +1,7 @@
 import express from 'express';
-import { Logger } from '../../common/logger';
+import { Logger } from '../../common/logger.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import {consentController} from '../controllers/consent.controller';
+import {consentController} from '../controllers/consent.controller.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ConsentRoutes{
@@ -18,7 +18,7 @@ export class ConsentRoutes{
         router.get(`/:client/consent/read`,this._consentController.readConsentinfo);
         router.put(`/:client/consent/update`,this._consentController.updateConsentinfo);
         router.delete(`/:client/consent/delete`,this._consentController.deleteConsentinfo);
-        
+
         app.use('/v1/', router);
     }
 

@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-len */
-import { Iresponse, Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface';
-import { platformServiceInterface } from '../refactor/interface/platform.interface';
-import { ChatMessage } from '../models/chat.message.model';
+import type { Iresponse, Imessage, IprocessedDialogflowResponseFormat } from '../refactor/interface/message.interface.js';
+import type { platformServiceInterface } from '../refactor/interface/platform.interface.js';
+import { ChatMessage } from '../models/chat.message.model.js';
 import { scoped, Lifecycle, inject } from 'tsyringe';
-import { SlackClickupCommonFunctions } from './slackAndCkickupSendCustomMessage';
-import { EntityManagerProvider } from './entity.manager.provider.service';
-import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
-import { ContactList } from '../models/contact.list';
-import { SystemGeneratedMessagesService } from '../services/system.generated.message.service';
+import { SlackClickupCommonFunctions } from './slackAndCkickupSendCustomMessage.js';
+import { EntityManagerProvider } from './entity.manager.provider.service.js';
+import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service.js';
+import { ContactList } from '../models/contact.list.js';
+import { SystemGeneratedMessagesService } from '../services/system.generated.message.service.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ClickUpMessageService implements platformServiceInterface {

@@ -1,12 +1,12 @@
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { Logger } from '../../common/logger';
-import { BloodWarriorCommonService } from './common.service';
-import { GetPatientInfoService } from '../support.app.service';
-import { NeedleService } from '../needle.service';
-import { platformServiceInterface } from '../../refactor/interface/platform.interface';
-import { Iresponse } from '../../refactor/interface/message.interface';
-import { RaiseDonationRequestService } from './raise.request.service';
-import { commonResponseMessageFormat } from '../common.response.format.object';
+import { Logger } from '../../common/logger.js';
+import { BloodWarriorCommonService } from './common.service.js';
+import { GetPatientInfoService } from '../support.app.service.js';
+import { NeedleService } from '../needle.service.js';
+import type { platformServiceInterface } from '../../refactor/interface/platform.interface.js';
+import type { Iresponse } from '../../refactor/interface/message.interface.js';
+import { RaiseDonationRequestService } from './raise.request.service.js';
+import { commonResponseMessageFormat } from '../common.response.format.object.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class FeelingUnwellService {
@@ -77,7 +77,7 @@ export class FeelingUnwellService {
                 ];
                 payload["templateName"] = "feeling_unwell_notify_volunteer";
                 payload["languageForSession"] = "en";
-                
+
                 const msg = `Hi ${volunteerName}, \n${patientName} is not feeling well and has a transfusion date on ${transfusionDate}. Could you please follow up with them? \nRegards \nTeam Blood Warriors`;
                 const previousPayload = eventObj.body.originalDetectIntentRequest.payload;
                 volunteerPhone = this.raiseDonationRequestService.convertPhoneNoReanToWhatsappMeta(volunteerPhone);
@@ -100,5 +100,5 @@ export class FeelingUnwellService {
                 .log_error(error.message,500,'Failed to notify volunteers about donor request');
         }
     }
-    
+
 }

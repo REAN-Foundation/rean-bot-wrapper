@@ -1,6 +1,6 @@
-import { ResponseHandler } from '../../utils/response.handler';
+import { ResponseHandler } from '../../utils/response.handler.js';
 import { inject, Lifecycle, scoped } from 'tsyringe';
-import { elasticsearchUtilities } from '../../utils/elasticsearch.utility';
+import { elasticsearchUtilities } from '../../utils/elasticsearch.utility.js';
 
 @scoped(Lifecycle.ContainerScoped)
 export class FrontendController {
