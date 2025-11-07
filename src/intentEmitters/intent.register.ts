@@ -23,7 +23,7 @@ import { HumanHandoverListener } from './intentListeners/human.handover.listener
 import { RequestLiveAgent } from './intentListeners/request.live.agent.listener.js';
 import { createDemoBot } from './intentListeners/create.demo.bot.listener.js';
 import { calorieDetection } from './intentListeners/calorie.detection.listener.js';
-import { CalorieUpdate } from './intentListeners/calorie.update.listener.js';
+// import { CalorieUpdate } from './intentListeners/calorie.update.listener.js';
 import { WhatsAppTemplateOpting } from './intentListeners/whatsapp.tempalte.opting.listener.js';
 import { MaternityCareplanListener } from './intentListeners/maternity.careplan.listener.js';
 import { BloodWarriorWelcome } from './intentListeners/bloodWarrior/welcome.listener.js';
@@ -143,7 +143,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('foodItemsDetails', calorieDetection);
 
         // IntentEmitter.registerListener('calorie.report.creation', calorieReport);
-        IntentEmitter.registerListener('CalorieNegativeFeedback - yes', CalorieUpdate);
+        // IntentEmitter.registerListener('CalorieNegativeFeedback - yes', CalorieUpdate);
 
         //hybrid model
         IntentEmitter.registerListener('testing-hybrid',OpenAiListener);

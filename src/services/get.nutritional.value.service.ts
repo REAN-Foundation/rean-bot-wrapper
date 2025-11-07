@@ -1,4 +1,4 @@
-import { CalorieInfo } from '../models/calorie.info.model.js';
+// import { CalorieInfo } from '../models/calorie.info.model.js';
 import { OpenAIResponseService } from '../services/openai.response.service.js';
 import { EntityManagerProvider } from '../services/entity.manager.provider.service.js';
 import { ClientEnvironmentProviderService } from '../services/set.client/client.environment.provider.service.js';
@@ -35,8 +35,8 @@ export class NutritionalValue{
                         .replace('T',' ')
                 };
                 // eslint-disable-next-line max-len
-                const calorieInfoRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(CalorieInfo);
-                await calorieInfoRepository.create(calorieInfoObj);
+                // const calorieInfoRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(CalorieInfo);
+                // await calorieInfoRepository.create(calorieInfoObj);
 
             });
         }

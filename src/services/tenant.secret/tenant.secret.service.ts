@@ -17,7 +17,6 @@ export class TenantSecretsService {
 
     baseUrl = process.env["REAN_APP_BACKEND_BASE_URL"];
 
-
     public loadClientEnvVariables = async() => {
         try {
             const tenantObjectList = await TenantService.getAllTenants(this.apiKey, this.baseUrl);
@@ -157,4 +156,5 @@ export class TenantSecretsService {
         const code = tenantCode.toLowerCase().replace(/_/g, "-");
         return `duploservices-${environment}-${code}-v1`;
     };
+
 }

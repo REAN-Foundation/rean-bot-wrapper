@@ -5,8 +5,8 @@ import { ChatSession } from '../models/chat.session.js';
 import { ContactList } from '../models/contact.list.js';
 import { MessageStatus } from '../models/message.status.js';
 import { ClientEnvironmentProviderService } from '../services/set.client/client.environment.provider.service.js';
-import { CalorieInfo } from '../models/calorie.info.model.js';
-import { CalorieDatabase } from '../models/calorie.db.model.js';
+// import { CalorieInfo } from '../models/calorie.info.model.js';
+// import { CalorieDatabase } from '../models/calorie.db.model.js';
 import { AssessmentSessionLogs } from '../models/assessment.session.model.js';
 import { ConsentInfo } from '../models/consent.info.model.js';
 import { UserConsent } from '../models/user.consent.model.js';
@@ -46,7 +46,7 @@ export class SequelizeClient {
 
             if (await clientEnvironmentProviderService.getClientEnvironmentVariable('NAME') === "CALORIE_BOT") {
                 // eslint-disable-next-line max-len
-                sequelizeClient.addModels([ChatMessage, ChatSession, ContactList, CalorieInfo, CalorieDatabase,ConsentInfo,UserConsent]);
+                sequelizeClient.addModels([ChatMessage, ChatSession, ContactList, ConsentInfo, UserConsent]);
             } else {
                 sequelizeClient.addModels([
                     ChatMessage,

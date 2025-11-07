@@ -6,7 +6,7 @@ import { ChatMessage } from '../../models/chat.message.model.js';
 import { ContactList } from '../../models/contact.list.js';
 import { HumanHandoff } from '../../services/human.handoff.service.js';
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service.js';
-import { CalorieInfo } from '../../models/calorie.info.model.js';
+// import { CalorieInfo } from '../../models/calorie.info.model.js';
 import { Op } from 'sequelize';
 import { ClickUpTask } from '../clickup/clickup.task.js';
 import { EntityManagerProvider } from '../entity.manager.provider.service.js';
@@ -48,15 +48,15 @@ export  class FeedbackService implements feedbackInterface {
                     console.log("Calorie negative feedback received.");
                     const response = await chatMessageRepository.findAll({ limit: 2, where: { userPlatformId: userId, direction: "In" }, raw: true, order: [['createdAt', 'DESC']] });
                     const negativeResponse = response[response.length - 1].messageContent;
-                    const CalorieInfoRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(CalorieInfo);
-                    await CalorieInfoRepository.findOne(
-                        {
-                            where : { user_message: { [Op.like]: `${negativeResponse}` } },
-                            order : [['updatedAt', 'DESC']],
-                            limit : 1,
-                        }).then(function (record) {
-                        return record.update({ negative_feedback: 1 });
-                    });
+                    // const CalorieInfoRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(CalorieInfo);
+                    // await CalorieInfoRepository.findOne(
+                    //     {
+                    //         where : { user_message: { [Op.like]: `${negativeResponse}` } },
+                    //         order : [['updatedAt', 'DESC']],
+                    //         limit : 1,
+                    //     }).then(function (record) {
+                    //     return record.update({ negative_feedback: 1 });
+                    // });
                     const data = {
                         "fulfillmentMessages" : [
                             {

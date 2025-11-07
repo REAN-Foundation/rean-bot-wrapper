@@ -1,10 +1,10 @@
 import { CalorieService } from "../../services/calorie.service.js";
 import { Logger } from "../../common/logger.js";
-import { GetCalories } from "../../services/get.calorie.service.js";
+// import { GetCalories } from "../../services/get.calorie.service.js";
 
 export const calorieDetection = async ( intent, eventObj ) => {
     const calorieservice:CalorieService = eventObj.container.resolve(CalorieService);
-    const getCalorieService:GetCalories = eventObj.container.resolve(GetCalories);
+    // const getCalorieService:GetCalories = eventObj.container.resolve(GetCalories);
     try {
         Logger.instance()
             .log("Calling food info service !!!!");
@@ -14,12 +14,14 @@ export const calorieDetection = async ( intent, eventObj ) => {
 
         response = await calorieservice.handleMessageCalorie(payload.sessionId,payload.source,eventObj);
 
-        if (eventObj.body.originalDetectIntentRequest.source === "DIALOGFLOW_CONSOLE"){
-            return response;
-        } else {
-            calorieNextSteps(eventObj, calorieservice, getCalorieService, payload);
-            return response;
-        }
+        // if (eventObj.body.originalDetectIntentRequest.source === "DIALOGFLOW_CONSOLE"){
+        return response;
+        // }
+
+        // else {
+        //     // calorieNextSteps(eventObj, calorieservice, getCalorieService, payload);
+        //     return response;
+        // }
     } catch (error) {
         Logger.instance()
             .log_error(error.message,500,'Food info listener error');

@@ -1,4 +1,7 @@
-import { isEmpty } from 'lodash';
+// import { isEmpty } from 'lodash';
+
+import lodash from 'lodash';
+const { isEmpty } = lodash;
 import { SignedUrls } from './signed.urls.service.js';
 export const getRiskAssessmentInfo = async (req) => {
 

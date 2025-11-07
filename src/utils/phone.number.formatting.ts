@@ -1,11 +1,16 @@
-import {countryMapping} from '../assets/static.data/phone.number.codes.js';
-import { PhoneNumberUtil } from 'google-libphonenumber';
+import { countryMapping } from '../assets/static.data/phone.number.codes.js';
+
+// import { PhoneNumberUtil } from 'google-libphonenumber';
+import libphonenumber from 'google-libphonenumber';
+const { PhoneNumberUtil } = libphonenumber;
 import { injectable } from 'tsyringe';
 
 @injectable()
 export class CountryCodeService {
+
     private mapping: Record<string, any>;
-    private phoneUtil: PhoneNumberUtil;
+
+    private phoneUtil: any;
 
     constructor() {
         this.mapping = countryMapping;
@@ -38,6 +43,5 @@ export class CountryCodeService {
         const formattedPhoneNummber = `+${countryCode}-${phoneNumber }`;
         return  formattedPhoneNummber ;
     }
-
 
 }

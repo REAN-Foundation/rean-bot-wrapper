@@ -10,7 +10,7 @@ import { Logger } from './common/logger.js';
 import { ConfigurationManager } from "./configs/configuration.manager.js";
 import { IntentRegister } from './intentEmitters/intent.register.js';
 import { container } from "tsyringe";
-import type { DependencyContainer} from "tsyringe";
+import type { DependencyContainer } from "tsyringe";
 import { IndexCreation } from './models/elasticsearchmodel.js';
 import type { platformServiceInterface } from "./refactor/interface/platform.interface.js";
 import { ClientEnvironmentProviderService } from "./services/set.client/client.environment.provider.service.js";
@@ -21,7 +21,8 @@ import { Injector } from "./startup/injector.js";
 import { SequelizeClient } from "./connection/sequelizeClient.js";
 import { TenantSecretsService } from "./services/tenant.secret/tenant.secret.service.js";
 import { ModuleInjector } from "./modules/module.injector.js";
-import { Module } from "module";
+
+// import { Module } from "module";
 
 declare module "express-serve-static-core" {
     interface Request {
@@ -47,7 +48,6 @@ export default class Application {
 
     private _checkCrossConnection: CheckCrossConnection = null;
 
-
     // private clientsList = [];
 
     private constructor() {
@@ -64,7 +64,6 @@ export default class Application {
     public app(): express.Application {
         return this._app;
     }
-
 
     async setWebhooksForClients(clientsList: string[]) {
         const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
@@ -96,7 +95,6 @@ export default class Application {
 
     }
 
-
     public start = async (): Promise<void> => {
         try {
 
@@ -108,7 +106,6 @@ export default class Application {
             const secretsService = container.resolve(TenantSecretsService);
 
             const clientList = await secretsService.loadClientEnvVariables();
-
 
             //Load the modules
             await Loader.init();
