@@ -68,6 +68,7 @@ export class ClientWebhookController {
         if (prevSessions){
             patientUserId  = prevSessions.dataValues.patientUserId;
             firstTimeUser = false;
+
         } else {
             firstTimeUser  = true;
         }
@@ -96,12 +97,14 @@ export class ClientWebhookController {
             const { id, status, timestamp } = statuses[0];
             const date = new Date(parseInt(timestamp) * 1000);
             console.log(id);
+
             // Retrieve message info
             let messageInfo = await chatMessageRepository.findOne({ where: { responseMessageID: id } });
             if (!messageInfo) {
                 await this.sleep(2000); // Retry after delay
                 messageInfo = await chatMessageRepository.findOne({ where: { responseMessageID: id } });
             }
+
             if (!messageInfo) {
                 console.log("Message info not found");
                 return this.responseHandler.sendFailureResponse(res, 404, "Message info not found.");
@@ -114,6 +117,7 @@ export class ClientWebhookController {
                 messageStatus : status,
                 channel       : messageInfo.platform,
             };
+
             const existingMessageStatus = await messageStatusRepository.findOne({ where: { chatMessageId: messageInfo.id } });
             if (["sent", "read", "delivered", "replied", "failed"].includes(status)) {
                 const statusVariableName = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
@@ -130,6 +134,7 @@ export class ClientWebhookController {
             console.error("While sending success response:", error);
         }
     }
+
     // Helper method to update or create message status
     private async handleStatusUpdate(
         existingMessageStatus,
@@ -172,6 +177,7 @@ export class ClientWebhookController {
             }
             if (req.body.statuses) {
                 this.sendSuccessMessage(chatMessageRepository, messageStatusRepostiory, res,req.body.statuses);
+
                 // console.log("request.body", req.body);
             }
             else {
@@ -257,6 +263,7 @@ export class ClientWebhookController {
                 else {
 
                     this._platformMessageService.handleMessage(handleReqVariable, req.params.channel);
+
                 }
             }
         }
@@ -264,6 +271,7 @@ export class ClientWebhookController {
             console.log("While Sending Consent Response", error);
 
         }
+
     }
 
     async getUserIdAndLanguagecode(reqBody,channel,req)
@@ -288,6 +296,7 @@ export class ClientWebhookController {
                 }
                 else {
                     userId = reqBody.messages[0].from;
+
                 }
             }
             else if (channel === "telegram") {
@@ -325,6 +334,7 @@ export class ClientWebhookController {
             else {
                 userId = reqBody.message.chat.id;
                 userName = reqBody.message.chat.first_name;
+
             }
             return [userId ,userName];
         }

@@ -111,6 +111,7 @@ export class TelegramMessageService implements platformServiceInterface{
             reaponse_message = { name: name,platform: "Telegram", platformId: platformId, chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: message_type,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[0], similarDoc: similarDoc };
         }
         return reaponse_message;
+
     };
 
     createFinalMessageFromHumanhandOver(requestBody) {
