@@ -5,6 +5,7 @@ import { inject, Lifecycle, scoped,  } from 'tsyringe';
 import { Logger } from '../../common/logger';
 
 import { ContactList } from '../../models/contact.list';
+import { ChatSession } from '../../models/chat.session';
 
 @scoped(Lifecycle.ContainerScoped)
 export class Registration{
@@ -83,6 +84,8 @@ export class Registration{
     async wrapperRegistration(entityManagerProvider,userPlatformId,userPlatformName,platform,patientUserId){
         const contactListRepository =
         (await entityManagerProvider.getEntityManager(this.EnvironmentProviderService)).getRepository(ContactList);
+        const chatSessionRepository =
+        (await entityManagerProvider.getEntityManager(this.EnvironmentProviderService)).getRepository(ContactList);
         const respContactList = await contactListRepository.findAll({ where: { mobileNumber: userPlatformId } });
         if (respContactList.length === 0) {
             await contactListRepository.create({
@@ -91,6 +94,11 @@ export class Registration{
                 platform      : platform,
                 patientUserId : patientUserId,
                 optOut        : "false" });
+            const defaultLanguage = this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE") || "en";
+            await chatSessionRepository.create({
+                userPlatformID      : userPlatformId,
+                preferredLanguage   : defaultLanguage,
+                sessionOpen         : "true" });
         }
         else {
             await contactListRepository.update(
