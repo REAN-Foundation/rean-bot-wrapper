@@ -85,7 +85,7 @@ export class Registration{
         const contactListRepository =
         (await entityManagerProvider.getEntityManager(this.EnvironmentProviderService)).getRepository(ContactList);
         const chatSessionRepository =
-        (await entityManagerProvider.getEntityManager(this.EnvironmentProviderService)).getRepository(ContactList);
+        (await entityManagerProvider.getEntityManager(this.EnvironmentProviderService)).getRepository(ChatSession);
         const respContactList = await contactListRepository.findAll({ where: { mobileNumber: userPlatformId } });
         if (respContactList.length === 0) {
             await contactListRepository.create({
