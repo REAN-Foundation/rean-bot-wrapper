@@ -113,6 +113,8 @@ export class MessageFlow{
         try {
 
             await this.engageMySQL(message);
+            console.log("Get put message.type: ",message.type);
+            console.log("Get put message.messageBody: ",message.messageBody);
             const translate_message = await this.translate.translateMessage(message.type, message.messageBody, message.platformId);
             translate_message["original_message"] = message.messageBody;
             message.messageBody = translate_message.message;
