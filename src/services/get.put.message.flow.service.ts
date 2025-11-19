@@ -265,7 +265,8 @@ export class MessageFlow{
 
             msg.message = await msg.message.replace("PatientName", msg.payload.PersonName ?? personName);
             msg.message = await this.translate.translatePushNotifications( msg.message, msg.userId);
-            msg.message = msg.message[0];
+
+            // msg.message = msg.message[0];
         }
         else if (msg.type === "interactivebuttons") {
             payload = await sendApiButtonService(msg.payload);
