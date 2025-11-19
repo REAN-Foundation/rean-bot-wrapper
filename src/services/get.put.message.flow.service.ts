@@ -115,12 +115,12 @@ export class MessageFlow{
             console.log("Get put message.type: ",message.type);
             console.log("Get put message.messageBody: ",message.messageBody);
             if ( message.type === 'nfm_reply' ) {
-                 return {
+                return {
                     message,
                     translate_message: {
-                        message: message.messageBody,
-                        original_message: message.messageBody,
-                        languageForSession: null
+                        message : message.messageBody,
+                        original_message : message.messageBody,
+                        languageForSession : null
                     }
                 };
             }
