@@ -1,8 +1,8 @@
 import { Lifecycle, inject, scoped } from "tsyringe";
-import XLSX = require('xlsx');
+import * as XLSX from 'xlsx';
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 import { platformServiceInterface } from "../refactor/interface/platform.interface";
-import dialogflow = require('@google-cloud/dialogflow');
+import * as dialogflow from '@google-cloud/dialogflow';
 import { Iresponse } from "../refactor/interface/message.interface";
 import { commonResponseMessageFormat } from "./common.response.format.object";
 

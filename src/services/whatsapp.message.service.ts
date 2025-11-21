@@ -18,7 +18,7 @@ import { EntityManagerProvider } from './entity.manager.provider.service';
 @scoped(Lifecycle.ContainerScoped)
 export class WhatsappMessageService extends CommonWhatsappService {
 
-    public res;
+    // public res;
 
     constructor(@inject(delay(() => MessageFlow)) public messageFlow,
         @inject(AwsS3manager) awsS3manager?: AwsS3manager,

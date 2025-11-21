@@ -18,7 +18,7 @@ export class ChatMessage extends Model implements IchatMessage {
         type      : DataType.INTEGER,
         allowNull : false
     })
-        id?: number;
+        declare id?: number;
 
     @ForeignKey(() => ChatSession)
     @Column({

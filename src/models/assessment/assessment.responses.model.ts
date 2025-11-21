@@ -20,7 +20,7 @@ export class AssessmentResponses extends Model implements IAssessmentResponses {
         type : DataType.INTEGER,
         allowNull : false
     })
-        id: number;
+        declare id: number;
 
     @Column({
         type : DataType.STRING(128)

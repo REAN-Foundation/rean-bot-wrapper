@@ -3,9 +3,9 @@ import { feedbackmessage } from '../refactor/interface/message.interface';
 
 @Table(
     {
-        timestamps : true,
-        modelName  : 'UserFeedback',
-        tableName  : 'user_feedback'
+    timestamps : true,
+    modelName  : 'UserFeedback',
+    tableName  : 'user_feedback'
     }
 )
 export class UserFeedback extends Model implements feedbackmessage {
@@ -15,7 +15,7 @@ export class UserFeedback extends Model implements feedbackmessage {
     @Column({
         type : DataType.INTEGER
     })
-        id?: number;
+        declare id?: number;
 
     @Column({
         type : DataType.STRING
@@ -41,7 +41,7 @@ export class UserFeedback extends Model implements feedbackmessage {
         type : DataType.STRING
     })
         ts: string;
-    
+
     @Column({
         type : DataType.STRING
     })

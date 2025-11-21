@@ -15,13 +15,13 @@ export class ReminderMessage extends Model implements IReminder {
         type: DataType.INTEGER,
         allowNull: false,
     })
-    id?: number;
+    declare id?: number;
 
     @Column({
         type: DataType.STRING(256), // or INTEGER if userId is numeric
         allowNull: false,
     })
-    userId: string;    
+    userId: string;
 
     @Column({
         type: DataType.STRING(1024),

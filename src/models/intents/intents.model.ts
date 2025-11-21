@@ -22,7 +22,7 @@ export class Intents extends Model implements IIntents {
         },
         allowNull : false
     })
-        id: string;
+        declare id: string;
 
     @Column({
         type : DataType.STRING(64),
@@ -45,5 +45,5 @@ export class Intents extends Model implements IIntents {
         type : DataType.TEXT()
     })
         Metadata: string;
-    
+
 }

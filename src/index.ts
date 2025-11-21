@@ -1,7 +1,6 @@
 import * as dotenv from 'dotenv';
+import Application from './app.js';
 dotenv.config();
-
-import Application from './app';
 
 (async () => {
     const app = Application.instance();

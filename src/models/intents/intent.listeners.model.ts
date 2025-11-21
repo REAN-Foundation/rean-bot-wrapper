@@ -18,7 +18,7 @@ export class IntentListeners extends Model implements IIntentListeners {
         type : DataType.INTEGER,
         allowNull : false
     })
-        id: number;
+        declare id: number;
 
     @ForeignKey(() => Intents)
     @Column({
@@ -26,7 +26,7 @@ export class IntentListeners extends Model implements IIntentListeners {
         allowNull : false
     })
         intentId: number;
-    
+
     @BelongsTo(() => Intents)
         Intents: Intents;
 

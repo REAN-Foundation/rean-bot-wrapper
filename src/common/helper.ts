@@ -7,11 +7,11 @@ import { generate } from 'generate-password';
 import { hashSync, compareSync, genSaltSync } from 'bcryptjs';
 import * as crypto from 'crypto';
 import express from 'express';
-import mime = require('mime-types');
+import * as mime from 'mime-types';
 
 export class Helper {
 
-    
+
 
     static getResourceOwner = (request: express.Request): string => {
         if (request.params.userId) {
@@ -405,7 +405,7 @@ export class Helper {
     public static removeLeadingZerosFromDay(dateString: string): string {
         const [year, month, day] = dateString.split('-');
         const formattedDay = parseInt(day).toString(); // Remove leading zeros
-    
+
         return `${year}-${month}-${formattedDay}`;
     }
 

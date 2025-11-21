@@ -15,7 +15,7 @@ export class UserConsent extends Model implements IuserConsent {
     @Column({
         type : DataType.INTEGER
     })
-        id?: number;
+        declare id?: number;
 
     @Column({
         type : DataType.STRING
