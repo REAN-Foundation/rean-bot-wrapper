@@ -109,7 +109,7 @@ export class ChatMessage extends Model implements IchatMessage {
         type : DataType.STRING
     })
         supportChannelTaskID : string;
-
+        
     @Column({
         type : DataType.BOOLEAN
     })
