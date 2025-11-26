@@ -30,7 +30,7 @@ export class HeartFailureRegistrationService {
         @inject(translateService) private translateService?: translateService
     ) {}
 
-    async registrationService (eventObj): Promise<any> {
+    async registrationService (eventObj, isTestUser = false ): Promise<any> {
         try {
             const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
             const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
@@ -39,7 +39,7 @@ export class HeartFailureRegistrationService {
                 personPhoneNumber, personName);
 
             const body : QueueDoaminModel =  {
-                Intent : "RegistrationHeartFailure",
+                Intent : isTestUser ? "CareplanRegistrationForTestUser" : "RegistrationHeartFailure",
                 Body   : {
                     PatientUserId : patientIDArray.patientUserId,
                     Name          : personName,
@@ -68,7 +68,7 @@ export class HeartFailureRegistrationService {
 
     }
 
-    public async enrollPatientService(patientUserId: any, name: string, eventObj: any) {
+    public async enrollPatientService(patientUserId: any, name: string, eventObj: any, isTestUser = false) {
         const communicationSearchUrl = `clinical/donation-communication/search?patientUserId=${patientUserId}`;
         const communicationResponse = await this.needleService.needleRequestForREAN("get", communicationSearchUrl);
 
@@ -87,11 +87,11 @@ export class HeartFailureRegistrationService {
                 await this.sendMessage(msg, eventObj);
             }
         } else {
-            await this.enrollPatient(patientUserId, name, msg, eventObj);
+            await this.enrollPatient(patientUserId, name, msg, eventObj, isTestUser);
         }
     }
 
-    async enrollPatient(patientUserId: string, name: string, msg: string, eventObj) {
+    async enrollPatient(patientUserId: string, name: string, msg: string, eventObj, isTestUser = false) {
 
         const channel: string = eventObj.body.originalDetectIntentRequest.payload.source;
         const buttonId: string = eventObj.body.queryResult.queryText ?? null;
@@ -107,17 +107,35 @@ export class HeartFailureRegistrationService {
                 msg = translatedMsg;
             }
         }
+
+        let obj1 = {};
        
-        const obj1 = {
-            Provider   : "REAN",
-            PlanName   : "Heart Failure",
-            PlanCode   : planCode,
-            Language   : careplanLanguage,
-            StartDate  : startDate.toISOString().split('T')[0],
-            DayOffset  : 0,
-            Channel    : this.getPatientInfoService.getReminderType(channel),
-            TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
-        };
+        if (isTestUser) {
+            const scheduleConfig = this.getScheduleForNextCron(15);
+            obj1 = {
+                Provider  : 'REAN',
+                StartDate : new Date().toISOString()
+                    .split('T')[0],
+                TenantName     : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME"),
+                PlanCode       : planCode,
+                PlanName       : planCode,
+                Channel        : this.getPatientInfoService.getReminderType(channel),
+                Language       : careplanLanguage,
+                IsTest         : true,
+                ScheduleConfig : scheduleConfig
+            };
+        } else {
+            obj1 = {
+                Provider   : "REAN",
+                PlanName   : "Heart Failure",
+                PlanCode   : planCode,
+                Language   : careplanLanguage,
+                StartDate  : startDate.toISOString().split('T')[0],
+                DayOffset  : 0,
+                Channel    : this.getPatientInfoService.getReminderType(channel),
+                TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
+            };
+        }
 
         console.log("enrollPatient Body Object", obj1);
         const response = await this.needleService.needleRequestForREAN("post", enrollRoute, null, obj1);
@@ -192,6 +210,36 @@ export class HeartFailureRegistrationService {
             }
         }
         return todayDate;
+    }
+
+    private getScheduleForNextCron(intervalMinutes = 15) {
+        const now = new Date();
+        const next = new Date(now);
+    
+        const currentMin = now.getMinutes();
+        const remainder = currentMin % intervalMinutes;
+    
+        let minutesToAdd = intervalMinutes - remainder;
+        if (minutesToAdd === 0) minutesToAdd = intervalMinutes;
+    
+        next.setMinutes(currentMin + minutesToAdd);
+        next.setSeconds(0);
+        next.setMilliseconds(0);
+    
+        next.setMinutes(next.getMinutes() + 2);
+    
+        let startFromTomorrow = false;
+        if (next.getDate() !== now.getDate()) {
+            startFromTomorrow = true;
+        }
+    
+        return {
+            NumberOfDays      : 1,
+            StartHour         : next.getHours(),
+            StartMinutes      : next.getMinutes(),
+            IntervalMinutes   : 1,
+            StartFromTomorrow : startFromTomorrow
+        };
     }
 
 }
