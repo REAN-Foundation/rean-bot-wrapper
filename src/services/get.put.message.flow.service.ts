@@ -111,8 +111,19 @@ export class MessageFlow{
 
     async preprocessOutgoingMessage(message: Imessage){
         try {
-
             await this.engageMySQL(message);
+            console.log("Get put message.type: ",message.type);
+            console.log("Get put message.messageBody: ",message.messageBody);
+            if ( message.type === 'nfm_reply' ) {
+                return {
+                    message,
+                    translate_message: {
+                        message : message.messageBody,
+                        original_message : message.messageBody,
+                        languageForSession : null
+                    }
+                };
+            }
             const translate_message = await this.translate.translateMessage(message.type, message.messageBody, message.platformId);
             translate_message["original_message"] = message.messageBody;
             message.messageBody = translate_message.message;
@@ -254,7 +265,8 @@ export class MessageFlow{
 
             msg.message = await msg.message.replace("PatientName", msg.payload.PersonName ?? personName);
             msg.message = await this.translate.translatePushNotifications( msg.message, msg.userId);
-            msg.message = msg.message[0];
+
+            // msg.message = msg.message[0];
         }
         else if (msg.type === "interactivebuttons") {
             payload = await sendApiButtonService(msg.payload);

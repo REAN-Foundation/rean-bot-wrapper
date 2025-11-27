@@ -148,6 +148,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         messagetoDialogflow.messageBody = messageObj.getNfmReply().body;
         console.log("NFM Response Message", messageObj.getNfmReply().body);
         messagetoDialogflow.intent = MessageHandlerType.AssessmentWithFormSubmission;
+        messagetoDialogflow.type = 'nfm_reply';
         console.log("NFM Response Message", messageObj);
         return messagetoDialogflow;
     }
