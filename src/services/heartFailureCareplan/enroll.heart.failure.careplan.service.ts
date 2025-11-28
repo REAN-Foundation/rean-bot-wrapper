@@ -194,6 +194,7 @@ export class HeartFailureRegistrationService {
             "Saathealth_careplan_en" : "en",
             "Saathealth_careplan_hi" : "hi",
             "Saathealth_careplan_mr" : "mr",
+            "Diabetes_Spanish"       : "es",
         };
         return languageCodeMapping[planCode] ?? "en";
     }
