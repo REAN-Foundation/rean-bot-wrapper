@@ -117,9 +117,9 @@ export class MessageFlow{
             if ( message.type === 'nfm_reply' ) {
                 return {
                     message,
-                    translate_message: {
-                        message : message.messageBody,
-                        original_message : message.messageBody,
+                    translate_message : {
+                        message            : message.messageBody,
+                        original_message   : message.messageBody,
                         languageForSession : null
                     }
                 };

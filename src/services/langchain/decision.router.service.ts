@@ -527,8 +527,7 @@ export class DecisionRouter {
             `
             );
             const model = new ChatOpenAI({
-                temperature : 0,
-                modelName   : "gpt-5o-mini"
+                modelName : "gpt-5-mini"
             });
             const chain = promptTemplate.pipe(model);
 
