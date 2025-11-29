@@ -13,6 +13,11 @@ import { Iresponse } from '../refactor/interface/message.interface';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { sendApiButtonService } from './whatsappmeta.button.service';
 import { Registration } from './registrationsAndEnrollements/patient.registration.service';
+import { TenantSettingService } from './tenant.setting/tenant.setting.service';
+import { ConsentMessage } from '../domain.types/tenant.setting/tenant.setting.types';
+import { UserConsentRepo } from '../database/repositories/consent/consent.repo';
+
+///////////////////////////////////////////////////////////////////////////////
 
 @scoped(Lifecycle.ContainerScoped)
 export class ConsentService {
@@ -174,13 +179,7 @@ export class ConsentService {
             let payload = null;
             if (consentReply === "consent_no"){
                 console.log("No Consent is Given");
-                const userConsentRepository =
-                (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(UserConsent);
-                const consentStatus =
-                await userConsentRepository.findOne({ where: { userPlatformID: userId } });
-                if (consentStatus){
-                    await consentStatus.update({ consentGiven: "false" });
-                }
+                await UserConsentRepo.updateUserConsent(req.container,userId,"false");
                 const message =  clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_NO_MESSAGE");
                 const messageType = "text";
                 this.sendCustomMessage( this._platformMessageService, message, messageType, userId , payload);
@@ -206,8 +205,8 @@ export class ConsentService {
                 this.sendCustomMessage(this._platformMessageService,message, messageType, userId , payload);
             }
             else {
-                const consentFindResult = await consentRepository.findOne({ where: { LanguageCode: languageCode } });
-                const message = `${consentFindResult.MessageContent} \n\n ${consentFindResult.WebsiteURL}`;
+                const consentMessage: ConsentMessage = await TenantSettingService.getConsentMessages(clientName, clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"), clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL"), languageCode);
+                const message = `${consentMessage.Content} \n\n ${consentMessage.WebsiteURL}`;
                 const messageType = buttonmessageType;
                 const button_yes = await this.translate.translatestring("Yes",languageCode);
                 const button_no = await this.translate.translatestring("No",languageCode);
