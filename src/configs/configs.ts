@@ -9,7 +9,7 @@ export type OpenEHRProvider = 'OpenEHRBase';
 export type EHRProvider = FHIRProvider | OpenEHRProvider;
 export type AuthorizationType = 'Custom'; //TBD: Other options need to be supported
 export type AuthenticationType = 'Custom'; //TBD: Other options need to be supported
-export type SecretsProvider = 'AWS-Secrets-Manager' | 'Azure-Key-Vault';
+export type SecretsProvider = 'AWS-Secrets-Manager'; //| 'Azure-Key-Vault';
 
 export interface AuthConfig {
     Authentication: AuthenticationType;
