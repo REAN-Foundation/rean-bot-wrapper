@@ -13,7 +13,7 @@ export class TenantSettingService {
             if (cachedTenantSetting) {
                 return cachedTenantSetting;
             }
-            const url = `${baseUrl}tenant-settings/by-code/${tenantCode}`;
+            const url = `${baseUrl}/tenant-settings/by-code/${tenantCode}`;
             const response = await needle("get", url, {
                 headers : {
                     'x-api-key' : apiKey
@@ -36,7 +36,7 @@ export class TenantSettingService {
             console.error('Error in TenantSettingService.getTenantSettingByCode:', error);
             return null;
         }
-        
+
     }
 
     static async isConsentEnabled(tenantCode: string, apiKey: string, baseUrl: string): Promise<boolean> {
