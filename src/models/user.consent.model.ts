@@ -3,9 +3,9 @@ import { IuserConsent } from '../refactor/interface/message.interface';
 
 @Table(
     {
-    timestamps : true,
-    modelName  : 'UserConsent',
-    tableName  : 'user_consent'
+        timestamps : true,
+        modelName  : 'UserConsent',
+        tableName  : 'user_consent'
     }
 )
 export class UserConsent extends Model implements IuserConsent {
