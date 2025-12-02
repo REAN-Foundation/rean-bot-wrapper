@@ -395,8 +395,8 @@ export class DecisionRouter {
             {
                 const workflowSchema = await this.workflowEventListener.getAllSchemaForTenant();
                 const workflowFlag = await this.checkWorkflowMode(workflowSchema, messageBody);
+                this.outgoingMessage.MetaData = messageBody;
                 if (workflowFlag) {
-                    this.outgoingMessage.MetaData = messageBody;
                     this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.WorkflowService;
                     return this.outgoingMessage;
                 } else {
