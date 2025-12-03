@@ -15,6 +15,10 @@ import { UserConsent } from '../../models/user.consent.model';
 import { ConsentService } from '../../services/consent.service';
 import { Registration } from '../../services/registrationsAndEnrollements/patient.registration.service';
 import { Logger } from '../../common/logger';
+import { UserConsentRepo } from '../../database/repositories/consent/consent.repo';
+import { ContactListRepo } from '../../database/repositories/contact.list/contact.list.repo';
+import { UserConsentDto } from '../../domain.types/user.consent/user.consent.domain.model';
+import { TenantSettingService } from '../../services/tenant.setting/tenant.setting.service';
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -57,39 +61,30 @@ export class ClientWebhookController {
 
     private async checkFirstTimeUser (req, userId)
     {
-        const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
-        const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-        let firstTimeUser  = false;
+        let firstTimeUser  = true;
         let patientUserId = null;
-        const entityManagerProvider = req.container.resolve(EntityManagerProvider);
-        const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ContactList);
-        const prevSessions = await chatMessageRepository.findOne({ where : { mobileNumber: userId, }
-        });
-        if (prevSessions){
-            patientUserId  = prevSessions.dataValues.patientUserId;
+        const contactList = await ContactListRepo.findContactByMobileNumber(req.container, userId);
+        if (contactList){
+            patientUserId  = contactList.patientUserId;
             firstTimeUser = false;
-
-        } else {
-            firstTimeUser  = true;
         }
         return [firstTimeUser , patientUserId ];
     }
 
-    private async checkConsentRequired(req,userId){
-        const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
-        let consentRequired = true;
-        const userConsentRepository =
-        (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(UserConsent);
-        const consentStatus = await userConsentRepository.findOne({ where: { userPlatformID: userId } });
-        if ( consentStatus){
-            if (consentStatus.dataValues.consentGiven === 'true'){
-                consentRequired = false;
+    private async checkConsentRequired(req: any, userId: string): Promise<boolean> {
+        try {
+            const userConsent: UserConsentDto | null = await UserConsentRepo.findUserConsentByPlatformId(req.container, userId);
+            console.log("userConsent", userConsent);
+            if (userConsent) {
+                return userConsent.consentGiven !== 'true';
             }
-            else {
-                consentRequired = true;
-            }
+         
+            return true;
+            
+        } catch (error) {
+            console.error('Error in checkConsentRequired:', error);
+            return true;
         }
-        return consentRequired;
     }
 
     async sendSuccessMessage(chatMessageRepository, messageStatusRepository, res, statuses) {
@@ -181,7 +176,11 @@ export class ClientWebhookController {
                 // console.log("request.body", req.body);
             }
             else {
-                const consentRequirement =  clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_ACTIVATION");
+                const consentRequirement = await TenantSettingService.isConsentEnabled(
+                    clientName,
+                    clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"),
+                    clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL")
+                );
                 console.log("Consent feature is ", consentRequirement);
                 const validChannels = ["REAN_SUPPORT", "slack", "SNEHA_SUPPORT", "api"];
                 if (!validChannels.includes(req.params.channel)) {
@@ -369,7 +368,11 @@ export class ClientWebhookController {
             this._clientAuthenticatorService.authenticate(req,res);
             const statuses = req.body.entry[0].changes[0].value.statuses;
             this._platformMessageService = req.container.resolve(req.params.channel);
-            const consentActivation =  clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_ACTIVATION");
+            const consentActivation = await TenantSettingService.isConsentEnabled(
+                clientName,
+                clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"),
+                clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL")
+            );
             let userPlatformId = null;
             let platformUserName = null;
             if (statuses) {
