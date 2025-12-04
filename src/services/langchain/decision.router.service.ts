@@ -393,16 +393,20 @@ export class DecisionRouter {
             const workflowMode = this.environmentProviderService.getClientEnvironmentVariable("WORK_FLOW_MODE");
             if (workflowMode === 'TRUE')
             {
-                const workflowSchema = await this.workflowEventListener.getAllSchemaForTenant();
-                const workflowFlag = await this.checkWorkflowMode(workflowSchema, messageBody);
+
+                // UNCOMMENT TO ENABLE THE QA WITH WORKFLOW SERVICE
+                // const workflowSchema = await this.workflowEventListener.getAllSchemaForTenant();
+                // const workflowFlag = await this.checkWorkflowMode(workflowSchema, messageBody);
                 this.outgoingMessage.MetaData = messageBody;
-                if (workflowFlag) {
-                    this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.WorkflowService;
-                    return this.outgoingMessage;
-                } else {
-                    this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.QnA;
-                    return this.outgoingMessage;
-                }
+
+                // if (workflowFlag) {
+                this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.WorkflowService;
+                return this.outgoingMessage;
+                
+                // } else {
+                //     this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.QnA;
+                //     return this.outgoingMessage;
+                // }
 
             }
             const resultFeedback = await this.checkFeedback(messageBody, channel);
