@@ -32,7 +32,7 @@ export class BloodGlucoseService {
 
         if (eventObj) {
             var { patientUserId, accessToken, BloodGlucose_Unit, BloodGlucose } = await this.checkEntry(eventObj);
-            const ReanBackendBaseUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
+            const ReanBackendBaseUrl = process.env.REAN_APP_BACKEND_BASE_URL;
 
             const url = `${ReanBackendBaseUrl}clinical/biometrics/blood-glucose/search?patientUserId=${patientUserId}`;
             const options = this.getHeaders.getHeaders(accessToken);
@@ -75,7 +75,7 @@ export class BloodGlucoseService {
             let unitmsg = null;
             ({ unitmsg, BloodGlucose_Unit } = this.getUnit(BloodGlucose_Unit));
             const options = this.getHeaders.getHeaders(accessToken);
-            const ReanBackendBaseUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
+            const ReanBackendBaseUrl = process.env.REAN_APP_BACKEND_BASE_URL;
             const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/blood-glucose`;
 
             const obj = {

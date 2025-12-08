@@ -8,7 +8,7 @@ export class TenantService {
 
     static async getAllTenants(apiKey: string, baseUrl: string): Promise<TenantsDomainModel[]> {
         try {
-            const url = `${baseUrl}/tenants/active`;
+            const url = `${baseUrl}tenants/active`;
             const response = await needle("get", url, {
                 headers : {
                     'x-api-key' : apiKey

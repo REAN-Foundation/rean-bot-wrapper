@@ -33,12 +33,10 @@ export class EnrollPatientService {
                 isRemindersLoaded = patient.IsRemindersLoaded;
             }
             const options = this.getHeaders.getHeaders();
-        
+
             //Update patient information
             if (!isRemindersLoaded) {
-                const ReanBackendBaseUrl =
-                    this.clientEnvironmentProviderService.getClientEnvironmentVariable('REAN_APP_BACKEND_BASE_URL');
-        
+                const ReanBackendBaseUrl = process.env.REAN_APP_BACKEND_BASE_URL;
                 const url = `${ReanBackendBaseUrl}care-plans/patients/${patientUserId}/enroll`;
                 const obj1 = {
                     Provider  : "REAN_BW",
@@ -49,7 +47,7 @@ export class EnrollPatientService {
                     Channel    : this.getPatientInfoService.getReminderType(channel),
                     TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
                 };
-        
+
                 const resp = await needle('post', url, obj1, options);
                 if (resp.statusCode !== 201) {
                     throw new Error('Failed to get response from ReanCare service API.');
@@ -60,7 +58,7 @@ export class EnrollPatientService {
                 const apiURL = `patients/${patientUserId}`;
                 const obj = { "IsRemindersLoaded": true };
                 await this.needleService.needleRequestForREAN("put", apiURL, null, obj);
-        
+
                 const dffMessage = `Thank you for confirmation. We will remind you before expected blood transfusion date.`;
                 return ( { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } });
 
@@ -68,11 +66,11 @@ export class EnrollPatientService {
                 const dffMessage = `You already have scheduled reminders. Or Change your blood transfusion date then, you will able to load the reminders again.`;
                 return { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } };
             }
-    
+
         } catch (error) {
             Logger.instance()
                 .log_error(error.message,500,'Register patient with blood warrior messaging service error');
         }
     };
-    
+
 }

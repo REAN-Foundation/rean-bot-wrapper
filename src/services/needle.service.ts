@@ -20,7 +20,7 @@ export class NeedleService {
 
     async needleRequestForREAN (method: string, url:string, accessToken?, obj?, api_key?) {
         try {
-            const ReanBackendBaseUrl = this.environmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
+            const ReanBackendBaseUrl = process.env.REAN_APP_BACKEND_BASE_URL;
             if (!accessToken) {
                 accessToken = null;
             }

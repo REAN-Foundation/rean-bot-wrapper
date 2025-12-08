@@ -13,9 +13,9 @@ export class TenantSecretsService {
         @inject('ISecretsService') private _secretsManager: ISecretsService
     ) {}
 
-    apiKey = process.env["REANCARE_API_KEY"];
+    apiKey = process.env.REANCARE_API_KEY;
 
-    baseUrl = process.env["REAN_APP_BACKEND_BASE_URL"];
+    baseUrl = process.env.REAN_APP_BACKEND_BASE_URL;
 
 
     public loadClientEnvVariables = async() => {
@@ -26,8 +26,12 @@ export class TenantSecretsService {
                 return;
             }
             const clientsList = [];
+
             for (const tenant of tenantObjectList) {
                 const tenantCode = tenant.Code;
+                if (tenantCode === "default") {
+                    continue;
+                }
                 clientsList.push(tenantCode);
                 const secretName = await this.getSecretName(tenantCode);
                 let secretObject = null;
@@ -71,14 +75,16 @@ export class TenantSecretsService {
                 //  const derivedTenantName = tenantParts.join("-").toUpperCase();
 
                 const tenantSecrets = {};
-                for (const k in secretObject) {
-                    if (typeof secretObject[k] === "object"){
-                        tenantSecrets[k.toUpperCase()] = JSON.stringify(secretObject[k]);
+                for (const key in secretObject) {
+
+                    // const secretKey = this.pascalToCapitalSnake(key);
+                    if (typeof secretObject[key] === "object"){
+                        tenantSecrets[key] = JSON.stringify(secretObject[key]);
                     }
                     else {
-                        tenantSecrets[k.toUpperCase()] = secretObject[k];
+                        tenantSecrets[key] = secretObject[key];
                     }
-                    console.log("loading this key", `${tenantCode}_${k.toUpperCase()}`);
+                    console.log("loading this key", `${tenantCode}_${key}`);
                 }
 
                 if (this.apiKey && this.baseUrl) {
@@ -89,11 +95,13 @@ export class TenantSecretsService {
 
                     if (botSettings) {
                         for (const key in botSettings){
+
+                            // const secretKey = this.pascalToCapitalSnake(key);
                             if (typeof botSettings[key] === "object"){
-                                tenantSecrets[key.toUpperCase()] = JSON.stringify(botSettings[key]);
+                                tenantSecrets[key] = JSON.stringify(botSettings[key]);
                             }
                             else {
-                                tenantSecrets[key.toUpperCase()] = botSettings[key];
+                                tenantSecrets[key] = botSettings[key];
                             }
                         }
                     }
@@ -102,24 +110,24 @@ export class TenantSecretsService {
                 }
                 await RequestResponseCacheService.set(`bot-secrets-${tenantCode}`,
                     tenantSecrets,
-                    "config"
+                    "persistent"
                 );
                 return;
             }
             else {
                 const tenantSecrets = {};
-                for (const k in secretObject) {
-                    if (typeof secretObject[k] === "object"){
-                        tenantSecrets[k.toUpperCase()] = JSON.stringify(secretObject[k]);
+                for (const key in secretObject) {
+                    if (typeof secretObject[key] === "object"){
+                        tenantSecrets[key] = JSON.stringify(secretObject[key]);
                     }
                     else {
-                        tenantSecrets[k.toUpperCase()] = secretObject[k];
+                        tenantSecrets[key] = secretObject[key];
                     }
-                    console.log("loading this key", `${secretObject.NAME}_${k.toUpperCase()}`);
+                    console.log("loading this key", `${secretObject.NAME}_${key}`);
                 }
                 await RequestResponseCacheService.set(`bot-secrets-${secretObject.NAME}`,
                     tenantSecrets,
-                    "config"
+                    "persistent"
                 );
                 return;
             }
@@ -157,4 +165,10 @@ export class TenantSecretsService {
         const code = tenantCode.toLowerCase().replace(/_/g, "-");
         return `duploservices-${environment}-${code}-v1`;
     };
+
+    private pascalToCapitalSnake(s: string): string {
+
+        return s.replace(/([A-Z])/g, "_$1").replace(/^_/, "").toUpperCase();
+    }
+
 }

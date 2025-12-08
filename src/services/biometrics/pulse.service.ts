@@ -33,13 +33,13 @@ export class PulseService {
         if (eventObj) {
             var { patientUserId, accessToken, Pulse_Unit, Pulse } = await this.checkEntry(eventObj);
 
-            const ReanBackendBaseUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
+            const ReanBackendBaseUrl = process.env.REAN_APP_BACKEND_BASE_URL;
             const url = `${ReanBackendBaseUrl}clinical/biometrics/pulse/search?patientUserId=${patientUserId}`;
-            
+
             const options = this.getHeaders.getHeaders(accessToken);
             const resp = await needle("get", url, options);
             const pulseId = resp.body.Data.PulseRecords.Items[0].id;
-            
+
             const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/Pulse/${pulseId}`;
 
             const obj = {
@@ -70,8 +70,8 @@ export class PulseService {
 
         if (eventObj) {
             var { patientUserId, accessToken, Pulse_Unit, Pulse } = await this.checkEntry(eventObj);
-            
-            const ReanBackendBaseUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
+
+            const ReanBackendBaseUrl = process.env.REAN_APP_BACKEND_BASE_URL;
             const options = this.getHeaders.getHeaders(accessToken);
             const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/Pulse`;
 

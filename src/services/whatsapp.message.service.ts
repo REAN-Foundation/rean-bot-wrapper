@@ -65,7 +65,8 @@ export class WhatsappMessageService extends CommonWhatsappService {
     async setWebhook(clientName: string){
 
         return new Promise(async (resolve, reject) => {
-            const webhookUrl = `${ await this.clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL")}/v1/${clientName}/whatsapp/${this.clientAuthenticator.urlToken}/receive`;
+            const baseUrl = process.env.BASE_URL;
+            const webhookUrl = `${baseUrl}/v1/${clientName}/whatsapp/${this.clientAuthenticator.urlToken}/receive`;
             const postData = JSON.stringify({
                 'url'     : webhookUrl,
                 "headers" : {
@@ -90,7 +91,8 @@ export class WhatsappMessageService extends CommonWhatsappService {
     SetWebHookOldNumber = async (clientName: string) => {
 
         return new Promise(async (resolve, reject) => {
-            const webhookUrl = `${await this.clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL")}/v1/${clientName}/whatsapp/${this.clientAuthenticator.urlToken}/receive`;
+            const baseUrl = process.env.BASE_URL;
+            const webhookUrl = `${baseUrl}/v1/${clientName}/whatsapp/${this.clientAuthenticator.urlToken}/receive`;
             if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY_OLD_NUMBER")) {
 
                 const postData = JSON.stringify({

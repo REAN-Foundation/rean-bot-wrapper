@@ -67,10 +67,10 @@ export class BloodPressureService {
         if (eventObj) {
             // eslint-disable-next-line max-len
             var { patientUserId, accessToken, Systolic, Diastolic, BloodPressure_Unit } = await this.checkEntry(eventObj);
-            const ReanBackendBaseUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
+            const ReanBackendBaseUrl = process.env.REAN_APP_BACKEND_BASE_URL;
 
             const url = `${ReanBackendBaseUrl}clinical/biometrics/blood-pressures/search?patientUserId=${patientUserId}`;
-            
+
             const options = this.getHeaders.getHeaders(accessToken);
             const resp = await needle("get", url, options);
             const bloodPressureId = resp.body.Data.BloodPressureRecords.Items[0].id;
@@ -112,7 +112,7 @@ export class BloodPressureService {
 
             let unitmsg = null;
             ({ unitmsg, BloodPressure_Unit } = this.getUnit(BloodPressure_Unit));
-            const ReanBackendBaseUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
+            const ReanBackendBaseUrl = process.env.REAN_APP_BACKEND_BASE_URL;
             const options = this.getHeaders.getHeaders(accessToken);
             const apiUrl = `${ReanBackendBaseUrl}clinical/biometrics/blood-pressures`;
 

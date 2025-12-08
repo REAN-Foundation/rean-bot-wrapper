@@ -32,9 +32,9 @@ export class SequelizeClient {
         const databaseName = await clientEnvironmentProviderService.getClientEnvironmentVariable("DATA_BASE_NAME");
         if (databaseName){
             const dbName = databaseName;
-            const dbPassword = await clientEnvironmentProviderService.getClientEnvironmentVariable("DB_PASSWORD");
-            const dbUser = await clientEnvironmentProviderService.getClientEnvironmentVariable("DB_USER_NAME");
-            const dbHost = await clientEnvironmentProviderService.getClientEnvironmentVariable("DB_HOST");
+            const dbPassword = process.env.DB_PASSWORD;
+            const dbUser = process.env.DB_USER_NAME;
+            const dbHost = process.env.DB_HOST;
             console.log("DB Connection Details:", dbName, dbUser, dbHost);
             const sequelizeClient = new Sequelize(dbName, dbUser, dbPassword, {
                 host           : dbHost,

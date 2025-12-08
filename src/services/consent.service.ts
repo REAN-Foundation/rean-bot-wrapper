@@ -21,7 +21,7 @@ import { UserConsentRepo } from '../database/repositories/consent/consent.repo';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ConsentService {
-    
+
     private _platformMessageService?: platformServiceInterface;
 
     constructor(
@@ -136,7 +136,7 @@ export class ConsentService {
             console.log("While updating Consent Status", error);
 
         }
-        
+
     }
 
     async handleConsentNoreply(userId,req): Promise<any> {
@@ -174,7 +174,7 @@ export class ConsentService {
             console.log(clientName);
 
             // const entityManagerProvider = req.container.resolve(EntityManagerProvider);
-            
+
             this._platformMessageService = req.container.resolve(req.params.channel);
             this._platformMessageService.res = res;
             let payload = null;
@@ -206,7 +206,9 @@ export class ConsentService {
                 this.sendCustomMessage(this._platformMessageService,message, messageType, userId , payload);
             }
             else {
-                const consentMessage: ConsentMessage = await TenantSettingService.getConsentMessages(clientName, clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"), clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL"), languageCode);
+                const reancareBaseUrl = process.env.REAN_APP_BACKEND_BASE_URL;
+                const reancareApiKey = process.env.REANCARE_API_KEY;
+                const consentMessage: ConsentMessage = await TenantSettingService.getConsentMessages(clientName, reancareApiKey, reancareBaseUrl, languageCode);
                 const message = `${consentMessage.Content} \n\n ${consentMessage.WebsiteURL}`;
                 const messageType = buttonmessageType;
                 const button_yes = await this.translate.translatestring("Yes",languageCode);

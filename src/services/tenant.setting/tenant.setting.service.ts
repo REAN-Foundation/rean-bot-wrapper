@@ -13,7 +13,7 @@ export class TenantSettingService {
             if (cachedTenantSetting) {
                 return cachedTenantSetting;
             }
-            const url = `${baseUrl}/tenant-settings/by-code/${tenantCode}`;
+            const url = `${baseUrl}tenant-settings/by-code/${tenantCode}`;
             const response = await needle("get", url, {
                 headers : {
                     'x-api-key' : apiKey

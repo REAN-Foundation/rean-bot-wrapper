@@ -112,3 +112,5 @@ dist
 ENV1.json
 ENV2.json
 .vscode/launch.json
+
+.env.old
