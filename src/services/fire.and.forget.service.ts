@@ -197,6 +197,15 @@ export class FireAndForgetService {
                 model.Body.Name, eventObj );
             console.log(`Fire and Forget Domain Model: ${model}`);
         }
+
+        if (model.Intent === "CareplanRegistrationForTestUser") {
+            const eventObj = model.Body.EventObj;
+            const _registrationService:  HeartFailureRegistrationService =
+                eventObj.container.resolve(HeartFailureRegistrationService);
+            await _registrationService.enrollPatientService(model.Body.PatientUserId,
+                model.Body.Name, eventObj, true );
+            console.log(`Fire and Forget Domain Model: ${model}`);
+        }
     };
 
     //#endregion

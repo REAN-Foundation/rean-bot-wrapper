@@ -84,7 +84,7 @@ import { NearestLocationListner } from './intentListeners/nearest.location.listn
 import { AppointmentBookingListner } from './intentListeners/appoinment.booking.listner';
 import { VolunteerSelectedPatient } from './intentListeners/bloodWarrior/volunteer.selected.patient';
 import { InitiateDeleteReminderListener, GetReminderDetails, DeleteReminder } from './intentListeners/initiate.delete.reminder.listener';
-import { EnrollHFCareplanListener, SentRegistrationMSGListener } from './intentListeners/heartFailureCareplan/start.careplan.listener';
+import { EnrollHFCareplanListener, SentRegistrationMSGListener, StartCareplanForTestUsersListener } from './intentListeners/heartFailureCareplan/start.careplan.listener';
 import { AssessmentScoringListener } from './intentListeners/assessment/assessemnt.quiz.scoring.listener';
 import { UserInfoListener } from './intentListeners/user.info.listener';
 import { FlowListener, ProcessWhatsAppFormResponsesListener } from './intentListeners/whatsapp.form/flow.listener';
@@ -286,6 +286,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('delete_reminder_time', DeleteReminder);
         IntentEmitter.registerListener('bookAppointment', AppointmentBookingListner);
         IntentEmitter.registerListener('Start_WhatsApp_Form_Select', FlowListener);
+        IntentEmitter.registerListener('Start_Careplan_For_Test_Users_Select', StartCareplanForTestUsersListener);
         IntentEmitter.registerListener('Process_WhatsApp_Form_Responses', ProcessWhatsAppFormResponsesListener);
         IntentEmitter.registerListener('deleteHistory - custom', UserChatHistoryDeletionListener);
 
