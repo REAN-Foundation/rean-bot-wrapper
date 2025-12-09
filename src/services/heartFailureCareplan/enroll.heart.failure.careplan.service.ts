@@ -183,6 +183,7 @@ export class HeartFailureRegistrationService {
             "Saath_Health_MR"        : "Saathealth_careplan_mr",
             "Diabetes"               : "Diabetes",
             "Diabetes_Spanish"       : "Diabetes_Spanish",
+            "SPHSD_Hypertension"     : "SPHSD_Hypertension",
         };
         return careplanCodeMapping[buttonId] ?? "Heart-Failure";
     }
