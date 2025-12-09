@@ -303,7 +303,7 @@ export class ClientWebhookController {
                     consentReply = reqBody.callback_query.data;
                     languageCode = consentReply.split("-")[1];
                     if (!languageCode){
-                        languageCode = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+                        languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
                     }
                     userId = reqBody.callback_query.message.chat.id;
                 }

@@ -111,7 +111,8 @@ export class HeartFailureRegistrationService {
         let obj1 = {};
        
         if (isTestUser) {
-            const scheduleConfig = this.getScheduleForNextCron(15);
+            const timezone = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE") || "+05:30";
+            const scheduleConfig = this.getScheduleForNextCron(15, timezone);
             obj1 = {
                 Provider  : 'REAN',
                 StartDate : new Date().toISOString()
@@ -214,34 +215,54 @@ export class HeartFailureRegistrationService {
         return todayDate;
     }
 
-    private getScheduleForNextCron(intervalMinutes = 15) {
-        const now = new Date();
-        const next = new Date(now);
-    
-        const currentMin = now.getMinutes();
-        const remainder = currentMin % intervalMinutes;
-    
-        let minutesToAdd = intervalMinutes - remainder;
-        if (minutesToAdd === 0) minutesToAdd = intervalMinutes;
-    
-        next.setMinutes(currentMin + minutesToAdd);
-        next.setSeconds(0);
-        next.setMilliseconds(0);
-    
-        next.setMinutes(next.getMinutes() + 2);
-    
-        let startFromTomorrow = false;
-        if (next.getDate() !== now.getDate()) {
-            startFromTomorrow = true;
+    private getScheduleForNextCron(intervalMinutes = 15, userTimezone: string) {
+        try {
+            if (!userTimezone.startsWith("+") && !userTimezone.startsWith("-")) {
+                userTimezone = "+" + userTimezone;
+            }
+            const sign = userTimezone.startsWith("-") ? -1 : 1;
+            let [tzHours, tzMinutes] = userTimezone.substring(1).split(":")
+                .map(Number);
+
+            if (isNaN(tzHours) || isNaN(tzMinutes)) {
+                tzHours = 5;
+                tzMinutes = 30;
+            }
+            const totalOffsetMinutes = sign * (tzHours * 60 + tzMinutes);
+
+            const nowUtc = new Date();
+            const nowLocal = new Date(nowUtc.getTime() + totalOffsetMinutes * 60000);
+
+            const nextLocal = new Date(nowLocal);
+
+            const currentMin = nowLocal.getMinutes();
+            const remainder = currentMin % intervalMinutes;
+
+            let minutesToAdd = intervalMinutes - remainder;
+            if (minutesToAdd === 0) minutesToAdd = intervalMinutes;
+
+            nextLocal.setMinutes(currentMin + minutesToAdd);
+            nextLocal.setSeconds(0);
+            nextLocal.setMilliseconds(0);
+
+            nextLocal.setMinutes(nextLocal.getMinutes() + 2);
+
+            let startFromTomorrow = false;
+            if (nextLocal.getDate() !== nowLocal.getDate()) {
+                startFromTomorrow = true;
+            }
+
+            return {
+                NumberOfDays      : 7,
+                StartHour         : nextLocal.getHours(),
+                StartMinutes      : nextLocal.getMinutes(),
+                IntervalMinutes   : 15,
+                StartFromTomorrow : startFromTomorrow,
+            };
+        } catch (error) {
+            Logger.instance().log(`Error in calculating schedule for next cron: ${error.message}`);
         }
-    
-        return {
-            NumberOfDays      : 1,
-            StartHour         : next.getHours(),
-            StartMinutes      : next.getMinutes(),
-            IntervalMinutes   : 1,
-            StartFromTomorrow : startFromTomorrow
-        };
+
     }
 
 }
