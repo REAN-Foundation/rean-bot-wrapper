@@ -324,6 +324,10 @@ export interface ConsentMessage {
     WebsiteURL?  : string;
 }
 
+export interface ConsentMessageWithLanguage extends ConsentMessage {
+    Language?  : string;
+}
+
 export interface TenantSettingsDomainModel {
     Common?                 : CommonSettings,
     Followup?               : FollowupSettings,
