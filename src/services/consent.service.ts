@@ -16,6 +16,8 @@ import { Registration } from './registrationsAndEnrollements/patient.registratio
 import { TenantSettingService } from './tenant.setting/tenant.setting.service';
 import { ConsentMessage, ConsentMessageWithLanguage } from '../domain.types/tenant.setting/tenant.setting.types';
 import { UserConsentRepo } from '../database/repositories/consent/consent.repo';
+import { MAX_TELEGRAM_BUTTONS, MAX_WHATSAPP_BUTTONS } from '../domain.types/user.consent/user.consent.types';
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -202,10 +204,10 @@ export class ConsentService {
                     buttonArray.push("consent_changeLanguge-en");
                 }
                 if (req.params.channel === "whatsappMeta"){
-                    payload = await sendApiButtonService(buttonArray.slice(0,6));
+                    payload = await sendApiButtonService(buttonArray.slice(0,MAX_WHATSAPP_BUTTONS));
                 }
                 else {
-                    payload = await sendTelegramButtonService(buttonArray.slice(0,16));
+                    payload = await sendTelegramButtonService(buttonArray.slice(0,MAX_TELEGRAM_BUTTONS));
                 }
                 this.sendCustomMessage(this._platformMessageService,message, messageType, userId , payload);
             }
