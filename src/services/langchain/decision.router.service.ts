@@ -19,6 +19,8 @@ import { NeedleService } from "../needle.service";
 import { AssessmentService } from "../Assesssment/assessment.service";
 import { AssessmentIdentifiers } from "../../models/assessment/assessment.identifiers.model";
 import { WorkflowEventListener } from "../emergency/workflow.event.listener";
+import { WorkflowRoutingService } from "../workflow/workflow.routing.service";
+import { Schema } from '../../refactor/interface/workflow/workflow.interface';
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -35,7 +37,8 @@ export class DecisionRouter {
         @inject(EmojiFilter) private emojiFilter?: EmojiFilter,
         @inject(NeedleService) private needleService?: NeedleService,
         @inject(AssessmentService) private assessmentService?: AssessmentService,
-        @inject(WorkflowEventListener) private workflowEventListener?: WorkflowEventListener
+        @inject(WorkflowEventListener) private workflowEventListener?: WorkflowEventListener,
+        @inject(WorkflowRoutingService) private workflowRoutingService?: WorkflowRoutingService
     ) {
         this.outgoingMessage = {
             PrimaryMessageHandler : MessageHandlerType.Unhandled,
@@ -395,18 +398,18 @@ export class DecisionRouter {
             {
 
                 // UNCOMMENT TO ENABLE THE QA WITH WORKFLOW SERVICE
-                // const workflowSchema = await this.workflowEventListener.getAllSchemaForTenant();
-                // const workflowFlag = await this.checkWorkflowMode(workflowSchema, messageBody);
+                const workflowSchema = await this.workflowEventListener.getAllSchemaForTenant();
+                const workflowFlag = await this.newCheckWorkflowMode(workflowSchema, messageBody);
                 this.outgoingMessage.MetaData = messageBody;
 
-                // if (workflowFlag) {
-                this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.WorkflowService;
-                return this.outgoingMessage;
+                if (workflowFlag) {
+                    this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.WorkflowService;
+                    return this.outgoingMessage;
                 
-                // } else {
-                //     this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.QnA;
-                //     return this.outgoingMessage;
-                // }
+                } else {
+                    this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.QnA;
+                    return this.outgoingMessage;
+                }
 
             }
             const resultFeedback = await this.checkFeedback(messageBody, channel);
@@ -546,6 +549,21 @@ export class DecisionRouter {
             return parsedResult.flag.toLowerCase() === "true";
         } catch (error) {
             console.log("ERROR WHILE CHECKING THE WORKFLOW MODE");
+        }
+    }
+
+    private async newCheckWorkflowMode(schema: Schema | Schema[], messageBody: Imessage) {
+        try {
+            const result = await this.workflowRoutingService.routeMessage(
+                messageBody.messageBody,
+                schema
+            );
+
+            console.log("WORKFLOW MODE AI RESPONSE", result);
+            return result.shouldTrigger;
+        } catch (error) {
+            console.log("ERROR WHILE CHECKING THE WORKFLOW MODE", error);
+            return false;
         }
     }
 
