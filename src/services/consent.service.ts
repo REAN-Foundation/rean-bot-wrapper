@@ -14,8 +14,10 @@ import { platformServiceInterface } from '../refactor/interface/platform.interfa
 import { sendApiButtonService } from './whatsappmeta.button.service';
 import { Registration } from './registrationsAndEnrollements/patient.registration.service';
 import { TenantSettingService } from './tenant.setting/tenant.setting.service';
-import { ConsentMessage } from '../domain.types/tenant.setting/tenant.setting.types';
+import { ConsentMessage, ConsentMessageWithLanguage } from '../domain.types/tenant.setting/tenant.setting.types';
 import { UserConsentRepo } from '../database/repositories/consent/consent.repo';
+import { MAX_TELEGRAM_BUTTONS, MAX_WHATSAPP_BUTTONS } from '../domain.types/user.consent/user.consent.types';
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -186,22 +188,26 @@ export class ConsentService {
                 this.sendCustomMessage( this._platformMessageService, message, messageType, userId , payload);
             }
             else if (consentReply === "consent_changeLanguge"){
-                const consentData = await consentRepository.findAll();
+                const consentMessages: ConsentMessageWithLanguage[] = await TenantSettingService.getConsentSetting(clientName, clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"), clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL"));
                 const buttonArray = [];
-                consentData.forEach(async consent=>
+                consentMessages.forEach(async consent=>
                 {
                     console.log(consent);
-                    buttonArray.push(consent.dataValues.Language);
-                    buttonArray.push(`consent_changeLanguge-${consent.dataValues.LanguageCode}`);
+                    buttonArray.push(consent.Language);
+                    buttonArray.push(`consent_changeLanguge-${consent.LanguageCode}`);
                 });
                 console.log(buttonArray);
                 const message = await this.translate.translatestring("Please, select your preferred language", languageCode);
                 const messageType = buttonmessageType;
+                if (buttonArray.length === 0){
+                    buttonArray.push("English");
+                    buttonArray.push("consent_changeLanguge-en");
+                }
                 if (req.params.channel === "whatsappMeta"){
-                    payload = await sendApiButtonService(buttonArray);
+                    payload = await sendApiButtonService(buttonArray.slice(0,MAX_WHATSAPP_BUTTONS));
                 }
                 else {
-                    payload = await sendTelegramButtonService(buttonArray);
+                    payload = await sendTelegramButtonService(buttonArray.slice(0,MAX_TELEGRAM_BUTTONS));
                 }
                 this.sendCustomMessage(this._platformMessageService,message, messageType, userId , payload);
             }
