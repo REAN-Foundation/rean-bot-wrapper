@@ -114,21 +114,21 @@ export class MessageFlow{
             await this.engageMySQL(message);
             console.log("Get put message.type: ",message.type);
             console.log("Get put message.messageBody: ",message.messageBody);
-            if ( message.type === 'nfm_reply' ) {
-                return {
-                    message,
-                    translate_message : {
-                        message            : message.messageBody,
-                        original_message   : message.messageBody,
-                        languageForSession : null
-                    }
-                };
-            }
-            const translate_message = await this.translate.translateMessage(message.type, message.messageBody, message.platformId);
-            translate_message["original_message"] = message.messageBody;
-            message.messageBody = translate_message.message;
-            message.originalMessage = translate_message["original_message"];
-            return { message, translate_message };
+            return {
+                message,
+                translate_message : {
+                    message            : message.messageBody,
+                    original_message   : message.messageBody,
+                    languageForSession : null
+                }
+            };
+
+            // const translate_message = await this.translate.translateMessage(message.type, message.messageBody, message.platformId);
+            // translate_message["original_message"] = message.messageBody;
+            // message.messageBody = translate_message.message;
+            // message.originalMessage = translate_message["original_message"];
+            // return { message, translate_message };
+
         } catch (error) {
             console.log(error);
         }
@@ -138,6 +138,29 @@ export class MessageFlow{
         try {
             const response_format: Iresponse = await platformMessageService.postResponse(messageToLlmRouter, processedResponse);
             response_format.sensitivity = processedResponse.message_from_nlp.getSensitivity();
+
+            // Translate outgoing message for the user's session language.
+            // Previously translation was done in `preprocessOutgoingMessage`.
+            // Moving translation here ensures we translate the response just before
+            // persisting and sending it to the platform.
+            try {
+                const translate_message = await this.translate.translateMessage(
+                    messageToLlmRouter.type,
+                    response_format.messageText,
+                    messageToLlmRouter.platformId
+                );
+                // preserve original text on the processedResponse for any downstream use
+                const originalMessage = response_format.messageText;
+                processedResponse.translate_message = {
+                    message: translate_message.message,
+                    original_message: originalMessage,
+                    languageForSession: translate_message.languageForSession ?? null
+                };
+                // replace message text with translated text
+                response_format.messageText = translate_message.message;
+            } catch (translateError) {
+                console.log('Error translating outgoing message in processOutgoingMessage', translateError);
+            }
 
             await this.saveResponseDataToUser(response_format, processedResponse);
 
