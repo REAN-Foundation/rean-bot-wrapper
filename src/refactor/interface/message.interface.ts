@@ -1,5 +1,6 @@
+import { CareplanEnrollmentDomainModel } from "../../domain.types/basic.careplan/careplan.types";
 import { IserviceResponseFunctionalities } from "../../services/response.format/response.interface";
-import { MessageHandlerType, NlpProviderType, UserFeedbackType, ChannelType,} from "../messageTypes/message.types";
+import { MessageHandlerType, NlpProviderType, UserFeedbackType, ChannelType, } from "../messageTypes/message.types";
 
 export interface Imessage{
     name             : string;
@@ -218,6 +219,7 @@ export interface OutgoingMessage {
     Feedback            ?: Feedback;
     QnA                 ?: QnADetails;
     Alert               ?: AlertDetails;
+    BasicCareplan      ?: CareplanEnrollmentDomainModel;
 }
 
 export interface IReminder {
