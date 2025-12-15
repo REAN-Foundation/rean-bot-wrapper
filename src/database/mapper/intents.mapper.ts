@@ -17,6 +17,6 @@ export class IntentsMapper {
             Metadata : intent.Metadata
         };
         return dto;
-    }
+    };
 
 }

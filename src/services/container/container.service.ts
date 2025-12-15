@@ -16,6 +16,6 @@ export class ContainerService {
             Logger.instance().log(error.message);
             return null;
         }
-    }
+    };
 
 }

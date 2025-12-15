@@ -86,6 +86,6 @@ export class CareplanMetaDataValidator {
             IsTest     : metadata.IsTest ?? false,
         };
         return model;
-    }
+    };
 
 }

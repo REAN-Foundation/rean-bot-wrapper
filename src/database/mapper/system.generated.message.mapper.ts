@@ -16,6 +16,6 @@ export class systemGeneratedMessagesMapper {
             LanguageCode   : message.languageCode,
         };
         return dto;
-    }
+    };
 
 }

@@ -37,6 +37,6 @@ export class IntentRepo {
             console.error('Error finding intent by code and type:', error);
             return null;
         }
-    }
+    };
 
 }
