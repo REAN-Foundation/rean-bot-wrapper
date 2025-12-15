@@ -22,6 +22,6 @@ export class SystemGeneratedMessagesRepo {
             console.error('Error finding system message by name:', error);
             return null;
         }
-    }
+    };
 
 }

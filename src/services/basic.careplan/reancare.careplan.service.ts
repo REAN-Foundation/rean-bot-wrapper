@@ -8,8 +8,7 @@ export class ReancareCareplanService {
     
     private _clientEnvironmentProviderService: ClientEnvironmentProviderService;
 
-    public EnrollCareplan =
-    async (container: DependencyContainer, patientUserId: string, model: CareplanEnrollmentDomainModel) => {
+    public EnrollCareplan = async (container: DependencyContainer, patientUserId: string, model: CareplanEnrollmentDomainModel) => {
         this._clientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
         console.log("this._clientEnvironmentProviderService", this._clientEnvironmentProviderService.getClientName());
         const baseURL = this._clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");

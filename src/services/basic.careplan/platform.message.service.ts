@@ -72,6 +72,6 @@ export class PlatformMessageService {
             throw new Error(`Unsupported message type: ${type}`);
         }
 
-    }
+    };
 
 }

@@ -22,10 +22,9 @@ export class IntentRepo {
             console.error('Error finding intent by code:', error);
             return null;
         }
-    }
+    };
 
-    static findIntentByCodeAndType =
-    async (container: DependencyContainer, code: string, type: IntentType): Promise<IntentDto | null> => {
+    static findIntentByCodeAndType = async (container: DependencyContainer, code: string, type: IntentType):Promise<IntentDto | null> => {
         try {
             const entityManager = await RepositoryHelper.resolveEntityManager(container);
             const intentRepository = entityManager.getRepository(Intents);
