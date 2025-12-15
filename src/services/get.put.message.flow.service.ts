@@ -493,7 +493,8 @@ export class MessageFlow{
             imageContent   : response_format.messageBody,
             imageUrl       : response_format.messageImageUrl,
             userPlatformID : response_format.sessionId,
-            intent         : intent
+            intent         : intent,
+            sensitivity     : response_format.sensitivity
         };
         const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         await (await chatMessageRepository.create(dfResponseObj)).save();

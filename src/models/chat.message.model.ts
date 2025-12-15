@@ -49,6 +49,13 @@ export class ChatMessage extends Model implements IchatMessage {
         type : DataType.STRING(256)
     })
         intent: string;
+    
+    @Column({
+        type      : DataType.STRING(64),
+        allowNull : true
+    })
+        sensitivity: string;
+
 
     @Column({
         type : DataType.STRING(256)

@@ -79,7 +79,7 @@ export interface IchatMessage {
     supportChannelTaskID: string;
     humanHandoff: string;
     feedbackType: string;
-
+    sensitivity?: string;
 }
 
 export interface chatSession {
