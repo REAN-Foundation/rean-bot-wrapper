@@ -327,7 +327,7 @@ export class DecisionRouter {
             if (!messageBody?.intent) {
                 return false;
             }
-            const clientName = this.environmentProviderService.getClientEnvironmentVariable("Name");
+            const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
             const childContainer = ContainerService.createChildContainer(clientName);
             if (!childContainer) {
                 throw new Error("Failed to create child container");
