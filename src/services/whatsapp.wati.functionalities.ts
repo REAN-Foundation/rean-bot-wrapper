@@ -49,7 +49,7 @@ export class WatiMessageFunctionalities implements getMessageFunctionalities {
     }
 
     async locationMessageFormat(messageObj: Message) {
-        
+
         // Method not implemented yet
     }
 
@@ -150,8 +150,10 @@ export class WatiMessageFunctionalities implements getMessageFunctionalities {
     }
 
     getWatiMedia = async (type, mediaPath, extension) => {
-        const watiToken = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_TOKEN");
-        const baseUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_BASE_URL");
+        const watiSettings = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WatiToken");
+        const watiToken = watiSettings.Value;
+        const watiUrl = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WatiBaseUrl");
+        const baseUrl = watiUrl.Value;
         const fileName = `${type}/` + Date.now() + `${extension}`;
         const writer = fs.createWriteStream(fileName);
         const data = new FormData();
@@ -201,5 +203,5 @@ export class WatiMessageFunctionalities implements getMessageFunctionalities {
             return messageToDialogflow;
         }
     }
-    
+
 }

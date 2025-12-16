@@ -11,7 +11,7 @@ import {CountryCodeService } from '../../utils/phone.number.formatting';
 // Get an instance of PhoneNumberUtil.
 
 
-// Get an instance of PhoneNumberUtil. 
+// Get an instance of PhoneNumberUtil.
 
 
 // @autoInjectable()
@@ -32,7 +32,7 @@ export class consentController {
     recordConsentinfo = async(req, res)=>{
         try {
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
-            const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             console.log(clientName);
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
             const consentRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ConsentInfo);
@@ -47,7 +47,7 @@ export class consentController {
                     Language       : req.body.language,
                     MessageContent : req.body.message,
                     WebsiteURL     : req.body.link,
-        
+
                 };
                 await consentRepository.create(consentObj);
                 this.responseHandler.sendSuccessResponse(res, 200, 'Info is successfully stored', "");
@@ -64,7 +64,7 @@ export class consentController {
     readConsentinfo = async(req, res)=>{
         try {
             const clientEnvironmentProviderService = await req.container.resolve(ClientEnvironmentProviderService);
-            const clientName =await  clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName =await  clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             console.log(clientName);
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
             // eslint-disable-next-line max-len
@@ -94,7 +94,7 @@ export class consentController {
             }
             else {
                 const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
-                const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+                const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
                 console.log(clientName);
                 const entityManagerProvider = req.container.resolve(EntityManagerProvider);
                 const consentRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ConsentInfo);
@@ -132,7 +132,7 @@ export class consentController {
     deleteConsentinfo = async(req, res)=>{
         try {
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
-            const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             console.log(clientName);
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
             const consentRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ConsentInfo);

@@ -157,7 +157,7 @@ export class ClientWebhookController {
         try {
 
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
-            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
             const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
             const messageStatusRepostiory = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(MessageStatus);
@@ -242,7 +242,7 @@ export class ClientWebhookController {
     private async handleConsentMessage(req: any, res: any, handleReqVariable,buttonKeyName,channel,firstTimeUser ) {
         try {
             const clientEnvironmentProviderService = await req.container.resolve(ClientEnvironmentProviderService);
-            const clientName = await  clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await  clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             console.log(clientName);
             console.log("Here in handle consent Message");
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
@@ -281,7 +281,7 @@ export class ClientWebhookController {
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
             let userId = null;
             let consentReply  = null;
-            let languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+            let languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DefaultLanguage");
             if (channel === "whatsappMeta"){
                 if (reqBody.messages[0].type === 'interactive'){
                     const interactiveType = reqBody.messages[0].interactive.type;
@@ -291,7 +291,7 @@ export class ClientWebhookController {
                         languageCode = consentReply.split("-")[1];
                     }
                     if (!languageCode){
-                        languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+                        languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DefaultLanguage");
                     }
                     userId = reqBody.messages[0].from;
                 }
@@ -305,7 +305,7 @@ export class ClientWebhookController {
                     consentReply = reqBody.callback_query.data;
                     languageCode = consentReply.split("-")[1];
                     if (!languageCode){
-                        languageCode = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+                        languageCode = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DefaultLanguage");
                     }
                     userId = reqBody.callback_query.message.chat.id;
                 }
@@ -363,7 +363,7 @@ export class ClientWebhookController {
             let logMessage = '';
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
-            const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
             const messageStatusRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(MessageStatus);
             this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
@@ -418,7 +418,7 @@ export class ClientWebhookController {
         try {
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
-            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(ChatMessage);
             const messageStatusRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(MessageStatus);
             console.log("Wati Client Name:", clientName);

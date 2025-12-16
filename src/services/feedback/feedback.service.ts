@@ -40,7 +40,7 @@ export  class FeedbackService implements feedbackInterface {
                 const payload = eventObj.body.originalDetectIntentRequest.payload;
                 const userId = payload.userId;
                 const username = payload.userName;
-                const client_name = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+                const client_name = clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
                 const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(ChatMessage);
                 let responseChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: userId } });
                 await chatMessageRepository.update({ humanHandoff: "false", feedbackType: "Negative Feedback" }, { where: { id: responseChatMessage[responseChatMessage.length - 1].id } });
@@ -73,7 +73,7 @@ export  class FeedbackService implements feedbackInterface {
                 else {
                     // eslint-disable-next-line init-declarations
                     const description = `**User Details**\n\n- **User Platform ID**: ${userId}\n- **Username**: ${username}`;
-                    const preferredSupportChannel = clientEnvironmentProviderService.getClientEnvironmentVariable("SUPPORT_CHANNEL");
+                    const preferredSupportChannel = clientEnvironmentProviderService.getClientEnvironmentVariable("SupportChannel");
                     if (payload.contextId){
                         responseChatMessage = await chatMessageRepository.findAll({ where: { responseMessageID: payload.contextId } });
                         await this.supportChannel(preferredSupportChannel,responseChatMessage,messageContent,null,"Negative Feedback",description, userId);
@@ -84,11 +84,13 @@ export  class FeedbackService implements feedbackInterface {
                     }
                     if (await humanHandoff.checkTime() === "false"){
                         let reply = "";
+                        const feedbackSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("FeedbackMessage");
+                        const negativeFeedback = feedbackSetting.Value.NegativeFeedbackMessage;
                         const customNegativeFeedbackMessage = await this.systemGeneratedMessageService.getMessage("NEGATIVE_FEEDBACK_MESSAGE");
                         if (customNegativeFeedbackMessage) {
                             reply = customNegativeFeedbackMessage;
-                        } else if (clientEnvironmentProviderService.getClientEnvironmentVariable("NEGATIVE_FEEDBACK_MESSAGE")) {
-                            reply = clientEnvironmentProviderService.getClientEnvironmentVariable("NEGATIVE_FEEDBACK_MESSAGE");
+                        } else if (negativeFeedback) {
+                            reply = negativeFeedback;
                         } else {
                             reply = "We're genuinely sorry to hear that you weren't satisfied with the assistance provided by our chatbot. Your feedback is invaluable in helping us improve our services. our team of experts will provide you with a satisfactory resolution as quickly as possible.";
                         }
@@ -138,9 +140,9 @@ export  class FeedbackService implements feedbackInterface {
                         resolve(data);
                     }
                 }
-                
+
             }
-                
+
             catch (error) {
                 console.log(error, 500, "Negative Feedback Service Error!");
                 reject(error.message);
@@ -165,9 +167,10 @@ export  class FeedbackService implements feedbackInterface {
                 if (customPositiveFeedbackMessage) {
                     replyToSend = customPositiveFeedbackMessage;
                 } else {
-                    replyToSend = this.clientEnvironmentProviderService.getClientEnvironmentVariable("POSITIVE_FEEDBACK_MESSAGE");
+                    const feedbackMessageSetting = clientEnvironmentProviderService.getClientEnvironmentVariable("FeedbackMessage");
+                    replyToSend = feedbackMessageSetting.Value.PositiveFeedbackMessage;
                 }
-                
+
                 let reply;
                 if (replyToSend) {
                     reply = replyToSend;
@@ -175,7 +178,7 @@ export  class FeedbackService implements feedbackInterface {
                     reply = "We are glad that you like it. Thank you for your valuable feedback";
                 }
                 let responseChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: userId } });
-                const preferredSupportChannel = clientEnvironmentProviderService.getClientEnvironmentVariable("SUPPORT_CHANNEL");
+                const preferredSupportChannel = clientEnvironmentProviderService.getClientEnvironmentVariable("SupportChannel");
                 const description = `**User Details**\n\n- **User Platform ID**: ${userId}\n- **Username**: ${username}`;
                 if (payload.contextId){
                     responseChatMessage = await chatMessageRepository.findAll({ where: { responseMessageID: payload.contextId } });
@@ -208,7 +211,8 @@ export  class FeedbackService implements feedbackInterface {
 
     supportChannel = async(preferredSupportChannel, responseChatMessage, messageContent, topic = null,tag = null,description = null, userId = null) => {
         if (preferredSupportChannel === "ClickUp"){
-            const listID = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_ISSUES_LIST_ID");
+            const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
+            const listID = clickupSecrets.IssuesListId;
             const chatMessageRepository = await (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
             const ContactListRepository = await (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
 

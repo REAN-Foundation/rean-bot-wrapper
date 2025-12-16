@@ -23,9 +23,12 @@ export class CallEyeImageQualityCheckModel {
         // eslint-disable-next-line max-len
         const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         const respChatMessage = await chatMessageRepository.findAll({ where: { "messageContent": imagePathFromDF, "direction": "In" } });
-        const eyeQualityCheckModelUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("EYE_QUALITY_IMAGE_URL");
-        const REQUEST_AUTHENTICATION =  this.clientEnvironmentProviderService.getClientEnvironmentVariable("REQUEST_AUTHENTICATION");
-        const cloudFrontPath = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("LVPEI_Data_CLOUD_FRONT_PATH");
+        const eyeQualityCheckModelSettings = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("EyeQualityCheckModelSettings");
+        const eyeQualityCheckModelUrl = eyeQualityCheckModelSettings.Value;
+        const authSettings = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("RequestAuthentication");
+        const REQUEST_AUTHENTICATION =  authSettings.Value;
+        const customCloudFrontPath = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("CustomCloudFrontPath");
+        const cloudFrontPath = customCloudFrontPath.Value;
         const parameters = eventObj.body.queryResult.parameters;
         let goodQuality = false;
         const filename = path.basename(parameters.imageUrl);
@@ -41,7 +44,7 @@ export class CallEyeImageQualityCheckModel {
         let message = null;
         if (response.statusCode === 200) {
             console.log("got results successfully");
-            
+
             if (response.body.result)
             {
                 message = "It is a *Good Quality* image as " + response.body.message  ;
@@ -83,7 +86,7 @@ export class CallEyeImageQualityCheckModel {
             Logger.instance()
                 .log_error(error.message, 500, 'error in sending message to telegram');
         }
-    
+
     };
 
 }

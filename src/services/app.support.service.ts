@@ -62,17 +62,18 @@ export class platformMessageService implements platformServiceInterface{
                 await this.messageFlow.checkTheFlowRouter(rhgMessagetoDialogflow, client, this);
             }
         }
-        
+
     }
 
-    postResponse (message, response: IprocessedDialogflowResponseFormat ){
+    async postResponse (message, response: IprocessedDialogflowResponseFormat ){
         const reansupport_Id = message.platformId;
         const image = response.message_from_nlp.getImageObject();
         const message_type = image.url ? "image" : "text";
         const intent = response.message_from_nlp.getIntent();
 
         const reaponse_message = { name: null,platform: "Rean_Support",chat_message_id: null,direction: "Out",message_type: message_type,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: reansupport_Id, messageText: response.processed_message[0] };
-        if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE")) {
+        const qaService = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("QaService");
+        if (qaService) {
             if (reaponse_message.name !== "ReanCare") {
                 console.log("Providing QA service through clickUp");
                 this.logsQAService.logMesssages(reaponse_message);

@@ -1,6 +1,6 @@
 import needle from "needle";
 import { RequestResponseCacheService } from "../../modules/cache/request.response.cache.service";
-import { ChatBotSettings, ConsentMessage, TenantSettingsDomainModel } from "../../domain.types/tenant.setting/tenant.setting.types";
+import { ChatBotSettings, ConsentMessage, TenantSettingsDomainModel, CustomSettings } from "../../domain.types/tenant.setting/tenant.setting.types";
 import { ApiError } from "../../common/api.error";
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,6 +29,7 @@ export class TenantSettingService {
                 ChatBot  : response.body?.Data?.TenantSettings?.ChatBot,
                 Forms    : response.body?.Data?.TenantSettings?.Forms,
                 Consent  : response.body?.Data?.TenantSettings?.Consent,
+                Custom   : response.body?.Data?.TenantSettings?.Custom
             };
             await RequestResponseCacheService.set(`tenant-setting-${tenantCode}`, tenantSetting);
             return tenantSetting;
@@ -68,6 +69,16 @@ export class TenantSettingService {
         try {
             const tenantSetting: TenantSettingsDomainModel = await this.getTenantSettingByCode(tenantCode, apiKey, baseUrl);
             return tenantSetting?.ChatBot ?? null;
+        } catch (error) {
+            console.error('Error in TenantSettingService.getChatBotSettings:', error);
+            return null;
+        }
+    }
+
+    static async getCustomSettings(tenantCode: string, apiKey: string, baseUrl: string): Promise<CustomSettings> {
+        try {
+            const tenantSetting: TenantSettingsDomainModel = await this.getTenantSettingByCode(tenantCode, apiKey, baseUrl);
+            return tenantSetting?.Custom ?? null;
         } catch (error) {
             console.error('Error in TenantSettingService.getChatBotSettings:', error);
             return null;

@@ -61,7 +61,9 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         const preferredLanguage = await this.userLanguage.getPreferredLanguageofSession(messageObj.getUserId());
         if (preferredLanguage !== "null"){
             if (file_path) {
-                const ConvertedToText = await this.speechtotext.SendSpeechRequest('https://api.telegram.org/file/bot' + this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN") + '/' + response.result.file_path, "telegram", preferredLanguage);
+                const telegramSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("telegram");
+                const telegramBotToken = telegramSecrets.BotToken;
+                const ConvertedToText = await this.speechtotext.SendSpeechRequest('https://api.telegram.org/file/bot' + telegramBotToken + '/' + response.result.file_path, "telegram", preferredLanguage);
                 if (ConvertedToText) {
                     const messagetoDialogflow = this.inputMessageFormat(messageObj);
                     messagetoDialogflow.messageBody = String(ConvertedToText);
@@ -98,21 +100,23 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         try {
             const photoFileId = messageObj.getPhotoFileId();
             const telegramMediaData = await this.GetTelegramMedia(photoFileId);
+            const telegramSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("telegram");
+            const telegramBotToken = telegramSecrets.BotToken;
 
             const filePath = await this.downloadTelegramMedia(
-                `https://api.telegram.org/file/bot${this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN")}/${telegramMediaData.result.file_path}`,
+                `https://api.telegram.org/file/bot${telegramBotToken}/${telegramMediaData.result.file_path}`,
                 "photo"
             );
             const location = await this.awsS3manager.uploadFile(filePath);
-    
+
             const urlParse = url.parse(location);
             const imageUrl = `${urlParse.protocol}//${urlParse.hostname}${urlParse.pathname}`;
-    
+
             const messagetoDialogflow = this.inputMessageFormat(messageObj);
             messagetoDialogflow.type = 'image';
             messagetoDialogflow.messageBody = imageUrl;
             messagetoDialogflow.imageUrl = location;
-    
+
             return messagetoDialogflow;
         } catch (error) {
             console.error('Error processing photo message:', error.message);
@@ -143,7 +147,9 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         let response: any = {};
         response = await this.GetTelegramMedia(messageObj.getdocumentFileId());
         if (response.result.file_path){
-            const filePath = await this.downloadTelegramDocument('https://api.telegram.org/file/bot' + this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN") + '/' + response.result.file_path, "document");
+            const telegramSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("telegram");
+            const telegramBotToken = telegramSecrets.BotToken;
+            const filePath = await this.downloadTelegramDocument('https://api.telegram.org/file/bot' + telegramBotToken + '/' + response.result.file_path, "document");
             const location = filePath;
             const messagetoDialogflow = this.inputMessageFormat(messageObj);
             messagetoDialogflow.type = 'document';
@@ -153,7 +159,9 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
     }
 
     GetTelegramMedia = async (fileid: string): Promise<any> => {
-        const telegramMediaPath = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_MEDIA_PATH_URL");
+        const telegramSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("telegram");
+        const telegramMediaPath = telegramSecrets.MediaPathUrl;
+        // const telegramMediaPath = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_MEDIA_PATH_URL");
 
         const options = {
             headers : {
@@ -169,22 +177,22 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
 
         try {
             const response = await axios.get(fileUrl, { responseType: 'stream' });
-    
+
             if (response.status !== 200) {
                 throw new Error(`Failed to download media. Status code: ${response.status}`);
             }
-    
+
             const filename = path.basename(fileUrl);
             const uploadpath = `./${media}/` + filename;
             const filePath = fs.createWriteStream(uploadpath);
-    
+
             response.data.pipe(filePath);
-    
+
             await new Promise<void>((resolve, reject) => {
                 filePath.on('finish', () => resolve());
                 filePath.on('error', (error) => reject(error));
             });
-    
+
             return uploadpath;
         } catch (error) {
             console.error('Error downloading media:', error.message);

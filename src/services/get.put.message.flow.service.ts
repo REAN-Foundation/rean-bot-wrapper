@@ -78,8 +78,10 @@ export class MessageFlow{
             console.log("The message is being set to make the decision");
             const outgoingMessage: OutgoingMessage = await this.decisionRouter.getDecision(preprocessedOutgoingMessage.message, channel);
             console.log("The outgoing message is being handled in routing");
+            const NlpTranslateServiceSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NlpTranslateService");
+            const nlpTranslateService = NlpTranslateServiceSetting?.Value;
             if (
-                await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_TRANSLATE_SERVICE") === "llm"
+                nlpTranslateService === "llm"
             &&
                 outgoingMessage.QnA.NLPProvider === "LLM"
             ) {
@@ -200,7 +202,7 @@ export class MessageFlow{
         const contactList = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
         const personContactList = await contactList.findOne({ where: { mobileNumber: msg.userId } });
         const reminderMessage = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ReminderMessage);
-        const defaultLangaugeCode = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE") ?? "en";
+        const defaultLangaugeCode = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DefaultLanguage") ?? "en";
         const payloadObj = typeof msg.payload === "string"
             ? JSON.parse(msg.payload)
             : msg.payload;

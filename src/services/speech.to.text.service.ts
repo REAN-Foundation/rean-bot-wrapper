@@ -19,7 +19,7 @@ export class Speechtotext {
             credentials : this.GCPCredentials,
             projectId   : this.GCPCredentials.project_id
         };
-        this.env = this.clientEnvironmentProviderService.getClientEnvironmentVariable("ENVIRONMENT");
+        this.env = process.env.ENVIRONMENT;
     }
 
     private GCPCredentials;
@@ -32,7 +32,7 @@ export class Speechtotext {
         return new Promise(async (resolve) => {
             if (chatServiceName === 'telegram') {
                 http.get(fileUrl, async (res) => {
-                    
+
                     //add time stamp - pending
                     const filename = path.basename(fileUrl);
 

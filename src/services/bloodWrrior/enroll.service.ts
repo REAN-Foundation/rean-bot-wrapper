@@ -45,7 +45,7 @@ export class EnrollPatientService {
                     StartDate : new Date().toISOString()
                         .split('T')[0],
                     Channel    : this.getPatientInfoService.getReminderType(channel),
-                    TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
+                    TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name")
                 };
 
                 const resp = await needle('post', url, obj1, options);

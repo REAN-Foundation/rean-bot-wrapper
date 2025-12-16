@@ -12,7 +12,7 @@ export class EmojiFilter{
         console.log("inside checkForEmoji",message);
         const regex = emojiRegex();
         let emojiObj;
-        const emoji = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("EMOJI");
+        const emoji = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Emoji");
         if (emoji){
             emojiObj = JSON.parse(emoji);
         }

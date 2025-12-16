@@ -61,7 +61,7 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
     async setWebhook(clientName: string){
         return;
     }
-    
+
     async SendMediaMessage(response_format: Iresponse, payload: any) {
         let whatsappMessageId;
         const type = response_format.message_type;
@@ -87,7 +87,10 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
                     }
 
                 }
-                if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE")){
+                const qaServiceSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("qaService");
+                const qaServiceValue = qaServiceSetting?.Value;
+                console.log(`QA_SERVICE Flag: ${qaServiceValue}`);
+                if (qaServiceValue){
                     if (response_format.name !== "ReanCare") {
                         Logger.instance().log("Providing QA service through clickUp");
                         await this.logsQAService.logMesssages(response_format);
@@ -169,5 +172,5 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
     async getMessageIdFromResponse(responseBody: any) {
         throw new Error("Method not implemented.");
     }
-    
+
 }

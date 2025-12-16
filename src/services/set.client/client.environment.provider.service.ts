@@ -25,7 +25,7 @@ export class ClientEnvironmentProviderService {
 
         // console.log("getClientEnvironmentVariable",[this.clientName + "_" + variablename]);
         const key = `bot-secrets-${this.clientName}`;
-        const clientVariables = await RequestResponseCacheService.get(key, "config");
+        const clientVariables = await RequestResponseCacheService.get(key, "persistent");
         if (clientVariables && clientVariables[variablename]){
             return clientVariables[variablename];
         }

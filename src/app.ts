@@ -74,7 +74,10 @@ export default class Application {
             console.log(clientName);
             clientEnvironmentProviderService.setClientName(clientName);
             sequelizeClient.getSequelizeClient(clientEnvironmentProviderService);
-            const telegramToken = await clientEnvironmentProviderService.getClientEnvironmentVariable('TELEGRAM_BOT_TOKEN');
+            const telegramSecrets = await clientEnvironmentProviderService.getClientEnvironmentVariable('telegram');
+            const telegramToken = telegramSecrets ? telegramSecrets.BotToken : null;
+            // const whatsappSecrets = await clientEnvironmentProviderService.getClientEnvironmentVariable('meta');
+            // const whatsappToken = whatsappSecrets ? whatsappSecrets['ApiToken'] : null;
             const whatsappToken = await clientEnvironmentProviderService.getClientEnvironmentVariable('WHATSAPP_LIVE_API_KEY') || await clientEnvironmentProviderService.getClientEnvironmentVariable('META_API_TOKEN');
             console.log(telegramToken);
             if (telegramToken) {

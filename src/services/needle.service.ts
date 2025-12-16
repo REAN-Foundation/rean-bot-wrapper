@@ -73,11 +73,13 @@ export class NeedleService {
         const whatsappHost = this.environmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
         const version = process.env.WHATSAPP_API_VERSION;
         const options = getRequestOptions();
-        const whatsappToken = this.environmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
+        const metaSecrets = await this.environmentProviderService.getClientEnvironmentVariable("meta");
+        const whatsappToken = metaSecrets.ApiToken;
         options.headers['Content-Type'] = 'application/json';
         options.headers['Authorization'] = `Bearer ${whatsappToken}`;
-        const whatsappPhoneNumberID = this.environmentProviderService.getClientEnvironmentVariable("WHATSAPP_PHONE_NUMBER_ID");
-        const url = `/${version}/${whatsappPhoneNumberID}/${endPoint}`;
+        const whatsappSecrets = await this.environmentProviderService.getClientEnvironmentVariable("whatsapp");
+        const whatsappPhoneNumberId = whatsappSecrets.PhoneNumberId;
+        const url = `/${version}/${whatsappPhoneNumberId}/${endPoint}`;
         const whatsappaApi = whatsappHost + url;
         let response = null;
         if (method === "get") {
@@ -99,9 +101,10 @@ export class NeedleService {
     }
 
     async needleRequestForTelegram(method: string, endPoint:string, obj?, payload?){
-        const telegramHost = this.environmentProviderService.getClientEnvironmentVariable("TELEGRAM_HOST");
+        const telegramHost = process.env.TELEGRAM_HOST;
         const options = getRequestOptions();
-        const telegramBotToken = this.environmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN");
+        const telegramSecrets = await this.environmentProviderService.getClientEnvironmentVariable("telegram");
+        const telegramBotToken = telegramSecrets.BotToken;
         const url = `/bot${telegramBotToken}/${endPoint}`;
         const telegramApi = telegramHost + url;
         console.log("The telegram URL is:" + telegramApi);

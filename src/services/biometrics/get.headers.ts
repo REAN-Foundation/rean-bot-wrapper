@@ -19,8 +19,9 @@ export class GetHeaders {
         return options;
     };
 
-    getWorkflowHeaders = (accessToken?: any) => {
-        const workflow_api_key = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WORK_FLOW_API_KEY");
+    getWorkflowHeaders = async(accessToken?: any) => {
+        const workflowApiKey = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WorkflowApiKey");
+        const workflow_api_key = workflowApiKey.Value;
         if (!accessToken) {
             accessToken = null;
         }

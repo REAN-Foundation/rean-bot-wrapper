@@ -11,20 +11,24 @@ export class WatiWhatsappAuthenticator implements clientAuthenticator{
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
     ){}
 
-    get urlToken(): any {
-        return this.clientEnvironmentProviderService.getClientEnvironmentVariable("WEBHOOK_WATI_CLIENT_URL_TOKEN");
+    async urlToken(): Promise<any> {
+        const watiSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("wati");
+        return watiSecrets.WebhookClientUrlToken;
+        //
+        //
+        //return this.clientEnvironmentProviderService.getClientEnvironmentVariable("WEBHOOK_WATI_CLIENT_URL_TOKEN");
     }
 
     get headerToken(): any {
         throw new Error("Method not required for Wati");
     }
-    
+
     authenticate(req: any) {
         if (this.urlToken === req.params.unique_token){
             return;
         }
         throw new Error('Unable to authenticate.');
-        
+
     }
-    
+
 }

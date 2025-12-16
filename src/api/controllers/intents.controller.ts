@@ -68,7 +68,7 @@ export class IntentsController {
         try {
             const intentId = request.params.id;
             const { name, code, type, metadata } = request.body;
-            
+
             const { repository, clientName } = await this.getContextualServices(request);
             console.log("Inside updating the intent for ", clientName);
 
@@ -77,7 +77,7 @@ export class IntentsController {
             if (!intent) {
                 this.responseHandler.sendFailureResponse(response, 404, 'Intent not found');
             }
-            
+
             intent.name = name || intent.name;
             intent.code = code || intent.code;
             intent.type = type || intent.type;
@@ -113,7 +113,7 @@ export class IntentsController {
 
     private async getContextualServices(request) {
         const clientEnvironmentProvider = request.container.resolve(ClientEnvironmentProviderService);
-        const clientName = clientEnvironmentProvider.getClientEnvironmentVariable("NAME");
+        const clientName = clientEnvironmentProvider.getClientEnvironmentVariable("Name");
 
         const entityManagerProvider = request.container.resolve(EntityManagerProvider);
         const repository = (

@@ -102,7 +102,7 @@ export class BloodWarriorCommonService {
                 PlanCode   : "Donor-Reminders",
                 StartDate  : bloodTransfusionDate.toISOString().split("T")[0],
                 Channel    : this.getPatientInfoService.getReminderType(channel),
-                TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
+                TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name")
             };
             result = await this.needleService.needleRequestForREAN("post", url, null, obj);
             if (result.HttpCode === 201) {

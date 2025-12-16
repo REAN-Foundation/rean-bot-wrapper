@@ -42,7 +42,7 @@ export class ServeAssessmentService {
 
             const userTask = JSON.parse(userTaskData);
             if (!assessmentLanguage) {
-                assessmentLanguage = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+                assessmentLanguage = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DefaultLanguage");
             }
 
             // const assessmentId = userTask.Action.Assessment.id;
@@ -358,7 +358,8 @@ export class ServeAssessmentService {
         if (intent === "Work_Commitments" ||
             intent === "Feeling_Unwell_A" ||
             intent === "Transit_Issues") {
-            const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
+            const docProcessBaseUrlSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DocumentProcessorBaseURL");
+            const docProcessBaseURL = docProcessBaseUrlSetting.Value;
             let todayDate = new Date().toISOString()
                 .split('T')[0];
 
@@ -366,7 +367,7 @@ export class ServeAssessmentService {
             const phoneNumber = Helper.formatPhoneForDocProcessor(userPhoneNumber);
             const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
             todayDate = Helper.removeLeadingZerosFromDay(todayDate);
-            const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
 
             // const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
             const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/assessment-response`;

@@ -30,8 +30,17 @@ export class TelegramMessageService implements platformServiceInterface{
         @inject(TelegramPostResponseFunctionalities) private telegramPostResponseFunctionalities?: TelegramPostResponseFunctionalities,
         @inject("telegram.authenticator") private clientAuthenticator?: clientAuthenticator,
         @inject(LogsQAService) private logsQAService?: LogsQAService) {
-        const token = this.environmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN");
-        this._telegram = new TelegramBot(token);
+
+        // const token = this.environmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN");
+        // this._telegram = new TelegramBot(token);
+        // this.init();
+        this.initializeToken();
+    }
+
+    private async initializeToken() {
+        const telegramSecrets = await this.environmentProviderService.getClientEnvironmentVariable("telegram");
+        const telegramBotToken = telegramSecrets.BotToken;
+        this._telegram = new TelegramBot(telegramBotToken);
         this.init();
     }
 
@@ -61,8 +70,10 @@ export class TelegramMessageService implements platformServiceInterface{
         });
     }
 
-    setWebhook(clientName){
-        this._telegram = new TelegramBot(this.environmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
+    async setWebhook(clientName){
+        const telegramSecrets = await this.environmentProviderService.getClientEnvironmentVariable("telegram");
+        const telegramBotToken = telegramSecrets.BotToken;
+        this._telegram = new TelegramBot(telegramBotToken);
         const webhookUrl = process.env.BASE_URL + '/v1/' + clientName + '/telegram/' + this.clientAuthenticator.urlToken + '/receive';
         this._telegram.setWebHook(webhookUrl);
         console.log("Telegram webhook set", webhookUrl);
@@ -140,9 +151,13 @@ export class TelegramMessageService implements platformServiceInterface{
             const type = response_format.message_type;
             if (type) {
                 const classmethod = `send${type}Response`;
-                const telegram = new TelegramBot(this.environmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
-                console.log(`QA_SERVICE Flag: ${this.environmentProviderService.getClientEnvironmentVariable("QA_SERVICE")}`);
-                if (this.environmentProviderService.getClientEnvironmentVariable("QA_SERVICE")) {
+                const telegramSecrets = await this.environmentProviderService.getClientEnvironmentVariable("telegram");
+                const telegramBotToken = telegramSecrets.BotToken;
+                const telegram = new TelegramBot(telegramBotToken);
+                const qaServiceSetting = await this.environmentProviderService.getClientEnvironmentVariable("qaService");
+                const qaServiceValue = qaServiceSetting?.Value;
+                console.log(`QA_SERVICE Flag: ${qaServiceValue}`);
+                if (qaServiceValue) {
                     if (response_format.name !== "ReanCare") {
                         console.log("Providing QA service through clickUp");
                         await this.logsQAService.logMesssages(response_format);

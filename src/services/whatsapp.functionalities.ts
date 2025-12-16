@@ -203,8 +203,10 @@ export class MessageFunctionalities implements getMessageFunctionalities {
     };
 
     GetWhatsappMetaMedia = async (type, imageUrl, extension) => {
+        const metaSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("meta");
         return new Promise<string>((resolve, reject) => {
-            const token = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
+
+            const token = metaSecrets.ApiToken;
             const headers = {
                 headers : {
                     'Authorization' : `Bearer ${token}`,
@@ -297,7 +299,8 @@ export class MessageFunctionalities implements getMessageFunctionalities {
     async getMetaMediaUrl(mediaId){
         try {
             const options = getRequestOptions();
-            const token = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
+            const metaSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("meta");
+            const token = metaSecrets.ApiToken;
             options.headers['Content-Type'] = 'application/json';
             options.headers['Authorization'] = `Bearer ${token}`;
             const hostname = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");

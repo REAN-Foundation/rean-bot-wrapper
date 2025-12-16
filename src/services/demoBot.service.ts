@@ -58,18 +58,19 @@ export class demoBotService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async createIntent(excelData, userSessionId){
         console.log('Creating intents');
-        const dfBotGcpCredentials = await this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS");
-        const dfBotGCPCredentials = JSON.parse(dfBotGcpCredentials);
-        const GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+        const dfBotGcpSettings = await this.clientEnvironment.getClientEnvironmentVariable("DialogflowSettings");
+        const dfBotGCPCredentials = dfBotGcpSettings.Value.DialogflowBotGcpProjectCredentials;
+        const GCPCredentials = await this.clientEnvironment.getClientEnvironmentVariable("GoogleApplicationCredentials");
+        // const GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
         const dialogflowApplicationCredentialsobj = dfBotGCPCredentials ? dfBotGCPCredentials : GCPCredentials;
         const options = {
             credentials : {
                 client_email : dialogflowApplicationCredentialsobj.client_email,
                 private_key  : dialogflowApplicationCredentialsobj.private_key,
             },
-            projectId : await this.clientEnvironment.getClientEnvironmentVariable('DIALOGFLOW_PROJECT_ID')
+            projectId : dfBotGcpSettings.Value.ProjectId,
         };
-        const projectIdFinal = await this.clientEnvironment.getClientEnvironmentVariable('DIALOGFLOW_PROJECT_ID');
+        const projectIdFinal = dfBotGcpSettings.Value.ProjectId;
 
         const intentsClient = new dialogflow.IntentsClient(options);
         const projectAgentPath = intentsClient.projectAgentPath(projectIdFinal);

@@ -51,8 +51,9 @@ export class handleRequestservice {
         const translate_message = await this.translateService.translateMessage(message.type, message.messageBody, UserPlatformID);
 
         let message_from_nlp: IserviceResponseFunctionalities = null;
-        const nlpService = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_SERVICE");
-        const clientName = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+        const nlpServiceSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NlpService");
+        const nlpService = nlpServiceSetting?.Value;
+        const clientName = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
 
         if (nlpService && nlpService === "openai") {
             message_from_nlp = await this.openAIResponseService.getOpenaiMessage(clientName, translate_message.message);
@@ -60,6 +61,8 @@ export class handleRequestservice {
         else if (nlpService && nlpService === "custom_ml_model") {
 
             let message_to_ml_model = translate_message.message;
+            const nlpTranslateServiceSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NlpTranslateService");
+            const nlpTranslateService = nlpTranslateServiceSetting?.Value;
 
             if (message.contextId) {
                 const tag = "Feedback";
@@ -67,7 +70,7 @@ export class handleRequestservice {
                 message_to_ml_model = "I have send the Feedback";
             }
 
-            else if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_TRANSLATE_SERVICE")) {
+            else if (nlpTranslateService) {
                 message_to_ml_model = message.messageBody;
             }
 
@@ -76,7 +79,7 @@ export class handleRequestservice {
         } else {
             // eslint-disable-next-line max-len
             message_from_nlp = await this.DialogflowResponseService.getDialogflowMessage(translate_message.message, channel, message.intent, message);
-            const openaiApiKey = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("OPENAI_API_KEY");
+            const openaiApiKey = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("OpenaiApiKey");
             if (openaiApiKey) {
                 if (message_from_nlp.getIntent() === "Default Fallback Intent") {
                     message_from_nlp = await this.openAIResponseService.getOpenaiMessage(clientName, translate_message.message);
@@ -117,7 +120,8 @@ export class handleRequestservice {
         if (customTranslations[0] === null) {
             let googleTranslate;
             if (messageHandler === "QnA") {
-                const nlpService = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_TRANSLATE_SERVICE");
+                const nlpServiceSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NlpTranslateService");
+                const nlpService = nlpServiceSetting?.Value;
                 if (nlpService === "llm") {
                     googleTranslate = message_from_nlp.getText();
                 }

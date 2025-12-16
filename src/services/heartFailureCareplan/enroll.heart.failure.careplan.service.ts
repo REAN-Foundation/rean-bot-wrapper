@@ -116,7 +116,7 @@ export class HeartFailureRegistrationService {
             StartDate  : startDate.toISOString().split('T')[0],
             DayOffset  : 0,
             Channel    : this.getPatientInfoService.getReminderType(channel),
-            TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
+            TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name")
         };
 
         console.log("enrollPatient Body Object", obj1);

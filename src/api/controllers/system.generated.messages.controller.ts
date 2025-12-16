@@ -17,9 +17,9 @@ export class SystemGeneratedMessagesController {
 
     create = async (request, response) => {
         try {
-            const { repository, clientName } = await this.getContextualServices(request); 
+            const { repository, clientName } = await this.getContextualServices(request);
             const messageName = request.body.name;
-            const messageExists = 
+            const messageExists =
                 await repository.findOne({where: {messageName: messageName}});
             if (messageExists) {
                 this.responseHandler.sendSuccessResponse(response, 200, 'Message already exists', '');
@@ -107,7 +107,7 @@ export class SystemGeneratedMessagesController {
 
     private async getContextualServices(request) {
         const clientEnvironmentProvider = request.container.resolve(ClientEnvironmentProviderService);
-        const clientName = clientEnvironmentProvider.getClientEnvironmentVariable("NAME");
+        const clientName = clientEnvironmentProvider.getClientEnvironmentVariable("Name");
 
         const entityManagerProvider = request.container.resolve(EntityManagerProvider);
         const repository = (

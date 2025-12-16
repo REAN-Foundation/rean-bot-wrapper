@@ -44,7 +44,7 @@ export class RegisterAllProfileService {
                     Gender     : body.PatientGender,
                     FirstName  : body.PatientFirstName,
                     LastName   : body.PatientLastName,
-                    TenantCode : this.clientEnvProviderService.getClientEnvironmentVariable("NAME"),
+                    TenantCode : this.clientEnvProviderService.getClientEnvironmentVariable("Name"),
                     BirthDate  : new Date(body.PatientBirthDate).toISOString()
                         .split('T')[0],
                     BloodGroup           : body.PatientBloodGroup,

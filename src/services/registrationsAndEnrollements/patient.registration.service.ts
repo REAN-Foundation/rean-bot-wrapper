@@ -44,9 +44,9 @@ export class Registration{
                 obj = {
                     Phone           : await this.countryCodeService.formatPhoneNumber(platformUserId),
                     FirstName       : platformUserName,
-                    DefaultTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
-                    CurrentTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
-                    TenantCode      : this.EnvironmentProviderService.getClientEnvironmentVariable("NAME"),
+                    DefaultTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("Timezone"),
+                    CurrentTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("Timezone"),
+                    TenantCode      : this.EnvironmentProviderService.getClientEnvironmentVariable("Name"),
                     GenerateOtp     : false
                 };
             } else if (creationMethod === "userName") {
@@ -54,9 +54,9 @@ export class Registration{
                     FirstName       : platformUserName,
                     UserName        : platformUserId,
                     UniqueReferenceId  : platformUserId,
-                    DefaultTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
-                    CurrentTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
-                    TenantCode      : this.EnvironmentProviderService.getClientEnvironmentVariable("NAME"),
+                    DefaultTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("Timezone"),
+                    CurrentTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("Timezone"),
+                    TenantCode      : this.EnvironmentProviderService.getClientEnvironmentVariable("Name"),
                     GenerateOtp     : false
                 };
             } else {

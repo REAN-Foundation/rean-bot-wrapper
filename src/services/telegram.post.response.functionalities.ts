@@ -40,7 +40,9 @@ export class TelegramPostResponseFunctionalities {
             chat_id : response_format.sessionId,
             voice   : response_format.messageBody
         };
-        const botToken = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN");
+        const telegramSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("telegram");
+        const botToken = telegramSecrets.BotToken;
+        // const botToken = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN");
         const channelUrl = `https://api.telegram.org/bot${botToken}/sendVoice`;
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars

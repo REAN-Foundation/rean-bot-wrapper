@@ -11,8 +11,10 @@ export class WhatsappMetaAuthenticator implements clientAuthenticator{
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
     ){}
 
-    get urlToken(): any {
-        return this.clientEnvironmentProviderService.getClientEnvironmentVariable("WEBHOOK_WHATSAPP_CLIENT_URL_TOKEN");
+    async urlToken(): Promise<any> {
+        const whatsappSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("whatsapp");
+        return whatsappSecrets.WebhookClientUrlToken;
+        //return this.clientEnvironmentProviderService.getClientEnvironmentVariable("WEBHOOK_WHATSAPP_CLIENT_URL_TOKEN");
     }
 
     get headerToken(): any {
@@ -25,7 +27,7 @@ export class WhatsappMetaAuthenticator implements clientAuthenticator{
             return;
         }
         throw new Error('Unable to authenticate.');
-        
+
     }
-    
+
 }

@@ -120,7 +120,8 @@ export class kerotoplastyService {
         if (EMRNumber) {
             EMRNumber = EMRNumber.toUpperCase();
         }
-        const ClickupListID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_CASE_LIST_ID");
+        const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
+        const ClickupListId = clickupSecrets.CaseListId;
         if (intent === "appointment-followconditionIdentification"){
             await contactList.update({ repetitionFlag: "True" }, { where: { mobileNumber: userId } });
         }
@@ -136,10 +137,10 @@ export class kerotoplastyService {
         }
         else
         {
-            const taskID = await this.clickUpTask.createTask( null, EMRNumber, user_details, severityGrade, ClickupListID );
-            await contactList.update({ cmrCaseTaskID: taskID }, { where: { mobileNumber: userId } });
-            await this.clickUpTask.postCommentOnTask(taskID, symptomComment);
-            await contactList.update({ cmrCaseTaskID: taskID, humanHandoff: "false" }, { where: { mobileNumber: userId } });
+            const taskId = await this.clickUpTask.createTask( null, EMRNumber, user_details, severityGrade, ClickupListId );
+            await contactList.update({ cmrCaseTaskID: taskId }, { where: { mobileNumber: userId } });
+            await this.clickUpTask.postCommentOnTask(taskId, symptomComment);
+            await contactList.update({ cmrCaseTaskID: taskId, humanHandoff: "false" }, { where: { mobileNumber: userId } });
 
         }
 
@@ -198,18 +199,19 @@ export class kerotoplastyService {
             }
         }
 
-        const ClickupListID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_CASE_LIST_ID");
+        const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
+        const ClickupListId = clickupSecrets.CaseListId;
         if (taskId){
             await this.clickUpTask.updateTask(taskId,null,user_details,EMRNumber, "Appointment");
             await this.clickUpTask.postCommentOnTask(taskId,symptomComment);
         }
         else
         {
-            const taskID = await this.clickUpTask.createTask(null, EMRNumber , user_details , 1 , ClickupListID,"Appoinment");
-            await contactList.update({ cmrCaseTaskID: taskID }, { where: { mobileNumber: userId } });
-            await this.clickUpTask.postCommentOnTask(taskID, symptomComment);
+            const taskId = await this.clickUpTask.createTask(null, EMRNumber , user_details , 1 , ClickupListId,"Appoinment");
+            await contactList.update({ cmrCaseTaskID: taskId }, { where: { mobileNumber: userId } });
+            await this.clickUpTask.postCommentOnTask(taskId, symptomComment);
             console.log("we are Here");
-            await contactList.update({ cmrCaseTaskID: taskID, humanHandoff: "false" }, { where: { mobileNumber: userId } });
+            await contactList.update({ cmrCaseTaskID: taskId, humanHandoff: "false" }, { where: { mobileNumber: userId } });
         }
 
     }
@@ -300,9 +302,10 @@ export class kerotoplastyService {
 
     async makeApiCall(emr_number, eventObj) {
         const clientEnvironmentProviderService = eventObj.container.resolve(ClientEnvironmentProviderService);
-        const url = clientEnvironmentProviderService.getClientEnvironmentVariable("EMR_URL");
-        const key = clientEnvironmentProviderService.getClientEnvironmentVariable("EMR_KEY");
-        const code = clientEnvironmentProviderService.getClientEnvironmentVariable("EMR_CODE");
+        const emrSettings = await clientEnvironmentProviderService.getClientEnvironmentVariable("EmrSettings");
+        const url = emrSettings.Value.Url;
+        const key = emrSettings.Value.Key;
+        const code = emrSettings.Value.Code;
         var headers = {
             'Content-Type' : 'application/json',
             accept         : 'application/json'

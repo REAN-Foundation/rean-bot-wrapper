@@ -379,7 +379,8 @@ export class DecisionRouter {
 
     async getDecision(messageBody: Imessage, channel: string){
         try {
-            const workflowMode = await this.environmentProviderService.getClientEnvironmentVariable("WORK_FLOW_MODE");
+            const workflowSetttings = await this.environmentProviderService.getClientEnvironmentVariable("WorkflowSettings");
+            const workflowMode = workflowSetttings.Value.Mode;
             if (workflowMode === 'TRUE')
             {
                 this.outgoingMessage.MetaData = messageBody;
@@ -443,8 +444,9 @@ export class DecisionRouter {
     }
 
     async getDialogflowLanguage(){
-        if (this.environmentProviderService.getClientEnvironmentVariable("DIALOGFLOW_DEFAULT_LANGUAGE_CODE")){
-            return this.environmentProviderService.getClientEnvironmentVariable("DIALOGFLOW_DEFAULT_LANGUAGE_CODE");
+        const dialogflowDefaultLanguage = process.env.DIALOGFLOW_DEFAULT_LANGUAGE_CODE;
+        if (dialogflowDefaultLanguage){
+            return dialogflowDefaultLanguage;
         }
         else {
             return "en-US";

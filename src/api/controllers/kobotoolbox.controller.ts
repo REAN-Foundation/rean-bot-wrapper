@@ -13,7 +13,7 @@ import { Iresponse } from '../../refactor/interface/message.interface';
 export class kobotoolboxController{
 
     private _platformMessageService?: platformServiceInterface;
-    
+
     constructor(
         @inject(ResponseHandler) private responseHandler?: ResponseHandler,
         @inject(AwsS3manager) private awss3manager?: AwsS3manager,
@@ -79,9 +79,10 @@ export class kobotoolboxController{
         try {
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
             this.awss3manager = req.container.resolve(AwsS3manager);
-            const filename = clientEnvironmentProviderService.getClientEnvironmentVariable("S3_KOBO_FILENAME");
+            const koboSettings = await clientEnvironmentProviderService.getClientEnvironmentVariable("KoboSettings");
+            const filename = koboSettings.Value.FileName;
             const userDetails = await this.getUserDetails(req.body);
-            const registrationRequired = await clientEnvironmentProviderService.getClientEnvironmentVariable("KOBO_REGISTERATION");
+            const registrationRequired = koboSettings.Value.RegistrationRequired;
             if (registrationRequired && userDetails.registration === "true") {
                 this.registerUser(req,userDetails);
                 this.sendFirstWelcomeMessage(req,userDetails);
@@ -95,5 +96,5 @@ export class kobotoolboxController{
         }
 
     };
-    
+
 }

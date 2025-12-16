@@ -42,7 +42,7 @@ export class RegistrationService {
                 LastName   : name.split(" ")[1],
                 Gender     : "Female",
                 BirthDate  : birthdate.split("T")[0],
-                TenantCode : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
+                TenantCode : this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name")
             };
 
             const patientUserId = null;
@@ -118,7 +118,7 @@ export class RegistrationService {
                 .split('T')[0],
             DayOffset  : (days(date_1, date_2) - 28),
             Channel    : this.getPatientInfoService.getReminderType(channel),
-            TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
+            TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name")
         };
         const resp = await this.needleService.needleRequestForREAN("post", enrollmentUrl, null, obj1);
 

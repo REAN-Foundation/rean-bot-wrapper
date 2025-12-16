@@ -94,8 +94,9 @@ export class translateService{
         const intent = messageFromDialogflow.getIntent();
         const parse_mode = messageFromDialogflow.getParseMode();
         const text = messageFromDialogflow.getText();
-        const customTranslateSetting: boolean = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("FIX_LANGUAGE") === "true";
-        const listOfNoTranslateIntents = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("FIX_LANGUAGE_INTENTS") ?? [];
+        const fixLanguageSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("FixLanguage");
+        const customTranslateSetting: boolean = fixLanguageSetting.Value.Enable;
+        const listOfNoTranslateIntents = fixLanguageSetting.Value.Intents ?? [];
         if (parse_mode) {
             translatedResponse = text;
         } else if (listOfNoTranslateIntents.includes(intent) && customTranslateSetting){
@@ -128,7 +129,7 @@ export class translateService{
             let languageForSession = await this.userLanguage.getPreferredLanguageofSession(phoneNumber);
             console.log("languageForSession before", languageForSession);
 
-            languageForSession = languageForSession !== 'null' ? languageForSession : await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+            languageForSession = languageForSession !== 'null' ? languageForSession : await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DefaultLanguage");
             console.log("languageForSession after", languageForSession);
             return languageForSession;
 
@@ -143,7 +144,8 @@ export class translateService{
         const responseLanguage = await this.detectLanguage(responseMessage[0]);
         const defultLanguage = await this.getDialogflowLanguage();
         const translate = new v2.Translate(this.obj);
-        this.translateGlossaryId = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("TRANSLATE_GLOSSARY");
+        const translateGlossarySetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("TranslateGlossary");
+        this.translateGlossaryId = translateGlossarySetting.Value;
         const customTranslateSetting: boolean = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("FIX_LANGUAGE") === "true";
         try {
             if (customTranslateSetting) {

@@ -21,8 +21,9 @@ export class CustomMLModelResponseService{
         private dialogflowResponseService?:DialogflowResponseService){}
 
     getCustomModelResponse = async(message: string, platform: string = null, completeMessage:Imessage = null) =>{
-        const customModelUrl = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("CUSTOM_ML_MODEL_URL");
-        const tenantDisplayCode = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+        const mlSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("ml");
+        const customModelUrl = mlSecrets.CustomMlModelUrl;
+        const tenantDisplayCode = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
 
         const repository = await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService);
         const UserInfoRepository = (

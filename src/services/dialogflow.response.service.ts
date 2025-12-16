@@ -33,7 +33,7 @@ export class DialogflowResponseService {
     getDialogflowMessage = async (message: string, platform: string = null, intent: string = null, completeMessage:Imessage = null ) => {
         try {
 
-            const env_name = await this.clientEnvironment.getClientEnvironmentVariable("NAME");
+            const env_name = await this.clientEnvironment.getClientEnvironmentVariable("Name");
             if (env_name === "UNION"){
                 dialogflow = dialogflowv2;
             }
@@ -48,7 +48,8 @@ export class DialogflowResponseService {
             let projectIdFinal = null;
 
             if (platform === "REAN_SUPPORT") {
-                const reanGcpCredentials = await this.clientEnvironment.getClientEnvironmentVariable("REAN_APP_SUPPORT_GCP_PROJ_CREDENTIALS");
+                const reanAppGcpSettings = await this.clientEnvironment.getClientEnvironmentVariable("ReanAppGcpSettings");
+                const reanGcpCredentials = reanAppGcpSettings.Value.SupportGcpProjCredentials;
                 const ReanAppGcpCredentials = JSON.parse(reanGcpCredentials);
                 options = {
                     credentials : {
@@ -57,12 +58,13 @@ export class DialogflowResponseService {
                     },
                     projectId : ReanAppGcpCredentials.private_key
                 };
-                projectIdFinal = await this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_PROJECT_ID_REAN_APP");
+                projectIdFinal = reanAppGcpSettings.Value.ProjectId;
 
             } else {
-                const dfBotGcpCredentials = await this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS");
+                const dialogflowSettings = await this.clientEnvironment.getClientEnvironmentVariable("DialogflowSettings");
+                const dfBotGcpCredentials = dialogflowSettings.Value.DialogflowBotGcpProjectCredentials;
                 const dfBotGCPCredentials = JSON.parse(dfBotGcpCredentials);
-                const GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+                const GCPCredentials = await this.clientEnvironment.getClientEnvironmentVariable("GoogleApplicationCredentials");
                 const dialogflowApplicationCredentialsobj = dfBotGCPCredentials ? dfBotGCPCredentials : GCPCredentials;
                 options = {
                     credentials : {
@@ -71,7 +73,7 @@ export class DialogflowResponseService {
                     },
                     projectId : dialogflowApplicationCredentialsobj.private_key
                 };
-                projectIdFinal = await this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_PROJECT_ID");
+                projectIdFinal = dialogflowSettings.Value.ProjectId;
 
             }
 

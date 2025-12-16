@@ -16,8 +16,10 @@ export class CallAnemiaModel {
         // eslint-disable-next-line max-len
         const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
         const respChatMessage = await chatMessageRepository.findAll({ where: { "messageContent": imagePathFromDF, "direction": "In" } });
-        const anemiaModelUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("ANEMIA_MODEL_URL");
-        const REQUEST_AUTHENTICATION = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REQUEST_AUTHENTICATION");
+        const anemiaSettings = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("AnemiaModelSettings");
+        const anemiaModelUrl = anemiaSettings.Value;
+        const authSettings = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("RequestAuthentication");
+        const REQUEST_AUTHENTICATION = authSettings.Value;
         const options = getRequestOptions();
         options.headers["Authorization"] = `Bearer ${REQUEST_AUTHENTICATION}`;
         options.headers["Content-Type"] = `application/json`;

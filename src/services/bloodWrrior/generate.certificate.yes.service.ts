@@ -88,7 +88,7 @@ export class GenerateCertificateYesService {
 
             //Certificate message to donor
             const donorName = body.Donor.User.Person.DisplayName;
-            const imageUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CERTIFICATE_URL");
+            const imageUrl = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("CertificateUrl");
             const filePath = await generatePdfCertificate(donorName, body.Donor.LastDonationDate, imageUrl );
             const bucket_name = process.env.TEMP_BUCKET_NAME;
             const cloud_front_path = process.env.TEMP_CLOUD_FRONT_PATH;
@@ -125,7 +125,7 @@ export class GenerateCertificateYesService {
                 PlanCode   : "Patient-Donation-Confirmation",
                 StartDate  : reminderDate.toISOString().split('T')[0],
                 Channel    : this.getPatientInfoService.getReminderType(payload.source),
-                TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
+                TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name")
             };
             await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
 

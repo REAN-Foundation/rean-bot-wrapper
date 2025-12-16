@@ -46,8 +46,10 @@ export class ConsentService {
             const results = await this.registrationService.getPatientUserId(sourceChannel, userPlatformId, platformUserName);
             await this.registrationService.wrapperRegistration(this.entityManagerProvider,userPlatformId, platformUserName,sourceChannel,results.patientUserId);
             this.updateConsentStatus(userPlatformId,EnvironmentProviderService);
-            const additionalInfoRequired =  EnvironmentProviderService.getClientEnvironmentVariable("ADDITIONAL_INFO_REQUIRED");
-            const careplanEnrollmentRequired = EnvironmentProviderService.getClientEnvironmentVariable("CAREPLAN_ENROLLMENT_REQUIRED");
+            const additionalIfoSettings = await EnvironmentProviderService.getClientEnvironmentVariable("AdditionalIfoSettings");
+            const additionalInfoRequired =  additionalIfoSettings.Value.IsEnabled;
+            const careplanSettings = await EnvironmentProviderService.getClientEnvironmentVariable("CareplanEnrollmentSettings");
+            const careplanEnrollmentRequired = careplanSettings.Value.IsEnabled;
             if (additionalInfoRequired){
                 this.triggerAdditionalInfoIntent(sourceChannel,eventObj,userPlatformId,EnvironmentProviderService);
             }
@@ -69,7 +71,8 @@ export class ConsentService {
             const button_yes = await this.translate.translatestring("Yes",languageCode);
             const button_no = await this.translate.translatestring("No",languageCode);
             const buttonArray = [button_yes, "Start_Careplan" ,button_no,"Welcome"];
-            const careplanEnrollmentMessage =  EnvironmentProviderService.getClientEnvironmentVariable("CAREPLAN_ENROLLMENT_MESSAGE");
+            const careplanSettings = await EnvironmentProviderService.getClientEnvironmentVariable("CareplanEnrollmentSettings");
+            const careplanEnrollmentMessage =  careplanSettings.Value.Message;
             if (sourceChannel === "whatsappMeta"){
                 payload = await sendApiButtonService(buttonArray);
                 messageType = "interactivebuttons";
@@ -91,7 +94,8 @@ export class ConsentService {
             const languageCode = eventObj.body.queryResult.languageCode;
             let payload = null;
             let messageType = null;
-            const RequiredAdditionalInfo =  EnvironmentProviderService.getClientEnvironmentVariable("REQUIRED_ADDITIONAL_INFO");
+            const additionalIfoSettings = await EnvironmentProviderService.getClientEnvironmentVariable("AdditionalIfoSettings");
+            const RequiredAdditionalInfo =  additionalIfoSettings.Value.RequiredInfo;
             const RequiredAdditionalobj = JSON.parse(RequiredAdditionalInfo );
             const values: any[] = Object.values(RequiredAdditionalobj);
             const RequiredAdditionalValuesString: string = values.join(',');
@@ -142,7 +146,7 @@ export class ConsentService {
     async handleConsentNoreply(userId,req): Promise<any> {
         try {
             const clientEnvironmentProviderService = await req.container.resolve(ClientEnvironmentProviderService);
-            const clientName = await  clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await  clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             console.log(clientName);
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
             const userConsentRepository =
@@ -170,7 +174,7 @@ export class ConsentService {
     async handleConsentRequest(req,userId,consentReply,languageCode,consentRepository,res,buttonmessageType){
         try {
             const clientEnvironmentProviderService = await req.container.resolve(ClientEnvironmentProviderService);
-            const clientName = await  clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await  clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             console.log(clientName);
 
             // const entityManagerProvider = req.container.resolve(EntityManagerProvider);

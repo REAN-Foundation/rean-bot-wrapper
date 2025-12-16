@@ -11,8 +11,9 @@ export class ClickUpAuthenticator implements clientAuthenticator{
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
     ){}
 
-    get urlToken(): any {
-        return this.clientEnvironmentProviderService.getClientEnvironmentVariable("WEBHOOK_CLICKUP_CLIENT_URL_TOKEN");
+    async urlToken(): Promise<any> {
+        const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
+        return clickupSecrets.WebhookClientUrlToken;
     }
 
     get headerToken(): any {
@@ -24,7 +25,7 @@ export class ClickUpAuthenticator implements clientAuthenticator{
             return;
         }
         throw new Error('Unable to authenticate.');
-        
+
     }
-    
+
 }

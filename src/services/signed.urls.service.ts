@@ -14,7 +14,8 @@ export class SignedUrls{
     ){}
 
     async getSignedUrl(url){
-        const expireLinkTime = await this.clientEnvironmentProviderservice.getClientEnvironmentVariable("EXPIRE_LINK_TIME");
+        const expireLinkTimeSetting = await this.clientEnvironmentProviderservice.getClientEnvironmentVariable("ExpireLinkTime");
+        const expireLinkTime = expireLinkTimeSetting?.Value;
         const millisecond = parseFloat(expireLinkTime);
         return new Promise<string> ((resolve) => {
             var signingParams = {

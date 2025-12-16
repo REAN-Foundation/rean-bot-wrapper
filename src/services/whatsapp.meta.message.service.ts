@@ -48,15 +48,17 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
     async postRequestMessages(postdata) {
         return new Promise(async(resolve,reject) =>{
             try {
-                console.log("NAME",this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME"));
+                console.log("NAME",this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name"));
                 const options = getRequestOptions();
-                const token = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
+                const metaSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("meta");
+                const token = metaSecrets.ApiToken;
                 options.headers['Content-Type'] = 'application/json';
                 options.headers['Authorization'] = `Bearer ${token}`;
                 const hostname = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
                 const version = process.env.WHATSAPP_API_VERSION;
-                const whatsappPhoneNumberID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_PHONE_NUMBER_ID");
-                const path = `/${version}/${whatsappPhoneNumberID}/messages`;
+                const whatsappSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("whatsapp");
+                const whatsappPhoneNumberId = whatsappSecrets.PhoneNumberId;
+                const path = `/${version}/${whatsappPhoneNumberId}/messages`;
                 const apiUrl_meta = hostname + path;
                 console.log("The request sent to whatsapp has body: ", JSON.stringify(postdata));
                 const response = await needle("post", apiUrl_meta, postdata, options);
@@ -77,11 +79,11 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
             if (type === "Location") {
                 type = 'location';
             }
-           
+
             if (type) {
                 const classmethod = `${type}ResponseFormat`;
                 const postDataMeta = await this.whatsappPostResponseFunctionalities[classmethod](response_format,payload);
-    
+
                 //custom payload helps in sending multiple response to a single request. The multiple response are handled in an array
                 if (Array.isArray(postDataMeta)){
                     for (let i = 0; i < postDataMeta.length; i++){
@@ -97,11 +99,13 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
                 else {
                     const postDataString = JSON.stringify(postDataMeta);
                     const needleResp:any = await this.postRequestMessages(postDataString);
-    
+
                     //improve this DB query
                     if (needleResp.statusCode === 200) {
-                        console.log(`QA_SERVICE Flag: ${this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE")}`);
-                        if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE")) {
+                        const qaServiceSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("qaService");
+                        const qaServiceValue = qaServiceSetting?.Value;
+                        console.log(`QA_SERVICE Flag: ${qaServiceValue}`);
+                        if (qaServiceValue) {
                             if (response_format.name !== "ReanCare") {
                                 console.log("Providing QA service through clickUp");
                                 await this.logsQAService.logMesssages(response_format);
@@ -114,7 +118,7 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
                             await chatMessageRepository.update({ responseMessageID: needleResp.body.messages[0].id }, { where: { id: id } } )
                                 .then(() => { console.log("updated"); })
                                 .catch(error => console.log("error on update", error));
-    
+
                             //Added else for those who haven't send any message on bot(blood warrior)
                         } else {
                             const chatMessageObj = {
@@ -136,20 +140,22 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
                         return needleResp;
                     }
                 }
-                
+
             }
         } catch (error) {
             console.log("error", error);
             return null;
         }
-        
+
     };
 
     delay = async() => {
         const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
         let delayClientPreference;
-        if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("DELAY_IN_RESPONSE")) {
-            delayClientPreference = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DELAY_IN_RESPONSE");
+        const responseDelaySetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DelayInResponse");
+        const responseDelayValue = responseDelaySetting?.Value;
+        if (responseDelayValue) {
+            delayClientPreference = responseDelayValue;
         }
         else {
             delayClientPreference = 500;
@@ -157,5 +163,5 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
         await delay(delayClientPreference);
 
     };
-    
+
 }
