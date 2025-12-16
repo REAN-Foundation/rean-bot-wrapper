@@ -16,9 +16,9 @@ export class CareplanEventQueue {
             (async () => {
                 await CareplanEventQueue.delay(CareplanEventQueue._delayBeforeProcessingMs);
                 await CareplanMessageSender.sendEnrollmentMessage(
-                    event.clientName,
-                    event.channel,
-                    event.patientUserId
+                    event.ClientName,
+                    event.Channel,
+                    event.PlatformUserId
                 );
                 onCompleted();
             })();
@@ -29,10 +29,10 @@ export class CareplanEventQueue {
     public static pushEvent(
         clientName: string,
         channel: string,
-        patientUserId?: string
+        platformUserId?: string
     ): void {
         try {
-            const event: CareplanEvent = { clientName, channel, patientUserId };
+            const event: CareplanEvent = { ClientName: clientName, Channel: channel, PlatformUserId: platformUserId };
 
             Logger.instance().log(
                 `Pushing careplan enrollment event to queue: ${JSON.stringify(event)}`
