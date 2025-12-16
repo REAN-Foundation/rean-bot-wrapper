@@ -124,7 +124,7 @@ export class Registration{
                     CareplanEventQueue.pushEvent(
                         this.EnvironmentProviderService.getClientName(),
                         channel,
-                        patientUserId
+                        PlatformUserId
                     );
                 } else {
                     patientUserId = result.Data.Patients.Items[0].UserId;
@@ -147,7 +147,7 @@ export class Registration{
                     CareplanEventQueue.pushEvent(
                         this.EnvironmentProviderService.getClientName(),
                         channel,
-                        patientUserId
+                        PlatformUserId
                     );
                 } else {
                     patientUserId = result.Data.Patients.Items[0].UserId;

@@ -324,7 +324,9 @@ export class DecisionRouter {
 
     async checkCareplanEnrollment(messageBody: Imessage, channel: string){
         try {
-
+            if (!messageBody?.intent) {
+                return false;
+            }
             const clientName = this.environmentProviderService.getClientEnvironmentVariable("Name");
             const childContainer = ContainerService.createChildContainer(clientName);
             if (!childContainer) {
@@ -332,7 +334,7 @@ export class DecisionRouter {
             }
             const intent = await IntentRepo.findIntentByCodeAndType(childContainer, messageBody.intent, IntentType.Careplan);
             if (!intent) {
-                throw new Error('Failed to find intent ${messageBody.intent} for careplan enrollment.');
+                throw new Error(`Failed to find intent ${messageBody.intent} for careplan enrollment.`);
             }
             const metaData = JSON.parse(intent.Metadata) as CareplanEnrollmentDomainModel;
             const careplanMetaData = CareplanMetaDataValidator.validatecareplanEnrollment(metaData);
