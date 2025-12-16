@@ -6,7 +6,8 @@ export enum MessageHandlerType {
     Custom      = 'Custom',
     Unhandled   = 'Unhandled',
     WorkflowService       = 'Alert',
-    AssessmentWithFormSubmission = 'AssessmentWithFormSubmission'
+    AssessmentWithFormSubmission = 'AssessmentWithFormSubmission',
+    BasicCareplan   = 'BasicCareplan'
 }
 
 export enum NlpProviderType {

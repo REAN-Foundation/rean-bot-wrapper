@@ -19,6 +19,11 @@ import { NeedleService } from "../needle.service";
 import { AssessmentService } from "../Assesssment/assessment.service";
 import { AssessmentIdentifiers } from "../../models/assessment/assessment.identifiers.model";
 import { WorkflowEventListener } from "../emergency/workflow.event.listener";
+import { IntentType } from "../../domain.types/intents/intents.types";
+import { ContainerService } from "../container/container.service";
+import { IntentRepo } from "../../database/repositories/intent/intent.repo";
+import { CareplanEnrollmentDomainModel } from "../../domain.types/basic.careplan/careplan.types";
+import { CareplanMetaDataValidator } from "../basic.careplan/careplan.metadata.validator";
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -189,7 +194,8 @@ export class DecisionRouter {
         
                 const matchingIntents = await intentRepository.findOne({
                     where : {
-                        code : intent
+                        code : intent,
+                        type : IntentType.Assessment
                     }
                 });
 
@@ -271,7 +277,8 @@ export class DecisionRouter {
                         ) {
                             const matchingIntents = await intentRepository.findOne({
                                 where : {
-                                    code : intent
+                                    code : intent,
+                                    type : IntentType.Assessment
                                 }
                             });
 
@@ -315,6 +322,35 @@ export class DecisionRouter {
 
     }
 
+    async checkCareplanEnrollment(messageBody: Imessage, channel: string){
+        try {
+
+            const clientName = this.environmentProviderService.getClientEnvironmentVariable("Name");
+            const childContainer = ContainerService.createChildContainer(clientName);
+            if (!childContainer) {
+                throw new Error("Failed to create child container");
+            }
+            const intent = await IntentRepo.findIntentByCodeAndType(childContainer, messageBody.intent, IntentType.Careplan);
+            if (!intent) {
+                throw new Error('Failed to find intent ${messageBody.intent} for careplan enrollment.');
+            }
+            const metaData = JSON.parse(intent.Metadata) as CareplanEnrollmentDomainModel;
+            const careplanMetaData = CareplanMetaDataValidator.validatecareplanEnrollment(metaData);
+
+            careplanMetaData.TenantName = clientName;
+            careplanMetaData.Channel = channel;
+            careplanMetaData.StartDate = new Date().toISOString()
+                .split('T')[0];
+
+            return careplanMetaData;
+                
+        } catch (error) {
+            console.log('Error in checkCareplanEnrollment:', error);
+            return false;
+        }
+
+    }
+    
     async checkDFIntent(messageBody: Imessage){
 
         // const dfResponse = await sessionClient.detectIntent(requestBody);
@@ -332,7 +368,6 @@ export class DecisionRouter {
         }
         return dfResponse;
     }
-
 
     async makeDecision(userQuery: string) {
 
@@ -409,6 +444,17 @@ export class DecisionRouter {
                 // }
 
             }
+
+            const careplanEnrollment = await this.checkCareplanEnrollment(messageBody, channel);
+            if (careplanEnrollment){
+                console.log(`Checking for careplan enrollment: ${messageBody}`);
+                console.log(`Enrolling to basic careplan: ${channel}`);
+                console.log(`Its careplan enrollment metadata: ${JSON.stringify(careplanEnrollment)}`);
+                this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.BasicCareplan;
+                this.outgoingMessage.MetaData = messageBody;
+                this.outgoingMessage.BasicCareplan = careplanEnrollment;
+                return this.outgoingMessage;
+            }
             const resultFeedback = await this.checkFeedback(messageBody, channel);
             this.outgoingMessage.MetaData = messageBody;
             if (!resultFeedback.feedbackFlag){
@@ -419,7 +465,7 @@ export class DecisionRouter {
                         this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.AssessmentWithFormSubmission;
                         return this.outgoingMessage;
                     }
-                    
+
                     //TODO: In WhatsApp form submission response length may greater than 256, so it is going to the QnA handler.
                     if (messageBody.messageBody.length > 256) {
                         this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.QnA;
@@ -478,7 +524,6 @@ export class DecisionRouter {
             return "en-US";
         }
     }
-
 
     private async checkWorkflowMode (schema: any, messageBody: Imessage){
         try {

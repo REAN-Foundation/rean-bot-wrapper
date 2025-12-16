@@ -64,6 +64,17 @@ export class TenantSettingService {
             return [];
         }
     }
+    
+    static async isBasicCareplanEnabled (tenantCode: string, apiKey: string, baseUrl: string): Promise<boolean> {
+        try {
+            const tenantSetting: TenantSettingsDomainModel =
+            await this.getTenantSettingByCode(tenantCode, apiKey, baseUrl);
+            return tenantSetting?.ChatBot?.BasicCarePlan ?? false;
+        } catch (error) {
+            console.error('Error in TenantSettingService.isBasicCareplanEnabled:', error);
+            return false;
+        }
+    }
 
     static async getConsentMessages(tenantCode: string, apiKey: string, baseUrl: string, languageCode = 'en'): Promise<ConsentMessage> {
         const defaultConsentMessage = {
