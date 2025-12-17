@@ -3,9 +3,9 @@ import { NeedleService } from '../needle.service';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 import { inject, Lifecycle, scoped,  } from 'tsyringe';
 import { Logger } from '../../common/logger';
-
 import { ContactList } from '../../models/contact.list';
 import { ChatSession } from '../../models/chat.session';
+import { CareplanEventQueue } from '../basic.careplan/careplan.event.queue';
 
 @scoped(Lifecycle.ContainerScoped)
 export class Registration{
@@ -52,13 +52,13 @@ export class Registration{
                 };
             } else if (creationMethod === "userName") {
                 obj = {
-                    FirstName       : platformUserName,
-                    UserName        : platformUserId,
-                    UniqueReferenceId  : platformUserId,
-                    DefaultTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
-                    CurrentTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
-                    TenantCode      : this.EnvironmentProviderService.getClientEnvironmentVariable("NAME"),
-                    GenerateOtp     : false
+                    FirstName         : platformUserName,
+                    UserName          : platformUserId,
+                    UniqueReferenceId : platformUserId,
+                    DefaultTimeZone   : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
+                    CurrentTimeZone   : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
+                    TenantCode        : this.EnvironmentProviderService.getClientEnvironmentVariable("NAME"),
+                    GenerateOtp       : false
                 };
             } else {
                 throw new Error(`Invalid creation method: ${creationMethod}`);
@@ -96,9 +96,9 @@ export class Registration{
                 optOut        : "false" });
             const defaultLanguage = this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE") || "en";
             await chatSessionRepository.create({
-                userPlatformID      : userPlatformId,
-                preferredLanguage   : defaultLanguage,
-                sessionOpen         : "true" });
+                userPlatformID    : userPlatformId,
+                preferredLanguage : defaultLanguage,
+                sessionOpen       : "true" });
         }
         else {
             await contactListRepository.update(
@@ -120,6 +120,12 @@ export class Registration{
                 const result = await this.checkPatientExist(PlatformUserId, null);
                 if (result.Data.Patients.Items.length === 0) {
                     patientUserId = await this.registerUserOnReanCare(platformUserName, PlatformUserId, "userName", password,api_key);
+
+                    CareplanEventQueue.pushEvent(
+                        this.EnvironmentProviderService.getClientName(),
+                        channel,
+                        PlatformUserId
+                    );
                 } else {
                     patientUserId = result.Data.Patients.Items[0].UserId;
                 }
@@ -137,6 +143,12 @@ export class Registration{
                 const result = await this.needleService.needleRequestForREAN("get", apiURL,null,null,api_key);
                 if (result.Data.Patients.Items.length === 0) {
                     patientUserId = await this.registerUserOnReanCare(platformUserName, PlatformUserId, "phoneNumber", password,api_key);
+
+                    CareplanEventQueue.pushEvent(
+                        this.EnvironmentProviderService.getClientName(),
+                        channel,
+                        PlatformUserId
+                    );
                 } else {
                     patientUserId = result.Data.Patients.Items[0].UserId;
                 }
