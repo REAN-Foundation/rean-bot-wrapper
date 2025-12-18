@@ -19,7 +19,7 @@ export interface CareplanEnrollmentDomainModel {
 }
 
 export interface CareplanEvent {
-    clientName: string;
-    channel: string;
-    patientUserId?: string;
+    ClientName: string;
+    Channel: string;
+    PlatformUserId?: string;
 }
