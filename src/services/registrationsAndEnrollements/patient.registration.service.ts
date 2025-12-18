@@ -6,6 +6,7 @@ import { Logger } from '../../common/logger';
 import { ContactList } from '../../models/contact.list';
 import { ChatSession } from '../../models/chat.session';
 import { CareplanEventQueue } from '../basic.careplan/careplan.event.queue';
+import { DEFAULT_DOB } from '../../refactor/messageTypes/user.info.types';
 
 @scoped(Lifecycle.ContainerScoped)
 export class Registration{
@@ -48,6 +49,7 @@ export class Registration{
                     DefaultTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
                     CurrentTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
                     TenantCode      : this.EnvironmentProviderService.getClientEnvironmentVariable("NAME"),
+                    BirthDate       : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_DOB") || DEFAULT_DOB,
                     GenerateOtp     : false
                 };
             } else if (creationMethod === "userName") {
@@ -58,6 +60,7 @@ export class Registration{
                     DefaultTimeZone   : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
                     CurrentTimeZone   : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
                     TenantCode        : this.EnvironmentProviderService.getClientEnvironmentVariable("NAME"),
+                    BirthDate         : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_DOB") || DEFAULT_DOB,
                     GenerateOtp       : false
                 };
             } else {
