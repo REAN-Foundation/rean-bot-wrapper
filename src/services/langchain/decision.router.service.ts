@@ -24,6 +24,7 @@ import { ContainerService } from "../container/container.service";
 import { IntentRepo } from "../../database/repositories/intent/intent.repo";
 import { CareplanEnrollmentDomainModel } from "../../domain.types/basic.careplan/careplan.types";
 import { CareplanMetaDataValidator } from "../basic.careplan/careplan.metadata.validator";
+import { NotificationType } from "../../domain.types/reminder/reminder.domain.model";
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -340,6 +341,7 @@ export class DecisionRouter {
             const careplanMetaData = CareplanMetaDataValidator.validatecareplanEnrollment(metaData);
 
             careplanMetaData.TenantName = clientName;
+            channel = channel === 'whatsappMeta' ? NotificationType.WhatsApp : channel;
             careplanMetaData.Channel = channel;
             careplanMetaData.StartDate = new Date().toISOString()
                 .split('T')[0];
