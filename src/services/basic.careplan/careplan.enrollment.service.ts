@@ -9,6 +9,7 @@ import { Imessage, Iresponse } from "../../refactor/interface/message.interface"
 import { SystemGeneratedMessagesRepo } from "../../database/repositories/system.messages/system.generated.messages.repo";
 import { platformServiceInterface } from "../../refactor/interface/platform.interface";
 import { commonResponseMessageFormat } from "../common.response.format.object";
+import { NotificationType } from "../../domain.types/reminder/reminder.domain.model";
 
 ///////////////////////////////////////////////////////////////////////////////
 export class CareplanEnrollmentService {
@@ -91,7 +92,7 @@ export class CareplanEnrollmentService {
                 `Sending registration message to patient: ${platformId} via channel: ${channel}`
             );
 
-            const platformMessageService: platformServiceInterface = childContainer.resolve(channel);
+            const platformMessageService: platformServiceInterface = childContainer.resolve(channel === NotificationType.WhatsApp ? 'whatsappMeta' : channel);
 
             const registrationMessage = await SystemGeneratedMessagesRepo.findMessageByName(
                 childContainer,
