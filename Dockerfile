@@ -13,7 +13,7 @@ RUN apk upgrade
 ADD . /app
 WORKDIR /app
 
-COPY package*.json /app/
+COPY package.json /app/
 # RUN npm install -g typescript
 RUN npm cache clean --force
 RUN rm -rf node_modules
@@ -38,7 +38,7 @@ RUN apk upgrade
 ADD . /app
 WORKDIR /app
 
-COPY package*.json /app/
+COPY package.json /app/
 RUN npm install --production
 RUN npm install pm2 -g
 RUN npm install sharp
