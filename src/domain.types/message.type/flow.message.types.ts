@@ -39,7 +39,7 @@ export enum FlowActionType {
 }
 
 export interface WhatsAppFlowTemplateRequest {
-    Type: string;
+    // Type: string;
     TemplateName: string;
     TemplateLanguage?: string;
     FlowToken?: string;

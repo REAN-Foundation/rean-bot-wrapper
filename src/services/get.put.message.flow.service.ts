@@ -212,6 +212,7 @@ export class MessageFlow{
         let payload = {};
         let messageType = "";
         let assessmentSession = null;
+        typeof msg.payload === "object" ? msg.payload = JSON.stringify(msg.payload) : msg.payload;
         let personName = " ";
         const contactList = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
         const personContactList = await contactList.findOne({ where: { mobileNumber: msg.userId } });
@@ -240,7 +241,7 @@ export class MessageFlow{
                     msg.message.Variables = JSON.parse(msg.message.Variables);
                 }
             }
-            if (msg.message.Variables[`${languageCode}`]) {
+            if (msg.message?.Variables[`${languageCode}`]) {
                 payload["variables"] = msg.message.Variables[`${languageCode}`];
             } else {
 
@@ -276,8 +277,8 @@ export class MessageFlow{
         }
         else if (msg.type === "reancareAssessment") {
             
-            // make compatible for telegram also.
-            const { updatedPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment( msg.userId,msg.channel, msg.payload, languageCode);
+            // make compatible for telegram also. 
+            const { updatedPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment( msg.userId,msg.channel, msg.payload, languageCode); 
             if (updatedPayload["channel"] === 'whatsappMeta' || updatedPayload["channel"] === 'WhatsappWati') {
                 messageType = msg.type;
                 msg.type = 'template';
@@ -542,10 +543,20 @@ export class MessageFlow{
                 throw new Error(`Error in getFormPayload: payload is null`);
             }
             const payloadObj = JSON.parse(payload);
-            const formMetadata = payloadObj.Metadata as WhatsAppFlowTemplateRequest | undefined;
+
+            // Extract metadata from new structure
+            // The metadata now has Type and ChannelConfig
+            const metadata = payloadObj.Metadata;
+
+            if (!metadata) {
+                throw new Error(`Error in getFormPayload: metadata is null`);
+            }
+
+            // Extract the actual form configuration from ChannelConfig
+            const formMetadata = metadata.ChannelConfig as WhatsAppFlowTemplateRequest | undefined;
 
             if (!formMetadata) {
-                throw new Error(`Error in getFormPayload: whatsappFormMetadata is null`);
+                throw new Error(`Error in getFormPayload: ChannelConfig is null`);
             }
 
             return {
@@ -557,8 +568,6 @@ export class MessageFlow{
                     },
                     components : [
                         formMetadata?.FlowActionData?.Component ?? null,
-
-                        // formMetadata?.Component ?? null,
                         {
                             type       : "button",
                             sub_type   : "flow",
@@ -568,20 +577,15 @@ export class MessageFlow{
                                     type   : "action",
                                     action : {
                                         flow_token : formMetadata?.FlowToken || 'unused',
-
-                                        // flow_action_data : {
-                                        //     ...formMetadata?.FlowActionData || {}
-                                        // }
                                     }
                                 }
                             ]
-
                         }
                     ].filter(Boolean)
                 },
             };
         } catch (error) {
-            console.log(`Error in getWhatsappFormMetadataPayload: ${error} payload: ${payload}`);
+            console.log(`Error in getFormPayload: ${error} payload: ${payload}`);
             return null;
         }
     };
