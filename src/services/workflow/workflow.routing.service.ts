@@ -70,7 +70,7 @@ Respond with ONLY valid JSON, no markdown formatting:
 {{
     "flag": "true or false",
     "reason": "brief explanation",
-    "matchedSchemaId": "schema-id or null"
+    "matchedSchemaId": "Provide the matching WORKFLOW SCHEMA ID or null"
 }}
 
 USER MESSAGE: {user_message}

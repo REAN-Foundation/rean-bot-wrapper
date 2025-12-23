@@ -112,7 +112,7 @@ export function buildWorkflowSummary(schema: Schema): string {
         .join(', ');
     
     return `
-WORKFLOW ${schema.id}:
+WORKFLOW SCHEMA ID: ${schema.id}
 Name: ${schema.Name}
 Description: ${schema.Description}
 
