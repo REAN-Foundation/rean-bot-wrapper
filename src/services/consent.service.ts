@@ -13,6 +13,13 @@ import { Iresponse } from '../refactor/interface/message.interface';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { sendApiButtonService } from './whatsappmeta.button.service';
 import { Registration } from './registrationsAndEnrollements/patient.registration.service';
+import { TenantSettingService } from './tenant.setting/tenant.setting.service';
+import { ConsentMessage, ConsentMessageWithLanguage } from '../domain.types/tenant.setting/tenant.setting.types';
+import { UserConsentRepo } from '../database/repositories/consent/consent.repo';
+import { MAX_TELEGRAM_BUTTONS, MAX_WHATSAPP_BUTTONS } from '../domain.types/user.consent/user.consent.types';
+
+
+///////////////////////////////////////////////////////////////////////////////
 
 @scoped(Lifecycle.ContainerScoped)
 export class ConsentService {
@@ -167,47 +174,46 @@ export class ConsentService {
             const clientEnvironmentProviderService = await req.container.resolve(ClientEnvironmentProviderService);
             const clientName = await  clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
             console.log(clientName);
-            const entityManagerProvider = req.container.resolve(EntityManagerProvider);
+
+            // const entityManagerProvider = req.container.resolve(EntityManagerProvider);
             
             this._platformMessageService = req.container.resolve(req.params.channel);
             this._platformMessageService.res = res;
             let payload = null;
             if (consentReply === "consent_no"){
                 console.log("No Consent is Given");
-                const userConsentRepository =
-                (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(UserConsent);
-                const consentStatus =
-                await userConsentRepository.findOne({ where: { userPlatformID: userId } });
-                if (consentStatus){
-                    await consentStatus.update({ consentGiven: "false" });
-                }
+                await UserConsentRepo.updateUserConsent(req.container,userId,"false");
                 const message =  clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_NO_MESSAGE");
                 const messageType = "text";
                 this.sendCustomMessage( this._platformMessageService, message, messageType, userId , payload);
             }
             else if (consentReply === "consent_changeLanguge"){
-                const consentData = await consentRepository.findAll();
+                const consentMessages: ConsentMessageWithLanguage[] = await TenantSettingService.getConsentSetting(clientName, clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"), clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL"));
                 const buttonArray = [];
-                consentData.forEach(async consent=>
+                consentMessages.forEach(async consent=>
                 {
                     console.log(consent);
-                    buttonArray.push(consent.dataValues.Language);
-                    buttonArray.push(`consent_changeLanguge-${consent.dataValues.LanguageCode}`);
+                    buttonArray.push(consent.Language);
+                    buttonArray.push(`consent_changeLanguge-${consent.LanguageCode}`);
                 });
                 console.log(buttonArray);
                 const message = await this.translate.translatestring("Please, select your preferred language", languageCode);
                 const messageType = buttonmessageType;
+                if (buttonArray.length === 0){
+                    buttonArray.push("English");
+                    buttonArray.push("consent_changeLanguge-en");
+                }
                 if (req.params.channel === "whatsappMeta"){
-                    payload = await sendApiButtonService(buttonArray);
+                    payload = await sendApiButtonService(buttonArray.slice(0,MAX_WHATSAPP_BUTTONS));
                 }
                 else {
-                    payload = await sendTelegramButtonService(buttonArray);
+                    payload = await sendTelegramButtonService(buttonArray.slice(0,MAX_TELEGRAM_BUTTONS));
                 }
                 this.sendCustomMessage(this._platformMessageService,message, messageType, userId , payload);
             }
             else {
-                const consentFindResult = await consentRepository.findOne({ where: { LanguageCode: languageCode } });
-                const message = `${consentFindResult.MessageContent} \n\n ${consentFindResult.WebsiteURL}`;
+                const consentMessage: ConsentMessage = await TenantSettingService.getConsentMessages(clientName, clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"), clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL"), languageCode);
+                const message = `${consentMessage.Content} \n\n ${consentMessage.WebsiteURL}`;
                 const messageType = buttonmessageType;
                 const button_yes = await this.translate.translatestring("Yes",languageCode);
                 const button_no = await this.translate.translatestring("No",languageCode);

@@ -7,6 +7,8 @@ import { handleRequestservice } from './handle.request.service';
 import { delay, inject, Lifecycle, scoped } from 'tsyringe';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { ChatMessage } from '../models/chat.message.model';
+import { ChatMessageSensitivity } from '../models/chat.message.sensitivity.model';
+
 import { GoogleTextToSpeech } from './text.to.speech';
 import { SlackMessageService } from "./slack.message.service";
 import { ChatSession } from '../models/chat.session';
@@ -117,9 +119,9 @@ export class MessageFlow{
             if ( message.type === 'nfm_reply' ) {
                 return {
                     message,
-                    translate_message: {
-                        message : message.messageBody,
-                        original_message : message.messageBody,
+                    translate_message : {
+                        message            : message.messageBody,
+                        original_message   : message.messageBody,
                         languageForSession : null
                     }
                 };
@@ -265,8 +267,9 @@ export class MessageFlow{
 
             msg.message = await msg.message.replace("PatientName", msg.payload.PersonName ?? personName);
             msg.message = await this.translate.translatePushNotifications( msg.message, msg.userId);
-
-            // msg.message = msg.message[0];
+            if (channel === "telegram" || channel === "Telegram") {
+                msg.message = msg.message[0];
+            }
         }
         else if (msg.type === "interactivebuttons") {
             payload = await sendApiButtonService(msg.payload);
@@ -478,6 +481,7 @@ export class MessageFlow{
     saveResponseDataToUser = async(response_format,processedResponse) => {
         const intent = processedResponse.message_from_nlp.getIntent();
         const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
+        const chatMessageSensitivityRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessageSensitivity);
         const chatSessionModel = await chatSessionRepository.findOne({ where: { userPlatformID: response_format.sessionId } });
         let chatSessionId = null;
         if (chatSessionModel) {
@@ -495,7 +499,13 @@ export class MessageFlow{
             intent         : intent
         };
         const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-        await (await chatMessageRepository.create(dfResponseObj)).save();
+        const savedMessage = await chatMessageRepository.create(dfResponseObj);
+        if (response_format?.sensitivity) {
+            await chatMessageSensitivityRepository.create({
+                chatMessageID : savedMessage.id,
+                sensitivity   : response_format.sensitivity
+            });
+        }
     };
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

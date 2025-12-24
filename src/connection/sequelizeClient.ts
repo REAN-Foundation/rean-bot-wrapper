@@ -1,6 +1,7 @@
 import { Sequelize } from 'sequelize-typescript';
 import { autoInjectable, singleton } from 'tsyringe';
 import { ChatMessage } from '../models/chat.message.model';
+import { ChatMessageSensitivity } from '../models/chat.message.sensitivity.model';
 import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
 import { MessageStatus } from '../models/message.status';
@@ -48,6 +49,7 @@ export class SequelizeClient {
             } else {
                 sequelizeClient.addModels([
                     ChatMessage,
+                    ChatMessageSensitivity,
                     ChatSession,
                     ContactList,
                     AssessmentSessionLogs,
