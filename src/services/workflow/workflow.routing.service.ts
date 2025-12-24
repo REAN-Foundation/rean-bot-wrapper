@@ -139,7 +139,7 @@ Analyze and provide your routing decision.
             const parsedResult = this.parseResponse(result);
 
             const shouldTrigger = parsedResult.flag.toLocaleLowerCase() === "true";
-            const matchedSchemaId = parsedResult.mathcedSchemaId;
+            const matchedSchemaId = parsedResult.matchedSchemaId;
 
             const matchedSchema = matchedSchemaId ? findSchemaById(schemas, matchedSchemaId) : undefined;
 

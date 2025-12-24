@@ -123,7 +123,7 @@ export interface MultiSchemaApiResponse {
 export interface WorkflowRoutingResult {
     flag: string;
     reason: string;
-    mathcedSchemaId: string | null;
+    matchedSchemaId: string | null;
 }
 
 export interface RoutingDecision {
