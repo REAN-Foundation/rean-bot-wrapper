@@ -12,6 +12,7 @@
         "sourceMap": true,
         "noEmitHelpers":false,
         "alwaysStrict": true,
+        "skipLibCheck": true,
         "suppressImplicitAnyIndexErrors": false,
         "forceConsistentCasingInFileNames": true,
         "resolveJsonModule" : true,
