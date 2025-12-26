@@ -185,7 +185,10 @@ export interface ChatBotSettings {
     ReminderAppointment : boolean   ,
     AppointmentFollowup : boolean,
     ConversationHistory : boolean,
-    Emojis              : boolean
+    Emojis              : boolean,
+    BasicAssessment     : boolean,
+    BasicCarePlan       : boolean,
+    Timezone?           : string
 }
 
 export enum FollowupSource {
@@ -322,6 +325,10 @@ export interface ConsentMessage {
     LanguageCode?  : string;
     Content?: string;
     WebsiteURL?  : string;
+}
+
+export interface ConsentMessageWithLanguage extends ConsentMessage {
+    Language?  : string;
 }
 
 export interface TenantSettingsDomainModel {
