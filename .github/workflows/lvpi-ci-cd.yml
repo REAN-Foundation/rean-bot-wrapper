@@ -5,7 +5,7 @@ name: LVPI-CI-CD
 
 on:
   push:
-    branches: [main]
+    branches: [main, feature/lvpi-ci-cd]
   workflow_dispatch:
     inputs:
       deploy_to_ecs:
