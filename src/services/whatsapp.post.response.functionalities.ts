@@ -228,8 +228,8 @@ export class WhatsappPostResponseFunctionalities{
                         "location" : {
                             "latitude"  : payload.location.latitude,
                             "longitude" : payload.location.longitude,
-                            "name"      : payload.location.name ?? "Incident Location",
-                            "address"   : payload.location.address ?? "Location details"
+                            "name"      : payload.location.name ?? payload.location.latitude+","+payload.location.longitude,
+                            "address"   : payload.location.address ?? payload.location.latitude+","+payload.location.longitude,
                         } }]
                 }] : []),
     
