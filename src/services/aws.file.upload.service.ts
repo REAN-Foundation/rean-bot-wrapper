@@ -1,6 +1,7 @@
 import AWS from 'aws-sdk';
 import fs from 'fs';
-import nodeHtmlToImage from 'node-html-to-image';
+
+// import nodeHtmlToImage from 'node-html-to-image';
 import path from 'path';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import { SignedUrls } from './signed.urls.service';
@@ -223,33 +224,34 @@ export class AwsS3manager{
         }
     }
 
-    async createFileFromHTML (html) {
-        const imageName = 'uploads/' + Date.now() + '.png';
+    // METHOD BEING DEPRECATED DUE TO PACKAGE SUPPORT ISSUES
+    // async createFileFromHTML (html) {
+    //     const imageName = 'uploads/' + Date.now() + '.png';
 
-        const REANLogo = fs.readFileSync('./uploads/ReanLogo.jpg');
-        const COWINLogo = fs.readFileSync('./uploads/COWINLogo.jpeg');
+    //     const REANLogo = fs.readFileSync('./uploads/ReanLogo.jpg');
+    //     const COWINLogo = fs.readFileSync('./uploads/COWINLogo.jpeg');
 
-        const base64REANLogo = new (Buffer as any).from(REANLogo).toString('base64');
-        const base64COWINLogo = new (Buffer as any).from(COWINLogo).toString('base64');
-        const dataURIREAN = 'data:image/jpeg;base64,' + base64REANLogo;
-        const dataURICOWIN = 'data:image/jpeg;base64,' + base64COWINLogo;
-        return new Promise<string>(async (resolve, reject) => {
-            nodeHtmlToImage({
-                output        : imageName,
-                html          : html,
-                content       : { imageSourceREAN: dataURIREAN, imageSourceCOWIN: dataURICOWIN },
-                puppeteerArgs : { args: ['--no-sandbox'] }
-            })
-                .then(() => {
-                    console.log('file created');
-                    resolve(imageName);
-                })
-                .catch(async (error) => {
-                    console.log('file creation error', error);
-                    reject('');
-                });
-        });
-    }
+    //     const base64REANLogo = new (Buffer as any).from(REANLogo).toString('base64');
+    //     const base64COWINLogo = new (Buffer as any).from(COWINLogo).toString('base64');
+    //     const dataURIREAN = 'data:image/jpeg;base64,' + base64REANLogo;
+    //     const dataURICOWIN = 'data:image/jpeg;base64,' + base64COWINLogo;
+    //     return new Promise<string>(async (resolve, reject) => {
+    //         nodeHtmlToImage({
+    //             output        : imageName,
+    //             html          : html,
+    //             content       : { imageSourceREAN: dataURIREAN, imageSourceCOWIN: dataURICOWIN },
+    //             puppeteerArgs : { args: ['--no-sandbox'] }
+    //         })
+    //             .then(() => {
+    //                 console.log('file created');
+    //                 resolve(imageName);
+    //             })
+    //             .catch(async (error) => {
+    //                 console.log('file creation error', error);
+    //                 reject('');
+    //             });
+    //     });
+    // }
 
     async getFile (key) {
         return new Promise<any>(async(resolve) => {
