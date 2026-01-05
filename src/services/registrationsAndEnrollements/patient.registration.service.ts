@@ -40,7 +40,7 @@ export class Registration{
     ): Promise<string> {
         try {
             let obj: Record<string, any> | null = null;
-    
+
             // Build the object based on creation method
             if (creationMethod === "phoneNumber") {
                 obj = {
@@ -68,8 +68,6 @@ export class Registration{
             }
     
             // API Call
-            console.log("Registration object", obj);
-            console.log("API key", api_key);
             const apiURL = `patients`;
             const response = await this.needleService.needleRequestForREAN("post", apiURL, null, obj,api_key);
     
