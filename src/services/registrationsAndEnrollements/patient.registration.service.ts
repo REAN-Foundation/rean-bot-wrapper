@@ -68,6 +68,8 @@ export class Registration{
             }
     
             // API Call
+            console.log("Registration object", obj);
+            console.log("API key", api_key);
             const apiURL = `patients`;
             const response = await this.needleService.needleRequestForREAN("post", apiURL, null, obj,api_key);
     
