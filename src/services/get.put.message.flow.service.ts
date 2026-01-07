@@ -212,7 +212,10 @@ export class MessageFlow{
         let payload = {};
         let messageType = "";
         let assessmentSession = null;
-        typeof msg.payload === "object" ? msg.payload = JSON.stringify(msg.payload) : msg.payload;
+
+        if (typeof msg.payload === "object" && !Array.isArray(msg.payload)) {
+            msg.payload = JSON.stringify(msg.payload);
+        }
         let personName = " ";
         const contactList = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
         const personContactList = await contactList.findOne({ where: { mobileNumber: msg.userId } });
@@ -277,8 +280,8 @@ export class MessageFlow{
         }
         else if (msg.type === "reancareAssessment") {
             
-            // make compatible for telegram also. 
-            const { updatedPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment( msg.userId,msg.channel, msg.payload, languageCode); 
+            // make compatible for telegram also.
+            const { updatedPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment( msg.userId,msg.channel, msg.payload, languageCode);
             if (updatedPayload["channel"] === 'whatsappMeta' || updatedPayload["channel"] === 'WhatsappWati') {
                 messageType = msg.type;
                 msg.type = 'template';
