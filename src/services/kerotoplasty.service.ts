@@ -252,7 +252,7 @@ export class kerotoplastyService {
             let report = "### Patient Details\n";
             if (response.body.patient_details) {
                 const patient_details = response.body.patient_details;
-                report = report + "- Name : " + patient_details.FirstName + ' ' + patient_details.LastName + '\n';
+                // report = report + "- Name : " + patient_details.FirstName + ' ' + patient_details.LastName + '\n';
                 report = report + "- Gender : " + patient_details.Gender + '\n';
 
                 const age = await this.getAge(patient_details.DOB);
