@@ -22,6 +22,7 @@ import { MessageHandlerType } from '../refactor/messageTypes/message.types';
 import { CommonAssessmentService } from './Assesssment/common.assessment.service';
 import { AssessmentHandlingService } from './Assesssment/assessment.handling.service';
 import { FormHandler } from './form/form.handler';
+import { CareplanEnrollmentService } from './basic.careplan/careplan.enrollment.service';
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -207,9 +208,26 @@ export class handleRequestservice {
         }
         case MessageHandlerType.WorkflowService: {
             console.log("Workflow service event .....");
-            const result = await this.workflowEventListener.commence(metaData, eventObj);
+
+            // This is the matching schema id from the llm service
+            const workflowId = outgoingMessage.Alert.AlertId;
+            const result = await this.workflowEventListener.commence(metaData, eventObj, workflowId);
             if (!result) {
                 console.log("Unable to process Workflow event listener event.");
+            }
+            break;
+        }
+
+        case MessageHandlerType.BasicCareplan: {
+            try {
+                console.log("Basic careplan enrollment message handler processing...");
+                await CareplanEnrollmentService.enrollPatient(
+                    outgoingMessage.BasicCareplan?.TenantName,
+                    outgoingMessage.BasicCareplan?.Channel,
+                    outgoingMessage.MetaData,
+                    outgoingMessage.BasicCareplan);
+            } catch (error) {
+                console.log("Error in Basic careplan enrollment:", error);
             }
             break;
         }
