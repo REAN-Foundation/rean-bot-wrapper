@@ -6,6 +6,10 @@ import { translateService } from "./translate.service";
 import { HandleMessagetypePayload } from './handle.messagetype.payload';
 import { ClientEnvironmentProviderService } from "./set.client/client.environment.provider.service";
 import { inject, Lifecycle, scoped } from "tsyringe";
+import { MessageType } from "../domain.types/common.types";
+import { getFlowMessageParts } from "../utils/flow.helper";
+import { FlowActionType } from "../domain.types/message.type/flow.message.types";
+import { SystemGeneratedMessagesService } from "./system.generated.message.service";
 
 @scoped(Lifecycle.ContainerScoped)
 export class WhatsappPostResponseFunctionalities{
@@ -14,7 +18,8 @@ export class WhatsappPostResponseFunctionalities{
         @inject(HandleMessagetypePayload) private handleMessagetypePayload?: HandleMessagetypePayload,
         @inject(UserLanguage) private userLanguage?: UserLanguage,
         @inject(translateService) private _translateService?: translateService,
-        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(SystemGeneratedMessagesService) private systemGeneratedMessages?: SystemGeneratedMessagesService
     ) {}
 
     textResponseFormat = (response_format:Iresponse,payload) =>{
@@ -107,7 +112,7 @@ export class WhatsappPostResponseFunctionalities{
 
     };
 
-    interactivelistResponseFormat = (response_format:Iresponse,payload) =>{
+    interactivelistResponseFormat = async (response_format:Iresponse,payload) =>{
         console.log(`........From interactivelistResponseFormat ${response_format} payload: ${JSON.stringify(payload, null, 2)}`, );
         const postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
         const rows_meta = [];
@@ -116,22 +121,41 @@ export class WhatsappPostResponseFunctionalities{
         if (payload.fields.header){
             header = payload.fields.header.stringValue;
         } else {
-            header = "Select ";
+            header = "Please Select";
         }
+        
+        let buttonText = ["Please Choose"];
+        if (payload.fields.selectButtonText) {
+            buttonText = [payload.fields.selectButtonText.stringValue];
+        }
+        const languageForSession = await this.userLanguage.getPreferredLanguageofSession(response_format.sessionId);
 
         let count_meta = 0;
+        buttonText = await this._translateService.translateResponse(buttonText, languageForSession);
+        const translatedHeader = await this._translateService.translateResponse([header], languageForSession);
+        header = translatedHeader[0];
         for (const lit of list_meta){
             let id_meta = count_meta;
             let description_meta = "";
             if (lit.structValue.fields.description){
                 description_meta = lit.structValue.fields.description.stringValue;
+                let translatedDescription = [description_meta];
+                translatedDescription = await this._translateService.translateResponse([description_meta], languageForSession);
             }
             if (lit.structValue.fields.id){
                 id_meta = lit.structValue.fields.id.stringValue;
             }
+            const title = lit.structValue.fields.title.stringValue;
+            let translatedTitle = [title];
+            if (languageForSession) {
+                translatedTitle = await this._translateService.translateResponse([title],languageForSession);
+                
+
+            }
+
             const temp_meta = {
                 "id"          : id_meta,
-                "title"       : lit.structValue.fields.title.stringValue,
+                "title"       : translatedTitle[0],
                 "description" : description_meta
             };
             rows_meta.push(temp_meta);
@@ -147,7 +171,7 @@ export class WhatsappPostResponseFunctionalities{
                 "text" : response_format.messageText
             },
             "action" : {
-                "button"   : "Select From Here",
+                "button"   : buttonText[0],
                 "sections" : [
                     {
                         "rows" : rows_meta
@@ -204,8 +228,8 @@ export class WhatsappPostResponseFunctionalities{
                         "location" : {
                             "latitude"  : payload.location.latitude,
                             "longitude" : payload.location.longitude,
-                            "name"      : payload.location.name ?? "Incident Location",
-                            "address"   : payload.location.address ?? "Location details"
+                            "name"      : payload.location.name ?? payload.location.latitude+","+payload.location.longitude,
+                            "address"   : payload.location.address ?? payload.location.latitude+","+payload.location.longitude,
                         } }]
                 }] : []),
     
@@ -274,6 +298,57 @@ export class WhatsappPostResponseFunctionalities{
         return postDataMeta;
     };
 
+    flowResponseFormat = async(response_format:Iresponse,payload) =>{
+        console.log(`........From flowResponseFormat ${response_format} payload: ${JSON.stringify(payload, null, 2)}`, );
+        const requestBody = this.postDataFormatWhatsapp(response_format.sessionId);
+        requestBody.type = MessageType.INTERACTIVE;
+
+        console.log(`Payload Flow Name:`, payload?.flowName);
+        const flowMessageParts = getFlowMessageParts(payload?.flowName);
+        console.log(`Flow Message Parts:`, flowMessageParts);
+
+        requestBody["interactive"] = {
+            "type"   : MessageType.FLOW,
+            "action" : {
+                "name"       : "flow",
+                "parameters" : {
+                    "flow_message_version" : "3",
+                    "flow_action"          : payload?.flowAction || FlowActionType.Navigate,
+                    "flow_name"            : payload.flowName,
+                    "flow_cta"             : "Click Here!",
+                    "flow_action_payload"  : {
+                        "screen" : flowMessageParts?.Screen ?? "WELCOME"
+                    }
+                }
+            }
+        };
+
+        if (flowMessageParts) {
+            if (flowMessageParts.Header) {
+                requestBody["interactive"]["header"] = flowMessageParts.Header;
+            }
+            if (flowMessageParts.Body) {
+                requestBody["interactive"]["body"] = flowMessageParts.Body;
+            }
+            if (flowMessageParts.Footer) {
+                requestBody["interactive"]["footer"] = flowMessageParts.Footer;
+            }
+            if (flowMessageParts.ActionVersion) {
+                requestBody["interactive"]["action"]["parameters"]["flow_message_version"] = flowMessageParts.ActionVersion;
+            }
+            if (flowMessageParts.Cta) {
+                requestBody["interactive"]["action"]["parameters"]["flow_cta"] = flowMessageParts.Cta;
+            }
+        }
+
+        if (payload?.flowActionPayload) {
+            requestBody["interactive"]["action"]["parameters"]["flow_action_payload"]["data"] = payload.flowActionPayload;
+        }
+
+        console.log(`Flow RequestBody:`, JSON.stringify(requestBody, null, 2));
+        return requestBody;
+    };
+
     custom_payloadResponseFormat = async(response_format:Iresponse,payload) =>{
         console.log(`........From custom_payloadResponseFormat ${response_format} payload: ${JSON.stringify(payload, null, 2)}`, );
         const payloadContent = this.handleMessagetypePayload.getPayloadContent(payload);
@@ -309,6 +384,14 @@ export class WhatsappPostResponseFunctionalities{
             "type"              : null
         };
         return postData;
+    };
+
+    reancareAssessmentWithFormResponseFormat = async(response_format:Iresponse,payload) => {
+        console.log(`........From reancareAssessmentWithFormResponseFormat ${response_format} payload: ${JSON.stringify(payload, null, 2)}`, );
+        let postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
+        postDataMeta = { ...postDataMeta,...payload || {} };
+        console.log(`........From reancareAssessmentWithFormResponseFormat ${response_format} payload: ${JSON.stringify(postDataMeta, null, 2)}`, );
+        return postDataMeta;
     };
 
     messageTextAccordingToMessageType = (response_format:Iresponse, payload:any, custom_payload_type:string) => {

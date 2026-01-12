@@ -8,6 +8,7 @@ import { SlackClickupCommonFunctions } from './slackAndCkickupSendCustomMessage'
 import { EntityManagerProvider } from './entity.manager.provider.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { ContactList } from '../models/contact.list';
+import { SystemGeneratedMessagesService } from '../services/system.generated.message.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ClickUpMessageService implements platformServiceInterface {
@@ -17,7 +18,8 @@ export class ClickUpMessageService implements platformServiceInterface {
     constructor(
         @inject(SlackClickupCommonFunctions) private slackClickupCommonFunctions?: SlackClickupCommonFunctions,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
-        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(SystemGeneratedMessagesService) private systemGeneratedMessagesService?: SystemGeneratedMessagesService
     ){}
 
     getMessageIdFromResponse(responseBody: any) {
@@ -83,12 +85,12 @@ export class ClickUpMessageService implements platformServiceInterface {
                     const now = Date.now();
                     ClickUpMessageService.processedComments.set(commentId, now);
 
-                    const commentObj = requestBody.history_items[0].comment.comment;
-                    for (let i = 0; i < commentObj.length; i++){
-                        if (commentObj[i].type && commentObj[i].text === "@watchers"){
-                            const tag = commentObj[i].text;
-                            this.eventComment(requestBody,tag);
-                        }
+                    const commentArray = requestBody.history_items[0].comment.comment;
+                    const tagObj = commentArray.find(item => item.type === "followers_tag");
+
+                    if (tagObj) {
+                        const tag = "@everyone";
+                        this.eventComment(requestBody, tag);
                     }
                 }
             }
@@ -132,8 +134,11 @@ export class ClickUpMessageService implements platformServiceInterface {
                 platform = personContactList.dataValues.platform;
                 userId = personContactList.dataValues.mobileNumber;
             }
-            const filterText = (requestBody.history_items[0].comment.text_content).replace(tag, '');
-            const textToUser = `Response from Expert : ${filterText}`;
+            const filterText = (requestBody.history_items[0].comment.text_content).replace(tag, '').replace('/n', '');
+            const textToUserFromClickup = await this.systemGeneratedMessagesService.getMessage("CLICKUP_REPLY_TO_USER_MESSAGE");
+            const textToUser = textToUserFromClickup && textToUserFromClickup.trim() !== ""
+                ? `${textToUserFromClickup} : ${filterText}`
+                : `Response from Expert : ${filterText}`;
             console.log("textToUser", textToUser);
             const commentId = requestBody.history_items[0].comment.id;
             await this.slackClickupCommonFunctions.sendCustomMessage(platform, userId, textToUser);

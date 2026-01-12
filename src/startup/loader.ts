@@ -4,6 +4,8 @@ import { Authenticator } from '../auth/authenticator';
 import { Injector } from './injector';
 import { Logger } from '../common/logger';
 import { Scheduler } from './scheduler';
+import { IEventConsumer } from '../modules/events/interfaces/event.consumer.interface';
+import { EventInjector } from '../modules/events/event.injector';
 
 export class Loader {
 
@@ -12,6 +14,8 @@ export class Loader {
     private static _container: DependencyContainer = container;
 
     private static _scheduler: Scheduler = Scheduler.instance();
+
+    private static _eventConsumers: IEventConsumer = null;
 
     public static get authenticator() {
         return Loader._authenticator;
@@ -30,7 +34,11 @@ export class Loader {
 
             //Register injections here...
             Injector.registerInjections(container);
+            EventInjector.registerInjections(container);
             Loader._authenticator = container.resolve(Authenticator);
+
+            Loader._eventConsumers = container.resolve('IEventConsumer');
+            await Loader._eventConsumers.startListening();
 
             return true;
 

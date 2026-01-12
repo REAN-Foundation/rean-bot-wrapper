@@ -197,11 +197,17 @@ export class MockMessageService implements platformServiceInterface {
             }
             else if (processedResponse.processed_message.length > 1) {
                 if (pasrseMode && pasrseMode === 'HTML') {
-                    const uploadImageName = await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
-                    const vaacinationImageFile = await this.awsS3manager.uploadFile(uploadImageName);
-                    if (vaacinationImageFile) {
-                        reaponse_message = { name: mock_user_name, platform: "MockChannel", platformId: platformId, chat_message_id: mock_chat_message_id, direction: "Out", message_type: "image", intent: intent, messageBody: String(vaacinationImageFile), messageImageUrl: null, messageImageCaption: null, sessionId: mock_whatsapp_id, input_message: mock_input_message, messageText: processedResponse.processed_message[1], similarDoc: similarDoc };
-                    }
+
+                    console.log(
+                        "THIS HTML TO IMAGE SUPPORT HAS BEEN DEPRECATED"
+                    );
+                    
+                    // METHOD BEING DEPRECATED DUE TO PACKAGE SUPPORT ISSUES
+                    // const uploadImageName = await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
+                    // const vaacinationImageFile = await this.awsS3manager.uploadFile(uploadImageName);
+                    // if (vaacinationImageFile) {
+                    //     reaponse_message = { name: mock_user_name, platform: "MockChannel", platformId: platformId, chat_message_id: mock_chat_message_id, direction: "Out", message_type: "image", intent: intent, messageBody: String(vaacinationImageFile), messageImageUrl: null, messageImageCaption: null, sessionId: mock_whatsapp_id, input_message: mock_input_message, messageText: processedResponse.processed_message[1], similarDoc: similarDoc };
+                    // }
                 }
                 else {
                     reaponse_message = { name: mock_user_name, platform: "MockChannel", platformId: platformId, chat_message_id: mock_chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: mock_whatsapp_id, input_message: mock_input_message, messageText: processedResponse.processed_message[0], similarDoc: similarDoc };

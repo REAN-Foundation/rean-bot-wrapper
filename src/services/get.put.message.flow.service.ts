@@ -7,6 +7,8 @@ import { handleRequestservice } from './handle.request.service';
 import { delay, inject, Lifecycle, scoped } from 'tsyringe';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 import { ChatMessage } from '../models/chat.message.model';
+import { ChatMessageSensitivity } from '../models/chat.message.sensitivity.model';
+
 import { GoogleTextToSpeech } from './text.to.speech';
 import { SlackMessageService } from "./slack.message.service";
 import { ChatSession } from '../models/chat.session';
@@ -26,6 +28,7 @@ import { sendTelegramButtonService } from './telegram.button.service';
 import { Logger } from '../common/logger';
 import { MessageHandlerType } from '../refactor/messageTypes/message.types';
 import { AssessmentIdentifiers } from '../models/assessment/assessment.identifiers.model';
+import { WhatsAppFlowTemplateRequest } from '../domain.types/message.type/flow.message.types';
 
 // import { AssessmentIdentifiers } from '../models/assessment/assessment.identifiers.model';
 
@@ -73,7 +76,9 @@ export class MessageFlow{
 
     async checkTheFlowRouter(messageToLlmRouter: Imessage, channel: string, platformMessageService: platformServiceInterface){
         try {
+            console.log(`checkTheFlowRouter messageToLlmRouter:${messageToLlmRouter} \n Chaneel : ${channel}`);
             const preprocessedOutgoingMessage = await this.preprocessOutgoingMessage(messageToLlmRouter);
+            console.log("Processed outgoing message", JSON.stringify(preprocessedOutgoingMessage, null, 2));
 
             console.log("The message is being set to make the decision");
             const outgoingMessage: OutgoingMessage = await this.decisionRouter.getDecision(preprocessedOutgoingMessage.message, channel);
@@ -87,13 +92,13 @@ export class MessageFlow{
             }
             const processedResponse = await this.handleRequestservice.handleUserRequestForRouting(outgoingMessage, platformMessageService);
 
-            if (outgoingMessage.PrimaryMessageHandler !== MessageHandlerType.WorkflowService) {
+            if (outgoingMessage.PrimaryMessageHandler !== MessageHandlerType.WorkflowService && processedResponse.message_from_nlp) {
                 const response = await this.processOutgoingMessage(messageToLlmRouter, channel, platformMessageService, processedResponse);
 
                 // Update the DB using message Id only if outgoing meesage is related with assessment
                 const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
                 const assessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
-                const key = `${messageToLlmRouter.platformId}:NextQuestionFlag`;
+                const key = `${messageToLlmRouter.platformId}:NextQuestionFlag:${outgoingMessage.Assessment.AssessmentId}`;
                 const nextQuestionFlag = await CacheMemory.get(key);
                 if (nextQuestionFlag === true && outgoingMessage.PrimaryMessageHandler === "Assessments") {
                     const messageId = platformMessageService.getMessageIdFromResponse(response);
@@ -108,8 +113,19 @@ export class MessageFlow{
 
     async preprocessOutgoingMessage(message: Imessage){
         try {
-
             await this.engageMySQL(message);
+            console.log("Get put message.type: ",message.type);
+            console.log("Get put message.messageBody: ",message.messageBody);
+            if ( message.type === 'nfm_reply' ) {
+                return {
+                    message,
+                    translate_message : {
+                        message            : message.messageBody,
+                        original_message   : message.messageBody,
+                        languageForSession : null
+                    }
+                };
+            }
             const translate_message = await this.translate.translateMessage(message.type, message.messageBody, message.platformId);
             translate_message["original_message"] = message.messageBody;
             message.messageBody = translate_message.message;
@@ -251,7 +267,9 @@ export class MessageFlow{
 
             msg.message = await msg.message.replace("PatientName", msg.payload.PersonName ?? personName);
             msg.message = await this.translate.translatePushNotifications( msg.message, msg.userId);
-            msg.message = msg.message[0];
+            if (channel === "telegram" || channel === "Telegram") {
+                msg.message = msg.message[0];
+            }
         }
         else if (msg.type === "interactivebuttons") {
             payload = await sendApiButtonService(msg.payload);
@@ -285,6 +303,12 @@ export class MessageFlow{
                 payload["buttonIds"] = await templateButtonService(msg.message.ButtonsIds);
             }
 
+        }
+        if (msg?.type === 'reancareAssessmentWithForm') {
+            console.log("Processing reancareAssessmentWithForm..");
+            const whatsappFormMetadata = await this.getFormPayload(msg?.payload);
+            payload = { ...payload, ...(whatsappFormMetadata || {}) };
+            console.log("ReancareAssessmentWithForm payload:", JSON.stringify(payload, null, 2));
         }
         const response_format = await platformMessageService.createFinalMessageFromHumanhandOver(msg);
         const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
@@ -336,7 +360,7 @@ export class MessageFlow{
         if (messageType === "reancareAssessment") {
             
             assessmentSession.userMessageId = platformMessageService.getMessageIdFromResponse(message_to_platform);
-            const Assessmentkey = `${response_format.sessionId}:Assessment`;
+            const Assessmentkey = `${response_format.sessionId}:Assessment:${assessmentSession.assesmentId}`;
             CacheMemory.set(Assessmentkey,assessmentSession.userMessageId);
             const AssessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
 
@@ -457,6 +481,7 @@ export class MessageFlow{
     saveResponseDataToUser = async(response_format,processedResponse) => {
         const intent = processedResponse.message_from_nlp.getIntent();
         const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
+        const chatMessageSensitivityRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessageSensitivity);
         const chatSessionModel = await chatSessionRepository.findOne({ where: { userPlatformID: response_format.sessionId } });
         let chatSessionId = null;
         if (chatSessionModel) {
@@ -474,7 +499,13 @@ export class MessageFlow{
             intent         : intent
         };
         const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-        await (await chatMessageRepository.create(dfResponseObj)).save();
+        const savedMessage = await chatMessageRepository.create(dfResponseObj);
+        if (response_format?.sensitivity) {
+            await chatMessageSensitivityRepository.create({
+                chatMessageID : savedMessage.id,
+                sensitivity   : response_format.sensitivity
+            });
+        }
     };
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -504,5 +535,55 @@ export class MessageFlow{
             console.log(error);
         }
     }
+
+    private getFormPayload = async(payload: string) => {
+        try {
+            if (!payload) {
+                throw new Error(`Error in getFormPayload: payload is null`);
+            }
+            const payloadObj = JSON.parse(payload);
+            const formMetadata = payloadObj.Metadata as WhatsAppFlowTemplateRequest | undefined;
+
+            if (!formMetadata) {
+                throw new Error(`Error in getFormPayload: whatsappFormMetadata is null`);
+            }
+
+            return {
+                type     : "template",
+                template : {
+                    name     : formMetadata.TemplateName,
+                    language : {
+                        code : formMetadata?.TemplateLanguage || 'en'
+                    },
+                    components : [
+                        formMetadata?.FlowActionData?.Component ?? null,
+
+                        // formMetadata?.Component ?? null,
+                        {
+                            type       : "button",
+                            sub_type   : "flow",
+                            index      : "0",
+                            parameters : [
+                                {
+                                    type   : "action",
+                                    action : {
+                                        flow_token : formMetadata?.FlowToken || 'unused',
+
+                                        // flow_action_data : {
+                                        //     ...formMetadata?.FlowActionData || {}
+                                        // }
+                                    }
+                                }
+                            ]
+
+                        }
+                    ].filter(Boolean)
+                },
+            };
+        } catch (error) {
+            console.log(`Error in getWhatsappFormMetadataPayload: ${error} payload: ${payload}`);
+            return null;
+        }
+    };
 
 }

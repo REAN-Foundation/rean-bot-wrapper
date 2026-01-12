@@ -3,7 +3,7 @@
 import { DialogflowResponseService } from './dialogflow.response.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { translateService } from './translate.service';
-import { inject, Lifecycle, scoped } from 'tsyringe';
+import { container, inject, Lifecycle, scoped } from 'tsyringe';
 import { Imessage } from '../refactor/interface/message.interface';
 import { ChatSession } from '../models/chat.session';
 import { EntityManagerProvider } from './entity.manager.provider.service';
@@ -21,6 +21,8 @@ import { WorkflowEventListener } from './emergency/workflow.event.listener';
 import { MessageHandlerType } from '../refactor/messageTypes/message.types';
 import { CommonAssessmentService } from './Assesssment/common.assessment.service';
 import { AssessmentHandlingService } from './Assesssment/assessment.handling.service';
+import { FormHandler } from './form/form.handler';
+import { CareplanEnrollmentService } from './basic.careplan/careplan.enrollment.service';
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -115,7 +117,15 @@ export class handleRequestservice {
         const customTranslations = [this.getTranslatedResponse(message_from_nlp, languageForSession)];
         if (customTranslations[0] === null) {
             let googleTranslate;
-            if (messageHandler === "Assessments") {
+            if (messageHandler === "QnA") {
+                if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_TRANSLATE_SERVICE") === "llm") {
+                    googleTranslate = message_from_nlp.getText();
+                }
+                else {
+                    googleTranslate = await this.translateService.processdialogflowmessage(message_from_nlp, languageForSession);
+                }
+            }
+            else if (messageHandler === "Assessments") {
                 googleTranslate = message_from_nlp.getText();
             } else {
                 googleTranslate = await this.translateService.processdialogflowmessage(message_from_nlp, languageForSession);
@@ -149,15 +159,25 @@ export class handleRequestservice {
             break;
         }
         case 'Assessments': {
-            const key = `${metaData.platformId}:Assessment`;
+            const key = `${metaData.platformId}:Assessment:${outgoingMessage.Assessment.AssessmentId}`;
             const userCacheData = await CacheMemory.get(key);
             if (userCacheData) {
                 console.log("user response",metaData.messageBody);
-                message_from_nlp = await this.serveAssessmentService.answerQuestion(eventObj, metaData.platformId, metaData.originalMessage, userCacheData, metaData.platform, true,metaData.intent);
-                console.log(`after calling answer question service, message: ${message_from_nlp.getText()}`);
+                message_from_nlp = await this.serveAssessmentService.answerQuestion(eventObj, metaData.platformId, metaData.originalMessage, userCacheData, metaData.platform, true,metaData.intent, metaData);
+                console.log(`after calling answer question service, message: ${message_from_nlp?.getText()}`);
             } else {
                 outgoingMessage.MetaData["eventObj"] = eventObj;
                 message_from_nlp = await this.assessmentHandlingService.initialiseAssessment(outgoingMessage, outgoingMessage.Assessment.AssessmentId, eventObj);
+            }
+            break;
+        }
+        case MessageHandlerType.AssessmentWithFormSubmission: {
+            try {
+                console.log("Handling case AssessmentWithFormSubmission", outgoingMessage);
+                const formHandle = container.resolve(FormHandler);
+                await formHandle.handleFormSubmission(outgoingMessage);
+            } catch (error) {
+                console.log("Error handling form submission", error);
             }
             break;
         }
@@ -188,14 +208,31 @@ export class handleRequestservice {
         }
         case MessageHandlerType.WorkflowService: {
             console.log("Workflow service event .....");
-            const result = await this.workflowEventListener.commence(metaData, eventObj);
+
+            // This is the matching schema id from the llm service
+            const workflowId = outgoingMessage.Alert.AlertId;
+            const result = await this.workflowEventListener.commence(metaData, eventObj, workflowId);
             if (!result) {
                 console.log("Unable to process Workflow event listener event.");
             }
             break;
         }
+
+        case MessageHandlerType.BasicCareplan: {
+            try {
+                console.log("Basic careplan enrollment message handler processing...");
+                await CareplanEnrollmentService.enrollPatient(
+                    outgoingMessage.BasicCareplan?.TenantName,
+                    outgoingMessage.BasicCareplan?.Channel,
+                    outgoingMessage.MetaData,
+                    outgoingMessage.BasicCareplan);
+            } catch (error) {
+                console.log("Error in Basic careplan enrollment:", error);
+            }
+            break;
         }
-        if (outgoingMessage.PrimaryMessageHandler !== MessageHandlerType.WorkflowService) {
+        }
+        if (outgoingMessage.PrimaryMessageHandler !== MessageHandlerType.WorkflowService && message_from_nlp) {
             processed_message = await this.processMessage(message_from_nlp, metaData.platformId, messageHandler);
         }
 

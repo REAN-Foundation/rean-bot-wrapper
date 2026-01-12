@@ -18,6 +18,15 @@ import { AssessmentSessionLogs } from "../../models/assessment.session.model";
 import { NeedleService } from "../needle.service";
 import { AssessmentService } from "../Assesssment/assessment.service";
 import { AssessmentIdentifiers } from "../../models/assessment/assessment.identifiers.model";
+import { WorkflowEventListener } from "../emergency/workflow.event.listener";
+import { WorkflowRoutingService } from "../workflow/workflow.routing.service";
+import { RoutingDecision, Schema } from '../../refactor/interface/workflow/workflow.interface';
+import { IntentType } from "../../domain.types/intents/intents.types";
+import { ContainerService } from "../container/container.service";
+import { IntentRepo } from "../../database/repositories/intent/intent.repo";
+import { CareplanEnrollmentDomainModel } from "../../domain.types/basic.careplan/careplan.types";
+import { CareplanMetaDataValidator } from "../basic.careplan/careplan.metadata.validator";
+import { NotificationType } from "../../domain.types/reminder/reminder.domain.model";
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -33,7 +42,9 @@ export class DecisionRouter {
         @inject(ClientEnvironmentProviderService) private environmentProviderService?: ClientEnvironmentProviderService,
         @inject(EmojiFilter) private emojiFilter?: EmojiFilter,
         @inject(NeedleService) private needleService?: NeedleService,
-        @inject(AssessmentService) private assessmentService?: AssessmentService
+        @inject(AssessmentService) private assessmentService?: AssessmentService,
+        @inject(WorkflowEventListener) private workflowEventListener?: WorkflowEventListener,
+        @inject(WorkflowRoutingService) private workflowRoutingService?: WorkflowRoutingService
     ) {
         this.outgoingMessage = {
             PrimaryMessageHandler : MessageHandlerType.Unhandled,
@@ -113,10 +124,7 @@ export class DecisionRouter {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async checkAssessment(messageBody: Imessage, channel: string) {
         try {
-            const intent = messageBody.intent;
-            const key = `${messageBody.platformId}:NextQuestionFlag`;
-            const nextQuestionFlag = await CacheMemory.get(key);
-
+            
             const assessmentData = {
                 AssessmentId   : '',
                 AssessmentName : '',
@@ -129,21 +137,69 @@ export class DecisionRouter {
                     "askQuestionAgain" : false
                 }
             };
+            let messageContextId: string | null = null;
+            if (channel === "telegram" || channel === "Telegram") {
+                messageContextId = messageBody.chat_message_id;
+            } else {
+                messageContextId = messageBody.contextId;
+            }
+            const intent = messageBody.intent;
+            const AssessmentSession =
+            (await this.entityManagerProvider.getEntityManager(this.environmentProviderService))
+                .getRepository(AssessmentSessionLogs);
+
+            const intentRepository = (
+                (await this.entityManagerProvider.getEntityManager(this.environmentProviderService))
+                    .getRepository(Intents)
+            );
+
+            let assessmentResponse = null;
+            if (messageContextId) {
+                assessmentResponse = await AssessmentSession.findOne({
+                    where : {
+                        userMessageId : messageContextId
+                    },
+                    order : [['createdAt', 'DESC']],
+                });
+
+                // Add null check for assessmentResponse
+                if (!assessmentResponse){
+                    assessmentResponse = await AssessmentSession.findOne({
+                        where : {
+                            userPlatformId : messageBody.platformId
+                        },
+                        order : [['createdAt', 'DESC']],
+                    });
+                }
+            } else {
+                assessmentResponse = await AssessmentSession.findOne({
+                    where : {
+                        userPlatformId : messageBody.platformId
+                    },
+                    order : [['createdAt', 'DESC']]
+                });
+            }
+
+            let key;
+            if (assessmentResponse) {
+                key = `${messageBody.platformId}:NextQuestionFlag:${assessmentResponse.assesmentId}`;
+            } else {
+                key = '';
+            }
+          
+            const nextQuestionFlag = await CacheMemory.get(key);
 
             // Currently will only support the assessment start through buttons
             if (
-                messageBody.contextId &&
+                messageContextId &&
                 messageBody.intent &&
                 !nextQuestionFlag
             ) {
-                const intentRepository = (
-                    (await this.entityManagerProvider.getEntityManager(this.environmentProviderService))
-                        .getRepository(Intents)
-                );
         
                 const matchingIntents = await intentRepository.findOne({
                     where : {
-                        code : intent
+                        code : intent,
+                        type : IntentType.Assessment
                     }
                 });
 
@@ -151,10 +207,6 @@ export class DecisionRouter {
 
                     // we will call the reancare api here
                     const assessmentCode = matchingIntents.dataValues.code;
-                    
-                    // const apiURL = `clinical/assessments/${assessmentCode}/start`;
-                    // const responseFromAssessmentService = await this.needleService.needleRequestForREAN("post", apiURL, null, {});
-                    // assessmentData.MetaData = responseFromAssessmentService;
                     assessmentData.AssessmentId = assessmentCode;
                     assessmentData.AssessmentName = matchingIntents.dataValues.name;
                     assessmentData.MetaData.assessmentStart = true;
@@ -168,7 +220,8 @@ export class DecisionRouter {
                 if (nextQuestionFlag) {
                     if (nextQuestionFlag === true) {
                         assessmentData.AssessmentFlag = true;
-                        
+                        assessmentData.AssessmentId = assessmentResponse.assesmentId;
+                
                         // await CacheMemory.set(key, false);
                     }
                 } else {
@@ -177,19 +230,9 @@ export class DecisionRouter {
             }
 
             if (assessmentData.AssessmentFlag && !assessmentData.MetaData.assessmentStart) {
-                const AssessmentSession =
-                (await this.entityManagerProvider.getEntityManager(this.environmentProviderService))
-                    .getRepository(AssessmentSessionLogs);
                 const AssessmentIdentifiersRepo = (
                     await this.entityManagerProvider.getEntityManager(this.environmentProviderService)
                 ).getRepository(AssessmentIdentifiers);
-                
-                const assessmentResponse = await AssessmentSession.findOne({
-                    where : {
-                        userPlatformId : messageBody.platformId
-                    },
-                    order : [['createdAt', 'DESC']],
-                });
 
                 // Add null check for assessmentResponse
                 if (!assessmentResponse) {
@@ -214,41 +257,53 @@ export class DecisionRouter {
                 const assessmentResponseType = assessmentResponse.userResponseType;
                 const assessmentIdentifierString = assessmentIdentifierData.identifier;
 
-                const validationFlag = await this.assessmentService.validateAssessmentResponse(
-                    assessmentResponseType,
-                    assessmentIdentifierString,
-                    messageBody,
-                    assessmentResponse.dataValues
-                );
+                let validationFlag = false;
 
-                if (!validationFlag) {
-                    assessmentData.AssessmentFlag = false;
+                if (assessmentIdentifierString === null) {
+                    validationFlag = true;
+
+                }
+                else {
+
+                    validationFlag = await this.assessmentService.validateAssessmentResponse(
+                        assessmentResponseType,
+                        assessmentIdentifierString,
+                        messageBody,
+                        assessmentResponse.dataValues
+                    );
+
+                    if (!validationFlag) {
+                        assessmentData.AssessmentFlag = false;
+
+                        if (
+                            messageBody.contextId &&
+                        messageBody.intent
+                        ) {
+                            const matchingIntents = await intentRepository.findOne({
+                                where : {
+                                    code : intent,
+                                    type : IntentType.Assessment
+                                }
+                            });
+
+                            if (matchingIntents) {
+
+                                // we will call the reancare api here
+                                const assessmentCode = matchingIntents.dataValues.code;
+                                assessmentData.AssessmentId = assessmentCode;
+                                assessmentData.AssessmentName = matchingIntents.dataValues.name;
+                                assessmentData.MetaData.assessmentStart = true;
+                                assessmentData.AssessmentFlag = true;
+                            } else {
+
+                                // here we will create the false flag and return object
+                                assessmentData.AssessmentFlag = false;
+                            }
+                        }
+                    }
                 }
             
             }
-
-            // Check if message is part of assessment
-            // const chatMessageRepository = (
-            //     await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-            // const botMessages = await chatMessageRepository.findAll({
-            //     where : {
-            //         userPlatformId : messageBody.platformId,
-            //         platform       : channel
-            //     },
-            //     order : [ [ 'createdAt', 'ASC' ] ]
-            // });
-
-            // const lastMessage = await chatMessageRepository.findOne({
-            //     where : {
-            //         userPlatformId : messageBody.platformId,
-            //         platform       : channel
-            //     },
-            //     order : [ [ 'createdAt', 'DESC'] ]
-            // });
-
-            //const assessmentInProgress = botMessages[botMessages.length - 3].messageFlag
-
-            // Implement further logic for checking if assessment.
 
             return assessmentData;
         } catch (error) {
@@ -271,6 +326,38 @@ export class DecisionRouter {
 
     }
 
+    async checkCareplanEnrollment(messageBody: Imessage, channel: string){
+        try {
+            if (!messageBody?.intent) {
+                return false;
+            }
+            const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
+            const childContainer = ContainerService.createChildContainer(clientName);
+            if (!childContainer) {
+                throw new Error("Failed to create child container");
+            }
+            const intent = await IntentRepo.findIntentByCodeAndType(childContainer, messageBody.intent, IntentType.Careplan);
+            if (!intent) {
+                throw new Error(`Failed to find intent ${messageBody.intent} for careplan enrollment.`);
+            }
+            const metaData = JSON.parse(intent.Metadata) as CareplanEnrollmentDomainModel;
+            const careplanMetaData = CareplanMetaDataValidator.validatecareplanEnrollment(metaData);
+
+            careplanMetaData.TenantName = clientName;
+            channel = channel === 'whatsappMeta' ? NotificationType.WhatsApp : channel;
+            careplanMetaData.Channel = channel;
+            careplanMetaData.StartDate = new Date().toISOString()
+                .split('T')[0];
+
+            return careplanMetaData;
+                
+        } catch (error) {
+            console.log('Error in checkCareplanEnrollment:', error);
+            return false;
+        }
+
+    }
+    
     async checkDFIntent(messageBody: Imessage){
 
         // const dfResponse = await sessionClient.detectIntent(requestBody);
@@ -348,8 +435,32 @@ export class DecisionRouter {
             const workflowMode = this.environmentProviderService.getClientEnvironmentVariable("WORK_FLOW_MODE");
             if (workflowMode === 'TRUE')
             {
+
+                // UNCOMMENT TO ENABLE THE QA WITH WORKFLOW SERVICE
+                const workflowSchema = await this.workflowEventListener.getAllSchemaForTenant();
+                const workflowFlag = await this.newCheckWorkflowMode(workflowSchema, messageBody);
                 this.outgoingMessage.MetaData = messageBody;
-                this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.WorkflowService;
+
+                if (workflowFlag.shouldTrigger) {
+                    this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.WorkflowService;
+                    this.outgoingMessage.Alert.AlertId = workflowFlag.matchedSchemaId;
+                    return this.outgoingMessage;
+                
+                } else {
+                    this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.QnA;
+                    return this.outgoingMessage;
+                }
+
+            }
+
+            const careplanEnrollment = await this.checkCareplanEnrollment(messageBody, channel);
+            if (careplanEnrollment){
+                console.log(`Checking for careplan enrollment: ${messageBody}`);
+                console.log(`Enrolling to basic careplan: ${channel}`);
+                console.log(`Its careplan enrollment metadata: ${JSON.stringify(careplanEnrollment)}`);
+                this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.BasicCareplan;
+                this.outgoingMessage.MetaData = messageBody;
+                this.outgoingMessage.BasicCareplan = careplanEnrollment;
                 return this.outgoingMessage;
             }
             const resultFeedback = await this.checkFeedback(messageBody, channel);
@@ -357,6 +468,13 @@ export class DecisionRouter {
             if (!resultFeedback.feedbackFlag){
                 const resultAssessment = await this.checkAssessment(messageBody, channel);
                 if (!resultAssessment.AssessmentFlag){
+                    console.log(`Checking for assessment with form submission: ${messageBody.intent}`);
+                    if (messageBody.intent === MessageHandlerType.AssessmentWithFormSubmission){
+                        this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.AssessmentWithFormSubmission;
+                        return this.outgoingMessage;
+                    }
+
+                    //TODO: In WhatsApp form submission response length may greater than 256, so it is going to the QnA handler.
                     if (messageBody.messageBody.length > 256) {
                         this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.QnA;
                         return this.outgoingMessage;
@@ -412,6 +530,95 @@ export class DecisionRouter {
         }
         else {
             return "en-US";
+        }
+    }
+
+    private async checkWorkflowMode (schema: any, messageBody: Imessage){
+        try {
+            const promptTemplate = PromptTemplate.fromTemplate(`
+            You are a workflow routing classifier for an emergency response system. Your task is to determine if a user message should trigger ANY of the available workflows or be sent to a general LLM service for answering questions.
+            
+            DECISION CRITERIA:
+
+            Send to WORKFLOW (flag: "true") if the user message:
+            - Provides any required or optional workflow parameter data (phone numbers, location, timestamps, etc.)
+            - Confirms acceptance/rejection of an emergency response
+            - Updates availability status or response status
+            - Provides location information, arrival confirmation, or incident updates
+            - Contains actionable data that advances ANY of the workflows
+            - Responds to a workflow prompt (e.g., "Are you available?", "What's your location?", "Confirm emergency")
+            - Indicates intent to report an emergency or respond to one
+            - Provides contact information in an emergency context
+
+            Send to LLM SERVICE (flag: "false") if the user message:
+            - Asks informational/educational questions (e.g., "How to give CPR?", "What are emergency procedures?")
+            - Requests general guidance, instructions, or explanations
+            - Asks about procedures, protocols, or emergency response techniques
+            - Is a conversational query not providing workflow data
+            - Seeks clarification about how the emergency system works
+            - Contains greetings, small talk, or completely off-topic questions
+            - Asks "what if" or hypothetical questions without providing actual data
+
+            IMPORTANT DISTINCTIONS:
+            - "I need help" with context → WORKFLOW (intent to report emergency)
+            - "How do I help someone?" → LLM SERVICE (asking for information)
+            - "Yes" / "I'm available" → WORKFLOW (responding to workflow prompt)
+            - "What should I do in emergency?" → LLM SERVICE (general question)
+            - Phone number or location shared → WORKFLOW (providing data)
+            - "Where should I go?" → LLM SERVICE (asking for directions/info)
+
+            OUTPUT FORMAT:
+            Respond ONLY with valid JSON, no additional text or markdown:
+            {{
+                "flag": "true or false",
+                "reason": "brief explanation of routing decision",
+                "matchedSchemaId": "schema-id-if-applicable or null"
+            }}
+
+            AVAILABLE WORKFLOW SCHEMAS:
+            {workflow_schema}
+
+            USER MESSAGE: {user_message}
+
+            Analyze the user message against ALL available workflows and determine the appropriate routing.
+            `
+            );
+            const model = new ChatOpenAI({
+                modelName : "gpt-5-mini"
+            });
+            const chain = promptTemplate.pipe(model);
+
+            const result = await chain.invoke({
+                workflow_schema : JSON.stringify(schema),
+                user_message    : messageBody.messageBody
+            });
+
+            console.log("WORKFLOW MODE AI RESPONSE", result.lc_kwargs.content);
+
+            const parsedResult = JSON.parse(result.lc_kwargs.content);
+            return parsedResult.flag.toLowerCase() === "true";
+        } catch (error) {
+            console.log("ERROR WHILE CHECKING THE WORKFLOW MODE");
+        }
+    }
+
+    private async newCheckWorkflowMode(schema: Schema | Schema[], messageBody: Imessage) {
+        try {
+            const result: RoutingDecision = await this.workflowRoutingService.routeMessage(
+                messageBody.messageBody,
+                schema
+            );
+
+            console.log("WORKFLOW MODE AI RESPONSE", result);
+            return result;
+        } catch (error) {
+            console.log("ERROR WHILE CHECKING THE WORKFLOW MODE", error);
+            const result: RoutingDecision = {
+                shouldTrigger   : false,
+                reason          : "Error while checking for workflow mode",
+                matchedSchemaId : null
+            };
+            return result;
         }
     }
 

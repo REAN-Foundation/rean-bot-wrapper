@@ -158,7 +158,7 @@ export class CommonAssessmentService {
                 message_to_platform = await this._platformMessageService.SendMediaMessage(response_format, updatedPayload);
             }
             assessmentSessionLogs.userMessageId = await this._platformMessageService.getMessageIdFromResponse(message_to_platform);
-            const key = `${personPhoneNumber}:Assessment`;
+            const key = `${personPhoneNumber}:Assessment:${assessmentSessionLogs.assesmentId}`;
             await CacheMemory.set(key, assessmentSessionLogs.userMessageId);
 
             const AssessmentSession = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);

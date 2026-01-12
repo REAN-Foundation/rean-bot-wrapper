@@ -7,6 +7,7 @@ import needle from 'needle';
 import { EntityManagerProvider } from "./entity.manager.provider.service";
 import { ContactList } from '../models/contact.list';
 import { NeedleService } from "./needle.service";
+import { CacheMemory } from "./cache.memory.service";
 
 @scoped(Lifecycle.ContainerScoped)
 export class kerotoplastyService {
@@ -23,71 +24,96 @@ export class kerotoplastyService {
 
     identifyCondition = async (eventObj) => {
         if (eventObj) {
-            const dropInVision = eventObj.body.queryResult.parameters.complexDropInVision.name;
-            const complexSeverePain = eventObj.body.queryResult.parameters.complexSeverePain.name;
-            let condition = null;
+            let symptoms: string[] = eventObj.body.queryResult.parameters.symptoms;
+            const Addition_info = this.clientEnvironmentProviderService.getClientEnvironmentVariable("ADDITIONAL_INFO");
+            const parsedInfo = JSON.parse(Addition_info);
 
-            //const params = eventObj.body.queryResult.parameters;
-            if (dropInVision === 'Yes' && complexSeverePain === 'Yes')
-            {
-                condition  = 'HyperCritical';
+            // Variables set for cache
+            const userPlatformId = eventObj.body.originalDetectIntentRequest.payload.userId;
+            const cacheKey = `SymptomsStorage:${userPlatformId}`;
+
+            const symptomsInCache = await CacheMemory.get(cacheKey);
+
+            const Normal_risk: string[] = parsedInfo.RISK_CLASSIFICATION.NORMAL.SYMPTOMS;
+            const Emergency_risk: string[] = parsedInfo.RISK_CLASSIFICATION.EMERGENCY.SYMPTOMS;
+            const Attention_needed_risk: string[] = parsedInfo.RISK_CLASSIFICATION.ATTENTION_NEEDED.SYMPTOMS;
+
+            let priority: number;
+            let message: any;
+
+            if (!symptoms) {
+                symptoms = [];
+                priority = symptomsInCache['priority'];
+                message = symptomsInCache['message'];
+            } else if (symptoms.some(symptom => Emergency_risk.includes(symptom))) {
+                message = parsedInfo.RISK_CLASSIFICATION.EMERGENCY.MESSAGE;
+                priority = 1;
             }
-            else if (dropInVision === 'Yes' || complexSeverePain === 'Yes') {
-                condition = 'Critical';
+            
+            // Then Attention Needed
+            else if (symptoms.some(symptom => Attention_needed_risk.includes(symptom))) {
+                message = parsedInfo.RISK_CLASSIFICATION.ATTENTION_NEEDED.MESSAGE;
+                priority = 2;
             }
-            else {
-                condition = 'Normal';
+            
+            // Then Normal
+            else if (symptoms.some(symptom => Normal_risk.includes(symptom))) {
+                message = parsedInfo.RISK_CLASSIFICATION.NORMAL.MESSAGE;
+                priority = 3;
             }
-            return condition;
+
+            if (!symptomsInCache) {
+                const cacheObj = {
+                    "priority" : priority,
+                    "message"  : message
+                };
+                await CacheMemory.set(cacheKey, cacheObj);
+            } else {
+                if (priority >= parseInt(symptomsInCache["priority"])) {
+                    priority = symptomsInCache["priority"];
+                    message = symptomsInCache["message"];
+                }
+            }
+ 
+            return [ symptoms,message, priority];
         } else {
             throw new Error(`500, kerotoplasy response Service Error!`);
         }
     };
-
-    async conditionSpecificResponse(condition){
-        let severityGrade = null;
-        let message = null;
-        switch (condition) {
-        case 'HyperCritical': {
-            message = `Your situation seems *hyper-critical*.\n Please Visit the nearest care center as soon as possible.`;
-            severityGrade = 1;
-            break;
-        }
-        case 'Critical':
-        {
-            message = `Your situation seems *critical*.\n Please visit us at the nearest center on the next available appointment.`;
-            severityGrade = 2;
-            break;
-        }
-        case 'Normal': {
-            message = `Your situation seems *normal*.\n Please visit us at our nearest center if there is drop in vision or severe pain in your operated eye.`;
-            severityGrade = 3;
-            break;
-        }
-        }
-        message = await this.DialogflowServices.making_response(message);
-        console.log("Our location data is being sent!!!!");
-        return [message, severityGrade];
-
-    }
     
-    async symptomByUser(parameters){
-        var symptomComment = "Patient is suffering from \n";
-        
-        if (parameters.complexNormalSymptoms.length !== 0){
-            for (let i = 0; i < parameters.complexNormalSymptoms.length; i++){
-                symptomComment += ` - ${parameters.complexNormalSymptoms[i].name} \n`;
-            }
-            
+    async symptomByUser(parameters) {
+        let symptomComment = "Patient is suffering from ";
+
+        const symptoms: string[] = parameters.symptoms;
+
+        if (symptoms.length === 1) {
+            symptomComment += symptoms[0];
+        } else if (symptoms.length === 2) {
+            symptomComment += `${symptoms[0]} and ${symptoms[1]}`;
+        } else if (symptoms.length > 2) {
+            const last = symptoms.pop();
+            symptomComment += `${symptoms.join(", ")} and ${last}`;
+        } else {
+            symptomComment = "No symptoms provided.";
         }
-        if (parameters.complexSeverePain.name === "Yes"){
-            symptomComment += " - Severe pain \n";
-        }
-        if (parameters.complexDropInVision.name === "Yes"){
-            symptomComment += " - Drop in vision \n";
-        }
-        return (symptomComment);
+
+        return symptomComment;
     }
+
+    // if (parameters.complexNormalSymptoms.length !== 0){
+    //     for (let i = 0; i < parameters.complexNormalSymptoms.length; i++){
+    //         symptomComment += ` - ${parameters.complexNormalSymptoms[i].name} \n`;
+    //     }
+            
+    // }
+    // if (parameters.complexSeverePain.name === "Yes"){
+    //     symptomComment += " - Severe pain \n";
+    // }
+    // if (parameters.complexDropInVision.name === "Yes"){
+    //     symptomComment += " - Drop in vision \n";
+    // }
+    //     return (symptomComment);
+    // }
 
     async postingImage(eventObj){
         try {
@@ -111,36 +137,41 @@ export class kerotoplastyService {
     }
 
     async postingOnClickup(intent,eventObj,severityGrade){
-        const parameters = eventObj.body.queryResult.parameters;
-        const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
-        const contactList =
-        (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
-        const personContactList = await contactList.findOne({ where: { mobileNumber: userId } });
-        let EMRNumber  = personContactList.dataValues.ehrSystemCode.toUpperCase();
-        if (EMRNumber) {
-            EMRNumber = EMRNumber.toUpperCase();
-        }
-        const ClickupListID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_CASE_LIST_ID");
-        if (intent === "appointment-followconditionIdentification"){
-            await contactList.update({ repetitionFlag: "True" }, { where: { mobileNumber: userId } });
-        }
-        else {
-            await contactList.update({ repetitionFlag: "False" }, { where: { mobileNumber: userId } });
-        }
-        const symptomComment = await this.symptomByUser(parameters);
-        const user_details = await this.getEMRDetails(EMRNumber , eventObj);
-        const taskId = personContactList.dataValues.cmrCaseTaskID;
-        if (taskId){
-            await this.clickUpTask.updateTask(taskId,severityGrade,user_details,EMRNumber);
-            await this.clickUpTask.postCommentOnTask(taskId,symptomComment);
-        }
-        else
-        {
-            const taskID = await this.clickUpTask.createTask( null, EMRNumber, user_details, severityGrade, ClickupListID );
-            await contactList.update({ cmrCaseTaskID: taskID }, { where: { mobileNumber: userId } });
-            await this.clickUpTask.postCommentOnTask(taskID, symptomComment);
-            await contactList.update({ cmrCaseTaskID: taskID, humanHandoff: "false" }, { where: { mobileNumber: userId } });
-    
+
+        try {
+            const parameters = eventObj.body.queryResult.parameters;
+            const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
+            const contactList =
+                    (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
+            const personContactList = await contactList.findOne({ where: { mobileNumber: userId } });
+            let EMRNumber  = personContactList.dataValues.ehrSystemCode.toUpperCase();
+            if (EMRNumber) {
+                EMRNumber = EMRNumber.toUpperCase();
+            }
+            const ClickupListID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_CASE_LIST_ID");
+            if (intent === "appointment-followconditionIdentification"){
+                await contactList.update({ repetitionFlag: "True" }, { where: { mobileNumber: userId } });
+            }
+            else {
+                await contactList.update({ repetitionFlag: "False" }, { where: { mobileNumber: userId } });
+            }
+            const symptomComment = await this.symptomByUser(parameters);
+            const user_details = await this.getEMRDetails(EMRNumber , eventObj);
+            const taskId = personContactList.dataValues.cmrCaseTaskID;
+            if (taskId){
+                await this.clickUpTask.updateTask(taskId,severityGrade,user_details,EMRNumber);
+                await this.clickUpTask.postCommentOnTask(taskId,symptomComment);
+            }
+            else
+            {
+                const taskID = await this.clickUpTask.createTask( null, EMRNumber, user_details, severityGrade, ClickupListID );
+                await contactList.update({ cmrCaseTaskID: taskID }, { where: { mobileNumber: userId } });
+                await this.clickUpTask.postCommentOnTask(taskID, symptomComment);
+                await contactList.update({ cmrCaseTaskID: taskID, humanHandoff: "false" }, { where: { mobileNumber: userId } });
+                
+            }
+        } catch (error) {
+            console.log(error);
         }
 
     }
@@ -221,7 +252,7 @@ export class kerotoplastyService {
             let report = "### Patient Details\n";
             if (response.body.patient_details) {
                 const patient_details = response.body.patient_details;
-                report = report + "- Name : " + patient_details.FirstName + ' ' + patient_details.LastName + '\n';
+                // report = report + "- Name : " + patient_details.FirstName + ' ' + patient_details.LastName + '\n';
                 report = report + "- Gender : " + patient_details.Gender + '\n';
 
                 const age = await this.getAge(patient_details.DOB);
