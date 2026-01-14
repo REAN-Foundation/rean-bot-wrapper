@@ -75,7 +75,7 @@
     "node-cron": "^2.0.3",
     "node-telegram-bot-api": "^0.54.0",
     "pb-util": "^1.0.3",
-    "pdfkit": "^0.13.0",
+    "pdfkit": "^0.17.2",
     "reflect-metadata": "^0.1.13",
     "rimraf": "3.0.2",
     "sequelize": "^6.29.3",
