@@ -11,27 +11,24 @@ export const kerotoplastySymptomAnalysisListener = async (intent, eventObj) => {
         const [symptoms, message, priority] =
             await kerotoplastyServiceObj.identifyCondition(eventObj) as [string[], any, number];
         
-        kerotoplastyServiceObj.postingOnClickup(intent, eventObj, priority);
         let outputMessage = "To better understand your condition, we’ll ask you a few quick questions. This will help us guide you effectively.";
-        if (priority <= 1){
+        if (priority == 1){
             outputMessage =  message;
         } else if (priority > 1 && intent === "symptomAnalysis") {
-
             // Format symptoms list naturally (comma + "and")
-
             const formattedSymptoms =
                     symptoms.length > 1
                         ? symptoms.slice(0, -1).join(", ") + " and " + symptoms.slice(-1)
                         : symptoms[0] || "";
 
             outputMessage = `Thanks for sharing your symptoms: *${formattedSymptoms}*`;
-
         } else {
             outputMessage = message;
-            // data = await dialogflowService.making_response(outputMessage);
-            // return data;
         }
-        followUpStep(intent, eventObj, priority);
+        if (priority != 0 ){
+            followUpStep(intent, eventObj, priority);
+            kerotoplastyServiceObj.postingOnClickup(intent, eventObj, priority);
+        }
         const data = await dialogflowService.making_response(outputMessage);
         return data;
     }
@@ -54,14 +51,14 @@ async function followUpStep(intent: string, eventObj: any, priority: number) {
         const userPlatformId = eventObj.body.originalDetectIntentRequest.payload.userId;
         const cacheKey = `SymptomsStorage:${userPlatformId}`;
 
-        if (priority <= 1 || intent === "MoreSymptoms" || intent === "KerotoplastyFollowUp") {
+        if (priority == 1 || intent === "MoreSymptoms" || intent === "KerotoplastyFollowUp") {
             inputMessage = "Would you be able to provide an *image of the affected area of your eye* for the doctor’s assessment?";
             yesIntentName = "EyeImage";
             noIntentName = "responseNo";
 
             // Delete the cache key as this is the final step
             await CacheMemory.delete(cacheKey);
-        } else {
+        } else if (priority > 1){
             inputMessage = `Could you let me know if you have any other symptoms?`;
             yesIntentName = "MoreSymptoms";
             noIntentName = "KerotoplastyFollowUp";
