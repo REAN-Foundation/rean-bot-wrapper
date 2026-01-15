@@ -38,7 +38,7 @@ export class kerotoplastyService {
             const Emergency_risk: string[] = parsedInfo.RISK_CLASSIFICATION.EMERGENCY.SYMPTOMS;
             const Attention_needed_risk: string[] = parsedInfo.RISK_CLASSIFICATION.ATTENTION_NEEDED.SYMPTOMS;
 
-            let priority: number;
+            let priority = 0;
             let message: any;
 
             if (!symptoms) {
