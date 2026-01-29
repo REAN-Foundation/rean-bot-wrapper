@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 import { Table, Column, Model, DataType, PrimaryKey, IsUUID } from 'sequelize-typescript';
-import { IIntents } from '../../refactor/interface/intents/intents.interface';
+import { IIntents, LLMProvider, EntitySchema, ConversationConfig } from '../../refactor/interface/intents/intents.interface';
 import { IntentType } from '../../refactor/messageTypes/intents/intents.message.types';
 import { v4 } from 'uuid';
 @Table(
@@ -45,5 +45,71 @@ export class Intents extends Model implements IIntents {
         type : DataType.TEXT()
     })
         Metadata: string;
-    
+
+    // LLM Configuration
+    @Column({
+        type : DataType.BOOLEAN,
+        defaultValue : false,
+        allowNull : false
+    })
+        llmEnabled: boolean;
+
+    @Column({
+        type : DataType.ENUM('dialogflow', 'openai', 'claude'),
+        defaultValue : 'dialogflow',
+        allowNull : false
+    })
+        llmProvider: LLMProvider;
+
+    @Column({
+        type : DataType.TEXT
+    })
+        intentDescription: string;
+
+    @Column({
+        type : DataType.JSON
+    })
+        intentExamples: string[];
+
+    // Entity Configuration
+    @Column({
+        type : DataType.JSON
+    })
+        entitySchema: EntitySchema;
+
+    // Conversation Configuration
+    @Column({
+        type : DataType.JSON
+    })
+        conversationConfig: ConversationConfig;
+
+    // Classification Settings
+    @Column({
+        type : DataType.FLOAT,
+        defaultValue : 0.75,
+        allowNull : false
+    })
+        confidenceThreshold: number;
+
+    @Column({
+        type : DataType.BOOLEAN,
+        defaultValue : true,
+        allowNull : false
+    })
+        fallbackToDialogflow: boolean;
+
+    @Column({
+        type : DataType.INTEGER,
+        defaultValue : 0,
+        allowNull : false
+    })
+        priority: number;
+
+    @Column({
+        type : DataType.BOOLEAN,
+        defaultValue : true,
+        allowNull : false
+    })
+        active: boolean;
+
 }

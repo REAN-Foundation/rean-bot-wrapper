@@ -27,6 +27,11 @@ import { IntentRepo } from "../../database/repositories/intent/intent.repo";
 import { CareplanEnrollmentDomainModel } from "../../domain.types/basic.careplan/careplan.types";
 import { CareplanMetaDataValidator } from "../basic.careplan/careplan.metadata.validator";
 import { NotificationType } from "../../domain.types/reminder/reminder.domain.model";
+import { EntityCollectionOrchestrator } from "../llm/entity.collection/entity.collection.orchestrator.service";
+import { EntityCollectionSessionRepo } from "../../database/repositories/llm/entity.collection.session.repo";
+import { FeatureFlagService } from "../feature.flags/feature.flag.service";
+import { SessionState } from "../../refactor/interface/llm/entity.collection.interfaces";
+import { LLMIntentClassificationService } from "../llm/llm.intent.classification.service";
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -44,7 +49,10 @@ export class DecisionRouter {
         @inject(NeedleService) private needleService?: NeedleService,
         @inject(AssessmentService) private assessmentService?: AssessmentService,
         @inject(WorkflowEventListener) private workflowEventListener?: WorkflowEventListener,
-        @inject(WorkflowRoutingService) private workflowRoutingService?: WorkflowRoutingService
+        @inject(WorkflowRoutingService) private workflowRoutingService?: WorkflowRoutingService,
+        @inject(FeatureFlagService) private featureFlagService?: FeatureFlagService,
+        @inject(EntityCollectionOrchestrator) private entityCollectionOrchestrator?: EntityCollectionOrchestrator,
+        @inject(LLMIntentClassificationService) private llmIntentClassificationService?: LLMIntentClassificationService
     ) {
         this.outgoingMessage = {
             PrimaryMessageHandler : MessageHandlerType.Unhandled,
@@ -357,7 +365,143 @@ export class DecisionRouter {
         }
 
     }
-    
+
+    /**
+     * Check if there's an active entity collection session for this user
+     */
+    private async checkActiveEntityCollectionSession(userPlatformId: string): Promise<any | null> {
+        try {
+            const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
+            const childContainer = ContainerService.createChildContainer(clientName);
+
+            // Check for active session in database
+            const activeSession = await EntityCollectionSessionRepo.findActiveByUserPlatformId(
+                childContainer,
+                userPlatformId
+            );
+
+            if (activeSession && ((activeSession.status as any) === 'collecting' || activeSession.status === 'active')) {
+                return activeSession;
+            }
+
+            return null;
+        } catch (error) {
+            console.error('[DecisionRouter] Error checking active session:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Check if intent requires entity collection
+     */
+    private async checkEntityCollection(messageBody: Imessage): Promise<any> {
+        try {
+            const entityCollectionData = {
+                requiresEntityCollection : false,
+                intentCode               : null,
+                sessionId                : null,
+                activeSession            : null,
+                classifiedIntent         : null,
+                llmClassification        : null
+            };
+
+            // First, check if there's an active session for this user
+            const activeSession = await this.checkActiveEntityCollectionSession(messageBody.platformId);
+
+            if (activeSession) {
+                entityCollectionData.requiresEntityCollection = true;
+                entityCollectionData.sessionId = activeSession.sessionId;
+                entityCollectionData.intentCode = activeSession.intentCode;
+                entityCollectionData.activeSession = activeSession;
+                return entityCollectionData;
+            }
+
+            // No active session, determine intent code
+            let intentCode: string | null = null;
+            let classificationResult = null;
+
+            if (messageBody.intent) {
+                // Deterministic case: Intent from button click
+                intentCode = messageBody.intent;
+            } else {
+                // Free text: Try LLM intent classification
+                const llmClassificationEnabled = await this.featureFlagService.isEnabled(
+                    'llmClassificationEnabled',
+                    { userId: messageBody.platformId }
+                );
+
+                if (llmClassificationEnabled) {
+                    try {
+                        classificationResult = await this.llmIntentClassificationService.classifyIntent(
+                            messageBody.messageBody,
+                            messageBody.platformId
+                        );
+
+                        // Check confidence threshold
+                        if (classificationResult && classificationResult.intentData) {
+                            const threshold = classificationResult.intentData.confidenceThreshold || 0.75;
+
+                            if (classificationResult.confidence >= threshold) {
+                                intentCode = classificationResult.intent;
+                                entityCollectionData.llmClassification = classificationResult;
+                            } else {
+                                console.log(`[DecisionRouter] LLM confidence ${classificationResult.confidence} below threshold ${threshold}, falling back to Dialogflow`);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('[DecisionRouter] Error in LLM intent classification:', error);
+                        // Fall back to Dialogflow by returning without intent
+                    }
+                }
+            }
+
+            // If we have an intent code, check if it requires entity collection
+            if (intentCode) {
+                const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
+                const childContainer = ContainerService.createChildContainer(clientName);
+
+                const intent = await IntentRepo.findIntentByCode(childContainer, intentCode);
+
+                if (intent && intent.llmEnabled && intent.entitySchema) {
+                    // Check if main entity collection flag is enabled
+                    const mainFlagEnabled = await this.featureFlagService.isEnabled(
+                        'llmEntityCollectionEnabled',
+                        { userId: messageBody.platformId }
+                    );
+
+                    if (mainFlagEnabled) {
+                        // Check if entity collection is enabled for this specific intent
+                        const intentFlagName = `entityCollection_${intent.Code.replace(/\./g, '_')}`;
+                        const isIntentEnabled = await this.featureFlagService.isEnabled(
+                            intentFlagName,
+                            { userId: messageBody.platformId }
+                        );
+
+                        if (isIntentEnabled) {
+                            entityCollectionData.requiresEntityCollection = true;
+                            entityCollectionData.intentCode = intent.Code;
+                            entityCollectionData.classifiedIntent = intent;
+                            // Generate new session ID
+                            entityCollectionData.sessionId = `ec_${messageBody.platformId}_${Date.now()}`;
+                        }
+                    }
+                }
+            }
+
+            return entityCollectionData;
+        } catch (error) {
+            console.error('[DecisionRouter] Error checking entity collection:', error);
+            return {
+                requiresEntityCollection : false,
+                intentCode               : null,
+                sessionId                : null,
+                activeSession            : null,
+                classifiedIntent         : null,
+                llmClassification        : null
+            };
+        }
+    }
+
     async checkDFIntent(messageBody: Imessage){
 
         // const dfResponse = await sessionClient.detectIntent(requestBody);
@@ -479,6 +623,35 @@ export class DecisionRouter {
                         this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.QnA;
                         return this.outgoingMessage;
                     }
+
+                    // Check for entity collection and LLM intent classification
+                    const entityCollectionCheck = await this.checkEntityCollection(messageBody);
+                    if (entityCollectionCheck.requiresEntityCollection) {
+                        console.log('[DecisionRouter] Entity collection required for this intent');
+                        this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.EntityCollection;
+                        this.outgoingMessage.EntityCollection = {
+                            sessionId     : entityCollectionCheck.sessionId,
+                            intentCode    : entityCollectionCheck.intentCode,
+                            isActive      : !!entityCollectionCheck.activeSession,
+                            activeSession : entityCollectionCheck.activeSession
+                        };
+                        return this.outgoingMessage;
+                    }
+
+                    // Check if LLM classified an intent (even if it doesn't require entity collection)
+                    if (entityCollectionCheck.llmClassification && entityCollectionCheck.llmClassification.intentData) {
+                        console.log('[DecisionRouter] Using LLM classified intent:', entityCollectionCheck.llmClassification.intent);
+                        this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.NLP;
+                        this.outgoingMessage.Intent = {
+                            NLPProvider   : NlpProviderType.LLM,
+                            IntentName    : entityCollectionCheck.llmClassification.intent,
+                            Confidence    : entityCollectionCheck.llmClassification.confidence,
+                            IntentContent : entityCollectionCheck.llmClassification
+                        };
+                        return this.outgoingMessage;
+                    }
+
+                    // Fall back to DialogFlow for intent detection
                     const resultIntent = await this.checkDFIntent(messageBody);
                     if (!this.intentFlag){
                         console.log("All functions returned false");

@@ -1,0 +1,65 @@
+const { v4: uuidv4 } = require('uuid');
+
+module.exports = {
+    up: (queryInterface, Sequelize) => {
+        const now = new Date();
+        const featureFlags = [
+            {
+                id: uuidv4(),
+                flagName: 'llmEntityCollectionEnabled',
+                description: 'Enable LLM-based multi-turn entity collection (Phase 3)',
+                enabled: false,
+                rolloutPercentage: 0,
+                targetIntents: null,
+                targetUsers: null,
+                targetPlatforms: null,
+                environments: JSON.stringify(['development', 'staging']),
+                expiresAt: null,
+                createdAt: now,
+                updatedAt: now
+            },
+            {
+                id: uuidv4(),
+                flagName: 'entityCollection_bloodGlucose',
+                description: 'Enable entity collection for blood glucose intent',
+                enabled: false,
+                rolloutPercentage: 0,
+                targetIntents: JSON.stringify(['blood.glucose.create']),
+                targetUsers: null,
+                targetPlatforms: null,
+                environments: JSON.stringify(['development', 'staging']),
+                expiresAt: null,
+                createdAt: now,
+                updatedAt: now
+            },
+            {
+                id: uuidv4(),
+                flagName: 'entityCollection_bloodPressure',
+                description: 'Enable entity collection for blood pressure intent',
+                enabled: false,
+                rolloutPercentage: 0,
+                targetIntents: JSON.stringify(['blood.pressure.create']),
+                targetUsers: null,
+                targetPlatforms: null,
+                environments: JSON.stringify(['development', 'staging']),
+                expiresAt: null,
+                createdAt: now,
+                updatedAt: now
+            }
+        ];
+
+        return queryInterface.bulkInsert('feature_flags', featureFlags, {});
+    },
+
+    down: (queryInterface, Sequelize) => {
+        return queryInterface.bulkDelete('feature_flags', {
+            flagName: {
+                [Sequelize.Op.in]: [
+                    'llmEntityCollectionEnabled',
+                    'entityCollection_bloodGlucose',
+                    'entityCollection_bloodPressure'
+                ]
+            }
+        }, {});
+    }
+};

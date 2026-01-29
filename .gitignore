@@ -113,3 +113,6 @@ dist
 ENV1.json
 ENV2.json
 .vscode/launch.json
+
+# Implementation docs
+docs/feature-development/

@@ -211,6 +211,13 @@ export interface AlertDetails {
 
 }
 
+export interface EntityCollectionDetails {
+    sessionId      : string;
+    intentCode     : string;
+    isActive       : boolean;
+    activeSession ?: any;
+}
+
 export interface OutgoingMessage {
     PrimaryMessageHandler: MessageHandlerType;
     MetaData             : Imessage;
@@ -220,6 +227,7 @@ export interface OutgoingMessage {
     QnA                 ?: QnADetails;
     Alert               ?: AlertDetails;
     BasicCareplan      ?: CareplanEnrollmentDomainModel;
+    EntityCollection   ?: EntityCollectionDetails;
 }
 
 export interface IReminder {

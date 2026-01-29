@@ -39,4 +39,22 @@ export class IntentRepo {
         }
     };
 
+    static findLLMEnabledIntents = async (container: DependencyContainer): Promise<IntentDto[]> => {
+        try {
+            const entityManager = await RepositoryHelper.resolveEntityManager(container);
+            const intentRepository = entityManager.getRepository(Intents);
+            const intents: Intents[] = await intentRepository.findAll({
+                where: {
+                    llmEnabled : true,
+                    active     : true
+                },
+                order: [['priority', 'DESC']]
+            });
+            return intents.map(intent => IntentsMapper.toDto(intent));
+        } catch (error) {
+            console.error('Error finding LLM enabled intents:', error);
+            return [];
+        }
+    };
+
 }

@@ -23,6 +23,9 @@ import { CommonAssessmentService } from './Assesssment/common.assessment.service
 import { AssessmentHandlingService } from './Assesssment/assessment.handling.service';
 import { FormHandler } from './form/form.handler';
 import { CareplanEnrollmentService } from './basic.careplan/careplan.enrollment.service';
+import { EntityCollectionOrchestrator } from './llm/entity.collection/entity.collection.orchestrator.service';
+import { IntentEmitter } from '../intentEmitters/intent.emitter';
+import { ContainerService } from './container/container.service';
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -41,7 +44,8 @@ export class handleRequestservice {
         @inject(CustomMLModelResponseService) private customMLModelResponseService?: CustomMLModelResponseService,
         @inject(ServeAssessmentService) private serveAssessmentService?: ServeAssessmentService,
         @inject(CommonAssessmentService) private commonAssessmentService?: CommonAssessmentService,
-        @inject(AssessmentHandlingService) private assessmentHandlingService?: AssessmentHandlingService
+        @inject(AssessmentHandlingService) private assessmentHandlingService?: AssessmentHandlingService,
+        @inject(EntityCollectionOrchestrator) private entityCollectionOrchestrator?: EntityCollectionOrchestrator
     ) {
     }
 
@@ -231,12 +235,176 @@ export class handleRequestservice {
             }
             break;
         }
+
+        case MessageHandlerType.EntityCollection: {
+            try {
+                console.log("[HandleRequestService] Processing entity collection...");
+                message_from_nlp = await this.handleEntityCollection(outgoingMessage, metaData);
+            } catch (error) {
+                console.error("[HandleRequestService] Error in entity collection, falling back to Dialogflow:", error);
+                // Fallback to Dialogflow on error
+                message_from_nlp = await this.DialogflowResponseService.getDialogflowMessage(
+                    metaData.messageBody,
+                    metaData.platform,
+                    metaData.intent,
+                    metaData
+                );
+            }
+            break;
+        }
         }
         if (outgoingMessage.PrimaryMessageHandler !== MessageHandlerType.WorkflowService && message_from_nlp) {
             processed_message = await this.processMessage(message_from_nlp, metaData.platformId, messageHandler);
         }
 
         return { message_from_nlp, processed_message };
+    }
+
+    /**
+     * Handle entity collection flow
+     */
+    private async handleEntityCollection(
+        outgoingMessage: OutgoingMessage,
+        metadata: Imessage
+    ): Promise<IserviceResponseFunctionalities> {
+        try {
+            const entityCollectionData = outgoingMessage.EntityCollection;
+
+            let response;
+
+            if (entityCollectionData.isActive) {
+                // Continue existing session
+                console.log(`[HandleRequestService] Continuing entity collection session: ${entityCollectionData.sessionId}`);
+                response = await this.entityCollectionOrchestrator.processMessage(
+                    entityCollectionData.sessionId,
+                    metadata.messageBody
+                );
+            } else {
+                // Start new session
+                console.log(`[HandleRequestService] Starting entity collection for intent: ${entityCollectionData.intentCode}`);
+                response = await this.entityCollectionOrchestrator.startSession(
+                    entityCollectionData.intentCode,
+                    metadata.platformId,
+                    entityCollectionData.sessionId,
+                    metadata.messageBody
+                );
+            }
+
+            // Check if entity collection is complete
+            if (response.isComplete && response.collectedEntities) {
+                // Entity collection complete, trigger intent with collected entities
+                console.log(`[HandleRequestService] Entity collection complete, triggering intent: ${entityCollectionData.intentCode}`);
+                return await this.triggerIntentWithCollectedEntities(
+                    entityCollectionData.intentCode,
+                    response.collectedEntities,
+                    metadata
+                );
+            } else if (!response.shouldContinue) {
+                // Entity collection abandoned or timed out, fallback to Dialogflow
+                console.log('[HandleRequestService] Entity collection failed, falling back to Dialogflow');
+                return await this.fallbackToDialogflow(metadata);
+            } else {
+                // Entity collection in progress, return question to user
+                console.log(`[HandleRequestService] Entity collection in progress: ${response.message}`);
+                return this.createResponseFromMessage(response.message, entityCollectionData.intentCode);
+            }
+        } catch (error) {
+            console.error('[HandleRequestService] Error in entity collection:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Trigger intent with collected entities
+     */
+    private async triggerIntentWithCollectedEntities(
+        intentCode: string,
+        collectedEntities: Map<string, any>,
+        metadata: Imessage
+    ): Promise<IserviceResponseFunctionalities> {
+        try {
+            const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const childContainer = ContainerService.createChildContainer(clientName);
+
+            // Convert entities Map to parameters object
+            const parameters = this.convertEntitiesToParameters(collectedEntities);
+
+            // Create eventObj with collected entities
+            const eventObj = {
+                container        : childContainer,
+                parameters       : parameters,
+                collectedEntities: collectedEntities,
+                message          : metadata,
+                channel          : metadata.platform,
+                source           : 'llm_entity_collection'
+            };
+
+            console.log(`[HandleRequestService] Emitting intent: ${intentCode} with entities:`, Array.from(collectedEntities.keys()));
+
+            // Emit intent with collected entities
+            const response = await IntentEmitter.emit(intentCode, eventObj);
+
+            // Extract response from promise results
+            let responseText = '';
+            if (Array.isArray(response) && response.length > 0) {
+                const firstResult = response[0];
+                if (firstResult.status === 'fulfilled' && firstResult.value) {
+                    if (typeof firstResult.value === 'string') {
+                        responseText = firstResult.value;
+                    } else if (firstResult.value.message) {
+                        responseText = firstResult.value.message;
+                    }
+                }
+            }
+
+            if (!responseText) {
+                responseText = `I've recorded your ${intentCode} successfully.`;
+            }
+
+            return this.createResponseFromMessage(responseText, intentCode);
+        } catch (error) {
+            console.error('[HandleRequestService] Error triggering intent:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Convert entities Map to parameters object
+     */
+    private convertEntitiesToParameters(entities: Map<string, any>): any {
+        const parameters = {};
+        entities.forEach((entity, name) => {
+            parameters[name] = entity.value;
+        });
+        return parameters;
+    }
+
+    /**
+     * Fallback to Dialogflow
+     */
+    private async fallbackToDialogflow(metadata: Imessage): Promise<IserviceResponseFunctionalities> {
+        console.log('[HandleRequestService] Falling back to Dialogflow for intent detection');
+        return await this.DialogflowResponseService.getDialogflowMessage(
+            metadata.messageBody,
+            metadata.platform,
+            metadata.intent,
+            metadata
+        );
+    }
+
+    /**
+     * Create a response object from a message string
+     */
+    private createResponseFromMessage(message: string, intent: string): IserviceResponseFunctionalities {
+        return {
+            getText        : () => message,
+            getIntent      : () => intent,
+            getSensitivity : () => null,
+            getPayload     : () => ({}),
+            getImageObject : () => null,
+            getParseMode   : () => false,
+            getSimilarDoc  : () => null
+        };
     }
 
 }

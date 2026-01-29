@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, ForeignKey, BelongsTo } from 'sequelize-typescript';
-import { IIntentListeners } from '../../refactor/interface/intents/intents.interface';
+import { IIntentListeners, HandlerType, ExecutionMode } from '../../refactor/interface/intents/intents.interface';
 import { Intents } from './intents.model';
 @Table(
     {
@@ -26,7 +26,7 @@ export class IntentListeners extends Model implements IIntentListeners {
         allowNull : false
     })
         intentId: number;
-    
+
     @BelongsTo(() => Intents)
         Intents: Intents;
 
@@ -40,4 +40,36 @@ export class IntentListeners extends Model implements IIntentListeners {
         type : DataType.INTEGER
     })
         sequence: number;
+
+    // Dynamic Handler Configuration
+    @Column({
+        type : DataType.ENUM('function', 'class', 'service'),
+        defaultValue : 'function',
+        allowNull : false
+    })
+        handlerType: HandlerType;
+
+    @Column({
+        type : DataType.STRING(255)
+    })
+        handlerPath: string;
+
+    @Column({
+        type : DataType.JSON
+    })
+        handlerConfig: any;
+
+    @Column({
+        type : DataType.BOOLEAN,
+        defaultValue : true,
+        allowNull : false
+    })
+        enabled: boolean;
+
+    @Column({
+        type : DataType.ENUM('sequential', 'parallel'),
+        defaultValue : 'sequential',
+        allowNull : false
+    })
+        executionMode: ExecutionMode;
 }

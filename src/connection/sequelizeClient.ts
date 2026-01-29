@@ -18,6 +18,11 @@ import { ReminderMessage } from '../models/reminder.model';
 import { Intents } from '../models/intents/intents.model';
 import { SystemGeneratedMessages } from '../models/system.generated.messages.model';
 import { AssessmentIdentifiers } from '../models/assessment/assessment.identifiers.model';
+import { IntentListeners } from '../models/intents/intent.listeners.model';
+import { EntityCollectionSession } from '../models/llm/entity.collection.session.model';
+import { IntentClassificationLog } from '../models/llm/intent.classification.log.model';
+import { LLMProviderConfig } from '../models/llm/llm.provider.config.model';
+import { FeatureFlag } from '../models/feature.flags/feature.flag.model';
 
 //////////////////////////////////////////////////////////////////////////////////////
 
@@ -60,8 +65,13 @@ export class SequelizeClient {
                     UserInfo,
                     ReminderMessage,
                     Intents,
+                    IntentListeners,
                     SystemGeneratedMessages,
-                    AssessmentIdentifiers
+                    AssessmentIdentifiers,
+                    EntityCollectionSession,
+                    IntentClassificationLog,
+                    LLMProviderConfig,
+                    FeatureFlag
                 ]);
             }
 
