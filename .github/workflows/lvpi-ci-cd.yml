@@ -17,6 +17,8 @@ on:
 env:
   AWS_REGION: ap-south-2
   ECR_REPOSITORY: lvpei-prod-rean-bot-wrapper
+  ECS_CLUSTER: lvpei-prod-cluster
+  ECS_SERVICE: lvpei-prod-rean-bot-wrapper
   IMAGE_TAG: ${{ github.sha }}
 
 permissions:
@@ -81,3 +83,28 @@ jobs:
       - name: Image digest
         run: |
           echo "Image pushed: ${{ steps.build-image.outputs.image_uri }}"
+
+      # Deploy to ECS - Update task definition with new image and force deployment
+      - name: Download current task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition ${{ env.ECS_SERVICE }} \
+            --query taskDefinition > task-definition.json
+          jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)' task-definition.json > clean-task-definition.json
+
+      - name: Update image in task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: clean-task-definition.json
+          container-name: ${{ env.ECS_SERVICE }}
+          image: ${{ steps.build-image.outputs.image_uri }}
+
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+          wait-for-minutes: 10
