@@ -1,4 +1,5 @@
 import { inject, Lifecycle, scoped } from 'tsyringe';
+import { v4 as uuidv4 } from 'uuid';
 import { EntityCollectionStateMachine } from './entity.collection.state.machine.service';
 import { EntityExtractionService } from './entity.extraction.service';
 import { EntityValidationService } from './entity.validation.service';
@@ -79,6 +80,7 @@ export class EntityCollectionOrchestrator {
             const context = await this.stateMachine.initializeSession(
                 sessionId,
                 String(intent.id),
+                intentCode,
                 userPlatformId,
                 requiredEntities,
                 maxTurns
@@ -363,10 +365,11 @@ export class EntityCollectionOrchestrator {
         const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
         const container = ContainerService.createChildContainer(clientName);
         await EntityCollectionSessionRepo.create(container, {
-            id                  : context.sessionId,
+            id                  : uuidv4(),  // Generate proper UUID for database id
             intentId            : context.intentId,
+            intentCode          : context.intentCode,  // Store intent code for retrieval
             userPlatformId      : context.userPlatformId,
-            sessionId           : context.sessionId,
+            sessionId           : context.sessionId,  // Keep custom session ID for lookups
             status              : context.currentState as any,
             currentTurn         : context.currentTurn,
             maxTurns            : context.maxTurns,

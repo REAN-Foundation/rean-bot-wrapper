@@ -26,8 +26,12 @@ module.exports = {
                     type: Sequelize.STRING(255),
                     allowNull: false
                 },
+                intentCode: {
+                    type: Sequelize.STRING(255),
+                    allowNull: false
+                },
                 status: {
-                    type: Sequelize.ENUM('active', 'completed', 'abandoned', 'timeout'),
+                    type: Sequelize.ENUM('initialized', 'collecting', 'validating', 'completed', 'abandoned', 'timeout', 'error'),
                     allowNull: false
                 },
                 currentTurn: {

@@ -43,6 +43,7 @@ export interface ExtractedEntity {
 export interface EntityCollectionContext {
     sessionId: string;
     intentId: string;
+    intentCode: string;
     userPlatformId: string;
     requiredEntities: EntityDefinition[];
     collectedEntities: Map<string, ExtractedEntity>;

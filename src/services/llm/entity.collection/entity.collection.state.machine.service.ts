@@ -27,6 +27,7 @@ export class EntityCollectionStateMachine {
     async initializeSession(
         sessionId: string,
         intentId: string,
+        intentCode: string,
         userPlatformId: string,
         requiredEntities: EntityDefinition[],
         maxTurns: number = 5
@@ -38,6 +39,7 @@ export class EntityCollectionStateMachine {
         const context: EntityCollectionContext = {
             sessionId,
             intentId,
+            intentCode,
             userPlatformId,
             requiredEntities,
             collectedEntities: new Map(),

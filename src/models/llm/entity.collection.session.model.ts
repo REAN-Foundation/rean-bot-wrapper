@@ -47,6 +47,12 @@ export class EntityCollectionSession extends Model implements IEntityCollectionS
     })
         sessionId: string;
 
+    @Column({
+        type: DataType.STRING(255),
+        allowNull: false
+    })
+        intentCode: string;
+
     // Session State
     @Column({
         type: DataType.ENUM('active', 'completed', 'abandoned', 'timeout'),

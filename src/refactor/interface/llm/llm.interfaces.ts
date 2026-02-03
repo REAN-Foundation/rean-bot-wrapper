@@ -38,6 +38,7 @@ export interface IEntityCollectionSession {
     intentId: string;
     userPlatformId: string;
     sessionId: string;
+    intentCode: string;
 
     // Session State
     status: SessionStatus;

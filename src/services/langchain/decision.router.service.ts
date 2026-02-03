@@ -380,7 +380,9 @@ export class DecisionRouter {
                 userPlatformId
             );
 
-            if (activeSession && ((activeSession.status as any) === 'collecting' || activeSession.status === 'active')) {
+            // Session is active if it's in any of the in-progress states
+            const inProgressStatuses = ['initialized', 'collecting', 'validating'];
+            if (activeSession && inProgressStatuses.includes(activeSession.status as string)) {
                 return activeSession;
             }
 

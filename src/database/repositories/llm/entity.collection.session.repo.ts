@@ -67,10 +67,13 @@ export class EntityCollectionSessionRepo {
         try {
             const entityManager = await RepositoryHelper.resolveEntityManager(container);
             const repository = entityManager.getRepository(EntityCollectionSession);
+            // Look for sessions that are in progress (initialized, collecting, or validating)
             const session: EntityCollectionSession | null = await repository.findOne({
                 where : {
                     userPlatformId,
-                    status : 'active'
+                    status : {
+                        [Op.in] : ['initialized', 'collecting', 'validating']
+                    }
                 },
                 order : [['lastActivityAt', 'DESC']]
             });
@@ -124,7 +127,9 @@ export class EntityCollectionSessionRepo {
             const repository = entityManager.getRepository(EntityCollectionSession);
             const sessions: EntityCollectionSession[] = await repository.findAll({
                 where : {
-                    status    : 'active',
+                    status : {
+                        [Op.in] : ['initialized', 'collecting', 'validating']
+                    },
                     timeoutAt : {
                         [Op.lt] : new Date()
                     }
