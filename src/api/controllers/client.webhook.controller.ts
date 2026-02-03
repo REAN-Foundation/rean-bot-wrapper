@@ -235,89 +235,94 @@ export class ClientWebhookController {
         }
     }
 
-    private async handleConsentMessage(req: any, res: any, handleReqVariable,buttonKeyName,channel,firstTimeUser ) {
+    private async handleConsentMessage(req: any, res: any, handleReqVariable, buttonKeyName, channel, firstTimeUser) {
         try {
             const clientEnvironmentProviderService = await req.container.resolve(ClientEnvironmentProviderService);
-            const clientName = await  clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-            console.log(clientName);
-            console.log("Here in handle consent Message");
+            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
-            const consentRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ConsentInfo);
-            const [userId, consentReply, languageCode] = await this.getUserIdAndLanguagecode(handleReqVariable, channel,req);
+            const consentRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(ConsentInfo);
+            const [userId, consentReply, languageCode] = await this.getUserIdAndLanguagecode(handleReqVariable, channel, req);
             let consentRequired = true;
-            console.log("Handling the consent message flow ", userId, consentReply, languageCode, firstTimeUser);
+
+            console.log("Handling the consent message flow", userId, consentReply, languageCode, firstTimeUser);
+
+            // Check if consent is required
             if (firstTimeUser || consentReply === "consent_no") {
                 consentRequired = true;
-            }
-            else {
+            } else {
                 consentRequired = await this.checkConsentRequired(req, userId);
             }
-            if (firstTimeUser && consentReply !== "consent_yes") {
-                this.consentService.handleConsentRequest(req, userId, consentReply, languageCode, consentRepository, res,buttonKeyName);
+
+            // NEW: For first-time users, show language selection first
+            if (firstTimeUser && !consentReply) {
+                this.consentService.sendLanguageSelectionMessage(req, userId, buttonKeyName);
             }
+            // Handle language selection callback
+            else if (consentReply && consentReply.startsWith("language_select-")) {
+                this.consentService.handleConsentRequest(req, userId, consentReply, languageCode, consentRepository, res, buttonKeyName);
+            }
+            // Handle consent flow (existing logic)
             else {
                 if (consentRequired && consentReply !== "consent_yes") {
                     this.consentService.handleConsentRequest(req, userId, consentReply, languageCode, consentRepository, res, buttonKeyName);
-                }
-                else {
-
+                } else {
                     this._platformMessageService.handleMessage(handleReqVariable, req.params.channel);
-
                 }
             }
+        } catch (error) {
+            console.log("Error in handleConsentMessage", error);
         }
-        catch (error) {
-            console.log("While Sending Consent Response", error);
-
-        }
-
     }
 
-    async getUserIdAndLanguagecode(reqBody,channel,req)
-    {
+    async getUserIdAndLanguagecode(reqBody, channel, req) {
         try {
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
             let userId = null;
-            let consentReply  = null;
+            let consentReply = null;
             let languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
-            if (channel === "whatsappMeta"){
-                if (reqBody.messages[0].type === 'interactive'){
+
+            if (channel === "whatsappMeta") {
+                if (reqBody.messages[0].type === 'interactive') {
                     const interactiveType = reqBody.messages[0].interactive.type;
                     consentReply = reqBody.messages[0]?.interactive[interactiveType]?.id;
+
                     if (consentReply) {
-                        consentReply = reqBody.messages[0]?.interactive[interactiveType]?.id;
+                        // Handle both language_select-{code} and consent_changeLanguge-{code}
+                        if (consentReply.includes("-")) {
+                            languageCode = consentReply.split("-")[1];
+                        }
+                    }
+
+                    if (!languageCode) {
+                        languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+                    }
+
+                    userId = reqBody.messages[0].from;
+                } else {
+                    userId = reqBody.messages[0].from;
+                }
+            } else if (channel === "telegram") {
+                if (reqBody.callback_query) {
+                    consentReply = reqBody.callback_query.data;
+
+                    // Handle both language_select-{code} and consent_changeLanguge-{code}
+                    if (consentReply && consentReply.includes("-")) {
                         languageCode = consentReply.split("-")[1];
                     }
-                    if (!languageCode){
-                        languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
-                    }
-                    userId = reqBody.messages[0].from;
-                }
-                else {
-                    userId = reqBody.messages[0].from;
 
-                }
-            }
-            else if (channel === "telegram") {
-                if (reqBody.callback_query){
-                    consentReply = reqBody.callback_query.data;
-                    languageCode = consentReply.split("-")[1];
-                    if (!languageCode){
+                    if (!languageCode) {
                         languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
                     }
+
                     userId = reqBody.callback_query.message.chat.id;
-                }
-                else {
+                } else {
                     userId = reqBody.message.chat.id;
-
                 }
             }
 
             return [userId, consentReply, languageCode];
-        }
-        catch (error) {
-            console.log("While getting user ID ,Language code", error);
-
+        } catch (error) {
+            console.log("Error in getUserIdAndLanguagecode", error);
         }
     }
 
