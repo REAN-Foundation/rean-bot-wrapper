@@ -19,7 +19,7 @@
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-comprehendmedical": "^3.13.0",
-    "@aws-sdk/client-sqs": "^3.890.0",
+    "@aws-sdk/client-sqs": "^3.974.0",
     "@google-cloud/dialogflow": "^6.0.0",
     "@google-cloud/speech": "^5.0.0",
     "@google-cloud/text-to-speech": "^4.0.0",
