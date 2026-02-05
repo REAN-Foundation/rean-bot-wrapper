@@ -19,11 +19,14 @@ import { NeedleService } from "../needle.service";
 import { AssessmentService } from "../Assesssment/assessment.service";
 import { AssessmentIdentifiers } from "../../models/assessment/assessment.identifiers.model";
 import { WorkflowEventListener } from "../emergency/workflow.event.listener";
+import { WorkflowRoutingService } from "../workflow/workflow.routing.service";
+import { RoutingDecision, Schema } from '../../refactor/interface/workflow/workflow.interface';
 import { IntentType } from "../../domain.types/intents/intents.types";
 import { ContainerService } from "../container/container.service";
 import { IntentRepo } from "../../database/repositories/intent/intent.repo";
 import { CareplanEnrollmentDomainModel } from "../../domain.types/basic.careplan/careplan.types";
 import { CareplanMetaDataValidator } from "../basic.careplan/careplan.metadata.validator";
+import { NotificationType } from "../../domain.types/reminder/reminder.domain.model";
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -40,7 +43,8 @@ export class DecisionRouter {
         @inject(EmojiFilter) private emojiFilter?: EmojiFilter,
         @inject(NeedleService) private needleService?: NeedleService,
         @inject(AssessmentService) private assessmentService?: AssessmentService,
-        @inject(WorkflowEventListener) private workflowEventListener?: WorkflowEventListener
+        @inject(WorkflowEventListener) private workflowEventListener?: WorkflowEventListener,
+        @inject(WorkflowRoutingService) private workflowRoutingService?: WorkflowRoutingService
     ) {
         this.outgoingMessage = {
             PrimaryMessageHandler : MessageHandlerType.Unhandled,
@@ -340,6 +344,7 @@ export class DecisionRouter {
             const careplanMetaData = CareplanMetaDataValidator.validatecareplanEnrollment(metaData);
 
             careplanMetaData.TenantName = clientName;
+            channel = channel === 'whatsappMeta' ? NotificationType.WhatsApp : channel;
             careplanMetaData.Channel = channel;
             careplanMetaData.StartDate = new Date().toISOString()
                 .split('T')[0];
@@ -432,18 +437,19 @@ export class DecisionRouter {
             {
 
                 // UNCOMMENT TO ENABLE THE QA WITH WORKFLOW SERVICE
-                // const workflowSchema = await this.workflowEventListener.getAllSchemaForTenant();
-                // const workflowFlag = await this.checkWorkflowMode(workflowSchema, messageBody);
+                const workflowSchema = await this.workflowEventListener.getAllSchemaForTenant();
+                const workflowFlag = await this.newCheckWorkflowMode(workflowSchema, messageBody);
                 this.outgoingMessage.MetaData = messageBody;
 
-                // if (workflowFlag) {
-                this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.WorkflowService;
-                return this.outgoingMessage;
+                if (workflowFlag.shouldTrigger) {
+                    this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.WorkflowService;
+                    this.outgoingMessage.Alert.AlertId = workflowFlag.matchedSchemaId;
+                    return this.outgoingMessage;
                 
-                // } else {
-                //     this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.QnA;
-                //     return this.outgoingMessage;
-                // }
+                } else {
+                    this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.QnA;
+                    return this.outgoingMessage;
+                }
 
             }
 
@@ -593,6 +599,26 @@ export class DecisionRouter {
             return parsedResult.flag.toLowerCase() === "true";
         } catch (error) {
             console.log("ERROR WHILE CHECKING THE WORKFLOW MODE");
+        }
+    }
+
+    private async newCheckWorkflowMode(schema: Schema | Schema[], messageBody: Imessage) {
+        try {
+            const result: RoutingDecision = await this.workflowRoutingService.routeMessage(
+                messageBody.messageBody,
+                schema
+            );
+
+            console.log("WORKFLOW MODE AI RESPONSE", result);
+            return result;
+        } catch (error) {
+            console.log("ERROR WHILE CHECKING THE WORKFLOW MODE", error);
+            const result: RoutingDecision = {
+                shouldTrigger   : false,
+                reason          : "Error while checking for workflow mode",
+                matchedSchemaId : null
+            };
+            return result;
         }
     }
 

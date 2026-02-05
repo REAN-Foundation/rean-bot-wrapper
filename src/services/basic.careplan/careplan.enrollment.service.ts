@@ -9,6 +9,7 @@ import { Imessage, Iresponse } from "../../refactor/interface/message.interface"
 import { SystemGeneratedMessagesRepo } from "../../database/repositories/system.messages/system.generated.messages.repo";
 import { platformServiceInterface } from "../../refactor/interface/platform.interface";
 import { commonResponseMessageFormat } from "../common.response.format.object";
+import { NotificationType } from "../../domain.types/reminder/reminder.domain.model";
 
 ///////////////////////////////////////////////////////////////////////////////
 export class CareplanEnrollmentService {
@@ -91,25 +92,36 @@ export class CareplanEnrollmentService {
                 `Sending registration message to patient: ${platformId} via channel: ${channel}`
             );
 
-            const platformMessageService: platformServiceInterface = childContainer.resolve(channel);
+            const platformMessageService: platformServiceInterface = childContainer.resolve(channel === NotificationType.WhatsApp ? 'whatsappMeta' : channel);
 
             const registrationMessage = await SystemGeneratedMessagesRepo.findMessageByName(
                 childContainer,
                 'CAREPLAN_REG_MESSAGE'
             );
 
-            if (!registrationMessage) {
-                Logger.instance().log('Registration message not found in system messages');
+            const welcomeMessage = await SystemGeneratedMessagesRepo.findMessageByName(
+                childContainer,
+                "CAREPLAN_WELCOME_MESSAGE"
+            );
+            
+            if (!registrationMessage && !welcomeMessage) {
+                Logger.instance().log('Careplan registration & welcome message not found in system messages');
                 return;
             }
 
             const responseFormat: Iresponse = commonResponseMessageFormat();
             responseFormat.platform = channel;
             responseFormat.sessionId = platformId;
-            responseFormat.messageText = registrationMessage.MessageContent;
             responseFormat.message_type = "text";
+            if (registrationMessage) {
+                responseFormat.messageText = registrationMessage.MessageContent;
+                await platformMessageService.SendMediaMessage(responseFormat, null);
+            }
 
-            await platformMessageService.SendMediaMessage(responseFormat, null);
+            if (welcomeMessage) {
+                responseFormat.messageText = welcomeMessage.MessageContent ;
+                await platformMessageService.SendMediaMessage(responseFormat, null);
+            }
 
             Logger.instance().log(
                 `Successfully sent registration message to patient: ${platformId}`

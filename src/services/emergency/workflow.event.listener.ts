@@ -17,6 +17,7 @@ import { commonResponseMessageFormat } from "../common.response.format.object";
 import { platformServiceInterface } from "../../refactor/interface/platform.interface";
 import { requestStatistics } from "../../refactor/interface/statistics.interface";
 import { sendTelegramButtonService } from "../telegram.button.service";
+import { match } from "assert";
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -63,7 +64,7 @@ export class WorkflowEventListener {
         return previousMessage;
     };
 
-    async commence(message: Imessage, platformMessageService) {
+    async commence(message: Imessage, platformMessageService,matchedWorkflowId?: string){
         try {
             console.log("Message ->", message);
             console.log("Client name", this.environmentProviderService.getClientEnvironmentVariable("NAME"));
@@ -124,7 +125,7 @@ export class WorkflowEventListener {
                 return null;
             }
 
-            var schemaId = schemaList[0].id;
+            var schemaId = matchedWorkflowId;
             var schemaInstanceId: string = null;
             var schemaName: string = null;
             var nodeInstanceId: string = null;
@@ -134,10 +135,12 @@ export class WorkflowEventListener {
            
             const prevMessage: WorkflowUserData = await this.getPreviousMessageFromWorkflow(message.platformId);
             if (!prevMessage) {
-                var baseSchema = schemaList.find((schema) => schema.ParentSchemaId === null);
-                if (baseSchema) {
-                    schemaId = baseSchema.id;
-                }
+                schemaId = matchedWorkflowId;
+                //when no routing prompt and matched workflowid present
+                // var baseSchema = schemaList.find((schema) => schema.ParentSchemaId === null);
+                // if (baseSchema) {
+                // schemaId = baseSchema.id;
+                // }
             }
             else {
                 schemaId         = prevMessage.SchemaId;

@@ -230,3 +230,8 @@ export interface IReminder {
     ReminderTime: string;
     ParentActionId: string;
 }
+
+export interface IChatMessageSensitivity {
+    chatMessageID: number;
+    sensitivity: string;
+}
