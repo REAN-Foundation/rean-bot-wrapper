@@ -1,13 +1,15 @@
 import needle from "needle";
 import { RequestResponseCacheService } from "../../modules/cache/request.response.cache.service";
-import { ChatBotSettings, ConsentMessage, TenantSettingsDomainModel, CustomSettings } from "../../domain.types/tenant.setting/tenant.setting.types";
+import { ChatBotSettings, ConsentMessage, ConsentMessageWithLanguage, TenantSettingsDomainModel, CustomSettings } from "../../domain.types/tenant.setting/tenant.setting.types";
 import { ApiError } from "../../common/api.error";
+import { languageCodeMapper } from "../../utils/language.code.mapper";
 
 ///////////////////////////////////////////////////////////////////////////////
 
 export class TenantSettingService {
 
-    static async getTenantSettingByCode(tenantCode: string, apiKey: string, baseUrl: string): Promise<TenantSettingsDomainModel> {
+    static async getTenantSettingByCode (
+        tenantCode: string, apiKey: string, baseUrl: string): Promise<TenantSettingsDomainModel> {
         try {
             const cachedTenantSetting = await RequestResponseCacheService.get(`tenant-setting-${tenantCode}`);
             if (cachedTenantSetting) {
@@ -37,12 +39,12 @@ export class TenantSettingService {
             console.error('Error in TenantSettingService.getTenantSettingByCode:', error);
             return null;
         }
-
     }
 
     static async isConsentEnabled(tenantCode: string, apiKey: string, baseUrl: string): Promise<boolean> {
         try {
-            const tenantSetting: TenantSettingsDomainModel = await this.getTenantSettingByCode(tenantCode, apiKey, baseUrl);
+            const tenantSetting: TenantSettingsDomainModel =
+            await this.getTenantSettingByCode(tenantCode, apiKey, baseUrl);
             return tenantSetting?.ChatBot?.Consent ?? false;
         } catch (error) {
             console.error('Error in TenantSettingService.isTenantSettingEnabled:', error);
@@ -50,15 +52,41 @@ export class TenantSettingService {
         }
     }
 
+    static async getConsentSetting(tenantCode: string, apiKey: string, baseUrl: string):
+    Promise<ConsentMessageWithLanguage[]> {
+        try {
+            const tenantSetting: TenantSettingsDomainModel =
+            await this.getTenantSettingByCode(tenantCode, apiKey, baseUrl);
+            const messages = tenantSetting?.Consent?.Messages ?? [];
+            return this.mapLanguageCodeWithLanguage(messages);
+        } catch (error) {
+            console.error('Error in TenantSettingService.getConsentSetting:', error);
+            return [];
+        }
+    }
+
+    static async isBasicCareplanEnabled (tenantCode: string, apiKey: string, baseUrl: string): Promise<boolean> {
+        try {
+            const tenantSetting: TenantSettingsDomainModel =
+            await this.getTenantSettingByCode(tenantCode, apiKey, baseUrl);
+            return tenantSetting?.ChatBot?.BasicCarePlan ?? false;
+        } catch (error) {
+            console.error('Error in TenantSettingService.isBasicCareplanEnabled:', error);
+            return false;
+        }
+    }
+
     static async getConsentMessages(tenantCode: string, apiKey: string, baseUrl: string, languageCode = 'en'): Promise<ConsentMessage> {
         const defaultConsentMessage = {
             LanguageCode : 'en',
-            Content      : 'Please read and accept the consent before using the service.',
-            WebsiteURL   : 'https://www.example.com'
+            Content      : 'Hello! Before we proceed further, we need your consent. We will use your health details only to give you the right advice and care messages. Do you agree that we use your information securely? ',
+            WebsiteURL   : 'https://www.reanfoundation.org/consent/'
         };
         try {
-            const tenantSetting: TenantSettingsDomainModel = await this.getTenantSettingByCode(tenantCode, apiKey, baseUrl);
-            return tenantSetting?.Consent?.Messages?.find(message => message.LanguageCode === languageCode) ?? defaultConsentMessage;
+            const tenantSetting: TenantSettingsDomainModel =
+            await this.getTenantSettingByCode(tenantCode, apiKey, baseUrl);
+            return tenantSetting?.Consent?.Messages?.find(message => message.LanguageCode === languageCode) ??
+            defaultConsentMessage;
         } catch (error) {
             console.error('Error in TenantSettingService.getConsentMessages:', error);
             return defaultConsentMessage;
@@ -67,7 +95,8 @@ export class TenantSettingService {
 
     static async getChatBotSettings(tenantCode: string, apiKey: string, baseUrl: string): Promise<ChatBotSettings> {
         try {
-            const tenantSetting: TenantSettingsDomainModel = await this.getTenantSettingByCode(tenantCode, apiKey, baseUrl);
+            const tenantSetting: TenantSettingsDomainModel =
+            await this.getTenantSettingByCode(tenantCode, apiKey, baseUrl);
             return tenantSetting?.ChatBot ?? null;
         } catch (error) {
             console.error('Error in TenantSettingService.getChatBotSettings:', error);
@@ -77,12 +106,22 @@ export class TenantSettingService {
 
     static async getCustomSettings(tenantCode: string, apiKey: string, baseUrl: string): Promise<CustomSettings> {
         try {
-            const tenantSetting: TenantSettingsDomainModel = await this.getTenantSettingByCode(tenantCode, apiKey, baseUrl);
+            const tenantSetting: TenantSettingsDomainModel =
+            await this.getTenantSettingByCode(tenantCode, apiKey, baseUrl);
             return tenantSetting?.Custom ?? null;
         } catch (error) {
             console.error('Error in TenantSettingService.getChatBotSettings:', error);
             return null;
         }
+    }
+
+    private static mapLanguageCodeWithLanguage(messages: ConsentMessage[]): ConsentMessageWithLanguage[] {
+        return messages.map(message => {
+            return {
+                ...message,
+                Language : languageCodeMapper.get(message.LanguageCode) || 'Unknown'
+            };
+        });
     }
 
 }

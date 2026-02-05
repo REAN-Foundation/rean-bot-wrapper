@@ -75,5 +75,7 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           push: false
           tags: reancare/services:${{ steps.vars.outputs.branch }}_${{ steps.vars.outputs.sha_short }}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache
+          # cache-from: type=local,src=/tmp/.buildx-cache
+          # cache-to: type=local,dest=/tmp/.buildx-cache
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

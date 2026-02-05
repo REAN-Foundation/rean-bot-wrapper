@@ -85,12 +85,12 @@ export class ClickUpMessageService implements platformServiceInterface {
                     const now = Date.now();
                     ClickUpMessageService.processedComments.set(commentId, now);
 
-                    const commentObj = requestBody.history_items[0].comment.comment;
-                    for (let i = 0; i < commentObj.length; i++){
-                        if (commentObj[i].type && (commentObj[i].text === "@watchers" || commentObj[i].text === "@everyone")){
-                            const tag = commentObj[i].text;
-                            this.eventComment(requestBody,tag);
-                        }
+                    const commentArray = requestBody.history_items[0].comment.comment;
+                    const tagObj = commentArray.find(item => item.type === "followers_tag");
+
+                    if (tagObj) {
+                        const tag = "@everyone";
+                        this.eventComment(requestBody, tag);
                     }
                 }
             }

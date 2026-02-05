@@ -34,6 +34,16 @@ export const EnrollHFCareplanListener = async ( intent, eventObj) => {
     } catch (error) {
         throw new Error(`Handle heart failure careplan intent ${error}`);
     }
-
 };
 
+export const StartCareplanForTestUsersListener = async ( intent, eventObj) => {
+    try {
+        console.log("StartCareplanForTestUsersListener intent", intent);
+        const enrollService: HeartFailureRegistrationService =
+            eventObj.container.resolve(HeartFailureRegistrationService);
+        const response = await enrollService.registrationService(eventObj, true);
+        return response;
+    } catch (error) {
+        throw new Error(`Handle start careplan for test users intent ${error}`);
+    }
+};

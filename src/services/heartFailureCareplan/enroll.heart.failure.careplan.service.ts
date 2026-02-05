@@ -12,6 +12,7 @@ import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.servi
 import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
 import { SystemGeneratedMessagesService } from "../system.generated.message.service";
 import { translateService } from '../translate.service';
+import { DEFAULT_DOB } from '../../refactor/messageTypes/user.info.types';
 
 @scoped(Lifecycle.ContainerScoped)
 
@@ -30,7 +31,7 @@ export class HeartFailureRegistrationService {
         @inject(translateService) private translateService?: translateService
     ) {}
 
-    async registrationService (eventObj): Promise<any> {
+    async registrationService (eventObj, isTestUser = false ): Promise<any> {
         try {
             const personName : string = eventObj.body.originalDetectIntentRequest.payload.userName;
             const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
@@ -39,7 +40,7 @@ export class HeartFailureRegistrationService {
                 personPhoneNumber, personName);
 
             const body : QueueDoaminModel =  {
-                Intent : "RegistrationHeartFailure",
+                Intent : isTestUser ? "CareplanRegistrationForTestUser" : "RegistrationHeartFailure",
                 Body   : {
                     PatientUserId : patientIDArray.patientUserId,
                     Name          : personName,
@@ -47,8 +48,8 @@ export class HeartFailureRegistrationService {
                 }
             };
             const patientUpdateUrl = `patients/${patientIDArray.patientUserId}`;
-            const defaultDOB = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_DOB");
-            const defaultGender = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_GENDER");
+            const defaultDOB = DEFAULT_DOB;
+            const defaultGender = "Male";
 
             const patientDomainModel = {
                 Gender    : defaultGender,
@@ -68,7 +69,7 @@ export class HeartFailureRegistrationService {
 
     }
 
-    public async enrollPatientService(patientUserId: any, name: string, eventObj: any) {
+    public async enrollPatientService(patientUserId: any, name: string, eventObj: any, isTestUser = false) {
         const communicationSearchUrl = `clinical/donation-communication/search?patientUserId=${patientUserId}`;
         const communicationResponse = await this.needleService.needleRequestForREAN("get", communicationSearchUrl);
 
@@ -87,11 +88,11 @@ export class HeartFailureRegistrationService {
                 await this.sendMessage(msg, eventObj);
             }
         } else {
-            await this.enrollPatient(patientUserId, name, msg, eventObj);
+            await this.enrollPatient(patientUserId, name, msg, eventObj, isTestUser);
         }
     }
 
-    async enrollPatient(patientUserId: string, name: string, msg: string, eventObj) {
+    async enrollPatient(patientUserId: string, name: string, msg: string, eventObj, isTestUser = false) {
 
         const channel: string = eventObj.body.originalDetectIntentRequest.payload.source;
         const buttonId: string = eventObj.body.queryResult.queryText ?? null;
@@ -108,16 +109,35 @@ export class HeartFailureRegistrationService {
             }
         }
 
-        const obj1 = {
-            Provider   : "REAN",
-            PlanName   : "Heart Failure",
-            PlanCode   : planCode,
-            Language   : careplanLanguage,
-            StartDate  : startDate.toISOString().split('T')[0],
-            DayOffset  : 0,
-            Channel    : this.getPatientInfoService.getReminderType(channel),
-            TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name")
-        };
+        let obj1 = {};
+
+        if (isTestUser) {
+            const timezone = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Timezone") || "+05:30";
+            const scheduleConfig = this.getScheduleForNextCron(15, timezone);
+            obj1 = {
+                Provider  : 'REAN',
+                StartDate : new Date().toISOString()
+                    .split('T')[0],
+                TenantName     : this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name"),
+                PlanCode       : planCode,
+                PlanName       : planCode,
+                Channel        : this.getPatientInfoService.getReminderType(channel),
+                Language       : careplanLanguage,
+                IsTest         : true,
+                ScheduleConfig : scheduleConfig
+            };
+        } else {
+            obj1 = {
+                Provider   : "REAN",
+                PlanName   : "Heart Failure",
+                PlanCode   : planCode,
+                Language   : careplanLanguage,
+                StartDate  : startDate.toISOString().split('T')[0],
+                DayOffset  : 0,
+                Channel    : this.getPatientInfoService.getReminderType(channel),
+                TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name")
+            };
+        }
 
         console.log("enrollPatient Body Object", obj1);
         const response = await this.needleService.needleRequestForREAN("post", enrollRoute, null, obj1);
@@ -151,17 +171,21 @@ export class HeartFailureRegistrationService {
 
     getSelectedCareplan(buttonId: string): string {
         const careplanCodeMapping = {
-            "Start_Careplan_HeartF1" : "HD_HTN_Smoker",
-            "Start_Careplan_HeartF2" : "HD_HTN_Non-smoker",
-            "Start_Careplan_HeartF3" : "HD_No_HTN_Smoker",
-            "Start_Careplan_HeartF4" : "HD_No_HTN_Non-smoker",
-            "Start_Careplan_HeartF5" : "RF_HTN_Smoker",
-            "Start_Careplan_HeartF6" : "RF_HTN_Non-smoker",
-            "Start_Careplan_HeartF7" : "RF_No_HTN_Smoker",
-            "Start_Careplan_HeartF8" : "RF_No_HTN_Non-smoker",
-            "Saath_Health_EN"        : "Saathealth_careplan_en",
-            "Saath_Health_HI"        : "Saathealth_careplan_hi",
-            "Saath_Health_MR"        : "Saathealth_careplan_mr",
+            "Start_Careplan_HeartF1"       : "HD_HTN_Smoker",
+            "Start_Careplan_HeartF2"       : "HD_HTN_Non-smoker",
+            "Start_Careplan_HeartF3"       : "HD_No_HTN_Smoker",
+            "Start_Careplan_HeartF4"       : "HD_No_HTN_Non-smoker",
+            "Start_Careplan_HeartF5"       : "RF_HTN_Smoker",
+            "Start_Careplan_HeartF6"       : "RF_HTN_Non-smoker",
+            "Start_Careplan_HeartF7"       : "RF_No_HTN_Smoker",
+            "Start_Careplan_HeartF8"       : "RF_No_HTN_Non-smoker",
+            "Saath_Health_EN"              : "Saathealth_careplan_en",
+            "Saath_Health_HI"              : "Saathealth_careplan_hi",
+            "Saath_Health_MR"              : "Saathealth_careplan_mr",
+            "Diabetes"                     : "Diabetes",
+            "Diabetes_Spanish"             : "Diabetes_Spanish",
+            "SPHSD_Hypertension"           : "SPHSD_Hypertension",
+            "SPHSD_Hypertension_Pregnancy" : "SPHSD_Hypertension_Pregnancy"
         };
         return careplanCodeMapping[buttonId] ?? "Heart-Failure";
     }
@@ -174,6 +198,7 @@ export class HeartFailureRegistrationService {
             "Saathealth_careplan_en" : "en",
             "Saathealth_careplan_hi" : "hi",
             "Saathealth_careplan_mr" : "mr",
+            "Diabetes_Spanish"       : "es",
         };
         return languageCodeMapping[planCode] ?? "en";
     }
@@ -191,6 +216,56 @@ export class HeartFailureRegistrationService {
             }
         }
         return todayDate;
+    }
+
+    private getScheduleForNextCron(intervalMinutes = 15, userTimezone: string) {
+        try {
+            if (!userTimezone.startsWith("+") && !userTimezone.startsWith("-")) {
+                userTimezone = "+" + userTimezone;
+            }
+            const sign = userTimezone.startsWith("-") ? -1 : 1;
+            let [tzHours, tzMinutes] = userTimezone.substring(1).split(":")
+                .map(Number);
+
+            if (isNaN(tzHours) || isNaN(tzMinutes)) {
+                tzHours = 5;
+                tzMinutes = 30;
+            }
+            const totalOffsetMinutes = sign * (tzHours * 60 + tzMinutes);
+
+            const nowUtc = new Date();
+            const nowLocal = new Date(nowUtc.getTime() + totalOffsetMinutes * 60000);
+
+            const nextLocal = new Date(nowLocal);
+
+            const currentMin = nowLocal.getMinutes();
+            const remainder = currentMin % intervalMinutes;
+
+            let minutesToAdd = intervalMinutes - remainder;
+            if (minutesToAdd === 0) minutesToAdd = intervalMinutes;
+
+            nextLocal.setMinutes(currentMin + minutesToAdd);
+            nextLocal.setSeconds(0);
+            nextLocal.setMilliseconds(0);
+
+            nextLocal.setMinutes(nextLocal.getMinutes() + 2);
+
+            let startFromTomorrow = false;
+            if (nextLocal.getDate() !== nowLocal.getDate()) {
+                startFromTomorrow = true;
+            }
+
+            return {
+                NumberOfDays      : 7,
+                StartHour         : nextLocal.getHours(),
+                StartMinutes      : nextLocal.getMinutes(),
+                IntervalMinutes   : 15,
+                StartFromTomorrow : startFromTomorrow,
+            };
+        } catch (error) {
+            Logger.instance().log(`Error in calculating schedule for next cron: ${error.message}`);
+        }
+
     }
 
 }

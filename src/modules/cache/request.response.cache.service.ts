@@ -150,7 +150,6 @@ export class RequestResponseCacheService {
                 const finalOptions = { ...strategyOptions, ...options };
                 return { key, value, options: finalOptions };
             });
-
             await RequestResponseCacheService._cache.setMany(cacheEntries);
         } catch (error) {
             console.error('Error in CacheService.setMany:', error);
@@ -219,7 +218,6 @@ export class RequestResponseCacheService {
     }> {
         try {
             const metrics = await RequestResponseCacheService.getMetrics();
-
             return {
                 metrics,
                 strategies       : StrategyManager.getAllStrategies(),

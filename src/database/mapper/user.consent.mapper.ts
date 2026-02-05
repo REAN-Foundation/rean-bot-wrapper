@@ -10,9 +10,9 @@ export class UserConsentMapper {
             return null;
         }
         const dto: UserConsentDto = {
-            id: userConsent.id,
-            userPlatformID: userConsent.userPlatformID,
-            consentGiven: userConsent.consentGiven
+            id             : userConsent.id,
+            userPlatformID : userConsent.userPlatformID,
+            consentGiven   : userConsent.consentGiven
         };
         return dto;
     };

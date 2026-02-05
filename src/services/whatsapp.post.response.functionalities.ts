@@ -228,8 +228,8 @@ export class WhatsappPostResponseFunctionalities{
                         "location" : {
                             "latitude"  : payload.location.latitude,
                             "longitude" : payload.location.longitude,
-                            "name"      : payload.location.name ?? "Incident Location",
-                            "address"   : payload.location.address ?? "Location details"
+                            "name"      : payload.location.name ?? payload.location.latitude+","+payload.location.longitude,
+                            "address"   : payload.location.address ?? payload.location.latitude+","+payload.location.longitude,
                         } }]
                 }] : []),
 
@@ -317,7 +317,7 @@ export class WhatsappPostResponseFunctionalities{
                     "flow_name"            : payload.flowName,
                     "flow_cta"             : "Click Here!",
                     "flow_action_payload"  : {
-                        "screen" : flowMessageParts.Screen ?? "QUESTION_ONE"
+                        "screen" : flowMessageParts?.Screen ?? "WELCOME"
                     }
                 }
             }
@@ -384,6 +384,14 @@ export class WhatsappPostResponseFunctionalities{
             "type"              : null
         };
         return postData;
+    };
+
+    reancareAssessmentWithFormResponseFormat = async(response_format:Iresponse,payload) => {
+        console.log(`........From reancareAssessmentWithFormResponseFormat ${response_format} payload: ${JSON.stringify(payload, null, 2)}`, );
+        let postDataMeta = this.postDataFormatWhatsapp(response_format.sessionId);
+        postDataMeta = { ...postDataMeta,...payload || {} };
+        console.log(`........From reancareAssessmentWithFormResponseFormat ${response_format} payload: ${JSON.stringify(postDataMeta, null, 2)}`, );
+        return postDataMeta;
     };
 
     messageTextAccordingToMessageType = (response_format:Iresponse, payload:any, custom_payload_type:string) => {
