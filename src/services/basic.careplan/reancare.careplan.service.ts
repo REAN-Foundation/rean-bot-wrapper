@@ -5,13 +5,14 @@ import { CareplanEnrollmentDomainModel } from "../../domain.types/basic.careplan
 
 @injectable()
 export class ReancareCareplanService {
-    
+
     private _clientEnvironmentProviderService: ClientEnvironmentProviderService;
 
     public EnrollCareplan = async (container: DependencyContainer, patientUserId: string, model: CareplanEnrollmentDomainModel) => {
         this._clientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
         console.log("this._clientEnvironmentProviderService", this._clientEnvironmentProviderService.getClientName());
-        const baseURL = this._clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
+        // const baseURL = this._clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
+        const baseURL = process.env["REAN_APP_BACKEND_BASE_URL"];
         const apiURL = `${baseURL}care-plans/patients/${patientUserId}/enroll`;
         const options = this.getOptions();
         const response = await axios.post(apiURL, model, options);
@@ -23,7 +24,7 @@ export class ReancareCareplanService {
     };
 
     private getOptions = () => {
-        const apiKey = this._clientEnvironmentProviderService?.getClientEnvironmentVariable("REANCARE_API_KEY");
+        const apiKey = process.env["REANCARE_API_KEY"];
         return {
             headers : {
                 "Content-Type" : "application/json",
@@ -31,5 +32,5 @@ export class ReancareCareplanService {
             }
         };
     };
-    
+
 }
