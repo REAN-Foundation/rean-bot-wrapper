@@ -31,7 +31,7 @@ export class SequelizeClient {
 
     public connect = async(clientEnvironmentProviderService) => {
         const databaseSecrets = await clientEnvironmentProviderService.getClientEnvironmentVariable("database");
-        const databaseName = databaseSecrets?.databaseName;
+        const databaseName = databaseSecrets?.DataBaseName;
         if (databaseName){
             const dbName = databaseName;
             const dbPassword = process.env.DB_PASSWORD;
