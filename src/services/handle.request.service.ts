@@ -21,6 +21,7 @@ import { WorkflowEventListener } from './emergency/workflow.event.listener';
 import { MessageHandlerType } from '../refactor/messageTypes/message.types';
 import { CommonAssessmentService } from './Assesssment/common.assessment.service';
 import { AssessmentHandlingService } from './Assesssment/assessment.handling.service';
+import { AssessmentResponseFormat } from './response.format/assessment.service.response.format';
 import { FormHandler } from './form/form.handler';
 import { CareplanEnrollmentService } from './basic.careplan/careplan.enrollment.service';
 
@@ -161,7 +162,14 @@ export class handleRequestservice {
         case 'Assessments': {
             const key = `${metaData.platformId}:Assessment:${outgoingMessage.Assessment.AssessmentId}`;
             const userCacheData = await CacheMemory.get(key);
-            if (userCacheData) {
+
+            // Check if this is a re-prompt for a required node
+            if (outgoingMessage.Assessment.MetaData?.askQuestionAgain && outgoingMessage.Assessment.Question) {
+                console.log("[Assessments] Re-prompting required assessment question");
+                const repromptMessage = outgoingMessage.Assessment.Question;
+                const responseMessage = this.assessmentHandlingService.getResponseMessage(repromptMessage, "AssessmentReprompt");
+                message_from_nlp = new AssessmentResponseFormat(responseMessage);
+            } else if (userCacheData) {
                 console.log("user response",metaData.messageBody);
                 message_from_nlp = await this.serveAssessmentService.answerQuestion(eventObj, metaData.platformId, metaData.originalMessage, userCacheData, metaData.platform, true,metaData.intent, metaData);
                 console.log(`after calling answer question service, message: ${message_from_nlp?.getText()}`);
