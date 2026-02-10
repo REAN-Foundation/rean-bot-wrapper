@@ -23,8 +23,9 @@ export class SlackAuthenticator implements clientAuthenticator{
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    authenticate(req: any, res: any) {
-        if (this.urlToken === req.params.unique_token){
+    async authenticate(req: any, res: any) {
+        const urlToken = await this.urlToken();
+        if (urlToken === req.params.unique_token){
             return;
         }
         throw new Error('Unable to authenticate.');

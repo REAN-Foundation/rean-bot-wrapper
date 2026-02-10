@@ -23,8 +23,9 @@ export class WatiWhatsappAuthenticator implements clientAuthenticator{
         throw new Error("Method not required for Wati");
     }
 
-    authenticate(req: any) {
-        if (this.urlToken === req.params.unique_token){
+    async authenticate(req: any) {
+        const urlToken = await this.urlToken();
+        if (urlToken === req.params.unique_token){
             return;
         }
         throw new Error('Unable to authenticate.');

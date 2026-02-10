@@ -21,8 +21,10 @@ export class ReanAppAuthenticator implements clientAuthenticator{
         return appClientHeaderTokenSetting.Value;
     }
 
-    authenticate(req: any) {
-        if (this.headerToken === req.headers.authentication && this.urlToken === req.params.unique_token){
+    async authenticate(req: any) {
+        const urlToken = await this.urlToken();
+        const headerToken = await this.headerToken();
+        if (headerToken === req.headers.authentication && urlToken === req.params.unique_token){
             return;
         }
         throw new Error('Unable to authenticate.');

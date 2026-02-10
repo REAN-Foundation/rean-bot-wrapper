@@ -162,7 +162,7 @@ export class ClientWebhookController {
             const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
             const messageStatusRepostiory = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(MessageStatus);
             this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
-            this._clientAuthenticatorService.authenticate(req,res);
+            await this._clientAuthenticatorService.authenticate(req,res);
             let userPlatformId = null;
             let platformUserName = null;
             this._platformMessageService = req.container.resolve(req.params.channel);
@@ -367,7 +367,7 @@ export class ClientWebhookController {
             const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
             const messageStatusRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(MessageStatus);
             this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
-            this._clientAuthenticatorService.authenticate(req,res);
+            await this._clientAuthenticatorService.authenticate(req,res);
             const statuses = req.body.entry[0].changes[0].value.statuses;
             this._platformMessageService = req.container.resolve(req.params.channel);
             const consentActivation = await TenantSettingService.isConsentEnabled(
@@ -433,7 +433,7 @@ export class ClientWebhookController {
             } else if (req.body.statusString === "SENT" && req.body.owner === false) {
                 this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
                 this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
-                this._clientAuthenticatorService.authenticate(req, res);
+                await this._clientAuthenticatorService.authenticate(req, res);
                 this._platformMessageService = req.container.resolve(req.params.channel);
                 this._platformMessageService.handleMessage(req.body, req.params.channel);
             } else {

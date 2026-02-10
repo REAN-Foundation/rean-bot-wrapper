@@ -21,9 +21,10 @@ export class WhatsappMetaAuthenticator implements clientAuthenticator{
         throw new Error('Method not implemented.');
     }
 
-    authenticate(req: any) {
+    async authenticate(req: any) {
         console.log("this.urlToken:" + this.urlToken + " req.params.unique_token:" + req.params.unique_token);
-        if (this.urlToken === req.params.unique_token){
+        const urlToken = await this.urlToken();
+        if (urlToken === req.params.unique_token){
             return;
         }
         throw new Error('Unable to authenticate.');
