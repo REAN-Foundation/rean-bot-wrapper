@@ -32,6 +32,7 @@ import { EntityCollectionSessionRepo } from "../../database/repositories/llm/ent
 import { FeatureFlagService } from "../feature.flags/feature.flag.service";
 import { SessionState } from "../../refactor/interface/llm/entity.collection.interfaces";
 import { LLMIntentClassificationService } from "../llm/llm.intent.classification.service";
+import { IntentResponseService } from "../llm/intent.response.service";
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -52,7 +53,8 @@ export class DecisionRouter {
         @inject(WorkflowRoutingService) private workflowRoutingService?: WorkflowRoutingService,
         @inject(FeatureFlagService) private featureFlagService?: FeatureFlagService,
         @inject(EntityCollectionOrchestrator) private entityCollectionOrchestrator?: EntityCollectionOrchestrator,
-        @inject(LLMIntentClassificationService) private llmIntentClassificationService?: LLMIntentClassificationService
+        @inject(LLMIntentClassificationService) private llmIntentClassificationService?: LLMIntentClassificationService,
+        @inject(IntentResponseService) private intentResponseService?: IntentResponseService
     ) {
         this.outgoingMessage = {
             PrimaryMessageHandler : MessageHandlerType.Unhandled,
@@ -464,27 +466,42 @@ export class DecisionRouter {
 
                 const intent = await IntentRepo.findIntentByCode(childContainer, intentCode);
 
-                if (intent && intent.llmEnabled && intent.entitySchema) {
-                    // Check if main entity collection flag is enabled
-                    const mainFlagEnabled = await this.featureFlagService.isEnabled(
-                        'llmEntityCollectionEnabled',
-                        { userId: messageBody.platformId }
-                    );
+                if (intent && intent.llmEnabled) {
+                    // For button clicks, create llmClassification structure
+                    if (messageBody.intent && !classificationResult) {
+                        classificationResult = {
+                            intent       : intent.code,
+                            confidence   : 1.0, // Button clicks are deterministic
+                            intentData   : intent,
+                            entities     : {},
+                            rawClassification: 'button_click'
+                        };
+                        entityCollectionData.llmClassification = classificationResult;
+                    }
 
-                    if (mainFlagEnabled) {
-                        // Check if entity collection is enabled for this specific intent
-                        const intentFlagName = `entityCollection_${intent.Code.replace(/\./g, '_')}`;
-                        const isIntentEnabled = await this.featureFlagService.isEnabled(
-                            intentFlagName,
+                    // Check if entity collection is required
+                    if (intent.entitySchema) {
+                        // Check if main entity collection flag is enabled
+                        const mainFlagEnabled = await this.featureFlagService.isEnabled(
+                            'llmEntityCollectionEnabled',
                             { userId: messageBody.platformId }
                         );
 
-                        if (isIntentEnabled) {
-                            entityCollectionData.requiresEntityCollection = true;
-                            entityCollectionData.intentCode = intent.Code;
-                            entityCollectionData.classifiedIntent = intent;
-                            // Generate new session ID
-                            entityCollectionData.sessionId = `ec_${messageBody.platformId}_${Date.now()}`;
+                        if (mainFlagEnabled) {
+                            // Check if entity collection is enabled for this specific intent
+                            const intentFlagName = `entityCollection_${intent.code.replace(/\./g, '_')}`;
+                            const isIntentEnabled = await this.featureFlagService.isEnabled(
+                                intentFlagName,
+                                { userId: messageBody.platformId }
+                            );
+
+                            if (isIntentEnabled) {
+                                entityCollectionData.requiresEntityCollection = true;
+                                entityCollectionData.intentCode = intent.code;
+                                entityCollectionData.classifiedIntent = intent;
+                                // Generate new session ID
+                                entityCollectionData.sessionId = `ec_${messageBody.platformId}_${Date.now()}`;
+                            }
                         }
                     }
                 }

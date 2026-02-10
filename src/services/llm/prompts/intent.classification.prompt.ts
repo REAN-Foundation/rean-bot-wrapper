@@ -82,8 +82,8 @@ RESPONSE FORMAT (JSON only, no additional text):
     private static formatIntents(intents: IntentDto[]): string {
         return intents
             .map((intent, index) => {
-                let formatted = `${index + 1}. Intent Code: "${intent.Code}"\n`;
-                formatted += `   Name: ${intent.Name}\n`;
+                let formatted = `${index + 1}. Intent Code: "${intent.code}"\n`;
+                formatted += `   Name: ${intent.name}\n`;
 
                 if (intent.intentDescription) {
                     formatted += `   Description: ${intent.intentDescription}\n`;

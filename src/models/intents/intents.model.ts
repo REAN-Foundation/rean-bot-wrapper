@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 import { Table, Column, Model, DataType, PrimaryKey, IsUUID } from 'sequelize-typescript';
-import { IIntents, LLMProvider, EntitySchema, ConversationConfig } from '../../refactor/interface/intents/intents.interface';
+import { IIntents, LLMProvider, EntitySchema, ConversationConfig, ResponseType, StaticResponseConfig } from '../../refactor/interface/intents/intents.interface';
 import { IntentType } from '../../refactor/messageTypes/intents/intents.message.types';
 import { v4 } from 'uuid';
 @Table(
@@ -111,5 +111,18 @@ export class Intents extends Model implements IIntents {
         allowNull : false
     })
         active: boolean;
+
+    // Response Configuration
+    @Column({
+        type : DataType.ENUM('static', 'listener', 'hybrid'),
+        defaultValue : 'listener',
+        allowNull : false
+    })
+        responseType: ResponseType;
+
+    @Column({
+        type : DataType.JSON
+    })
+        staticResponse: StaticResponseConfig;
 
 }

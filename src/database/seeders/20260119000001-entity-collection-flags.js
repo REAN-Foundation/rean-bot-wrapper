@@ -18,10 +18,11 @@ module.exports = {
                 createdAt: now,
                 updatedAt: now
             },
+            // Flag names are generated from intent codes: entityCollection_${intentCode.replace(/\./g, '_')}
             {
                 id: uuidv4(),
-                flagName: 'entityCollection_bloodGlucose',
-                description: 'Enable entity collection for blood glucose intent',
+                flagName: 'entityCollection_blood_glucose_create',
+                description: 'Enable entity collection for blood glucose intent (blood.glucose.create)',
                 enabled: false,
                 rolloutPercentage: 0,
                 targetIntents: JSON.stringify(['blood.glucose.create']),
@@ -34,8 +35,8 @@ module.exports = {
             },
             {
                 id: uuidv4(),
-                flagName: 'entityCollection_bloodPressure',
-                description: 'Enable entity collection for blood pressure intent',
+                flagName: 'entityCollection_blood_pressure_create',
+                description: 'Enable entity collection for blood pressure intent (blood.pressure.create)',
                 enabled: false,
                 rolloutPercentage: 0,
                 targetIntents: JSON.stringify(['blood.pressure.create']),
@@ -56,8 +57,8 @@ module.exports = {
             flagName: {
                 [Sequelize.Op.in]: [
                     'llmEntityCollectionEnabled',
-                    'entityCollection_bloodGlucose',
-                    'entityCollection_bloodPressure'
+                    'entityCollection_blood_glucose_create',
+                    'entityCollection_blood_pressure_create'
                 ]
             }
         }, {});

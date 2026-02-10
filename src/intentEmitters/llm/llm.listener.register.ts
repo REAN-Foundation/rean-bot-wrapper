@@ -1,9 +1,23 @@
 import { container } from 'tsyringe';
 import { Logger } from '../../common/logger';
 import { LLMIntentRegistry } from './llm.intent.registry';
+import { ILLMIntentListener } from '../../refactor/interface/llm/llm.event.interfaces';
+import { BaseLLMListener } from './base.llm.listener';
 
 // Import LLM-native listeners
 import { BloodGlucoseListener } from './listeners/blood.glucose.listener';
+import { DeleteUserYesListener, DeleteUserNoListener } from './listeners/delete.user.listener';
+import {
+    KeratoplastySymptomAnalysisListener,
+    KeratoplastyMoreSymptomsListener,
+    KeratoplastyFollowupListener,
+    KeratoplastyEyeImageListener,
+    KeratoplastyResponseNoListener,
+    KeratoplastyResponseYesListener
+} from './listeners/keratoplasty.listener';
+
+// Type for listener class constructors
+type ListenerClass = new (...args: any[]) => BaseLLMListener;
 
 /**
  * Register all LLM-native intent listeners
@@ -20,9 +34,24 @@ export function registerLLMListeners(): void {
     Logger.instance().log('[LLMListenerRegister] Starting LLM listener registration...');
 
     // List of all LLM listener classes
-    const listenerClasses = [
+    const listenerClasses: ListenerClass[] = [
+        // Biometrics
         BloodGlucoseListener,
+
+        // User management
+        DeleteUserYesListener,
+        DeleteUserNoListener,
+
+        // Keratoplasty symptom flow
+        KeratoplastySymptomAnalysisListener,
+        KeratoplastyMoreSymptomsListener,
+        KeratoplastyFollowupListener,
+        KeratoplastyEyeImageListener,
+        KeratoplastyResponseNoListener,
+        KeratoplastyResponseYesListener,
+
         // Add more listeners here as they are created:
+        // CovidSymptomAssessmentListener,
         // BloodPressureListener,
         // WeightListener,
         // etc.
@@ -32,7 +61,7 @@ export function registerLLMListeners(): void {
     for (const ListenerClass of listenerClasses) {
         try {
             // Resolve listener instance from DI container
-            const listener = container.resolve(ListenerClass);
+            const listener = container.resolve<BaseLLMListener>(ListenerClass);
 
             // Register with the LLM Intent Registry
             LLMIntentRegistry.registerListener(listener);

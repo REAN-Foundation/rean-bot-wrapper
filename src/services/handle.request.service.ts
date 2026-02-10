@@ -28,6 +28,8 @@ import { IntentEmitter } from '../intentEmitters/intent.emitter';
 import { ContainerService } from './container/container.service';
 import { LLMIntentRegistry } from '../intentEmitters/llm/llm.intent.registry';
 import { LLMEventObject, LLMListenerResponse } from '../refactor/interface/llm/llm.event.interfaces';
+import { IntentResponseService } from './llm/intent.response.service';
+import { PlatformPayloadBuilder, FormattedButton } from './platform.payload.builder.service';
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -47,7 +49,8 @@ export class handleRequestservice {
         @inject(ServeAssessmentService) private serveAssessmentService?: ServeAssessmentService,
         @inject(CommonAssessmentService) private commonAssessmentService?: CommonAssessmentService,
         @inject(AssessmentHandlingService) private assessmentHandlingService?: AssessmentHandlingService,
-        @inject(EntityCollectionOrchestrator) private entityCollectionOrchestrator?: EntityCollectionOrchestrator
+        @inject(EntityCollectionOrchestrator) private entityCollectionOrchestrator?: EntityCollectionOrchestrator,
+        @inject(IntentResponseService) private intentResponseService?: IntentResponseService
     ) {
     }
 
@@ -269,7 +272,7 @@ export class handleRequestservice {
     }
 
     /**
-     * Handle LLM classified intent by triggering intent listener directly
+     * Handle LLM classified intent using database-driven IntentResponseService
      */
     private async handleLLMClassifiedIntent(
         outgoingMessage: OutgoingMessage,
@@ -280,58 +283,38 @@ export class handleRequestservice {
             const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
             const childContainer = ContainerService.createChildContainer(clientName);
 
-            // Check if we have an LLM-native listener for this intent
-            if (LLMIntentRegistry.has(intentName)) {
-                console.log(`[HandleRequestService] Using LLM-native listener for: ${intentName}`);
+            console.log(`[HandleRequestService] Processing LLM classified intent: ${intentName}`);
 
-                // Create LLMEventObject for new listener
-                const llmEvent = this.createLLMEventObject(
-                    intentName,
-                    metadata,
-                    outgoingMessage.Intent.IntentContent?.entities || {},
-                    'llm_classification',
-                    childContainer,
-                    outgoingMessage.Intent.IntentContent
-                );
+            // Create LLMEventObject for the intent
+            const llmEvent = this.createLLMEventObject(
+                intentName,
+                metadata,
+                outgoingMessage.Intent.IntentContent?.entities || {},
+                'llm_classification',
+                childContainer,
+                outgoingMessage.Intent.IntentContent
+            );
 
-                const response = await LLMIntentRegistry.emit(intentName, llmEvent);
+            // Use IntentResponseService to handle the intent (static/listener/hybrid)
+            const result = await this.intentResponseService.processIntent(
+                intentName,
+                llmEvent,
+                childContainer
+            );
 
-                if (response && response.success) {
-                    return this.createResponseFromMessage(response.message, intentName);
-                } else if (response && !response.success) {
-                    console.log(`[HandleRequestService] LLM listener returned error: ${response.message}`);
-                    return this.createResponseFromMessage(response.message, intentName);
+            console.log(`[HandleRequestService] Intent response type: ${result.responseType}, Success: ${result.success}`);
+
+            if (result.success) {
+                // Pass buttons to createResponseFromMessage - they'll be converted to Dialogflow-compatible payload
+                if (result.buttons && result.buttons.length > 0) {
+                    console.log(`[HandleRequestService] Intent has ${result.buttons.length} buttons`);
                 }
-            }
 
-            // Fallback to legacy IntentEmitter for non-migrated intents
-            console.log(`[HandleRequestService] No LLM listener found, using legacy IntentEmitter for: ${intentName}`);
-            const eventObj = {
-                container  : childContainer,
-                parameters : outgoingMessage.Intent.IntentContent?.entities || {},
-                message    : metadata,
-                channel    : metadata.platform,
-                source     : 'llm_classification'
-            };
+                return this.createResponseFromMessage(result.message, intentName, result.buttons);
+            } else {
+                console.log(`[HandleRequestService] Intent processing failed: ${result.message}`);
 
-            const response = await IntentEmitter.emit(intentName, eventObj);
-
-            // Extract response from promise results
-            let responseText = '';
-            if (Array.isArray(response) && response.length > 0) {
-                const firstResult = response[0];
-                if (firstResult.status === 'fulfilled' && firstResult.value) {
-                    if (typeof firstResult.value === 'string') {
-                        responseText = firstResult.value;
-                    } else if (firstResult.value.message) {
-                        responseText = firstResult.value.message;
-                    }
-                }
-            }
-
-            // If no response from listeners, provide a default
-            if (!responseText) {
-                console.log(`[HandleRequestService] No response from intent listeners for: ${intentName}`);
+                // Fallback to Dialogflow
                 return await this.DialogflowResponseService.getDialogflowMessage(
                     metadata.messageBody,
                     metadata.platform,
@@ -339,8 +322,6 @@ export class handleRequestservice {
                     metadata
                 );
             }
-
-            return this.createResponseFromMessage(responseText, intentName);
         } catch (error) {
             console.error('[HandleRequestService] Error handling LLM classified intent:', error);
             return await this.DialogflowResponseService.getDialogflowMessage(
@@ -466,73 +447,45 @@ export class handleRequestservice {
 
             console.log(`[HandleRequestService] Triggering intent: ${intentCode} with entities:`, Array.from(collectedEntities.keys()));
 
-            // Check if we have an LLM-native listener for this intent
-            if (LLMIntentRegistry.has(intentCode)) {
-                console.log(`[HandleRequestService] Using LLM-native listener for: ${intentCode}`);
-
-                // Convert Map to Record for LLMEventObject
-                const entityRecord: Record<string, { value: any; rawValue?: string; confidence?: number }> = {};
-                collectedEntities.forEach((entity, name) => {
-                    if (typeof entity === 'object' && entity !== null && 'value' in entity) {
-                        entityRecord[name] = entity;
-                    } else {
-                        entityRecord[name] = { value: entity };
-                    }
-                });
-
-                // Create LLMEventObject for entity collection flow
-                const llmEvent = this.createLLMEventObject(
-                    intentCode,
-                    metadata,
-                    entityRecord,
-                    'entity_collection',
-                    childContainer
-                );
-
-                const response = await LLMIntentRegistry.emit(intentCode, llmEvent);
-
-                if (response && response.success) {
-                    return this.createResponseFromMessage(response.message, intentCode);
-                } else if (response && !response.success) {
-                    console.log(`[HandleRequestService] LLM listener returned error: ${response.message}`);
-                    return this.createResponseFromMessage(response.message, intentCode);
+            // Convert Map to Record for LLMEventObject
+            const entityRecord: Record<string, { value: any; rawValue?: string; confidence?: number }> = {};
+            collectedEntities.forEach((entity, name) => {
+                if (typeof entity === 'object' && entity !== null && 'value' in entity) {
+                    entityRecord[name] = entity;
+                } else {
+                    entityRecord[name] = { value: entity };
                 }
-            }
+            });
 
-            // Fallback to legacy IntentEmitter for non-migrated intents
-            console.log(`[HandleRequestService] No LLM listener found, using legacy IntentEmitter for: ${intentCode}`);
+            // Create LLMEventObject for entity collection flow
+            const llmEvent = this.createLLMEventObject(
+                intentCode,
+                metadata,
+                entityRecord,
+                'entity_collection',
+                childContainer
+            );
 
-            // Create eventObj with collected entities for legacy listeners
-            const eventObj = {
-                container        : childContainer,
-                parameters       : parameters,
-                collectedEntities: collectedEntities,
-                message          : metadata,
-                channel          : metadata.platform,
-                source           : 'llm_entity_collection'
-            };
+            // Use IntentResponseService to handle the intent (static/listener/hybrid)
+            const result = await this.intentResponseService.processIntent(
+                intentCode,
+                llmEvent,
+                childContainer
+            );
 
-            // Emit intent with collected entities
-            const response = await IntentEmitter.emit(intentCode, eventObj);
+            console.log(`[HandleRequestService] Intent response type: ${result.responseType}, Success: ${result.success}`);
 
-            // Extract response from promise results
-            let responseText = '';
-            if (Array.isArray(response) && response.length > 0) {
-                const firstResult = response[0];
-                if (firstResult.status === 'fulfilled' && firstResult.value) {
-                    if (typeof firstResult.value === 'string') {
-                        responseText = firstResult.value;
-                    } else if (firstResult.value.message) {
-                        responseText = firstResult.value.message;
-                    }
+            if (result.success) {
+                // Pass buttons to createResponseFromMessage - they'll be converted to Dialogflow-compatible payload
+                if (result.buttons && result.buttons.length > 0) {
+                    console.log(`[HandleRequestService] Intent has ${result.buttons.length} buttons`);
                 }
-            }
 
-            if (!responseText) {
-                responseText = `I've recorded your ${intentCode} successfully.`;
+                return this.createResponseFromMessage(result.message, intentCode, result.buttons);
+            } else {
+                const errorMessage = `I've recorded your ${intentCode} successfully.`;
+                return this.createResponseFromMessage(errorMessage, intentCode);
             }
-
-            return this.createResponseFromMessage(responseText, intentCode);
         } catch (error) {
             console.error('[HandleRequestService] Error triggering intent:', error);
             throw error;
@@ -566,15 +519,29 @@ export class handleRequestservice {
     /**
      * Create a response object from a message string
      * Matches the IserviceResponseFunctionalities interface used by DialogflowResponseFormat
+     *
+     * @param message - The message text to send
+     * @param intent - The intent name
+     * @param buttons - Optional buttons to include (converted to Dialogflow-compatible payload)
+     * @returns IserviceResponseFunctionalities object compatible with existing platform services
      */
-    private createResponseFromMessage(message: string, intent: string): IserviceResponseFunctionalities {
+    private createResponseFromMessage(
+        message: string,
+        intent: string,
+        buttons?: FormattedButton[]
+    ): IserviceResponseFunctionalities {
+        // Build Dialogflow-compatible payload if buttons exist
+        const payload = buttons && buttons.length > 0
+            ? PlatformPayloadBuilder.buildButtonPayload(buttons)
+            : null;
+
         return {
             getText        : () => [message],  // Must be string array for translateService compatibility
             getIntent      : () => intent,
             getSensitivity : () => null,
-            getPayload     : () => null,        // Must be null to avoid errors in getTranslatedResponse
+            getPayload     : () => payload,    // Returns button payload in Dialogflow format
             getImageObject : () => ({ url: "", caption: "" }),
-            getParseMode   : () => null,        // null instead of false for consistency
+            getParseMode   : () => null,
             getSimilarDoc  : () => null
         };
     }
