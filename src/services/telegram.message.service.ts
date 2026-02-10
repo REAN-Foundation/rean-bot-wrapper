@@ -31,14 +31,19 @@ export class TelegramMessageService implements platformServiceInterface{
         @inject("telegram.authenticator") private clientAuthenticator?: clientAuthenticator,
         @inject(LogsQAService) private logsQAService?: LogsQAService) {
 
+        // Token initialization is deferred to when it's actually needed (e.g., handleMessage/setWebhook),
+        // because the client name and secrets are not available at DI construction time.
         // const token = this.environmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN");
         // this._telegram = new TelegramBot(token);
         // this.init();
-        this.initializeToken();
+        // this.initializeToken();
     }
 
     private async initializeToken() {
         const telegramSecrets = await this.environmentProviderService.getClientEnvironmentVariable("telegram");
+        if (!telegramSecrets) {
+            throw new Error("Telegram secrets not found. Ensure the client environment is configured with 'telegram' secrets.");
+        }
         const telegramBotToken = telegramSecrets.BotToken;
         this._telegram = new TelegramBot(telegramBotToken);
         this.init();
@@ -49,7 +54,10 @@ export class TelegramMessageService implements platformServiceInterface{
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    handleMessage(msg, channel: string){
+    async handleMessage(msg, channel: string){
+        if (!this._telegram) {
+            await this.initializeToken();
+        }
         this._telegram.processUpdate(msg);
         console.log("message sent to events");
         return null;
@@ -104,7 +112,7 @@ export class TelegramMessageService implements platformServiceInterface{
                 console.log(
                     "THIS HTML TO IMAGE SUPPORT HAS BEEN DEPRECATED"
                 );
-                    
+
                 // METHOD BEING DEPRECATED DUE TO PACKAGE SUPPORT ISSUES
                 // eslint-disable-next-line max-len
                 // const uploadImageName = await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
