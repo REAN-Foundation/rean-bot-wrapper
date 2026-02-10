@@ -27,9 +27,29 @@ export class ClientEnvironmentProviderService {
         const key = `bot-secrets-${this.clientName}`;
         const clientVariables = await RequestResponseCacheService.get(key, "persistent");
         if (clientVariables && clientVariables[variablename]){
-            return clientVariables[variablename];
+            const value = clientVariables[variablename];
+            if (value === undefined) {
+                return undefined;
+            }
+            return this.normalizeCachedValue(value);
+            // return clientVariables[variablename];
         }
         return undefined;
+    }
+
+    private normalizeCachedValue(value: any): any {
+        if (typeof value !== 'string') {
+            return value;
+        }
+        const trimmed = value.trim();
+        if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+            try {
+                return JSON.parse(value);
+            } catch {
+                return value;
+            }
+        }
+        return value;
     }
 
     clientNameMiddleware = (req, res, next) => {
