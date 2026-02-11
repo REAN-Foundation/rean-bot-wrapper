@@ -158,6 +158,7 @@ export class ClientWebhookController {
 
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
             const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
+            console.log("Client Name:", clientName);
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
             const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
             const messageStatusRepostiory = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(MessageStatus);
