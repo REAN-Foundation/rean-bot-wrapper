@@ -66,7 +66,7 @@ export class ClickUpTask{
             const response = await needle("post", createTaskUrl, obj, options);
             if (response.statusCode !== 200) {
                 console.log("Error in creating the ClickUp Task");
-                console.log(response);
+                // console.log(response);
             }
             const taskID = response.body.id;
             console.log(`task has been created with ${taskID}`);

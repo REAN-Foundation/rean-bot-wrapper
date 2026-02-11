@@ -170,20 +170,21 @@ export class HeartFailureRegistrationService {
 
     getSelectedCareplan(buttonId: string): string {
         const careplanCodeMapping = {
-            "Start_Careplan_HeartF1" : "HD_HTN_Smoker",
-            "Start_Careplan_HeartF2" : "HD_HTN_Non-smoker",
-            "Start_Careplan_HeartF3" : "HD_No_HTN_Smoker",
-            "Start_Careplan_HeartF4" : "HD_No_HTN_Non-smoker",
-            "Start_Careplan_HeartF5" : "RF_HTN_Smoker",
-            "Start_Careplan_HeartF6" : "RF_HTN_Non-smoker",
-            "Start_Careplan_HeartF7" : "RF_No_HTN_Smoker",
-            "Start_Careplan_HeartF8" : "RF_No_HTN_Non-smoker",
-            "Saath_Health_EN"        : "Saathealth_careplan_en",
-            "Saath_Health_HI"        : "Saathealth_careplan_hi",
-            "Saath_Health_MR"        : "Saathealth_careplan_mr",
-            "Diabetes"               : "Diabetes",
-            "Diabetes_Spanish"       : "Diabetes_Spanish",
-            "SPHSD_Hypertension"     : "SPHSD_Hypertension",
+            "Start_Careplan_HeartF1"       : "HD_HTN_Smoker",
+            "Start_Careplan_HeartF2"       : "HD_HTN_Non-smoker",
+            "Start_Careplan_HeartF3"       : "HD_No_HTN_Smoker",
+            "Start_Careplan_HeartF4"       : "HD_No_HTN_Non-smoker",
+            "Start_Careplan_HeartF5"       : "RF_HTN_Smoker",
+            "Start_Careplan_HeartF6"       : "RF_HTN_Non-smoker",
+            "Start_Careplan_HeartF7"       : "RF_No_HTN_Smoker",
+            "Start_Careplan_HeartF8"       : "RF_No_HTN_Non-smoker",
+            "Saath_Health_EN"              : "Saathealth_careplan_en",
+            "Saath_Health_HI"              : "Saathealth_careplan_hi",
+            "Saath_Health_MR"              : "Saathealth_careplan_mr",
+            "Diabetes"                     : "Diabetes",
+            "Diabetes_Spanish"             : "Diabetes_Spanish",
+            "SPHSD_Hypertension"           : "SPHSD_Hypertension",
+            "SPHSD_Hypertension_Pregnancy" : "SPHSD_Hypertension_Pregnancy"
         };
         return careplanCodeMapping[buttonId] ?? "Heart-Failure";
     }

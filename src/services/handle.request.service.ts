@@ -208,7 +208,10 @@ export class handleRequestservice {
         }
         case MessageHandlerType.WorkflowService: {
             console.log("Workflow service event .....");
-            const result = await this.workflowEventListener.commence(metaData, eventObj);
+
+            // This is the matching schema id from the llm service
+            const workflowId = outgoingMessage.Alert.AlertId;
+            const result = await this.workflowEventListener.commence(metaData, eventObj, workflowId);
             if (!result) {
                 console.log("Unable to process Workflow event listener event.");
             }
