@@ -19,6 +19,7 @@ import { UserConsentRepo } from '../../database/repositories/consent/consent.rep
 import { ContactListRepo } from '../../database/repositories/contact.list/contact.list.repo';
 import { UserConsentDto } from '../../domain.types/user.consent/user.consent.domain.model';
 import { TenantSettingService } from '../../services/tenant.setting/tenant.setting.service';
+import { UserLanguage } from '../../services/set.language';
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -318,6 +319,12 @@ export class ClientWebhookController {
                 } else {
                     userId = reqBody.message.chat.id;
                 }
+            }
+            const userLanguageService = req.container.resolve(UserLanguage);
+            const storedLanguage = await userLanguageService.getPreferredLanguageofSession(userId);
+
+            if (storedLanguage && storedLanguage !== "null") {
+                languageCode = storedLanguage;
             }
 
             return [userId, consentReply, languageCode];
