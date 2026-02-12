@@ -282,7 +282,8 @@ export class ConsentService {
             if (consentReply === "consent_no") {
                 console.log("No Consent is Given");
                 await UserConsentRepo.updateUserConsent(req.container, userId, "false");
-                const message = clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_NO_MESSAGE");
+                const rawMessage = clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_NO_MESSAGE");
+                const message = await this.translate.translatestring(rawMessage, languageCode);
                 const messageType = "text";
                 this.sendCustomMessage(this._platformMessageService, message, messageType, userId, payload);
             }
