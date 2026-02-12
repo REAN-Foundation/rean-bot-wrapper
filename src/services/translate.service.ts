@@ -6,9 +6,6 @@ import { DialogflowResponseFormat } from './response.format/dialogflow.response.
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 
-let detected_language = 'en';
-let dialogflow_language = "en-US";
-
 @scoped(Lifecycle.ContainerScoped)
 export class translateService{
 
@@ -38,22 +35,22 @@ export class translateService{
 
     }
 
-    detectLanguage = async (message:string) => {
+   detectLanguage = async (message: string) => {
 
-        //this is a temp solution for detecting the "hindi" and "Hindi" as english as Google translate detects it as Filipino
-        if (message === "Hindi" || message === "hindi" ) {
-            return detected_language = "en";
+        if (message === "Hindi" || message === "hindi") {
+            return "en";
         }
-        else {
-            const translate = new v2.Translate(this.obj);
-            const [detections] = await translate.detect(message);
-            const detectedLanguage = await Array.isArray(detections) ? detections : [detections];
-            detected_language = detectedLanguage[0].language;
-            console.log("The detected language is!!!!!!!!!!!!!", detected_language);
-            detected_language = await this.checkLanguage(detected_language);
-            return detected_language;
-        }
+
+        const translate = new v2.Translate(this.obj);
+        const [detections] = await translate.detect(message);
+        const detectedArray = Array.isArray(detections) ? detections : [detections];
+
+        const detected = detectedArray[0].language;
+        console.log("Detected language:", detected);
+
+        return await this.checkLanguage(detected);
     };
+
 
     translateMessage = async (messageType, message:string, sessionId) => {
         const defultLanguage = await this.getDialogflowLanguage();
@@ -69,9 +66,6 @@ export class translateService{
             const target = defultLanguage;
             const [translation] = await translate.translate(message, target);
             message = translation;
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            dialogflow_language = defultLanguage;
-            console.log("dialogflow_language", dialogflow_language);
         }
 
         console.log("exited the translate msg");
