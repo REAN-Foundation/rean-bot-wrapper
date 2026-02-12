@@ -244,16 +244,10 @@ export class ConsentService {
             this._platformMessageService = req.container.resolve(req.params.channel);
             this._platformMessageService.res = res;
             let payload = null;
-
-            // Handle language selection (NEW CASE)
             if (consentReply && consentReply.startsWith("language_select-")) {
                 const selectedLanguageCode = consentReply.split("-")[1];
-
-                // Save to chat_session table
                 const userLanguageService = req.container.resolve(UserLanguage);
                 await userLanguageService.updateUserPreferredLanguage(userId, selectedLanguageCode);
-
-                // Now show consent in the selected language
                 const consentMessage: ConsentMessage = await TenantSettingService.getConsentMessages(
                     clientName,
                     clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"),
@@ -266,7 +260,7 @@ export class ConsentService {
                 const button_yes = await this.translate.translatestring("Yes", selectedLanguageCode);
                 const button_no = await this.translate.translatestring("No", selectedLanguageCode);
                 const button_changeLanguage = await this.translate.translatestring("Change Language", selectedLanguageCode);
-                const buttonArray = [button_yes, "consent_yes", button_no, "consent_no", button_changeLanguage, "consent_changeLanguge"];
+                const buttonArray = [button_yes, "consent_yes", button_no, "consent_no"];
 
                 if (req.params.channel === "whatsappMeta") {
                     payload = await sendApiButtonService(buttonArray);
@@ -277,8 +271,6 @@ export class ConsentService {
                 this.sendCustomMessage(this._platformMessageService, message, messageType, userId, payload);
                 return;
             }
-
-            // Handle consent no
             if (consentReply === "consent_no") {
                 console.log("No Consent is Given");
                 await UserConsentRepo.updateUserConsent(req.container, userId, "false");
@@ -287,7 +279,6 @@ export class ConsentService {
                 const messageType = "text";
                 this.sendCustomMessage(this._platformMessageService, message, messageType, userId, payload);
             }
-            // Handle change language during consent
             else if (consentReply === "consent_changeLanguge") {
                 const consentMessages: ConsentMessageWithLanguage[] = await TenantSettingService.getConsentSetting(
                     clientName,
@@ -317,7 +308,6 @@ export class ConsentService {
 
                 this.sendCustomMessage(this._platformMessageService, message, messageType, userId, payload);
             }
-            // Handle showing consent (default case)
             else {
                 const consentMessage: ConsentMessage = await TenantSettingService.getConsentMessages(
                     clientName,
@@ -331,7 +321,7 @@ export class ConsentService {
                 const button_yes = await this.translate.translatestring("Yes", languageCode);
                 const button_no = await this.translate.translatestring("No", languageCode);
                 const button_changeLanguage = await this.translate.translatestring("Change Language", languageCode);
-                const buttonArray = [button_yes, "consent_yes", button_no, "consent_no", button_changeLanguage, "consent_changeLanguge"];
+                const buttonArray = [button_yes, "consent_yes", button_no, "consent_no", button_changeLanguage];
 
                 if (req.params.channel === "whatsappMeta") {
                     payload = await sendApiButtonService(buttonArray);
