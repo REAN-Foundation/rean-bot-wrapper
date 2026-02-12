@@ -171,96 +171,57 @@ export class ConsentService {
 
     }
 
-    // async handleConsentRequest(req,userId,consentReply,languageCode,consentRepository,res,buttonmessageType){
-    //     try {
-    //         const clientEnvironmentProviderService = await req.container.resolve(ClientEnvironmentProviderService);
-    //         const clientName = await  clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-    //         console.log(clientName);
-
-    //         // const entityManagerProvider = req.container.resolve(EntityManagerProvider);
-            
-    //         this._platformMessageService = req.container.resolve(req.params.channel);
-    //         this._platformMessageService.res = res;
-    //         let payload = null;
-    //         if (consentReply === "consent_no"){
-    //             console.log("No Consent is Given");
-    //             await UserConsentRepo.updateUserConsent(req.container,userId,"false");
-    //             const message =  clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_NO_MESSAGE");
-    //             const messageType = "text";
-    //             this.sendCustomMessage( this._platformMessageService, message, messageType, userId , payload);
-    //         }
-    //         else if (consentReply === "consent_changeLanguge"){
-    //             const consentMessages: ConsentMessageWithLanguage[] = await TenantSettingService.getConsentSetting(clientName, clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"), clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL"));
-    //             const buttonArray = [];
-    //             consentMessages.forEach(async consent=>
-    //             {
-    //                 console.log(consent);
-    //                 buttonArray.push(consent.Language);
-    //                 buttonArray.push(`consent_changeLanguge-${consent.LanguageCode}`);
-    //             });
-    //             console.log(buttonArray);
-    //             const message = await this.translate.translatestring("Please, select your preferred language", languageCode);
-    //             const messageType = buttonmessageType;
-    //             if (buttonArray.length === 0){
-    //                 buttonArray.push("English");
-    //                 buttonArray.push("consent_changeLanguge-en");
-    //             }
-    //             if (req.params.channel === "whatsappMeta"){
-    //                 payload = await sendApiButtonService(buttonArray.slice(0,MAX_WHATSAPP_BUTTONS));
-    //             }
-    //             else {
-    //                 payload = await sendTelegramButtonService(buttonArray.slice(0,MAX_TELEGRAM_BUTTONS));
-    //             }
-    //             this.sendCustomMessage(this._platformMessageService,message, messageType, userId , payload);
-    //         }
-    //         else {
-    //             const consentMessage: ConsentMessage = await TenantSettingService.getConsentMessages(clientName, clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"), clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL"), languageCode);
-    //             const message = `${consentMessage.Content} \n\n ${consentMessage.WebsiteURL}`;
-    //             const messageType = buttonmessageType;
-    //             const button_yes = await this.translate.translatestring("Yes",languageCode);
-    //             const button_no = await this.translate.translatestring("No",languageCode);
-    //             const button_changeLanguage = await this.translate.translatestring("Change Language",languageCode);
-    //             const buttonArray = [button_yes, "consent_yes" ,button_no,"consent_no", button_changeLanguage,"consent_changeLanguge"];
-    //             if (req.params.channel === "whatsappMeta"){
-    //                 payload = await sendApiButtonService(buttonArray);
-    //             }
-    //             else {
-    //                 payload = await sendTelegramButtonService(buttonArray);
-    //             }
-    //             this.sendCustomMessage(this._platformMessageService,message, messageType, userId , payload);
-    //         }
-    //     }
-    //     catch (error) {
-    //         console.log("WhileStoring the additional info", error);
-
-    //     }
-    // }
-
-    async handleConsentRequest(req, userId, consentReply, languageCode, consentRepository, res, buttonmessageType) {
+    async handleConsentRequest(req,userId,consentReply,languageCode,consentRepository,res,buttonmessageType) {
         try {
-            const clientEnvironmentProviderService = await req.container.resolve(ClientEnvironmentProviderService);
-            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientEnvironmentProviderService =
+                await req.container.resolve(ClientEnvironmentProviderService);
+
+            const clientName =
+                await clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
 
             this._platformMessageService = req.container.resolve(req.params.channel);
             this._platformMessageService.res = res;
+
             let payload = null;
+
+            // 🔹 Handle language selection
             if (consentReply && consentReply.startsWith("language_select-")) {
+
                 const selectedLanguageCode = consentReply.split("-")[1];
+
                 const userLanguageService = req.container.resolve(UserLanguage);
-                await userLanguageService.updateUserPreferredLanguage(userId, selectedLanguageCode);
-                const consentMessage: ConsentMessage = await TenantSettingService.getConsentMessages(
-                    clientName,
-                    clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"),
-                    clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL"),
+                await userLanguageService.updateUserPreferredLanguage(
+                    userId,
                     selectedLanguageCode
                 );
 
-                const message = `${consentMessage.Content} \n\n ${consentMessage.WebsiteURL}`;
+                const consentMessage: ConsentMessage =
+                    await TenantSettingService.getConsentMessages(
+                        clientName,
+                        clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"),
+                        clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL"),
+                        selectedLanguageCode
+                    );
+
+                const message =
+                    `${consentMessage.Content} \n\n ${consentMessage.WebsiteURL}`;
+
                 const messageType = buttonmessageType;
-                const button_yes = await this.translate.translatestring("Yes", selectedLanguageCode);
-                const button_no = await this.translate.translatestring("No", selectedLanguageCode);
-                const button_changeLanguage = await this.translate.translatestring("Change Language", selectedLanguageCode);
-                const buttonArray = [button_yes, "consent_yes", button_no, "consent_no"];
+
+                const button_yes = await this.translate.translatestring(
+                    "Yes",
+                    selectedLanguageCode
+                );
+
+                const button_no = await this.translate.translatestring(
+                    "No",
+                    selectedLanguageCode
+                );
+
+                const buttonArray = [
+                    button_yes, "consent_yes",
+                    button_no, "consent_no"
+                ];
 
                 if (req.params.channel === "whatsappMeta") {
                     payload = await sendApiButtonService(buttonArray);
@@ -268,73 +229,97 @@ export class ConsentService {
                     payload = await sendTelegramButtonService(buttonArray);
                 }
 
-                this.sendCustomMessage(this._platformMessageService, message, messageType, userId, payload);
-                return;
-            }
-            if (consentReply === "consent_no") {
-                console.log("No Consent is Given");
-                await UserConsentRepo.updateUserConsent(req.container, userId, "false");
-                const rawMessage = clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_NO_MESSAGE");
-                const message = await this.translate.translatestring(rawMessage, languageCode);
-                const messageType = "text";
-                this.sendCustomMessage(this._platformMessageService, message, messageType, userId, payload);
-            }
-            else if (consentReply === "consent_changeLanguge") {
-                const consentMessages: ConsentMessageWithLanguage[] = await TenantSettingService.getConsentSetting(
-                    clientName,
-                    clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"),
-                    clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL")
+                this.sendCustomMessage(
+                    this._platformMessageService,
+                    message,
+                    messageType,
+                    userId,
+                    payload
                 );
 
-                const buttonArray = [];
-                consentMessages.forEach(async consent => {
-                    buttonArray.push(consent.Language);
-                    buttonArray.push(`consent_changeLanguge-${consent.LanguageCode}`);
-                });
-
-                const message = await this.translate.translatestring("Please, select your preferred language", languageCode);
-                const messageType = buttonmessageType;
-
-                if (buttonArray.length === 0) {
-                    buttonArray.push("English");
-                    buttonArray.push("consent_changeLanguge-en");
-                }
-
-                if (req.params.channel === "whatsappMeta") {
-                    payload = await sendApiButtonService(buttonArray.slice(0, MAX_WHATSAPP_BUTTONS));
-                } else {
-                    payload = await sendTelegramButtonService(buttonArray.slice(0, MAX_TELEGRAM_BUTTONS));
-                }
-
-                this.sendCustomMessage(this._platformMessageService, message, messageType, userId, payload);
+                return;
             }
-            else {
-                const consentMessage: ConsentMessage = await TenantSettingService.getConsentMessages(
+
+            // 🔹 Handle consent NO
+            if (consentReply === "consent_no") {
+
+                console.log("No Consent is Given");
+
+                await UserConsentRepo.updateUserConsent(
+                    req.container,
+                    userId,
+                    "false"
+                );
+
+                const rawMessage =
+                    clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_NO_MESSAGE");
+
+                const message = await this.translate.translatestring(
+                    rawMessage,
+                    languageCode
+                );
+
+                const messageType = "text";
+
+                this.sendCustomMessage(
+                    this._platformMessageService,
+                    message,
+                    messageType,
+                    userId,
+                    payload
+                );
+
+                return;
+            }
+
+            // 🔹 Default consent display
+            const consentMessage: ConsentMessage =
+                await TenantSettingService.getConsentMessages(
                     clientName,
                     clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"),
                     clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL"),
                     languageCode
                 );
 
-                const message = `${consentMessage.Content} \n\n ${consentMessage.WebsiteURL}`;
-                const messageType = buttonmessageType;
-                const button_yes = await this.translate.translatestring("Yes", languageCode);
-                const button_no = await this.translate.translatestring("No", languageCode);
-                const button_changeLanguage = await this.translate.translatestring("Change Language", languageCode);
-                const buttonArray = [button_yes, "consent_yes", button_no, "consent_no", button_changeLanguage];
+            const message =
+                `${consentMessage.Content} \n\n ${consentMessage.WebsiteURL}`;
 
-                if (req.params.channel === "whatsappMeta") {
-                    payload = await sendApiButtonService(buttonArray);
-                } else {
-                    payload = await sendTelegramButtonService(buttonArray);
-                }
+            const messageType = buttonmessageType;
 
-                this.sendCustomMessage(this._platformMessageService, message, messageType, userId, payload);
+            const button_yes = await this.translate.translatestring(
+                "Yes",
+                languageCode
+            );
+
+            const button_no = await this.translate.translatestring(
+                "No",
+                languageCode
+            );
+
+            const buttonArray = [
+                button_yes, "consent_yes",
+                button_no, "consent_no"
+            ];
+
+            if (req.params.channel === "whatsappMeta") {
+                payload = await sendApiButtonService(buttonArray);
+            } else {
+                payload = await sendTelegramButtonService(buttonArray);
             }
+
+            this.sendCustomMessage(
+                this._platformMessageService,
+                message,
+                messageType,
+                userId,
+                payload
+            );
+
         } catch (error) {
             console.log("Error in handleConsentRequest", error);
         }
     }
+
 
     async sendLanguageSelectionMessage(req, userId, buttonmessageType) {
         try {
