@@ -132,6 +132,7 @@ export class DecisionRouter {
                 CurrentNodeId  : '',
                 Question       : '',
                 AssessmentFlag : false,
+                QuestionData   : null,
                 MetaData       : {
                     "assessmentStart"  : false,
                     "askQuestionAgain" : false
@@ -285,9 +286,13 @@ export class DecisionRouter {
                             const questionResponse = await this.needleService.needleRequestForREAN("get", questionApiURL, null, null);
                             const currentQuestion = questionResponse?.Data?.Question?.Description || "Please provide your response.";
 
+                            // Store full question data for button rendering
+                            const questionData = questionResponse?.Data?.Question;
+
                             assessmentData.AssessmentFlag = true;  // Stay in assessment
                             assessmentData.MetaData.askQuestionAgain = true;
                             assessmentData.Question = currentQuestion;
+                            assessmentData.QuestionData = questionData;
 
                             // Increment retry count
                             assessmentResponse.retry_count = (assessmentResponse.retry_count || 0) + 1;
@@ -341,6 +346,7 @@ export class DecisionRouter {
                 CurrentNodeId  : '',
                 Question       : '',
                 AssessmentFlag : false,
+                QuestionData   : null,
                 MetaData       : {
                     "assessmentStart"  : false,
                     "askQuestionAgain" : false
@@ -527,7 +533,8 @@ export class DecisionRouter {
                         AssessmentName : resultAssessment.AssessmentName,
                         TemplateId     : resultAssessment.TemplateId,
                         MetaData       : resultAssessment.MetaData,
-                        Question       : resultAssessment.Question
+                        Question       : resultAssessment.Question,
+                        QuestionData   : resultAssessment.QuestionData
                     };
                     return this.outgoingMessage;
                 }

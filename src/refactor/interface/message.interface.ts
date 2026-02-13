@@ -184,6 +184,7 @@ export interface AssessmentDetails {
     Hint           ?: string;
     UserResponse   ?: string | number | boolean | unknown;
     AssessmentFlag ?: boolean;
+    QuestionData   ?: any; // Full question data from REAN API for re-prompting with buttons
     MetaData       ?: {
         assessmentStart  : boolean;
         askQuestionAgain : boolean;
