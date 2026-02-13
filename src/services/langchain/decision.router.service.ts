@@ -273,6 +273,30 @@ export class DecisionRouter {
                     );
 
                     if (!validationFlag) {
+                        // Check if this node is required
+                        const isNodeRequired = assessmentResponse.is_node_required ?? false;
+
+                        if (isNodeRequired) {
+                            // Node is required - don't allow escape
+                            console.log(`[checkAssessment] Validation failed for required node ${assessmentResponse.assesmentNodeId}`);
+
+                            // Fetch the current question from REAN API to reiterate it
+                            const questionApiURL = `clinical/assessments/${assessmentResponse.assesmentId}/questions/${assessmentResponse.assesmentNodeId}`;
+                            const questionResponse = await this.needleService.needleRequestForREAN("get", questionApiURL, null, null);
+                            const currentQuestion = questionResponse?.Data?.Question?.Description || "Please provide your response.";
+
+                            assessmentData.AssessmentFlag = true;  // Stay in assessment
+                            assessmentData.MetaData.askQuestionAgain = true;
+                            assessmentData.Question = currentQuestion;
+
+                            // Increment retry count
+                            assessmentResponse.retry_count = (assessmentResponse.retry_count || 0) + 1;
+                            await assessmentResponse.save();
+
+                            return assessmentData;
+                        }
+
+                        // Node is optional - allow escape to fallback
                         assessmentData.AssessmentFlag = false;
 
                         if (
@@ -501,7 +525,9 @@ export class DecisionRouter {
                     this.outgoingMessage.Assessment = {
                         AssessmentId   : resultAssessment.AssessmentId,
                         AssessmentName : resultAssessment.AssessmentName,
-                        TemplateId     : resultAssessment.TemplateId
+                        TemplateId     : resultAssessment.TemplateId,
+                        MetaData       : resultAssessment.MetaData,
+                        Question       : resultAssessment.Question
                     };
                     return this.outgoingMessage;
                 }

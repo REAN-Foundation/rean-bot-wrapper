@@ -156,6 +156,8 @@ export interface assessmentSessionLogs{
     userResponse: string;
     userResponseTime: Date;
     userMessageId: string;
+    is_node_required?: boolean;
+    retry_count?: number;
 }
 
 export interface consentInfo{
@@ -182,6 +184,10 @@ export interface AssessmentDetails {
     Hint           ?: string;
     UserResponse   ?: string | number | boolean | unknown;
     AssessmentFlag ?: boolean;
+    MetaData       ?: {
+        assessmentStart  : boolean;
+        askQuestionAgain : boolean;
+    };
 }
 
 export interface Feedback {
