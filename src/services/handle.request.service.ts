@@ -164,11 +164,31 @@ export class handleRequestservice {
             const userCacheData = await CacheMemory.get(key);
 
             // Check if this is a re-prompt for a required node
-            if (outgoingMessage.Assessment.MetaData?.askQuestionAgain && outgoingMessage.Assessment.Question) {
+            if (outgoingMessage.Assessment.MetaData?.askQuestionAgain && outgoingMessage.Assessment.QuestionData) {
                 console.log("[Assessments] Re-prompting required assessment question");
-                const repromptMessage = outgoingMessage.Assessment.Question;
-                const responseMessage = this.assessmentHandlingService.getResponseMessage(repromptMessage, "AssessmentReprompt");
-                message_from_nlp = new AssessmentResponseFormat(responseMessage);
+
+                // Use serveAssessmentService to handle the question with buttons
+                const questionData = outgoingMessage.Assessment.QuestionData;
+                const channel = metaData.platform;
+
+                const { message, payload, messageType } = await this.serveAssessmentService.handleButtonCreation(
+                    questionData,
+                    channel
+                );
+
+                const responseMessage = {
+                    message     : message,
+                    intent      : 'AssessmentReprompt',
+                    payload     : payload,
+                    messageType : messageType
+                };
+
+                const formattedResponse = new AssessmentResponseFormat(responseMessage);
+
+                // Store message type for platform services
+                (formattedResponse as any).message_type = messageType;
+
+                message_from_nlp = formattedResponse;
             } else if (userCacheData) {
                 console.log("user response",metaData.messageBody);
                 message_from_nlp = await this.serveAssessmentService.answerQuestion(eventObj, metaData.platformId, metaData.originalMessage, userCacheData, metaData.platform, true,metaData.intent, metaData);
