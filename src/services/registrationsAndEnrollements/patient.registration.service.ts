@@ -39,9 +39,10 @@ export class Registration{
         api_key: string
     ): Promise<string> {
         try {
-            let obj: Record<string, any> | null = null;
+            let obj = null;
             const defaultTimezone = await this.EnvironmentProviderService.getClientEnvironmentVariable("Timezone");
             const tenantCode = await this.EnvironmentProviderService.getClientEnvironmentVariable("Name");
+            console.log("Registering user on ReanCare with Timezone & name:", defaultTimezone, tenantCode);
 
             // Build the object based on creation method
             if (creationMethod === "phoneNumber") {

@@ -110,15 +110,17 @@ export class HeartFailureRegistrationService {
         }
 
         let obj1 = {};
+        const tenantName = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
 
         if (isTestUser) {
             const timezone = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Timezone") || "+05:30";
             const scheduleConfig = this.getScheduleForNextCron(15, timezone);
+
             obj1 = {
                 Provider  : 'REAN',
                 StartDate : new Date().toISOString()
                     .split('T')[0],
-                TenantName     : this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name"),
+                TenantName     : tenantName,
                 PlanCode       : planCode,
                 PlanName       : planCode,
                 Channel        : this.getPatientInfoService.getReminderType(channel),
@@ -135,7 +137,7 @@ export class HeartFailureRegistrationService {
                 StartDate  : startDate.toISOString().split('T')[0],
                 DayOffset  : 0,
                 Channel    : this.getPatientInfoService.getReminderType(channel),
-                TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name")
+                TenantName : tenantName
             };
         }
 

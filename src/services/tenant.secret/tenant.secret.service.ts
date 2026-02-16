@@ -94,6 +94,7 @@ export class TenantSecretsService {
                         this.baseUrl);
 
                     if (botSettings) {
+                        console.log("Chatbot Settings", botSettings.ChatBot);
                         for (const key in botSettings.Common){
 
                             // const secretKey = this.pascalToCapitalSnake(key);
@@ -108,8 +109,6 @@ export class TenantSecretsService {
                         }
 
                         for (const key in botSettings.ChatBot){
-
-                            // const secretKey = this.pascalToCapitalSnake(key);
                             if (typeof botSettings.ChatBot[key] === "object"){
                                 tenantSecrets[key] = JSON.stringify(botSettings.ChatBot[key]);
                             }
