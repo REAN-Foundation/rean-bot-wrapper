@@ -43,6 +43,7 @@ export class InMemoryCache implements ICache {
 
     async set(key: string, value: any, options: CacheOptions = {}): Promise<void> {
         let ttl = options.Ttl;
+        console.log(`Setting cache for key: ${key} with TTL: ${ttl} ms`);
         if (options.Ttl != null){
             ttl = options.Ttl || this.config.DefaultTTL;
         }
@@ -181,6 +182,7 @@ export class InMemoryCache implements ICache {
 
     // Private helper methods
     private isExpired(entry: CacheEntry): boolean {
+        if (entry.Ttl === null) return false;
         return Date.now() - entry.Timestamp > entry.Ttl;
     }
 
