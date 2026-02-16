@@ -145,8 +145,9 @@ export class translateService{
         const defultLanguage = await this.getDialogflowLanguage();
         const translate = new v2.Translate(this.obj);
         const translateGlossarySetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("TranslateGlossary");
-        this.translateGlossaryId = translateGlossarySetting.Value;
-        const customTranslateSetting: boolean = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("FIX_LANGUAGE") === "true";
+        this.translateGlossaryId = translateGlossarySetting ? translateGlossarySetting.Value : null;
+        const fixLanguageSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("FixLanguage");
+        const customTranslateSetting: boolean = fixLanguageSetting.Value.Enable;
         try {
             if (customTranslateSetting) {
                 responseMessage = [responseMessage[0]];

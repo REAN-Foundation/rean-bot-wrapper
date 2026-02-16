@@ -12,14 +12,15 @@ export class EmojiFilter{
         console.log("inside checkForEmoji",message);
         const regex = emojiRegex();
         let emojiObj;
-        const emoji = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Emoji");
-        if (emoji){
-            emojiObj = JSON.parse(emoji);
-        }
-        else {
-            emojiObj = JSON.parse(process.env.EMOJI);
-        }
-        const emojiObjKeys = Object.keys(emojiObj);
+        const emojiSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("EmojiSetting");
+        const emoji = emojiSetting.Value;
+        // if (emoji){
+        //     emojiObj = JSON.parse(emoji);
+        // }
+        // else {
+        //     emojiObj = JSON.parse(process.env.EMOJI);
+        // }
+        const emojiObjKeys = Object.keys(emoji);
 
         // console.log("emojiKeys", emojiObjKeys);
         let filteredMessage: string = message;

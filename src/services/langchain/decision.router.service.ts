@@ -85,7 +85,19 @@ export class DecisionRouter {
         };
     }
 
-    public model = new ChatOpenAI({ temperature: 0, modelName: "gpt-3.5-turbo" });
+    /** Lazy ChatOpenAI using tenant API key (avoids construction-time env requirement). */
+    private async getModel(): Promise<ChatOpenAI> {
+        const apiKeySetting = await this.environmentProviderService.getClientEnvironmentVariable("OpenAiApiKey");
+        const apiKey = apiKeySetting?.Value ?? process.env.OPENAI_API_KEY;
+        if (!apiKey) {
+            throw new Error("OpenAI or Azure OpenAI API key not found. Set OpenAiApiKey in tenant secrets or OPENAI_API_KEY in .env.");
+        }
+        return new ChatOpenAI({
+            temperature : 0,
+            modelName   : "gpt-3.5-turbo",
+            openAIApiKey: apiKey
+        });
+    }
 
     public feedbackFlag = false;
 
@@ -411,9 +423,8 @@ export class DecisionRouter {
             `
         );
 
-        // const model = new ChatOpenAI({ temperature: 0, modelName: "gpt-3.5-turbo" });
-
-        const chain = promptTemplate.pipe(this.model);
+        const model = await this.getModel();
+        const chain = promptTemplate.pipe(model);
 
         const result = await chain.invoke({ question: userQuery });
 
@@ -433,7 +444,7 @@ export class DecisionRouter {
     async getDecision(messageBody: Imessage, channel: string){
         try {
             const workflowSetttings = await this.environmentProviderService.getClientEnvironmentVariable("WorkflowSettings");
-            const workflowMode = workflowSetttings.Value.Mode;
+            const workflowMode = workflowSetttings?.Value?.Mode;
             if (workflowMode === 'TRUE')
             {
 
@@ -522,6 +533,9 @@ export class DecisionRouter {
             }
         } catch (error) {
             console.log('Error in router:', error);
+            this.outgoingMessage.MetaData = messageBody;
+            this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.QnA;
+            return this.outgoingMessage;
         }
     }
 
@@ -585,9 +599,7 @@ export class DecisionRouter {
             Analyze the user message against ALL available workflows and determine the appropriate routing.
             `
             );
-            const model = new ChatOpenAI({
-                modelName : "gpt-5-mini"
-            });
+            const model = await this.getModel();
             const chain = promptTemplate.pipe(model);
 
             const result = await chain.invoke({

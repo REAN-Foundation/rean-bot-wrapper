@@ -31,7 +31,7 @@ export class TenantSettingService {
                 ChatBot  : response.body?.Data?.TenantSettings?.ChatBot,
                 Forms    : response.body?.Data?.TenantSettings?.Forms,
                 Consent  : response.body?.Data?.TenantSettings?.Consent,
-                Custom   : response.body?.Data?.TenantSettings?.Custom
+                Custom   : response.body?.Data?.TenantSettings?.CustomSettings
             };
             await RequestResponseCacheService.set(`tenant-setting-${tenantCode}`, tenantSetting);
             return tenantSetting;

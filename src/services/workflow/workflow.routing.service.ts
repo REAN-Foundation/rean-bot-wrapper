@@ -3,6 +3,7 @@
  * Handles routing decision between workflows and LLM Service
  */
 
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { PromptTemplate } from "langchain/prompts";
 
@@ -18,24 +19,17 @@ import {
     buildWorkflowSummary,
     findSchemaById
 } from '../../utils/helpers/workflow.helper';
+import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
 
 /**
  * Workflow Routing Service Class
+ * Uses tenant-scoped OpenAI API key from client environment (lazy model creation).
  */
 
+@scoped(Lifecycle.ContainerScoped)
 export class WorkflowRoutingService {
-    
-    private model: ChatOpenAI;
-    private promptTemplate: PromptTemplate;
 
-    constructor() {
-        
-        // Initialize the ChatOpenAI model
-        this.model = new ChatOpenAI({
-            modelName : "gpt-5-mini"
-        });
-
-        this.promptTemplate = PromptTemplate.fromTemplate(`
+    private readonly promptTemplate: PromptTemplate = PromptTemplate.fromTemplate(`
 You are a workflow routing classifier. Analyze the user message and determine if it should trigger a specific workflow or be sent to a general LLM service.
 
 AVAILABLE WORKFLOWS:
@@ -77,6 +71,24 @@ USER MESSAGE: {user_message}
 
 Analyze and provide your routing decision.
         `);
+
+    constructor(
+        @inject(ClientEnvironmentProviderService) private readonly clientEnvironment: ClientEnvironmentProviderService
+    ) {}
+
+    /**
+     * Get ChatOpenAI instance using tenant's API key (from client environment or fallback to process.env).
+     */
+    private async getModel(): Promise<ChatOpenAI> {
+        const apiKeySetting = await this.clientEnvironment.getClientEnvironmentVariable("OpenAiApiKey");
+        const apiKey = apiKeySetting?.Value ?? process.env.OPENAI_API_KEY;
+        if (!apiKey) {
+            throw new Error("OpenAI or Azure OpenAI API key not found. Set OpenAiApiKey in tenant secrets or OPENAI_API_KEY in .env.");
+        }
+        return new ChatOpenAI({
+            modelName : "gpt-5-mini",
+            openAIApiKey : apiKey
+        });
     }
 
     /**
@@ -123,9 +135,9 @@ Analyze and provide your routing decision.
         }
 
         try {
-
+            const model = await this.getModel();
             // Create the chain
-            const chain = this.promptTemplate.pipe(this.model);
+            const chain = this.promptTemplate.pipe(model);
 
             // Invoke the chain
             const result = await chain.invoke({

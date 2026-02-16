@@ -20,7 +20,8 @@ export class DialogflowResponseService {
                 @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,) { }
 
     async getDialogflowLanguage(){
-        const defaultLanguage = await this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_DEFAULT_LANGUAGE_CODE");
+        const defaultLanguageSetting = await this.clientEnvironment.getClientEnvironmentVariable("DialogflowSettings");
+        const defaultLanguage = defaultLanguageSetting ? defaultLanguageSetting.Value.DefaultLanguageCode : "en";
         if (defaultLanguage){
             return defaultLanguage;
         }
@@ -63,7 +64,8 @@ export class DialogflowResponseService {
             } else {
                 const dialogflowSettings = await this.clientEnvironment.getClientEnvironmentVariable("DialogflowSettings");
                 const dfBotGcpCredentials = dialogflowSettings.Value.DialogflowBotGcpProjectCredentials;
-                const dfBotGCPCredentials = JSON.parse(dfBotGcpCredentials);
+                // const dfBotGCPCredentials = JSON.parse(dfBotGcpCredentials);
+                const dfBotGCPCredentials = dfBotGcpCredentials;
                 const GCPCredentials = await this.clientEnvironment.getClientEnvironmentVariable("GoogleApplicationCredentials");
                 const dialogflowApplicationCredentialsobj = dfBotGCPCredentials ? dfBotGCPCredentials : GCPCredentials;
                 options = {
