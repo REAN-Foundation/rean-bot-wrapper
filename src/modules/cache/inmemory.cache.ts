@@ -42,7 +42,10 @@ export class InMemoryCache implements ICache {
     }
 
     async set(key: string, value: any, options: CacheOptions = {}): Promise<void> {
-        const ttl = options.Ttl || this.config.DefaultTTL;
+        let ttl = options.Ttl;
+        if (options.Ttl != null){
+            ttl = options.Ttl || this.config.DefaultTTL;
+        }
         const size = this.calculateSize(value);
         const timestamp = Date.now();
 
