@@ -40,15 +40,17 @@ export class Registration{
     ): Promise<string> {
         try {
             let obj: Record<string, any> | null = null;
+            const defaultTimezone = await this.EnvironmentProviderService.getClientEnvironmentVariable("Timezone");
+            const tenantCode = await this.EnvironmentProviderService.getClientEnvironmentVariable("Name");
 
             // Build the object based on creation method
             if (creationMethod === "phoneNumber") {
                 obj = {
                     Phone           : await this.countryCodeService.formatPhoneNumber(platformUserId),
                     FirstName       : platformUserName,
-                    DefaultTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("Timezone"),
-                    CurrentTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("Timezone"),
-                    TenantCode      : this.EnvironmentProviderService.getClientEnvironmentVariable("Name"),
+                    DefaultTimeZone : defaultTimezone,
+                    CurrentTimeZone : defaultTimezone,
+                    TenantCode      : tenantCode,
                     BirthDate       : DEFAULT_DOB,
                     GenerateOtp     : false
                 };
@@ -57,9 +59,9 @@ export class Registration{
                     FirstName       : platformUserName,
                     UserName        : platformUserId,
                     UniqueReferenceId  : platformUserId,
-                    DefaultTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("Timezone"),
-                    CurrentTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("Timezone"),
-                    TenantCode      : this.EnvironmentProviderService.getClientEnvironmentVariable("Name"),
+                    DefaultTimeZone : defaultTimezone,
+                    CurrentTimeZone : defaultTimezone,
+                    TenantCode      : tenantCode,
                     BirthDate       : DEFAULT_DOB,
                     GenerateOtp     : false
                 };
@@ -97,7 +99,7 @@ export class Registration{
                 platform      : platform,
                 patientUserId : patientUserId,
                 optOut        : "false" });
-            const defaultLanguage = this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE") || "en";
+            const defaultLanguage = await this.EnvironmentProviderService.getClientEnvironmentVariable("DefaultLanguage") || "en";
             await chatSessionRepository.create({
                 userPlatformID    : userPlatformId,
                 preferredLanguage : defaultLanguage,
