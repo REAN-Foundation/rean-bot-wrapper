@@ -95,8 +95,8 @@ export class translateService{
         const parse_mode = messageFromDialogflow.getParseMode();
         const text = messageFromDialogflow.getText();
         const fixLanguageSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("FixLanguage");
-        const customTranslateSetting: boolean = fixLanguageSetting.Value.Enable;
-        const listOfNoTranslateIntents = fixLanguageSetting.Value.Intents ?? [];
+        const customTranslateSetting: boolean = fixLanguageSetting?.Value.Enable ?? false;
+        const listOfNoTranslateIntents = fixLanguageSetting?.Value.Intents ?? [];
         if (parse_mode) {
             translatedResponse = text;
         } else if (listOfNoTranslateIntents.includes(intent) && customTranslateSetting){
@@ -147,7 +147,7 @@ export class translateService{
         const translateGlossarySetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("TranslateGlossary");
         this.translateGlossaryId = translateGlossarySetting ? translateGlossarySetting.Value : null;
         const fixLanguageSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("FixLanguage");
-        const customTranslateSetting: boolean = fixLanguageSetting.Value.Enable;
+        const customTranslateSetting: boolean = fixLanguageSetting?.Value.Enable ?? false;
         try {
             if (customTranslateSetting) {
                 responseMessage = [responseMessage[0]];
