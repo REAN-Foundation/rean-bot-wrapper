@@ -95,7 +95,8 @@ export class TenantSecretsService {
                         this.baseUrl);
 
                     if (botSettings) {
-                        tenantSecrets = {...tenantSecrets, ...botSettings.Common, ...botSettings.ChatBot, ...botSettings.Custom, ...botSettings.Followup, ...botSettings.Forms, ...botSettings.Consent};
+                        // tenantSecrets = {...tenantSecrets, ...botSettings.Common, ...botSettings.ChatBot, ...botSettings.Custom, ...botSettings.Followup, ...botSettings.Forms, ...botSettings.Consent};
+                        tenantSecrets = {...tenantSecrets, ...botSettings.Common, ...botSettings.ChatBot, ...botSettings.Custom, ...botSettings.Followup, ...botSettings.Forms};
                         console.log("Final tenant secrets:", tenantSecrets);
                         // for (const key in botSettings.Common){
 
