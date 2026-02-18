@@ -61,4 +61,18 @@ export class AssessmentSessionLogs extends Model implements assessmentSessionLog
     })
         userMessageId: string;
 
+    @Column({
+        type         : DataType.BOOLEAN,
+        allowNull    : false,
+        defaultValue : false
+    })
+        is_node_required: boolean;
+
+    @Column({
+        type         : DataType.INTEGER,
+        allowNull    : false,
+        defaultValue : 0
+    })
+        retry_count: number;
+
 }
