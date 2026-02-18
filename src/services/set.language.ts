@@ -112,13 +112,41 @@ export class UserLanguage {
         return detected_language;
     }
 
-    async updateUserPreferredLanguage (userPlatformId: string, languageCode: string) {
+    // async updateUserPreferredLanguage (userPlatformId: string, languageCode: string) {
+    //     const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
+    //     await chatSessionRepository.update({ preferredLanguage: languageCode }, {
+    //         where : {
+    //             userPlatformID : userPlatformId
+    //         }
+    //     });
+    // }
+
+    async updateUserPreferredLanguage(userPlatformId: string, languageCode: string) {
         const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
-        await chatSessionRepository.update({ preferredLanguage: languageCode }, {
-            where : {
-                userPlatformID : userPlatformId
+
+        // Find the latest open session
+        const existingSessions = await chatSessionRepository.findAll({
+            where: {
+                userPlatformID: userPlatformId,
+                sessionOpen: 'true'
             }
         });
+
+        if (existingSessions && existingSessions.length > 0) {
+            // Update the latest session
+            const latestSession = existingSessions[existingSessions.length - 1];
+            await chatSessionRepository.update(
+                { preferredLanguage: languageCode },
+                { where: { autoIncrementalID: latestSession.autoIncrementalID } }
+            );
+        } else {
+            // Create a new session with the selected language
+            await chatSessionRepository.create({
+                userPlatformID: userPlatformId,
+                preferredLanguage: languageCode,
+                sessionOpen: 'true'
+            });
+        }
     }
 
 }

@@ -123,6 +123,8 @@ export class ServeAssessmentService {
                     userMessageId        : null,
                     identifiers          : questionNode.FieldIdentifier,
                     identifiersUnit      : questionNode.FieldIdentifierUnit,
+                    is_node_required     : questionNode.Required ?? false,
+                    retry_count          : 0,
                 };
 
                 const key = `${platformUserId}:NextQuestionFlag:${assessmentId}`;
@@ -536,6 +538,8 @@ export class ServeAssessmentService {
                 userResponse         : null,
                 userResponseTime     : userResponseTime,
                 userMessageId        : null,
+                is_node_required     : questionData.Required ?? false,
+                retry_count          : 0,
             };
 
             const assessmentSessionData = await AssessmentSessionRepo.create(assessmentSessionLogs);
