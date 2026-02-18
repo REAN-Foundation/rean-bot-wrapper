@@ -13,7 +13,7 @@ export class EmojiFilter{
         const regex = emojiRegex();
         let emojiObj;
         const emojiSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("EmojiSetting");
-        const emoji = emojiSetting.Value;
+        const emoji = emojiSetting?.Value;
         // if (emoji){
         //     emojiObj = JSON.parse(emoji);
         // }
