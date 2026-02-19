@@ -9,7 +9,7 @@ name: Test-CI-CD
 
 on:
   push:
-    branches: [tenant_onboarding_03]
+    branches: [tenant_onboarding_04]
 
 jobs:
   Deploy-ECS:
