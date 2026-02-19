@@ -89,6 +89,7 @@ export default class Application {
 
             if (whatsappToken) {
                 await whatsapp.setWebhook(clientName);
+                console.log("Whatsapp webhook is set");
             }
             else {
                 console.log("whatsapp webhook need not to be set");
@@ -152,7 +153,7 @@ export default class Application {
 
     private setupMiddlewares = async (): Promise<boolean> => {
 
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             try {
                 this._app.use((req, _res, next) => {
                     req.container = Loader.container.createChildContainer();
@@ -166,7 +167,7 @@ export default class Application {
                 this._timer = new Timer(this._app);
                 this._timer.timingRequestAndResponseCycle();
                 this._checkCrossConnection = new CheckCrossConnection();
-                this._app.use(this._checkCrossConnection.checkCrossConnection);
+                this._app.use(await this._checkCrossConnection.checkCrossConnection);
 
                 // this._app.use(this.limiter);
 

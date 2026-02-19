@@ -9,14 +9,15 @@ export class CheckCrossConnection {
     constructor(
         private responseHandler?: ResponseHandler) {}
 
-    checkCrossConnection = (req, res, next): void => {
+    checkCrossConnection = async (req, res, next): Promise<void> => {
 
         // eslint-disable-next-line max-len
         const clientEnvironmentProviderService: ClientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
         const urlParsed = req.url.split('/');
         if (urlParsed.includes("whatsappMeta") && req.method === "POST") {
-
-            const set_phone_number_id = process.env[`${urlParsed[2]}_WHATSAPP_PHONE_NUMBER_ID`];
+            const whatsappSecrets = await clientEnvironmentProviderService.getClientEnvironmentVariable("whatsapp");
+            const set_phone_number_id = whatsappSecrets?.PhoneNumberId;
+            // const set_phone_number_id = process.env[`${urlParsed[2]}_WHATSAPP_PHONE_NUMBER_ID`];
             if (urlParsed[5] === 'send'){
                 console.log("No cross connection",req.url);
                 clientEnvironmentProviderService.setClientName(urlParsed[2]);
@@ -47,7 +48,7 @@ export class CheckCrossConnection {
             next();
             // }
         }
-        
+
     };
 
 }
