@@ -75,8 +75,8 @@ export class BotFeedback{
 
                                 const options = getRequestOptions();
                                 options.headers['Content-Type'] = 'application/json';
-                                options.headers['D360-Api-Key'] = clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY");
-                                const hostname = clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST");
+                                options.headers['D360-Api-Key'] = process.env.WHATSAPP_LIVE_API_KEY;
+                                const hostname = process.env.WHATSAPP_LIVE_HOST;
                                 const path = '/v1/messages';
                                 const apiUrl = "https://" + hostname + path;
                                 console.log("apiuri",apiUrl);

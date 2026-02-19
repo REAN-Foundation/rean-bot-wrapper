@@ -73,7 +73,7 @@ export class WhatsappMessageService extends CommonWhatsappService {
                     "authentication" : this.clientAuthenticator.headerToken
                 }
             });
-            const apiKey = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY");
+            const apiKey = process.env.WHATSAPP_LIVE_API_KEY;
 
             const request = await this.createRequestforWebhook(resolve, reject, apiKey);
 
@@ -116,7 +116,7 @@ export class WhatsappMessageService extends CommonWhatsappService {
     };
 
     SendWhatsappMessageOldNumber = async (contact, message) => {
-        const hostName = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST");
+        const hostName = process.env.WHATSAPP_LIVE_HOST;
         const apiKey = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY_OLD_NUMBER");
         return new Promise((resolve, reject) => {
             const postData = JSON.stringify({

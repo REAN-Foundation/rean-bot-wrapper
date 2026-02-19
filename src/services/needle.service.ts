@@ -136,8 +136,8 @@ export class NeedleService {
     async needleRequestForWhatsapp(method: string, endPoint:string, obj?){
         const options = getRequestOptions();
         options.headers['Content-Type'] = 'application/json';
-        options.headers['D360-Api-Key'] = this.environmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY");
-        const hostname = this.environmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST");
+        options.headers['D360-Api-Key'] = process.env.WHATSAPP_LIVE_API_KEY;
+        const hostname = process.env.WHATSAPP_LIVE_HOST;
         const apiUrl = "https://" + hostname + endPoint;
         // eslint-disable-next-line init-declarations
         await needle.post(apiUrl, obj, options, function(err, resp) {

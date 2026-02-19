@@ -155,8 +155,8 @@ export class MessageFunctionalities implements getMessageFunctionalities {
 
     /*retrive whatsapp media */
     GetWhatsappMedia = async (type, mediaId, extension) => {
-        const hostName = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST");
-        const apiKey = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY");
+        const hostName = process.env.WHATSAPP_LIVE_HOST;
+        const apiKey = process.env.WHATSAPP_LIVE_API_KEY;
         return new Promise<string>((resolve, reject) => {
             const options = {
                 hostname : hostName,

@@ -125,7 +125,7 @@ export class GeneralReminderService {
             let apiURL = null;
             const channel = eventObj.body.originalDetectIntentRequest.payload.source;
             const hookUrl = "https://api.weatherstack.com/current?access_key=93fdf8204559b90ec79466809edb7aad&query=Pune";
-            const rawData = this.getTemplateData(jsonFormat, personName, channel);
+            const rawData = await this.getTemplateData(jsonFormat, personName, channel);
             const obj = this.getCommonReminderBody(channel, patientUserId, jsonFormat.TaskName, whenDay, whenTime, hookUrl, rawData);
             if (frequency === "Once" || frequency === ""){
                 apiURL = `reminders/one-time`;
@@ -180,8 +180,8 @@ export class GeneralReminderService {
         }
     }
 
-    private getTemplateData(jsonFormat: any, personName? , channel?) {
-        const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
+    private async getTemplateData(jsonFormat: any, personName? , channel?) {
+        const clientName = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
         const fourthVariable = jsonFormat.TaskType === 'medication' ? 'take your medicine' : 'attend your appointment';
         let variables = null;
         let templateName = "appointment_rem_question";
