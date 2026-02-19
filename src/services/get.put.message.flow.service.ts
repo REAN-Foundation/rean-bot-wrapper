@@ -76,7 +76,7 @@ export class MessageFlow{
 
     async checkTheFlowRouter(messageToLlmRouter: Imessage, channel: string, platformMessageService: platformServiceInterface){
         try {
-            console.log(`checkTheFlowRouter messageToLlmRouter:${messageToLlmRouter} \n Chaneel : ${channel}`);
+            console.log(`checkTheFlowRouter messageToLlmRouter:${messageToLlmRouter} \n Channel : ${channel}`);
             const preprocessedOutgoingMessage = await this.preprocessOutgoingMessage(messageToLlmRouter);
             console.log("Processed outgoing message", JSON.stringify(preprocessedOutgoingMessage, null, 2));
 

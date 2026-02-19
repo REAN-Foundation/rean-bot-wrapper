@@ -12,13 +12,13 @@ export class ReanAppAuthenticator implements clientAuthenticator{
     ){}
 
     async urlToken(): Promise<any> {
-        const appClientUrlTokenSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WebhookReanappClientUrlToken");
-        return appClientUrlTokenSetting.Value;
+        const appClientUrlToken = process.env.WEBHOOK_REANAPP_CLIENT_URL_TOKEN;
+        return appClientUrlToken;
     }
 
     async headerToken(): Promise<any> {
-        const appClientHeaderTokenSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WebhookReanappClientHeaderToken");
-        return appClientHeaderTokenSetting.Value;
+        const appClientHeaderToken = process.env.WEBHOOK_REANAPP_CLIENT_HEADER_TOKEN;
+        return appClientHeaderToken;
     }
 
     async authenticate(req: any) {
