@@ -16,6 +16,7 @@ export class CheckCrossConnection {
         console.log("URL: ", req.url);
         const urlParsed = req.url.split('/');
         if (urlParsed.includes("whatsappMeta") && req.method === "POST") {
+            clientEnvironmentProviderService.setClientName(urlParsed[2]);
             const whatsappSecrets = await clientEnvironmentProviderService.getClientEnvironmentVariable("whatsapp");
             const set_phone_number_id = whatsappSecrets?.PhoneNumberId;
             console.log("Phone number id set in environment variable is " + set_phone_number_id);
