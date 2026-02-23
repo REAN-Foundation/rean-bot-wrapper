@@ -67,14 +67,13 @@ export class ClickUpTask{
             }
             const response = await needle("post", createTaskUrl, obj, options);
             if (response.statusCode !== 200) {
-                console.log("Error in creating the ClickUp Task");
-                // console.log(response);
+                console.log(`[ClickUp] Error creating task. Status: ${response.statusCode}, Body:`, JSON.stringify(response.body));
             }
             const taskID = response.body.id;
-            console.log(`task has been created with ${taskID}`);
+            console.log(`[ClickUp] Task created with ID: ${taskID}`);
             return taskID;
         } catch (error) {
-            console.log("Error while creating the task on ClickUp", error);
+            console.log("[ClickUp] Error while creating task:", error.message || error);
         }
     }
 
@@ -100,13 +99,17 @@ export class ClickUpTask{
             });
         }
         catch (error){
-            console.log(error);
+            console.log(`[ClickUp] Error attaching file to task ${taskID}:`, error.message || error);
         }
     }
 
     async postCommentOnTask(taskID,comment){
+        if (!taskID) {
+            console.log("[ClickUp] postCommentOnTask skipped: taskID is null/undefined");
+            return;
+        }
         try {
-            const createTaskUrl = `https://api.clickup.com/api/v2/task/${taskID}/comment`;
+            const commentUrl = `https://api.clickup.com/api/v2/task/${taskID}/comment`;
             const options = getRequestOptions();
             const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
             const CLICKUP_AUTHENTICATION = clickupSecrets.Authentication;
@@ -116,11 +119,15 @@ export class ClickUpTask{
                 "comment_text" : comment,
                 "notify_all"   : true
             };
-            await needle("post", createTaskUrl, obj, options);
-            console.log("comment has been added in the task");
+            const response = await needle("post", commentUrl, obj, options);
+            if (response.statusCode !== 200) {
+                console.log(`[ClickUp] Failed to post comment on task ${taskID}. Status: ${response.statusCode}, Body:`, JSON.stringify(response.body));
+            } else {
+                console.log(`[ClickUp] Comment added to task ${taskID}`);
+            }
         }
         catch (error){
-            console.log(error);
+            console.log(`[ClickUp] Error posting comment on task ${taskID}:`, error.message || error);
         }
 
     }
@@ -149,10 +156,13 @@ export class ClickUpTask{
                 obj.priority = priority;
             }
 
-            await needle("put", updateTaskUrl, obj, options);
+            const response = await needle("put", updateTaskUrl, obj, options);
+            if (response.statusCode !== 200) {
+                console.log(`[ClickUp] Failed to update task ${taskID}. Status: ${response.statusCode}, Body:`, JSON.stringify(response.body));
+            }
         }
         catch (error){
-            console.log(error);
+            console.log(`[ClickUp] Error updating task ${taskID}:`, error.message || error);
         }
 
     }

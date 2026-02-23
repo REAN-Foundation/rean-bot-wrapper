@@ -201,7 +201,7 @@ export class ClientWebhookController {
                     return res.status(200).send(response);
                 }
                 else {
-                    this.handelRequestWithoutConsent(
+                    await this.handelRequestWithoutConsent(
                         firstTimeUser,
                         patientUSerId,
                         req,
@@ -234,9 +234,9 @@ export class ClientWebhookController {
                 const results = await this.registrationService.getPatientUserId(req.params.channel, userPlatformId, platformUserName);
                 await this.registrationService.wrapperRegistration(entityManagerProvider,userPlatformId, platformUserName,req.params.channel,results.patientUserId);
             }
-            this._platformMessageService.handleMessage(reqVariable, req.params.channel);
+            await this._platformMessageService.handleMessage(reqVariable, req.params.channel);
         } catch (error) {
-            console.log(error);
+            console.log("[WebhookController] Error in handelRequestWithoutConsent:", error);
         }
     }
 
