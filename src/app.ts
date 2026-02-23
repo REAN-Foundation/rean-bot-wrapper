@@ -89,7 +89,7 @@ export default class Application {
 
             if (whatsappToken) {
                 await whatsapp.setWebhook(clientName);
-                console.log("Whatsapp webhook is set");
+                console.log(`Whatsapp webhook is set for client ${clientName}`);
             }
             else {
                 console.log("whatsapp webhook need not to be set");

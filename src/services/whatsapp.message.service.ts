@@ -66,11 +66,13 @@ export class WhatsappMessageService extends CommonWhatsappService {
 
         return new Promise(async (resolve, reject) => {
             const baseUrl = process.env.BASE_URL;
-            const webhookUrl = `${baseUrl}/v1/${clientName}/whatsapp/${this.clientAuthenticator.urlToken}/receive`;
+            const urlToken = await this.clientAuthenticator.urlToken;
+            const headerToken = await this.clientAuthenticator.headerToken;
+            const webhookUrl = `${baseUrl}/v1/${clientName}/whatsapp/${urlToken}/receive`;
             const postData = JSON.stringify({
                 'url'     : webhookUrl,
                 "headers" : {
-                    "authentication" : this.clientAuthenticator.headerToken
+                    "authentication" : headerToken
                 }
             });
             const apiKey = process.env.WHATSAPP_LIVE_API_KEY;
