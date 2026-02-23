@@ -20,8 +20,9 @@ export class ClickUpAuthenticator implements clientAuthenticator{
         throw new Error('Method not implemented.');
     }
 
-    authenticate(req: any) {
-        if (this.urlToken === req.params.unique_token){
+    async authenticate(req: any) {
+        const urlToken = await this.urlToken();
+        if (urlToken === req.params.unique_token){
             return;
         }
         throw new Error('Unable to authenticate.');

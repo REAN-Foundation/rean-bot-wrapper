@@ -98,7 +98,7 @@ export class ClickUpMessageService implements platformServiceInterface {
         else if (requestBody.event === "taskStatusUpdated") {
             const status = requestBody.history_items[0].after.status;
             console.log("status after", status);
-            const qAServiceFlag = this.clientEnvironmentProviderService.getClientEnvironmentVariable("QaService") ?? false;
+            const qAServiceFlag = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("QaService") ?? false;
             if (status === "complete"){
                 if (qAServiceFlag ) {
                     this.eventStatusUpdated(requestBody);
@@ -154,12 +154,12 @@ export class ClickUpMessageService implements platformServiceInterface {
             const contactMail = "example@gmail.com";
             const contactList =
             (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
-            let personContactList = await contactList.findOne({ where: { cmrCaseTaskID:  requestBody.task_id } });
+            let personContactList = await contactList.findOne({ where: { cmrCaseTaskID: requestBody.task_id } });
             if (!personContactList){
-                personContactList = await contactList.findOne({ where: { cmrChatTaskID:  requestBody.task_id } });
+                personContactList = await contactList.findOne({ where: { cmrChatTaskID: requestBody.task_id } });
             }
             let textToUser = `As our expert have provided their insight, we are closing the ticket. If you are still unsatisfied with the answer provided, contact us at ${contactMail}`;
-            if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_TICKET_CLOSE_RESPONSE_MESSAGE")){
+            if (await this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_TICKET_CLOSE_RESPONSE_MESSAGE")){
                 textToUser = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_TICKET_CLOSE_RESPONSE_MESSAGE");
             }
             console.log("textToUser", textToUser);
