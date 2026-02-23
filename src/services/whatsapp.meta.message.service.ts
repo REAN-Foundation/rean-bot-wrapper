@@ -48,16 +48,16 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
     async postRequestMessages(postdata) {
         return new Promise(async(resolve,reject) =>{
             try {
-                console.log("NAME",this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name"));
+                console.log("NAME", await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name"));
                 const options = getRequestOptions();
                 const metaSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("meta");
-                const token = metaSecrets.ApiToken;
+                const token = metaSecrets?.ApiToken;
                 options.headers['Content-Type'] = 'application/json';
                 options.headers['Authorization'] = `Bearer ${token}`;
-                const hostname = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
+                const hostname = process.env.META_WHATSAPP_HOST;
                 const version = process.env.WHATSAPP_API_VERSION;
                 const whatsappSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("whatsapp");
-                const whatsappPhoneNumberId = whatsappSecrets.PhoneNumberId;
+                const whatsappPhoneNumberId = whatsappSecrets?.PhoneNumberId;
                 const path = `/${version}/${whatsappPhoneNumberId}/messages`;
                 const apiUrl_meta = hostname + path;
                 console.log("The request sent to whatsapp has body: ", JSON.stringify(postdata));
@@ -102,10 +102,8 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
 
                     //improve this DB query
                     if (needleResp.statusCode === 200) {
-                        const qaServiceSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("qaService");
-                        const qaServiceValue = qaServiceSetting?.Value;
-                        console.log(`QA_SERVICE Flag: ${qaServiceValue}`);
-                        if (qaServiceValue) {
+                        const qaService = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("QnA");
+                        if (qaService) {
                             if (response_format.name !== "ReanCare") {
                                 console.log("Providing QA service through clickUp");
                                 await this.logsQAService.logMesssages(response_format);

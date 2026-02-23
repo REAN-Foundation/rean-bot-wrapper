@@ -98,7 +98,7 @@ export class ClickUpMessageService implements platformServiceInterface {
         else if (requestBody.event === "taskStatusUpdated") {
             const status = requestBody.history_items[0].after.status;
             console.log("status after", status);
-            const qAServiceFlag = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("QaService") ?? false;
+            const qAServiceFlag = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("QnA") ?? false;
             if (status === "complete"){
                 if (qAServiceFlag ) {
                     await this.eventStatusUpdated(requestBody);

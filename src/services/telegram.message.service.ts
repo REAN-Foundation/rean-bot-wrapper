@@ -44,7 +44,7 @@ export class TelegramMessageService implements platformServiceInterface{
         if (!telegramSecrets) {
             throw new Error("Telegram secrets not found. Ensure the client environment is configured with 'telegram' secrets.");
         }
-        const telegramBotToken = telegramSecrets.BotToken;
+        const telegramBotToken = telegramSecrets?.BotToken;
         this._telegram = new TelegramBot(telegramBotToken);
         this.init();
     }
@@ -80,7 +80,7 @@ export class TelegramMessageService implements platformServiceInterface{
 
     async setWebhook(clientName){
         const telegramSecrets = await this.environmentProviderService.getClientEnvironmentVariable("telegram");
-        const telegramBotToken = telegramSecrets.BotToken;
+        const telegramBotToken = telegramSecrets?.BotToken;
         this._telegram = new TelegramBot(telegramBotToken);
         const urlToken = await this.clientAuthenticator.urlToken();
         const webhookUrl = process.env.BASE_URL + '/v1/' + clientName + '/telegram/' + urlToken + '/receive';
@@ -167,12 +167,10 @@ export class TelegramMessageService implements platformServiceInterface{
             if (type) {
                 const classmethod = `send${type}Response`;
                 const telegramSecrets = await this.environmentProviderService.getClientEnvironmentVariable("telegram");
-                const telegramBotToken = telegramSecrets.BotToken;
+                const telegramBotToken = telegramSecrets?.BotToken;
                 const telegram = new TelegramBot(telegramBotToken);
-                const qaServiceSetting = await this.environmentProviderService.getClientEnvironmentVariable("qaService");
-                const qaServiceValue = qaServiceSetting?.Value;
-                console.log(`QA_SERVICE Flag: ${qaServiceValue}`);
-                if (qaServiceValue) {
+                const qaService = await this.environmentProviderService.getClientEnvironmentVariable("QnA");
+                if (qaService) {
                     if (response_format.name !== "ReanCare") {
                         console.log("Providing QA service through clickUp");
                         await this.logsQAService.logMesssages(response_format);

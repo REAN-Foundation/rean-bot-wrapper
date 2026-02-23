@@ -87,10 +87,8 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
                     }
 
                 }
-                const qaServiceSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("qaService");
-                const qaServiceValue = qaServiceSetting?.Value;
-                console.log(`QA_SERVICE Flag: ${qaServiceValue}`);
-                if (qaServiceValue){
+                const qaService = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("QnA");
+                if (qaService){
                     if (response_format.name !== "ReanCare") {
                         Logger.instance().log("Providing QA service through clickUp");
                         await this.logsQAService.logMesssages(response_format);
@@ -124,7 +122,7 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
                     console.log(
                         "THIS HTML TO IMAGE SUPPORT HAS BEEN DEPRECATED"
                     );
-                    
+
                     // METHOD BEING DEPRECATED DUE TO PACKAGE SUPPORT ISSUES
                     // const uploadImageName = await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
                     // const vacinationImageFile = await this.awsS3manager.uploadFile(uploadImageName);
