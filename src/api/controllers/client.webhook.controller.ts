@@ -364,7 +364,7 @@ export class ClientWebhookController {
             let logMessage = '';
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
-            const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
+            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
             const messageStatusRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(MessageStatus);
             this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
