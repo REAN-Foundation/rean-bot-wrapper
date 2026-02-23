@@ -29,7 +29,7 @@ export class ClickUpMessageService implements platformServiceInterface {
     public res;
 
     async handleMessage(requestBody: any) {
-        this.clickupEventHandler(requestBody);
+        await this.clickupEventHandler(requestBody);
 
     }
 
@@ -90,7 +90,7 @@ export class ClickUpMessageService implements platformServiceInterface {
 
                     if (tagObj) {
                         const tag = "@everyone";
-                        this.eventComment(requestBody, tag);
+                        await this.eventComment(requestBody, tag);
                     }
                 }
             }
@@ -101,7 +101,7 @@ export class ClickUpMessageService implements platformServiceInterface {
             const qAServiceFlag = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("QaService") ?? false;
             if (status === "complete"){
                 if (qAServiceFlag ) {
-                    this.eventStatusUpdated(requestBody);
+                    await this.eventStatusUpdated(requestBody);
                 }
             }
         }
