@@ -38,6 +38,7 @@ export class EnrollPatientService {
             if (!isRemindersLoaded) {
                 const ReanBackendBaseUrl = process.env.REAN_APP_BACKEND_BASE_URL;
                 const url = `${ReanBackendBaseUrl}care-plans/patients/${patientUserId}/enroll`;
+                const tenantName = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
                 const obj1 = {
                     Provider  : "REAN_BW",
                     PlanName  : "Patient messages",
@@ -45,7 +46,7 @@ export class EnrollPatientService {
                     StartDate : new Date().toISOString()
                         .split('T')[0],
                     Channel    : this.getPatientInfoService.getReminderType(channel),
-                    TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name")
+                    TenantName : tenantName
                 };
 
                 const resp = await needle('post', url, obj1, options);

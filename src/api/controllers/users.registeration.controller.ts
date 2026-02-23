@@ -148,7 +148,7 @@ export class UserRegistrationController{
         try {
             const userDetails :  UserDetailsDomainModel = await this._validator.validateUserDetails(request);
             const clientEnvironmentProviderService = request.container.resolve(ClientEnvironmentProviderService);
-            const WelcomeMessageTemplateNameJson = clientEnvironmentProviderService.getClientEnvironmentVariable("WELCOME_MESSAGE_TEMPLATE_NAMES");
+            const WelcomeMessageTemplateNameJson = await clientEnvironmentProviderService.getClientEnvironmentVariable("WELCOME_MESSAGE_TEMPLATE_NAMES");
             const payload: Record<string, any> = {
                 variables          : [],
                 templateName       : JSON.parse(WelcomeMessageTemplateNameJson)[userDetails.languageCode],

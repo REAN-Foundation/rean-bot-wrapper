@@ -29,7 +29,7 @@ export class OpenAIResponseService {
             const openai = new OpenAI({
                 // apiKey : process.env.OPENAI_API_KEY // This is also the default, can be omitted
                 // apiKey : await this.clientEnvironment.getClientEnvironmentVariable("OpenAiApiKey")
-                apiKey : apiKeySetting.Value
+                apiKey : apiKeySetting?.Value
             });
 
             // const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironment)).getRepository(ChatMessage);

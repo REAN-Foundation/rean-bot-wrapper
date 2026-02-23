@@ -22,7 +22,7 @@ export class SystemGeneratedMessagesService {
             if (message) {
                 systemGeneratedMessage = message.dataValues.messageContent;
             } else {
-                systemGeneratedMessage = this.clientEnvironmentProviderService.getClientEnvironmentVariable(name);
+                systemGeneratedMessage = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             }
             return systemGeneratedMessage;
         } catch (error) {

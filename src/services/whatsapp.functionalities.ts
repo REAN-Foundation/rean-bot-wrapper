@@ -208,7 +208,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         const metaSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("meta");
         return new Promise<string>((resolve, reject) => {
 
-            const token = metaSecrets.ApiToken;
+            const token = metaSecrets?.ApiToken;
             const headers = {
                 headers : {
                     'Authorization' : `Bearer ${token}`,
@@ -302,10 +302,10 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         try {
             const options = getRequestOptions();
             const metaSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("meta");
-            const token = metaSecrets.ApiToken;
+            const token = metaSecrets?.ApiToken;
             options.headers['Content-Type'] = 'application/json';
             options.headers['Authorization'] = `Bearer ${token}`;
-            const hostname = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
+            const hostname = process.env.META_WHATSAPP_HOST;
             const version = process.env.WHATSAPP_API_VERSION;
             const path = `/${version}/${mediaId}`;
             const apiUrl_meta = hostname + path;

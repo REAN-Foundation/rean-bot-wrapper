@@ -27,7 +27,7 @@ export class ClickUpTask{
             }
             else {
 
-                listID = clickupSecrets.ListId;
+                listID = clickupSecrets?.ListId;
             }
             const createTaskUrl = `https://api.clickup.com/api/v2/list/${listID}/task`;
             const options = getRequestOptions();
@@ -89,7 +89,7 @@ export class ClickUpTask{
 
             const headers = form.getHeaders();
             const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
-            headers.Authorization = clickupSecrets.Authentication;
+            headers.Authorization = clickupSecrets?.Authentication;
 
             await axios({
                 method : 'post',
@@ -112,7 +112,7 @@ export class ClickUpTask{
             const commentUrl = `https://api.clickup.com/api/v2/task/${taskID}/comment`;
             const options = getRequestOptions();
             const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
-            const CLICKUP_AUTHENTICATION = clickupSecrets.Authentication;
+            const CLICKUP_AUTHENTICATION = clickupSecrets?.Authentication;
             options.headers["Authorization"] =  CLICKUP_AUTHENTICATION;
             options.headers["Content-Type"] = `application/json`;
             const obj = {
@@ -137,7 +137,7 @@ export class ClickUpTask{
             const updateTaskUrl = `https://api.clickup.com/api/v2/task/${taskID}`;
             const options = getRequestOptions();
             const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
-            const CLICKUP_AUTHENTICATION = clickupSecrets.Authentication;
+            const CLICKUP_AUTHENTICATION = clickupSecrets?.Authentication;
             options.headers["Authorization"] =  CLICKUP_AUTHENTICATION;
             options.headers["Content-Type"] = `application/json`;
             const obj = {
@@ -171,13 +171,13 @@ export class ClickUpTask{
         try {
             const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
             const clickupTagsSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("ClickupTags");
-            const clientTags = clickupTagsSetting.Value;
+            const clientTags = clickupTagsSetting?.Value;
             if (clientTags) {
                 const exists = clientTags.includes(intent);
                 if (exists) {
                     const updateTaskUrl = `https://api.clickup.com/api/v2/task/${taskID}/tag/${intent}`;
                     const options = getRequestOptions();
-                    const CLICKUP_AUTHENTICATION = clickupSecrets.Authentication;
+                    const CLICKUP_AUTHENTICATION = clickupSecrets?.Authentication;
                     options.headers["Authorization"] =  CLICKUP_AUTHENTICATION;
                     options.headers["Content-Type"] = `application/json`;
                     const response = await needle("post", updateTaskUrl, {}, options);
@@ -194,7 +194,7 @@ export class ClickUpTask{
             const updateTaskUrl = `https://api.clickup.com/api/v2/task/${taskID}/tag/${intent}`;
             const options = getRequestOptions();
             const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
-            const CLICKUP_AUTHENTICATION = clickupSecrets.Authentication;
+            const CLICKUP_AUTHENTICATION = clickupSecrets?.Authentication;
             options.headers["Authorization"] =  CLICKUP_AUTHENTICATION;
             options.headers["Content-Type"] = `application/json`;
             const response = await needle("post", updateTaskUrl, {}, options);
@@ -209,7 +209,7 @@ export class ClickUpTask{
             const getTaskUrl = `https://api.clickup.com/api/v2/task/${taskID}`;
             const options = getRequestOptions();
             const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
-            const CLICKUP_AUTHENTICATION = clickupSecrets.Authentication;
+            const CLICKUP_AUTHENTICATION = clickupSecrets?.Authentication;
             options.headers["Authorization"] = CLICKUP_AUTHENTICATION;
             options.headers["Content-Type"] = "application/json";
 

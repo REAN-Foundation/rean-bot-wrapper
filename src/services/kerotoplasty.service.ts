@@ -26,7 +26,7 @@ export class kerotoplastyService {
         if (eventObj) {
             let symptoms: string[] = eventObj.body.queryResult.parameters.symptoms;
             const additionalInfoSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("AdditionalIfoSettings");
-            const additionalInfo = additionalInfoSetting['Value'] ? JSON.parse(additionalInfoSetting['Value']) : null;
+            const additionalInfo = additionalInfoSetting?.Value;
             const parsedInfo = JSON.parse(additionalInfo);
 
             // Variables set for cache
@@ -149,7 +149,7 @@ export class kerotoplastyService {
             EMRNumber = EMRNumber.toUpperCase();
         }
         const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
-        const ClickupListId = clickupSecrets.CaseListId;
+        const ClickupListId = clickupSecrets?.CaseListId;
         if (intent === "appointment-followconditionIdentification"){
             await contactList.update({ repetitionFlag: "True" }, { where: { mobileNumber: userId } });
         }
@@ -228,7 +228,7 @@ export class kerotoplastyService {
         }
 
         const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
-        const ClickupListId = clickupSecrets.CaseListId;
+        const ClickupListId = clickupSecrets?.CaseListId;
         if (taskId){
             await this.clickUpTask.updateTask(taskId,null,user_details,EMRNumber, "Appointment");
             await this.clickUpTask.postCommentOnTask(taskId,symptomComment);

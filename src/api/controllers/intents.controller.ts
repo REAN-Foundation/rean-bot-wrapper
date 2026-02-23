@@ -113,7 +113,7 @@ export class IntentsController {
 
     private async getContextualServices(request) {
         const clientEnvironmentProvider = request.container.resolve(ClientEnvironmentProviderService);
-        const clientName = clientEnvironmentProvider.getClientEnvironmentVariable("Name");
+        const clientName = await clientEnvironmentProvider.getClientEnvironmentVariable("Name");
 
         const entityManagerProvider = request.container.resolve(EntityManagerProvider);
         const repository = (

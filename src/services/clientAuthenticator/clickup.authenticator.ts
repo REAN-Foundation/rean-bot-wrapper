@@ -13,7 +13,7 @@ export class ClickUpAuthenticator implements clientAuthenticator{
 
     async urlToken(): Promise<any> {
         const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
-        return clickupSecrets.WebhookClientUrlToken;
+        return clickupSecrets?.WebhookClientUrlToken;
     }
 
     get headerToken(): any {

@@ -32,8 +32,8 @@ export class DFBackup {
     }
 
     async getIntents() {
-        const dfSettings = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DialogflowBotGcpProjectCredentials");
-        const dfBotGCPCredentials = dfSettings ? JSON.parse(dfSettings.Value) : null;
+        const dfSettings = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DialogflowSettings");
+        const dfBotGCPCredentials = dfSettings?.Value.DialogflowBotGcpProjectCredentials;
         const GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
         const dialogflowApplicationCredentialsobj = dfBotGCPCredentials ? dfBotGCPCredentials : GCPCredentials;
         const options = {

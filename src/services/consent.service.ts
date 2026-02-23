@@ -148,7 +148,7 @@ export class ConsentService {
     async handleConsentNoreply(userId,req): Promise<any> {
         try {
             const clientEnvironmentProviderService = await req.container.resolve(ClientEnvironmentProviderService);
-            const clientName = await  clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
+            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             console.log(clientName);
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
             const userConsentRepository =
@@ -176,7 +176,7 @@ export class ConsentService {
     async handleConsentRequest(req,userId,consentReply,languageCode,consentRepository,res,buttonmessageType){
         try {
             const clientEnvironmentProviderService = await req.container.resolve(ClientEnvironmentProviderService);
-            const clientName = await  clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
+            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             console.log(clientName);
 
             // const entityManagerProvider = req.container.resolve(EntityManagerProvider);
@@ -187,12 +187,14 @@ export class ConsentService {
             if (consentReply === "consent_no"){
                 console.log("No Consent is Given");
                 await UserConsentRepo.updateUserConsent(req.container,userId,"false");
-                const message =  clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_NO_MESSAGE");
+                const message =  await clientEnvironmentProviderService.getClientEnvironmentVariable("CONSENT_NO_MESSAGE");
                 const messageType = "text";
                 this.sendCustomMessage( this._platformMessageService, message, messageType, userId , payload);
             }
             else if (consentReply === "consent_changeLanguge"){
-                const consentMessages: ConsentMessageWithLanguage[] = await TenantSettingService.getConsentSetting(clientName, clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"), clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL"));
+                const apiKey = process.env.REANCARE_API_KEY;
+                const reancareBaseUrl = process.env.REAN_APP_BACKEND_BASE_URL;
+                const consentMessages: ConsentMessageWithLanguage[] = await TenantSettingService.getConsentSetting(clientName, apiKey, reancareBaseUrl);
                 const buttonArray = [];
                 consentMessages.forEach(async consent=>
                 {

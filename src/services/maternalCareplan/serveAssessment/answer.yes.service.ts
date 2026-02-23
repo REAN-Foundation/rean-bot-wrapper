@@ -49,7 +49,7 @@ export class AnswerYesMsgService {
         } else {
             chatMessageId = eventObj.body.originalDetectIntentRequest.payload.contextId;
         }
-        const userReplyJsonUrl = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("ASSESSMENT_USER_REPLY_JSON_URL");
+        const userReplyJsonUrl = process.env.ASSESSMENT_USER_REPLY_JSON_URL;
         if (userReplyJsonUrl)
         {
             const userResponses = await this.fetchJsonFile(userReplyJsonUrl);

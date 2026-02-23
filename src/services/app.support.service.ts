@@ -72,7 +72,7 @@ export class platformMessageService implements platformServiceInterface{
         const intent = response.message_from_nlp.getIntent();
 
         const reaponse_message = { name: null,platform: "Rean_Support",chat_message_id: null,direction: "Out",message_type: message_type,intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: reansupport_Id, messageText: response.processed_message[0] };
-        const qaService = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("QaService");
+        const qaService = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("QnA");
         if (qaService) {
             if (reaponse_message.name !== "ReanCare") {
                 console.log("Providing QA service through clickUp");

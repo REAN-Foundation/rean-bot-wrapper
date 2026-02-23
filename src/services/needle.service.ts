@@ -70,11 +70,11 @@ export class NeedleService {
     }
 
     async needleRequestForWhatsappMeta(method: string, endPoint:string, postDataMeta?, payload?){
-        const whatsappHost = this.environmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
+        const whatsappHost = process.env.META_WHATSAPP_HOST;
         const version = process.env.WHATSAPP_API_VERSION;
         const options = getRequestOptions();
         const metaSecrets = await this.environmentProviderService.getClientEnvironmentVariable("meta");
-        const whatsappToken = metaSecrets.ApiToken;
+        const whatsappToken = metaSecrets?.ApiToken;
         options.headers['Content-Type'] = 'application/json';
         options.headers['Authorization'] = `Bearer ${whatsappToken}`;
         const whatsappSecrets = await this.environmentProviderService.getClientEnvironmentVariable("whatsapp");
@@ -104,7 +104,7 @@ export class NeedleService {
         const telegramHost = process.env.TELEGRAM_HOST;
         const options = getRequestOptions();
         const telegramSecrets = await this.environmentProviderService.getClientEnvironmentVariable("telegram");
-        const telegramBotToken = telegramSecrets.BotToken;
+        const telegramBotToken = telegramSecrets?.BotToken;
         const url = `/bot${telegramBotToken}/${endPoint}`;
         const telegramApi = telegramHost + url;
         console.log("The telegram URL is:" + telegramApi);

@@ -13,7 +13,7 @@ export class SlackAuthenticator implements clientAuthenticator{
 
     async urlToken(): Promise<any> {
         const slackSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("slack");
-        return slackSecrets.WebhookClientUrlToken;
+        return slackSecrets?.WebhookClientUrlToken;
         //
         // return this.clientEnvironmentProviderService.getClientEnvironmentVariable("WEBHOOK_SLACK_CLIENT_URL_TOKEN");
     }

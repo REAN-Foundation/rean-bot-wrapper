@@ -13,7 +13,7 @@ export class WhatsappAuthenticator implements clientAuthenticator{
 
     async urlToken(): Promise<any> {
         const whatsappSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("whatsapp");
-        return whatsappSecrets.WebhookClientUrlToken;
+        return whatsappSecrets?.WebhookClientUrlToken;
         //
         //
         //return this.clientEnvironmentProviderService.getClientEnvironmentVariable("WEBHOOK_WHATSAPP_CLIENT_URL_TOKEN");
@@ -22,7 +22,7 @@ export class WhatsappAuthenticator implements clientAuthenticator{
 
     async headerToken(): Promise<any> {
         const whatsappSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("whatsapp");
-        return whatsappSecrets.WebhookClientHeaderToken;
+        return whatsappSecrets?.WebhookClientHeaderToken;
         //return this.clientEnvironmentProviderService.getClientEnvironmentVariable("WEBHOOK_WHATSAPP_CLIENT_HEADER_TOKEN");
     }
 

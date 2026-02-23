@@ -62,7 +62,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         if (preferredLanguage !== "null"){
             if (file_path) {
                 const telegramSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("telegram");
-                const telegramBotToken = telegramSecrets.BotToken;
+                const telegramBotToken = telegramSecrets?.BotToken;
                 const ConvertedToText = await this.speechtotext.SendSpeechRequest('https://api.telegram.org/file/bot' + telegramBotToken + '/' + response.result.file_path, "telegram", preferredLanguage);
                 if (ConvertedToText) {
                     const messagetoDialogflow = this.inputMessageFormat(messageObj);
@@ -101,7 +101,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
             const photoFileId = messageObj.getPhotoFileId();
             const telegramMediaData = await this.GetTelegramMedia(photoFileId);
             const telegramSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("telegram");
-            const telegramBotToken = telegramSecrets.BotToken;
+            const telegramBotToken = telegramSecrets?.BotToken;
 
             const filePath = await this.downloadTelegramMedia(
                 `https://api.telegram.org/file/bot${telegramBotToken}/${telegramMediaData.result.file_path}`,
@@ -148,7 +148,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
         response = await this.GetTelegramMedia(messageObj.getdocumentFileId());
         if (response.result.file_path){
             const telegramSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("telegram");
-            const telegramBotToken = telegramSecrets.BotToken;
+            const telegramBotToken = telegramSecrets?.BotToken;
             const filePath = await this.downloadTelegramDocument('https://api.telegram.org/file/bot' + telegramBotToken + '/' + response.result.file_path, "document");
             const location = filePath;
             const messagetoDialogflow = this.inputMessageFormat(messageObj);
@@ -160,7 +160,7 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
 
     GetTelegramMedia = async (fileid: string): Promise<any> => {
         const telegramSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("telegram");
-        const telegramMediaPath = telegramSecrets.MediaPathUrl;
+        const telegramMediaPath = telegramSecrets?.MediaPathUrl;
         // const telegramMediaPath = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_MEDIA_PATH_URL");
 
         const options = {

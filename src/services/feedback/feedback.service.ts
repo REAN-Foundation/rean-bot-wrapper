@@ -40,7 +40,7 @@ export  class FeedbackService implements feedbackInterface {
                 const payload = eventObj.body.originalDetectIntentRequest.payload;
                 const userId = payload.userId;
                 const username = payload.userName;
-                const client_name = clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
+                const client_name = await clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
                 const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(ChatMessage);
                 let responseChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: userId } });
                 await chatMessageRepository.update({ humanHandoff: "false", feedbackType: "Negative Feedback" }, { where: { id: responseChatMessage[responseChatMessage.length - 1].id } });
@@ -73,7 +73,7 @@ export  class FeedbackService implements feedbackInterface {
                 else {
                     // eslint-disable-next-line init-declarations
                     const description = `**User Details**\n\n- **User Platform ID**: ${userId}\n- **Username**: ${username}`;
-                    const preferredSupportChannel = clientEnvironmentProviderService.getClientEnvironmentVariable("SupportChannel");
+                    const preferredSupportChannel = await clientEnvironmentProviderService.getClientEnvironmentVariable("SupportChannel");
                     if (payload.contextId){
                         responseChatMessage = await chatMessageRepository.findAll({ where: { responseMessageID: payload.contextId } });
                         await this.supportChannel(preferredSupportChannel,responseChatMessage,messageContent,null,"Negative Feedback",description, userId);
@@ -167,7 +167,7 @@ export  class FeedbackService implements feedbackInterface {
                 if (customPositiveFeedbackMessage) {
                     replyToSend = customPositiveFeedbackMessage;
                 } else {
-                    const feedbackMessageSetting = clientEnvironmentProviderService.getClientEnvironmentVariable("FeedbackMessage");
+                    const feedbackMessageSetting = await clientEnvironmentProviderService.getClientEnvironmentVariable("FeedbackMessage");
                     replyToSend = feedbackMessageSetting.Value.PositiveFeedbackMessage;
                 }
 
@@ -212,7 +212,7 @@ export  class FeedbackService implements feedbackInterface {
     supportChannel = async(preferredSupportChannel, responseChatMessage, messageContent, topic = null,tag = null,description = null, userId = null) => {
         if (preferredSupportChannel === "ClickUp"){
             const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
-            const listID = clickupSecrets.IssuesListId;
+            const listID = clickupSecrets?.IssuesListId;
             const chatMessageRepository = await (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
             const ContactListRepository = await (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
 

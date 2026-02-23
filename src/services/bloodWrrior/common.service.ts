@@ -96,13 +96,14 @@ export class BloodWarriorCommonService {
         try {
             let result = null;
             const url = `care-plans/patients/${donorUserId}/enroll`;
+            const tenantName = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             const obj = {
                 Provider   : "REAN_BW",
                 PlanName   : "Donor messages",
                 PlanCode   : "Donor-Reminders",
                 StartDate  : bloodTransfusionDate.toISOString().split("T")[0],
                 Channel    : this.getPatientInfoService.getReminderType(channel),
-                TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name")
+                TenantName : tenantName
             };
             result = await this.needleService.needleRequestForREAN("post", url, null, obj);
             if (result.HttpCode === 201) {

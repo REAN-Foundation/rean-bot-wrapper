@@ -57,7 +57,7 @@ export class kobotoolboxController{
     async sendFirstWelcomeMessage(request,UD){
         try {
             const clientEnvironmentProviderService = request.container.resolve(ClientEnvironmentProviderService);
-            const WelcomeMessageTemplateNameJson = clientEnvironmentProviderService.getClientEnvironmentVariable("WELCOME_MESSAGE_TEMPLATE_NAMES");
+            const WelcomeMessageTemplateNameJson = await clientEnvironmentProviderService.getClientEnvironmentVariable("WELCOME_MESSAGE_TEMPLATE_NAMES");
             const payload: Record<string, any> = {
                 variables          : [],
                 templateName       : JSON.parse(WelcomeMessageTemplateNameJson)["en"],

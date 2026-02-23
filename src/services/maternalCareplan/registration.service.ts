@@ -34,6 +34,7 @@ export class RegistrationService {
             const options = await this.getHeaders.getHeaders();
             const ReanBackendBaseUrl = process.env.REAN_APP_BACKEND_BASE_URL;
             const patientRegisterUrl = `${ReanBackendBaseUrl}patients`;
+            const tenantName = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
 
             const patientDomainModel = {
                 Phone      : phoneNumber,
@@ -42,7 +43,7 @@ export class RegistrationService {
                 LastName   : name.split(" ")[1],
                 Gender     : "Female",
                 BirthDate  : birthdate.split("T")[0],
-                TenantCode : this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name")
+                TenantCode : tenantName
             };
 
             const patientUserId = null;
@@ -110,6 +111,7 @@ export class RegistrationService {
 
         const channel = eventObj.body.originalDetectIntentRequest.payload.source;
         const enrollmentUrl = `care-plans/patients/${patientUserId}/enroll`;
+        const tenantName = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
         const obj1 = {
             Provider  : "REAN",
             PlanName  : "Maternity Careplan",
@@ -118,7 +120,7 @@ export class RegistrationService {
                 .split('T')[0],
             DayOffset  : (days(date_1, date_2) - 28),
             Channel    : this.getPatientInfoService.getReminderType(channel),
-            TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name")
+            TenantName : tenantName
         };
         const resp = await this.needleService.needleRequestForREAN("post", enrollmentUrl, null, obj1);
 

@@ -29,7 +29,8 @@ export class translateService{
     private translateGlossaryId: string;
 
     async getDialogflowLanguage(){
-        const defaultLanguageCode = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DIALOGFLOW_DEFAULT_LANGUAGE_CODE");
+        const dialogflowLanguageSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DialogflowSettings");
+        const defaultLanguageCode = dialogflowLanguageSetting?.Value.DefaultLanguageCode ?? "en";
         if (defaultLanguageCode){
             return defaultLanguageCode;
         }

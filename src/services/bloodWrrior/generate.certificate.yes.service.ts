@@ -119,13 +119,14 @@ export class GenerateCertificateYesService {
             //load patient 2nd reminder to ask whether donation has completed or not
             const reminderDate = TimeHelper.addDuration(new Date(body.Donor.LastDonationDate), 5, DurationType.Day);
             const apiURL = `care-plans/patients/${body.PatientUserId}/enroll`;
+            const tenantName = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             const obj = {
                 Provider   : "REAN_BW",
                 PlanName   : "Patient donation confirmation message",
                 PlanCode   : "Patient-Donation-Confirmation",
                 StartDate  : reminderDate.toISOString().split('T')[0],
                 Channel    : this.getPatientInfoService.getReminderType(payload.source),
-                TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name")
+                TenantName : tenantName
             };
             await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
 

@@ -35,9 +35,9 @@ export class AppointmentUserReplyService {
                 raw: true
             });
             const appointment_id = appRecord ? appRecord.ParentActionId : null;
-            const docProcessBaseUrlSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DocumentProcessorBaseURL");
+            // const docProcessBaseUrlSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DocumentProcessorBaseURL");
 
-            const docProcessBaseURL = docProcessBaseUrlSetting.Value;
+            const docProcessBaseURL = process.env.DOCUMENT_PROCESSOR_BASE_URL;
 
             // let todayDate = new Date().toISOString()
             //     .split('T')[0];

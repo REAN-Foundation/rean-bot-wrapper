@@ -69,8 +69,9 @@ export class WhatsappPostResponseFunctionalities{
         const buttons = [];
         const numberOfButtons = (payload.fields.buttons.listValue.values).length;
         const languageForSession = await this.userLanguage.getPreferredLanguageofSession(response_format.sessionId);
-        const customTranslateSetting: boolean = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("FIX_LANGUAGE") === "true";
-        const listOfNoTranslateIntents = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("FIX_LANGUAGE_INTENTS") ?? [];
+        const fixLanguageSettings = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("FixLanguage");
+        const customTranslateSetting: boolean =  fixLanguageSettings?.Value.Enable === "true";
+        const listOfNoTranslateIntents = fixLanguageSettings?.Value.Intents ?? [];
         const intent = response_format.intent;
         for (let i = 0; i < numberOfButtons; i++){
             const id = payload.fields.buttons.listValue.values[i].structValue.fields.reply.structValue.fields.id.stringValue;

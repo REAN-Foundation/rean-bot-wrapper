@@ -41,7 +41,7 @@ export class TelegramPostResponseFunctionalities {
             voice   : response_format.messageBody
         };
         const telegramSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("telegram");
-        const botToken = telegramSecrets.BotToken;
+        const botToken = telegramSecrets?.BotToken;
         // const botToken = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN");
         const channelUrl = `https://api.telegram.org/bot${botToken}/sendVoice`;
 

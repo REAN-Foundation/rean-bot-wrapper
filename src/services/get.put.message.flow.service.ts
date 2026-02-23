@@ -389,7 +389,7 @@ export class MessageFlow{
                 raw        : true
             });
             const appointment_id = appRecord ? appRecord.ParentActionId : null;
-            const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
+            const docProcessBaseURL = process.env.DOCUMENT_PROCESSOR_BASE_URL;
 
             //let todayDate = new Date().toISOString()
             //  .split('T')[0];

@@ -32,7 +32,7 @@ export class consentController {
     recordConsentinfo = async(req, res)=>{
         try {
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
-            const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
+            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             console.log(clientName);
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
             const consentRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ConsentInfo);
@@ -64,7 +64,7 @@ export class consentController {
     readConsentinfo = async(req, res)=>{
         try {
             const clientEnvironmentProviderService = await req.container.resolve(ClientEnvironmentProviderService);
-            const clientName =await  clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
+            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             console.log(clientName);
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
             // eslint-disable-next-line max-len
@@ -94,7 +94,7 @@ export class consentController {
             }
             else {
                 const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
-                const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
+                const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
                 console.log(clientName);
                 const entityManagerProvider = req.container.resolve(EntityManagerProvider);
                 const consentRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ConsentInfo);
@@ -132,7 +132,7 @@ export class consentController {
     deleteConsentinfo = async(req, res)=>{
         try {
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
-            const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
+            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             console.log(clientName);
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
             const consentRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ConsentInfo);

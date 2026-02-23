@@ -127,7 +127,7 @@ export class SlackMessageService implements platformServiceInterface {
         if (!this.isInitialised){
             console.log("SMS delayedInitialisation");
             const slackSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("slack");
-            const slackToken = slackSecrets.TokenFeedback;
+            const slackToken = slackSecrets?.TokenFeedback;
             this.client = new WebClient(slackToken);
             this.channelID = slackSecrets.FeedbackChannelId;
             const slackSecret = slackSecrets.SecretFeedback;

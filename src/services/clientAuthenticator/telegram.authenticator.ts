@@ -16,7 +16,7 @@ export class TelegramAuthenticator implements clientAuthenticator{
 
     async urlToken(): Promise<any> {
         const telegramSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("telegram");
-        return telegramSecrets.WebhookClientUrlToken;
+        return telegramSecrets?.WebhookClientUrlToken;
         //
         //
         // return this.clientEnvironmentProviderService.getClientEnvironmentVariable("WEBHOOK_TELEGRAM_CLIENT_URL_TOKEN");
