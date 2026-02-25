@@ -37,9 +37,6 @@ export class AwsSecretsManager implements ISecretsService {
         const responseCredentials: any = await this.getCrossAccountCredentials();
         const region = process.env.region;
 
-        // const secretNameList = process.env.SECRET_NAME_LIST.split(',');
-        // const secretObjectList = [];
-
         // eslint-disable-next-line max-len
         const client = new AWS.SecretsManager({ region: region, accessKeyId: responseCredentials.accessKeyId, secretAccessKey: responseCredentials.secretAccessKey, sessionToken: responseCredentials.sessionToken });
 

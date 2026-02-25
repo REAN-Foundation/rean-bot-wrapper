@@ -46,9 +46,6 @@ export default class Application {
 
     private _checkCrossConnection: CheckCrossConnection = null;
 
-
-    // private clientsList = [];
-
     private constructor() {
         this._app = express();
         this._intentRegister = new IntentRegister();
@@ -78,7 +75,6 @@ export default class Application {
             const telegramToken = telegramSecrets ? telegramSecrets.BotToken : null;
             const whatsappSecrets = await clientEnvironmentProviderService.getClientEnvironmentVariable('meta');
             const whatsappToken = whatsappSecrets ? whatsappSecrets['ApiToken'] : null;
-            // const whatsappToken = await clientEnvironmentProviderService.getClientEnvironmentVariable('WHATSAPP_LIVE_API_KEY') || await clientEnvironmentProviderService.getClientEnvironmentVariable('META_API_TOKEN');
             console.log(telegramToken);
             if (telegramToken) {
                 await telegram.setWebhook(clientName);

@@ -36,16 +36,6 @@ export class TenantSecretsService {
                 const secretName = await this.getSecretName(tenantCode);
                 let secretObject = null;
                 secretObject = await this._secretsManager.getSecrets(secretName);
-
-                //  if (!secretObject) {
-                //      const oldSecretName = this.getOldSecretName(tenantCode);
-                //      console.log(`No secret found for ${secretName}. Trying old secret name ${oldSecretName}`);
-                //      secretObject = await this._secretsManager.getSecrets(oldSecretName);
-                //      if (!secretObject) {
-                //          console.warn(`No secret found for tenant ${tenantCode} with names ${secretName} or ${oldSecretName}. Skipping...`);
-                //          continue;
-                //      }
-                //  }
                 if (!secretObject) {
                     console.warn(`No secret found for tenant ${tenantCode} with name ${secretName}. Skipping...`);
                     continue;
@@ -66,28 +56,7 @@ export class TenantSecretsService {
 
             if (!secretObject.NAME) {
 
-                //  const parts = secretName.split("-");
-
-                //  // Always skip the first and last
-                //  const tenantParts = parts.slice(1, -1);
-
-                //  // Join back with "-" and uppercase
-                //  const derivedTenantName = tenantParts.join("-").toUpperCase();
-
                 let tenantSecrets = {...secretObject};
-                // for (const key in secretObject) {
-
-                //     // const secretKey = this.pascalToCapitalSnake(key);
-                //     if (typeof secretObject[key] === "object"){
-                //         tenantSecrets[key] = JSON.stringify(secretObject[key]);
-                //     }
-                //     else {
-                //         tenantSecrets[key] = secretObject[key];
-                //     }
-                //     console.log("loading this key", `${tenantCode}_${key}`);
-                // }
-                console.log("Bot Secrets: ", tenantSecrets);
-
                 if (this.apiKey && this.baseUrl) {
                     const botSettings = await TenantSettingService.getTenantSettingByCode(
                         tenantCode,
@@ -95,84 +64,8 @@ export class TenantSecretsService {
                         this.baseUrl);
 
                     if (botSettings) {
-                        // tenantSecrets = {...tenantSecrets, ...botSettings.Common, ...botSettings.ChatBot, ...botSettings.Custom, ...botSettings.Followup, ...botSettings.Forms, ...botSettings.Consent};
                         tenantSecrets = {...tenantSecrets, ...botSettings.Common, ...botSettings.ChatBot, ...botSettings.Custom, ...botSettings.Followup, ...botSettings.Forms};
                         console.log("Final tenant secrets:", tenantSecrets);
-                        // for (const key in botSettings.Common){
-
-                        //     // const secretKey = this.pascalToCapitalSnake(key);
-                        //     if (typeof botSettings.Common[key] === "object"){
-                        //         tenantSecrets[key] = JSON.stringify(botSettings.Common[key]);
-                        //     }
-                        //     else {
-                        //         tenantSecrets[key] = botSettings.Common[key];
-                        //     }
-
-                        //     console.log("loading this key", `${tenantCode}_${key}`);
-                        // }
-
-                        // for (const key in botSettings.ChatBot){
-                        //     if (typeof botSettings.ChatBot[key] === "object"){
-                        //         tenantSecrets[key] = JSON.stringify(botSettings.ChatBot[key]);
-                        //     }
-                        //     else {
-                        //         tenantSecrets[key] = botSettings.ChatBot[key];
-                        //     }
-
-                        //     console.log("loading this key", `${tenantCode}_${key}`);
-                        // }
-
-                        // for (const key in botSettings.Custom){
-
-                        //     // const secretKey = this.pascalToCapitalSnake(key);
-                        //     if (typeof botSettings.Custom[key] === "object"){
-                        //         tenantSecrets[key] = JSON.stringify(botSettings.Custom[key]);
-                        //     }
-                        //     else {
-                        //         tenantSecrets[key] = botSettings.Custom[key];
-                        //     }
-
-                        //     console.log("loading this key", `${tenantCode}_${key}`);
-                        // }
-
-                        // for (const key in botSettings.Followup){
-
-                        //     // const secretKey = this.pascalToCapitalSnake(key);
-                        //     if (typeof botSettings.Followup[key] === "object"){
-                        //         tenantSecrets[key] = JSON.stringify(botSettings.Followup[key]);
-                        //     }
-                        //     else {
-                        //         tenantSecrets[key] = botSettings.Followup[key];
-                        //     }
-
-                        //     console.log("loading this key", `${tenantCode}_${key}`);
-                        // }
-
-                        // for (const key in botSettings.Forms){
-
-                        //     // const secretKey = this.pascalToCapitalSnake(key);
-                        //     if (typeof botSettings.Forms[key] === "object"){
-                        //         tenantSecrets[key] = JSON.stringify(botSettings.Forms[key]);
-                        //     }
-                        //     else {
-                        //         tenantSecrets[key] = botSettings.Forms[key];
-                        //     }
-
-                        //     console.log("loading this key", `${tenantCode}_${key}`);
-                        // }
-
-                        // for (const key in botSettings.Consent){
-
-                        //     // const secretKey = this.pascalToCapitalSnake(key);
-                        //     if (typeof botSettings.Consent[key] === "object"){
-                        //         tenantSecrets[key] = JSON.stringify(botSettings.Consent[key]);
-                        //     }
-                        //     else {
-                        //         tenantSecrets[key] = botSettings.Consent[key];
-                        //     }
-
-                        //     console.log("loading this key", `${tenantCode}_${key}`);
-                        // }
                     }
 
                 } else {

@@ -19,8 +19,6 @@ export class CheckCrossConnection {
             clientEnvironmentProviderService.setClientName(urlParsed[2]);
             const whatsappSecrets = await clientEnvironmentProviderService.getClientEnvironmentVariable("whatsapp");
             const set_phone_number_id = whatsappSecrets?.PhoneNumberId;
-            console.log("Phone number id set in environment variable is " + set_phone_number_id);
-            // const set_phone_number_id = process.env[`${urlParsed[2]}_WHATSAPP_PHONE_NUMBER_ID`];
             if (urlParsed[5] === 'send'){
                 console.log("No cross connection",req.url);
                 clientEnvironmentProviderService.setClientName(urlParsed[2]);
@@ -28,7 +26,6 @@ export class CheckCrossConnection {
                 next();
             } else {
                 const phone_number_id_in_request = req.body.entry[0].changes[0].value.metadata.phone_number_id;
-                console.log("Phone number id in request is " + phone_number_id_in_request);
                 if (phone_number_id_in_request !== set_phone_number_id){
                     this.responseHandler.sendSuccessResponse(res, 200, 'Cross Connection', "");
                     console.log("Cross connection");

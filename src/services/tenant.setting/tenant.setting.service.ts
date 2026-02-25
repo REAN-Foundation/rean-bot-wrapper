@@ -33,7 +33,7 @@ export class TenantSettingService {
                 Consent  : response.body?.Data?.TenantSettings?.Consent,
                 Custom   : response.body?.Data?.TenantSettings?.CustomSettings
             };
-            await RequestResponseCacheService.set(`tenant-setting-${tenantCode}`, tenantSetting, "persistent");
+            await RequestResponseCacheService.set(`tenant-setting-${tenantCode}`, tenantSetting);
             return tenantSetting;
         } catch (error) {
             console.error('Error in TenantSettingService.getTenantSettingByCode:', error);
