@@ -337,6 +337,7 @@ export interface TenantSettingsDomainModel {
     ChatBot?                : ChatBotSettings,
     Forms?                  : FormsSettings,
     Consent?                : ConsentSettings,
+    TenantId?               : string
 }
 
 export interface TenantSettingsDto extends TenantSettingsDomainModel {

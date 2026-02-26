@@ -11,6 +11,7 @@ import { EntityManagerProvider } from "./entity.manager.provider.service";
 import { UserInfo } from "../models/user.info.model";
 import { SystemGeneratedMessages } from "../models/system.generated.messages.model";
 import { SystemGeneratedMessagesService } from "./system.generated.message.service";
+import { TenantSettingService } from "./tenant.setting/tenant.setting.service";
 
 @scoped(Lifecycle.ContainerScoped)
 export class CustomMLModelResponseService{
@@ -45,10 +46,16 @@ export class CustomMLModelResponseService{
             }
         }
 
+        const tenantId = await TenantSettingService.getTenantId(
+            tenantDisplayCode,
+            this.clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"),
+            this.clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL")
+        );
         const obj = { 
             "userID"              : completeMessage.platformId,
             "user_query"          : message,
-            "tenant_display_code" : tenantDisplayCode
+            "tenant_display_code" : tenantDisplayCode,
+            "tenant_id"           : tenantId
         };
 
         // send authorisation once enabled for the custom model
