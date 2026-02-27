@@ -32,7 +32,6 @@ export class TenantSecretsService {
                 if (tenantCode === "default") {
                     continue;
                 }
-                clientsList.push(tenantCode);
                 const secretName = await this.getSecretName(tenantCode);
                 let secretObject = null;
                 secretObject = await this._secretsManager.getSecrets(secretName);
@@ -40,6 +39,7 @@ export class TenantSecretsService {
                     console.warn(`No secret found for tenant ${tenantCode} with name ${secretName}. Skipping...`);
                     continue;
                 }
+                clientsList.push(tenantCode);
                 await this.storeVariablesInCache(secretObject, tenantCode);
             }
             return clientsList;
