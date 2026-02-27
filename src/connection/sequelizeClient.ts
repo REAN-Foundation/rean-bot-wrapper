@@ -21,7 +21,7 @@ import { AssessmentIdentifiers } from '../models/assessment/assessment.identifie
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-const sequrlizeClients = new Map<string, Sequelize>();
+const sequrlizeClients: { [key: string]: Sequelize } = {};
 
 //////////////////////////////////////////////////////////////////////////////////////
 
@@ -35,10 +35,14 @@ export class SequelizeClient {
             const dbPassword = clientEnvironmentProviderService.getClientEnvironmentVariable("DB_PASSWORD");
             const dbUser = clientEnvironmentProviderService.getClientEnvironmentVariable("DB_USER_NAME");
             const dbHost = clientEnvironmentProviderService.getClientEnvironmentVariable("DB_HOST");
+            const dbDialect = (process.env.DB_DIALECT || 'mysql') as 'mysql' | 'postgres';
+            const defaultPort = dbDialect === 'postgres' ? 5432 : 3306;
+            const dbPort = parseInt(process.env.DB_PORT) || defaultPort;
+            console.log(`CONNECTED TO DB ON ${dbDialect} and PORT ${dbPort}`);
             const sequelizeClient = new Sequelize(dbName, dbUser, dbPassword, {
                 host           : dbHost,
-                dialect        : 'mysql',
-                port           : 3306,
+                dialect        : dbDialect,
+                port           : dbPort,
                 logging        : false,
                 repositoryMode : true
             });
