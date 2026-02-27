@@ -21,6 +21,7 @@ import { WorkflowEventListener } from './emergency/workflow.event.listener';
 import { MessageHandlerType } from '../refactor/messageTypes/message.types';
 import { CommonAssessmentService } from './Assesssment/common.assessment.service';
 import { AssessmentHandlingService } from './Assesssment/assessment.handling.service';
+import { AssessmentResponseFormat } from './response.format/assessment.service.response.format';
 import { FormHandler } from './form/form.handler';
 import { CareplanEnrollmentService } from './basic.careplan/careplan.enrollment.service';
 
@@ -168,7 +169,34 @@ export class handleRequestservice {
         case 'Assessments': {
             const key = `${metaData.platformId}:Assessment:${outgoingMessage.Assessment.AssessmentId}`;
             const userCacheData = await CacheMemory.get(key);
-            if (userCacheData) {
+
+            // Check if this is a re-prompt for a required node
+            if (outgoingMessage.Assessment.MetaData?.askQuestionAgain && outgoingMessage.Assessment.QuestionData) {
+                console.log("[Assessments] Re-prompting required assessment question");
+
+                // Use serveAssessmentService to handle the question with buttons
+                const questionData = outgoingMessage.Assessment.QuestionData;
+                const channel = metaData.platform;
+
+                const { message, payload, messageType } = await this.serveAssessmentService.handleButtonCreation(
+                    questionData,
+                    channel
+                );
+
+                const responseMessage = {
+                    message     : message,
+                    intent      : 'AssessmentReprompt',
+                    payload     : payload,
+                    messageType : messageType
+                };
+
+                const formattedResponse = new AssessmentResponseFormat(responseMessage);
+
+                // Store message type for platform services
+                (formattedResponse as any).message_type = messageType;
+
+                message_from_nlp = formattedResponse;
+            } else if (userCacheData) {
                 console.log("user response",metaData.messageBody);
                 message_from_nlp = await this.serveAssessmentService.answerQuestion(eventObj, metaData.platformId, metaData.originalMessage, userCacheData, metaData.platform, true,metaData.intent, metaData);
                 console.log(`after calling answer question service, message: ${message_from_nlp?.getText()}`);

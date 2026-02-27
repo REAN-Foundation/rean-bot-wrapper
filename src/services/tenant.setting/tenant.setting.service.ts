@@ -31,7 +31,8 @@ export class TenantSettingService {
                 ChatBot  : response.body?.Data?.TenantSettings?.ChatBot,
                 Forms    : response.body?.Data?.TenantSettings?.Forms,
                 Consent  : response.body?.Data?.TenantSettings?.Consent,
-                Custom   : response.body?.Data?.TenantSettings?.CustomSettings
+                Custom   : response.body?.Data?.TenantSettings?.CustomSettings,
+                TenantId : response.body?.Data?.TenantSettings?.TenantId,
             };
             await RequestResponseCacheService.set(`tenant-setting-${tenantCode}`, tenantSetting);
             return tenantSetting;
@@ -110,7 +111,18 @@ export class TenantSettingService {
             await this.getTenantSettingByCode(tenantCode, apiKey, baseUrl);
             return tenantSetting?.Custom ?? null;
         } catch (error) {
-            console.error('Error in TenantSettingService.getChatBotSettings:', error);
+            console.error('Error in TenantSettingService.getCustomSettings:', error);
+            return null;
+        }
+    }
+
+    static async getTenantId(tenantCode: string, apiKey: string, baseUrl: string): Promise<string> {
+        try {
+            const tenantSetting: TenantSettingsDomainModel =
+            await this.getTenantSettingByCode(tenantCode, apiKey, baseUrl);
+            return tenantSetting?.TenantId;
+        } catch (error) {
+            console.error('Error in TenantSettingService.getTenantId:', error);
             return null;
         }
     }

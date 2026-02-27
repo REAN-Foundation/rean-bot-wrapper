@@ -115,3 +115,6 @@ ENV2.json
 .vscode/launch.json
 
 .env.old
+#docs to be removed for now
+docs/feature-development/
+docs/plans/

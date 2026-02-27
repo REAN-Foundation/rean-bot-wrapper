@@ -356,6 +356,7 @@ export interface TenantSettingsDomainModel {
     Forms?                  : FormsSettings,
     Consent?                : ConsentSettings,
     Custom?                 : CustomSettings
+    TenantId?               : string
 }
 
 export interface TenantSettingsDto extends TenantSettingsDomainModel {
