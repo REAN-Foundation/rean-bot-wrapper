@@ -24,8 +24,10 @@ export class AppointmentUserReplyService {
     async sendUserResponse (eventObj) {
         try {
             let msg = "";
-            const reminderMessage = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ReminderMessage);
+            const reminderMessage =
+            (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ReminderMessage);
             const intentName = eventObj.body.queryResult ? eventObj.body.queryResult.intent.displayName : null;
+
             //const personPhoneNumber : string = eventObj.body.originalDetectIntentRequest.payload.userId;
             //const phoneNumber = Helper.formatPhoneForDocProcessor(personPhoneNumber);
             const previousMessageContextID = eventObj.body.originalDetectIntentRequest.payload.contextId;
@@ -35,7 +37,6 @@ export class AppointmentUserReplyService {
                 raw: true
             });
             const appointment_id = appRecord ? appRecord.ParentActionId : null;
-            // const docProcessBaseUrlSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DocumentProcessorBaseURL");
 
             const docProcessBaseURL = process.env.DOCUMENT_PROCESSOR_BASE_URL;
 

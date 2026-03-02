@@ -61,7 +61,6 @@ export class demoBotService {
         const dfBotGcpSettings = await this.clientEnvironment.getClientEnvironmentVariable("DialogflowSettings");
         const dfBotGCPCredentials = dfBotGcpSettings.Value.DialogflowBotGcpProjectCredentials;
         const GCPCredentials = await this.clientEnvironment.getClientEnvironmentVariable("GoogleApplicationCredentials");
-        // const GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
         const dialogflowApplicationCredentialsobj = dfBotGCPCredentials ? dfBotGCPCredentials : GCPCredentials;
         const options = {
             credentials : {

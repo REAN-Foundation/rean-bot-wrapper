@@ -14,9 +14,7 @@ export class WatiWhatsappAuthenticator implements clientAuthenticator{
     async urlToken(): Promise<any> {
         const watiSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("wati");
         return watiSecrets?.WebhookClientUrlToken;
-        //
-        //
-        //return this.clientEnvironmentProviderService.getClientEnvironmentVariable("WEBHOOK_WATI_CLIENT_URL_TOKEN");
+
     }
 
     get headerToken(): any {

@@ -37,7 +37,6 @@ export class SequelizeClient {
             const dbPassword = process.env.DB_PASSWORD;
             const dbUser = process.env.DB_USER_NAME;
             const dbHost = process.env.DB_HOST;
-            console.log("DB Connection Details:", dbName, dbUser, dbHost);
             const sequelizeClient = new Sequelize(dbName, dbUser, dbPassword, {
                 host           : dbHost,
                 dialect        : 'mysql',

@@ -324,7 +324,6 @@ export class ServeAssessmentService {
         if (intent === "Work_Commitments" ||
             intent === "Feeling_Unwell_A" ||
             intent === "Transit_Issues") {
-            // const docProcessBaseUrlSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DocumentProcessorBaseURL");
             const docProcessBaseURL = process.env.DOCUMENT_PROCESSOR_BASE_URL;
             let todayDate = new Date().toISOString()
                 .split('T')[0];

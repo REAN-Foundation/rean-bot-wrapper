@@ -6,9 +6,11 @@ import { sendExtraMessages } from "../../services/send.extra.messages.service";
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
 
 export const AppointmentBookingListner = async ( intent, eventObj ) => {
-    const dialoflowMessageFormattingObj: dialoflowMessageFormatting = eventObj.container.resolve(dialoflowMessageFormatting);
+    const dialoflowMessageFormattingObj: dialoflowMessageFormatting =
+    eventObj.container.resolve(dialoflowMessageFormatting);
     const kerotoplastyServiceObj: kerotoplastyService = eventObj.container.resolve(kerotoplastyService);
-    const clientEnvironmentProviderServiceObj: ClientEnvironmentProviderService = eventObj.container.resolve(ClientEnvironmentProviderService);
+    const clientEnvironmentProviderServiceObj: ClientEnvironmentProviderService =
+    eventObj.container.resolve(ClientEnvironmentProviderService);
 
     try {
         console.log("Appointment booking listener is here");

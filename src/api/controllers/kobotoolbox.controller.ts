@@ -51,7 +51,13 @@ export class kobotoolboxController{
         const entityManagerProvider = req.container.resolve(EntityManagerProvider);
         this.registrationService = req.container.resolve(Registration);
         const result = await this.registrationService.getPatientUserId(UD.platform,UD.phoneNumber,UD.userName);
-        await this.registrationService.wrapperRegistration(entityManagerProvider,UD.phoneNumber,UD.userName,UD.platform, result.patientUserId);
+        await this.registrationService.wrapperRegistration(
+            entityManagerProvider,
+            UD.phoneNumber,
+            UD.userName,
+            UD.platform,
+            result.patientUserId
+        );
     }
 
     async sendFirstWelcomeMessage(request,UD){

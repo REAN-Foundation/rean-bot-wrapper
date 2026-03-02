@@ -31,7 +31,6 @@ export class ClientEnvironmentProviderService {
             if (value === undefined) {
                 return undefined;
             }
-            // return this.normalizeCachedValue(value);
             return clientVariables[variablename];
         }
         return undefined;

@@ -20,7 +20,7 @@ export class SystemGeneratedMessagesController {
             const { repository, clientName } = await this.getContextualServices(request);
             const messageName = request.body.name;
             const messageExists =
-                await repository.findOne({where: {messageName: messageName}});
+                await repository.findOne({ where: { messageName: messageName } });
             if (messageExists) {
                 this.responseHandler.sendSuccessResponse(response, 200, 'Message already exists', '');
             } else {
@@ -116,4 +116,5 @@ export class SystemGeneratedMessagesController {
 
         return { clientEnvironmentProvider, clientName, repository };
     }
+
 }

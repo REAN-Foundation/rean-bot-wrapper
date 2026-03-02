@@ -14,7 +14,6 @@ export class WhatsappMetaAuthenticator implements clientAuthenticator{
     async urlToken(): Promise<any> {
         const whatsappSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("whatsapp");
         return whatsappSecrets?.WebhookClientUrlToken;
-        //return this.clientEnvironmentProviderService.getClientEnvironmentVariable("WEBHOOK_WHATSAPP_CLIENT_URL_TOKEN");
     }
 
     get headerToken(): any {

@@ -120,7 +120,6 @@ export class UserRegistrationController{
         }
     }
 
-
     unenrollFromCareplan = async(request, response)=>{
         try {
             this.registrationService = request.container.resolve(Registration);

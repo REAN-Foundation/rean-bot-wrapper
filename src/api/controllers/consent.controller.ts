@@ -6,13 +6,11 @@ import { AwsS3manager } from '../../services/aws.file.upload.service';
 import { ConsentInfo } from '../../models/consent.info.model';
 import { EntityManagerProvider } from '../../services/entity.manager.provider.service';
 import { ErrorHandler } from '../../utils/error.handler';
-import {CountryCodeService } from '../../utils/phone.number.formatting';
+import { CountryCodeService } from '../../utils/phone.number.formatting';
 
 // Get an instance of PhoneNumberUtil.
 
-
 // Get an instance of PhoneNumberUtil.
-
 
 // @autoInjectable()
 @scoped(Lifecycle.ContainerScoped)

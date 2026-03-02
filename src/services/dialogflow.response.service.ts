@@ -64,7 +64,6 @@ export class DialogflowResponseService {
             } else {
                 const dialogflowSettings = await this.clientEnvironment.getClientEnvironmentVariable("DialogflowSettings");
                 const dfBotGcpCredentials = dialogflowSettings.Value.DialogflowBotGcpProjectCredentials;
-                // const dfBotGCPCredentials = JSON.parse(dfBotGcpCredentials);
                 const dfBotGCPCredentials = dfBotGcpCredentials;
                 const GCPCredentials = await this.clientEnvironment.getClientEnvironmentVariable("GoogleApplicationCredentials");
                 const dialogflowApplicationCredentialsobj = dfBotGCPCredentials ? dfBotGCPCredentials : GCPCredentials;

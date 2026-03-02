@@ -122,4 +122,5 @@ export class IntentsController {
 
         return { clientEnvironmentProvider, clientName, repository };
     }
+
 }

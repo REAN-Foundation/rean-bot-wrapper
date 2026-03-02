@@ -14,12 +14,6 @@ export class EmojiFilter{
         let emojiObj;
         const emojiSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("EmojiSetting");
         const emoji = emojiSetting?.Value;
-        // if (emoji){
-        //     emojiObj = JSON.parse(emoji);
-        // }
-        // else {
-        //     emojiObj = JSON.parse(process.env.EMOJI);
-        // }
         const emojiObjKeys = Object.keys(emoji);
 
         // console.log("emojiKeys", emojiObjKeys);

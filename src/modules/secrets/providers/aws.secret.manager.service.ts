@@ -2,7 +2,6 @@
 import AWS from 'aws-sdk';
 import { ISecretsService } from '../interfaces/secrets.provider.interface';
 
-// import { TempCredentials } from './get.temporary.aws.credentials';
 
 // Load the AWS SDK
 console.log("start---------");

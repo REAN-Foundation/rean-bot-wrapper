@@ -20,7 +20,6 @@ import { Injector } from "./startup/injector";
 import { SequelizeClient } from "./connection/sequelizeClient";
 import { TenantSecretsService } from "./services/tenant.secret/tenant.secret.service";
 import { ModuleInjector } from "./modules/module.injector";
-import { Module } from "module";
 
 declare module "express-serve-static-core" {
     interface Request {
@@ -61,7 +60,6 @@ export default class Application {
         return this._app;
     }
 
-
     async setWebhooksForClients(clientsList: string[]) {
         const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
         const sequelizeClient: SequelizeClient = container.resolve(SequelizeClient);
@@ -95,7 +93,6 @@ export default class Application {
 
     }
 
-
     public start = async (): Promise<void> => {
         try {
 
@@ -107,7 +104,6 @@ export default class Application {
             const secretsService = container.resolve(TenantSecretsService);
 
             const clientList = await secretsService.loadClientEnvVariables();
-
 
             //Load the modules
             await Loader.init();
@@ -148,42 +144,44 @@ export default class Application {
     };
 
     private setupMiddlewares = async (): Promise<boolean> => {
+        try {
+            this._app.use((req, _res, next) => {
+                req.container = Loader.container.createChildContainer();
+                Injector.registerInjections(req.container);
+                next();
+            });
 
-        return new Promise(async (resolve, reject) => {
-            try {
-                this._app.use((req, _res, next) => {
-                    req.container = Loader.container.createChildContainer();
-                    Injector.registerInjections(req.container);
-                    next();
-                });
-                this._app.use(express.urlencoded({ extended: true }));
-                this._app.use(express.json());
-                this._app.use(helmet());
-                this._app.use(cors());
-                this._timer = new Timer(this._app);
-                this._timer.timingRequestAndResponseCycle();
-                this._checkCrossConnection = new CheckCrossConnection();
-                this._app.use(await this._checkCrossConnection.checkCrossConnection);
+            this._app.use(express.urlencoded({ extended: true }));
+            this._app.use(express.json());
+            this._app.use(helmet());
+            this._app.use(cors());
 
-                // this._app.use(this.limiter);
+            this._timer = new Timer(this._app);
+            this._timer.timingRequestAndResponseCycle();
 
-                const MAX_UPLOAD_FILE_SIZE = ConfigurationManager.MaxUploadFileSize();
+            this._checkCrossConnection = new CheckCrossConnection();
+            this._app.use(await this._checkCrossConnection.checkCrossConnection);
 
-                this._app.use(fileUpload({
-                    limits            : { fileSize: MAX_UPLOAD_FILE_SIZE },
-                    preserveExtension : true,
-                    createParentPath  : true,
-                    parseNested       : true,
-                    useTempFiles      : true,
-                    tempFileDir       : '/tmp/uploads/'
-                }));
-                resolve(true);
-            }
-            catch (error) {
-                reject(error);
-            }
-        });
+            // this._app.use(this.limiter);
+
+            const MAX_UPLOAD_FILE_SIZE = ConfigurationManager.MaxUploadFileSize();
+            this._app.use(fileUpload({
+                limits            : { fileSize: MAX_UPLOAD_FILE_SIZE },
+                preserveExtension : true,
+                createParentPath  : true,
+                parseNested       : true,
+                useTempFiles      : true,
+                tempFileDir       : '/tmp/uploads/'
+            }));
+
+            return true;
+        } catch (error) {
+            console.log('An error occurred while setting up middlewares.' + error.message);
+            throw error;
+
+        }
     };
+
 
     private listen = () => {
         return new Promise((resolve, reject) => {

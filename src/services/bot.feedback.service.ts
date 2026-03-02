@@ -80,7 +80,6 @@ export class BotFeedback{
                                 const path = '/v1/messages';
                                 const apiUrl = "https://" + hostname + path;
                                 console.log("apiuri",apiUrl);
-                                console.log("options",options);
                                 await needle.post(apiUrl, JSON.stringify(postData), options, async function(err, resp) {
                                     if (err) {
                                         console.log("err", err);
