@@ -5,8 +5,7 @@ import { IuserConsent } from '../refactor/interface/message.interface';
     timestamps : true,
     modelName  : 'UserConsent',
     tableName  : 'user_consent'
-    }
-)
+})
 
 export class UserConsent extends Model implements IuserConsent {
 

@@ -13,7 +13,7 @@ export class AwsSecretsManager implements ISecretsService {
     async getCrossAccountCredentials() {
         return new Promise((resolve, reject) => {
             const sts = new AWS.STS();
-            const timestamp = (new Date()).getTime();
+            const timestamp = Date.now();
             const params = {
                 RoleArn         : process.env.ROLE_ARN,
                 RoleSessionName : `be-descriptibe-here-${timestamp}`
@@ -63,7 +63,7 @@ export class AwsSecretsManager implements ISecretsService {
         try {
             const response = await client.getSecretValue({ SecretId: secretName }).promise();
 
-            if (!response || !response.SecretString) {
+            if (!response?.SecretString) {
 
                 // Secret exists but no value
                 return null;

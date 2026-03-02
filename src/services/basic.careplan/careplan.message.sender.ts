@@ -52,7 +52,8 @@ export class CareplanMessageSender {
     }
 
     private static getClientConfig(childContainer: any): { apiKey: string; baseUrl: string } {
-        const clientEnvironmentProviderService = childContainer.resolve(ClientEnvironmentProviderService);
+
+        // const clientEnvironmentProviderService = childContainer.resolve(ClientEnvironmentProviderService);
         return {
             apiKey  : process.env.REANCARE_API_KEY,
             baseUrl : process.env.REAN_APP_BACKEND_BASE_URL

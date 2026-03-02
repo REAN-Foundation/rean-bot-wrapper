@@ -47,11 +47,11 @@ export class AwsS3manager{
         try {
             console.log("function is called ");
             const responseCredentials: any = await this.getCrossAccountCredentials();
-            var BUCKET_NAME = process.env.BUCKET_NAME;
+            let BUCKET_NAME = process.env.BUCKET_NAME;
             const koboSettings = await this.clientEnvironment.getClientEnvironmentVariable("KoboSettings");
             const koboBucketname = koboSettings.Value.BucketName;
             if (koboBucketname) {
-                var BUCKET_NAME = `${koboBucketname}`;
+                BUCKET_NAME = `${koboBucketname}`;
             }
             const params = {
                 Bucket : BUCKET_NAME,
@@ -258,9 +258,9 @@ export class AwsS3manager{
     async getFile (key) {
         return new Promise<any>(async(resolve) => {
             const responseCredentials: any = await this.getCrossAccountCredentials();
-            var BUCKET_NAME = process.env.BUCKET_NAME;
+            let BUCKET_NAME = process.env.BUCKET_NAME;
             if (await this.clientEnvironment.getClientEnvironmentVariable("S3_BUCKET_NAME")) {
-                var BUCKET_NAME = `${await this.clientEnvironment.getClientEnvironmentVariable("S3_BUCKET_NAME")}`;
+                BUCKET_NAME = `${await this.clientEnvironment.getClientEnvironmentVariable("S3_BUCKET_NAME")}`;
             }
             console.log("DBCJNKJCLNDSKOSCHKLSDNCKLNSD",BUCKET_NAME);
             const s3 = new AWS.S3(responseCredentials);
