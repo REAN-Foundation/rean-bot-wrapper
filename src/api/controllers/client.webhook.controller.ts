@@ -10,6 +10,7 @@ import { MessageStatus } from '../../models/message.status';
 import { EntityManagerProvider } from '../../services/entity.manager.provider.service';
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
 import { ContactList } from '../../models/contact.list';
+import { BlockList } from '../../models/block.list.model';
 import { ConsentInfo } from '../../models/consent.info.model';
 import { UserConsent } from '../../models/user.consent.model';
 import { ConsentService } from '../../services/consent.service';
@@ -20,6 +21,7 @@ import { ContactListRepo } from '../../database/repositories/contact.list/contac
 import { UserConsentDto } from '../../domain.types/user.consent/user.consent.domain.model';
 import { TenantSettingService } from '../../services/tenant.setting/tenant.setting.service';
 import { UserLanguage } from '../../services/set.language';
+import { BlockUserService } from '../../services/block.user.service';
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -36,7 +38,8 @@ export class ClientWebhookController {
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(ConsentService) private consentService?: ConsentService,
         @inject(Registration) private registrationService?: Registration,
-        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(BlockUserService) private blockUserService?: BlockUserService
     ) {
 
     }
@@ -407,6 +410,12 @@ export class ClientWebhookController {
                 if (req.params.channel === "whatsappMeta"){
                     userPlatformId = req.body.entry[0].changes[0].value.messages[0].from;
                     platformUserName = req.body.entry[0].changes[0].value.contacts[0].profile.name;
+                    const isBlocked = await this.blockUserService.isUserBlocked(req, userPlatformId);
+                    if (isBlocked) {
+                        console.log(`User ${userPlatformId} is blocked. Sending block message.`);
+                        await this.blockUserService.handleBlockMessage(req, userPlatformId, res);
+                        return;
+                    }
                 }
                 const [firstTimeUser ,ehrSystemCode ]  = await this.checkFirstTimeUser(req, userPlatformId);
                 if (consentActivation &&  req.params.channel === "whatsappMeta"){
@@ -490,6 +499,75 @@ export class ClientWebhookController {
         return new Promise((resolve) => {
             setTimeout(resolve, ms);
         });
+    };
+
+    updateBlockStatus = async (req, res) => {
+        try {
+
+            const taskId = req.params.task_id;
+            const status = req.body.block_status;
+
+            const blockStatus =
+                status === true ||
+                status === "true" ||
+                status === "blocked";
+
+            const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
+            const entityManagerProvider = req.container.resolve(EntityManagerProvider);
+
+            const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+
+            const entityManager = await entityManagerProvider.getEntityManager(
+                clientEnvironmentProviderService,
+                clientName
+            );
+
+            const contactListRepository = entityManager.getRepository(ContactList);
+            const blockListRepository = entityManager.getRepository(BlockList);
+            const contact = await contactListRepository.findOne({
+                where: { cmrChatTaskID: taskId }
+            });
+
+            if (!contact) {
+                return this.responseHandler.sendFailureResponse(res, 404, "Contact not found for task", req);
+            }
+
+            const userPlatformId = contact.mobileNumber;
+
+            if (blockStatus) {
+
+                const existingUser = await blockListRepository.findOne({
+                    where: { userPlatformID: userPlatformId }
+                });
+
+                if (!existingUser) {
+                    await blockListRepository.create({
+                        userPlatformID: userPlatformId
+                    });
+                }
+
+                Logger.instance().log(`User ${userPlatformId} added to block list`);
+
+            } else {
+
+                await blockListRepository.destroy({
+                    where: { userPlatformID: userPlatformId }
+                });
+
+                Logger.instance().log(`User ${userPlatformId} removed from block list`);
+            }
+
+            return this.responseHandler.sendSuccessResponse(
+                res,
+                200,
+                "Block status updated successfully",
+                ""
+            );
+
+        } catch (error) {
+            console.log("Error updating block status", error);
+            this.errorHandler.handleControllerError(error, res, req);
+        }
     };
 
 }
