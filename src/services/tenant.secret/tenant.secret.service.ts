@@ -10,7 +10,7 @@ import { Environment } from "../../domain.types/tenant.setting/tenant.setting.ty
 export class TenantSecretsService {
 
     constructor(
-        @inject('ISecretsService') private _secretsManager: ISecretsService
+        @inject('ISecretsService') private readonly _secretsManager: ISecretsService
     ) {}
 
     apiKey = process.env.REANCARE_API_KEY;
@@ -54,55 +54,56 @@ export class TenantSecretsService {
     private async storeVariablesInCache(secretObject, tenantCode) {
         try {
 
-            if (!secretObject.NAME) {
+            // if (!secretObject.NAME) {
 
-                let tenantSecrets = {...secretObject};
-                if (this.apiKey && this.baseUrl) {
-                    const botSettings = await TenantSettingService.getTenantSettingByCode(
-                        tenantCode,
-                        this.apiKey,
-                        this.baseUrl);
+            let tenantSecrets = {...secretObject};
+            if (this.apiKey && this.baseUrl) {
+                const botSettings = await TenantSettingService.getTenantSettingByCode(
+                    tenantCode,
+                    this.apiKey,
+                    this.baseUrl);
 
-                    if (botSettings) {
-                        tenantSecrets = {...tenantSecrets, ...botSettings.Common, ...botSettings.ChatBot, ...botSettings.Custom, ...botSettings.Followup, ...botSettings.Forms};
-                        console.log("Final tenant secrets:", tenantSecrets);
-                    }
-
-                } else {
-                    console.warn(`Missing REANCARE_API_KEY or REAN_APP_BACKEND_BASE_URL. Skipping tenant settings fetch.`);
+                if (botSettings) {
+                    tenantSecrets = {...tenantSecrets, ...botSettings.Common, ...botSettings.ChatBot, ...botSettings.Custom, ...botSettings.Followup, ...botSettings.Forms};
+                    console.log("Final tenant secrets:", tenantSecrets);
                 }
-                await RequestResponseCacheService.set(`bot-secrets-${tenantCode}`,
-                    tenantSecrets,
-                    "persistent"
-                );
-                const cachedData =await RequestResponseCacheService.get(`bot-secrets-${tenantCode}`);
-                console.log("cached data is ", cachedData);
 
-                return;
+            } else {
+                console.warn(`Missing REANCARE_API_KEY or REAN_APP_BACKEND_BASE_URL. Skipping tenant settings fetch.`);
             }
-            else {
-                const tenantSecrets = {};
-                for (const key in secretObject) {
-                    if (typeof secretObject[key] === "object"){
-                        tenantSecrets[key] = JSON.stringify(secretObject[key]);
-                    }
-                    else {
-                        tenantSecrets[key] = secretObject[key];
-                    }
-                    console.log("loading this key", `${secretObject.NAME}_${key}`);
-                }
-                await RequestResponseCacheService.set(`bot-secrets-${secretObject.NAME}`,
-                    tenantSecrets,
-                    "persistent"
-                );
-                return;
-            }
+            await RequestResponseCacheService.set(`bot-secrets-${tenantCode}`,
+                tenantSecrets,
+                "persistent"
+            );
+            const cachedData =await RequestResponseCacheService.get(`bot-secrets-${tenantCode}`);
+            console.log("cached data is ", cachedData);
+
+            return;
+
+            // }
+            // else {
+            //     const tenantSecrets = {};
+            //     for (const key in secretObject) {
+            //         if (typeof secretObject[key] === "object"){
+            //             tenantSecrets[key] = JSON.stringify(secretObject[key]);
+            //         }
+            //         else {
+            //             tenantSecrets[key] = secretObject[key];
+            //         }
+            //         console.log("loading this key", `${secretObject.NAME}_${key}`);
+            //     }
+            //     await RequestResponseCacheService.set(`bot-secrets-${secretObject.NAME}`,
+            //         tenantSecrets,
+            //         "persistent"
+            //     );
+            //     return;
+            // }
         } catch (e) {
             console.log(e);
         }
     }
 
-    private getEnvironment = async () => {
+    private readonly getEnvironment = async () => {
         const env = process.env.NODE_ENV;
         if (!env) {
             throw new ApiError(500, 'NODE_ENV is not set.');
@@ -120,13 +121,13 @@ export class TenantSecretsService {
         }
     };
 
-    private getSecretName = async (tenantCode: string) => {
+    private readonly getSecretName = async (tenantCode: string) => {
         const environment = await this.getEnvironment();
         const code = tenantCode.toLowerCase().replace(/_/g, "-");
         return `${environment}-${code}-v1`;
     };
 
-    private getOldSecretName = async (tenantCode: string) => {
+    private readonly getOldSecretName = async (tenantCode: string) => {
         const environment = await this.getEnvironment();
         const code = tenantCode.toLowerCase().replace(/_/g, "-");
         return `duploservices-${environment}-${code}-v1`;

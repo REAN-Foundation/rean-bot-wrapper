@@ -161,7 +161,6 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
     GetTelegramMedia = async (fileid: string): Promise<any> => {
         const telegramSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("telegram");
         const telegramMediaPath = telegramSecrets?.MediaPathUrl;
-        // const telegramMediaPath = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_MEDIA_PATH_URL");
 
         const options = {
             headers : {
