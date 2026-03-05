@@ -505,7 +505,7 @@ export class ClientWebhookController {
         try {
 
             const taskId = req.params.task_id;
-            const status = req.body.block_status;
+            const status = req.query.block_status;
 
             const blockStatus =
                 status === true ||

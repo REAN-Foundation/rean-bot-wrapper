@@ -7,6 +7,7 @@ import { platformServiceInterface } from "../refactor/interface/platform.interfa
 import { commonResponseMessageFormat } from "./common.response.format.object";
 import { Iresponse } from "../refactor/interface/message.interface";
 import { Logger } from "../common/logger";
+import { SystemGeneratedMessagesService } from "./system.generated.message.service";
 
 /////////////////////////////////////////////////////////////////////////////////////
 
@@ -54,11 +55,16 @@ export class BlockUserService {
 
             this._platformMessageService = req.container.resolve(req.params.channel);
             this._platformMessageService.res = res;
+            const systemGeneratedMessages = req.container.resolve(SystemGeneratedMessagesService);
+            let message = await systemGeneratedMessages.getMessage("BLOCK_MESSAGE");
+            if (!message) {
+                message = "Sorry, we cannot answer any further questions.";
+            }
 
             const response_format: Iresponse = commonResponseMessageFormat();
 
             response_format.sessionId = userPlatformId;
-            response_format.messageText = "Sorry, we cannot answer any further questions.";
+            response_format.messageText = message;
             response_format.message_type = "text";
 
             this._platformMessageService.SendMediaMessage(response_format, null);
