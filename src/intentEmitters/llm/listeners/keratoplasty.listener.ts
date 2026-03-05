@@ -316,7 +316,15 @@ export class KeratoplastyEyeImageListener extends BaseLLMListener {
         this.log(`Keratoplasty eye image submission for user: ${event.userId}`);
 
         // Check if image URL is provided
-        const imageUrl = this.getEntity<string>(event, 'imageUrl');
+        let imageUrl = this.getEntity<string>(event, 'imageUrl');
+
+        // If no direct imageUrl, try to extract from text
+        if (!imageUrl) {
+            const textContent = this.getEntity<string>(event, 'text');
+            if (textContent) {
+                imageUrl = this.extractUrlFromText(textContent);
+            }
+        }
 
         if (!imageUrl) {
             // Prompt user to send image
@@ -363,6 +371,30 @@ export class KeratoplastyEyeImageListener extends BaseLLMListener {
             this.logError('Error processing keratoplasty eye image', error);
             return this.error('There was an issue processing your image. Please try again.');
         }
+    }
+
+    /**
+     * Extract URL from text content
+     * Supports http, https, and common image hosting patterns
+     */
+    private extractUrlFromText(text: string): string | null {
+        if (!text) {
+            return null;
+        }
+
+        // URL regex pattern - matches http/https URLs
+        const urlRegex = /(https?:\/\/[^\s]+)/gi;
+        const matches = text.match(urlRegex);
+
+        if (matches && matches.length > 0) {
+            // Return the first URL found
+            const url = matches[0];
+            this.log(`Extracted URL from text: ${url}`);
+            return url;
+        }
+
+        this.log('No URL found in text content');
+        return null;
     }
 }
 
