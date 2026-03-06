@@ -4,6 +4,7 @@ import { ChatMessage } from '../models/chat.message.model';
 import { ChatMessageSensitivity } from '../models/chat.message.sensitivity.model';
 import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
+import { BlockList } from '../models/block.list.model';
 import { MessageStatus } from '../models/message.status';
 import { ClientEnvironmentProviderService } from '../services/set.client/client.environment.provider.service';
 import { CalorieInfo } from '../models/calorie.info.model';
@@ -54,6 +55,7 @@ export class SequelizeClient {
                     ChatMessageSensitivity,
                     ChatSession,
                     ContactList,
+                    BlockList,
                     AssessmentSessionLogs,
                     ConsentInfo,
                     UserConsent,
