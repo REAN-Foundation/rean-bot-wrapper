@@ -41,13 +41,13 @@ export class getAdditionalInfoSevice {
     async SendValidEHRResponse(EHRNumber,userId,userName,languageCode,eventObj){
         try {
             let message = null;
-            const clientName = this.clientEnvironment.getClientEnvironmentVariable("NAME");
+            const clientName = await this.clientEnvironment.getClientEnvironmentVariable("Name");
 
             if (clientName === "GGHN_HIVTB" )
             {
                 message = await this.getMessageForGGHN(EHRNumber,userName);
             }
-            
+
             if (clientName === "LVPEI"|| clientName === "REAN_BOT")
             {
                 message = await this.getMessageForLVPEI(EHRNumber,userId,userName,languageCode,eventObj);
@@ -59,7 +59,8 @@ export class getAdditionalInfoSevice {
                 this.sendExtraMessagesobj.sendResponsebyButton(message,eventObj,userId,buttonArray);
             }
             else {
-                const RequiredAdditionalInfo =  await this.clientEnvironment.getClientEnvironmentVariable("REQUIRED_ADDITIONAL_INFO");
+                const additionalIfoSettings = await this.clientEnvironment.getClientEnvironmentVariable("AdditionalIfoSettings");
+                const RequiredAdditionalInfo =  additionalIfoSettings.Value.IsEnabled;
                 const RequiredAdditionalobj = JSON.parse(RequiredAdditionalInfo );
                 message = `Sorry the provided ${ RequiredAdditionalobj.EHRCODE} ${EHRNumber} is not in our records \n Do you want to Re-enter your ${ RequiredAdditionalobj.EHRCODE}`;
                 const button_yes = await this.translate.translatestring("Yes",languageCode);
@@ -97,7 +98,7 @@ export class getAdditionalInfoSevice {
                 }
                 message = message + ` \n \n Is the above provided information correct?`;
             }
-            else 
+            else
             {
                 message = null;
             }
@@ -120,7 +121,7 @@ export class getAdditionalInfoSevice {
         return message;
     }
 
-   
+
 
     async getUserInfo(authenticationToken,userID){
         try {
@@ -146,14 +147,14 @@ export class getAdditionalInfoSevice {
             console.log("While getting user info", error);
 
         }
-        
+
     }
 
     async getauthenticationToken(){
         try {
-            const gghnUrl =  await this.clientEnvironment.getClientEnvironmentVariable("GGHN_URL");
-            const userName = await this.clientEnvironment.getClientEnvironmentVariable("GGHN_USER_NAME");
-            const password = await this.clientEnvironment.getClientEnvironmentVariable("GGHN_PASSWORD");
+            const gghnUrl =  await this.clientEnvironment.getClientEnvironmentVariable("GghnUrl");
+            const userName = await this.clientEnvironment.getClientEnvironmentVariable("GghnUserName");
+            const password = await this.clientEnvironment.getClientEnvironmentVariable("GghnPassword");
             const url = gghnUrl;
 
             const headers = {
@@ -174,7 +175,7 @@ export class getAdditionalInfoSevice {
             console.log("While getting authentication token", error);
 
         }
-  
+
     }
 
     async SaveEHRNumber(ehrSystemCode,userId){
@@ -194,7 +195,7 @@ export class getAdditionalInfoSevice {
             else {
                 console.log("while updating the EHR number");
             }
-    
+
         }
         catch (error) {
             console.log("in error", error);
@@ -211,7 +212,8 @@ export class getAdditionalInfoSevice {
             const personContactList = await contactList.findOne({ where: { mobileNumber: userId } });
             if (personContactList){
                 const EhrNumber = personContactList.dataValues.ehrSystemCode;
-                const RequiredAdditionalInfo =  await this.clientEnvironment.getClientEnvironmentVariable("REQUIRED_ADDITIONAL_INFO");
+                const additionalIfoSettings = await this.clientEnvironment.getClientEnvironmentVariable("AdditionalIfoSettings");
+                const RequiredAdditionalInfo =  additionalIfoSettings.Value.RequiredInfo;
                 const RequiredAdditionalobj = JSON.parse(RequiredAdditionalInfo );
                 const dffMessage = `Your ${RequiredAdditionalobj.EHRCODE} is ${EhrNumber}.`;
                 const message = `Do you want to change your  ${ RequiredAdditionalobj.EHRCODE}?`;

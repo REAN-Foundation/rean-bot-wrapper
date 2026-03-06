@@ -17,13 +17,13 @@ interface Center {
     priority: number;
     pincode: string;
   }
-  
+
   interface Location {
     cityA: string;
     latitudeA: number;
     longitudeA: number;
   }
-  
+
   interface Distance {
     [x: string]: any;
     postalAddress: string;
@@ -62,7 +62,7 @@ export class NearestLocation {
         return new Promise((resolve, reject) => {
             const centers: Center[] = [];
             const stream = streamifier.createReadStream(buffer);
-    
+
             stream
                 .pipe(csv())
                 .on('data', (row) => {
@@ -175,7 +175,7 @@ export class NearestLocation {
 
         // Combine preferred centers at the top with the sorted non-preferred centers
         const finalCenters = [...preferredCenters, ...nonPreferredCenters];
-    
+
         return finalCenters;
     }
 
@@ -201,7 +201,8 @@ export class NearestLocation {
         try {
             const latlongString = await this.getLatLong(userLocationDetails);
             const userLocation = this.UserLocation(latlongString);
-            const fileKey = this.clientEnvironment.getClientEnvironmentVariable("CENTER_LOCATION_FILE_KEY");
+            const fileSettings = await this.clientEnvironment.getClientEnvironmentVariable("CenterLocationFileKey");
+            const fileKey = fileSettings.Value;
             const csvFile = await this.awsS3manager.getFile(fileKey);
             const centersDetails = await this.readCsv(csvFile.Body);
             const FilteredCenters = await this.filterCentersOnTags(filteringTags,centersDetails);

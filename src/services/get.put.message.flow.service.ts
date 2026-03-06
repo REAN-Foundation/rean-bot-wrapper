@@ -76,15 +76,17 @@ export class MessageFlow{
 
     async checkTheFlowRouter(messageToLlmRouter: Imessage, channel: string, platformMessageService: platformServiceInterface){
         try {
-            console.log(`checkTheFlowRouter messageToLlmRouter:${messageToLlmRouter} \n Chaneel : ${channel}`);
+            console.log(`checkTheFlowRouter messageToLlmRouter:${messageToLlmRouter} \n Channel : ${channel}`);
             const preprocessedOutgoingMessage = await this.preprocessOutgoingMessage(messageToLlmRouter);
             console.log("Processed outgoing message", JSON.stringify(preprocessedOutgoingMessage, null, 2));
 
             console.log("The message is being set to make the decision");
             const outgoingMessage: OutgoingMessage = await this.decisionRouter.getDecision(preprocessedOutgoingMessage.message, channel);
             console.log("The outgoing message is being handled in routing");
+            const NlpTranslateServiceSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NlpTranslateService");
+            const nlpTranslateService = NlpTranslateServiceSetting?.Value;
             if (
-                this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_TRANSLATE_SERVICE") === "llm"
+                nlpTranslateService === "llm"
             &&
                 outgoingMessage.QnA.NLPProvider === "LLM"
             ) {
@@ -212,11 +214,15 @@ export class MessageFlow{
         let payload = {};
         let messageType = "";
         let assessmentSession = null;
+
+        if (typeof msg.payload === "object" && !Array.isArray(msg.payload)) {
+            msg.payload = JSON.stringify(msg.payload);
+        }
         let personName = " ";
         const contactList = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
         const personContactList = await contactList.findOne({ where: { mobileNumber: msg.userId } });
         const reminderMessage = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ReminderMessage);
-        const defaultLangaugeCode = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE") ?? "en";
+        const defaultLangaugeCode = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DefaultLanguage") ?? "en";
         const payloadObj = typeof msg.payload === "string"
             ? JSON.parse(msg.payload)
             : msg.payload;
@@ -240,7 +246,7 @@ export class MessageFlow{
                     msg.message.Variables = JSON.parse(msg.message.Variables);
                 }
             }
-            if (msg.message.Variables[`${languageCode}`]) {
+            if (msg.message?.Variables[`${languageCode}`]) {
                 payload["variables"] = msg.message.Variables[`${languageCode}`];
             } else {
 
@@ -275,7 +281,7 @@ export class MessageFlow{
             payload = await sendApiButtonService(msg.payload);
         }
         else if (msg.type === "reancareAssessment") {
-            
+
             // make compatible for telegram also.
             const { updatedPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment( msg.userId,msg.channel, msg.payload, languageCode);
             if (updatedPayload["channel"] === 'whatsappMeta' || updatedPayload["channel"] === 'WhatsappWati') {
@@ -290,10 +296,10 @@ export class MessageFlow{
             }
             assessmentSession = assessmentSessionLogs;
             console.log(`assessment record ${JSON.stringify(payload)}`);
-            
+
         }
         if (msg.type === "inline_keyboard") {
-            
+
             payload = await sendTelegramButtonService(msg.payload);
         }
         if (msg.message.ButtonsIds != null && channel !== "telegram" && channel !== "Telegram") {
@@ -340,7 +346,7 @@ export class MessageFlow{
         let message_to_platform = null;
         // eslint-disable-next-line max-len
         message_to_platform = await platformMessageService.SendMediaMessage(response_format, payload);
-        const customRemSetting: boolean = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CUSTOM_REM_SETTING") === "true";
+        const customRemSetting: boolean = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("CUSTOM_REM_SETTING") === "true";
         if (msg.agentName === 'Reancare' && customRemSetting) {
             try {
                 const msg_id = await platformMessageService.getMessageIdFromResponse(message_to_platform);
@@ -358,7 +364,7 @@ export class MessageFlow{
             }
         }
         if (messageType === "reancareAssessment") {
-            
+
             assessmentSession.userMessageId = platformMessageService.getMessageIdFromResponse(message_to_platform);
             const Assessmentkey = `${response_format.sessionId}:Assessment:${assessmentSession.assesmentId}`;
             CacheMemory.set(Assessmentkey,assessmentSession.userMessageId);
@@ -383,8 +389,8 @@ export class MessageFlow{
                 raw        : true
             });
             const appointment_id = appRecord ? appRecord.ParentActionId : null;
-            const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
-            
+            const docProcessBaseURL = process.env.DOCUMENT_PROCESSOR_BASE_URL;
+
             //let todayDate = new Date().toISOString()
             //  .split('T')[0];
             //todayDate = Helper.removeLeadingZerosFromDay(todayDate);
@@ -542,10 +548,20 @@ export class MessageFlow{
                 throw new Error(`Error in getFormPayload: payload is null`);
             }
             const payloadObj = JSON.parse(payload);
-            const formMetadata = payloadObj.Metadata as WhatsAppFlowTemplateRequest | undefined;
+
+            // Extract metadata from new structure
+            // The metadata now has Type and ChannelConfig
+            const metadata = payloadObj.Metadata;
+
+            if (!metadata) {
+                throw new Error(`Error in getFormPayload: metadata is null`);
+            }
+
+            // Extract the actual form configuration from ChannelConfig
+            const formMetadata = metadata.ChannelConfig as WhatsAppFlowTemplateRequest | undefined;
 
             if (!formMetadata) {
-                throw new Error(`Error in getFormPayload: whatsappFormMetadata is null`);
+                throw new Error(`Error in getFormPayload: ChannelConfig is null`);
             }
 
             return {
@@ -557,8 +573,6 @@ export class MessageFlow{
                     },
                     components : [
                         formMetadata?.FlowActionData?.Component ?? null,
-
-                        // formMetadata?.Component ?? null,
                         {
                             type       : "button",
                             sub_type   : "flow",
@@ -568,20 +582,15 @@ export class MessageFlow{
                                     type   : "action",
                                     action : {
                                         flow_token : formMetadata?.FlowToken || 'unused',
-
-                                        // flow_action_data : {
-                                        //     ...formMetadata?.FlowActionData || {}
-                                        // }
                                     }
                                 }
                             ]
-
                         }
                     ].filter(Boolean)
                 },
             };
         } catch (error) {
-            console.log(`Error in getWhatsappFormMetadataPayload: ${error} payload: ${payload}`);
+            console.log(`Error in getFormPayload: ${error} payload: ${payload}`);
             return null;
         }
     };

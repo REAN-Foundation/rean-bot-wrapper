@@ -1,6 +1,6 @@
 import needle from "needle";
 import { RequestResponseCacheService } from "../../modules/cache/request.response.cache.service";
-import { ChatBotSettings, ConsentMessage, ConsentMessageWithLanguage, TenantSettingsDomainModel } from "../../domain.types/tenant.setting/tenant.setting.types";
+import { ChatBotSettings, ConsentMessage, ConsentMessageWithLanguage, TenantSettingsDomainModel, CustomSettings } from "../../domain.types/tenant.setting/tenant.setting.types";
 import { ApiError } from "../../common/api.error";
 import { languageCodeMapper } from "../../utils/language.code.mapper";
 
@@ -31,6 +31,7 @@ export class TenantSettingService {
                 ChatBot  : response.body?.Data?.TenantSettings?.ChatBot,
                 Forms    : response.body?.Data?.TenantSettings?.Forms,
                 Consent  : response.body?.Data?.TenantSettings?.Consent,
+                Custom   : response.body?.Data?.TenantSettings?.CustomSettings,
                 TenantId : response.body?.Data?.TenantSettings?.TenantId,
             };
             await RequestResponseCacheService.set(`tenant-setting-${tenantCode}`, tenantSetting);
@@ -39,7 +40,6 @@ export class TenantSettingService {
             console.error('Error in TenantSettingService.getTenantSettingByCode:', error);
             return null;
         }
-        
     }
 
     static async isConsentEnabled(tenantCode: string, apiKey: string, baseUrl: string): Promise<boolean> {
@@ -65,7 +65,7 @@ export class TenantSettingService {
             return [];
         }
     }
-    
+
     static async isBasicCareplanEnabled (tenantCode: string, apiKey: string, baseUrl: string): Promise<boolean> {
         try {
             const tenantSetting: TenantSettingsDomainModel =
@@ -105,9 +105,20 @@ export class TenantSettingService {
         }
     }
 
+    static async getCustomSettings(tenantCode: string, apiKey: string, baseUrl: string): Promise<CustomSettings> {
+        try {
+            const tenantSetting: TenantSettingsDomainModel =
+            await this.getTenantSettingByCode(tenantCode, apiKey, baseUrl);
+            return tenantSetting?.Custom ?? null;
+        } catch (error) {
+            console.error('Error in TenantSettingService.getCustomSettings:', error);
+            return null;
+        }
+    }
+
     static async getTenantId(tenantCode: string, apiKey: string, baseUrl: string): Promise<string> {
         try {
-            const tenantSetting: TenantSettingsDomainModel = 
+            const tenantSetting: TenantSettingsDomainModel =
             await this.getTenantSettingByCode(tenantCode, apiKey, baseUrl);
             return tenantSetting?.TenantId;
         } catch (error) {

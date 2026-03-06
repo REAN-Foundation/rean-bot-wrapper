@@ -13,7 +13,7 @@ export class elasticsearchUserstat{
 
     createUserStat = async (req) => {
         req.created_at = new Date();
-        const elasticsearchIndexPrefix = this.clientEnvironmentProviderService.getClientEnvironmentVariable("ELASTICSEARCH_INDEX_PREFIX");
+        const elasticsearchIndexPrefix = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("ELASTICSEARCH_INDEX_PREFIX");
         const index_prefix = elasticsearchIndexPrefix ? process.env.ELASTICSEARCH_INDEX_PREFIX : 'test_';
         const userStatModel = index_prefix + "chat_message";
         this._elasticsearchUtilities.save(req, userStatModel);

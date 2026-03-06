@@ -34,9 +34,10 @@ export class WhatsappMessageService extends CommonWhatsappService {
         return this.messageFlow.send_manual_msg(msg, this);
     }
 
-    createRequestforWebhook(resolve, reject, apiKey) {
+    async createRequestforWebhook(resolve, reject, apiKey) {
+        const hostName = process.env.WHATSAPP_LIVE_HOST;
         const options = {
-            hostname : this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST"),
+            hostname : hostName,
             path     : '/v1/configs/webhook',
             method   : 'POST',
             headers  : {
@@ -61,19 +62,22 @@ export class WhatsappMessageService extends CommonWhatsappService {
         return request;
     }
 
-    setWebhook(clientName: string){
+    async setWebhook(clientName: string){
 
-        return new Promise((resolve, reject) => {
-            const webhookUrl = `${this.clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL")}/v1/${clientName}/whatsapp/${this.clientAuthenticator.urlToken}/receive`;
+        return new Promise(async (resolve, reject) => {
+            const baseUrl = process.env.BASE_URL;
+            const urlToken = await this.clientAuthenticator.urlToken;
+            const headerToken = await this.clientAuthenticator.headerToken;
+            const webhookUrl = `${baseUrl}/v1/${clientName}/whatsapp/${urlToken}/receive`;
             const postData = JSON.stringify({
                 'url'     : webhookUrl,
                 "headers" : {
-                    "authentication" : this.clientAuthenticator.headerToken
+                    "authentication" : headerToken
                 }
             });
-            const apiKey = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY");
+            const apiKey = process.env.WHATSAPP_LIVE_API_KEY;
 
-            const request = this.createRequestforWebhook(resolve, reject, apiKey);
+            const request = await this.createRequestforWebhook(resolve, reject, apiKey);
 
             // request.on('error', (e) => {
             //     console.error(`problem with request: ${e.message}`);
@@ -88,17 +92,18 @@ export class WhatsappMessageService extends CommonWhatsappService {
 
     SetWebHookOldNumber = async (clientName: string) => {
 
-        return new Promise((resolve, reject) => {
-            const webhookUrl = `${this.clientEnvironmentProviderService.getClientEnvironmentVariable("BASE_URL")}/v1/${clientName}/whatsapp/${this.clientAuthenticator.urlToken}/receive`;
+        return new Promise(async (resolve, reject) => {
+            const baseUrl = process.env.BASE_URL;
+            const webhookUrl = `${baseUrl}/v1/${clientName}/whatsapp/${this.clientAuthenticator.urlToken}/receive`;
             if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY_OLD_NUMBER")) {
 
                 const postData = JSON.stringify({
                     'url' : webhookUrl,
                 });
 
-                const apiKey = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY_OLD_NUMBER");
+                const apiKey = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY_OLD_NUMBER");
 
-                const request = this.createRequestforWebhook(resolve, reject, apiKey);
+                const request = await this.createRequestforWebhook(resolve, reject, apiKey);
 
                 // request.on('error', (e) => {
                 //     console.error(`problem with request: ${e.message}`);
@@ -113,7 +118,8 @@ export class WhatsappMessageService extends CommonWhatsappService {
     };
 
     SendWhatsappMessageOldNumber = async (contact, message) => {
-
+        const hostName = process.env.WHATSAPP_LIVE_HOST;
+        const apiKey = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY_OLD_NUMBER");
         return new Promise((resolve, reject) => {
             const postData = JSON.stringify({
                 'recipient_type' : 'individual',
@@ -125,12 +131,12 @@ export class WhatsappMessageService extends CommonWhatsappService {
             });
 
             const options = {
-                hostname : this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST"),
+                hostname : hostName,
                 path     : '/v1/messages',
                 method   : 'POST',
                 headers  : {
                     'Content-Type' : 'application/json',
-                    'D360-Api-Key' : this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY_OLD_NUMBER")
+                    'D360-Api-Key' : apiKey
                 }
             };
             const request = http.request(options, (response) => {
@@ -168,8 +174,8 @@ export class WhatsappMessageService extends CommonWhatsappService {
             try {
                 const options = getRequestOptions();
                 options.headers['Content-Type'] = 'application/json';
-                options.headers['D360-Api-Key'] = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY");
-                const hostname = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST");
+                options.headers['D360-Api-Key'] = process.env.WHATSAPP_LIVE_API_KEY;
+                const hostname = process.env.WHATSAPP_LIVE_HOST;
                 const path = '/v1/messages';
                 const apiUrl = "https://" + hostname + path;
                 // eslint-disable-next-line init-declarations
@@ -181,7 +187,7 @@ export class WhatsappMessageService extends CommonWhatsappService {
                     console.log("resp", resp.body);
                     resolve(resp.body);
                 });
-                
+
             }
             catch (error) {
                 console.log("error", error);
@@ -208,7 +214,7 @@ export class WhatsappMessageService extends CommonWhatsappService {
                     .catch(error => console.log("error on update", error));
                 return needleResp;
             }
-            
+
         }
     }
 

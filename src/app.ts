@@ -13,11 +13,13 @@ import { container, DependencyContainer } from "tsyringe";
 import { IndexCreation } from './models/elasticsearchmodel';
 import { platformServiceInterface } from "./refactor/interface/platform.interface";
 import { ClientEnvironmentProviderService } from "./services/set.client/client.environment.provider.service";
-import { AwsSecretsManager } from "./services/aws.secret.manager.service";
+import { AwsSecretsManager } from "./modules/secrets/providers/aws.secret.manager.service";
 import { Timer } from "./middleware/timer";
 import { CheckCrossConnection } from "./middleware/check.cross.connection";
 import { Injector } from "./startup/injector";
 import { SequelizeClient } from "./connection/sequelizeClient";
+import { TenantSecretsService } from "./services/tenant.secret/tenant.secret.service";
+import { ModuleInjector } from "./modules/module.injector";
 
 declare module "express-serve-static-core" {
     interface Request {
@@ -43,8 +45,6 @@ export default class Application {
 
     private _checkCrossConnection: CheckCrossConnection = null;
 
-    private clientsList = [];
-
     private constructor() {
         this._app = express();
         this._intentRegister = new IntentRegister();
@@ -59,60 +59,31 @@ export default class Application {
     public app(): express.Application {
         return this._app;
     }
-    
-    async processClientEnvVariables() {
 
-        try {
-            const secretObjectList = await this._awsSecretsManager.getSecrets();
-
-            for (const ele of secretObjectList) {
-                if (!ele.NAME) {
-                    for (const k in ele) {
-                        if (typeof ele[k] === "object"){
-                            process.env[k.toUpperCase()] = JSON.stringify(ele[k]);
-                        }
-                        else {
-                            process.env[k.toUpperCase()] = ele[k];
-                        }
-                        console.log("loading this key", k.toUpperCase());
-                    }
-                }
-                else {
-                    this.clientsList.push(ele.NAME);
-                    for (const k in ele) {
-                        if (typeof ele[k] === "object"){
-                            process.env[ele.NAME + "_" + k.toUpperCase()] = JSON.stringify(ele[k]);
-                        }
-                        else {
-                            process.env[ele.NAME + "_" + k.toUpperCase()] = ele[k];
-                        }
-                    }
-                }
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    }
-
-    async setWebhooksForClients() {
+    async setWebhooksForClients(clientsList: string[]) {
         const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
         const sequelizeClient: SequelizeClient = container.resolve(SequelizeClient);
         const telegram: platformServiceInterface = container.resolve('telegram');
         const whatsapp: platformServiceInterface = container.resolve('whatsapp');
-        for (const clientName of this.clientsList) {
+        for (const clientName of clientsList) {
             console.log(clientName);
             clientEnvironmentProviderService.setClientName(clientName);
             sequelizeClient.getSequelizeClient(clientEnvironmentProviderService);
-            console.log(clientEnvironmentProviderService.getClientEnvironmentVariable('TELEGRAM_BOT_TOKEN'));
-            if (clientEnvironmentProviderService.getClientEnvironmentVariable('TELEGRAM_BOT_TOKEN')) {
-                telegram.setWebhook(clientName);
+            const telegramSecrets = await clientEnvironmentProviderService.getClientEnvironmentVariable('telegram');
+            const telegramToken = telegramSecrets ? telegramSecrets.BotToken : null;
+            const whatsappSecrets = await clientEnvironmentProviderService.getClientEnvironmentVariable('meta');
+            const whatsappToken = whatsappSecrets ? whatsappSecrets['ApiToken'] : null;
+            console.log(telegramToken);
+            if (telegramToken) {
+                await telegram.setWebhook(clientName);
                 console.log("Telegram webhook is set");
             } else {
                 console.log("Telegram webhook need not to be set");
             }
-            
-            if (clientEnvironmentProviderService.getClientEnvironmentVariable('WHATSAPP_LIVE_API_KEY') || clientEnvironmentProviderService.getClientEnvironmentVariable('META_API_TOKEN')) {
-                whatsapp.setWebhook(clientName);
+
+            if (whatsappToken) {
+                await whatsapp.setWebhook(clientName);
+                console.log(`Whatsapp webhook is set for client ${clientName}`);
             }
             else {
                 console.log("whatsapp webhook need not to be set");
@@ -124,10 +95,15 @@ export default class Application {
 
     public start = async (): Promise<void> => {
         try {
-            await this.processClientEnvVariables();
 
             //Load configurations
             ConfigurationManager.loadConfigurations();
+
+            ModuleInjector.registerInjections(container);
+
+            const secretsService = container.resolve(TenantSecretsService);
+
+            const clientList = await secretsService.loadClientEnvVariables();
 
             //Load the modules
             await Loader.init();
@@ -144,7 +120,7 @@ export default class Application {
             this._IndexCreation.createIndexes();
 
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            await this.setWebhooksForClients();
+            await this.setWebhooksForClients(clientList);
 
             await Loader.scheduler.schedule();
 
@@ -168,49 +144,51 @@ export default class Application {
     };
 
     private setupMiddlewares = async (): Promise<boolean> => {
+        try {
+            this._app.use((req, _res, next) => {
+                req.container = Loader.container.createChildContainer();
+                Injector.registerInjections(req.container);
+                next();
+            });
 
-        return new Promise((resolve, reject) => {
-            try {
-                this._app.use((req, _res, next) => {
-                    req.container = Loader.container.createChildContainer();
-                    Injector.registerInjections(req.container);
-                    next();
-                });
-                this._app.use(express.urlencoded({ extended: true }));
-                this._app.use(express.json());
-                this._app.use(helmet());
-                this._app.use(cors());
-                this._timer = new Timer(this._app);
-                this._timer.timingRequestAndResponseCycle();
-                this._checkCrossConnection = new CheckCrossConnection();
-                this._app.use(this._checkCrossConnection.checkCrossConnection);
+            this._app.use(express.urlencoded({ extended: true }));
+            this._app.use(express.json());
+            this._app.use(helmet());
+            this._app.use(cors());
 
-                // this._app.use(this.limiter);
-                
-                const MAX_UPLOAD_FILE_SIZE = ConfigurationManager.MaxUploadFileSize();
+            this._timer = new Timer(this._app);
+            this._timer.timingRequestAndResponseCycle();
 
-                this._app.use(fileUpload({
-                    limits            : { fileSize: MAX_UPLOAD_FILE_SIZE },
-                    preserveExtension : true,
-                    createParentPath  : true,
-                    parseNested       : true,
-                    useTempFiles      : true,
-                    tempFileDir       : '/tmp/uploads/'
-                }));
-                resolve(true);
-            }
-            catch (error) {
-                reject(error);
-            }
-        });
+            this._checkCrossConnection = new CheckCrossConnection();
+            this._app.use(await this._checkCrossConnection.checkCrossConnection);
+
+            // this._app.use(this.limiter);
+
+            const MAX_UPLOAD_FILE_SIZE = ConfigurationManager.MaxUploadFileSize();
+            this._app.use(fileUpload({
+                limits            : { fileSize: MAX_UPLOAD_FILE_SIZE },
+                preserveExtension : true,
+                createParentPath  : true,
+                parseNested       : true,
+                useTempFiles      : true,
+                tempFileDir       : '/tmp/uploads/'
+            }));
+
+            return true;
+        } catch (error) {
+            console.log('An error occurred while setting up middlewares.' + error.message);
+            throw error;
+
+        }
     };
+
 
     private listen = () => {
         return new Promise((resolve, reject) => {
             try {
                 const port = process.env.PORT;
                 const server = this._app.listen(port, () => {
-                    const serviceName = 'REANCare api' + '-' + process.env.NODE_ENV;
+                    const serviceName = 'Rean-Bot-Wrapper' + '-' + process.env.NODE_ENV;
                     Logger.instance().log(serviceName + ' is up and listening on port ' + process.env.PORT.toString());
                     this._app.emit("server_started");
                 });
