@@ -412,11 +412,7 @@ export class ClientWebhookController {
                     platformUserName = req.body.entry[0].changes[0].value.contacts[0].profile.name;
                     const isBlocked = await this.blockUserService.isUserBlocked(req, userPlatformId);
                     if (isBlocked) {
-                        
                         console.log(`User ${userPlatformId} is blocked. `);
-                        
-                        // await this.blockUserService.handleBlockMessage(req, userPlatformId, res);
-
                         return;
                     }
                 }
