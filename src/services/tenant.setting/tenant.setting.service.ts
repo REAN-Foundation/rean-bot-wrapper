@@ -1,6 +1,6 @@
 import needle from "needle";
 import { RequestResponseCacheService } from "../../modules/cache/request.response.cache.service";
-import { ChatBotSettings, ConsentMessage, ConsentMessageWithLanguage, TenantSettingsDomainModel } from "../../domain.types/tenant.setting/tenant.setting.types";
+import { ChatBotSettings, ConsentMessage, ConsentMessageWithLanguage, TenantSettingsDomainModel, WelcomeMessage } from "../../domain.types/tenant.setting/tenant.setting.types";
 import { ApiError } from "../../common/api.error";
 import { languageCodeMapper } from "../../utils/language.code.mapper";
 
@@ -123,6 +123,27 @@ export class TenantSettingService {
                 Language : languageCodeMapper.get(message.LanguageCode) || 'Unknown'
             };
         });
+    }
+
+    static async getWelcomeMessage(tenantCode: string,apiKey: string,baseUrl: string): Promise<WelcomeMessage> {
+
+        const defaultWelcomeMessage: WelcomeMessage = {
+            LanguageCode : 'en',
+            Content      : 'Hello! Welcome to our health assistant. How can I help you today?'
+        };
+
+        try {
+            const tenantSetting: TenantSettingsDomainModel =
+                await this.getTenantSettingByCode(tenantCode, apiKey, baseUrl);
+
+            const welcomeMessage = tenantSetting?.ChatBot?.WelcomeMessages?.[0] ?? defaultWelcomeMessage;
+
+            return welcomeMessage;
+
+        } catch (error) {
+            console.error('Error in TenantSettingService.getWelcomeMessage:', error);
+            return defaultWelcomeMessage;
+        }
     }
 
 }
