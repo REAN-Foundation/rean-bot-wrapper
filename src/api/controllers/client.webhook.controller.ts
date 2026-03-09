@@ -414,6 +414,7 @@ export class ClientWebhookController {
                     if (isBlocked) {
                         
                         console.log(`User ${userPlatformId} is blocked. `);
+                        
                         // await this.blockUserService.handleBlockMessage(req, userPlatformId, res);
 
                         return;
