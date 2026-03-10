@@ -26,7 +26,7 @@ export class GetPatientInfoService{
 
                 const phoneNumber = await this.needleService.getPhoneNumber(eventObj);
                 const options = this.getHeaders.getHeaders();
-                const ReanBackendBaseUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
+                const ReanBackendBaseUrl = process.env.REAN_APP_BACKEND_BASE_URL;
                 const apiUrl = `${ReanBackendBaseUrl}patients/byPhone?phone=${encodeURIComponent(phoneNumber)}`;
                 console.log("apiUrl", apiUrl);
                 const response = await needle("get", apiUrl, options);
@@ -83,9 +83,9 @@ export class GetPatientInfoService{
             try {
                 Logger.instance().log(`Get MedicationInfo API`);
                 const options = getRequestOptions("rean_app");
-                options.headers["x-api-key"] = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY");
+                options.headers["x-api-key"] =  process.env.REANCARE_API_KEY;
                 options.headers["authorization"] = `Bearer ${accessToken}`;
-                const ReanBackendBaseUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
+                const ReanBackendBaseUrl = process.env.REAN_APP_BACKEND_BASE_URL;
                 const apiUrl = `${ReanBackendBaseUrl}clinical/medications/current/${patientUserId}`;
 
                 const response = await needle("get", apiUrl, options);
@@ -129,9 +129,9 @@ export class GetPatientInfoService{
 
             const patientUserId = result.message[0].UserId;
             const accessToken = result.message[0].accessToken;
-            options.headers["x-api-key"] = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY");
+            options.headers["x-api-key"] = process.env.REANCARE_API_KEY;
             options.headers["authorization"] = `Bearer ${accessToken}`;
-            const ReanBackendBaseUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
+            const ReanBackendBaseUrl = process.env.REAN_APP_BACKEND_BASE_URL;
 
             const medicineName: string = eventObj.body.queryResult.parameters.medicine;
             const frequency: string = eventObj.body.queryResult.parameters.frequency;
@@ -216,7 +216,7 @@ export class GetPatientInfoService{
                 break;
             }
             case "Night":{
-                    
+
                 obj1.TimeSchedules = ["Night"];
                 obj1.Frequency = 1;
                 break;
@@ -225,7 +225,7 @@ export class GetPatientInfoService{
                 obj1.TimeSchedules = ["Evening"];
                 obj1.Frequency = 1;
                 break;
-                    
+
             }
             case "Empty Stomach":
             case "Once": {

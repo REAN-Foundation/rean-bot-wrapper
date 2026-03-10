@@ -8,7 +8,7 @@ export class GetHeaders {
     // eslint-disable-next-line max-len
     constructor(@inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService) {}
 
-    getHeaders = (accessToken?: any, api_key = this.clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY")) => {
+    getHeaders = (accessToken?: any, api_key = process.env.REANCARE_API_KEY) => {
         const reancare_api_key = api_key;
         if (!accessToken) {
             accessToken = null;
@@ -19,8 +19,9 @@ export class GetHeaders {
         return options;
     };
 
-    getWorkflowHeaders = (accessToken?: any) => {
-        const workflow_api_key = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WORK_FLOW_API_KEY");
+    getWorkflowHeaders = async(accessToken?: any) => {
+        const workflowSettings = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WorkflowSettings");
+        const workflow_api_key = workflowSettings?.Value.ApiKey;
         if (!accessToken) {
             accessToken = null;
         }

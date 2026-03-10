@@ -1,6 +1,5 @@
 import { Logger } from "../../common/logger";
 import { ContainerService } from "../container/container.service";
-import { ClientEnvironmentProviderService } from "../set.client/client.environment.provider.service";
 import { TenantSettingService } from "../tenant.setting/tenant.setting.service";
 import { IntentRepo } from "../../database/repositories/intent/intent.repo";
 import { CareplanMetaDataValidator } from "./careplan.metadata.validator";
@@ -20,7 +19,7 @@ export class CareplanMessageSender {
             CareplanMessageSender.validateInputs(clientName, patientUserId);
 
             const childContainer = CareplanMessageSender.createContainer(clientName);
-            const { apiKey, baseUrl } = CareplanMessageSender.getClientConfig(childContainer);
+            const { apiKey, baseUrl } = CareplanMessageSender.getClientConfig();
 
             await CareplanMessageSender.ensureFeatureEnabled(clientName, apiKey, baseUrl);
 
@@ -51,11 +50,10 @@ export class CareplanMessageSender {
         return childContainer;
     }
 
-    private static getClientConfig(childContainer: any): { apiKey: string; baseUrl: string } {
-        const clientEnvironmentProviderService = childContainer.resolve(ClientEnvironmentProviderService);
+    private static getClientConfig(): { apiKey: string; baseUrl: string } {
         return {
-            apiKey  : clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"),
-            baseUrl : clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL")
+            apiKey  : process.env.REANCARE_API_KEY,
+            baseUrl : process.env.REAN_APP_BACKEND_BASE_URL
         };
     }
 

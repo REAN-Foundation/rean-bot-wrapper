@@ -26,6 +26,12 @@ export const CacheStrategies: Record<string, CacheOptions> = {
         Priority             : CachePriority.High
     },
 
+    persistent : {
+        Ttl                  : null,           // ❗ Never expires
+        StaleWhileRevalidate : false,          // No background refresh
+        Priority             : CachePriority.Low
+    }
+
     // 4. BUSINESS DATA - Core business entities
     //   business: {
     //     Ttl: 30 * 60 * 1000, // 30 minutes

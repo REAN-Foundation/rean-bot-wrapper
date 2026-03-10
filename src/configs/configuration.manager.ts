@@ -9,6 +9,7 @@ import {
     EHRSpecification,
     AuthenticationType,
     AuthorizationType,
+    SecretsProvider
 } from './configs';
 
 export class ConfigurationManager {
@@ -41,7 +42,11 @@ export class ConfigurationManager {
                     VisibilityTimeout      : configuration?.Messaging?.Events?.VisibilityTimeout,
                 },
             },
+            SecretsManager : {
+                Provider : configuration?.SecretsManager?.Provider as SecretsProvider,
+            },
             MaxUploadFileSize : configuration.MaxUploadFileSize,
+
         };
 
         ConfigurationManager.checkConfigSanity();
@@ -66,7 +71,7 @@ export class ConfigurationManager {
     public static DatabaseFlavour = (): DatabaseFlavour => {
         return ConfigurationManager._config.Database.Flavour;
     };
-    
+
     public static EhrSpecification = (): EHRSpecification => {
         return ConfigurationManager._config.Ehr.Specification;
     };
@@ -85,6 +90,10 @@ export class ConfigurationManager {
 
     public static MessagingConfig = (): MessagingConfig => {
         return ConfigurationManager._config.Messaging;
+    };
+
+    public static SecretsProvider = (): SecretsProvider => {
+        return ConfigurationManager._config.SecretsManager.Provider;
     };
 
     private static checkConfigSanity() {
