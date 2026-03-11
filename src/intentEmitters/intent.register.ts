@@ -79,7 +79,6 @@ import { CincinnatiPerMinuteMsgListener } from './intentListeners/maternity.care
 import { PatientDonationConfirmationListener } from './intentListeners/bloodWarrior/patient.donation.confirmation.listener';
 import { AdditionalInfoEditListener } from './intentListeners/consentListners/get.additional.info.listener';
 import { AdditionalInfoReadListener } from './intentListeners/consentListners/read.additional.info.listener';
-import { WelcomeIntentListener } from './intentListeners/welcome.intent.listener';
 import { NearestLocationListner } from './intentListeners/nearest.location.listner';
 import { AppointmentBookingListner } from './intentListeners/appoinment.booking.listner';
 import { VolunteerSelectedPatient } from './intentListeners/bloodWarrior/volunteer.selected.patient';
