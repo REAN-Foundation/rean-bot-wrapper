@@ -12,9 +12,9 @@ export const DefaultWelcomeListener = async (intent, eventObj) => {
         let response = null;
         const payload = eventObj.body.originalDetectIntentRequest.payload;
         const clientEnvironmentProviderService: ClientEnvironmentProviderService = eventObj.container.resolve(ClientEnvironmentProviderService);
-        const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
-        const baseUrl = await clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
-        const apiKey = await clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY");
+        const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
+        const baseUrl = process.env.REAN_APP_BACKEND_BASE_URL;
+        const apiKey = process.env.REANCARE_API_KEY;
         response = await TenantSettingService.getWelcomeMessage(clientName, apiKey, baseUrl);
         if (!response) {
             console.log('I have failed');
