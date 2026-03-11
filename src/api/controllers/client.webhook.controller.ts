@@ -44,6 +44,10 @@ export class ClientWebhookController {
 
     }
 
+    apiKey = process.env.REANCARE_API_KEY;
+
+    reanBackendUrl = process.env.REAN_APP_BACKEND_BASE_URL;
+
     sendMessage = async (req, res) => {
         try {
             this._platformMessageService = req.container.resolve(req.params.channel);
@@ -82,9 +86,9 @@ export class ClientWebhookController {
             if (userConsent) {
                 return userConsent.consentGiven !== 'true';
             }
-         
+
             return true;
-            
+
         } catch (error) {
             console.error('Error in checkConsentRequired:', error);
             return true;
@@ -157,12 +161,13 @@ export class ClientWebhookController {
         try {
 
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
-            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
+            console.log("Client Name:", clientName);
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
             const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
             const messageStatusRepostiory = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(MessageStatus);
             this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
-            this._clientAuthenticatorService.authenticate(req,res);
+            await this._clientAuthenticatorService.authenticate(req,res);
             let userPlatformId = null;
             let platformUserName = null;
             this._platformMessageService = req.container.resolve(req.params.channel);
@@ -182,8 +187,8 @@ export class ClientWebhookController {
             else {
                 const consentRequirement = await TenantSettingService.isConsentEnabled(
                     clientName,
-                    clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"),
-                    clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL")
+                    this.apiKey,
+                    this.reanBackendUrl
                 );
                 console.log("Consent feature is ", consentRequirement);
                 const validChannels = ["REAN_SUPPORT", "slack", "SNEHA_SUPPORT", "api"];
@@ -200,7 +205,7 @@ export class ClientWebhookController {
                     return res.status(200).send(response);
                 }
                 else {
-                    this.handelRequestWithoutConsent(
+                    await this.handelRequestWithoutConsent(
                         firstTimeUser,
                         patientUSerId,
                         req,
@@ -233,16 +238,18 @@ export class ClientWebhookController {
                 const results = await this.registrationService.getPatientUserId(req.params.channel, userPlatformId, platformUserName);
                 await this.registrationService.wrapperRegistration(entityManagerProvider,userPlatformId, platformUserName,req.params.channel,results.patientUserId);
             }
-            this._platformMessageService.handleMessage(reqVariable, req.params.channel);
+            await this._platformMessageService.handleMessage(reqVariable, req.params.channel);
         } catch (error) {
-            console.log(error);
+            console.log("[WebhookController] Error in handelRequestWithoutConsent:", error);
         }
     }
 
     private async handleConsentMessage(req: any, res: any, handleReqVariable, buttonKeyName, channel, firstTimeUser) {
         try {
             const clientEnvironmentProviderService = await req.container.resolve(ClientEnvironmentProviderService);
-            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await  clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
+            console.log(clientName);
+            console.log("Here in handle consent Message");
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
             const consentRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(ConsentInfo);
             const [userId, consentReply, languageCode] = await this.getUserIdAndLanguagecode(handleReqVariable, channel, req);
@@ -261,15 +268,18 @@ export class ClientWebhookController {
             if (firstTimeUser && !consentReply) {
                 this.consentService.sendLanguageSelectionMessage(req, userId, buttonKeyName);
             }
+
             // Handle language selection callback
             else if (consentReply && consentReply.startsWith("language_select-")) {
                 this.consentService.handleConsentRequest(req, userId, consentReply, languageCode, consentRepository, res, buttonKeyName);
             }
+
             // Handle consent flow (existing logic)
             else {
                 if (consentRequired && consentReply !== "consent_yes") {
                     this.consentService.handleConsentRequest(req, userId, consentReply, languageCode, consentRepository, res, buttonKeyName);
-                } else {
+                }
+                else {
                     this._platformMessageService.handleMessage(handleReqVariable, req.params.channel);
                 }
             }
@@ -282,15 +292,15 @@ export class ClientWebhookController {
         try {
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
             let userId = null;
-            let consentReply = null;
-            let languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
-
-            if (channel === "whatsappMeta") {
-                if (reqBody.messages[0].type === 'interactive') {
+            let consentReply  = null;
+            let languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DefaultLanguage");
+            if (channel === "whatsappMeta"){
+                if (reqBody.messages[0].type === 'interactive'){
                     const interactiveType = reqBody.messages[0].interactive.type;
                     consentReply = reqBody.messages[0]?.interactive[interactiveType]?.id;
 
                     if (consentReply) {
+
                         // Handle both language_select-{code} and consent_changeLanguge-{code}
                         if (consentReply.includes("-")) {
                             languageCode = consentReply.split("-")[1];
@@ -313,9 +323,8 @@ export class ClientWebhookController {
                     if (consentReply && consentReply.includes("-")) {
                         languageCode = consentReply.split("-")[1];
                     }
-
-                    if (!languageCode) {
-                        languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+                    if (!languageCode){
+                        languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DefaultLanguage");
                     }
 
                     userId = reqBody.callback_query.message.chat.id;
@@ -376,17 +385,17 @@ export class ClientWebhookController {
             let logMessage = '';
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
-            const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
             const messageStatusRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(MessageStatus);
             this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
-            this._clientAuthenticatorService.authenticate(req,res);
+            await this._clientAuthenticatorService.authenticate(req,res);
             const statuses = req.body.entry[0].changes[0].value.statuses;
             this._platformMessageService = req.container.resolve(req.params.channel);
             const consentActivation = await TenantSettingService.isConsentEnabled(
                 clientName,
-                clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"),
-                clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL")
+                this.apiKey,
+                this.reanBackendUrl
             );
             let userPlatformId = null;
             let platformUserName = null;
@@ -412,8 +421,7 @@ export class ClientWebhookController {
                     platformUserName = req.body.entry[0].changes[0].value.contacts[0].profile.name;
                     const isBlocked = await this.blockUserService.isUserBlocked(req, userPlatformId);
                     if (isBlocked) {
-                        console.log(`User ${userPlatformId} is blocked. Sending block message.`);
-                        await this.blockUserService.handleBlockMessage(req, userPlatformId, res);
+                        console.log(`User ${userPlatformId} is blocked. `);
                         return;
                     }
                 }
@@ -437,7 +445,7 @@ export class ClientWebhookController {
         try {
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
-            const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(ChatMessage);
             const messageStatusRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(MessageStatus);
             console.log("Wati Client Name:", clientName);
@@ -452,7 +460,7 @@ export class ClientWebhookController {
             } else if (req.body.statusString === "SENT" && req.body.owner === false) {
                 this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
                 this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
-                this._clientAuthenticatorService.authenticate(req, res);
+                await this._clientAuthenticatorService.authenticate(req, res);
                 this._platformMessageService = req.container.resolve(req.params.channel);
                 this._platformMessageService.handleMessage(req.body, req.params.channel);
             } else {

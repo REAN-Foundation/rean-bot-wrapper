@@ -315,9 +315,9 @@ export interface FormsIntegrations {
 }
 
 export interface FormsSettings {
-        Integrations  : FormsIntegrations,
-        OfflineSupport: boolean,
-        FieldApp      : boolean
+    Integrations  : FormsIntegrations,
+    OfflineSupport: boolean,
+    FieldApp      : boolean
 }
 
 export interface ConsentSettings {
@@ -334,6 +334,24 @@ export interface ConsentMessage {
     WebsiteURL?  : string;
 }
 
+export enum CustomSettingDataType {
+    String  = 'string',
+    Number  = 'number',
+    Boolean = 'boolean',
+    Object  = 'object',
+    Array   = 'array'
+}
+export interface CustomSettingItem {
+    Name        : string;
+    Description : string;
+    DataType    : CustomSettingDataType;
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    Value       : string | number | boolean | object | any[];
+}
+
+export interface CustomSettings {
+    [key: string]: CustomSettingItem;
+}
 export interface ConsentMessageWithLanguage extends ConsentMessage {
     Language?  : string;
 }
@@ -344,6 +362,7 @@ export interface TenantSettingsDomainModel {
     ChatBot?                : ChatBotSettings,
     Forms?                  : FormsSettings,
     Consent?                : ConsentSettings,
+    Custom?                 : CustomSettings
     TenantId?               : string
 }
 

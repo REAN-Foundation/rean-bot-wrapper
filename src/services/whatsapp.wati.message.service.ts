@@ -61,7 +61,7 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
     async setWebhook(clientName: string){
         return;
     }
-    
+
     async SendMediaMessage(response_format: Iresponse, payload: any) {
         let whatsappMessageId;
         const type = response_format.message_type;
@@ -87,7 +87,8 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
                     }
 
                 }
-                if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE")){
+                const qaService = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("QnA");
+                if (qaService){
                     if (response_format.name !== "ReanCare") {
                         Logger.instance().log("Providing QA service through clickUp");
                         await this.logsQAService.logMesssages(response_format);
@@ -121,7 +122,7 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
                     console.log(
                         "THIS HTML TO IMAGE SUPPORT HAS BEEN DEPRECATED"
                     );
-                    
+
                     // METHOD BEING DEPRECATED DUE TO PACKAGE SUPPORT ISSUES
                     // const uploadImageName = await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
                     // const vacinationImageFile = await this.awsS3manager.uploadFile(uploadImageName);
@@ -175,5 +176,5 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
     async getMessageIdFromResponse(responseBody: any) {
         throw new Error("Method not implemented.");
     }
-    
+
 }

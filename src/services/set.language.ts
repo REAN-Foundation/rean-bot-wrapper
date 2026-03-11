@@ -44,8 +44,10 @@ export class UserLanguage {
             // if (detected_language !== preferredLanguage){
             //     return "change language";
             // }
-            if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("TRANSLATE_SETTING")) {
-                this.translateSetting = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TRANSLATE_SETTING");
+            const translateSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("TranslateSetting");
+            const translateSettingValue = translateSetting?.Value;
+            if (translateSettingValue) {
+                this.translateSetting = translateSettingValue;
             } else {
                 this.translateSetting = 10;
             }

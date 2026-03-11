@@ -43,7 +43,7 @@ export class GetCalories {
 
             const query_result = request;
             const meta_data = [];
-            
+
             const food_names = [];
             const calories_array = [];
             const reply_text = [];
@@ -79,7 +79,7 @@ export class GetCalories {
                 const food_details = JSON.parse(JSON.stringify(await this.mainGetFood(access_token,food_id)));
                 const food = JSON.parse(food_details.body);
                 const servings = food.food.servings;
-                
+
                 if (!foodName.value && !foodName.unit) {
                     console.log("No quantity has been defined");
                     let calories = '0';
@@ -103,7 +103,7 @@ export class GetCalories {
                     // eslint-disable-next-line max-len
                     await this.saveToDB(table_id,search_term.name,food.food.food_name,calories,value,serving_data);
                     meta_data.push(temp);
-                    const reply = `${search_term.name.toLowerCase()} ${food_description.toLowerCase()} is ${parseInt(calories)} calories`; 
+                    const reply = `${search_term.name.toLowerCase()} ${food_description.toLowerCase()} is ${parseInt(calories)} calories`;
                     reply_text.push(reply);
                 } else if (!foodName.unit && foodName.value){
                     value = parseInt(foodName.value);
@@ -130,12 +130,12 @@ export class GetCalories {
                     // eslint-disable-next-line max-len
                     await this.saveToDB(table_id,search_term.name,food.food.food_name,calories,value,serving_data);
                     meta_data.push(temp);
-                    const reply = `${search_term.name.toLowerCase()} ${food_description.toLowerCase()} is ${parseInt(calories)} calories`; 
+                    const reply = `${search_term.name.toLowerCase()} ${food_description.toLowerCase()} is ${parseInt(calories)} calories`;
                     reply_text.push(reply);
 
                 } else {
                     console.log("Here in else of unit");
-                    
+
                     const matched_serving = await this.getUnitData(servings.serving,foodName.unit);
                     let match = {
                         "calories"            : "0",
@@ -151,7 +151,7 @@ export class GetCalories {
                     }
                     serving_data = match;
                     const volumes = ["ml","g","kg"];
-                    
+
                     const calories = match.calories;
                     var temp_cal = 0;
                     if (!foodName.value){
@@ -180,12 +180,12 @@ export class GetCalories {
                     const reply = `${search_term.name.toLowerCase()} ${match.serving_description} is ${calories} calories`;
                     reply_text.push(reply);
 
-                } 
+                }
 
             }
 
             const total_calories = calories_array.reduce((a,b) => a + b);
-            
+
             const text = 'The calorie content for ' +  reply_text.join(',') + '. Your total calorie intake based on the provided food items  and quantity is ' + total_calories + ' kcal (estimated).';
             const findit = await calorieInfoRepository.findOne(
                 {
@@ -221,17 +221,17 @@ export class GetCalories {
         var format = 'json';
         var max_results = 5;
         const url = 'https://platform.fatsecret.com/rest/server.api?method=' + method + '&search_expression=' + search + '&format=' + format + '&max_results=' + max_results;
-        
+
         var options = {
             method  : 'POST',
             url     : url,
-            headers : { 
+            headers : {
                 'content-type'  : 'application/json',
                 'Authorization' : `Bearer ${access_token}`
             }
         };
         const  res = await this.doRequest(options);
-        
+
         return res;
     }
 
@@ -239,17 +239,17 @@ export class GetCalories {
         var method = 'food.get.v2';
         var format = 'json';
         const url = 'https://platform.fatsecret.com/rest/server.api?method=' + method + '&food_id=' + food_id + '&format=' + format;
-        
+
         var options = {
             method  : 'POST',
             url     : url,
-            headers : { 
+            headers : {
                 'content-type'  : 'application/json',
                 'Authorization' : `Bearer ${access_token}`
             }
         };
         const  res = await this.doRequest(options);
-        
+
         return res;
     }
 
@@ -265,7 +265,7 @@ export class GetCalories {
             "number_of_units"     : "1",
         };
         for (var unit of servings){
-            
+
             if (unit['measurement_description'].match(serving_unit)){
                 unit_found =  unit;
                 break;
@@ -300,9 +300,9 @@ export class GetCalories {
     }
 
     async main() {
-    
-        const clientID = this.clientEnvironment.getClientEnvironmentVariable("FS_CLIENT_ID");
-        const clientSecret = this.clientEnvironment.getClientEnvironmentVariable("FS_CLIENT_SECRET");
+
+        const clientID = await this.clientEnvironment.getClientEnvironmentVariable("FS_CLIENT_ID");
+        const clientSecret = await this.clientEnvironment.getClientEnvironmentVariable("FS_CLIENT_SECRET");
 
         var options = {
             method : 'POST',
@@ -319,7 +319,7 @@ export class GetCalories {
             json : true
         };
         const  res = await this.doRequest(options);
-        
+
         return res;
     }
 
@@ -328,7 +328,7 @@ export class GetCalories {
             requestCalorie(url, function (error, res, body) {
                 if (!error && res.statusCode == 200) {
                     const data = {
-                        'body' : body 
+                        'body' : body
                     };
                     resolve(data);
                 } else {
@@ -338,3 +338,4 @@ export class GetCalories {
         });
     }
 }
+

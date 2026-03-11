@@ -31,11 +31,13 @@ const sequrlizeClients = new Map<string, Sequelize>();
 export class SequelizeClient {
 
     public connect = async(clientEnvironmentProviderService) => {
-        if (clientEnvironmentProviderService.getClientEnvironmentVariable("DATA_BASE_NAME")){
-            const dbName = clientEnvironmentProviderService.getClientEnvironmentVariable("DATA_BASE_NAME");
-            const dbPassword = clientEnvironmentProviderService.getClientEnvironmentVariable("DB_PASSWORD");
-            const dbUser = clientEnvironmentProviderService.getClientEnvironmentVariable("DB_USER_NAME");
-            const dbHost = clientEnvironmentProviderService.getClientEnvironmentVariable("DB_HOST");
+        const databaseSecrets = await clientEnvironmentProviderService.getClientEnvironmentVariable("database");
+        const databaseName = databaseSecrets?.DataBaseName;
+        if (databaseName){
+            const dbName = databaseName;
+            const dbPassword = process.env.DB_PASSWORD;
+            const dbUser = process.env.DB_USER_NAME;
+            const dbHost = process.env.DB_HOST;
             const sequelizeClient = new Sequelize(dbName, dbUser, dbPassword, {
                 host           : dbHost,
                 dialect        : 'mysql',
@@ -44,7 +46,7 @@ export class SequelizeClient {
                 repositoryMode : true
             });
 
-            if (clientEnvironmentProviderService.getClientEnvironmentVariable('NAME') === "CALORIE_BOT") {
+            if (await clientEnvironmentProviderService.getClientEnvironmentVariable('Name') === "CALORIE_BOT") {
                 // eslint-disable-next-line max-len
                 sequelizeClient.addModels([ChatMessage, ChatSession, ContactList, CalorieInfo, CalorieDatabase,ConsentInfo,UserConsent]);
             } else {
@@ -88,7 +90,8 @@ export class SequelizeClient {
 
     // eslint-disable-next-line max-len
     getSequelizeClient = async(clientEnvironmentVariable: ClientEnvironmentProviderService):Promise<Sequelize> => {
-        const clientName = clientEnvironmentVariable.getClientEnvironmentVariable("NAME");
+        const clientName = await clientEnvironmentVariable.getClientEnvironmentVariable("Name");
+        console.log("Client Name for DB Connection:", clientName);
         if (sequrlizeClients[clientName]) {
             Logger.instance().log(`Returning existing client DB for: ${clientName}`);
             return sequrlizeClients[clientName];

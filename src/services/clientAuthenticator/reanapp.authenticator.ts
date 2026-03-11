@@ -11,16 +11,20 @@ export class ReanAppAuthenticator implements clientAuthenticator{
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
     ){}
 
-    get urlToken(): any {
-        return this.clientEnvironmentProviderService.getClientEnvironmentVariable("WEBHOOK_REANAPP_CLIENT_URL_TOKEN");
+    async urlToken(): Promise<any> {
+        const appClientUrlToken = process.env.WEBHOOK_REANAPP_CLIENT_URL_TOKEN;
+        return appClientUrlToken;
     }
 
-    get headerToken(): any {
-        return this.clientEnvironmentProviderService.getClientEnvironmentVariable("WEBHOOK_REANAPP_CLIENT_HEADER_TOKEN");
+    async headerToken(): Promise<any> {
+        const appClientHeaderToken = process.env.WEBHOOK_REANAPP_CLIENT_HEADER_TOKEN;
+        return appClientHeaderToken;
     }
 
-    authenticate(req: any) {
-        if (this.headerToken === req.headers.authentication && this.urlToken === req.params.unique_token){
+    async authenticate(req: any) {
+        const urlToken = await this.urlToken();
+        const headerToken = await this.headerToken();
+        if (headerToken === req.headers.authentication && urlToken === req.params.unique_token){
             return;
         }
         throw new Error('Unable to authenticate.');

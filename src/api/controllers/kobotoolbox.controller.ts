@@ -13,7 +13,7 @@ import { Iresponse } from '../../refactor/interface/message.interface';
 export class kobotoolboxController{
 
     private _platformMessageService?: platformServiceInterface;
-    
+
     constructor(
         @inject(ResponseHandler) private responseHandler?: ResponseHandler,
         @inject(AwsS3manager) private awss3manager?: AwsS3manager,
@@ -51,13 +51,19 @@ export class kobotoolboxController{
         const entityManagerProvider = req.container.resolve(EntityManagerProvider);
         this.registrationService = req.container.resolve(Registration);
         const result = await this.registrationService.getPatientUserId(UD.platform,UD.phoneNumber,UD.userName);
-        await this.registrationService.wrapperRegistration(entityManagerProvider,UD.phoneNumber,UD.userName,UD.platform, result.patientUserId);
+        await this.registrationService.wrapperRegistration(
+            entityManagerProvider,
+            UD.phoneNumber,
+            UD.userName,
+            UD.platform,
+            result.patientUserId
+        );
     }
 
     async sendFirstWelcomeMessage(request,UD){
         try {
             const clientEnvironmentProviderService = request.container.resolve(ClientEnvironmentProviderService);
-            const WelcomeMessageTemplateNameJson = clientEnvironmentProviderService.getClientEnvironmentVariable("WELCOME_MESSAGE_TEMPLATE_NAMES");
+            const WelcomeMessageTemplateNameJson = await clientEnvironmentProviderService.getClientEnvironmentVariable("WELCOME_MESSAGE_TEMPLATE_NAMES");
             const payload: Record<string, any> = {
                 variables          : [],
                 templateName       : JSON.parse(WelcomeMessageTemplateNameJson)["en"],
@@ -79,9 +85,10 @@ export class kobotoolboxController{
         try {
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
             this.awss3manager = req.container.resolve(AwsS3manager);
-            const filename = clientEnvironmentProviderService.getClientEnvironmentVariable("S3_KOBO_FILENAME");
+            const koboSettings = await clientEnvironmentProviderService.getClientEnvironmentVariable("KoboSettings");
+            const filename = koboSettings.Value.FileName;
             const userDetails = await this.getUserDetails(req.body);
-            const registrationRequired = await clientEnvironmentProviderService.getClientEnvironmentVariable("KOBO_REGISTERATION");
+            const registrationRequired = koboSettings.Value.RegistrationRequired;
             if (registrationRequired && userDetails.registration === "true") {
                 this.registerUser(req,userDetails);
                 this.sendFirstWelcomeMessage(req,userDetails);
@@ -95,5 +102,5 @@ export class kobotoolboxController{
         }
 
     };
-    
+
 }

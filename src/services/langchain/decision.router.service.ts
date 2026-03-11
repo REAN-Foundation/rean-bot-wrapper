@@ -85,7 +85,19 @@ export class DecisionRouter {
         };
     }
 
-    public model = new ChatOpenAI({ temperature: 0, modelName: "gpt-3.5-turbo" });
+    /** Lazy ChatOpenAI using tenant API key (avoids construction-time env requirement). */
+    private async getModel(): Promise<ChatOpenAI> {
+        const apiKeySetting = await this.environmentProviderService.getClientEnvironmentVariable("OpenAiApiKey");
+        const apiKey = apiKeySetting?.Value ?? process.env.OPENAI_API_KEY;
+        if (!apiKey) {
+            throw new Error("OpenAI or Azure OpenAI API key not found. Set OpenAiApiKey in tenant secrets or OPENAI_API_KEY in .env.");
+        }
+        return new ChatOpenAI({
+            temperature : 0,
+            modelName   : "gpt-3.5-turbo",
+            openAIApiKey: apiKey
+        });
+    }
 
     public feedbackFlag = false;
 
@@ -124,7 +136,7 @@ export class DecisionRouter {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async checkAssessment(messageBody: Imessage, channel: string) {
         try {
-            
+
             const assessmentData = {
                 AssessmentId   : '',
                 AssessmentName : '',
@@ -187,7 +199,7 @@ export class DecisionRouter {
             } else {
                 key = '';
             }
-          
+
             const nextQuestionFlag = await CacheMemory.get(key);
 
             // Currently will only support the assessment start through buttons
@@ -196,7 +208,7 @@ export class DecisionRouter {
                 messageBody.intent &&
                 !nextQuestionFlag
             ) {
-        
+
                 const matchingIntents = await intentRepository.findOne({
                     where : {
                         code : intent,
@@ -222,7 +234,7 @@ export class DecisionRouter {
                     if (nextQuestionFlag === true) {
                         assessmentData.AssessmentFlag = true;
                         assessmentData.AssessmentId = assessmentResponse.assesmentId;
-                
+
                         // await CacheMemory.set(key, false);
                     }
                 } else {
@@ -331,13 +343,13 @@ export class DecisionRouter {
                         }
                     }
                 }
-            
+
             }
 
             return assessmentData;
         } catch (error) {
             console.log('Error in checkAssessment:', error);
-            
+
             // Return default assessment data with flag set to false on error
             return {
                 AssessmentId   : '',
@@ -361,7 +373,7 @@ export class DecisionRouter {
             if (!messageBody?.intent) {
                 return false;
             }
-            const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await this.environmentProviderService.getClientEnvironmentVariable("Name");
             const childContainer = ContainerService.createChildContainer(clientName);
             if (!childContainer) {
                 throw new Error("Failed to create child container");
@@ -380,14 +392,14 @@ export class DecisionRouter {
                 .split('T')[0];
 
             return careplanMetaData;
-                
+
         } catch (error) {
             console.log('Error in checkCareplanEnrollment:', error);
             return false;
         }
 
     }
-    
+
     async checkDFIntent(messageBody: Imessage){
 
         // const dfResponse = await sessionClient.detectIntent(requestBody);
@@ -441,9 +453,8 @@ export class DecisionRouter {
             `
         );
 
-        // const model = new ChatOpenAI({ temperature: 0, modelName: "gpt-3.5-turbo" });
-
-        const chain = promptTemplate.pipe(this.model);
+        const model = await this.getModel();
+        const chain = promptTemplate.pipe(model);
 
         const result = await chain.invoke({ question: userQuery });
 
@@ -462,7 +473,8 @@ export class DecisionRouter {
 
     async getDecision(messageBody: Imessage, channel: string){
         try {
-            const workflowMode = this.environmentProviderService.getClientEnvironmentVariable("WORK_FLOW_MODE");
+            const workflowSetttings = await this.environmentProviderService.getClientEnvironmentVariable("WorkflowSettings");
+            const workflowMode = workflowSetttings?.Value?.Mode;
             if (workflowMode === 'TRUE')
             {
 
@@ -475,7 +487,7 @@ export class DecisionRouter {
                     this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.WorkflowService;
                     this.outgoingMessage.Alert.AlertId = workflowFlag.matchedSchemaId;
                     return this.outgoingMessage;
-                
+
                 } else {
                     this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.QnA;
                     return this.outgoingMessage;
@@ -554,12 +566,16 @@ export class DecisionRouter {
             }
         } catch (error) {
             console.log('Error in router:', error);
+            this.outgoingMessage.MetaData = messageBody;
+            this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.QnA;
+            return this.outgoingMessage;
         }
     }
 
     async getDialogflowLanguage(){
-        if (this.environmentProviderService.getClientEnvironmentVariable("DIALOGFLOW_DEFAULT_LANGUAGE_CODE")){
-            return this.environmentProviderService.getClientEnvironmentVariable("DIALOGFLOW_DEFAULT_LANGUAGE_CODE");
+        const dialogflowDefaultLanguage = process.env.DIALOGFLOW_DEFAULT_LANGUAGE_CODE;
+        if (dialogflowDefaultLanguage){
+            return dialogflowDefaultLanguage;
         }
         else {
             return "en-US";
@@ -570,7 +586,7 @@ export class DecisionRouter {
         try {
             const promptTemplate = PromptTemplate.fromTemplate(`
             You are a workflow routing classifier for an emergency response system. Your task is to determine if a user message should trigger ANY of the available workflows or be sent to a general LLM service for answering questions.
-            
+
             DECISION CRITERIA:
 
             Send to WORKFLOW (flag: "true") if the user message:
@@ -616,9 +632,7 @@ export class DecisionRouter {
             Analyze the user message against ALL available workflows and determine the appropriate routing.
             `
             );
-            const model = new ChatOpenAI({
-                modelName : "gpt-5-mini"
-            });
+            const model = await this.getModel();
             const chain = promptTemplate.pipe(model);
 
             const result = await chain.invoke({

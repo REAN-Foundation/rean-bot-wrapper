@@ -103,9 +103,9 @@ export class ChatBotController {
     sendWorkflowMessage = async (request, response) => {
         try {
             const clientEnvironmentProviderService = request.container.resolve(ClientEnvironmentProviderService);
-            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             const entityManagerProvider = request.container.resolve(EntityManagerProvider);
-          
+
             const requestBody = request.body;
             let messageChannel = requestBody.UserMessage.MessageChannel;
             if (requestBody.UserMessage.MessageChannel === "WhatsApp" || requestBody.UserMessage.MessageChannel === "Other"){
@@ -174,7 +174,7 @@ export class ChatBotController {
                 {
                     response_format.message_type = 'template';
                     console.log("An emergency incident message");
-                  
+
                     payload["templateName"] = "incident_code";
                     payload["languageForSession"] = "en";
                     payload["variables"] = [
@@ -183,7 +183,7 @@ export class ChatBotController {
                             text : event.UserMessage.TextMessage
                         },
                     ];
-                                               
+
                 }
             }
 
@@ -261,14 +261,14 @@ export class ChatBotController {
                 event.UserMessage.MessageChannel === 'whatsappWati') {
                     payload = await sendApiInteractiveListService(availabliltyButton);
                     response_format.message_type = 'interactivelist';
-                  
+
                 } else {
                     payload = await sendTelegramButtonService(availabliltyButton);
                     response_format.message_type = 'inline_keyboard';
                 }
-                
+
             }
-        
+
             else if (event.UserMessage.MessageType === "Question" && !event.UserMessage.QuestionText.startsWith("Will you be available")) {
                 response_format.message_type = "question";
                 response_format.messageText = event.UserMessage.QuestionText;
@@ -296,7 +296,7 @@ export class ChatBotController {
                     }
                 }
             }
-       
+
             console.log("PAYLOAD", JSON.stringify(payload, null, 2));
             const res = await this._platformMessageService.SendMediaMessage(response_format, payload);
             if (res) {
