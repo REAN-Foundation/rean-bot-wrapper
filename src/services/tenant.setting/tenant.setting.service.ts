@@ -16,6 +16,7 @@ export class TenantSettingService {
                 return cachedTenantSetting;
             }
             const url = `${baseUrl}tenant-settings/by-code/${tenantCode}`;
+            console.log(`Fetching tenant settings for tenant code: ${tenantCode} from URL: ${url}`);
             const response = await needle("get", url, {
                 headers : {
                     'x-api-key' : apiKey
