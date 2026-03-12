@@ -280,8 +280,8 @@ export class ConsentService {
             const consentMessage: ConsentMessage =
                 await TenantSettingService.getConsentMessages(
                     clientName,
-                    clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"),
-                    clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL"),
+                    process.env.REANCARE_API_KEY,
+                    process.env.REAN_APP_BACKEND_BASE_URL,
                     languageCode
                 );
 
@@ -333,8 +333,8 @@ export class ConsentService {
             this._platformMessageService = req.container.resolve(req.params.channel);
             const consentMessages: ConsentMessageWithLanguage[] = await TenantSettingService.getConsentSetting(
                 clientName,
-                clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"),
-                clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL")
+                process.env.REANCARE_API_KEY,
+                process.env.REAN_APP_BACKEND_BASE_URL,
             );
 
             const buttonArray = [];
