@@ -13,14 +13,12 @@ export class TenantSecretsService {
         @inject('ISecretsService') private readonly _secretsManager: ISecretsService
     ) {}
 
-    apiKey = process.env.REANCARE_API_KEY;
-
-    baseUrl = process.env.REAN_APP_BACKEND_BASE_URL;
-
 
     public loadClientEnvVariables = async() => {
         try {
-            const tenantObjectList = await TenantService.getAllTenants(this.apiKey, this.baseUrl);
+            const apiKey = process.env.REANCARE_API_KEY;
+            const baseUrl = process.env.REAN_APP_BACKEND_BASE_URL;
+            const tenantObjectList = await TenantService.getAllTenants(apiKey, baseUrl);
             if (!tenantObjectList || tenantObjectList.length === 0) {
                 console.warn("No tenants found to load secrets for.");
                 return;
@@ -39,8 +37,8 @@ export class TenantSecretsService {
                     console.warn(`No secret found for tenant ${tenantCode} with name ${secretName}. Skipping...`);
                     continue;
                 }
-                clientsList.push(tenantCode);
                 await this.storeVariablesInCache(secretObject, tenantCode);
+                clientsList.push(tenantCode);
             }
             return clientsList;
 
@@ -57,11 +55,13 @@ export class TenantSecretsService {
             // if (!secretObject.NAME) {
 
             let tenantSecrets = {...secretObject};
-            if (this.apiKey && this.baseUrl) {
+            const apiKey = process.env.REANCARE_API_KEY;
+            const baseUrl = process.env.REAN_APP_BACKEND_BASE_URL;
+            if (apiKey && baseUrl) {
                 const botSettings = await TenantSettingService.getTenantSettingByCode(
                     tenantCode,
-                    this.apiKey,
-                    this.baseUrl);
+                    apiKey,
+                    baseUrl);
 
                 if (botSettings) {
                     tenantSecrets = {...tenantSecrets, ...botSettings.Common, ...botSettings.ChatBot, ...botSettings.Custom, ...botSettings.Followup, ...botSettings.Forms};
