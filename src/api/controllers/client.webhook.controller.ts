@@ -308,7 +308,7 @@ export class ClientWebhookController {
                     }
 
                     if (!languageCode) {
-                        languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+                        languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DefaultLanguage");
                     }
 
                     userId = reqBody.messages[0].from;
