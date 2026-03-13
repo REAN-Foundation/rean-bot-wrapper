@@ -573,7 +573,8 @@ export class DecisionRouter {
     }
 
     async getDialogflowLanguage(){
-        const dialogflowDefaultLanguage = process.env.DIALOGFLOW_DEFAULT_LANGUAGE_CODE;
+        const dialogflowSettings = await this.environmentProviderService.getClientEnvironmentVariable("DialogflowSettings");
+        const dialogflowDefaultLanguage = dialogflowSettings?.Value?.DefaultLanguageCode;
         if (dialogflowDefaultLanguage){
             return dialogflowDefaultLanguage;
         }
