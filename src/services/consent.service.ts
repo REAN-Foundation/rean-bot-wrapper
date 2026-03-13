@@ -328,7 +328,7 @@ export class ConsentService {
     async sendLanguageSelectionMessage(req, userId, buttonmessageType) {
         try {
             const clientEnvironmentProviderService = await req.container.resolve(ClientEnvironmentProviderService);
-            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
 
             this._platformMessageService = req.container.resolve(req.params.channel);
             const consentMessages: ConsentMessageWithLanguage[] = await TenantSettingService.getConsentSetting(

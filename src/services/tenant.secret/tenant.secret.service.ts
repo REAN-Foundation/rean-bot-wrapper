@@ -27,6 +27,7 @@ export class TenantSecretsService {
 
             for (const tenant of tenantObjectList) {
                 const tenantCode = tenant.Code;
+                console.log(`Processing tenant: ${tenantCode}`);
                 if (tenantCode === "default") {
                     continue;
                 }
