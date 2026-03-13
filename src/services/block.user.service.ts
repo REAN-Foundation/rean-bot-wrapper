@@ -31,7 +31,7 @@ export class BlockUserService {
                 req.container.resolve(EntityManagerProvider);
 
             const clientName =
-                clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+                await clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
 
             const blockRepository =
                 (await entityManagerProvider

@@ -523,7 +523,7 @@ export class ClientWebhookController {
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
 
-            const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
 
             const entityManager = await entityManagerProvider.getEntityManager(
                 clientEnvironmentProviderService,
