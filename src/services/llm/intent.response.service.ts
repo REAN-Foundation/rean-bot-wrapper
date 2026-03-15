@@ -117,11 +117,11 @@ export class IntentResponseService {
         const buttons = this.formatButtons(staticResponse.buttons);
 
         return {
-            success: true,
-            message: staticResponse.message,
-            buttons: buttons.length > 0 ? buttons : undefined,
-            responseType: 'static',
-            listenerExecuted: false
+            success          : true,
+            message          : staticResponse.message,
+            buttons          : buttons.length > 0 ? buttons : undefined,
+            responseType     : 'static',
+            listenerExecuted : false
         };
     }
 
@@ -195,8 +195,8 @@ export class IntentResponseService {
 
         return {
             ...staticResult,
-            responseType: 'hybrid',
-            listenerExecuted: true
+            responseType     : 'hybrid',
+            listenerExecuted : true
         };
     }
 
@@ -227,9 +227,9 @@ export class IntentResponseService {
         }
 
         return buttons.map(button => ({
-            text: button.text,
-            type: button.type || 'text',
-            value: button.value
+            text  : button.text,
+            type  : button.type || 'text',
+            value : button.value
         }));
     }
 
@@ -245,19 +245,19 @@ export class IntentResponseService {
 
         if (response.data?.followUpButtons) {
             buttons = response.data.followUpButtons.map((btn: any) => ({
-                text: btn.text,
-                type: 'intent' as const,
-                value: btn.intentCode
+                text  : btn.text,
+                type  : 'intent' as const,
+                value : btn.intentCode
             }));
         }
 
         return {
-            success: response.success,
-            message: response.message,
+            success          : response.success,
+            message          : response.message,
             buttons,
-            data: response.data,
+            data             : response.data,
             responseType,
-            listenerExecuted: true
+            listenerExecuted : true
         };
     }
 
@@ -266,10 +266,10 @@ export class IntentResponseService {
      */
     private createErrorResponse(message: string): IntentResponseResult {
         return {
-            success: false,
+            success          : false,
             message,
-            responseType: 'listener',
-            listenerExecuted: false
+            responseType     : 'listener',
+            listenerExecuted : false
         };
     }
 

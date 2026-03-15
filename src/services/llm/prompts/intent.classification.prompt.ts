@@ -32,16 +32,19 @@ export class IntentClassificationPromptBuilder {
         return `You are an intent classification system for a healthcare chatbot.
 Your task is to classify user messages into ONE of the available intents.
 
-INSTRUCTIONS:
+CRITICAL INSTRUCTIONS:
 1. Analyze the user's message carefully
 2. Match it to the most appropriate intent based on descriptions and examples
-3. Return your response in the exact JSON format specified
-4. Include a confidence score (0.0 to 1.0) based on how well the message matches the intent
-5. Provide a brief reasoning for your classification
+3. Return the "Intent Code" value EXACTLY as written - copy it character-by-character
+4. Do NOT modify the intent code in any way (no capitalization changes, no spaces, no underscores)
+5. Include a confidence score (0.0 to 1.0) based on how well the message matches the intent
+6. Provide a brief reasoning for your classification
+
+IMPORTANT: The "intent" field in your JSON response must be an EXACT COPY of one of the "Intent Code" values from the list provided. Character-perfect matching is required.
 
 RESPONSE FORMAT (JSON only, no additional text):
 {
-  "intent": "<intent_code>",
+  "intent": "<exact_intent_code_from_available_intents>",
   "confidence": 0.0-1.0,
   "reasoning": "Brief explanation of why this intent was selected"
 }`;
@@ -68,7 +71,9 @@ RESPONSE FORMAT (JSON only, no additional text):
         prompt += `\nAVAILABLE INTENTS:\n`;
         prompt += this.formatIntents(availableIntents);
 
-        prompt += `\nClassify the user message into ONE of the above intents.`;
+        prompt += `\n\nIMPORTANT REMINDER: Copy the "Intent Code" EXACTLY as shown above.`;
+        prompt += `\nFor example, if you see 'Intent Code: "conditionIdentification"', your response must contain: "intent": "conditionIdentification"`;
+        prompt += `\n\nNow classify the user message into ONE of the above intents.`;
         prompt += `\nRespond with JSON only:`;
 
         return prompt;
@@ -82,7 +87,7 @@ RESPONSE FORMAT (JSON only, no additional text):
     private static formatIntents(intents: IntentDto[]): string {
         return intents
             .map((intent, index) => {
-                let formatted = `${index + 1}. Intent Code: "${intent.code}"\n`;
+                let formatted = `${index + 1}. Intent Code: "${intent.code}" ← USE THIS EXACT CODE\n`;
                 formatted += `   Name: ${intent.name}\n`;
 
                 if (intent.intentDescription) {

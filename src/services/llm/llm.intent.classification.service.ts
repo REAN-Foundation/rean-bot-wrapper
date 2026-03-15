@@ -62,10 +62,10 @@ export class LLMIntentClassificationService {
 
             // 4. Call LLM
             const response = await provider.generate({
-                prompt: userPrompt,
+                prompt      : userPrompt,
                 systemPrompt,
-                temperature: 0,
-                maxTokens: 500
+                temperature : 0,
+                maxTokens   : 500
             });
 
             // 5. Parse response
@@ -82,13 +82,13 @@ export class LLMIntentClassificationService {
             const processingTimeMs = Date.now() - startTime;
 
             const result: IntentClassificationResult = {
-                intent: classification.intent,
-                confidence: classification.confidence,
-                reasoning: classification.reasoning,
-                intentData: intentData || undefined,
+                intent     : classification.intent,
+                confidence : classification.confidence,
+                reasoning  : classification.reasoning,
+                intentData : intentData || undefined,
                 processingTimeMs,
-                provider: provider.providerName,
-                model: provider.modelName
+                provider   : provider.providerName,
+                model      : provider.modelName
             };
 
             // 7. Log classification
@@ -131,9 +131,9 @@ export class LLMIntentClassificationService {
             const parsed = JSON.parse(cleaned);
 
             return {
-                intent: parsed.intent || '',
-                confidence: parsed.confidence || 0,
-                reasoning: parsed.reasoning || ''
+                intent     : parsed.intent || '',
+                confidence : parsed.confidence || 0,
+                reasoning  : parsed.reasoning || ''
             };
         } catch (error) {
             console.error('Error parsing classification response:', error);
@@ -160,17 +160,17 @@ export class LLMIntentClassificationService {
             const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
             const container = ContainerService.createChildContainer(clientName);
             await IntentClassificationLogRepo.create(container, {
-                userPlatformId: platformId,
+                userPlatformId       : platformId,
                 userMessage,
-                detectedLanguage: language,
-                llmProvider: result.provider,
-                llmModel: result.model,
-                classifiedIntent: result.intent,
-                confidenceScore: result.confidence,
-                classificationMethod: 'llm',
-                fallbackTriggered: false,
-                processingTimeMs: result.processingTimeMs,
-                tokenUsage: usage
+                detectedLanguage     : language,
+                llmProvider          : result.provider,
+                llmModel             : result.model,
+                classifiedIntent     : result.intent,
+                confidenceScore      : result.confidence,
+                classificationMethod : 'llm',
+                fallbackTriggered    : false,
+                processingTimeMs     : result.processingTimeMs,
+                tokenUsage           : usage
             });
         } catch (error) {
             console.error('Error logging classification:', error);
@@ -195,13 +195,13 @@ export class LLMIntentClassificationService {
             const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
             const container = ContainerService.createChildContainer(clientName);
             await IntentClassificationLogRepo.create(container, {
-                userPlatformId: platformId,
+                userPlatformId       : platformId,
                 userMessage,
-                classificationMethod: 'llm',
-                fallbackTriggered: true,
+                classificationMethod : 'llm',
+                fallbackTriggered    : true,
                 processingTimeMs,
-                dialogflowResult: {
-                    error: error instanceof Error ? error.message : String(error)
+                dialogflowResult     : {
+                    error : error instanceof Error ? error.message : String(error)
                 }
             });
         } catch (logError) {

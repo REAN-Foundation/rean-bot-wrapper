@@ -15,6 +15,7 @@ import {
     KeratoplastyResponseNoListener,
     KeratoplastyResponseYesListener
 } from './listeners/keratoplasty.listener';
+import { FindNearestLocationListener } from './listeners/nearest.location.listener';
 
 // Type for listener class constructors
 type ListenerClass = new (...args: any[]) => BaseLLMListener;
@@ -49,6 +50,9 @@ export function registerLLMListeners(): void {
         KeratoplastyEyeImageListener,
         KeratoplastyResponseNoListener,
         KeratoplastyResponseYesListener,
+
+        // Location services
+        FindNearestLocationListener,
 
         // Add more listeners here as they are created:
         // CovidSymptomAssessmentListener,

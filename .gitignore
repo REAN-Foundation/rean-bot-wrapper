@@ -116,3 +116,6 @@ ENV2.json
 
 # Implementation docs
 docs/feature-development/
+
+# Dialogflow export documentation (client-specific, not committed)
+docs/dialogflow-exports/
