@@ -11,7 +11,6 @@ export class EmojiFilter{
     async checkForEmoji(message: string) {
         console.log("inside checkForEmoji",message);
         const regex = emojiRegex();
-        // let emojiObj;
         const emojiSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("EmojiSetting");
         const emoji = emojiSetting?.Value;
         const emojiObjKeys = Object.keys(emoji);
