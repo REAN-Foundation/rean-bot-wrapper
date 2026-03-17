@@ -16,6 +16,23 @@ import {
     KeratoplastyResponseYesListener
 } from './listeners/keratoplasty.listener';
 import { FindNearestLocationListener } from './listeners/nearest.location.listener';
+import {
+    ConditionIdentificationListener,
+    MoreSymptomsListener,
+    KeratoplastyFollowUpListener,
+    EyeImageListener,
+    ResponseYesListener,
+    ResponseNoListener
+} from './listeners/dialogflow.symptom.assessment.listener';
+import {
+    ReportSymptomsListener,
+    SymptomAnalysisListener,
+    ProvideImageYesListener,
+    ProvideImageNoListener,
+    SimplifiedEyeImageListener,
+    MedicationYesListener,
+    MedicationNoListener
+} from './listeners/simplified.symptom.listener';
 
 // Type for listener class constructors
 type ListenerClass = new (...args: any[]) => BaseLLMListener;
@@ -50,6 +67,23 @@ export function registerLLMListeners(): void {
         KeratoplastyEyeImageListener,
         KeratoplastyResponseNoListener,
         KeratoplastyResponseYesListener,
+
+        // Dialogflow symptom assessment flow (OLD - to be deprecated)
+        ConditionIdentificationListener,
+        MoreSymptomsListener,
+        KeratoplastyFollowUpListener,
+        EyeImageListener,
+        ResponseYesListener,
+        ResponseNoListener,
+
+        // Simplified symptom flow (NEW)
+        ReportSymptomsListener,
+        SymptomAnalysisListener,
+        ProvideImageYesListener,
+        ProvideImageNoListener,
+        SimplifiedEyeImageListener,
+        MedicationYesListener,
+        MedicationNoListener,
 
         // Location services
         FindNearestLocationListener,

@@ -60,6 +60,7 @@ export class IntentResponseService {
         this.log(`Processing intent: ${intentCode}`);
 
         try {
+
             // 1. Fetch intent configuration from database
             const intentConfig = await IntentRepo.findIntentByCode(container, intentCode);
 
@@ -105,7 +106,7 @@ export class IntentResponseService {
         intentConfig: IntentDto,
         event: LLMEventObject
     ): Promise<IntentResponseResult> {
-        this.log(`Handling static response for: ${intentConfig.code}`);
+        this. log(`Handling static response for: ${intentConfig.code}`);
 
         const staticResponse = intentConfig.staticResponse as StaticResponseConfig;
 
@@ -208,6 +209,7 @@ export class IntentResponseService {
         event: LLMEventObject,
         container: DependencyContainer
     ): void {
+
         // Don't await - fire and forget
         this.handleListenerResponse(intentConfig, event, container)
             .then(result => {
@@ -240,6 +242,7 @@ export class IntentResponseService {
         response: LLMListenerResponse,
         responseType: ResponseType
     ): IntentResponseResult {
+        
         // Extract buttons from response data if present
         let buttons: FormattedButton[] | undefined;
 

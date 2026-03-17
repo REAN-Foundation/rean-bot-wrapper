@@ -218,6 +218,9 @@ export class EntityCollectionOrchestrator {
             timestamp         : new Date()
         });
 
+        // Save context back to cache with updated conversation history
+        await this.stateMachine.saveContext(context);
+
         // Update database
         await this.updateDatabaseSession(context);
 
@@ -278,6 +281,9 @@ export class EntityCollectionOrchestrator {
             entitiesExtracted : extractedEntities,
             timestamp         : new Date()
         });
+
+        // Save context back to cache with updated conversation history
+        await this.stateMachine.saveContext(context);
 
         // Update database with completion
         context.currentState = SessionState.COMPLETED;

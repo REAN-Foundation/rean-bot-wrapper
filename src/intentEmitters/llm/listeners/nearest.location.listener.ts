@@ -79,7 +79,7 @@ export class FindNearestLocationListener extends BaseLLMListener {
      * @param locationEntity - The entity value
      * @param rawValue - The raw text value (used to detect type like "latlong")
      */
-    private extractLocationValue(locationEntity: any, rawValue: string = ''): string | null {
+    private extractLocationValue(locationEntity: any, rawValue = ''): string | null {
         if (!locationEntity) {
             return null;
         }

@@ -30,7 +30,7 @@ export class EntityCollectionStateMachine {
         intentCode: string,
         userPlatformId: string,
         requiredEntities: EntityDefinition[],
-        maxTurns: number = 5
+        maxTurns = 5
     ): Promise<EntityCollectionContext> {
 
         const timeoutAt = new Date();
@@ -42,10 +42,10 @@ export class EntityCollectionStateMachine {
             intentCode,
             userPlatformId,
             requiredEntities,
-            collectedEntities: new Map(),
-            conversationHistory: [],
-            currentState: SessionState.INITIALIZED,
-            currentTurn: 0,
+            collectedEntities   : new Map(),
+            conversationHistory : [],
+            currentState        : SessionState.INITIALIZED,
+            currentTurn         : 0,
             maxTurns,
             timeoutAt
         };
@@ -96,17 +96,17 @@ export class EntityCollectionStateMachine {
 
         // State machine logic
         switch (context.currentState) {
-            case SessionState.INITIALIZED:
-                return await this.handleInitializedState(context);
+        case SessionState.INITIALIZED:
+            return await this.handleInitializedState(context);
 
-            case SessionState.COLLECTING:
-                return await this.handleCollectingState(context);
+        case SessionState.COLLECTING:
+            return await this.handleCollectingState(context);
 
-            case SessionState.VALIDATING:
-                return await this.handleValidatingState(context);
+        case SessionState.VALIDATING:
+            return await this.handleValidatingState(context);
 
-            default:
-                throw new Error(`Invalid state: ${context.currentState}`);
+        default:
+            throw new Error(`Invalid state: ${context.currentState}`);
         }
     }
 
@@ -144,11 +144,11 @@ export class EntityCollectionStateMachine {
         await this.saveContext(context);
 
         return {
-            newState: SessionState.COLLECTING,
-            action: 'ask_question',
-            data: {
+            newState : SessionState.COLLECTING,
+            action   : 'ask_question',
+            data     : {
                 missingEntities,
-                nextEntity: missingEntities[0]
+                nextEntity : missingEntities[0]
             }
         };
     }
@@ -170,11 +170,11 @@ export class EntityCollectionStateMachine {
             await this.saveContext(context);
 
             return {
-                newState: SessionState.COLLECTING,
-                action: 'ask_question',
-                data: {
-                    invalidEntities: invalidEntities.map(e => e.name),
-                    needsClarification: true
+                newState : SessionState.COLLECTING,
+                action   : 'ask_question',
+                data     : {
+                    invalidEntities    : invalidEntities.map(e => e.name),
+                    needsClarification : true
                 }
             };
         }
@@ -196,21 +196,21 @@ export class EntityCollectionStateMachine {
         let action: SessionTransitionResult['action'];
 
         switch (newState) {
-            case SessionState.COLLECTING:
-                action = 'ask_question';
-                break;
-            case SessionState.VALIDATING:
-                action = 'validate';
-                break;
-            case SessionState.COMPLETED:
-                action = 'complete';
-                break;
-            case SessionState.ABANDONED:
-            case SessionState.TIMEOUT:
-                action = 'abandon';
-                break;
-            default:
-                action = 'continue';
+        case SessionState.COLLECTING:
+            action = 'ask_question';
+            break;
+        case SessionState.VALIDATING:
+            action = 'validate';
+            break;
+        case SessionState.COMPLETED:
+            action = 'complete';
+            break;
+        case SessionState.ABANDONED:
+        case SessionState.TIMEOUT:
+            action = 'abandon';
+            break;
+        default:
+            action = 'continue';
         }
 
         return { newState, action };
@@ -229,7 +229,7 @@ export class EntityCollectionStateMachine {
     /**
      * Save context to cache
      */
-    private async saveContext(context: EntityCollectionContext): Promise<void> {
+    async saveContext(context: EntityCollectionContext): Promise<void> {
         const key = this.getCacheKey(context.sessionId);
         const serialized = this.serializeContext(context);
         await CacheMemory.set(key, serialized);
@@ -248,7 +248,7 @@ export class EntityCollectionStateMachine {
     private serializeContext(context: EntityCollectionContext): string {
         return JSON.stringify({
             ...context,
-            collectedEntities: Array.from(context.collectedEntities.entries())
+            collectedEntities : Array.from(context.collectedEntities.entries())
         });
     }
 
@@ -259,8 +259,8 @@ export class EntityCollectionStateMachine {
         const parsed = JSON.parse(serialized);
         return {
             ...parsed,
-            collectedEntities: new Map(parsed.collectedEntities),
-            timeoutAt: new Date(parsed.timeoutAt)
+            collectedEntities : new Map(parsed.collectedEntities),
+            timeoutAt         : new Date(parsed.timeoutAt)
         };
     }
 
