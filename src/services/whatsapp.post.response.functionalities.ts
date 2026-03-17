@@ -28,6 +28,7 @@ export class WhatsappPostResponseFunctionalities{
         postDataMeta["text"] = {
             "body" : response_format.messageText
         };
+        console.log('postDataMeta before regex: ', postDataMeta);
         if (new RegExp("(https?:+)").test(response_format.messageText)) {
             postDataMeta["text"]["preview_url"] = true;
         } else {
