@@ -90,17 +90,23 @@ export class SequelizeClient {
 
     // eslint-disable-next-line max-len
     getSequelizeClient = async(clientEnvironmentVariable: ClientEnvironmentProviderService):Promise<Sequelize> => {
-        const clientName = await clientEnvironmentVariable.getClientEnvironmentVariable("Name");
-        console.log("Client Name for DB Connection:", clientName);
-        if (sequrlizeClients[clientName]) {
-            Logger.instance().log(`Returning existing client DB for: ${clientName}`);
-            return sequrlizeClients[clientName];
+        try {
+            const clientName = await clientEnvironmentVariable.getClientEnvironmentVariable("Name");
+            console.log("Client Name for DB Connection:", clientName);
+            if (sequrlizeClients[clientName]) {
+                Logger.instance().log(`Returning existing client DB for: ${clientName}`);
+                return sequrlizeClients[clientName];
+            }
+            else {
+                Logger.instance().log(`Created a new client DB for: ${clientName}`);
+                sequrlizeClients[clientName] = await this.connect(clientEnvironmentVariable);
+                return sequrlizeClients[clientName];
+            }
+        } catch (error) {
+            console.error(`Error in getSequelizeClient for client ${await clientEnvironmentVariable.getClientEnvironmentVariable("Name")}:`, error);
+            // throw error; // Rethrow the error after logging it
         }
-        else {
-            Logger.instance().log(`Created a new client DB for: ${clientName}`);
-            sequrlizeClients[clientName] = await this.connect(clientEnvironmentVariable);
-            return sequrlizeClients[clientName];
-        }
+
     };
 
 }
