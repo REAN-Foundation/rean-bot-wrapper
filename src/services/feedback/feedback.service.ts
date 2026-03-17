@@ -75,7 +75,6 @@ export  class FeedbackService implements feedbackInterface {
                     const description = `**User Details**\n\n- **User Platform ID**: ${userId}\n- **Username**: ${username}`;
                     const supportChannels = await clientEnvironmentProviderService.getClientEnvironmentVariable("SupportChannels");
                     const preferredSupportChannel = Object.keys(supportChannels).find((channel) => supportChannels[channel]);
-                    // const preferredSupportChannel = await clientEnvironmentProviderService.getClientEnvironmentVariable("SupportChannel");
                     if (payload.contextId){
                         responseChatMessage = await chatMessageRepository.findAll({ where: { responseMessageID: payload.contextId } });
                         await this.supportChannel(preferredSupportChannel,responseChatMessage,messageContent,null,"Negative Feedback",description, userId);
