@@ -73,7 +73,9 @@ export  class FeedbackService implements feedbackInterface {
                 else {
                     // eslint-disable-next-line init-declarations
                     const description = `**User Details**\n\n- **User Platform ID**: ${userId}\n- **Username**: ${username}`;
-                    const preferredSupportChannel = await clientEnvironmentProviderService.getClientEnvironmentVariable("SupportChannel");
+                    const supportChannels = await clientEnvironmentProviderService.getClientEnvironmentVariable("SupportChannels");
+                    const preferredSupportChannel = Object.keys(supportChannels).find((channel) => supportChannels[channel]);
+                    // const preferredSupportChannel = await clientEnvironmentProviderService.getClientEnvironmentVariable("SupportChannel");
                     if (payload.contextId){
                         responseChatMessage = await chatMessageRepository.findAll({ where: { responseMessageID: payload.contextId } });
                         await this.supportChannel(preferredSupportChannel,responseChatMessage,messageContent,null,"Negative Feedback",description, userId);

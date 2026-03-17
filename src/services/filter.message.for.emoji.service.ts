@@ -22,7 +22,7 @@ export class EmojiFilter{
             console.log("convertToUnicodeEmoji", convertToUnicodeEmoji);
             if (convertToUnicodeEmoji !== undefined){
                 if (emojiObjKeys.includes(convertToUnicodeEmoji)){
-                    filteredMessage = emojiObjKeys[convertToUnicodeEmoji];
+                    filteredMessage = emoji[convertToUnicodeEmoji];
                     console.log("filtered message", filteredMessage);
                     return filteredMessage;
                 }
