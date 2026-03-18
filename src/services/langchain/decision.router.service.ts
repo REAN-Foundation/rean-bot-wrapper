@@ -415,7 +415,7 @@ export class DecisionRouter {
      */
     private async checkActiveEntityCollectionSession(userPlatformId: string): Promise<any | null> {
         try {
-            const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await this.environmentProviderService.getClientEnvironmentVariable("Name");
             const childContainer = ContainerService.createChildContainer(clientName);
 
             // Check for active session in database
@@ -503,7 +503,7 @@ export class DecisionRouter {
 
             // If we have an intent code, check if it requires entity collection
             if (intentCode) {
-                const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
+                const clientName = await this.environmentProviderService.getClientEnvironmentVariable("Name");
                 const childContainer = ContainerService.createChildContainer(clientName);
 
                 const intent = await IntentRepo.findIntentByCode(childContainer, intentCode);

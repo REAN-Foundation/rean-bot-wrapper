@@ -124,7 +124,7 @@ export class FeatureFlagService {
         }
 
         // Fetch from database
-        const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
+        const clientName = await this.environmentProviderService.getClientEnvironmentVariable("Name");
         const container = ContainerService.createChildContainer(clientName);
         const flag = await FeatureFlagRepo.findByFlagName(container, flagName);
 
@@ -169,7 +169,7 @@ export class FeatureFlagService {
      */
     async getAllFlags(): Promise<IFeatureFlag[]> {
         try {
-            const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await this.environmentProviderService.getClientEnvironmentVariable("Name");
             const container = ContainerService.createChildContainer(clientName);
             return await FeatureFlagRepo.findAll(container);
         } catch (error) {
@@ -184,7 +184,7 @@ export class FeatureFlagService {
      */
     async getEnabledFlags(): Promise<IFeatureFlag[]> {
         try {
-            const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await this.environmentProviderService.getClientEnvironmentVariable("Name");
             const container = ContainerService.createChildContainer(clientName);
             return await FeatureFlagRepo.findEnabledFlags(container);
         } catch (error) {
@@ -201,7 +201,7 @@ export class FeatureFlagService {
      */
     async updateFlag(flagName: string, updates: Partial<IFeatureFlag>): Promise<boolean> {
         try {
-            const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await this.environmentProviderService.getClientEnvironmentVariable("Name");
             const container = ContainerService.createChildContainer(clientName);
             const success = await FeatureFlagRepo.update(container, flagName, updates);
             if (success) {
@@ -222,7 +222,7 @@ export class FeatureFlagService {
      */
     async createFlag(flagData: Partial<IFeatureFlag>): Promise<IFeatureFlag | null> {
         try {
-            const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await this.environmentProviderService.getClientEnvironmentVariable("Name");
             const container = ContainerService.createChildContainer(clientName);
             return await FeatureFlagRepo.create(container, flagData);
         } catch (error) {
@@ -238,7 +238,7 @@ export class FeatureFlagService {
      */
     async deleteFlag(flagName: string): Promise<boolean> {
         try {
-            const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await this.environmentProviderService.getClientEnvironmentVariable("Name");
             const container = ContainerService.createChildContainer(clientName);
             const success = await FeatureFlagRepo.delete(container, flagName);
             if (success) {

@@ -36,7 +36,7 @@ export class LLMProviderFactory {
         }
 
         // Fetch configuration from database
-        const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
+        const clientName = await this.environmentProviderService.getClientEnvironmentVariable("Name");
         const container = ContainerService.createChildContainer(clientName);
         const config = await LLMProviderConfigRepo.findByProviderAndModel(
             container,
@@ -66,7 +66,7 @@ export class LLMProviderFactory {
      * @returns Promise<ILLMProvider>
      */
     async getDefaultProvider(): Promise<ILLMProvider> {
-        const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
+        const clientName = await this.environmentProviderService.getClientEnvironmentVariable("Name");
         const container = ContainerService.createChildContainer(clientName);
         const enabledProviders = await LLMProviderConfigRepo.findEnabledProviders(container);
 
@@ -85,7 +85,7 @@ export class LLMProviderFactory {
      * @returns Promise<ILLMProvider[]>
      */
     async getAllEnabledProviders(): Promise<ILLMProvider[]> {
-        const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
+        const clientName = await this.environmentProviderService.getClientEnvironmentVariable("Name");
         const container = ContainerService.createChildContainer(clientName);
         const enabledConfigs = await LLMProviderConfigRepo.findEnabledProviders(container);
 
@@ -121,18 +121,18 @@ export class LLMProviderFactory {
         };
 
         switch (config.providerName.toLowerCase()) {
-            case 'openai':
-                return new OpenAIProvider({
-                    ...providerConfig,
-                    model: config.modelName,
-                });
+        case 'openai':
+            return new OpenAIProvider({
+                ...providerConfig,
+                model: config.modelName,
+            });
 
-            case 'claude':
-                // TODO: Implement ClaudeProvider when needed
-                throw new Error('Claude provider not yet implemented');
+        case 'claude':
+            // TODO: Implement ClaudeProvider when needed
+            throw new Error('Claude provider not yet implemented');
 
-            default:
-                throw new Error(`Unsupported LLM provider: ${config.providerName}`);
+        default:
+            throw new Error(`Unsupported LLM provider: ${config.providerName}`);
         }
     }
 

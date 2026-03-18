@@ -62,7 +62,7 @@ export class EntityCollectionOrchestrator {
             }
 
             // Get intent configuration
-            const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await this.environmentProviderService.getClientEnvironmentVariable("Name");
             const container = ContainerService.createChildContainer(clientName);
             const intent = await IntentRepo.findIntentByCode(container, intentCode);
 
@@ -368,7 +368,7 @@ export class EntityCollectionOrchestrator {
      * Create database session record
      */
     private async createDatabaseSession(context: EntityCollectionContext): Promise<void> {
-        const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
+        const clientName = await this.environmentProviderService.getClientEnvironmentVariable("Name");
         const container = ContainerService.createChildContainer(clientName);
         await EntityCollectionSessionRepo.create(container, {
             id                  : uuidv4(),  // Generate proper UUID for database id
@@ -392,7 +392,7 @@ export class EntityCollectionOrchestrator {
      * Update database session record
      */
     private async updateDatabaseSession(context: EntityCollectionContext): Promise<void> {
-        const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
+        const clientName = await this.environmentProviderService.getClientEnvironmentVariable("Name");
         const container = ContainerService.createChildContainer(clientName);
         await EntityCollectionSessionRepo.update(container, context.sessionId, {
             status              : context.currentState as any,

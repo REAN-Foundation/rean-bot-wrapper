@@ -72,7 +72,7 @@ export class LLMIntentClassificationService {
             const classification = this.parseClassificationResponse(response.content);
 
             // 6. Get intent data
-            const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await this.environmentProviderService.getClientEnvironmentVariable("Name");
             const container = ContainerService.createChildContainer(clientName);
             const intentData = await IntentRepo.findIntentByCode(
                 container,
@@ -110,7 +110,7 @@ export class LLMIntentClassificationService {
      * @returns Promise<IntentDto[]>
      */
     private async getAvailableIntents(): Promise<IntentDto[]> {
-        const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
+        const clientName = await this.environmentProviderService.getClientEnvironmentVariable("Name");
         const container = ContainerService.createChildContainer(clientName);
         return await IntentRepo.findLLMEnabledIntents(container);
     }
@@ -157,7 +157,7 @@ export class LLMIntentClassificationService {
         language?: string
     ): Promise<void> {
         try {
-            const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await this.environmentProviderService.getClientEnvironmentVariable("Name");
             const container = ContainerService.createChildContainer(clientName);
             await IntentClassificationLogRepo.create(container, {
                 userPlatformId       : platformId,
@@ -192,7 +192,7 @@ export class LLMIntentClassificationService {
         processingTimeMs: number
     ): Promise<void> {
         try {
-            const clientName = this.environmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await this.environmentProviderService.getClientEnvironmentVariable("Name");
             const container = ContainerService.createChildContainer(clientName);
             await IntentClassificationLogRepo.create(container, {
                 userPlatformId       : platformId,

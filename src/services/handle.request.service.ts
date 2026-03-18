@@ -237,7 +237,7 @@ export class handleRequestservice {
                 let tag = "null";
                 tag = (metaData.type === "reaction") ? "reaction" : "Feedback";
                 await this.feedbackService.recordFeedback(outgoingMessage.Feedback.FeedbackContent, metaData.contextId, tag);
-                const feedbackPrompt = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("FEEDBACK_PROMPT");
+                const feedbackPrompt = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("FeedbackPrompt");
                 if (feedbackPrompt) {
                     messageToMlModel = feedbackPrompt + outgoingMessage.Feedback.FeedbackContent;
                 } else {
@@ -315,7 +315,7 @@ export class handleRequestservice {
     ): Promise<IserviceResponseFunctionalities> {
         try {
             const intentName = outgoingMessage.Intent.IntentName;
-            const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             const childContainer = ContainerService.createChildContainer(clientName);
 
             console.log(`[HandleRequestService] Processing LLM classified intent: ${intentName}`);
@@ -474,7 +474,7 @@ export class handleRequestservice {
         metadata: Imessage
     ): Promise<IserviceResponseFunctionalities> {
         try {
-            const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             const childContainer = ContainerService.createChildContainer(clientName);
 
             // Convert entities Map to parameters object

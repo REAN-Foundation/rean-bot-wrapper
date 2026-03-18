@@ -58,8 +58,8 @@ export class SymptomAnalysisListener extends BaseLLMListener {
             }
 
             // Get risk classification config
-            const additionalInfo = clientEnvService.getClientEnvironmentVariable('ADDITIONAL_INFO');
-            const parsedInfo = JSON.parse(additionalInfo);
+            const additionalInfo = await clientEnvService.getClientEnvironmentVariable('AdditionalInfoSettings');
+            const parsedInfo = JSON.parse(additionalInfo.Value.RequiredInfo);
 
             // Classify symptoms by severity
             const { priority, message } = this.classifySymptoms(symptoms, parsedInfo);
