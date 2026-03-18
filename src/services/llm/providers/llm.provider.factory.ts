@@ -104,11 +104,27 @@ export class LLMProviderFactory {
      * @returns Promise<ILLMProvider>
      */
     private async createProvider(config: ILLMProviderConfig): Promise<ILLMProvider> {
-        // Get API key from environment variable
-        const apiKey = process.env[config.apiConfig.apiKeyEnvVar || ''];
+        // Get API key from client environment service
+        let apiKey: string | undefined;
+
+        switch (config.providerName.toLowerCase()) {
+        case 'openai': {
+            const openaiApiKeySetting = await this.environmentProviderService.getClientEnvironmentVariable("OpenaiApiKey");
+            apiKey = openaiApiKeySetting?.Value;
+            break;
+        }
+        case 'claude': {
+            const claudeApiKeySetting = await this.environmentProviderService.getClientEnvironmentVariable("ClaudeApiKey");
+            apiKey = claudeApiKeySetting?.Value;
+            break;
+        }
+        default:
+            throw new Error(`Unsupported LLM provider: ${config.providerName}`);
+        }
+
         if (!apiKey) {
             throw new Error(
-                `API key not found in environment variable: ${config.apiConfig.apiKeyEnvVar}`
+                `API key not found for ${config.providerName}. Please configure it in client environment variables.`
             );
         }
 
