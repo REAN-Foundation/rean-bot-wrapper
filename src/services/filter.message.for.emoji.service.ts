@@ -11,15 +11,10 @@ export class EmojiFilter{
     async checkForEmoji(message: string) {
         console.log("inside checkForEmoji",message);
         const regex = emojiRegex();
-        let emojiObj;
-        if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("EMOJI")){
-            emojiObj = JSON.parse(this.clientEnvironmentProviderService.getClientEnvironmentVariable("EMOJI"));
-        }
-        else {
-            emojiObj = JSON.parse(process.env.EMOJI);
-        }
-        const emojiObjKeys = Object.keys(emojiObj);
-        
+        const emojiSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("EmojiSetting");
+        const emoji = emojiSetting?.Value;
+        const emojiObjKeys = Object.keys(emoji);
+
         // console.log("emojiKeys", emojiObjKeys);
         let filteredMessage: string = message;
         for (const match of message.matchAll(regex)) {
@@ -27,7 +22,7 @@ export class EmojiFilter{
             console.log("convertToUnicodeEmoji", convertToUnicodeEmoji);
             if (convertToUnicodeEmoji !== undefined){
                 if (emojiObjKeys.includes(convertToUnicodeEmoji)){
-                    filteredMessage = emojiObj[convertToUnicodeEmoji];
+                    filteredMessage = emojiObjKeys[convertToUnicodeEmoji];
                     console.log("filtered message", filteredMessage);
                     return filteredMessage;
                 }

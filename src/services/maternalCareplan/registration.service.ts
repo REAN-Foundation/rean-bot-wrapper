@@ -28,13 +28,13 @@ export class RegistrationService {
             const name : string = eventObj.body.queryResult.parameters.Name.name;
             const lmp : string = eventObj.body.queryResult.parameters.LMP;
             const birthdate : string = eventObj.body.queryResult.parameters.Birthdate;
-    
+
             const phoneNumber = await this.needleService.getPhoneNumber(eventObj);
-            
+
             const options = await this.getHeaders.getHeaders();
-            const ReanBackendBaseUrl =
-                this.clientEnvironmentProviderService.getClientEnvironmentVariable('REAN_APP_BACKEND_BASE_URL');
+            const ReanBackendBaseUrl = process.env.REAN_APP_BACKEND_BASE_URL;
             const patientRegisterUrl = `${ReanBackendBaseUrl}patients`;
+            const tenantName = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
 
             const patientDomainModel = {
                 Phone      : phoneNumber,
@@ -43,9 +43,9 @@ export class RegistrationService {
                 LastName   : name.split(" ")[1],
                 Gender     : "Female",
                 BirthDate  : birthdate.split("T")[0],
-                TenantCode : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
+                TenantCode : tenantName
             };
-    
+
             const patientUserId = null;
 
             const body : QueueDoaminModel =  {
@@ -65,7 +65,7 @@ export class RegistrationService {
                 const dffMessage = `Hi ${name}, \nYour phone number already registered with us.`;
                 FireAndForgetService.enqueue(body);
                 return { fulfillmentMessages: [{ text: { text: [dffMessage] } }]  };
-    
+
             } else if (registrationResponse.statusCode === 201) {
                 body.Body.PatientUserId = registrationResponse.body.Data.Patient.UserId;
                 const registrationMessage = `Hi ${name}, \nYour Last Mensuration Period(LMP) date is ${new Date(lmp.split("T")[0]).toDateString()}.\nYou will get periodic notifications based on your LMP.`;
@@ -111,6 +111,7 @@ export class RegistrationService {
 
         const channel = eventObj.body.originalDetectIntentRequest.payload.source;
         const enrollmentUrl = `care-plans/patients/${patientUserId}/enroll`;
+        const tenantName = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
         const obj1 = {
             Provider  : "REAN",
             PlanName  : "Maternity Careplan",
@@ -119,7 +120,7 @@ export class RegistrationService {
                 .split('T')[0],
             DayOffset  : (days(date_1, date_2) - 28),
             Channel    : this.getPatientInfoService.getReminderType(channel),
-            TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
+            TenantName : tenantName
         };
         const resp = await this.needleService.needleRequestForREAN("post", enrollmentUrl, null, obj1);
 

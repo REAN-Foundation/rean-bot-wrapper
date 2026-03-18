@@ -10,6 +10,7 @@ import { MessageStatus } from '../../models/message.status';
 import { EntityManagerProvider } from '../../services/entity.manager.provider.service';
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
 import { ContactList } from '../../models/contact.list';
+import { BlockList } from '../../models/block.list.model';
 import { ConsentInfo } from '../../models/consent.info.model';
 import { UserConsent } from '../../models/user.consent.model';
 import { ConsentService } from '../../services/consent.service';
@@ -19,6 +20,8 @@ import { UserConsentRepo } from '../../database/repositories/consent/consent.rep
 import { ContactListRepo } from '../../database/repositories/contact.list/contact.list.repo';
 import { UserConsentDto } from '../../domain.types/user.consent/user.consent.domain.model';
 import { TenantSettingService } from '../../services/tenant.setting/tenant.setting.service';
+import { UserLanguage } from '../../services/set.language';
+import { BlockUserService } from '../../services/block.user.service';
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -35,10 +38,15 @@ export class ClientWebhookController {
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(ConsentService) private consentService?: ConsentService,
         @inject(Registration) private registrationService?: Registration,
-        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(BlockUserService) private blockUserService?: BlockUserService
     ) {
 
     }
+
+    apiKey = process.env.REANCARE_API_KEY;
+
+    reanBackendUrl = process.env.REAN_APP_BACKEND_BASE_URL;
 
     sendMessage = async (req, res) => {
         try {
@@ -78,9 +86,9 @@ export class ClientWebhookController {
             if (userConsent) {
                 return userConsent.consentGiven !== 'true';
             }
-         
+
             return true;
-            
+
         } catch (error) {
             console.error('Error in checkConsentRequired:', error);
             return true;
@@ -153,12 +161,13 @@ export class ClientWebhookController {
         try {
 
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
-            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
+            console.log("Client Name:", clientName);
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
             const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
             const messageStatusRepostiory = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(MessageStatus);
             this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
-            this._clientAuthenticatorService.authenticate(req,res);
+            await this._clientAuthenticatorService.authenticate(req,res);
             let userPlatformId = null;
             let platformUserName = null;
             this._platformMessageService = req.container.resolve(req.params.channel);
@@ -178,8 +187,8 @@ export class ClientWebhookController {
             else {
                 const consentRequirement = await TenantSettingService.isConsentEnabled(
                     clientName,
-                    clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"),
-                    clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL")
+                    this.apiKey,
+                    this.reanBackendUrl
                 );
                 console.log("Consent feature is ", consentRequirement);
                 const validChannels = ["REAN_SUPPORT", "slack", "SNEHA_SUPPORT", "api"];
@@ -196,7 +205,7 @@ export class ClientWebhookController {
                     return res.status(200).send(response);
                 }
                 else {
-                    this.handelRequestWithoutConsent(
+                    await this.handelRequestWithoutConsent(
                         firstTimeUser,
                         patientUSerId,
                         req,
@@ -229,95 +238,110 @@ export class ClientWebhookController {
                 const results = await this.registrationService.getPatientUserId(req.params.channel, userPlatformId, platformUserName);
                 await this.registrationService.wrapperRegistration(entityManagerProvider,userPlatformId, platformUserName,req.params.channel,results.patientUserId);
             }
-            this._platformMessageService.handleMessage(reqVariable, req.params.channel);
+            await this._platformMessageService.handleMessage(reqVariable, req.params.channel);
         } catch (error) {
-            console.log(error);
+            console.log("[WebhookController] Error in handelRequestWithoutConsent:", error);
         }
     }
 
-    private async handleConsentMessage(req: any, res: any, handleReqVariable,buttonKeyName,channel,firstTimeUser ) {
+    private async handleConsentMessage(req: any, res: any, handleReqVariable, buttonKeyName, channel, firstTimeUser) {
         try {
             const clientEnvironmentProviderService = await req.container.resolve(ClientEnvironmentProviderService);
-            const clientName = await  clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await  clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             console.log(clientName);
             console.log("Here in handle consent Message");
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
-            const consentRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ConsentInfo);
-            const [userId, consentReply, languageCode] = await this.getUserIdAndLanguagecode(handleReqVariable, channel,req);
+            const consentRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(ConsentInfo);
+            const [userId, consentReply, languageCode] = await this.getUserIdAndLanguagecode(handleReqVariable, channel, req);
             let consentRequired = true;
-            console.log("Handling the consent message flow ", userId, consentReply, languageCode, firstTimeUser);
+
+            console.log("Handling the consent message flow", userId, consentReply, languageCode, firstTimeUser);
+
+            // Check if consent is required
             if (firstTimeUser || consentReply === "consent_no") {
                 consentRequired = true;
-            }
-            else {
+            } else {
                 consentRequired = await this.checkConsentRequired(req, userId);
             }
-            if (firstTimeUser && consentReply !== "consent_yes") {
-                this.consentService.handleConsentRequest(req, userId, consentReply, languageCode, consentRepository, res,buttonKeyName);
+
+            // NEW: For first-time users, show language selection first
+            if (firstTimeUser && !consentReply) {
+                this.consentService.sendLanguageSelectionMessage(req, userId, buttonKeyName);
             }
+
+            // Handle language selection callback
+            else if (consentReply && consentReply.startsWith("language_select-")) {
+                this.consentService.handleConsentRequest(req, userId, consentReply, languageCode, consentRepository, res, buttonKeyName);
+            }
+
+            // Handle consent flow (existing logic)
             else {
                 if (consentRequired && consentReply !== "consent_yes") {
                     this.consentService.handleConsentRequest(req, userId, consentReply, languageCode, consentRepository, res, buttonKeyName);
                 }
                 else {
-
                     this._platformMessageService.handleMessage(handleReqVariable, req.params.channel);
-
                 }
             }
+        } catch (error) {
+            console.log("Error in handleConsentMessage", error);
         }
-        catch (error) {
-            console.log("While Sending Consent Response", error);
-
-        }
-
     }
 
-    async getUserIdAndLanguagecode(reqBody,channel,req)
-    {
+    async getUserIdAndLanguagecode(reqBody, channel, req) {
         try {
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
             let userId = null;
             let consentReply  = null;
-            let languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+            let languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DefaultLanguage");
             if (channel === "whatsappMeta"){
                 if (reqBody.messages[0].type === 'interactive'){
                     const interactiveType = reqBody.messages[0].interactive.type;
                     consentReply = reqBody.messages[0]?.interactive[interactiveType]?.id;
+
                     if (consentReply) {
-                        consentReply = reqBody.messages[0]?.interactive[interactiveType]?.id;
+
+                        // Handle both language_select-{code} and consent_changeLanguge-{code}
+                        if (consentReply.includes("-")) {
+                            languageCode = consentReply.split("-")[1];
+                        }
+                    }
+
+                    if (!languageCode) {
+                        languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DefaultLanguage");
+                    }
+
+                    userId = reqBody.messages[0].from;
+                } else {
+                    userId = reqBody.messages[0].from;
+                }
+            } else if (channel === "telegram") {
+                if (reqBody.callback_query) {
+                    consentReply = reqBody.callback_query.data;
+
+                    // Handle both language_select-{code} and consent_changeLanguge-{code}
+                    if (consentReply && consentReply.includes("-")) {
                         languageCode = consentReply.split("-")[1];
                     }
                     if (!languageCode){
-                        languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+                        languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DefaultLanguage");
                     }
-                    userId = reqBody.messages[0].from;
-                }
-                else {
-                    userId = reqBody.messages[0].from;
 
+                    userId = reqBody.callback_query.message.chat.id;
+                } else {
+                    userId = reqBody.message.chat.id;
                 }
             }
-            else if (channel === "telegram") {
-                if (reqBody.callback_query){
-                    consentReply = reqBody.callback_query.data;
-                    languageCode = consentReply.split("-")[1];
-                    if (!languageCode){
-                        languageCode = await clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
-                    }
-                    userId = reqBody.callback_query.message.chat.id;
-                }
-                else {
-                    userId = reqBody.message.chat.id;
+            const userLanguageService = req.container.resolve(UserLanguage);
+            const storedLanguage = await userLanguageService.getPreferredLanguageofSession(userId);
 
-                }
+            if (storedLanguage && storedLanguage !== "null") {
+                languageCode = storedLanguage;
             }
 
             return [userId, consentReply, languageCode];
-        }
-        catch (error) {
-            console.log("While getting user ID ,Language code", error);
-
+        } catch (error) {
+            console.log("Error in getUserIdAndLanguagecode", error);
         }
     }
 
@@ -361,17 +385,17 @@ export class ClientWebhookController {
             let logMessage = '';
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
-            const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService,clientName)).getRepository(ChatMessage);
             const messageStatusRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(MessageStatus);
             this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
-            this._clientAuthenticatorService.authenticate(req,res);
+            await this._clientAuthenticatorService.authenticate(req,res);
             const statuses = req.body.entry[0].changes[0].value.statuses;
             this._platformMessageService = req.container.resolve(req.params.channel);
             const consentActivation = await TenantSettingService.isConsentEnabled(
                 clientName,
-                clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"),
-                clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL")
+                this.apiKey,
+                this.reanBackendUrl
             );
             let userPlatformId = null;
             let platformUserName = null;
@@ -395,6 +419,11 @@ export class ClientWebhookController {
                 if (req.params.channel === "whatsappMeta"){
                     userPlatformId = req.body.entry[0].changes[0].value.messages[0].from;
                     platformUserName = req.body.entry[0].changes[0].value.contacts[0].profile.name;
+                    const isBlocked = await this.blockUserService.isUserBlocked(req, userPlatformId);
+                    if (isBlocked) {
+                        console.log(`User ${userPlatformId} is blocked. `);
+                        return;
+                    }
                 }
                 const [firstTimeUser ,ehrSystemCode ]  = await this.checkFirstTimeUser(req, userPlatformId);
                 if (consentActivation &&  req.params.channel === "whatsappMeta"){
@@ -416,7 +445,7 @@ export class ClientWebhookController {
         try {
             const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
             const entityManagerProvider = req.container.resolve(EntityManagerProvider);
-            const clientName = clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             const chatMessageRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(ChatMessage);
             const messageStatusRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService, clientName)).getRepository(MessageStatus);
             console.log("Wati Client Name:", clientName);
@@ -431,7 +460,7 @@ export class ClientWebhookController {
             } else if (req.body.statusString === "SENT" && req.body.owner === false) {
                 this.responseHandler.sendSuccessResponse(res, 200, 'Message received successfully!', "");
                 this._clientAuthenticatorService = req.container.resolve(req.params.channel + '.authenticator');
-                this._clientAuthenticatorService.authenticate(req, res);
+                await this._clientAuthenticatorService.authenticate(req, res);
                 this._platformMessageService = req.container.resolve(req.params.channel);
                 this._platformMessageService.handleMessage(req.body, req.params.channel);
             } else {
@@ -478,6 +507,75 @@ export class ClientWebhookController {
         return new Promise((resolve) => {
             setTimeout(resolve, ms);
         });
+    };
+
+    updateBlockStatus = async (req, res) => {
+        try {
+
+            const taskId = req.params.task_id;
+            const status = req.query.block_status;
+
+            const blockStatus =
+                status === true ||
+                status === "true" ||
+                status === "blocked";
+
+            const clientEnvironmentProviderService = req.container.resolve(ClientEnvironmentProviderService);
+            const entityManagerProvider = req.container.resolve(EntityManagerProvider);
+
+            const clientName = await clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
+
+            const entityManager = await entityManagerProvider.getEntityManager(
+                clientEnvironmentProviderService,
+                clientName
+            );
+
+            const contactListRepository = entityManager.getRepository(ContactList);
+            const blockListRepository = entityManager.getRepository(BlockList);
+            const contact = await contactListRepository.findOne({
+                where: { cmrChatTaskID: taskId }
+            });
+
+            if (!contact) {
+                return this.responseHandler.sendFailureResponse(res, 404, "Contact not found for task", req);
+            }
+
+            const userPlatformId = contact.mobileNumber;
+
+            if (blockStatus) {
+
+                const existingUser = await blockListRepository.findOne({
+                    where: { userPlatformID: userPlatformId }
+                });
+
+                if (!existingUser) {
+                    await blockListRepository.create({
+                        userPlatformID: userPlatformId
+                    });
+                }
+
+                Logger.instance().log(`User ${userPlatformId} added to block list`);
+
+            } else {
+
+                await blockListRepository.destroy({
+                    where: { userPlatformID: userPlatformId }
+                });
+
+                Logger.instance().log(`User ${userPlatformId} removed from block list`);
+            }
+
+            return this.responseHandler.sendSuccessResponse(
+                res,
+                200,
+                "Block status updated successfully",
+                ""
+            );
+
+        } catch (error) {
+            console.log("Error updating block status", error);
+            this.errorHandler.handleControllerError(error, res, req);
+        }
     };
 
 }

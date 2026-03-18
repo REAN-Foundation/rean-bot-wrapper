@@ -1,6 +1,7 @@
 import AWS from 'aws-sdk';
 import fs from 'fs';
-import nodeHtmlToImage from 'node-html-to-image';
+
+// import nodeHtmlToImage from 'node-html-to-image';
 import path from 'path';
 import { inject, Lifecycle, scoped } from 'tsyringe';
 import { SignedUrls } from './signed.urls.service';
@@ -46,9 +47,11 @@ export class AwsS3manager{
         try {
             console.log("function is called ");
             const responseCredentials: any = await this.getCrossAccountCredentials();
-            var BUCKET_NAME = process.env.BUCKET_NAME;
-            if (this.clientEnvironment.getClientEnvironmentVariable("S3_BUCKET_NAME")) {
-                var BUCKET_NAME = this.clientEnvironment.getClientEnvironmentVariable("S3_BUCKET_NAME");
+            let BUCKET_NAME = process.env.BUCKET_NAME;
+            const koboSettings = await this.clientEnvironment.getClientEnvironmentVariable("KoboSettings");
+            const koboBucketname = koboSettings.Value.BucketName;
+            if (koboBucketname) {
+                BUCKET_NAME = `${koboBucketname}`;
             }
             const params = {
                 Bucket : BUCKET_NAME,
@@ -84,10 +87,10 @@ export class AwsS3manager{
                     .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
                     .join(' '); // Join the words back
             };
-            
+
             // Convert newRow values to title case
             newRow = newRow.map(toTitleCase);
-        
+
             rows.push(newRow);
 
             // Step 3: Convert updated rows back to CSV format
@@ -134,7 +137,7 @@ export class AwsS3manager{
         {
             var filename = filePath.replace(/^.*[\\/]/, '');
             this.fileName = filename;
-            
+
         }
         else {
             this.fileName = newFilename;
@@ -151,7 +154,7 @@ export class AwsS3manager{
             ContentType : Helper.getMimeType(extension),
         };
         this.params = params;
-        
+
         // fs.stat(filePath, function (err) {
         //     try {
         //         if (err === null) {
@@ -160,7 +163,7 @@ export class AwsS3manager{
         //             var filename = filePath.replace(/^.*[\\/]/, '');
         //             this.fileName = filename;
         //             const extension = path.parse(filename).ext;
-        
+
         //             // Setting up S3 upload parameters
         //             const params = {
         //                 Bucket        : BucketName,
@@ -168,7 +171,7 @@ export class AwsS3manager{
         //                 Body          : fileContent,
         //                 'ContentType' : 'image/jpeg'
         //             };
-            
+
         //             if (extension === '.ogg' || extension === '.mp3' || extension === '.oga'){
         //                 console.log("Detected as an Audio file");
         //                 params.ContentType = 'audio/ogg';
@@ -188,9 +191,9 @@ export class AwsS3manager{
         //     catch (error){
         //         console.log(error);
         //     }
-                
+
         // });
-        
+
     };
 
     async uploadFileToS3 (
@@ -223,40 +226,41 @@ export class AwsS3manager{
         }
     }
 
-    async createFileFromHTML (html) {
-        const imageName = 'uploads/' + Date.now() + '.png';
+    // METHOD BEING DEPRECATED DUE TO PACKAGE SUPPORT ISSUES
+    // async createFileFromHTML (html) {
+    //     const imageName = 'uploads/' + Date.now() + '.png';
 
-        const REANLogo = fs.readFileSync('./uploads/ReanLogo.jpg');
-        const COWINLogo = fs.readFileSync('./uploads/COWINLogo.jpeg');
+    //     const REANLogo = fs.readFileSync('./uploads/ReanLogo.jpg');
+    //     const COWINLogo = fs.readFileSync('./uploads/COWINLogo.jpeg');
 
-        const base64REANLogo = new (Buffer as any).from(REANLogo).toString('base64');
-        const base64COWINLogo = new (Buffer as any).from(COWINLogo).toString('base64');
-        const dataURIREAN = 'data:image/jpeg;base64,' + base64REANLogo;
-        const dataURICOWIN = 'data:image/jpeg;base64,' + base64COWINLogo;
-        return new Promise<string>(async (resolve, reject) => {
-            nodeHtmlToImage({
-                output        : imageName,
-                html          : html,
-                content       : { imageSourceREAN: dataURIREAN, imageSourceCOWIN: dataURICOWIN },
-                puppeteerArgs : { args: ['--no-sandbox'] }
-            })
-                .then(() => {
-                    console.log('file created');
-                    resolve(imageName);
-                })
-                .catch(async (error) => {
-                    console.log('file creation error', error);
-                    reject('');
-                });
-        });
-    }
+    //     const base64REANLogo = new (Buffer as any).from(REANLogo).toString('base64');
+    //     const base64COWINLogo = new (Buffer as any).from(COWINLogo).toString('base64');
+    //     const dataURIREAN = 'data:image/jpeg;base64,' + base64REANLogo;
+    //     const dataURICOWIN = 'data:image/jpeg;base64,' + base64COWINLogo;
+    //     return new Promise<string>(async (resolve, reject) => {
+    //         nodeHtmlToImage({
+    //             output        : imageName,
+    //             html          : html,
+    //             content       : { imageSourceREAN: dataURIREAN, imageSourceCOWIN: dataURICOWIN },
+    //             puppeteerArgs : { args: ['--no-sandbox'] }
+    //         })
+    //             .then(() => {
+    //                 console.log('file created');
+    //                 resolve(imageName);
+    //             })
+    //             .catch(async (error) => {
+    //                 console.log('file creation error', error);
+    //                 reject('');
+    //             });
+    //     });
+    // }
 
     async getFile (key) {
         return new Promise<any>(async(resolve) => {
             const responseCredentials: any = await this.getCrossAccountCredentials();
-            var BUCKET_NAME = process.env.BUCKET_NAME;
-            if (this.clientEnvironment.getClientEnvironmentVariable("S3_BUCKET_NAME")) {
-                var BUCKET_NAME = this.clientEnvironment.getClientEnvironmentVariable("S3_BUCKET_NAME");
+            let BUCKET_NAME = process.env.BUCKET_NAME;
+            if (await this.clientEnvironment.getClientEnvironmentVariable("S3_BUCKET_NAME")) {
+                BUCKET_NAME = `${await this.clientEnvironment.getClientEnvironmentVariable("S3_BUCKET_NAME")}`;
             }
             console.log("DBCJNKJCLNDSKOSCHKLSDNCKLNSD",BUCKET_NAME);
             const s3 = new AWS.S3(responseCredentials);

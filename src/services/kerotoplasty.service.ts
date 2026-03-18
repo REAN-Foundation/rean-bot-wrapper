@@ -25,8 +25,9 @@ export class kerotoplastyService {
     identifyCondition = async (eventObj) => {
         if (eventObj) {
             let symptoms: string[] = eventObj.body.queryResult.parameters.symptoms;
-            const Addition_info = this.clientEnvironmentProviderService.getClientEnvironmentVariable("ADDITIONAL_INFO");
-            const parsedInfo = JSON.parse(Addition_info);
+            const additionalInfoSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("AdditionalIfoSettings");
+            const additionalInfo = additionalInfoSetting?.Value;
+            const parsedInfo = JSON.parse(additionalInfo);
 
             // Variables set for cache
             const userPlatformId = eventObj.body.originalDetectIntentRequest.payload.userId;
@@ -38,7 +39,7 @@ export class kerotoplastyService {
             const Emergency_risk: string[] = parsedInfo.RISK_CLASSIFICATION.EMERGENCY.SYMPTOMS;
             const Attention_needed_risk: string[] = parsedInfo.RISK_CLASSIFICATION.ATTENTION_NEEDED.SYMPTOMS;
 
-            let priority: number;
+            let priority = 0;
             let message: any;
 
             if (!symptoms) {
@@ -49,13 +50,13 @@ export class kerotoplastyService {
                 message = parsedInfo.RISK_CLASSIFICATION.EMERGENCY.MESSAGE;
                 priority = 1;
             }
-            
+
             // Then Attention Needed
             else if (symptoms.some(symptom => Attention_needed_risk.includes(symptom))) {
                 message = parsedInfo.RISK_CLASSIFICATION.ATTENTION_NEEDED.MESSAGE;
                 priority = 2;
             }
-            
+
             // Then Normal
             else if (symptoms.some(symptom => Normal_risk.includes(symptom))) {
                 message = parsedInfo.RISK_CLASSIFICATION.NORMAL.MESSAGE;
@@ -74,13 +75,13 @@ export class kerotoplastyService {
                     message = symptomsInCache["message"];
                 }
             }
- 
+
             return [ symptoms,message, priority];
         } else {
             throw new Error(`500, kerotoplasy response Service Error!`);
         }
     };
-    
+
     async symptomByUser(parameters) {
         let symptomComment = "Patient is suffering from ";
 
@@ -104,7 +105,7 @@ export class kerotoplastyService {
     //     for (let i = 0; i < parameters.complexNormalSymptoms.length; i++){
     //         symptomComment += ` - ${parameters.complexNormalSymptoms[i].name} \n`;
     //     }
-            
+
     // }
     // if (parameters.complexSeverePain.name === "Yes"){
     //     symptomComment += " - Severe pain \n";
@@ -138,40 +139,37 @@ export class kerotoplastyService {
 
     async postingOnClickup(intent,eventObj,severityGrade){
 
-        try {
-            const parameters = eventObj.body.queryResult.parameters;
-            const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
-            const contactList =
-                    (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
-            const personContactList = await contactList.findOne({ where: { mobileNumber: userId } });
-            let EMRNumber  = personContactList.dataValues.ehrSystemCode.toUpperCase();
-            if (EMRNumber) {
-                EMRNumber = EMRNumber.toUpperCase();
-            }
-            const ClickupListID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_CASE_LIST_ID");
-            if (intent === "appointment-followconditionIdentification"){
-                await contactList.update({ repetitionFlag: "True" }, { where: { mobileNumber: userId } });
-            }
-            else {
-                await contactList.update({ repetitionFlag: "False" }, { where: { mobileNumber: userId } });
-            }
-            const symptomComment = await this.symptomByUser(parameters);
-            const user_details = await this.getEMRDetails(EMRNumber , eventObj);
-            const taskId = personContactList.dataValues.cmrCaseTaskID;
-            if (taskId){
-                await this.clickUpTask.updateTask(taskId,severityGrade,user_details,EMRNumber);
-                await this.clickUpTask.postCommentOnTask(taskId,symptomComment);
-            }
-            else
-            {
-                const taskID = await this.clickUpTask.createTask( null, EMRNumber, user_details, severityGrade, ClickupListID );
-                await contactList.update({ cmrCaseTaskID: taskID }, { where: { mobileNumber: userId } });
-                await this.clickUpTask.postCommentOnTask(taskID, symptomComment);
-                await contactList.update({ cmrCaseTaskID: taskID, humanHandoff: "false" }, { where: { mobileNumber: userId } });
-                
-            }
-        } catch (error) {
-            console.log(error);
+        const parameters = eventObj.body.queryResult.parameters;
+        const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
+        const contactList =
+        (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
+        const personContactList = await contactList.findOne({ where: { mobileNumber: userId } });
+        let EMRNumber  = personContactList.dataValues.ehrSystemCode.toUpperCase();
+        if (EMRNumber) {
+            EMRNumber = EMRNumber.toUpperCase();
+        }
+        const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
+        const ClickupListId = clickupSecrets?.CaseListId;
+        if (intent === "appointment-followconditionIdentification"){
+            await contactList.update({ repetitionFlag: "True" }, { where: { mobileNumber: userId } });
+        }
+        else {
+            await contactList.update({ repetitionFlag: "False" }, { where: { mobileNumber: userId } });
+        }
+        const symptomComment = await this.symptomByUser(parameters);
+        const user_details = await this.getEMRDetails(EMRNumber , eventObj);
+        const taskId = personContactList.dataValues.cmrCaseTaskID;
+        if (taskId){
+            await this.clickUpTask.updateTask(taskId,severityGrade,user_details,EMRNumber);
+            await this.clickUpTask.postCommentOnTask(taskId,symptomComment);
+        }
+        else
+        {
+            const taskId = await this.clickUpTask.createTask( null, EMRNumber, user_details, severityGrade, ClickupListId );
+            await contactList.update({ cmrCaseTaskID: taskId }, { where: { mobileNumber: userId } });
+            await this.clickUpTask.postCommentOnTask(taskId, symptomComment);
+            await contactList.update({ cmrCaseTaskID: taskId, humanHandoff: "false" }, { where: { mobileNumber: userId } });
+
         }
 
     }
@@ -217,7 +215,7 @@ export class kerotoplastyService {
             EMRNumber = EMRNumber.toUpperCase();
             user_details = await this.getEMRDetails(EMRNumber,eventObj);
         } else {
-            const shareable_details_raw = this.clientEnvironmentProviderService.getClientEnvironmentVariable("SHAREABLE_DETAILS");
+            const shareable_details_raw = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("SHAREABLE_DETAILS");
             if (shareable_details_raw){
                 const shareable_details = JSON.parse(shareable_details_raw);
                 if (shareable_details.Name){
@@ -229,18 +227,19 @@ export class kerotoplastyService {
             }
         }
 
-        const ClickupListID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_CASE_LIST_ID");
+        const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
+        const ClickupListId = clickupSecrets?.CaseListId;
         if (taskId){
             await this.clickUpTask.updateTask(taskId,null,user_details,EMRNumber, "Appointment");
             await this.clickUpTask.postCommentOnTask(taskId,symptomComment);
         }
         else
         {
-            const taskID = await this.clickUpTask.createTask(null, EMRNumber , user_details , 1 , ClickupListID,"Appoinment");
-            await contactList.update({ cmrCaseTaskID: taskID }, { where: { mobileNumber: userId } });
-            await this.clickUpTask.postCommentOnTask(taskID, symptomComment);
+            const taskId = await this.clickUpTask.createTask(null, EMRNumber , user_details , 1 , ClickupListId,"Appoinment");
+            await contactList.update({ cmrCaseTaskID: taskId }, { where: { mobileNumber: userId } });
+            await this.clickUpTask.postCommentOnTask(taskId, symptomComment);
             console.log("we are Here");
-            await contactList.update({ cmrCaseTaskID: taskID, humanHandoff: "false" }, { where: { mobileNumber: userId } });
+            await contactList.update({ cmrCaseTaskID: taskId, humanHandoff: "false" }, { where: { mobileNumber: userId } });
         }
 
     }
@@ -331,9 +330,10 @@ export class kerotoplastyService {
 
     async makeApiCall(emr_number, eventObj) {
         const clientEnvironmentProviderService = eventObj.container.resolve(ClientEnvironmentProviderService);
-        const url = clientEnvironmentProviderService.getClientEnvironmentVariable("EMR_URL");
-        const key = clientEnvironmentProviderService.getClientEnvironmentVariable("EMR_KEY");
-        const code = clientEnvironmentProviderService.getClientEnvironmentVariable("EMR_CODE");
+        const emrSettings = await clientEnvironmentProviderService.getClientEnvironmentVariable("EmrSettings");
+        const url = emrSettings.Value.Url;
+        const key = emrSettings.Value.Key;
+        const code = emrSettings.Value.Code;
         var headers = {
             'Content-Type' : 'application/json',
             accept         : 'application/json'
@@ -366,5 +366,5 @@ export class kerotoplastyService {
             setTimeout(resolve, ms);
         });
     }
-    
+
 }

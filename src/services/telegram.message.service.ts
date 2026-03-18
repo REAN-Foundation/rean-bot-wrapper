@@ -30,8 +30,22 @@ export class TelegramMessageService implements platformServiceInterface{
         @inject(TelegramPostResponseFunctionalities) private telegramPostResponseFunctionalities?: TelegramPostResponseFunctionalities,
         @inject("telegram.authenticator") private clientAuthenticator?: clientAuthenticator,
         @inject(LogsQAService) private logsQAService?: LogsQAService) {
-        const token = this.environmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN");
-        this._telegram = new TelegramBot(token);
+
+        // Token initialization is deferred to when it's actually needed (e.g., handleMessage/setWebhook),
+        // because the client name and secrets are not available at DI construction time.
+        // const token = this.environmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN");
+        // this._telegram = new TelegramBot(token);
+        // this.init();
+        // this.initializeToken();
+    }
+
+    private async initializeToken() {
+        const telegramSecrets = await this.environmentProviderService.getClientEnvironmentVariable("telegram");
+        if (!telegramSecrets) {
+            throw new Error("Telegram secrets not found. Ensure the client environment is configured with 'telegram' secrets.");
+        }
+        const telegramBotToken = telegramSecrets?.BotToken;
+        this._telegram = new TelegramBot(telegramBotToken);
         this.init();
     }
 
@@ -40,7 +54,10 @@ export class TelegramMessageService implements platformServiceInterface{
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    handleMessage(msg, channel: string){
+    async handleMessage(msg, channel: string){
+        if (!this._telegram) {
+            await this.initializeToken();
+        }
         this._telegram.processUpdate(msg);
         console.log("message sent to events");
         return null;
@@ -61,9 +78,12 @@ export class TelegramMessageService implements platformServiceInterface{
         });
     }
 
-    setWebhook(clientName){
-        this._telegram = new TelegramBot(this.environmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
-        const webhookUrl = this.environmentProviderService.getClientEnvironmentVariable("BASE_URL") + '/v1/' + clientName + '/telegram/' + this.clientAuthenticator.urlToken + '/receive';
+    async setWebhook(clientName){
+        const telegramSecrets = await this.environmentProviderService.getClientEnvironmentVariable("telegram");
+        const telegramBotToken = telegramSecrets?.BotToken;
+        this._telegram = new TelegramBot(telegramBotToken);
+        const urlToken = await this.clientAuthenticator.urlToken();
+        const webhookUrl = process.env.BASE_URL + '/v1/' + clientName + '/telegram/' + urlToken + '/receive';
         this._telegram.setWebHook(webhookUrl);
         console.log("Telegram webhook set", webhookUrl);
     }
@@ -89,12 +109,18 @@ export class TelegramMessageService implements platformServiceInterface{
         else if (processedResponse.processed_message.length > 1) {
 
             if (pasrseMode && pasrseMode === 'HTML') {
+
+                console.log(
+                    "THIS HTML TO IMAGE SUPPORT HAS BEEN DEPRECATED"
+                );
+
+                // METHOD BEING DEPRECATED DUE TO PACKAGE SUPPORT ISSUES
                 // eslint-disable-next-line max-len
-                const uploadImageName = await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
-                const vaacinationImageFile = await this.awsS3manager.uploadFile(uploadImageName);
-                if (vaacinationImageFile) {
-                    reaponse_message = { name: name,platform: "Telegram", platformId: platformId, chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",intent: intent,messageBody: String(vaacinationImageFile), messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[1], similarDoc: similarDoc };
-                }
+                // const uploadImageName = await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
+                // const vaacinationImageFile = await this.awsS3manager.uploadFile(uploadImageName);
+                // if (vaacinationImageFile) {
+                //     reaponse_message = { name: name,platform: "Telegram", platformId: platformId, chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "image",intent: intent,messageBody: String(vaacinationImageFile), messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[1], similarDoc: similarDoc };
+                // }
             }
             else {
                 reaponse_message = { name: name,platform: "Telegram", platformId: platformId, chat_message_id: chat_message_id,direction: "Out",input_message: input_message,message_type: "text",intent: intent,messageBody: null, messageImageUrl: null , messageImageCaption: null, sessionId: telegram_id, messageText: processedResponse.processed_message[0], similarDoc: similarDoc };
@@ -140,9 +166,11 @@ export class TelegramMessageService implements platformServiceInterface{
             const type = response_format.message_type;
             if (type) {
                 const classmethod = `send${type}Response`;
-                const telegram = new TelegramBot(this.environmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
-                console.log(`QA_SERVICE Flag: ${this.environmentProviderService.getClientEnvironmentVariable("QA_SERVICE")}`);
-                if (this.environmentProviderService.getClientEnvironmentVariable("QA_SERVICE")) {
+                const telegramSecrets = await this.environmentProviderService.getClientEnvironmentVariable("telegram");
+                const telegramBotToken = telegramSecrets?.BotToken;
+                const telegram = new TelegramBot(telegramBotToken);
+                const qaService = await this.environmentProviderService.getClientEnvironmentVariable("QnA");
+                if (qaService) {
                     if (response_format.name !== "ReanCare") {
                         console.log("Providing QA service through clickUp");
                         await this.logsQAService.logMesssages(response_format);

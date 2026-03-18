@@ -12,6 +12,7 @@ import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.servi
 import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
 import { SystemGeneratedMessagesService } from "../system.generated.message.service";
 import { translateService } from '../translate.service';
+import { DEFAULT_DOB } from '../../refactor/messageTypes/user.info.types';
 
 @scoped(Lifecycle.ContainerScoped)
 
@@ -47,8 +48,8 @@ export class HeartFailureRegistrationService {
                 }
             };
             const patientUpdateUrl = `patients/${patientIDArray.patientUserId}`;
-            const defaultDOB = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_DOB");
-            const defaultGender = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_GENDER");
+            const defaultDOB = DEFAULT_DOB;
+            const defaultGender = "Male";
 
             const patientDomainModel = {
                 Gender    : defaultGender,
@@ -109,15 +110,17 @@ export class HeartFailureRegistrationService {
         }
 
         let obj1 = {};
-       
+        const tenantName = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
+
         if (isTestUser) {
-            const timezone = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE") || "+05:30";
+            const timezone = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Timezone") || "+05:30";
             const scheduleConfig = this.getScheduleForNextCron(15, timezone);
+
             obj1 = {
                 Provider  : 'REAN',
                 StartDate : new Date().toISOString()
                     .split('T')[0],
-                TenantName     : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME"),
+                TenantName     : tenantName,
                 PlanCode       : planCode,
                 PlanName       : planCode,
                 Channel        : this.getPatientInfoService.getReminderType(channel),
@@ -134,7 +137,7 @@ export class HeartFailureRegistrationService {
                 StartDate  : startDate.toISOString().split('T')[0],
                 DayOffset  : 0,
                 Channel    : this.getPatientInfoService.getReminderType(channel),
-                TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
+                TenantName : tenantName
             };
         }
 
@@ -170,20 +173,21 @@ export class HeartFailureRegistrationService {
 
     getSelectedCareplan(buttonId: string): string {
         const careplanCodeMapping = {
-            "Start_Careplan_HeartF1" : "HD_HTN_Smoker",
-            "Start_Careplan_HeartF2" : "HD_HTN_Non-smoker",
-            "Start_Careplan_HeartF3" : "HD_No_HTN_Smoker",
-            "Start_Careplan_HeartF4" : "HD_No_HTN_Non-smoker",
-            "Start_Careplan_HeartF5" : "RF_HTN_Smoker",
-            "Start_Careplan_HeartF6" : "RF_HTN_Non-smoker",
-            "Start_Careplan_HeartF7" : "RF_No_HTN_Smoker",
-            "Start_Careplan_HeartF8" : "RF_No_HTN_Non-smoker",
-            "Saath_Health_EN"        : "Saathealth_careplan_en",
-            "Saath_Health_HI"        : "Saathealth_careplan_hi",
-            "Saath_Health_MR"        : "Saathealth_careplan_mr",
-            "Diabetes"               : "Diabetes",
-            "Diabetes_Spanish"       : "Diabetes_Spanish",
-            "SPHSD_Hypertension"     : "SPHSD_Hypertension",
+            "Start_Careplan_HeartF1"       : "HD_HTN_Smoker",
+            "Start_Careplan_HeartF2"       : "HD_HTN_Non-smoker",
+            "Start_Careplan_HeartF3"       : "HD_No_HTN_Smoker",
+            "Start_Careplan_HeartF4"       : "HD_No_HTN_Non-smoker",
+            "Start_Careplan_HeartF5"       : "RF_HTN_Smoker",
+            "Start_Careplan_HeartF6"       : "RF_HTN_Non-smoker",
+            "Start_Careplan_HeartF7"       : "RF_No_HTN_Smoker",
+            "Start_Careplan_HeartF8"       : "RF_No_HTN_Non-smoker",
+            "Saath_Health_EN"              : "Saathealth_careplan_en",
+            "Saath_Health_HI"              : "Saathealth_careplan_hi",
+            "Saath_Health_MR"              : "Saathealth_careplan_mr",
+            "Diabetes"                     : "Diabetes",
+            "Diabetes_Spanish"             : "Diabetes_Spanish",
+            "SPHSD_Hypertension"           : "SPHSD_Hypertension",
+            "SPHSD_Hypertension_Pregnancy" : "SPHSD_Hypertension_Pregnancy"
         };
         return careplanCodeMapping[buttonId] ?? "Heart-Failure";
     }
@@ -200,7 +204,7 @@ export class HeartFailureRegistrationService {
         };
         return languageCodeMapping[planCode] ?? "en";
     }
-    
+
     calculateStartDateByButtonId(buttonId: string, todayDate: Date): Date {
         if (buttonId?.startsWith("Start_Careplan_HeartF")) {
             const dayOfWeek = todayDate.getDay();

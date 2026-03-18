@@ -61,7 +61,7 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
     async setWebhook(clientName: string){
         return;
     }
-    
+
     async SendMediaMessage(response_format: Iresponse, payload: any) {
         let whatsappMessageId;
         const type = response_format.message_type;
@@ -87,7 +87,8 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
                     }
 
                 }
-                if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("QA_SERVICE")){
+                const qaService = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("QnA");
+                if (qaService){
                     if (response_format.name !== "ReanCare") {
                         Logger.instance().log("Providing QA service through clickUp");
                         await this.logsQAService.logMesssages(response_format);
@@ -117,11 +118,17 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
                 response_message = { name: user_name, platform: platform, platformId: platformId, chat_message_id: chat_message_id, direction: "Out", message_type: "image", intent: intent, messageBody: image.url, messageImageUrl: image.url, messageImageCaption: image.caption, sessionId: wati_whatsapp_id, input_message: input_message, messageText: image.caption, similarDoc: similar_doc };
             } else if (processedResponse.processed_message.length > 1) {
                 if (parseMode && parseMode === "HTML") {
-                    const uploadImageName = await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
-                    const vacinationImageFile = await this.awsS3manager.uploadFile(uploadImageName);
-                    if (vacinationImageFile) {
-                        response_message = { name: user_name, platform: platform, platformId: platformId, chat_message_id: chat_message_id, direction: "Out", message_type: "image", intent: intent, messageBody: String(vacinationImageFile), messageImageUrl: null, messageImageCaption: null, sessionId: wati_whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[1], similarDoc: similar_doc };
-                    }
+
+                    console.log(
+                        "THIS HTML TO IMAGE SUPPORT HAS BEEN DEPRECATED"
+                    );
+
+                    // METHOD BEING DEPRECATED DUE TO PACKAGE SUPPORT ISSUES
+                    // const uploadImageName = await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
+                    // const vacinationImageFile = await this.awsS3manager.uploadFile(uploadImageName);
+                    // if (vacinationImageFile) {
+                    //     response_message = { name: user_name, platform: platform, platformId: platformId, chat_message_id: chat_message_id, direction: "Out", message_type: "image", intent: intent, messageBody: String(vacinationImageFile), messageImageUrl: null, messageImageCaption: null, sessionId: wati_whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[1], similarDoc: similar_doc };
+                    // }
                 } else {
                     response_message = { name: user_name, platform: platform, platformId: platformId, chat_message_id: chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: wati_whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[0], similarDoc: similar_doc };
                     response_message = { name: user_name, platform: platform, platformId: platformId, chat_message_id: chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: wati_whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[1], similarDoc: similar_doc };
@@ -169,5 +176,5 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
     async getMessageIdFromResponse(responseBody: any) {
         throw new Error("Method not implemented.");
     }
-    
+
 }

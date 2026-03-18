@@ -21,6 +21,7 @@ import { WorkflowEventListener } from './emergency/workflow.event.listener';
 import { MessageHandlerType, NlpProviderType } from '../refactor/messageTypes/message.types';
 import { CommonAssessmentService } from './Assesssment/common.assessment.service';
 import { AssessmentHandlingService } from './Assesssment/assessment.handling.service';
+import { AssessmentResponseFormat } from './response.format/assessment.service.response.format';
 import { FormHandler } from './form/form.handler';
 import { CareplanEnrollmentService } from './basic.careplan/careplan.enrollment.service';
 import { EntityCollectionOrchestrator } from './llm/entity.collection/entity.collection.orchestrator.service';
@@ -62,8 +63,9 @@ export class handleRequestservice {
         const translate_message = await this.translateService.translateMessage(message.type, message.messageBody, UserPlatformID);
 
         let message_from_nlp: IserviceResponseFunctionalities = null;
-        const nlpService = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_SERVICE");
-        const clientName = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+        const nlpServiceSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NlpService");
+        const nlpService = nlpServiceSetting?.Value;
+        const clientName = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
 
         if (nlpService && nlpService === "openai") {
             message_from_nlp = await this.openAIResponseService.getOpenaiMessage(clientName, translate_message.message);
@@ -71,6 +73,8 @@ export class handleRequestservice {
         else if (nlpService && nlpService === "custom_ml_model") {
 
             let message_to_ml_model = translate_message.message;
+            const nlpTranslateServiceSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NlpTranslateService");
+            const nlpTranslateService = nlpTranslateServiceSetting?.Value;
 
             if (message.contextId) {
                 const tag = "Feedback";
@@ -78,7 +82,7 @@ export class handleRequestservice {
                 message_to_ml_model = "I have send the Feedback";
             }
 
-            else if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_TRANSLATE_SERVICE")) {
+            else if (nlpTranslateService) {
                 message_to_ml_model = message.messageBody;
             }
 
@@ -87,7 +91,9 @@ export class handleRequestservice {
         } else {
             // eslint-disable-next-line max-len
             message_from_nlp = await this.DialogflowResponseService.getDialogflowMessage(translate_message.message, channel, message.intent, message);
-            if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("OPENAI_API_KEY")) {
+            const openaiApiKeySetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("OpenaiApiKey");
+            const openaiApiKey = openaiApiKeySetting?.Value;
+            if (openaiApiKey) {
                 if (message_from_nlp.getIntent() === "Default Fallback Intent") {
                     message_from_nlp = await this.openAIResponseService.getOpenaiMessage(clientName, translate_message.message);
                 }
@@ -127,7 +133,9 @@ export class handleRequestservice {
         if (customTranslations[0] === null) {
             let googleTranslate;
             if (messageHandler === "QnA") {
-                if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("NLP_TRANSLATE_SERVICE") === "llm") {
+                const nlpServiceSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NlpTranslateService");
+                const nlpService = nlpServiceSetting?.Value;
+                if (nlpService === "llm") {
                     googleTranslate = message_from_nlp.getText();
                 }
                 else {
@@ -176,7 +184,34 @@ export class handleRequestservice {
         case 'Assessments': {
             const key = `${metaData.platformId}:Assessment:${outgoingMessage.Assessment.AssessmentId}`;
             const userCacheData = await CacheMemory.get(key);
-            if (userCacheData) {
+
+            // Check if this is a re-prompt for a required node
+            if (outgoingMessage.Assessment.MetaData?.askQuestionAgain && outgoingMessage.Assessment.QuestionData) {
+                console.log("[Assessments] Re-prompting required assessment question");
+
+                // Use serveAssessmentService to handle the question with buttons
+                const questionData = outgoingMessage.Assessment.QuestionData;
+                const channel = metaData.platform;
+
+                const { message, payload, messageType } = await this.serveAssessmentService.handleButtonCreation(
+                    questionData,
+                    channel
+                );
+
+                const responseMessage = {
+                    message     : message,
+                    intent      : 'AssessmentReprompt',
+                    payload     : payload,
+                    messageType : messageType
+                };
+
+                const formattedResponse = new AssessmentResponseFormat(responseMessage);
+
+                // Store message type for platform services
+                (formattedResponse as any).message_type = messageType;
+
+                message_from_nlp = formattedResponse;
+            } else if (userCacheData) {
                 console.log("user response",metaData.messageBody);
                 message_from_nlp = await this.serveAssessmentService.answerQuestion(eventObj, metaData.platformId, metaData.originalMessage, userCacheData, metaData.platform, true,metaData.intent, metaData);
                 console.log(`after calling answer question service, message: ${message_from_nlp?.getText()}`);
@@ -202,8 +237,8 @@ export class handleRequestservice {
                 let tag = "null";
                 tag = (metaData.type === "reaction") ? "reaction" : "Feedback";
                 await this.feedbackService.recordFeedback(outgoingMessage.Feedback.FeedbackContent, metaData.contextId, tag);
-                if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("FEEDBACK_PROMPT")) {
-                    const feedbackPrompt = this.clientEnvironmentProviderService.getClientEnvironmentVariable("FEEDBACK_PROMPT");
+                const feedbackPrompt = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("FEEDBACK_PROMPT");
+                if (feedbackPrompt) {
                     messageToMlModel = feedbackPrompt + outgoingMessage.Feedback.FeedbackContent;
                 } else {
                     messageToMlModel = "I have sent feedback to your message tell me that : we have acknowledged your feedback out team of experts will come back to you";

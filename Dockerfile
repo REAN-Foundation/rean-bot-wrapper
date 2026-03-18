@@ -5,7 +5,8 @@ RUN apk add --no-cache \
     && rm -rf /var/cache/apk/*
 RUN apk add --update alpine-sdk
 RUN apk add chromium \
-    harfbuzz
+    harfbuzz \
+    libsodium>=1.0.20-r1
 
 RUN apk update
 RUN apk upgrade
@@ -27,10 +28,13 @@ FROM node:24-alpine3.22
 RUN apk add bash
 RUN apk add --no-cache \
         python3 \
+        py3-pip \
+    && pip3 install --break-system-packages awscli \
     && rm -rf /var/cache/apk/*
 RUN apk add --update alpine-sdk
 RUN apk add chromium \
-    harfbuzz
+    harfbuzz \
+    libsodium>=1.0.20-r1
 
 RUN apk update
 RUN apk upgrade
@@ -46,3 +50,4 @@ COPY --from=builder ./app/dist/ .
 COPY --from=builder /app/src/libs/  src/libs
 RUN chmod +x /app/entrypoint.sh
 ENTRYPOINT ["/bin/bash", "-c", "/app/entrypoint.sh"]
+# CMD ["node", "src/index.js"]

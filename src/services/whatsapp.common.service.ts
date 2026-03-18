@@ -80,12 +80,18 @@ export class CommonWhatsappService implements platformServiceInterface {
             }
             else if (processedResponse.processed_message.length > 1) {
                 if (pasrseMode && pasrseMode === 'HTML') {
+
+                    console.log(
+                        "THIS HTML TO IMAGE SUPPORT HAS BEEN DEPRECATED"
+                    );
+                    
+                    // METHOD BEING DEPRECATED DUE TO PACKAGE SUPPORT ISSUES
                     // eslint-disable-next-line max-len
-                    const uploadImageName = await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
-                    const vaacinationImageFile = await this.awsS3manager.uploadFile(uploadImageName);
-                    if (vaacinationImageFile) {
-                        reaponse_message = { name: user_name, platform: platform, platformId: platformId, chat_message_id: chat_message_id, direction: "Out", message_type: "image", intent: intent, messageBody: String(vaacinationImageFile), messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[1], similarDoc: similar_doc };
-                    }
+                    // const uploadImageName = await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);
+                    // const vaacinationImageFile = await this.awsS3manager.uploadFile(uploadImageName);
+                    // if (vaacinationImageFile) {
+                    //     reaponse_message = { name: user_name, platform: platform, platformId: platformId, chat_message_id: chat_message_id, direction: "Out", message_type: "image", intent: intent, messageBody: String(vaacinationImageFile), messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[1], similarDoc: similar_doc };
+                    // }
                 } else {
                     reaponse_message = { name: user_name, platform: platform, platformId: platformId, chat_message_id: chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[0], similarDoc: similar_doc };
                     reaponse_message = { name: user_name, platform: platform, platformId: platformId, chat_message_id: chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: whatsapp_id, input_message: input_message, messageText: processedResponse.processed_message[1], similarDoc: similar_doc };

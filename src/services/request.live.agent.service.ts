@@ -19,8 +19,8 @@ export class LiveAgent{
         const payload = body.originalDetectIntentRequest.payload;
         return new Promise(async(resolve) =>{
             if (await humanHandoff.checkTime() === "false") {
-                const startHHhour = parseFloat(this.clientEnvironmentProviderService.getClientEnvironmentVariable("HH_START_HOUR_LOCAL"));
-                const endHHhour = parseFloat(this.clientEnvironmentProviderService.getClientEnvironmentVariable("HH_END_HOUR_LOCAL"));
+                const startHHhour = parseFloat(await this.clientEnvironmentProviderService.getClientEnvironmentVariable("HH_START_HOUR_LOCAL"));
+                const endHHhour = parseFloat(await this.clientEnvironmentProviderService.getClientEnvironmentVariable("HH_END_HOUR_LOCAL"));
                 const reply = `Our experts will be available between ${startHHhour} and ${endHHhour}`;
                 const data = {
                     "fulfillmentMessages" : [
@@ -36,7 +36,7 @@ export class LiveAgent{
                 resolve(data);
             }
             else {
-                
+
                 // eslint-disable-next-line max-len
                 const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
                 const chatMessageObject = await chatMessageRepository.findOne({ order: [['createdAt', 'DESC']], limit: 1 });
@@ -59,7 +59,7 @@ export class LiveAgent{
                 const client = this.slackMessageService.client;
                 const slackchannelID = this.slackMessageService.channelID;
                 const response = await client.chat.postMessage({ channel: slackchannelID, text: `${payload.userName} wants to connect with an expert`, });
-                
+
                 await chatMessageRepository.update({ ts: response.ts }, { where: { id: chatMessageObject.id } })
                     .then(() => { console.log("updated"); })
                     .catch(error => console.log("error on update", error));

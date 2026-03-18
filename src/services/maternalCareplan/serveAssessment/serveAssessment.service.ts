@@ -42,7 +42,7 @@ export class ServeAssessmentService {
 
             const userTask = JSON.parse(userTaskData);
             if (!assessmentLanguage) {
-                assessmentLanguage = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+                assessmentLanguage = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DefaultLanguage");
             }
 
             // const assessmentId = userTask.Action.Assessment.id;
@@ -123,6 +123,8 @@ export class ServeAssessmentService {
                     userMessageId        : null,
                     identifiers          : questionNode.FieldIdentifier,
                     identifiersUnit      : questionNode.FieldIdentifierUnit,
+                    is_node_required     : questionNode.Required ?? false,
+                    retry_count          : 0,
                 };
 
                 const key = `${platformUserId}:NextQuestionFlag:${assessmentId}`;
@@ -189,19 +191,19 @@ export class ServeAssessmentService {
             } else if (requestBody.Data.AnswerResponse.Next !== null && nodeType === "Message") {
                 message = questionData.Message;
                 messageFlag = "assessment";
-                    
+
                 const { assessmentSessionData } = await this.createAssessmentSessionAndIdentifier(
                     questionData,
                     assessmentSession.userPlatformId
                 );
-    
+
                 const nextApiURL = `clinical/assessments/${assessmentSession.assesmentId}/questions/${questionData.id}/answer`;
                 const nextObj = {
                     ResponseType : questionData.ExpectedResponseType
                 };
-                
+
                 const nextRequestBody = await this.needleService.needleRequestForREAN("post", nextApiURL, null, nextObj);
-                    
+
                 if (nextRequestBody.Data.AnswerResponse.Next !== null) {
                     await this.sendAssessmentMessage(
                         doSend,
@@ -221,13 +223,13 @@ export class ServeAssessmentService {
                     );
                     const nextQuestionData = nextRequestBody.Data.AnswerResponse.Next;
                     const nextNodeType = nextRequestBody.Data.AnswerResponse?.Next?.NodeType ?? null;
-                        
+
                     if (nextNodeType !== "Message") {
                         const nextQuestionResult = await this.handleButtonCreation(nextQuestionData, channel);
                         message = nextQuestionResult.message;
                         payload = nextQuestionResult.payload;
                         messageType = nextQuestionResult.messageType;
-                            
+
                         await this.createAssessmentSessionAndIdentifier(
                             nextQuestionData,
                             assessmentSession.userPlatformId
@@ -284,7 +286,7 @@ export class ServeAssessmentService {
                 else {
                     message = "The assessment has been completed.";
                 }
-                
+
                 if (result.Data.Patients.Items) {
                     const userInfoPayload = {
                         "Name"   : result.Data.Patients.Items[0].DisplayName,
@@ -322,7 +324,7 @@ export class ServeAssessmentService {
         if (intent === "Work_Commitments" ||
             intent === "Feeling_Unwell_A" ||
             intent === "Transit_Issues") {
-            const docProcessBaseURL = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DOCUMENT_PROCESSOR_BASE_URL");
+            const docProcessBaseURL = process.env.DOCUMENT_PROCESSOR_BASE_URL;
             let todayDate = new Date().toISOString()
                 .split('T')[0];
 
@@ -330,7 +332,7 @@ export class ServeAssessmentService {
             const phoneNumber = Helper.formatPhoneForDocProcessor(userPhoneNumber);
             const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
             todayDate = Helper.removeLeadingZerosFromDay(todayDate);
-            const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+            const client = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
 
             // const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/appointment-status/${phoneNumber}/days/${todayDate}`;
             const getUrl = `${docProcessBaseURL}appointment-schedules/${client}/assessment-response`;
@@ -365,7 +367,7 @@ export class ServeAssessmentService {
         const key = `${assessmentSession.userPlatformId}:Assessment:${assessmentSession.assesmentId}`;
 
         await CacheMemory.set(key, messageId);
-        
+
         // if (assessmentSession.userResponseType === "Text") {
         await this.updateMessageFlag(userId, messageId, chatMessageRepository, messageFlag);
         console.log("updated the message flag to assessment");
@@ -480,7 +482,7 @@ export class ServeAssessmentService {
                 const buttonArray = [];
                 const buttonIds = questionRawData?.ButtonsIds || [];
                 const optionsNameArray = questionData.Options || [];
-                
+
                 // Build button array
                 let i = 0;
                 for (const buttonId of buttonIds) {
@@ -525,7 +527,7 @@ export class ServeAssessmentService {
 
             const isMessageNode = questionData.NodeType === "Message";
             const userResponseTime = isMessageNode ? new Date() : null;
-            
+
             const assessmentSessionLogs = {
                 patientUserId        : questionData.PatientUserId,
                 userPlatformId       : userPlatformId,
@@ -536,6 +538,8 @@ export class ServeAssessmentService {
                 userResponse         : null,
                 userResponseTime     : userResponseTime,
                 userMessageId        : null,
+                is_node_required     : questionData.Required ?? false,
+                retry_count          : 0,
             };
 
             const assessmentSessionData = await AssessmentSessionRepo.create(assessmentSessionLogs);
@@ -557,7 +561,7 @@ export class ServeAssessmentService {
                 .log_error(error.message, 500, 'Create assessment session and identifier error.');
         }
     }
-   
+
     public async sendAssessmentMessage(
         doSend: boolean,
         eventObj: any,
@@ -598,7 +602,7 @@ export class ServeAssessmentService {
 
                 const AssessmentSessionRepo = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(AssessmentSessionLogs);
                 const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
-                
+
                 const chatMessageObj = {
                     chatSessionID  : null,
                     platform       : channel,

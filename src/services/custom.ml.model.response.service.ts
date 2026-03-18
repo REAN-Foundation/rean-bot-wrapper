@@ -11,6 +11,8 @@ import { EntityManagerProvider } from "./entity.manager.provider.service";
 import { UserInfo } from "../models/user.info.model";
 import { SystemGeneratedMessages } from "../models/system.generated.messages.model";
 import { SystemGeneratedMessagesService } from "./system.generated.message.service";
+import { TenantSettingService } from "./tenant.setting/tenant.setting.service";
+import { ContactList } from "../models/contact.list";
 
 @scoped(Lifecycle.ContainerScoped)
 export class CustomMLModelResponseService{
@@ -21,14 +23,26 @@ export class CustomMLModelResponseService{
         private dialogflowResponseService?:DialogflowResponseService){}
 
     getCustomModelResponse = async(message: string, platform: string = null, completeMessage:Imessage = null) =>{
-        const customModelUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CUSTOM_ML_MODEL_URL");
-        const tenantDisplayCode = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+        const mlSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("ml");
+        const customModelUrl = mlSecrets.CustomMlModelUrl;
+        const tenantDisplayCode = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
 
         const repository = await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService);
         const UserInfoRepository = (
             await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)
         ).getRepository(UserInfo);
-        
+        const ContactListRepository = (
+            await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)
+        ).getRepository(ContactList);
+
+        const contactList = await ContactListRepository.findOne({
+            where : {
+                mobileNumber : completeMessage.platformId
+            }
+        });
+
+        const patientUserId = contactList.dataValues.patientUserId;
+
         const infoProvided = await UserInfoRepository.findOne({
             where : {
                 userPlatformID : completeMessage.platformId
@@ -45,10 +59,17 @@ export class CustomMLModelResponseService{
             }
         }
 
-        const obj = { 
+        const tenantId = await TenantSettingService.getTenantId(
+            tenantDisplayCode,
+            process.env.REANCARE_API_KEY,
+            process.env.REAN_APP_BACKEND_BASE_URL
+        );
+        const obj = {
             "userID"              : completeMessage.platformId,
             "user_query"          : message,
-            "tenant_display_code" : tenantDisplayCode
+            "tenant_display_code" : tenantDisplayCode,
+            "tenant_id"           : tenantId,
+            "patient_user_id"     : patientUserId
         };
 
         // send authorisation once enabled for the custom model
@@ -65,7 +86,7 @@ export class CustomMLModelResponseService{
         //call the model
         const callCustomModel = await needle("post",customModelUrl,obj,options);
 
-        const feedbackAdded: boolean = this.clientEnvironmentProviderService.getClientEnvironmentVariable("ADD_FEEDBACK_MESSAGE") === "true";
+        const feedbackAdded: boolean = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("ADD_FEEDBACK_MESSAGE") === "true";
         if (feedbackAdded && callCustomModel.body?.answer){
             const feedbackMessageToBeAdded = await this.systemGeneratedMessages.getMessage("FEEDBACK_MESSAGE");
             const messageAfterFeedback = callCustomModel.body.answer +  `

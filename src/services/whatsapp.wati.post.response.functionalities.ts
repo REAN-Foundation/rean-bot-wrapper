@@ -24,15 +24,18 @@ export class WhatsappWatiPostResponseFunctionalities {
         try {
             const phoneNumber = response_format.platformId;
             const params = { 'messageText': response_format.messageText };
-            const watiUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_BASE_URL");
+            const watiUrlSettings = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WatiBaseUrl");
+            const watiUrl = watiUrlSettings.Value;
             const baseUrl = `${watiUrl}/api/v1/sendSessionMessage/${phoneNumber}?messageText=`;
             console.log("Sending Wati Text Response");
             const url = encodeURI(baseUrl + response_format.messageText);
+            const watiTokenSettings = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WatiToken");
+            const watiToken = watiTokenSettings.Value;
             const options = {
                 method  : 'POST',
                 url     : url,
                 headers : {
-                    Authorization : this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_TOKEN")
+                    Authorization : watiToken
                 }
             };
             const response = await axios.request(options).then(function (response){
@@ -138,8 +141,10 @@ export class WhatsappWatiPostResponseFunctionalities {
 
     async sendMediaMessage(response_format, payload, fileName, contentType) {
         const endpoint = "sendSessionFile";
-        const baseUrl = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_BASE_URL");
-        const watiToken = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_TOKEN");
+        const watiUrlSettings = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WatiBaseUrl");
+        const baseUrl = watiUrlSettings.Value;
+        const watiTokenSettings = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WatiToken");
+        const watiToken = watiTokenSettings.Value;
         const phoneNumber = response_format.platformId;
         let mediaLink =  response_format.messageBody;
         if (!mediaLink) {
@@ -193,8 +198,10 @@ export class WhatsappWatiPostResponseFunctionalities {
 
     sendtemplateResponse = async (response_format: Iresponse, payload) => {
         const customParameters = await this.createTemplateParams(payload);
-        const baseUrl = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_BASE_URL");
-        const watiToken = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_TOKEN");
+        const watiUrlSettings = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WatiBaseUrl");
+        const baseUrl = watiUrlSettings.Value;
+        const watiTokenSettings = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WatiToken");
+        const watiToken = watiTokenSettings.Value;
         const phoneNumber = response_format.platformId ? null : response_format.sessionId;
         const postDataWati = {
             "parameters"     : customParameters, // [{"name":"value", "name": "value"}]
@@ -254,8 +261,10 @@ export class WhatsappWatiPostResponseFunctionalities {
     };
 
     postRequestToWati = async (response_format: Iresponse, endPoint: string, postDataWati: any) => {
-        const baseUrl = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_BASE_URL");
-        const watiToken = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WATI_TOKEN");
+        const watiUrlSettings = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WatiBaseUrl");
+        const baseUrl = watiUrlSettings.Value;
+        const watiTokenSettings = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WatiToken");
+        const watiToken = watiTokenSettings.Value;
         let phoneNumber;
         if (response_format.platformId){
             phoneNumber = response_format.platformId;
@@ -305,5 +314,5 @@ export class WhatsappWatiPostResponseFunctionalities {
         const base64Data = Buffer.from(response.data, 'binary').toString('base64');
         return base64Data;
     };
-    
+
 }

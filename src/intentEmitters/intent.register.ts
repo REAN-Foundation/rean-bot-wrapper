@@ -79,7 +79,6 @@ import { CincinnatiPerMinuteMsgListener } from './intentListeners/maternity.care
 import { PatientDonationConfirmationListener } from './intentListeners/bloodWarrior/patient.donation.confirmation.listener';
 import { AdditionalInfoEditListener } from './intentListeners/consentListners/get.additional.info.listener';
 import { AdditionalInfoReadListener } from './intentListeners/consentListners/read.additional.info.listener';
-import { WelcomeIntentListener } from './intentListeners/welcome.intent.listener';
 import { NearestLocationListner } from './intentListeners/nearest.location.listner';
 import { AppointmentBookingListner } from './intentListeners/appoinment.booking.listner';
 import { VolunteerSelectedPatient } from './intentListeners/bloodWarrior/volunteer.selected.patient';
@@ -89,6 +88,7 @@ import { AssessmentScoringListener } from './intentListeners/assessment/assessem
 import { UserInfoListener } from './intentListeners/user.info.listener';
 import { FlowListener, ProcessWhatsAppFormResponsesListener } from './intentListeners/whatsapp.form/flow.listener';
 import { UserChatHistoryDeletionListener } from './intentListeners/user.history.deletion.listener';
+import { DefaultWelcomeListener } from './intentListeners/default.welcome.listener';
 
 /*
  * Init function (being called during application bootstrap)
@@ -112,7 +112,7 @@ export class IntentRegister {
         IntentEmitter.registerListener('covid-resources', getCovidResources1s);
 
         IntentEmitter.registerListener('Custom Welcome Intent', CustomWelcomeIntent);
-        IntentEmitter.registerListener('Default Welcome Intent', WelcomeIntentListener);
+        IntentEmitter.registerListener('Default Welcome Intent', DefaultWelcomeListener);
         IntentEmitter.registerListener('Custom Language - custom', CustomLanguageListener);
         IntentEmitter.registerListener('Welcome With Basic Assessment', WelcomeWithBasicAssessmentListener);
         IntentEmitter.registerListener('Change Language', LanguageChangeListener);

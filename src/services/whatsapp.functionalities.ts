@@ -102,7 +102,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         } else {
             throw new Error("Unable to find the image file path");
         }
-        
+
     }
 
     async interactiveMessageFormat(messageObj: Message) {
@@ -155,14 +155,16 @@ export class MessageFunctionalities implements getMessageFunctionalities {
 
     /*retrive whatsapp media */
     GetWhatsappMedia = async (type, mediaId, extension) => {
+        const hostName = process.env.WHATSAPP_LIVE_HOST;
+        const apiKey = process.env.WHATSAPP_LIVE_API_KEY;
         return new Promise<string>((resolve, reject) => {
             const options = {
-                hostname : this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST"),
+                hostname : hostName,
                 path     : '/v1/media/' + mediaId,
                 method   : 'GET',
                 headers  : {
                     'Content-Type' : 'application/json',
-                    'D360-Api-Key' : this.clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY")
+                    'D360-Api-Key' : apiKey
                 }
             };
 
@@ -176,7 +178,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
                     res.pipe(filePath);
                     resolve(uploadpath);
                 });
-                
+
             }
 
             else {
@@ -193,7 +195,7 @@ export class MessageFunctionalities implements getMessageFunctionalities {
                         });
                     });
                 });
-    
+
                 request.on('error', (e) => {
                     reject(e);
                 });
@@ -203,8 +205,10 @@ export class MessageFunctionalities implements getMessageFunctionalities {
     };
 
     GetWhatsappMetaMedia = async (type, imageUrl, extension) => {
+        const metaSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("meta");
         return new Promise<string>((resolve, reject) => {
-            const token = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
+
+            const token = metaSecrets?.ApiToken;
             const headers = {
                 headers : {
                     'Authorization' : `Bearer ${token}`,
@@ -297,10 +301,11 @@ export class MessageFunctionalities implements getMessageFunctionalities {
     async getMetaMediaUrl(mediaId){
         try {
             const options = getRequestOptions();
-            const token = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_API_TOKEN");
+            const metaSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("meta");
+            const token = metaSecrets?.ApiToken;
             options.headers['Content-Type'] = 'application/json';
             options.headers['Authorization'] = `Bearer ${token}`;
-            const hostname = this.clientEnvironmentProviderService.getClientEnvironmentVariable("META_WHATSAPP_HOST");
+            const hostname = process.env.META_WHATSAPP_HOST;
             const version = process.env.WHATSAPP_API_VERSION;
             const path = `/${version}/${mediaId}`;
             const apiUrl_meta = hostname + path;
