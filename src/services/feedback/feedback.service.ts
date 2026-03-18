@@ -86,7 +86,7 @@ export  class FeedbackService implements feedbackInterface {
                     if (await humanHandoff.checkTime() === "false"){
                         let reply = "";
                         const feedbackSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("FeedbackMessage");
-                        const negativeFeedback = feedbackSetting.Value.NegativeFeedbackMessage;
+                        const negativeFeedback = feedbackSetting?.Value.NegativeFeedbackMessage;
                         const customNegativeFeedbackMessage = await this.systemGeneratedMessageService.getMessage("NEGATIVE_FEEDBACK_MESSAGE");
                         if (customNegativeFeedbackMessage) {
                             reply = customNegativeFeedbackMessage;
@@ -169,7 +169,7 @@ export  class FeedbackService implements feedbackInterface {
                     replyToSend = customPositiveFeedbackMessage;
                 } else {
                     const feedbackMessageSetting = await clientEnvironmentProviderService.getClientEnvironmentVariable("FeedbackMessage");
-                    replyToSend = feedbackMessageSetting.Value.PositiveFeedbackMessage;
+                    replyToSend = feedbackMessageSetting?.Value.PositiveFeedbackMessage;
                 }
 
                 let reply;
@@ -179,7 +179,8 @@ export  class FeedbackService implements feedbackInterface {
                     reply = "We are glad that you like it. Thank you for your valuable feedback";
                 }
                 let responseChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: userId } });
-                const preferredSupportChannel = clientEnvironmentProviderService.getClientEnvironmentVariable("SupportChannel");
+                const supportChannels = await clientEnvironmentProviderService.getClientEnvironmentVariable("SupportChannels");
+                const preferredSupportChannel = Object.keys(supportChannels).find((channel) => supportChannels[channel]);
                 const description = `**User Details**\n\n- **User Platform ID**: ${userId}\n- **Username**: ${username}`;
                 if (payload.contextId){
                     responseChatMessage = await chatMessageRepository.findAll({ where: { responseMessageID: payload.contextId } });
