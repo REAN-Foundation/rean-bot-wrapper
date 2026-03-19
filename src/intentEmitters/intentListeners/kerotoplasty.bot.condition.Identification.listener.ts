@@ -34,7 +34,6 @@ export const kerotoplastySymptomAnalysisListener = async (intent, eventObj) => {
             
         }
         const data = await dialogflowService.making_response(outputMessage);
-        console.log('data from dialogflowService.making_response:', data);
         return data;
     }
     catch (error: any) {
