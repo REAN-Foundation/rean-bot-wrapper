@@ -80,8 +80,7 @@ Analyze and provide your routing decision.
      * Get ChatOpenAI instance using tenant's API key (from client environment or fallback to process.env).
      */
     private async getModel(): Promise<ChatOpenAI> {
-        const apiKeySetting = await this.clientEnvironment.getClientEnvironmentVariable("OpenAiApiKey");
-        const apiKey = apiKeySetting?.Value ?? process.env.OPENAI_API_KEY;
+        const apiKey = process.env.OPENAI_API_KEY;
         if (!apiKey) {
             throw new Error("OpenAI or Azure OpenAI API key not found. Set OpenAiApiKey in tenant secrets or OPENAI_API_KEY in .env.");
         }
@@ -171,5 +170,5 @@ Analyze and provide your routing decision.
             };
         }
     }
-    
+
 }

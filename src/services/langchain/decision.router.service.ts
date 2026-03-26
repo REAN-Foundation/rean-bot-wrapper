@@ -87,8 +87,7 @@ export class DecisionRouter {
 
     /** Lazy ChatOpenAI using tenant API key (avoids construction-time env requirement). */
     private async getModel(): Promise<ChatOpenAI> {
-        const apiKeySetting = await this.environmentProviderService.getClientEnvironmentVariable("OpenAiApiKey");
-        const apiKey = apiKeySetting?.Value ?? process.env.OPENAI_API_KEY;
+        const apiKey = process.env.OPENAI_API_KEY;
         if (!apiKey) {
             throw new Error("OpenAI or Azure OpenAI API key not found. Set OpenAiApiKey in tenant secrets or OPENAI_API_KEY in .env.");
         }
