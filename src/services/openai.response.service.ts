@@ -24,10 +24,8 @@ export class OpenAIResponseService {
             // });
             // const openai = new OpenAIApi(configuration);
 
-            const apiKeySetting = await this.clientEnvironment.getClientEnvironmentVariable("OpenAiApiKey");
-
             const openai = new OpenAI({
-                apiKey : apiKeySetting?.Value
+                apiKey : process.env.OPENAI_API_KEY
             });
 
             // const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironment)).getRepository(ChatMessage);

@@ -82,8 +82,7 @@ export class handleRequestservice {
         } else {
             // eslint-disable-next-line max-len
             message_from_nlp = await this.DialogflowResponseService.getDialogflowMessage(translate_message.message, channel, message.intent, message);
-            const openaiApiKeySetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("OpenaiApiKey");
-            const openaiApiKey = openaiApiKeySetting?.Value;
+            const openaiApiKey = process.env.OPENAI_API_KEY;
             if (openaiApiKey) {
                 if (message_from_nlp.getIntent() === "Default Fallback Intent") {
                     message_from_nlp = await this.openAIResponseService.getOpenaiMessage(clientName, translate_message.message);
