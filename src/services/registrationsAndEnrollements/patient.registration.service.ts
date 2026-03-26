@@ -6,6 +6,7 @@ import { Logger } from '../../common/logger';
 import { ContactList } from '../../models/contact.list';
 import { ChatSession } from '../../models/chat.session';
 import { CareplanEventQueue } from '../basic.careplan/careplan.event.queue';
+import { RegistrationAssessmentEventQueue } from '../registration.assessment/registration.assessment.event.queue';
 import { DEFAULT_DOB } from '../../refactor/messageTypes/user.info.types';
 
 @scoped(Lifecycle.ContainerScoped)
@@ -133,6 +134,12 @@ export class Registration{
                         channel,
                         PlatformUserId
                     );
+                    RegistrationAssessmentEventQueue.pushEvent(
+                        this.EnvironmentProviderService.getClientName(),
+                        channel,
+                        PlatformUserId,
+                        patientUserId
+                    );
                 } else {
                     patientUserId = result.Data.Patients.Items[0].UserId;
                 }
@@ -155,6 +162,12 @@ export class Registration{
                         this.EnvironmentProviderService.getClientName(),
                         channel,
                         PlatformUserId
+                    );
+                    RegistrationAssessmentEventQueue.pushEvent(
+                        this.EnvironmentProviderService.getClientName(),
+                        channel,
+                        PlatformUserId,
+                        patientUserId
                     );
                 } else {
                     patientUserId = result.Data.Patients.Items[0].UserId;

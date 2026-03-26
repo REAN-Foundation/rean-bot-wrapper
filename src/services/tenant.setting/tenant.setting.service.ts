@@ -78,6 +78,18 @@ export class TenantSettingService {
         }
     }
 
+    static async isBasicAssessmentEnabled (tenantCode: string, apiKey: string, baseUrl: string): Promise<boolean> {
+        try {
+            const tenantSetting: TenantSettingsDomainModel =
+            await this.getTenantSettingByCode(tenantCode, apiKey, baseUrl);
+            console.log(`Basic Assessment setting for tenant ${tenantCode}: ${tenantSetting?.ChatBot}`);
+            return tenantSetting?.ChatBot?.BasicAssessment ?? false;
+        } catch (error) {
+            console.error('Error in TenantSettingService.isBasicAssessmentEnabled:', error);
+            return false;
+        }
+    }
+
     static async getConsentMessages(tenantCode: string, apiKey: string, baseUrl: string, languageCode = 'en'): Promise<ConsentMessage> {
         const defaultConsentMessage = {
             LanguageCode : 'en',
