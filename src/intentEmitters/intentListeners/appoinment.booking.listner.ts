@@ -14,7 +14,8 @@ export const AppointmentBookingListner = async ( intent, eventObj ) => {
 
     try {
         console.log("Appointment booking listener is here");
-        const customRemSetting: boolean = await clientEnvironmentProviderServiceObj.getClientEnvironmentVariable("CUSTOM_REM_SETTING") === "true";
+        const customRemSettings = await clientEnvironmentProviderServiceObj.getClientEnvironmentVariable("CustomRemSetting");
+        const customRemSetting: boolean =  customRemSettings?.Value === "true";
         let response = null;
         const parameters =  eventObj.body.queryResult.parameters;
         const date_time = eventObj.body.queryResult.parameters.Date.date_time;
