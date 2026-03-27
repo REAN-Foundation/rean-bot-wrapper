@@ -50,8 +50,8 @@ export class ConsentService {
             const results = await this.registrationService.getPatientUserId(sourceChannel, userPlatformId, platformUserName);
             await this.registrationService.wrapperRegistration(this.entityManagerProvider,userPlatformId, platformUserName,sourceChannel,results.patientUserId);
             this.updateConsentStatus(userPlatformId,EnvironmentProviderService);
-            const additionalIfoSettings = await EnvironmentProviderService.getClientEnvironmentVariable("AdditionalIfoSettings");
-            const additionalInfoRequired =  additionalIfoSettings.Value.IsEnabled;
+            const additionalIfoSettings = await EnvironmentProviderService.getClientEnvironmentVariable("AdditionalInfoSettings");
+            const additionalInfoRequired =  additionalIfoSettings.Value.RequiredInfo;
             const careplanSettings = await EnvironmentProviderService.getClientEnvironmentVariable("CareplanEnrollmentSettings");
             const careplanEnrollmentRequired = careplanSettings.Value.IsEnabled;
             if (additionalInfoRequired){
@@ -98,7 +98,7 @@ export class ConsentService {
             const languageCode = eventObj.body.queryResult.languageCode;
             let payload = null;
             let messageType = null;
-            const additionalIfoSettings = await EnvironmentProviderService.getClientEnvironmentVariable("AdditionalIfoSettings");
+            const additionalIfoSettings = await EnvironmentProviderService.getClientEnvironmentVariable("AdditionalInfoSettings");
             const RequiredAdditionalInfo =  additionalIfoSettings.Value.RequiredInfo;
             const RequiredAdditionalobj = JSON.parse(RequiredAdditionalInfo );
             const values: any[] = Object.values(RequiredAdditionalobj);

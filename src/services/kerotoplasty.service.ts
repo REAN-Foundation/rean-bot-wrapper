@@ -25,8 +25,8 @@ export class kerotoplastyService {
     identifyCondition = async (eventObj) => {
         if (eventObj) {
             let symptoms: string[] = eventObj.body.queryResult.parameters.symptoms;
-            const additionalInfoSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("AdditionalIfoSettings");
-            const additionalInfo = additionalInfoSetting?.Value;
+            const additionalInfoSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("AdditionalInfoSettings");
+            const additionalInfo = additionalInfoSetting?.Value.AdditionalInfo;
             const parsedInfo = JSON.parse(additionalInfo);
 
             // Variables set for cache
@@ -215,7 +215,8 @@ export class kerotoplastyService {
             EMRNumber = EMRNumber.toUpperCase();
             user_details = await this.getEMRDetails(EMRNumber,eventObj);
         } else {
-            const shareable_details_raw = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("SHAREABLE_DETAILS");
+            const shareableDetailsSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("ShareableDetailsSetting");
+            const shareable_details_raw = shareableDetailsSetting?.Value;
             if (shareable_details_raw){
                 const shareable_details = JSON.parse(shareable_details_raw);
                 if (shareable_details.Name){

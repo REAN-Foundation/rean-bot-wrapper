@@ -59,8 +59,8 @@ export class getAdditionalInfoSevice {
                 this.sendExtraMessagesobj.sendResponsebyButton(message,eventObj,userId,buttonArray);
             }
             else {
-                const additionalIfoSettings = await this.clientEnvironment.getClientEnvironmentVariable("AdditionalIfoSettings");
-                const RequiredAdditionalInfo =  additionalIfoSettings.Value.IsEnabled;
+                const additionalIfoSettings = await this.clientEnvironment.getClientEnvironmentVariable("AdditionalInfoSettings");
+                const RequiredAdditionalInfo =  additionalIfoSettings.Value.RequiredInfo;
                 const RequiredAdditionalobj = JSON.parse(RequiredAdditionalInfo );
                 message = `Sorry the provided ${ RequiredAdditionalobj.EHRCODE} ${EHRNumber} is not in our records \n Do you want to Re-enter your ${ RequiredAdditionalobj.EHRCODE}`;
                 const button_yes = await this.translate.translatestring("Yes",languageCode);
@@ -212,7 +212,7 @@ export class getAdditionalInfoSevice {
             const personContactList = await contactList.findOne({ where: { mobileNumber: userId } });
             if (personContactList){
                 const EhrNumber = personContactList.dataValues.ehrSystemCode;
-                const additionalIfoSettings = await this.clientEnvironment.getClientEnvironmentVariable("AdditionalIfoSettings");
+                const additionalIfoSettings = await this.clientEnvironment.getClientEnvironmentVariable("AdditionalInfoSettings");
                 const RequiredAdditionalInfo =  additionalIfoSettings.Value.RequiredInfo;
                 const RequiredAdditionalobj = JSON.parse(RequiredAdditionalInfo );
                 const dffMessage = `Your ${RequiredAdditionalobj.EHRCODE} is ${EhrNumber}.`;
