@@ -10,7 +10,7 @@ export class MockChannelAuthenticator implements clientAuthenticator {
     ) {}
 
     async apiKey(): Promise<string> {
-        return await this.clientEnvironmentProviderService.getClientEnvironmentVariable("WEBHOOK_MOCK_CHANNEL_CLIENT_API_KEY");
+        return process.env.WEBHOOK_MOCK_CHANNEL_CLIENT_API_KEY;
     }
 
     async authenticate(req: any) {
