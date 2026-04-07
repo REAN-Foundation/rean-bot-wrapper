@@ -110,7 +110,6 @@ export class BotFeedback{
                     else {
                         console.log("time diff needs to be > 1 minute for aksing feedback");
                     }
-
                 }
                 const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
                 const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(ChatSession);
@@ -124,7 +123,6 @@ export class BotFeedback{
                     console.log("userID", userId);
                     await testSettimeout(userId);
                 }
-
             },
             null,
             true,

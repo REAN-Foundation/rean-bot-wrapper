@@ -59,7 +59,6 @@ export class HumanHandoff {
             };
             resolve(data);
             const ts = resp[resp.length - 1].supportChannelTaskID;
-
             // console.log("ts", ts);
             await this.slackMessageService.delayedInitialisation();
             const client = this.slackMessageService.client;

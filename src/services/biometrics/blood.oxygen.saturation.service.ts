@@ -6,12 +6,10 @@ import needle from "needle";
 
 @scoped(Lifecycle.ContainerScoped)
 export class BloodOxygenSaturationService {
-
     constructor(@inject(GetHeaders) private getHeaders?: GetHeaders,
                 @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,
                 // eslint-disable-next-line max-len
                 @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService) {}
-
     getremark = (BloodOxygenSaturation) => {
         let remark = '';
         if (BloodOxygenSaturation >= 96) {

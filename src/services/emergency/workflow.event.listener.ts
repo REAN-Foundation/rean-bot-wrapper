@@ -44,7 +44,6 @@ export class WorkflowEventListener {
                 ['CreatedAt', 'DESC']
             ]
         });
-
         if (previousMessage?.SchemaInstanceId) {
             const url = '/engine/schema-instances/' + previousMessage.SchemaInstanceId;
             const response = await this.callWorkflowApi('get', url);

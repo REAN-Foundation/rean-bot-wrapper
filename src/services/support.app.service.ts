@@ -216,7 +216,6 @@ export class GetPatientInfoService{
                 break;
             }
             case "Night":{
-
                 obj1.TimeSchedules = ["Night"];
                 obj1.Frequency = 1;
                 break;
@@ -225,7 +224,6 @@ export class GetPatientInfoService{
                 obj1.TimeSchedules = ["Evening"];
                 obj1.Frequency = 1;
                 break;
-
             }
             case "Empty Stomach":
             case "Once": {
