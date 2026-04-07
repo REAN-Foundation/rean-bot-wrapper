@@ -6,6 +6,7 @@ import { Logger } from '../../common/logger';
 import { ContactList } from '../../models/contact.list';
 import { ChatSession } from '../../models/chat.session';
 import { CareplanEventQueue } from '../basic.careplan/careplan.event.queue';
+import { RegistrationAssessmentEventQueue } from '../registration.assessment/registration.assessment.event.queue';
 import { DEFAULT_DOB } from '../../refactor/messageTypes/user.info.types';
 
 @scoped(Lifecycle.ContainerScoped)
@@ -39,51 +40,52 @@ export class Registration{
         api_key: string
     ): Promise<string> {
         try {
-            let obj: Record<string, any> | null = null;
-    
+            let obj = null;
+            const defaultTimezone = await this.EnvironmentProviderService.getClientEnvironmentVariable("Timezone");
+            const tenantCode = await this.EnvironmentProviderService.getClientEnvironmentVariable("Name");
+            console.log("Registering user on ReanCare with Timezone & name:", defaultTimezone, tenantCode);
+
             // Build the object based on creation method
             if (creationMethod === "phoneNumber") {
                 obj = {
                     Phone           : await this.countryCodeService.formatPhoneNumber(platformUserId),
                     FirstName       : platformUserName,
-                    DefaultTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
-                    CurrentTimeZone : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
-                    TenantCode      : this.EnvironmentProviderService.getClientEnvironmentVariable("NAME"),
-                    BirthDate       : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_DOB") || DEFAULT_DOB,
+                    DefaultTimeZone : defaultTimezone,
+                    CurrentTimeZone : defaultTimezone,
+                    TenantCode      : tenantCode,
+                    BirthDate       : DEFAULT_DOB,
                     GenerateOtp     : false
                 };
             } else if (creationMethod === "userName") {
                 obj = {
-                    FirstName         : platformUserName,
-                    UserName          : platformUserId,
-                    UniqueReferenceId : platformUserId,
-                    DefaultTimeZone   : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
-                    CurrentTimeZone   : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE"),
-                    TenantCode        : this.EnvironmentProviderService.getClientEnvironmentVariable("NAME"),
-                    BirthDate         : this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_DOB") || DEFAULT_DOB,
-                    GenerateOtp       : false
+                    FirstName       : platformUserName,
+                    UserName        : platformUserId,
+                    UniqueReferenceId  : platformUserId,
+                    DefaultTimeZone : defaultTimezone,
+                    CurrentTimeZone : defaultTimezone,
+                    TenantCode      : tenantCode,
+                    BirthDate       : DEFAULT_DOB,
+                    GenerateOtp     : false
                 };
             } else {
                 throw new Error(`Invalid creation method: ${creationMethod}`);
             }
-    
+
             // API Call
             const apiURL = `patients`;
             const response = await this.needleService.needleRequestForREAN("post", apiURL, null, obj,api_key);
-    
+
             // Return the User ID
             if (response?.Data?.Patient?.UserId) {
                 return response.Data.Patient.UserId;
             } else {
                 throw new Error(`Failed to register user. Invalid response format: ${JSON.stringify(response)}`);
             }
-            
         } catch (error: any) {
             console.error("Error in registerUserOnReanCare:", error.message || error);
             throw new Error(`Error in registerUserOnReanCare: ${error.message || error}`);
         }
     }
-    
     async wrapperRegistration(entityManagerProvider,userPlatformId,userPlatformName,platform,patientUserId){
         const contactListRepository =
         (await entityManagerProvider.getEntityManager(this.EnvironmentProviderService)).getRepository(ContactList);
@@ -97,7 +99,7 @@ export class Registration{
                 platform      : platform,
                 patientUserId : patientUserId,
                 optOut        : "false" });
-            const defaultLanguage = this.EnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE") || "en";
+            const defaultLanguage = await this.EnvironmentProviderService.getClientEnvironmentVariable("DefaultLanguage") || "en";
             await chatSessionRepository.create({
                 userPlatformID    : userPlatformId,
                 preferredLanguage : defaultLanguage,
@@ -115,19 +117,26 @@ export class Registration{
         PlatformUserId: string,
         platformUserName: string,
         password: string = process.env.USER_REGISTRATION_PASSWORD,
-        api_key:string = this.EnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY")
+        apiKey: string = process.env.REANCARE_API_KEY
     ): Promise<{ patientUserId: string | null; statusCode: number; errorMessage?: string }> {
         try {
             let patientUserId = null;
+
             if (channel === "telegram" || channel === "Telegram") {
                 const result = await this.checkPatientExist(PlatformUserId, null);
                 if (result.Data.Patients.Items.length === 0) {
-                    patientUserId = await this.registerUserOnReanCare(platformUserName, PlatformUserId, "userName", password,api_key);
+                    patientUserId = await this.registerUserOnReanCare(platformUserName, PlatformUserId, "userName", password, apiKey);
 
                     CareplanEventQueue.pushEvent(
                         this.EnvironmentProviderService.getClientName(),
                         channel,
                         PlatformUserId
+                    );
+                    RegistrationAssessmentEventQueue.pushEvent(
+                        this.EnvironmentProviderService.getClientName(),
+                        channel,
+                        PlatformUserId,
+                        patientUserId
                     );
                 } else {
                     patientUserId = result.Data.Patients.Items[0].UserId;
@@ -143,14 +152,20 @@ export class Registration{
                 const PhoneNumber = await this.countryCodeService.formatPhoneNumber(PlatformUserId);
                 Logger.instance().log(`Fetching patient details for phone number: ${PhoneNumber}`);
                 const apiURL = `patients/byPhone?phone=${encodeURIComponent(PhoneNumber)}`;
-                const result = await this.needleService.needleRequestForREAN("get", apiURL,null,null,api_key);
+                const result = await this.needleService.needleRequestForREAN("get", apiURL, null, null, apiKey);
                 if (result.Data.Patients.Items.length === 0) {
-                    patientUserId = await this.registerUserOnReanCare(platformUserName, PlatformUserId, "phoneNumber", password,api_key);
+                    patientUserId = await this.registerUserOnReanCare(platformUserName, PlatformUserId, "phoneNumber", password, apiKey);
 
                     CareplanEventQueue.pushEvent(
                         this.EnvironmentProviderService.getClientName(),
                         channel,
                         PlatformUserId
+                    );
+                    RegistrationAssessmentEventQueue.pushEvent(
+                        this.EnvironmentProviderService.getClientName(),
+                        channel,
+                        PlatformUserId,
+                        patientUserId
                     );
                 } else {
                     patientUserId = result.Data.Patients.Items[0].UserId;
@@ -158,13 +173,11 @@ export class Registration{
             } else {
                 throw new Error("Channel not integrated");
             }
-    
             return { patientUserId, statusCode: 200 }; // Success case
         } catch (error: any) {
 
             // Log the error if necessary
             console.error(`Error in getPatientUserId: ${error.message}`);
-    
             // Re-throw the error to propagate it to the caller
             throw error;
         }

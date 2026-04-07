@@ -4,13 +4,12 @@ import axios from "axios";
 
 @injectable()
 export class ReancareAssessmentService {
-    
     private _clientEnvironmentProviderService: ClientEnvironmentProviderService;
 
     public submitAssessment = async (container: DependencyContainer, assessmentData: any) => {
         this._clientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
         console.log("this._clientEnvironmentProviderService", this._clientEnvironmentProviderService.getClientName());
-        const baseURL = this._clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL");
+        const baseURL = process.env["REAN_APP_BACKEND_BASE_URL"];
         const apiURL = `${baseURL}clinical/assessments/${assessmentData.AssessmentTemplateId}/submit-at-once/whatsapp-form`;
         const options = this.getOptions();
         const response = await axios.post(apiURL, assessmentData, options);
@@ -22,7 +21,7 @@ export class ReancareAssessmentService {
     };
 
     private getOptions = () => {
-        const apiKey = this._clientEnvironmentProviderService?.getClientEnvironmentVariable("REANCARE_API_KEY");
+        const apiKey = process.env["REANCARE_API_KEY"];
         return {
             headers : {
                 "Content-Type" : "application/json",
@@ -30,5 +29,4 @@ export class ReancareAssessmentService {
             }
         };
     };
-    
 }

@@ -1,6 +1,6 @@
 import needle from "needle";
 import { RequestResponseCacheService } from "../../modules/cache/request.response.cache.service";
-import { ChatBotSettings, ConsentMessage, ConsentMessageWithLanguage, TenantSettingsDomainModel } from "../../domain.types/tenant.setting/tenant.setting.types";
+import { ChatBotSettings, ConsentMessage, ConsentMessageWithLanguage, TenantSettingsDomainModel, CustomSettings, WelcomeMessage } from "../../domain.types/tenant.setting/tenant.setting.types";
 import { ApiError } from "../../common/api.error";
 import { languageCodeMapper } from "../../utils/language.code.mapper";
 
@@ -16,6 +16,7 @@ export class TenantSettingService {
                 return cachedTenantSetting;
             }
             const url = `${baseUrl}tenant-settings/by-code/${tenantCode}`;
+            console.log(`Fetching tenant settings for tenant code: ${tenantCode} from URL: ${url}`);
             const response = await needle("get", url, {
                 headers : {
                     'x-api-key' : apiKey
@@ -31,6 +32,7 @@ export class TenantSettingService {
                 ChatBot  : response.body?.Data?.TenantSettings?.ChatBot,
                 Forms    : response.body?.Data?.TenantSettings?.Forms,
                 Consent  : response.body?.Data?.TenantSettings?.Consent,
+                Custom   : response.body?.Data?.TenantSettings?.CustomSettings,
                 TenantId : response.body?.Data?.TenantSettings?.TenantId,
             };
             await RequestResponseCacheService.set(`tenant-setting-${tenantCode}`, tenantSetting);
@@ -39,7 +41,6 @@ export class TenantSettingService {
             console.error('Error in TenantSettingService.getTenantSettingByCode:', error);
             return null;
         }
-        
     }
 
     static async isConsentEnabled(tenantCode: string, apiKey: string, baseUrl: string): Promise<boolean> {
@@ -65,7 +66,6 @@ export class TenantSettingService {
             return [];
         }
     }
-    
     static async isBasicCareplanEnabled (tenantCode: string, apiKey: string, baseUrl: string): Promise<boolean> {
         try {
             const tenantSetting: TenantSettingsDomainModel =
@@ -73,6 +73,18 @@ export class TenantSettingService {
             return tenantSetting?.ChatBot?.BasicCarePlan ?? false;
         } catch (error) {
             console.error('Error in TenantSettingService.isBasicCareplanEnabled:', error);
+            return false;
+        }
+    }
+
+    static async isBasicAssessmentEnabled (tenantCode: string, apiKey: string, baseUrl: string): Promise<boolean> {
+        try {
+            const tenantSetting: TenantSettingsDomainModel =
+            await this.getTenantSettingByCode(tenantCode, apiKey, baseUrl);
+            console.log(`Basic Assessment setting for tenant ${tenantCode}: ${tenantSetting?.ChatBot}`);
+            return tenantSetting?.ChatBot?.BasicAssessment ?? false;
+        } catch (error) {
+            console.error('Error in TenantSettingService.isBasicAssessmentEnabled:', error);
             return false;
         }
     }
@@ -105,9 +117,20 @@ export class TenantSettingService {
         }
     }
 
+    static async getCustomSettings(tenantCode: string, apiKey: string, baseUrl: string): Promise<CustomSettings> {
+        try {
+            const tenantSetting: TenantSettingsDomainModel =
+            await this.getTenantSettingByCode(tenantCode, apiKey, baseUrl);
+            return tenantSetting?.Custom ?? null;
+        } catch (error) {
+            console.error('Error in TenantSettingService.getCustomSettings:', error);
+            return null;
+        }
+    }
+
     static async getTenantId(tenantCode: string, apiKey: string, baseUrl: string): Promise<string> {
         try {
-            const tenantSetting: TenantSettingsDomainModel = 
+            const tenantSetting: TenantSettingsDomainModel =
             await this.getTenantSettingByCode(tenantCode, apiKey, baseUrl);
             return tenantSetting?.TenantId;
         } catch (error) {
@@ -123,6 +146,27 @@ export class TenantSettingService {
                 Language : languageCodeMapper.get(message.LanguageCode) || 'Unknown'
             };
         });
+    }
+
+    static async getWelcomeMessage(tenantCode: string,apiKey: string,baseUrl: string): Promise<WelcomeMessage> {
+
+        const defaultWelcomeMessage: WelcomeMessage = {
+            LanguageCode : 'en',
+            Content      : 'Hello! Welcome to our health assistant. How can I help you today?'
+        };
+
+        try {
+            const tenantSetting: TenantSettingsDomainModel =
+                await this.getTenantSettingByCode(tenantCode, apiKey, baseUrl);
+
+            const welcomeMessage = tenantSetting?.ChatBot?.WelcomeMessages?.[0] ?? defaultWelcomeMessage;
+
+            return welcomeMessage;
+
+        } catch (error) {
+            console.error('Error in TenantSettingService.getWelcomeMessage:', error);
+            return defaultWelcomeMessage;
+        }
     }
 
 }

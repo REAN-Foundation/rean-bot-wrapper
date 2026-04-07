@@ -40,6 +40,7 @@ export class UserRegistrationController{
                 userDetails.platform,
                 userDetails.phoneNumber,
                 userDetails.userName,
+                null,
                 authenticationKey
             );
             if (result.statusCode === 200) {
@@ -118,7 +119,6 @@ export class UserRegistrationController{
             return undefined;
         }
     }
-    
 
     unenrollFromCareplan = async(request, response)=>{
         try {
@@ -147,7 +147,7 @@ export class UserRegistrationController{
         try {
             const userDetails :  UserDetailsDomainModel = await this._validator.validateUserDetails(request);
             const clientEnvironmentProviderService = request.container.resolve(ClientEnvironmentProviderService);
-            const WelcomeMessageTemplateNameJson = clientEnvironmentProviderService.getClientEnvironmentVariable("WELCOME_MESSAGE_TEMPLATE_NAMES");
+            const WelcomeMessageTemplateNameJson = await clientEnvironmentProviderService.getClientEnvironmentVariable("WELCOME_MESSAGE_TEMPLATE_NAMES");
             const payload: Record<string, any> = {
                 variables          : [],
                 templateName       : JSON.parse(WelcomeMessageTemplateNameJson)[userDetails.languageCode],

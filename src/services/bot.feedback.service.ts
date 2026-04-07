@@ -47,7 +47,9 @@ export class BotFeedback{
                         const message = "Please rate our bot";
                         if (askForFeedback === "true") {
                             if (platform === "Telegram"){
-                                const telegram = new TelegramBot(clientEnvironmentProviderService.getClientEnvironmentVariable("TELEGRAM_BOT_TOKEN"));
+                                const telegramSecrets = await clientEnvironmentProviderService.getClientEnvironmentVariable("telegram");
+                                const telegramToken = telegramSecrets?.BotToken;
+                                const telegram = new TelegramBot(telegramToken);
                                 telegram.sendMessage(userId, message, { parse_mode: 'HTML' })
                                     .then(async(data) => { console.log("message sent", data);
                                         await chatSessionRepository.update({ askForFeedback: "false" }, { where: { userPlatformID: userId } } )
@@ -70,15 +72,14 @@ export class BotFeedback{
                                     'type'           : "text",
                                     'text'           : { 'body': message }
                                 };
-                                
+
                                 const options = getRequestOptions();
                                 options.headers['Content-Type'] = 'application/json';
-                                options.headers['D360-Api-Key'] = clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_API_KEY");
-                                const hostname = clientEnvironmentProviderService.getClientEnvironmentVariable("WHATSAPP_LIVE_HOST");
+                                options.headers['D360-Api-Key'] = process.env.WHATSAPP_LIVE_API_KEY;
+                                const hostname = process.env.WHATSAPP_LIVE_HOST;
                                 const path = '/v1/messages';
                                 const apiUrl = "https://" + hostname + path;
                                 console.log("apiuri",apiUrl);
-                                console.log("options",options);
                                 await needle.post(apiUrl, JSON.stringify(postData), options, async function(err, resp) {
                                     if (err) {
                                         console.log("err", err);
@@ -109,7 +110,6 @@ export class BotFeedback{
                     else {
                         console.log("time diff needs to be > 1 minute for aksing feedback");
                     }
-                    
                 }
                 const clientEnvironmentProviderService: ClientEnvironmentProviderService = container.resolve(ClientEnvironmentProviderService);
                 const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(clientEnvironmentProviderService)).getRepository(ChatSession);
@@ -123,7 +123,6 @@ export class BotFeedback{
                     console.log("userID", userId);
                     await testSettimeout(userId);
                 }
-            
             },
             null,
             true,

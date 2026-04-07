@@ -23,8 +23,9 @@ export class CustomMLModelResponseService{
         private dialogflowResponseService?:DialogflowResponseService){}
 
     getCustomModelResponse = async(message: string, platform: string = null, completeMessage:Imessage = null) =>{
-        const customModelUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CUSTOM_ML_MODEL_URL");
-        const tenantDisplayCode = this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME");
+        const mlSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("ml");
+        const customModelUrl = mlSecrets.CustomMlModelUrl;
+        const tenantDisplayCode = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
 
         const repository = await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService);
         const UserInfoRepository = (
@@ -41,7 +42,6 @@ export class CustomMLModelResponseService{
         });
 
         const patientUserId = contactList.dataValues.patientUserId;
-        
         const infoProvided = await UserInfoRepository.findOne({
             where : {
                 userPlatformID : completeMessage.platformId
@@ -60,10 +60,10 @@ export class CustomMLModelResponseService{
 
         const tenantId = await TenantSettingService.getTenantId(
             tenantDisplayCode,
-            this.clientEnvironmentProviderService.getClientEnvironmentVariable("REANCARE_API_KEY"),
-            this.clientEnvironmentProviderService.getClientEnvironmentVariable("REAN_APP_BACKEND_BASE_URL")
+            process.env.REANCARE_API_KEY,
+            process.env.REAN_APP_BACKEND_BASE_URL
         );
-        const obj = { 
+        const obj = {
             "userID"              : completeMessage.platformId,
             "user_query"          : message,
             "tenant_display_code" : tenantDisplayCode,
@@ -85,7 +85,7 @@ export class CustomMLModelResponseService{
         //call the model
         const callCustomModel = await needle("post",customModelUrl,obj,options);
 
-        const feedbackAdded: boolean = this.clientEnvironmentProviderService.getClientEnvironmentVariable("ADD_FEEDBACK_MESSAGE") === "true";
+        const feedbackAdded: boolean = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("ADD_FEEDBACK_MESSAGE") === "true";
         if (feedbackAdded && callCustomModel.body?.answer){
             const feedbackMessageToBeAdded = await this.systemGeneratedMessages.getMessage("FEEDBACK_MESSAGE");
             const messageAfterFeedback = callCustomModel.body.answer +  `

@@ -11,21 +11,23 @@ export class SlackAuthenticator implements clientAuthenticator{
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
     ){}
 
-    get urlToken(): any {
-        return this.clientEnvironmentProviderService.getClientEnvironmentVariable("WEBHOOK_SLACK_CLIENT_URL_TOKEN");
+    async urlToken(): Promise<any> {
+        const slackSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("slack");
+        return slackSecrets?.WebhookClientUrlToken;
     }
 
     get headerToken(): any {
         throw new Error('Method not implemented.');
     }
-    
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    authenticate(req: any, res: any) {
-        if (this.urlToken === req.params.unique_token){
+    async authenticate(req: any, res: any) {
+        const urlToken = await this.urlToken();
+        if (urlToken === req.params.unique_token){
             return;
         }
         throw new Error('Unable to authenticate.');
-        
+
     }
-    
+
 }

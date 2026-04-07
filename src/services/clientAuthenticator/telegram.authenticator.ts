@@ -14,13 +14,17 @@ export class TelegramAuthenticator implements clientAuthenticator{
         throw new Error('Method not implemented.');
     }
 
-    get urlToken(): any {
-        return this.clientEnvironmentProviderService.getClientEnvironmentVariable("WEBHOOK_TELEGRAM_CLIENT_URL_TOKEN");
+    async urlToken(): Promise<any> {
+        const telegramSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("telegram");
+        return telegramSecrets?.WebhookClientUrlToken;
+
     }
 
-    authenticate(req: any) {
+    async authenticate(req: any) {
         console.log(this.clientEnvironmentProviderService.getClientName());
-        if (this.urlToken === req.params.unique_token){
+        const urlToken = await this.urlToken();
+        console.log("urlToken:" + urlToken + " req.params.unique_token:" + req.params.unique_token);
+        if (urlToken === req.params.unique_token){
             return;
         }
         throw new Error('Unable to authenticate.');

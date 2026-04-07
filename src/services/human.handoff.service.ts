@@ -21,8 +21,10 @@ export class HumanHandoff {
         console.log("minutesutc", minutesUtc);
 
         // const secondsUtc = time_obj.getUTCSeconds();
-        const startHHhour = parseFloat(this.clientEnvironmentProviderService.getClientEnvironmentVariable("HH_START_HOUR"));
-        const endHHhour = parseFloat(this.clientEnvironmentProviderService.getClientEnvironmentVariable("HH_END_HOUR"));
+        const startHour = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("HH_START_HOUR");
+        const endHour = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("HH_END_HOUR");
+        const startHHhour = parseFloat(startHour);
+        const endHHhour = parseFloat(endHour);
 
         if ((hourUtc >= startHHhour) && ( hourUtc <= endHHhour)){
             console.log("returned true");
@@ -57,7 +59,6 @@ export class HumanHandoff {
             };
             resolve(data);
             const ts = resp[resp.length - 1].supportChannelTaskID;
-            
             // console.log("ts", ts);
             await this.slackMessageService.delayedInitialisation();
             const client = this.slackMessageService.client;

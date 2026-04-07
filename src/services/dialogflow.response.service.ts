@@ -20,8 +20,10 @@ export class DialogflowResponseService {
                 @inject(GetPatientInfoService) private getPatientInfoService?: GetPatientInfoService,) { }
 
     async getDialogflowLanguage(){
-        if (this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_DEFAULT_LANGUAGE_CODE")){
-            return this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_DEFAULT_LANGUAGE_CODE");
+        const defaultLanguageSetting = await this.clientEnvironment.getClientEnvironmentVariable("DialogflowSettings");
+        const defaultLanguage = defaultLanguageSetting ? defaultLanguageSetting.Value.DefaultLanguageCode : "en";
+        if (defaultLanguage){
+            return defaultLanguage;
         }
         else {
             return "en-US";
@@ -31,13 +33,12 @@ export class DialogflowResponseService {
 
     getDialogflowMessage = async (message: string, platform: string = null, intent: string = null, completeMessage:Imessage = null ) => {
         try {
-            
-            const env_name = this.clientEnvironment.getClientEnvironmentVariable("NAME");
+
+            const env_name = await this.clientEnvironment.getClientEnvironmentVariable("Name");
             if (env_name === "UNION"){
                 dialogflow = dialogflowv2;
             }
             const dialogflow_language = await this.getDialogflowLanguage();
-            
             const userId: string = completeMessage.platformId === null ? v4() : completeMessage.platformId;
             const location = completeMessage.latlong === null ? v4() : completeMessage.latlong;
 
@@ -47,7 +48,9 @@ export class DialogflowResponseService {
             let projectIdFinal = null;
 
             if (platform === "REAN_SUPPORT") {
-                const ReanAppGcpCredentials = JSON.parse(this.clientEnvironment.getClientEnvironmentVariable("REAN_APP_SUPPORT_GCP_PROJ_CREDENTIALS"));
+                const reanAppGcpSettings = await this.clientEnvironment.getClientEnvironmentVariable("ReanAppGcpSettings");
+                const reanGcpCredentials = reanAppGcpSettings.Value.SupportGcpProjCredentials;
+                const ReanAppGcpCredentials = JSON.parse(reanGcpCredentials);
                 options = {
                     credentials : {
                         client_email : ReanAppGcpCredentials.client_email,
@@ -55,11 +58,13 @@ export class DialogflowResponseService {
                     },
                     projectId : ReanAppGcpCredentials.private_key
                 };
-                projectIdFinal = this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_PROJECT_ID_REAN_APP");
+                projectIdFinal = reanAppGcpSettings.Value.ProjectId;
 
             } else {
-                const dfBotGCPCredentials = JSON.parse(this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS"));
-                const GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+                const dialogflowSettings = await this.clientEnvironment.getClientEnvironmentVariable("DialogflowSettings");
+                const dfBotGcpCredentials = dialogflowSettings.Value.DialogflowBotGcpProjectCredentials;
+                const dfBotGCPCredentials = dfBotGcpCredentials;
+                const GCPCredentials = await this.clientEnvironment.getClientEnvironmentVariable("GoogleApplicationCredentials");
                 const dialogflowApplicationCredentialsobj = dfBotGCPCredentials ? dfBotGCPCredentials : GCPCredentials;
                 options = {
                     credentials : {
@@ -68,7 +73,7 @@ export class DialogflowResponseService {
                     },
                     projectId : dialogflowApplicationCredentialsobj.private_key
                 };
-                projectIdFinal = this.clientEnvironment.getClientEnvironmentVariable("DIALOGFLOW_PROJECT_ID");
+                projectIdFinal = dialogflowSettings.Value.ProjectId;
 
             }
 

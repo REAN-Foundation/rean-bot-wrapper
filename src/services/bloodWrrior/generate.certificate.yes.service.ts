@@ -88,7 +88,7 @@ export class GenerateCertificateYesService {
 
             //Certificate message to donor
             const donorName = body.Donor.User.Person.DisplayName;
-            const imageUrl = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CERTIFICATE_URL");
+            const imageUrl = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("CertificateUrl");
             const filePath = await generatePdfCertificate(donorName, body.Donor.LastDonationDate, imageUrl );
             const bucket_name = process.env.TEMP_BUCKET_NAME;
             const cloud_front_path = process.env.TEMP_CLOUD_FRONT_PATH;
@@ -119,13 +119,14 @@ export class GenerateCertificateYesService {
             //load patient 2nd reminder to ask whether donation has completed or not
             const reminderDate = TimeHelper.addDuration(new Date(body.Donor.LastDonationDate), 5, DurationType.Day);
             const apiURL = `care-plans/patients/${body.PatientUserId}/enroll`;
+            const tenantName = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
             const obj = {
                 Provider   : "REAN_BW",
                 PlanName   : "Patient donation confirmation message",
                 PlanCode   : "Patient-Donation-Confirmation",
                 StartDate  : reminderDate.toISOString().split('T')[0],
                 Channel    : this.getPatientInfoService.getReminderType(payload.source),
-                TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
+                TenantName : tenantName
             };
             await this.needleService.needleRequestForREAN("post", apiURL, null, obj);
 

@@ -19,12 +19,10 @@ export class DFBackup {
         for (const intent of intent_list[0]) {
             intents.push(JSON.stringify(intent));
         }
-    
         const today = new Date();
         const dd = String(today.getDate()).padStart(2, '0');
         const mm = String(today.getMonth() + 1).padStart(2, '0');
         const yyyy = today.getFullYear();
-        
         const date = mm + '-' + dd + '-' + yyyy;
         const fileName = date + "_" + project_id;
         const key = `${clientName}/df_backups/data/${fileName}.json`;
@@ -32,7 +30,8 @@ export class DFBackup {
     }
 
     async getIntents() {
-        const dfBotGCPCredentials = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DIALOGFLOW_BOT_GCP_PROJECT_CREDENTIALS");
+        const dfSettings = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DialogflowSettings");
+        const dfBotGCPCredentials = dfSettings?.Value.DialogflowBotGcpProjectCredentials;
         const GCPCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
         const dialogflowApplicationCredentialsobj = dfBotGCPCredentials ? dfBotGCPCredentials : GCPCredentials;
         const options = {

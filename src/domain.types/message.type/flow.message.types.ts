@@ -2,7 +2,6 @@ export interface TextHeader {
     type: "text";
     text: string;
   }
-  
 export interface ImageHeader {
     type: "image";
     image: { link: string };
@@ -28,7 +27,6 @@ export interface FlowMessageParts {
     Cta?: string;
     Screen?: string;
   }
-            
 export enum FlowActionType {
     Navigate = 'navigate',
     DataExchange = 'data_exchange',
@@ -39,7 +37,8 @@ export enum FlowActionType {
 }
 
 export interface WhatsAppFlowTemplateRequest {
-    Type: string;
+
+    // Type: string;
     TemplateName: string;
     TemplateLanguage?: string;
     FlowToken?: string;

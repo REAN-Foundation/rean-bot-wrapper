@@ -87,7 +87,6 @@
 
 //       // Store the entry as JSON
 //       const entryString = JSON.stringify(entry);
-      
 //       // Check if key exists for metrics
 //       const exists = await this._client.exists(key);
 //       if (exists === 1) {
@@ -119,11 +118,11 @@
 //       }
 
 //       const entry: CacheEntry = JSON.parse(entryString);
-      
+
 //       // Update hit count
 //       entry.Hits++;
 //       await this._client.setEx(key, Math.floor((entry.Ttl - (Date.now() - entry.Timestamp)) / 1000), JSON.stringify(entry));
-      
+
 //       this.recordHit();
 //       return entry;
 //     } catch (error) {
@@ -155,13 +154,13 @@
 //     try {
 //       // Get entry for metrics before deletion
 //       const entry = await this.get(key);
-      
+
 //       const deleted = await this._client.del(key);
-      
+
 //       if (deleted > 0 && entry) {
 //         this.updateMetrics(entry, 'remove');
 //       }
-      
+
 //       return deleted > 0;
 //     } catch (error) {
 //       console.error('Redis delete error:', error);
@@ -191,7 +190,6 @@
 //       const keys = await this._client.keys(`*${searchPattern}*`);
 //       if (keys.length > 0) {
 //         await this._client.del(keys);
-        
 //         // Update metrics (approximate since we can't get individual sizes easily)
 //         this.metrics.TotalEntries = Math.max(0, this.metrics.TotalEntries - keys.length);
 //       }
@@ -211,7 +209,6 @@
 //       // Update total entries from Redis
 //       const dbSize = await this._client.dbSize();
 //       this.metrics.TotalEntries = dbSize;
-      
 //       this.updateHitRate();
 //       return { ...this.metrics };
 //     } catch (error) {
@@ -234,7 +231,6 @@
 
 //     try {
 //       const pipeline = this._client.multi();
-      
 //       for (const { key, value, options } of entries) {
 //         const ttl = Math.floor((options?.Ttl || this.config.DefaultTTL) / 1000);
 //         const entry: CacheEntry = {
@@ -244,11 +240,11 @@
 //           Hits: 0,
 //           Size: this.calculateSize(value),
 //         };
-        
+
 //         pipeline.setEx(key, ttl, JSON.stringify(entry));
-        
+
 //       }
-      
+
 //       await pipeline.exec();
 //     } catch (error) {
 //       console.error('Redis setMany error:', error);
@@ -291,7 +287,6 @@
 //     try {
 //       const pipeline = this._client.multi();
 //       keys.forEach(key => pipeline.del(key));
-      
 //       const results = await pipeline.exec();
 //       return results?.map(result => (result as any)?.[1] > 0) || keys.map(() => false);
 //     } catch (error) {

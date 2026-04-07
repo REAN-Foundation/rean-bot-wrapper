@@ -6,13 +6,16 @@ import { sendExtraMessages } from "../../services/send.extra.messages.service";
 import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
 
 export const AppointmentBookingListner = async ( intent, eventObj ) => {
-    const dialoflowMessageFormattingObj: dialoflowMessageFormatting = eventObj.container.resolve(dialoflowMessageFormatting);
+    const dialoflowMessageFormattingObj: dialoflowMessageFormatting =
+    eventObj.container.resolve(dialoflowMessageFormatting);
     const kerotoplastyServiceObj: kerotoplastyService = eventObj.container.resolve(kerotoplastyService);
-    const clientEnvironmentProviderServiceObj: ClientEnvironmentProviderService = eventObj.container.resolve(ClientEnvironmentProviderService);
+    const clientEnvironmentProviderServiceObj: ClientEnvironmentProviderService =
+    eventObj.container.resolve(ClientEnvironmentProviderService);
 
     try {
         console.log("Appointment booking listener is here");
-        const customRemSetting: boolean = clientEnvironmentProviderServiceObj.getClientEnvironmentVariable("CUSTOM_REM_SETTING") === "true";
+        const customRemSettings = await clientEnvironmentProviderServiceObj.getClientEnvironmentVariable("CustomRemSetting");
+        const customRemSetting: boolean =  customRemSettings?.Value === "true";
         let response = null;
         const parameters =  eventObj.body.queryResult.parameters;
         const date_time = eventObj.body.queryResult.parameters.Date.date_time;
@@ -51,7 +54,7 @@ export const AppointmentBookingListner = async ( intent, eventObj ) => {
             .log_error(error.message,500,'Food info listener error');
         throw new Error("Food info listener error");
     }
-}; 
+};
 async function keratoplastyNextSteps(intent,eventObj) {
     try {
         console.log("STEP 4");

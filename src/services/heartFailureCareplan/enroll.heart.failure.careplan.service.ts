@@ -12,6 +12,7 @@ import { FireAndForgetService, QueueDoaminModel } from '../fire.and.forget.servi
 import { Registration } from '../registrationsAndEnrollements/patient.registration.service';
 import { SystemGeneratedMessagesService } from "../system.generated.message.service";
 import { translateService } from '../translate.service';
+import { DEFAULT_DOB } from '../../refactor/messageTypes/user.info.types';
 
 @scoped(Lifecycle.ContainerScoped)
 
@@ -47,8 +48,8 @@ export class HeartFailureRegistrationService {
                 }
             };
             const patientUpdateUrl = `patients/${patientIDArray.patientUserId}`;
-            const defaultDOB = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_DOB");
-            const defaultGender = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_GENDER");
+            const defaultDOB = DEFAULT_DOB;
+            const defaultGender = "Male";
 
             const patientDomainModel = {
                 Gender    : defaultGender,
@@ -109,15 +110,17 @@ export class HeartFailureRegistrationService {
         }
 
         let obj1 = {};
-       
+        const tenantName = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Name");
+
         if (isTestUser) {
-            const timezone = this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_USERS_TIME_ZONE") || "+05:30";
+            const timezone = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("Timezone") || "+05:30";
             const scheduleConfig = this.getScheduleForNextCron(15, timezone);
+
             obj1 = {
                 Provider  : 'REAN',
                 StartDate : new Date().toISOString()
                     .split('T')[0],
-                TenantName     : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME"),
+                TenantName     : tenantName,
                 PlanCode       : planCode,
                 PlanName       : planCode,
                 Channel        : this.getPatientInfoService.getReminderType(channel),
@@ -134,7 +137,7 @@ export class HeartFailureRegistrationService {
                 StartDate  : startDate.toISOString().split('T')[0],
                 DayOffset  : 0,
                 Channel    : this.getPatientInfoService.getReminderType(channel),
-                TenantName : this.clientEnvironmentProviderService.getClientEnvironmentVariable("NAME")
+                TenantName : tenantName
             };
         }
 

@@ -42,14 +42,18 @@ export class InMemoryCache implements ICache {
     }
 
     async set(key: string, value: any, options: CacheOptions = {}): Promise<void> {
-        const ttl = options.Ttl || this.config.DefaultTTL;
+        let ttl = options.Ttl;
+        console.log(`Setting cache for key: ${key} with TTL: ${ttl} ms`);
+        if (options.Ttl != null){
+            ttl = options.Ttl || this.config.DefaultTTL;
+        }
         const size = this.calculateSize(value);
         const timestamp = Date.now();
-        
+
         // Check memory limits before adding
         // if (this.metrics.TotalSize + size > this.config.MaxMemorySize) {
         //   await this.cleanup();
-        
+
         //   // If still over limit after cleanup, reject based on priority
         //   if (this.metrics.TotalSize + size > this.config.MaxMemorySize && options.Priority !== CachePriority.High) {
         //     console.warn(`Cache memory limit exceeded for key: ${key}`);
@@ -78,7 +82,6 @@ export class InMemoryCache implements ICache {
 
     async get(key: string): Promise<CacheEntry | undefined> {
         const entry = this.cache.get(key);
-        
         if (!entry) {
             this.recordMiss();
             return undefined;
@@ -178,6 +181,7 @@ export class InMemoryCache implements ICache {
 
     // Private helper methods
     private isExpired(entry: CacheEntry): boolean {
+        if (entry.Ttl === null) return false;
         return Date.now() - entry.Timestamp > entry.Ttl;
     }
 

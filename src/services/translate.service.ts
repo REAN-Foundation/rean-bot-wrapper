@@ -25,8 +25,10 @@ export class translateService{
     private translateGlossaryId: string;
 
     async getDialogflowLanguage(){
-        if (this.clientEnvironmentProviderService.getClientEnvironmentVariable("DIALOGFLOW_DEFAULT_LANGUAGE_CODE")){
-            return this.clientEnvironmentProviderService.getClientEnvironmentVariable("DIALOGFLOW_DEFAULT_LANGUAGE_CODE");
+        const dialogflowLanguageSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DialogflowSettings");
+        const defaultLanguageCode = dialogflowLanguageSetting?.Value.DefaultLanguageCode ?? "en";
+        if (defaultLanguageCode){
+            return defaultLanguageCode;
         }
         else {
             return "en";
@@ -85,8 +87,9 @@ export class translateService{
         const intent = messageFromDialogflow.getIntent();
         const parse_mode = messageFromDialogflow.getParseMode();
         const text = messageFromDialogflow.getText();
-        const customTranslateSetting: boolean = this.clientEnvironmentProviderService.getClientEnvironmentVariable("FIX_LANGUAGE") === "true";
-        const listOfNoTranslateIntents = this.clientEnvironmentProviderService.getClientEnvironmentVariable("FIX_LANGUAGE_INTENTS") ?? [];
+        const fixLanguageSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("FixLanguage");
+        const customTranslateSetting: boolean = fixLanguageSetting?.Value.Enable ?? false;
+        const listOfNoTranslateIntents = fixLanguageSetting?.Value.Intents ?? [];
         if (parse_mode) {
             translatedResponse = text;
         } else if (listOfNoTranslateIntents.includes(intent) && customTranslateSetting){
@@ -119,7 +122,7 @@ export class translateService{
             let languageForSession = await this.userLanguage.getPreferredLanguageofSession(phoneNumber);
             console.log("languageForSession before", languageForSession);
 
-            languageForSession = languageForSession !== 'null' ? languageForSession : this.clientEnvironmentProviderService.getClientEnvironmentVariable("DEFAULT_LANGUAGE_CODE");
+            languageForSession = languageForSession !== 'null' ? languageForSession : await this.clientEnvironmentProviderService.getClientEnvironmentVariable("DefaultLanguage");
             console.log("languageForSession after", languageForSession);
             return languageForSession;
 
@@ -134,15 +137,17 @@ export class translateService{
         const responseLanguage = await this.detectLanguage(responseMessage[0]);
         const defultLanguage = await this.getDialogflowLanguage();
         const translate = new v2.Translate(this.obj);
-        this.translateGlossaryId = this.clientEnvironmentProviderService.getClientEnvironmentVariable("TRANSLATE_GLOSSARY");
-        const customTranslateSetting: boolean = this.clientEnvironmentProviderService.getClientEnvironmentVariable("FIX_LANGUAGE") === "true";
+        const translateGlossarySetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("TranslateGlossary");
+        this.translateGlossaryId = translateGlossarySetting ? translateGlossarySetting.Value : null;
+        const fixLanguageSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("FixLanguage");
+        const customTranslateSetting: boolean = fixLanguageSetting?.Value.Enable ?? false;
         try {
             if (customTranslateSetting) {
                 responseMessage = [responseMessage[0]];
             } else {
                 if (detected_language !== defultLanguage) {
                     if (this.translateGlossaryId) {
-                        this.translated_message = await this.translateTextWithGlossary(responseMessage[0], detected_language, translate); 
+                        this.translated_message = await this.translateTextWithGlossary(responseMessage[0], detected_language, translate);
                     } else {
                         this.translated_message = await translate.translate(responseMessage[0], { to: detected_language, format: "text" });
                     }
@@ -195,7 +200,6 @@ export class translateService{
             const [response] = await translationClient.translateText(request);
 
             const glossary_response = response.glossaryTranslations[0].translatedText;
-        
             return [glossary_response];
         } catch {
             const translated_response = await translate.translate(message, { to: target_language, format: "text" });

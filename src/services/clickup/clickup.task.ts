@@ -20,22 +20,23 @@ export class ClickUpTask{
     // eslint-disable-next-line max-len
     async createTask(responseChatMessage = null, postTopic:string = null, description:string = null, priority = null, ClickupListID = null,tag = ''){
         try {
+            const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
             let listID = null;
             if (ClickupListID){
                 listID = ClickupListID;
             }
             else {
-                listID = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_LIST_ID");
+
+                listID = clickupSecrets?.ListId;
             }
             const createTaskUrl = `https://api.clickup.com/api/v2/list/${listID}/task`;
             const options = getRequestOptions();
-            const CLICKUP_AUTHENTICATION = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
+            const CLICKUP_AUTHENTICATION = clickupSecrets.Authentication;
             options.headers["Authorization"] =  CLICKUP_AUTHENTICATION;
             options.headers["Content-Type"] = `application/json`;
             let topic:any = null;
             if (postTopic){
                 topic = postTopic;
-                
             }
             else if (responseChatMessage?.length >= 1 ){
                 topic = responseChatMessage[responseChatMessage.length - 1].dataValues.messageContent;
@@ -65,14 +66,13 @@ export class ClickUpTask{
             }
             const response = await needle("post", createTaskUrl, obj, options);
             if (response.statusCode !== 200) {
-                console.log("Error in creating the ClickUp Task");
-                // console.log(response);
+                console.log(`[ClickUp] Error creating task. Status: ${response.statusCode}, Body:`, JSON.stringify(response.body));
             }
             const taskID = response.body.id;
-            console.log(`task has been created with ${taskID}`);
+            console.log(`[ClickUp] Task created with ID: ${taskID}`);
             return taskID;
         } catch (error) {
-            console.log("Error while creating the task on ClickUp", error);
+            console.log("[ClickUp] Error while creating task:", error.message || error);
         }
     }
 
@@ -82,13 +82,14 @@ export class ClickUpTask{
         try {
             const form = new FormData();
             const filename = crypto.randomBytes(16).toString('hex');
-            
+
             form.append(filename, '');
             form.append('attachment', fs.createReadStream(imageLink));
-            
+
             const headers = form.getHeaders();
-            headers.Authorization = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
-            
+            const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
+            headers.Authorization = clickupSecrets?.Authentication;
+
             await axios({
                 method : 'post',
                 url    : `https://api.clickup.com/api/v2/task/${taskID}/attachment`,
@@ -97,26 +98,35 @@ export class ClickUpTask{
             });
         }
         catch (error){
-            console.log(error);
+            console.log(`[ClickUp] Error attaching file to task ${taskID}:`, error.message || error);
         }
     }
 
     async postCommentOnTask(taskID,comment){
+        if (!taskID) {
+            console.log("[ClickUp] postCommentOnTask skipped: taskID is null/undefined");
+            return;
+        }
         try {
-            const createTaskUrl = `https://api.clickup.com/api/v2/task/${taskID}/comment`;
+            const commentUrl = `https://api.clickup.com/api/v2/task/${taskID}/comment`;
             const options = getRequestOptions();
-            const CLICKUP_AUTHENTICATION = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
+            const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
+            const CLICKUP_AUTHENTICATION = clickupSecrets?.Authentication;
             options.headers["Authorization"] =  CLICKUP_AUTHENTICATION;
             options.headers["Content-Type"] = `application/json`;
             const obj = {
                 "comment_text" : comment,
                 "notify_all"   : true
             };
-            await needle("post", createTaskUrl, obj, options);
-            console.log("comment has been added in the task");
+            const response = await needle("post", commentUrl, obj, options);
+            if (response.statusCode !== 200) {
+                console.log(`[ClickUp] Failed to post comment on task ${taskID}. Status: ${response.statusCode}, Body:`, JSON.stringify(response.body));
+            } else {
+                console.log(`[ClickUp] Comment added to task ${taskID}`);
+            }
         }
         catch (error){
-            console.log(error);
+            console.log(`[ClickUp] Error posting comment on task ${taskID}:`, error.message || error);
         }
 
     }
@@ -125,7 +135,8 @@ export class ClickUpTask{
         try {
             const updateTaskUrl = `https://api.clickup.com/api/v2/task/${taskID}`;
             const options = getRequestOptions();
-            const CLICKUP_AUTHENTICATION = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
+            const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
+            const CLICKUP_AUTHENTICATION = clickupSecrets?.Authentication;
             options.headers["Authorization"] =  CLICKUP_AUTHENTICATION;
             options.headers["Content-Type"] = `application/json`;
             const obj = {
@@ -143,24 +154,29 @@ export class ClickUpTask{
             if (priority != null) {
                 obj.priority = priority;
             }
-    
-            await needle("put", updateTaskUrl, obj, options);
+
+            const response = await needle("put", updateTaskUrl, obj, options);
+            if (response.statusCode !== 200) {
+                console.log(`[ClickUp] Failed to update task ${taskID}. Status: ${response.statusCode}, Body:`, JSON.stringify(response.body));
+            }
         }
         catch (error){
-            console.log(error);
+            console.log(`[ClickUp] Error updating task ${taskID}:`, error.message || error);
         }
-        
+
     }
 
     async updateTag(taskID: string, intent = '') {
         try {
-            const clientTags = JSON.parse(this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_TAGS"));
+            const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
+            const clickupTagsSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("ClickupTags");
+            const clientTags = clickupTagsSetting?.Value;
             if (clientTags) {
                 const exists = clientTags.includes(intent);
                 if (exists) {
                     const updateTaskUrl = `https://api.clickup.com/api/v2/task/${taskID}/tag/${intent}`;
                     const options = getRequestOptions();
-                    const CLICKUP_AUTHENTICATION = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
+                    const CLICKUP_AUTHENTICATION = clickupSecrets?.Authentication;
                     options.headers["Authorization"] =  CLICKUP_AUTHENTICATION;
                     options.headers["Content-Type"] = `application/json`;
                     const response = await needle("post", updateTaskUrl, {}, options);
@@ -176,7 +192,8 @@ export class ClickUpTask{
         try {
             const updateTaskUrl = `https://api.clickup.com/api/v2/task/${taskID}/tag/${intent}`;
             const options = getRequestOptions();
-            const CLICKUP_AUTHENTICATION = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
+            const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
+            const CLICKUP_AUTHENTICATION = clickupSecrets?.Authentication;
             options.headers["Authorization"] =  CLICKUP_AUTHENTICATION;
             options.headers["Content-Type"] = `application/json`;
             const response = await needle("post", updateTaskUrl, {}, options);
@@ -190,7 +207,8 @@ export class ClickUpTask{
         try {
             const getTaskUrl = `https://api.clickup.com/api/v2/task/${taskID}`;
             const options = getRequestOptions();
-            const CLICKUP_AUTHENTICATION = this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_AUTHENTICATION");
+            const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
+            const CLICKUP_AUTHENTICATION = clickupSecrets?.Authentication;
             options.headers["Authorization"] = CLICKUP_AUTHENTICATION;
             options.headers["Content-Type"] = "application/json";
 

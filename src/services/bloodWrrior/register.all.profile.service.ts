@@ -37,6 +37,7 @@ export class RegisterAllProfileService {
             const body = payload.body;
 
             if (body.Profile === "Patient") {
+                const tenantCode = await this.clientEnvProviderService.getClientEnvironmentVariable("Name");
                 const obj = {
                     Phone      : `+91-${body.PatientPhone}`,
                     Password   : body.Password,
@@ -44,7 +45,7 @@ export class RegisterAllProfileService {
                     Gender     : body.PatientGender,
                     FirstName  : body.PatientFirstName,
                     LastName   : body.PatientLastName,
-                    TenantCode : this.clientEnvProviderService.getClientEnvironmentVariable("NAME"),
+                    TenantCode : tenantCode,
                     BirthDate  : new Date(body.PatientBirthDate).toISOString()
                         .split('T')[0],
                     BloodGroup           : body.PatientBloodGroup,
