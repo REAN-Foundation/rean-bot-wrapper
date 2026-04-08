@@ -13,7 +13,7 @@ import { getRiskAssessmentFollowup } from './intentListeners/risk.assessment.fol
 import { getMedicationInfo } from './intentListeners/support.app.listener';
 import { AppSupportListener } from './intentListeners/app.support.listener';
 import { AppSymptomListener } from './intentListeners/app.symptom.listener';
-import { AnemiaBotListener } from './intentListeners/anemia.bot.listener';
+import { getAnemiaSegmentationResult } from './intentListeners/anemia.segmentation.bot.listener';
 import { NegativeFeedbackListener } from './intentListeners/negative.feedabck.listener';
 import { PositiveFeedbackListener } from './intentListeners/positive.feedback.listener';
 import { AppMedicationListener } from './intentListeners/app.medication.listener';
@@ -121,7 +121,7 @@ export class IntentRegister {
 
         IntentEmitter.registerListener('Risk.Assessment', RiskAssessmentListener);
         
-        IntentEmitter.registerListener('anemiaInitialisation-followup', AnemiaBotListener);
+        IntentEmitter.registerListener('AnemiaImage',  getAnemiaSegmentationResult);
 
         IntentEmitter.registerListener('NegativeFeedback', NegativeFeedbackListener);
 

@@ -139,7 +139,7 @@ export default class Application {
 
         }
         catch (error) {
-            Logger.instance().log('An error occurred while starting reancare-api service.' + error.message);
+            Logger.instance().log('An error occurred while starting reanbot-api service.' + error.message);
         }
     };
 
