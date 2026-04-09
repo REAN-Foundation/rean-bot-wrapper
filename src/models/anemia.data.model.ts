@@ -1,19 +1,24 @@
-import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from 'sequelize-typescript';
-import { assessmentSessionLogs } from '../refactor/interface/message.interface';
+import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, IsUUID } from 'sequelize-typescript';
+import { anemiaDataRecord } from '../refactor/interface/message.interface';
+import { v4 } from 'uuid';
 
 @Table({
     timestamps : true,
-    modelName  : 'AssessmentSessionLogs',
-    tableName  : 'assessment_session_logs',
+    modelName  : 'AnemiaDataRecord',
+    tableName  : 'anemia_data_record',
     })
-export class AssessmentSessionLogs extends Model implements assessmentSessionLogs {
+export class AnemiaDataRecord extends Model implements anemiaDataRecord {
     
-    @AutoIncrement
+    @IsUUID(4)
     @PrimaryKey
     @Column({
-        type : DataType.INTEGER
-    })
-        autoIncrementalID: number;
+          type : DataType.UUID,
+          defaultValue : () => {
+              return v4();
+          },
+          allowNull : false
+      })
+          id: string;
 
     @Column({
         type : DataType.STRING
@@ -27,51 +32,33 @@ export class AssessmentSessionLogs extends Model implements assessmentSessionLog
 
     @Column({
         type : DataType.STRING
+        
     })
-        assessmentTemplateId: string;
+        patientId: string
 
     @Column({
-        type : DataType.STRING
+        type: DataType.FLOAT
     })
-        assesmentId: string;
-
-    @Column({
-        type : DataType.STRING
-    })
-        assesmentNodeId: string;
+        pridictedHb: number;
     
-    @Column({
-        type : DataType.STRING
+            @Column({
+        type: DataType.FLOAT
     })
-        userResponseType: string;
+        exactHb: number;
 
     @Column({
-        type : DataType.STRING
+       type: DataType.STRING
     })
-        userResponse: string;
-    
-    @Column({
-        type : DataType.DATE
-    })
-        userResponseTime: Date;
+        originalImagePath : string
 
     @Column({
-        type : DataType.STRING
+       type: DataType.STRING
     })
-        userMessageId: string;
-
+        bucketImagePath : string
+        
     @Column({
-        type         : DataType.BOOLEAN,
-        allowNull    : false,
-        defaultValue : false
+       type: DataType.STRING
     })
-        is_node_required: boolean;
-
-    @Column({
-        type         : DataType.INTEGER,
-        allowNull    : false,
-        defaultValue : 0
-    })
-        retry_count: number;
+        segmentedImagePath : string
 
 }
