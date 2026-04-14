@@ -1,6 +1,7 @@
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { AwsS3manager } from './aws.file.upload.service';
 import { inject, Lifecycle, scoped } from 'tsyringe';
+import { AnemiaDataRecord } from '../models/anemia.data.model';
 import { EntityManagerProvider } from './entity.manager.provider.service';
 import needle from "needle";
 import path from 'path';
@@ -13,7 +14,8 @@ export class AnemiaModelCommunication {
 
     // eslint-disable-next-line max-len
     constructor(
-        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject (EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
+        @inject(ClientEnvironmentProviderService) private EnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(AwsS3manager) private awsS3manager?: AwsS3manager,
         @inject(sendExtraMessages) private sendExtraMessagesobj? : sendExtraMessages,
     ) { }
@@ -41,8 +43,9 @@ export class AnemiaModelCommunication {
             const userId = Body.body.originalDetectIntentRequest.payload.userId;
             const filePath =  `./photo/` + filename;
             const newFilename = `${uniqueId}:${userId}`;
-            const bucket_name  = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("AnemiaDataBackupBucketName");
-            const fileLocation = await this.awsS3manager.uploadFileToS3(filePath, bucket_name, cloudFrontPath, newFilename);
+            const bucket_name  = await this.EnvironmentProviderService.getClientEnvironmentVariable("AnemiaDataBackupBucketName");
+            const fileLocation =
+            await this.awsS3manager.uploadFileToS3(filePath, bucket_name, cloudFrontPath, newFilename);
             const cacheData = {
                 "origionalImagePath" : fileLocation,
                 "SegmentedImagePath" : "",
@@ -78,13 +81,24 @@ export class AnemiaModelCommunication {
 
     async Record(userId){
         const cacheData = CacheMemory.get(`Anemia:${userId}`);
-        
+        const AnemiaRepoObj =
+        (await this.entityManagerProvider.getEntityManager(this.EnvironmentProviderService)).getRepository(AnemiaDataRecord);
+        await AnemiaRepoObj.create({
+            userPlatformId     : userId,
+            patientId          : cacheData["patientId"],
+            pridictedHb        : cacheData["HbValue"],
+            originalImagePath  : cacheData["origionalImagePath"],
+            segmentedImagePath : cacheData["SegmentedImagePath"]
+        }
+        );
+        CacheMemory.delete(`Anemia:${userId}`);
+
     }
 
     async Regression(eventObj){
         const cloudFrontPath = eventObj.body.queryResult.queryText;
         const filename = path.basename(cloudFrontPath);
-        const result = await this. getAnemiaResults(cloudFrontPath,filename,"segment");
+        const result = await this. getAnemiaResults(cloudFrontPath,filename,"regression");
         const HbValue = result.HbValue;
         const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
         const cacheData = CacheMemory.get(`Anemia:${userId}`);
