@@ -61,6 +61,7 @@ export class WhatsappWatiMessageService implements platformServiceInterface{
     async setWebhook(clientName: string){
         return;
     }
+    
     async SendMediaMessage(response_format: Iresponse, payload: any) {
         let whatsappMessageId;
         const type = response_format.message_type;

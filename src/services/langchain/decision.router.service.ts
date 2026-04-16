@@ -27,6 +27,7 @@ import { IntentRepo } from "../../database/repositories/intent/intent.repo";
 import { CareplanEnrollmentDomainModel } from "../../domain.types/basic.careplan/careplan.types";
 import { CareplanMetaDataValidator } from "../basic.careplan/careplan.metadata.validator";
 import { NotificationType } from "../../domain.types/reminder/reminder.domain.model";
+import { UserInfoService } from "../user.info/user.info.service";
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -44,7 +45,8 @@ export class DecisionRouter {
         @inject(NeedleService) private needleService?: NeedleService,
         @inject(AssessmentService) private assessmentService?: AssessmentService,
         @inject(WorkflowEventListener) private workflowEventListener?: WorkflowEventListener,
-        @inject(WorkflowRoutingService) private workflowRoutingService?: WorkflowRoutingService
+        @inject(WorkflowRoutingService) private workflowRoutingService?: WorkflowRoutingService,
+        @inject(UserInfoService) private userInfoService?: UserInfoService
     ) {
         this.outgoingMessage = {
             PrimaryMessageHandler : MessageHandlerType.Unhandled,
@@ -103,6 +105,23 @@ export class DecisionRouter {
     public assessmentFlag = false;
 
     public intentFlag = false;
+
+    private async checkUserInfo(platformId: string): Promise<boolean> {
+        try {
+            const result = await this.userInfoService.checkUserProvidedInfo(platformId);
+            if (!result) {
+                return false;
+            }
+            const info = result.providedInfo as any;
+            const hasName   = info?.userName   != null && info.userName   !== '';
+            const hasAge    = info?.userAge    != null;
+            const hasGender = info?.userGender != null && info.userGender !== '';
+            return hasName && hasAge && hasGender;
+        } catch (error) {
+            console.log('[checkUserInfo] Error checking user info, allowing through:', error);
+            return true;
+        }
+    }
 
     async checkFeedback(messageBody: Imessage, channel: string){
 
@@ -391,7 +410,6 @@ export class DecisionRouter {
         }
 
     }
-    
     async checkDFIntent(messageBody: Imessage){
 
         // const dfResponse = await sessionClient.detectIntent(requestBody);
@@ -501,6 +519,30 @@ export class DecisionRouter {
             if (!resultFeedback.feedbackFlag){
                 const resultAssessment = await this.checkAssessment(messageBody, channel);
                 if (!resultAssessment.AssessmentFlag){
+
+                    // ── USER INFO GATE ────────────────────────────────────────────────────
+
+                    const userInfoCheckFlag = await this.environmentProviderService?.getClientEnvironmentVariable('UserInfoCheckFlag');
+                    const userInfoCheck: boolean = userInfoCheckFlag?.Value === "True";
+                    if (userInfoCheck) {
+                        const userHasProvidedInfo = await this.checkUserInfo(messageBody.platformId);
+                        if (!userHasProvidedInfo) {
+                            console.log(`[getDecision] User ${messageBody.platformId} has not provided info. Triggering Default Welcome Intent.`);
+                            messageBody.intent = 'DefaultWelcomeIntent';
+                            const resultIntent = await this.checkDFIntent(messageBody);
+                            this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.NLP;
+                            this.outgoingMessage.Intent = {
+                                NLPProvider   : NlpProviderType.Dialogflow,
+                                IntentName    : resultIntent?.getIntent() ?? 'Default Welcome Intent',
+                                Confidence    : resultIntent?.getConfidenceScore() ?? undefined,
+                                IntentContent : resultIntent
+                            };
+                            return this.outgoingMessage;
+                        }
+                    }
+                    
+                    // ── END USER INFO GATE ────────────────────────────────────────────────
+
                     console.log(`Checking for assessment with form submission: ${messageBody.intent}`);
                     if (messageBody.intent === MessageHandlerType.AssessmentWithFormSubmission){
                         this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.AssessmentWithFormSubmission;

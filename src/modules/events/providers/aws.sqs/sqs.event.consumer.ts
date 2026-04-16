@@ -102,6 +102,7 @@ export class AwsSqsEventConsumer implements IEventConsumer {
             throw error;
         }
     }
+    
     async stopListening(): Promise<void> {
         if (!this.isListening) {
             return;
@@ -137,6 +138,7 @@ export class AwsSqsEventConsumer implements IEventConsumer {
             Logger.instance().log(`Error closing consumer SQS client: ${error.message}`);
         }
     }
+
     async acknowledgeMessage(messageId: string): Promise<void> {
         const msg = this.pendingMessages.get(messageId);
         if (msg && this.sqsClient && msg.ReceiptHandle) {
@@ -152,6 +154,7 @@ export class AwsSqsEventConsumer implements IEventConsumer {
             }
         }
     }
+
     async rejectMessage(messageId: string, requeue = false): Promise<void> {
         const msg = this.pendingMessages.get(messageId);
         if (msg && this.sqsClient) {
@@ -216,6 +219,7 @@ export class AwsSqsEventConsumer implements IEventConsumer {
             Logger.instance().log(`Error polling messages from ${this.queueUrl}: ${error.message}`);
         }
     }
+
     private async handleMessage(msg: Message | null, options?: ConsumerOptions): Promise<void> {
         if (!msg || !msg.Body) {
             return;

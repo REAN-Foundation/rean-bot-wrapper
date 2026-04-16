@@ -254,6 +254,21 @@ export class MessageFlow{
                 payload["variables"] = msg.message.Variables[languageCode];
             }
 
+            // extract name from template variables
+            let extractedName = "Unknown";
+
+            if (Array.isArray(payload["variables"]) && payload["variables"].length > 0) {
+                extractedName = payload["variables"][0];
+            }
+
+            // create contact if not exists
+            if (!personContactList) {
+                await contactList.create({
+                    mobileNumber: msg.userId,
+                    username: extractedName,
+                    platform: channel,
+                });
+            }
             // Fetch image URL in template message
             if (msg.message.Url) {
                 payload["headers"] = {
@@ -321,7 +336,18 @@ export class MessageFlow{
         let chatSessionId = null;
         if (chatSessionModel) {
             chatSessionId = chatSessionModel.autoIncrementalID;
+        } else {
+            const newSession = chatSessionRepository.create({
+                userPlatformID: response_format.sessionId,
+                platform: response_format.platform
+            });
+            const savedSession = await chatSessionRepository.findOne({
+                where: { userPlatformID: response_format.sessionId }
+            });
+
+            chatSessionId = savedSession?.autoIncrementalID;
         }
+
         const chatMessageObj = {
             chatSessionID  : chatSessionId,
             platform       : response_format.platform,
@@ -346,7 +372,7 @@ export class MessageFlow{
         // eslint-disable-next-line max-len
         message_to_platform = await platformMessageService.SendMediaMessage(response_format, payload);
         const customRemSettings = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("CustomRemSetting");
-        const customRemSetting: boolean = customRemSettings?.Value === "true";
+        const customRemSetting: boolean = customRemSettings?.Value === "True";
         if (msg.agentName === 'Reancare' && customRemSetting) {
             try {
                 const msg_id = await platformMessageService.getMessageIdFromResponse(message_to_platform);
