@@ -42,7 +42,6 @@ export class CustomMLModelResponseService{
         });
 
         const patientUserId = contactList.dataValues.patientUserId;
-
         const infoProvided = await UserInfoRepository.findOne({
             where : {
                 userPlatformID : completeMessage.platformId

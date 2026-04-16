@@ -35,6 +35,5 @@ export class SignedUrls{
             console.log("signedUrl", signedUrl);
         });
     }
-
 }
 

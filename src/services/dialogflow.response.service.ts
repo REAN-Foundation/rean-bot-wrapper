@@ -39,7 +39,6 @@ export class DialogflowResponseService {
                 dialogflow = dialogflowv2;
             }
             const dialogflow_language = await this.getDialogflowLanguage();
-
             const userId: string = completeMessage.platformId === null ? v4() : completeMessage.platformId;
             const location = completeMessage.latlong === null ? v4() : completeMessage.latlong;
 

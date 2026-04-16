@@ -9,7 +9,6 @@ import { injectable } from 'tsyringe';
 
 @injectable()
 export class AwsSqsEventConsumer implements IEventConsumer {
-
     private sqsClient: SQSClient | null = null;
 
     private isListening = false;
@@ -17,7 +16,6 @@ export class AwsSqsEventConsumer implements IEventConsumer {
     private pollingInterval: NodeJS.Timeout | null = null;
 
     private pendingMessages: Map<string, Message> = new Map();
-
     private queueUrl = process.env.EVENT_QUEUE_URL;
 
     private readonly pollingIntervalMs = parseInt(process.env.SQS_POLLING_INTERVAL_MS || '1000');
@@ -30,7 +28,6 @@ export class AwsSqsEventConsumer implements IEventConsumer {
         if (this.sqsClient) {
             return;
         }
-
         try {
             this.sqsClient = new SQSClient({
                 region      : process.env.AWS_REGION,
@@ -64,7 +61,6 @@ export class AwsSqsEventConsumer implements IEventConsumer {
             });
 
             const result = await this.sqsClient.send(command);
-
             if (result.Attributes) {
                 Logger.instance().log(`Queue validation successful for: ${this.queueUrl}`);
                 Logger.instance().log(`Queue ARN: ${result.Attributes.QueueArn || 'N/A'}`);
@@ -106,7 +102,7 @@ export class AwsSqsEventConsumer implements IEventConsumer {
             throw error;
         }
     }
-
+    
     async stopListening(): Promise<void> {
         if (!this.isListening) {
             return;
@@ -163,7 +159,6 @@ export class AwsSqsEventConsumer implements IEventConsumer {
         const msg = this.pendingMessages.get(messageId);
         if (msg && this.sqsClient) {
             this.pendingMessages.delete(messageId);
-
             if (!requeue && msg.ReceiptHandle) {
                 try {
                     await this.sqsClient.send(new DeleteMessageCommand({
@@ -179,19 +174,16 @@ export class AwsSqsEventConsumer implements IEventConsumer {
             }
         }
     }
-
     private startPolling(): void {
         const poll = async () => {
             if (!this.isListening) {
                 return;
             }
-
             try {
                 await this.pollMessages();
             } catch (error) {
                 Logger.instance().log(`Error during polling: ${error.message}`);
             }
-
             if (this.isListening) {
                 this.pollingInterval = setTimeout(poll, this.pollingIntervalMs);
             }
@@ -204,7 +196,6 @@ export class AwsSqsEventConsumer implements IEventConsumer {
         if (!this.sqsClient || !this.isListening) {
             return;
         }
-
         try {
             const params: ReceiveMessageCommandInput = {
                 QueueUrl              : this.queueUrl,
@@ -224,7 +215,6 @@ export class AwsSqsEventConsumer implements IEventConsumer {
                     await this.handleMessage(message);
                 }
             }
-
         } catch (error) {
             Logger.instance().log(`Error polling messages from ${this.queueUrl}: ${error.message}`);
         }
@@ -282,7 +272,6 @@ export class AwsSqsEventConsumer implements IEventConsumer {
         case EventType.USER_DELETE:
             await EventHandler.handleUserDeletion(eventMessage);
             break;
-
         default:
             Logger.instance().log(`No handler found for event type: ${eventType}, skipping event ${eventMessage.EventId}`);
             break;

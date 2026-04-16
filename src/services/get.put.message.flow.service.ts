@@ -296,7 +296,6 @@ export class MessageFlow{
             payload = await sendApiButtonService(msg.payload);
         }
         else if (msg.type === "reancareAssessment") {
-
             // make compatible for telegram also.
             const { updatedPayload, assessmentSessionLogs } = await this.serveAssessmentService.startAssessment( msg.userId,msg.channel, msg.payload, languageCode);
             if (updatedPayload["channel"] === 'whatsappMeta' || updatedPayload["channel"] === 'WhatsappWati') {
@@ -391,7 +390,6 @@ export class MessageFlow{
             }
         }
         if (messageType === "reancareAssessment") {
-
             assessmentSession.userMessageId = platformMessageService.getMessageIdFromResponse(message_to_platform);
             const Assessmentkey = `${response_format.sessionId}:Assessment:${assessmentSession.assesmentId}`;
             CacheMemory.set(Assessmentkey,assessmentSession.userMessageId);

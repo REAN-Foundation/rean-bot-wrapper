@@ -81,13 +81,12 @@ export class Registration{
             } else {
                 throw new Error(`Failed to register user. Invalid response format: ${JSON.stringify(response)}`);
             }
-
         } catch (error: any) {
             console.error("Error in registerUserOnReanCare:", error.message || error);
             throw new Error(`Error in registerUserOnReanCare: ${error.message || error}`);
         }
     }
-
+    
     async wrapperRegistration(entityManagerProvider,userPlatformId,userPlatformName,platform,patientUserId){
         const contactListRepository =
         (await entityManagerProvider.getEntityManager(this.EnvironmentProviderService)).getRepository(ContactList);
@@ -175,13 +174,11 @@ export class Registration{
             } else {
                 throw new Error("Channel not integrated");
             }
-
             return { patientUserId, statusCode: 200 }; // Success case
         } catch (error: any) {
 
             // Log the error if necessary
             console.error(`Error in getPatientUserId: ${error.message}`);
-
             // Re-throw the error to propagate it to the caller
             throw error;
         }
