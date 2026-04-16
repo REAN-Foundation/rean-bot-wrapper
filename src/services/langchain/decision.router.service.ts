@@ -531,8 +531,9 @@ export class DecisionRouter {
 
                     // ── USER INFO GATE ────────────────────────────────────────────────────
 
-                    const userInfoCheckFlag = await this.environmentProviderService?.getClientEnvironmentVariable('UserInfoCheckFlag') ?? false;
-                    if (userInfoCheckFlag) {
+                    const userInfoCheckFlag = await this.environmentProviderService?.getClientEnvironmentVariable('UserInfoCheckFlag');
+                    const userInfoCheck: boolean = userInfoCheckFlag?.Value === "True";
+                    if (userInfoCheck) {
                         const userHasProvidedInfo = await this.checkUserInfo(messageBody.platformId);
                         if (!userHasProvidedInfo) {
                             console.log(`[getDecision] User ${messageBody.platformId} has not provided info. Triggering Default Welcome Intent.`);
