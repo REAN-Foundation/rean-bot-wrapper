@@ -4,6 +4,7 @@ import { Logger } from '../common/logger';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { EntityManagerProvider } from './entity.manager.provider.service';
 import { ChatMessage } from '../models/chat.message.model';
+import { ChatMessageSensitivity } from '../models/chat.message.sensitivity.model';
 import { ChatSession } from '../models/chat.session';
 import { ContactList } from '../models/contact.list';
 import { UserConsent } from '../models/user.consent.model';
@@ -163,6 +164,7 @@ export class UserDeleteQueueService {
 
             const chatSessionRepo = entityManager.getRepository(ChatSession);
             const chatMessageRepo = entityManager.getRepository(ChatMessage);
+            const chatMessageSensitivityRepo = entityManager.getRepository(ChatMessageSensitivity);
             const messageStatusRepo = entityManager.getRepository(MessageStatus);
 
             const userPlatformID = user;
@@ -181,6 +183,11 @@ export class UserDeleteQueueService {
                 const messageIds = messages.map(msg => msg.id);
 
                 if (messageIds.length > 0) {
+
+                    await chatMessageSensitivityRepo.destroy({
+                        where: { chatMessageId: messageIds }
+                    });
+
                     await messageStatusRepo.destroy({
                         where: { chatMessageId: messageIds }
                     });

@@ -373,7 +373,7 @@ export class MessageFlow{
         // eslint-disable-next-line max-len
         message_to_platform = await platformMessageService.SendMediaMessage(response_format, payload);
         const customRemSettings = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("CustomRemSetting");
-        const customRemSetting: boolean = customRemSettings?.Value === "true";
+        const customRemSetting: boolean = customRemSettings?.Value === "True";
         if (msg.agentName === 'Reancare' && customRemSetting) {
             try {
                 const msg_id = await platformMessageService.getMessageIdFromResponse(message_to_platform);
