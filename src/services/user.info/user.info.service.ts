@@ -14,7 +14,7 @@ export class UserInfoService {
     private _platformMessageService : platformServiceInterface = null;
 
     constructor(
-        @inject(ClientEnvironmentProviderService) 
+        @inject(ClientEnvironmentProviderService)
             private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider
     ){}
@@ -63,7 +63,7 @@ export class UserInfoService {
             ).getRepository(ContactList);
 
             const userInfoExists = await UserInfoRepository.findOne(
-                { 
+                {
                     where : {
                         userPlatformID : userPlatformID
                     }
@@ -90,7 +90,8 @@ export class UserInfoService {
     }
 
     async getMessageText() {
-        const message = this.clientEnvironmentProviderService.getClientEnvironmentVariable("USER_INFO_THANK_YOU_MESSAGE");
+        const messageSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("UserInfoThankYouMessage");
+        const message = messageSetting?.Value;
         return message;
     }
 }
