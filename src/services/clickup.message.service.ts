@@ -161,7 +161,7 @@ export class ClickUpMessageService implements platformServiceInterface {
             }
             let textToUser = `As our expert have provided their insight, we are closing the ticket. If you are still unsatisfied with the answer provided, contact us at ${contactMail}`;
             const clickupTicketCloseResponse = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("ClickupTicketCloseResponseMessage");
-            const clickupTicketCloseResponseMessage = clickupTicketCloseResponse?.Value
+            const clickupTicketCloseResponseMessage = clickupTicketCloseResponse?.Value;
             if (clickupTicketCloseResponseMessage){
                 textToUser = clickupTicketCloseResponseMessage;
             }
