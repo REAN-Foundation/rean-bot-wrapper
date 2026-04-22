@@ -22,15 +22,21 @@ export class AnemiaModelCommunication {
 
     async Segmentation(eventObj) {
         try {
+            const signedUrl = eventObj.body.originalDetectIntentRequest.payload.completeMessage.imageUrl;
             const cloudFrontPath = eventObj.body.queryResult.queryText;
             const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
             const filename = path.basename(cloudFrontPath);
             this.fileBackup(eventObj.body,cloudFrontPath,filename);
-            const response = await this. getAnemiaResults(cloudFrontPath,filename,"segment");
+            const response = await this.getAnemiaResults(signedUrl, filename, "segment");
+            const imageURL = response?.body?.segmented_image_url;
+            if (!imageURL) {
+                console.log("Segmentation failed: no imageURL in response");
+                return;
+            }
             const cacheData = CacheMemory.get(`Anemia:${userId}`);
-            cacheData["SegmentedImagePath"] = response.imageURL;
-            CacheMemory.set(`Anemia:${userId}`, cacheData );
-            this.sendExtraMessagesobj.sendSecondaryButtonMessage(response.imageURL, "AnemiaImageCorrect", "AnemiaImageIncorrect",  eventObj);
+            cacheData["SegmentedImagePath"] = imageURL;
+            CacheMemory.set(`Anemia:${userId}`, cacheData);
+            this.sendExtraMessagesobj.sendSecondaryButtonMessage(imageURL, "AnemiaImageCorrect", "AnemiaImageIncorrect", eventObj);
     
         } catch (error) {
             console.log("segmentation Service Error");
@@ -40,7 +46,7 @@ export class AnemiaModelCommunication {
     async fileBackup(Body,cloudFrontPath,filename ){
         try {
             const uniqueId = Body.originalDetectIntentRequest.payload.location;
-            const userId = Body.body.originalDetectIntentRequest.payload.userId;
+            const userId = Body.originalDetectIntentRequest.payload.userId;
             const filePath =  `./photo/` + filename;
             const newFilename = `${uniqueId}:${userId}`;
             const bucket_name  = await this.EnvironmentProviderService.getClientEnvironmentVariable("AnemiaDataBackupBucketName");
@@ -60,8 +66,8 @@ export class AnemiaModelCommunication {
 
     async getAnemiaResults(cloudFrontPath,filename,path){
         try {
-            const baseUrl = process.env.ANEMIA_SERVICE_BASE_URL;
-            const apiUrl = baseUrl + path;
+            const baseUrl = process.env.ANEMIA_SERVICE_BASE_URL ?? '';
+            const apiUrl = baseUrl.replace(/\/$/, '') + '/' + path;
             const apiKey = process.env.ANEMIA_SERVICE_API_KEY;
             const options = await getRequestOptions();
             options.headers["Authorization"] = `Bearer ${apiKey}`;
@@ -98,7 +104,7 @@ export class AnemiaModelCommunication {
     async Regression(eventObj){
         const cloudFrontPath = eventObj.body.queryResult.queryText;
         const filename = path.basename(cloudFrontPath);
-        const result = await this. getAnemiaResults(cloudFrontPath,filename,"regression");
+        const result = await this.getAnemiaResults(cloudFrontPath,filename,"regression");
         const HbValue = result.HbValue;
         const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
         const cacheData = CacheMemory.get(`Anemia:${userId}`);
