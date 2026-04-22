@@ -221,7 +221,8 @@ export class handleRequestservice {
                 let tag = "null";
                 tag = (metaData.type === "reaction") ? "reaction" : "Feedback";
                 await this.feedbackService.recordFeedback(outgoingMessage.Feedback.FeedbackContent, metaData.contextId, tag);
-                const feedbackPrompt = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("FEEDBACK_PROMPT");
+                const feedbackPromtSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("FeedbackPrompt");
+                const feedbackPrompt = feedbackPromtSetting?.Value;
                 if (feedbackPrompt) {
                     messageToMlModel = feedbackPrompt + outgoingMessage.Feedback.FeedbackContent;
                 } else {

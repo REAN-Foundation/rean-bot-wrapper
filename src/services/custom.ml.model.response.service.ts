@@ -85,8 +85,8 @@ export class CustomMLModelResponseService{
 
         //call the model
         const callCustomModel = await needle("post",customModelUrl,obj,options);
-
-        const feedbackAdded: boolean = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("ADD_FEEDBACK_MESSAGE") === "true";
+        const addFeedbackMessageSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("AddFeedbackMessageFlag");
+        const feedbackAdded: boolean = addFeedbackMessageSetting?.Value === "True";
         if (feedbackAdded && callCustomModel.body?.answer){
             const feedbackMessageToBeAdded = await this.systemGeneratedMessages.getMessage("FEEDBACK_MESSAGE");
             const messageAfterFeedback = callCustomModel.body.answer +  `
