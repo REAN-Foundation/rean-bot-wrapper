@@ -148,7 +148,8 @@ export class ClickUpMessageService implements platformServiceInterface {
     }
 
     async eventStatusUpdated(requestBody) {
-        const blockSendCloseMessage = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("BLOCK_TASK_CLOSE_MESSAGE") === "true";
+        const blockTaskCloseMessageSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("BlockTaskCloseMessage");
+        const blockSendCloseMessage = blockTaskCloseMessageSetting?.Value === "True";
         if (!blockSendCloseMessage) {
             const contactMail = "example@gmail.com";
             const contactList =
@@ -158,8 +159,10 @@ export class ClickUpMessageService implements platformServiceInterface {
                 personContactList = await contactList.findOne({ where: { cmrChatTaskID: requestBody.task_id } });
             }
             let textToUser = `As our expert have provided their insight, we are closing the ticket. If you are still unsatisfied with the answer provided, contact us at ${contactMail}`;
-            if (await this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_TICKET_CLOSE_RESPONSE_MESSAGE")){
-                textToUser = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("CLICKUP_TICKET_CLOSE_RESPONSE_MESSAGE");
+            const clickupTicketCloseResponse = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("ClickupTicketCloseResponseMessage");
+            const clickupTicketCloseResponseMessage = clickupTicketCloseResponse?.Value;
+            if (clickupTicketCloseResponseMessage){
+                textToUser = clickupTicketCloseResponseMessage;
             }
             console.log("textToUser", textToUser);
             await this.slackClickupCommonFunctions.sendCustomMessage(personContactList.dataValues.platform, personContactList.dataValues.mobileNumber, textToUser);

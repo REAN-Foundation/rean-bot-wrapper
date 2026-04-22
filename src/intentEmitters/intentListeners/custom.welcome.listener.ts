@@ -72,7 +72,7 @@ export const WelcomeWithBasicAssessmentListener = async (Intent, eventObj) => {
         } else {
             response = {
                 "followupEventInput" : {
-                    "name"         : "DefaultFallbackIntent",
+                    "name"         : "WelcomeMessage",
                     "languageCode" : "en-US" 
                 }
             };
