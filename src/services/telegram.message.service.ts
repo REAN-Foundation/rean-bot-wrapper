@@ -113,7 +113,6 @@ export class TelegramMessageService implements platformServiceInterface{
                 console.log(
                     "THIS HTML TO IMAGE SUPPORT HAS BEEN DEPRECATED"
                 );
-
                 // METHOD BEING DEPRECATED DUE TO PACKAGE SUPPORT ISSUES
                 // eslint-disable-next-line max-len
                 // const uploadImageName = await this.awsS3manager.createFileFromHTML(processedResponse.processed_message[0]);

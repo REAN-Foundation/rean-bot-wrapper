@@ -116,5 +116,4 @@ export class SystemGeneratedMessagesController {
 
         return { clientEnvironmentProvider, clientName, repository };
     }
-
 }

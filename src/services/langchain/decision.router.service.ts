@@ -154,7 +154,6 @@ export class DecisionRouter {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async checkAssessment(messageBody: Imessage, channel: string) {
         try {
-
             const assessmentData = {
                 AssessmentId   : '',
                 AssessmentName : '',
@@ -217,7 +216,6 @@ export class DecisionRouter {
             } else {
                 key = '';
             }
-
             const nextQuestionFlag = await CacheMemory.get(key);
 
             // Currently will only support the assessment start through buttons
@@ -226,7 +224,6 @@ export class DecisionRouter {
                 messageBody.intent &&
                 !nextQuestionFlag
             ) {
-
                 const matchingIntents = await intentRepository.findOne({
                     where : {
                         code : intent,
@@ -252,7 +249,6 @@ export class DecisionRouter {
                     if (nextQuestionFlag === true) {
                         assessmentData.AssessmentFlag = true;
                         assessmentData.AssessmentId = assessmentResponse.assesmentId;
-
                         // await CacheMemory.set(key, false);
                     }
                 } else {
@@ -361,13 +357,11 @@ export class DecisionRouter {
                         }
                     }
                 }
-
             }
 
             return assessmentData;
         } catch (error) {
             console.log('Error in checkAssessment:', error);
-
             // Return default assessment data with flag set to false on error
             return {
                 AssessmentId   : '',
@@ -410,14 +404,12 @@ export class DecisionRouter {
                 .split('T')[0];
 
             return careplanMetaData;
-
         } catch (error) {
             console.log('Error in checkCareplanEnrollment:', error);
             return false;
         }
 
     }
-
     async checkDFIntent(messageBody: Imessage){
 
         // const dfResponse = await sessionClient.detectIntent(requestBody);
@@ -505,7 +497,6 @@ export class DecisionRouter {
                     this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.WorkflowService;
                     this.outgoingMessage.Alert.AlertId = workflowFlag.matchedSchemaId;
                     return this.outgoingMessage;
-
                 } else {
                     this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.QnA;
                     return this.outgoingMessage;
@@ -629,7 +620,6 @@ export class DecisionRouter {
         try {
             const promptTemplate = PromptTemplate.fromTemplate(`
             You are a workflow routing classifier for an emergency response system. Your task is to determine if a user message should trigger ANY of the available workflows or be sent to a general LLM service for answering questions.
-
             DECISION CRITERIA:
 
             Send to WORKFLOW (flag: "true") if the user message:
