@@ -36,4 +36,4 @@ export const getAnemiaHbValue = async(IntentEmitter,eventObj) => {
             .log_error(error.message, 500, 'Anemia HB Value Listener Error!');
     }
 
-}
+};
