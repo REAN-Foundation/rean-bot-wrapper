@@ -2,7 +2,6 @@
 import { Logger } from '../../common/logger';
 import { AnemiaModelCommunication } from '../../services/anemia.service';
 import { dialoflowMessageFormatting } from "../../services/Dialogflow.service";
-import { ClientEnvironmentProviderService } from '../../services/set.client/client.environment.provider.service';
 
 export const getAnemiaSegmentationResult = async (intent, eventObj) => {
     
