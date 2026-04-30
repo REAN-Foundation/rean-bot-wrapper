@@ -160,6 +160,20 @@ export interface assessmentSessionLogs{
     retry_count?: number;
 }
 
+export interface anemiaDataRecord{
+        id: string;
+        userPlatformId: string;
+        patientUserId: string;
+        patientId: string
+        pridictedHb: number;
+        exactHb: number;
+        originalImagePath : string
+        bucketImagePath : string
+        segmentedImagePath : string
+        age: string;
+        gender: string;
+}
+
 export interface consentInfo{
     autoIncrementalID?: number;
     Language:string;
