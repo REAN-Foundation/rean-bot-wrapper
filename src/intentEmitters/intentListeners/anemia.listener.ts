@@ -12,7 +12,7 @@ export const getAnemiaSegmentationResult = async (intent, eventObj) => {
             .log('Calling Eye Image Quality Check Service !!!!!!');
         const AnemiaModelObj: AnemiaModelCommunication = eventObj.container.resolve(AnemiaModelCommunication);
         AnemiaModelObj.Segmentation(eventObj);
-        const response = await dialogflowService.making_response("Getting Segmentated Image");
+        const response = await dialogflowService.making_response("Getting Segmented Image");
         return response;
 
     } catch (error) {

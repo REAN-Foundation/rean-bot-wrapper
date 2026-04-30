@@ -119,7 +119,7 @@ export class AnemiaModelCommunication {
             cacheData["gender"] = gender;
             cacheData["patientId"] = parameters.patientId ?? "";
             CacheMemory.set(`Anemia:${userId}`, cacheData);
-            const result = await this.getAnemiaResults(segmentedImagePath, filename, "regression", age, gender);
+            const result = await this.getAnemiaResults(segmentedImagePath, filename, "predict", age, gender);
             const HbValue = result?.body?.HbValue;
             cacheData["HbValue"] = HbValue;
             CacheMemory.set(`Anemia:${userId}`, cacheData);
