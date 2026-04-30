@@ -26,15 +26,15 @@ export const getAnemiaHbValue = async(IntentEmitter,eventObj) => {
     try {
         const dialogflowService: dialoflowMessageFormatting = eventObj.container.resolve(dialoflowMessageFormatting);
         Logger.instance()
-            .log('Calling Eye Image Quality Check Service !!!!!!');
+            .log('Calling Anemia HB Value Service');
         const AnemiaModelObj: AnemiaModelCommunication = eventObj.container.resolve(AnemiaModelCommunication);
-        const HbValue = AnemiaModelObj.Regression(eventObj);
-        const response = await dialogflowService.making_response(HbValue);
+        AnemiaModelObj.Regression(eventObj);
+        const response = await dialogflowService.making_response("Getting HB Value");
         return response;
 
     } catch (error) {
         Logger.instance()
-            .log_error(error.message, 500, 'eye Image Quality Check Listner Error!');
+            .log_error(error.message, 500, 'Anemia HB Value Listener Error!');
     }
 
 }

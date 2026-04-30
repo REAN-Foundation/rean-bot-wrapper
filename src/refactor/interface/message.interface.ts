@@ -170,6 +170,8 @@ export interface anemiaDataRecord{
         originalImagePath : string
         bucketImagePath : string
         segmentedImagePath : string
+        age: string;
+        gender: string;
 }
 
 export interface consentInfo{

@@ -56,7 +56,9 @@ export class AnemiaModelCommunication {
                 "origionalImagePath" : fileLocation,
                 "SegmentedImagePath" : "",
                 "HbValue"            : 0,
-                "patientId"          : ""
+                "patientId"          : "",
+                "age"                : "",
+                "gender"             : ""
             };
             CacheMemory.set(`Anemia:${userId}`, cacheData );
         } catch (error) {
@@ -64,20 +66,22 @@ export class AnemiaModelCommunication {
         }
     }
 
-    async getAnemiaResults(cloudFrontPath,filename,path){
+    async getAnemiaResults(cloudFrontPath, filename, apiPath, age?: string, gender?: string){
         try {
             const baseUrl = process.env.ANEMIA_SERVICE_BASE_URL ?? '';
-            const apiUrl = baseUrl.replace(/\/$/, '') + '/' + path;
+            const apiUrl = baseUrl.replace(/\/$/, '') + '/' + apiPath;
             const apiKey = process.env.ANEMIA_SERVICE_API_KEY;
             const options = await getRequestOptions();
             options.headers["Authorization"] = `Bearer ${apiKey}`;
             options.headers["Content-Type"] = `application/json`;
-            const obj = {
+            const obj: Record<string, unknown> = {
                 "path"     : cloudFrontPath,
                 "FileName" : filename
             };
+            if (age !== undefined) obj["age"] = age;
+            if (gender !== undefined) obj["gender"] = gender;
             const response = await needle("POST", apiUrl, obj, options);
-   
+
             return response;
         } catch (error) {
             console.log("error while getting result from Anemia Service");
@@ -94,25 +98,36 @@ export class AnemiaModelCommunication {
             patientId          : cacheData["patientId"],
             pridictedHb        : cacheData["HbValue"],
             originalImagePath  : cacheData["origionalImagePath"],
-            segmentedImagePath : cacheData["SegmentedImagePath"]
-        }
-        );
+            segmentedImagePath : cacheData["SegmentedImagePath"],
+            age                : cacheData["age"],
+            gender             : cacheData["gender"]
+        });
         CacheMemory.delete(`Anemia:${userId}`);
 
     }
 
     async Regression(eventObj){
-        const cloudFrontPath = eventObj.body.queryResult.queryText;
-        const filename = path.basename(cloudFrontPath);
-        const result = await this.getAnemiaResults(cloudFrontPath,filename,"regression");
-        const HbValue = result.HbValue;
-        const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
-        const cacheData = CacheMemory.get(`Anemia:${userId}`);
-        cacheData["patientId"] = eventObj.body.queryResult.parameters.patientId;
-        cacheData["HbValue"] = HbValue;
-        await CacheMemory.set(`Anemia:${userId}`, cacheData );
-        this.Record(userId);
-        return HbValue;
+        try {
+            const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
+            const parameters = eventObj.body.queryResult.parameters;
+            const age = String(parameters.age ?? "");
+            const gender = String(parameters.gender ?? "");
+            const cacheData = CacheMemory.get(`Anemia:${userId}`);
+            const segmentedImagePath = cacheData["SegmentedImagePath"];
+            const filename = path.basename(segmentedImagePath);
+            cacheData["age"] = age;
+            cacheData["gender"] = gender;
+            cacheData["patientId"] = parameters.patientId ?? "";
+            CacheMemory.set(`Anemia:${userId}`, cacheData);
+            const result = await this.getAnemiaResults(segmentedImagePath, filename, "regression", age, gender);
+            const HbValue = result?.body?.HbValue;
+            cacheData["HbValue"] = HbValue;
+            CacheMemory.set(`Anemia:${userId}`, cacheData);
+            await this.Record(userId);
+            await this.sendExtraMessagesobj?.sendExtraMessage(eventObj, "AnemiaImageCorrect", String(HbValue));
+        } catch (error) {
+            console.log("Regression Service Error", error);
+        }
     }
 
 }

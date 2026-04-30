@@ -61,4 +61,14 @@ export class AnemiaDataRecord extends Model implements anemiaDataRecord {
     })
         segmentedImagePath : string
 
+    @Column({
+        type: DataType.STRING
+    })
+        age: string;
+
+    @Column({
+        type: DataType.STRING
+    })
+        gender: string;
+
 }
