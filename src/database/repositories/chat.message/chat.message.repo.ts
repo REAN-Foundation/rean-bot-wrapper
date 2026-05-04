@@ -9,7 +9,7 @@ import { RepositoryHelper } from "../repo.helper";
 
 export class ChatMessageRepo {
 
-    static hasUserInteractedToday = async (
+    static hasBotRespondedToday = async (
         container: DependencyContainer,
         platformId: string
     ): Promise<boolean> => {
@@ -21,12 +21,13 @@ export class ChatMessageRepo {
             const record = await chatMessageRepository.findOne({
                 where : {
                     userPlatformID : platformId,
+                    direction      : 'Out',
                     createdAt      : { [Op.gte]: startOfToday }
                 }
             });
             return record !== null;
         } catch (error) {
-            console.error('Error in hasUserInteractedToday:', error);
+            console.error('Error in hasBotRespondedToday:', error);
             return false;
         }
     };

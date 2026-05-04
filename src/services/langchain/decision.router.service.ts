@@ -734,7 +734,7 @@ export class DecisionRouter {
             if (!childContainer) {
                 return false;
             }
-            const hasInteracted = await ChatMessageRepo.hasUserInteractedToday(childContainer, platformId);
+            const hasInteracted = await ChatMessageRepo.hasBotRespondedToday(childContainer, platformId);
             return !hasInteracted;
         } catch (error) {
             console.log('[checkFirstInteractionToday] Error checking first interaction today:', error);
