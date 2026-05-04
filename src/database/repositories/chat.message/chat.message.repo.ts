@@ -32,6 +32,29 @@ export class ChatMessageRepo {
         }
     };
 
+    static getIncomingMessageCountToday = async (
+        container: DependencyContainer,
+        platformId: string
+    ): Promise<boolean> => {
+        try {
+            const entityManager = await RepositoryHelper.resolveEntityManager(container);
+            const chatMessageRepository = entityManager.getRepository(ChatMessage);
+            const startOfToday = new Date();
+            startOfToday.setHours(0, 0, 0, 0);
+            const count = await chatMessageRepository.count({
+                where : {
+                    userPlatformID : platformId,
+                    direction      : 'In',
+                    createdAt      : { [Op.gte]: startOfToday }
+                }
+            });
+            return count === 1;
+        } catch (error) {
+            console.error('Error in getIncomingMessageCountToday:', error);
+            return false;
+        }
+    };
+
     static findLatestMessageByPlatformId = async (
         container: DependencyContainer,
         platformId: string
