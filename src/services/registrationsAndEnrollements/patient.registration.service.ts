@@ -86,6 +86,7 @@ export class Registration{
             throw new Error(`Error in registerUserOnReanCare: ${error.message || error}`);
         }
     }
+    
     async wrapperRegistration(entityManagerProvider,userPlatformId,userPlatformName,platform,patientUserId){
         const contactListRepository =
         (await entityManagerProvider.getEntityManager(this.EnvironmentProviderService)).getRepository(ContactList);

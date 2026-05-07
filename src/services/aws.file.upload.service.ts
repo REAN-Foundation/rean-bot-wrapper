@@ -193,7 +193,7 @@ export class AwsS3manager{
     };
 
     async uploadFileToS3 (
-        filePath,
+        filePath = null,
         bucket_name : string = process.env.BUCKET_NAME,
         cloudFrontPath : string = process.env.CLOUD_FRONT_PATH,newFilename = null) {
 
@@ -260,12 +260,10 @@ export class AwsS3manager{
             }
             console.log("DBCJNKJCLNDSKOSCHKLSDNCKLNSD",BUCKET_NAME);
             const s3 = new AWS.S3(responseCredentials);
-
             const downloadParams = {
                 Key    : key,
                 Bucket : BUCKET_NAME
             };
-
             s3.getObject(downloadParams, function (error, data) {
                 if (error) {
                     console.error(error);
@@ -273,7 +271,6 @@ export class AwsS3manager{
                 resolve(data);
             });
         });
-
     }
 
 }

@@ -19,6 +19,7 @@ import { ReminderMessage } from '../models/reminder.model';
 import { Intents } from '../models/intents/intents.model';
 import { SystemGeneratedMessages } from '../models/system.generated.messages.model';
 import { AssessmentIdentifiers } from '../models/assessment/assessment.identifiers.model';
+import { AnemiaDataRecord } from '../models/anemia.data.model';
 
 //////////////////////////////////////////////////////////////////////////////////////
 
@@ -65,7 +66,8 @@ export class SequelizeClient {
                     ReminderMessage,
                     Intents,
                     SystemGeneratedMessages,
-                    AssessmentIdentifiers
+                    AssessmentIdentifiers,
+                    AnemiaDataRecord
                 ]);
             }
 

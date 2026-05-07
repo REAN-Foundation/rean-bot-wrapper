@@ -28,6 +28,7 @@ import { CareplanEnrollmentDomainModel } from "../../domain.types/basic.careplan
 import { CareplanMetaDataValidator } from "../basic.careplan/careplan.metadata.validator";
 import { NotificationType } from "../../domain.types/reminder/reminder.domain.model";
 import { UserInfoService } from "../user.info/user.info.service";
+import { ChatMessageRepo } from "../../database/repositories/chat.message/chat.message.repo";
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -497,9 +498,21 @@ export class DecisionRouter {
                     this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.WorkflowService;
                     this.outgoingMessage.Alert.AlertId = workflowFlag.matchedSchemaId;
                     return this.outgoingMessage;
+
                 } else {
+                    console.log('### WORKFLOW MODE: false user platform id is ', messageBody.platformId);
+                    const isFirstInteractionToday = await this.checkFirstInteractionToday(messageBody.platformId);
+                    console.log('### WORKFLOW MODE: is first interaction today? ', isFirstInteractionToday);
+                    if (isFirstInteractionToday) {
+                        console.log('### WORKFLOW MODE: First interaction today — routing to WorkflowService', this.environmentProviderService?.getClientName());
+                        this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.WorkflowService;
+                        this.outgoingMessage.Alert.AlertId = workflowFlag.matchedSchemaId;
+                        return this.outgoingMessage;
+                    }
+                    console.log('### WORKFLOW MODE: Routing to QnA service as workflow flag is false', this.environmentProviderService?.getClientName());
                     this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.QnA;
                     return this.outgoingMessage;
+                    
                 }
 
             }
@@ -699,6 +712,23 @@ export class DecisionRouter {
                 matchedSchemaId : null
             };
             return result;
+        }
+    }
+
+    private async checkFirstInteractionToday(platformId: string): Promise<boolean> {
+        try {
+            if (!this.environmentProviderService) {
+                return false;
+            }
+            const clientName = await this.environmentProviderService.getClientEnvironmentVariable("Name");
+            const childContainer = ContainerService.createChildContainer(clientName);
+            if (!childContainer) {
+                return false;
+            }
+            return await ChatMessageRepo.getIncomingMessageCountToday(childContainer, platformId);
+        } catch (error) {
+            console.log('[checkFirstInteractionToday] Error checking first interaction today:', error);
+            return false;
         }
     }
 

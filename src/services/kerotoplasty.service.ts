@@ -78,7 +78,6 @@ export class kerotoplastyService {
             throw new Error(`500, kerotoplasy response Service Error!`);
         }
     };
-    
     async symptomByUser(parameters) {
         let symptomComment = "Patient is suffering from ";
 
