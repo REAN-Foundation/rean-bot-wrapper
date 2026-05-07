@@ -82,7 +82,7 @@ export class BodyHeightService {
             throw new Error(`500, BodyHeightCreate Info Service Error!`);
         }
     };
-
+    
     async checkEntry(eventObj: any) {
         let BodyHeight = eventObj.body.queryResult.parameters.BodyHeight;
         let BodyHeight_Unit = eventObj.body.queryResult.parameters.BodyHeight_Unit;

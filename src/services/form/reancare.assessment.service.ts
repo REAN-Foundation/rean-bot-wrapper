@@ -4,7 +4,7 @@ import axios from "axios";
 
 @injectable()
 export class ReancareAssessmentService {
-
+    
     private _clientEnvironmentProviderService: ClientEnvironmentProviderService;
 
     public submitAssessment = async (container: DependencyContainer, assessmentData: any) => {
@@ -30,5 +30,4 @@ export class ReancareAssessmentService {
             }
         };
     };
-
 }
