@@ -4,7 +4,6 @@ export class ReancarePatientService {
 
     public static GetPatientFirstName = async (patientUserId: string): Promise<string | null> => {
         try {
-            console.log("Fetching first name for patientUserId:", patientUserId);
             if (!patientUserId) {
                 return null;
             }
@@ -17,7 +16,6 @@ export class ReancarePatientService {
                 return null;
             }
             const firstName = response.data?.Data?.Patient?.User?.Person?.FirstName;
-            console.log("Fetched first name from REAN for patientUserId", patientUserId, "is", response.data?.Data?.Patient?.User?.Person?.FirstName);
             return firstName && firstName.trim() !== '' ? firstName : null;
         } catch (error: any) {
             console.error('[ReancarePatientService.GetPatientFirstName] Error:', error?.message);
