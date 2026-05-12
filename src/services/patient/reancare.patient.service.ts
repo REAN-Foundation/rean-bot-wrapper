@@ -4,6 +4,7 @@ export class ReancarePatientService {
 
     public static GetPatientFirstName = async (patientUserId: string): Promise<string | null> => {
         try {
+            console.log("Fetching first name for patientUserId:", patientUserId);
             if (!patientUserId) {
                 return null;
             }

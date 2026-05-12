@@ -212,6 +212,7 @@ export class MessageFlow{
     }
 
     async send_manual_msg (msg,platformMessageService: platformServiceInterface) {
+        console.log('Inside send_manual_msg of get.put.message.flow.service1');
         let payload = {};
         let messageType = "";
         let assessmentSession = null;
@@ -229,6 +230,8 @@ export class MessageFlow{
             : msg.payload;
         const languageCode = payloadObj?.Language ?? defaultLangaugeCode;
         payload["languageForSession"] = languageCode;
+        console.log("Language code for session:", languageCode);
+        console.log("Person contact list:", personContactList);
         if (personContactList) {
             personName = personContactList.username;
         }
@@ -255,9 +258,10 @@ export class MessageFlow{
                 payload["variables"] = msg.message.Variables[languageCode];
             }
 
-
             if (!personContactList) {
+                console.log("Creating contact list entry for userId", msg.userId);
                 const firstName = await ReancarePatientService.GetPatientFirstName(msg.payload?.userId);
+                console.log("First name fetched for userId", msg.payload?.userId, "is", firstName);
                 await contactList.create({
                     mobileNumber  : msg.userId,
                     username      : firstName ?? 'Unknown',
@@ -341,7 +345,7 @@ export class MessageFlow{
                 preferredLanguage : defaultLangaugeCode
             });
             const savedSession = await chatSessionRepository.findOne({
-                where: { userPlatformID: response_format.sessionId }
+                where : { userPlatformID: response_format.sessionId }
             });
 
             chatSessionId = savedSession?.autoIncrementalID;
