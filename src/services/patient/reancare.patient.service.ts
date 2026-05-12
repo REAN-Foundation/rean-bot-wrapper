@@ -17,7 +17,7 @@ export class ReancarePatientService {
                 return null;
             }
             const firstName = response.data?.Data?.User?.Person?.FirstName;
-            console.log("Fetched first name from REAN for patientUserId", patientUserId, "is", response.data?.Data?.User?.Person?.FirstName);
+            console.log("Fetched first name from REAN for patientUserId", patientUserId, "is", response.data?.Data?.Patient?.User?.Person?.FirstName);
             return firstName && firstName.trim() !== '' ? firstName : null;
         } catch (error: any) {
             console.error('[ReancarePatientService.GetPatientFirstName] Error:', error?.message);
