@@ -268,7 +268,7 @@ export class MessageFlow{
                     mobileNumber  : msg.userId,
                     username      : firstName ?? 'Unknown',
                     platform      : channel,
-                    patientUserId : msg.payload?.userId,
+                    patientUserId : payload?.userId,
                 });
             }
 
