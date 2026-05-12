@@ -260,13 +260,15 @@ export class MessageFlow{
 
             if (!personContactList) {
                 console.log("Creating contact list entry for userId", msg.userId);
-                const firstName = await ReancarePatientService.GetPatientFirstName(msg.payload?.userId);
+                console.log("Payload", msg.payload);
+                const payload = JSON.parse(msg.payload);
+                const firstName = await ReancarePatientService.GetPatientFirstName(payload?.userId);
                 console.log("First name fetched for userId", msg.payload?.userId, "is", firstName);
                 await contactList.create({
                     mobileNumber  : msg.userId,
                     username      : firstName ?? 'Unknown',
                     platform      : channel,
-                    patientUserId : msg.payload?.userId,
+                    patientUserId : payload?.userId,
                 });
             }
 
