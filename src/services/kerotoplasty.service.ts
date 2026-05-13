@@ -50,13 +50,11 @@ export class kerotoplastyService {
                 message = parsedInfo.RISK_CLASSIFICATION.EMERGENCY.MESSAGE;
                 priority = 1;
             }
-
             // Then Attention Needed
             else if (symptoms.some(symptom => Attention_needed_risk.includes(symptom))) {
                 message = parsedInfo.RISK_CLASSIFICATION.ATTENTION_NEEDED.MESSAGE;
                 priority = 2;
             }
-
             // Then Normal
             else if (symptoms.some(symptom => Normal_risk.includes(symptom))) {
                 message = parsedInfo.RISK_CLASSIFICATION.NORMAL.MESSAGE;
@@ -75,13 +73,11 @@ export class kerotoplastyService {
                     message = symptomsInCache["message"];
                 }
             }
-
             return [ symptoms,message, priority];
         } else {
             throw new Error(`500, kerotoplasy response Service Error!`);
         }
     };
-
     async symptomByUser(parameters) {
         let symptomComment = "Patient is suffering from ";
 
@@ -105,7 +101,6 @@ export class kerotoplastyService {
     //     for (let i = 0; i < parameters.complexNormalSymptoms.length; i++){
     //         symptomComment += ` - ${parameters.complexNormalSymptoms[i].name} \n`;
     //     }
-
     // }
     // if (parameters.complexSeverePain.name === "Yes"){
     //     symptomComment += " - Severe pain \n";
@@ -367,5 +362,4 @@ export class kerotoplastyService {
             setTimeout(resolve, ms);
         });
     }
-
 }

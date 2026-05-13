@@ -47,7 +47,6 @@ export class getAdditionalInfoSevice {
             {
                 message = await this.getMessageForGGHN(EHRNumber,userName);
             }
-
             if (clientName === "LVPEI"|| clientName === "REAN_BOT")
             {
                 message = await this.getMessageForLVPEI(EHRNumber,userId,userName,languageCode,eventObj);
@@ -122,7 +121,6 @@ export class getAdditionalInfoSevice {
     }
 
 
-
     async getUserInfo(authenticationToken,userID){
         try {
             const url = `https://hid4mel.gghnigeria.org/api/PharmacyPickup/QueryPatientInfo?querycode=${userID}`;
@@ -147,7 +145,6 @@ export class getAdditionalInfoSevice {
             console.log("While getting user info", error);
 
         }
-
     }
 
     async getauthenticationToken(){
@@ -175,7 +172,6 @@ export class getAdditionalInfoSevice {
             console.log("While getting authentication token", error);
 
         }
-
     }
 
     async SaveEHRNumber(ehrSystemCode,userId){
@@ -195,7 +191,6 @@ export class getAdditionalInfoSevice {
             else {
                 console.log("while updating the EHR number");
             }
-
         }
         catch (error) {
             console.log("in error", error);
