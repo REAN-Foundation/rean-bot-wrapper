@@ -29,6 +29,7 @@ import { Logger } from '../common/logger';
 import { MessageHandlerType } from '../refactor/messageTypes/message.types';
 import { AssessmentIdentifiers } from '../models/assessment/assessment.identifiers.model';
 import { WhatsAppFlowTemplateRequest } from '../domain.types/message.type/flow.message.types';
+import { ReancarePatientService } from './patient/reancare.patient.service';
 
 // import { AssessmentIdentifiers } from '../models/assessment/assessment.identifiers.model';
 
@@ -254,21 +255,17 @@ export class MessageFlow{
                 payload["variables"] = msg.message.Variables[languageCode];
             }
 
-            // extract name from template variables
-            let extractedName = "Unknown";
-
-            if (Array.isArray(payload["variables"]) && payload["variables"].length > 0) {
-                extractedName = payload["variables"][0];
-            }
-
-            // create contact if not exists
             if (!personContactList) {
+                const payload = JSON.parse(msg.payload);
+                const firstName = await ReancarePatientService.GetPatientFirstName(payload?.userId);
                 await contactList.create({
-                    mobileNumber: msg.userId,
-                    username: extractedName,
-                    platform: channel,
+                    mobileNumber  : msg.userId,
+                    username      : firstName ?? 'Unknown',
+                    platform      : channel,
+                    patientUserId : payload?.userId,
                 });
             }
+
             // Fetch image URL in template message
             if (msg.message.Url) {
                 payload["headers"] = {
@@ -338,11 +335,12 @@ export class MessageFlow{
             chatSessionId = chatSessionModel.autoIncrementalID;
         } else {
             const newSession = chatSessionRepository.create({
-                userPlatformID: response_format.sessionId,
-                platform: response_format.platform
+                userPlatformID    : response_format.sessionId,
+                platform          : response_format.platform,
+                preferredLanguage : defaultLangaugeCode
             });
             const savedSession = await chatSessionRepository.findOne({
-                where: { userPlatformID: response_format.sessionId }
+                where : { userPlatformID: response_format.sessionId }
             });
 
             chatSessionId = savedSession?.autoIncrementalID;
