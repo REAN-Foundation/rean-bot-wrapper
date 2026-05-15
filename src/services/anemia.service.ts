@@ -132,6 +132,10 @@ export class AnemiaModelCommunication {
             cacheData["HbValue"] = HbValue;
             CacheMemory.set(`Anemia:${userId}`, cacheData);
             await this.Record(userId);
+            const payload = eventObj.body.originalDetectIntentRequest.payload;
+            if (payload.source === "Telegram") {
+                payload.source = "telegram";
+            }
             await this.sendExtraMessagesobj?.sendExtraMessage(eventObj, "AnemiaImageCorrect", String(HbValue));
         } catch (error) {
             console.log("Regression Service Error", error);
