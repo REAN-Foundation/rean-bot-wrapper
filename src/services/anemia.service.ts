@@ -114,7 +114,7 @@ export class AnemiaModelCommunication {
         try {
             const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
             const parameters = eventObj.body.queryResult.parameters;
-            const age = String(parameters.Age ?? "");
+            const age = String(parameters.Age?.amount ?? "");
             const gender = String(parameters.Gender ?? "");
             const cacheData = await CacheMemory.get(`Anemia:${userId}`);
             const segmentedImagePath = cacheData?.["SegmentedImagePath"];
