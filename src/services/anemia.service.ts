@@ -129,6 +129,7 @@ export class AnemiaModelCommunication {
             CacheMemory.set(`Anemia:${userId}`, cacheData);
             const result = await this.getAnemiaResults(segmentedImagePath, filename, "predict", age, gender);
             const HbValue = result?.body?.hb_value;
+            const unit = result?.body?.unit ?? "";
             cacheData["HbValue"] = HbValue;
             CacheMemory.set(`Anemia:${userId}`, cacheData);
             await this.Record(userId);
@@ -136,7 +137,8 @@ export class AnemiaModelCommunication {
             if (payload.source === "Telegram") {
                 payload.source = "telegram";
             }
-            await this.sendExtraMessagesobj?.sendExtraMessage(eventObj, "AnemiaImageCorrect", String(HbValue));
+            const hbMessage = unit ? `${HbValue} ${unit}` : String(HbValue);
+            await this.sendExtraMessagesobj?.sendExtraMessage(eventObj, "AnemiaImageCorrect", hbMessage);
         } catch (error) {
             console.log("Regression Service Error", error);
         }
