@@ -213,7 +213,7 @@ export class getAdditionalInfoSevice {
             if (personContactList){
                 const EhrNumber = personContactList.dataValues.ehrSystemCode;
                 const additionalIfoSettings = await this.clientEnvironment.getClientEnvironmentVariable("AdditionalInfoSettings");
-                const RequiredAdditionalInfo =  additionalIfoSettings.Value.RequiredInfo;
+                const RequiredAdditionalInfo =  additionalIfoSettings.Value.AdditionalInfo;
                 const RequiredAdditionalobj = JSON.parse(RequiredAdditionalInfo );
                 const dffMessage = `Your ${RequiredAdditionalobj.EHRCODE} is ${EhrNumber}.`;
                 const message = `Do you want to change your  ${ RequiredAdditionalobj.EHRCODE}?`;
