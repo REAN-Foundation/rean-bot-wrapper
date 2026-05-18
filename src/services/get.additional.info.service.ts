@@ -210,16 +210,8 @@ export class getAdditionalInfoSevice {
             if (personContactList){
                 const EhrNumber = personContactList.dataValues.ehrSystemCode;
                 const additionalIfoSettings = await this.clientEnvironment.getClientEnvironmentVariable("AdditionalInfoSettings");
-                console.log("additional info",additionalIfoSettings);
-                console.log("additional info settings",additionalIfoSettings?.Value);
-                console.log("Type of additional info settings",typeof additionalIfoSettings?.Value);
-                console.log('required additional info',additionalIfoSettings?.Value?.AdditionalInfo);
-                console.log('Type of required additional info',typeof additionalIfoSettings?.Value?.AdditionalInfo);
                 const RequiredAdditionalobj =  additionalIfoSettings.Value.AdditionalInfo;
-
-                // const RequiredAdditionalobj = JSON.parse(RequiredAdditionalInfo );
-                console.log('required additional obj',RequiredAdditionalobj);
-                const dffMessage = `Your ${RequiredAdditionalobj?.EHRCODE} is ${EhrNumber}.`;
+                const dffMessage = `Your ${RequiredAdditionalobj?.EHRCODE} is ${EhrNumber || 'not found'}.`;
                 const message = `Do you want to change your  ${ RequiredAdditionalobj?.EHRCODE}?`;
                 const languageCode = eventObj.body.queryResult.languageCode;
                 const button_yes = await this.translate.translatestring("Yes",languageCode);
