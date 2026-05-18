@@ -48,7 +48,7 @@ export class getAdditionalInfoSevice {
                 message = await this.getMessageForGGHN(EHRNumber,userName);
             }
 
-            if (clientName === "LVPEI"|| clientName === "REAN_BOT")
+            if (clientName === "LVPEI" || clientName === "REAN_BOT")
             {
                 message = await this.getMessageForLVPEI(EHRNumber,userId,userName,languageCode,eventObj);
             }
@@ -108,7 +108,6 @@ export class getAdditionalInfoSevice {
         }
     }
 
-
     async getMessageForGGHN(EHRNumber,userName)
     {
         const authenticationToken = await this.getauthenticationToken();
@@ -120,8 +119,6 @@ export class getAdditionalInfoSevice {
         }
         return message;
     }
-
-
 
     async getUserInfo(authenticationToken,userID){
         try {
@@ -213,10 +210,16 @@ export class getAdditionalInfoSevice {
             if (personContactList){
                 const EhrNumber = personContactList.dataValues.ehrSystemCode;
                 const additionalIfoSettings = await this.clientEnvironment.getClientEnvironmentVariable("AdditionalInfoSettings");
+                console.log("additional info",additionalIfoSettings);
+                console.log("additional info settings",additionalIfoSettings?.Value);
+                console.log("Type of additional info settings",typeof additionalIfoSettings?.Value);
+                console.log('required additional info',additionalIfoSettings?.Value?.AdditionalInfo);
+                console.log('Type of required additional info',typeof additionalIfoSettings?.Value?.AdditionalInfo);
                 const RequiredAdditionalInfo =  additionalIfoSettings.Value.AdditionalInfo;
                 const RequiredAdditionalobj = JSON.parse(RequiredAdditionalInfo );
-                const dffMessage = `Your ${RequiredAdditionalobj.EHRCODE} is ${EhrNumber}.`;
-                const message = `Do you want to change your  ${ RequiredAdditionalobj.EHRCODE}?`;
+                console.log('required additional obj',RequiredAdditionalobj);
+                const dffMessage = `Your ${RequiredAdditionalobj?.EHRCODE || 'Participant Code'} is ${EhrNumber}.`;
+                const message = `Do you want to change your  ${ RequiredAdditionalobj.EHRCODE || 'Participant Code' }?`;
                 const languageCode = eventObj.body.queryResult.languageCode;
                 const button_yes = await this.translate.translatestring("Yes",languageCode);
                 const button_no = await this.translate.translatestring("No",languageCode);
