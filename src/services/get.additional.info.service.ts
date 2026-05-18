@@ -215,11 +215,12 @@ export class getAdditionalInfoSevice {
                 console.log("Type of additional info settings",typeof additionalIfoSettings?.Value);
                 console.log('required additional info',additionalIfoSettings?.Value?.AdditionalInfo);
                 console.log('Type of required additional info',typeof additionalIfoSettings?.Value?.AdditionalInfo);
-                const RequiredAdditionalInfo =  additionalIfoSettings.Value.AdditionalInfo;
-                const RequiredAdditionalobj = JSON.parse(RequiredAdditionalInfo );
+                const RequiredAdditionalobj =  additionalIfoSettings.Value.AdditionalInfo;
+
+                // const RequiredAdditionalobj = JSON.parse(RequiredAdditionalInfo );
                 console.log('required additional obj',RequiredAdditionalobj);
-                const dffMessage = `Your ${RequiredAdditionalobj?.EHRCODE || 'Participant Code'} is ${EhrNumber}.`;
-                const message = `Do you want to change your  ${ RequiredAdditionalobj.EHRCODE || 'Participant Code' }?`;
+                const dffMessage = `Your ${RequiredAdditionalobj?.EHRCODE} is ${EhrNumber}.`;
+                const message = `Do you want to change your  ${ RequiredAdditionalobj?.EHRCODE}?`;
                 const languageCode = eventObj.body.queryResult.languageCode;
                 const button_yes = await this.translate.translatestring("Yes",languageCode);
                 const button_no = await this.translate.translatestring("No",languageCode);
