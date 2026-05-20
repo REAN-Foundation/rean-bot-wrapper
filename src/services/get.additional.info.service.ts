@@ -144,7 +144,6 @@ export class getAdditionalInfoSevice {
             console.log("While getting user info", error);
 
         }
-
     }
 
     async getauthenticationToken(){
@@ -172,7 +171,6 @@ export class getAdditionalInfoSevice {
             console.log("While getting authentication token", error);
 
         }
-
     }
 
     async SaveEHRNumber(ehrSystemCode,userId){
@@ -192,7 +190,6 @@ export class getAdditionalInfoSevice {
             else {
                 console.log("while updating the EHR number");
             }
-
         }
         catch (error) {
             console.log("in error", error);

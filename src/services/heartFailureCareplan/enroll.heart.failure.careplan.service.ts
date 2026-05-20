@@ -204,7 +204,7 @@ export class HeartFailureRegistrationService {
         };
         return languageCodeMapping[planCode] ?? "en";
     }
-
+    
     calculateStartDateByButtonId(buttonId: string, todayDate: Date): Date {
         if (buttonId?.startsWith("Start_Careplan_HeartF")) {
             const dayOfWeek = todayDate.getDay();

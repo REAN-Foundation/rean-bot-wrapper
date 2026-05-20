@@ -142,7 +142,6 @@ export class ClickUpMessageService implements platformServiceInterface {
             console.log("textToUser", textToUser);
             const commentId = requestBody.history_items[0].comment.id;
             await this.slackClickupCommonFunctions.sendCustomMessage(platform, userId, textToUser);
-
         } catch (error) {
             console.log(error);
         }
