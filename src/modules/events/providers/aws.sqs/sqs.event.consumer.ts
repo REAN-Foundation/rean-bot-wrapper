@@ -103,6 +103,7 @@ export class AwsSqsEventConsumer implements IEventConsumer {
             throw error;
         }
     }
+
     async stopListening(): Promise<void> {
         if (!this.isListening) {
             return;
@@ -174,6 +175,7 @@ export class AwsSqsEventConsumer implements IEventConsumer {
             }
         }
     }
+
     private startPolling(): void {
         const poll = async () => {
             if (!this.isListening) {

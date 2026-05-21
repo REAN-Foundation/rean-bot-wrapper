@@ -47,7 +47,8 @@ export class getAdditionalInfoSevice {
             {
                 message = await this.getMessageForGGHN(EHRNumber,userName);
             }
-            if (clientName === "LVPEI"|| clientName === "REAN_BOT")
+
+            if (clientName === "LVPEI" || clientName === "REAN_BOT")
             {
                 message = await this.getMessageForLVPEI(EHRNumber,userId,userName,languageCode,eventObj);
             }
@@ -107,7 +108,6 @@ export class getAdditionalInfoSevice {
         }
     }
 
-
     async getMessageForGGHN(EHRNumber,userName)
     {
         const authenticationToken = await this.getauthenticationToken();
@@ -119,7 +119,6 @@ export class getAdditionalInfoSevice {
         }
         return message;
     }
-
 
     async getUserInfo(authenticationToken,userID){
         try {
@@ -208,10 +207,9 @@ export class getAdditionalInfoSevice {
             if (personContactList){
                 const EhrNumber = personContactList.dataValues.ehrSystemCode;
                 const additionalIfoSettings = await this.clientEnvironment.getClientEnvironmentVariable("AdditionalInfoSettings");
-                const RequiredAdditionalInfo =  additionalIfoSettings.Value.RequiredInfo;
-                const RequiredAdditionalobj = JSON.parse(RequiredAdditionalInfo );
-                const dffMessage = `Your ${RequiredAdditionalobj.EHRCODE} is ${EhrNumber}.`;
-                const message = `Do you want to change your  ${ RequiredAdditionalobj.EHRCODE}?`;
+                const RequiredAdditionalobj =  additionalIfoSettings.Value.AdditionalInfo;
+                const dffMessage = `Your ${RequiredAdditionalobj?.EHRCODE} is ${EhrNumber || 'not found'}.`;
+                const message = `Do you want to change your  ${ RequiredAdditionalobj?.EHRCODE}?`;
                 const languageCode = eventObj.body.queryResult.languageCode;
                 const button_yes = await this.translate.translatestring("Yes",languageCode);
                 const button_no = await this.translate.translatestring("No",languageCode);

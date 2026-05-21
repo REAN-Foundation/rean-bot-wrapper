@@ -26,14 +26,18 @@ export class AnemiaModelCommunication {
             const cloudFrontPath = eventObj.body.queryResult.queryText;
             const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
             const filename = path.basename(cloudFrontPath);
-            this.fileBackup(eventObj.body,cloudFrontPath,filename);
+            await this.fileBackup(eventObj.body,cloudFrontPath,filename);
             const response = await this.getAnemiaResults(signedUrl, filename, "segment");
             const imageURL = response?.body?.segmented_image_url;
             if (!imageURL) {
                 console.log("Segmentation failed: no imageURL in response");
                 return;
             }
-            const cacheData = CacheMemory.get(`Anemia:${userId}`);
+            const cacheData = await CacheMemory.get(`Anemia:${userId}`);
+            if (!cacheData) {
+                console.log(`Segmentation: cache missing for user ${userId} (fileBackup likely failed)`);
+                return;
+            }
             cacheData["SegmentedImagePath"] = imageURL;
             CacheMemory.set(`Anemia:${userId}`, cacheData);
             this.sendExtraMessagesobj.sendSecondaryButtonMessage(imageURL, "AnemiaImageCorrect", "AnemiaImageIncorrect", eventObj);
@@ -90,7 +94,7 @@ export class AnemiaModelCommunication {
     }
 
     async Record(userId){
-        const cacheData = CacheMemory.get(`Anemia:${userId}`);
+        const cacheData = await CacheMemory.get(`Anemia:${userId}`);
         const AnemiaRepoObj =
         (await this.entityManagerProvider.getEntityManager(this.EnvironmentProviderService)).getRepository(AnemiaDataRecord);
         await AnemiaRepoObj.create({
@@ -110,21 +114,31 @@ export class AnemiaModelCommunication {
         try {
             const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
             const parameters = eventObj.body.queryResult.parameters;
-            const age = String(parameters.Age ?? "");
+            const age = String(parameters.Age?.amount ?? "");
             const gender = String(parameters.Gender ?? "");
-            const cacheData = CacheMemory.get(`Anemia:${userId}`);
-            const segmentedImagePath = cacheData["SegmentedImagePath"];
+            const cacheData = await CacheMemory.get(`Anemia:${userId}`);
+            const segmentedImagePath = cacheData?.["SegmentedImagePath"];
+            if (!segmentedImagePath) {
+                console.log(`Regression aborted: SegmentedImagePath missing for user ${userId}`);
+                return;
+            }
             const filename = path.basename(segmentedImagePath);
             cacheData["age"] = age;
             cacheData["gender"] = gender;
             cacheData["patientId"] = parameters.patientId ?? "";
             CacheMemory.set(`Anemia:${userId}`, cacheData);
             const result = await this.getAnemiaResults(segmentedImagePath, filename, "predict", age, gender);
-            const HbValue = result?.body?.HbValue;
+            const HbValue = result?.body?.hb_value;
+            const unit = result?.body?.unit ?? "";
             cacheData["HbValue"] = HbValue;
             CacheMemory.set(`Anemia:${userId}`, cacheData);
             await this.Record(userId);
-            await this.sendExtraMessagesobj?.sendExtraMessage(eventObj, "AnemiaImageCorrect", String(HbValue));
+            const payload = eventObj.body.originalDetectIntentRequest.payload;
+            if (payload.source === "Telegram") {
+                payload.source = "telegram";
+            }
+            const hbMessage = unit ? `${HbValue} ${unit}` : String(HbValue);
+            await this.sendExtraMessagesobj?.sendExtraMessage(eventObj, "AnemiaImageCorrect", hbMessage);
         } catch (error) {
             console.log("Regression Service Error", error);
         }
