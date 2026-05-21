@@ -375,13 +375,14 @@ export class MessageFlow{
         if (msg.agentName === 'Reancare' && customRemSetting) {
             try {
                 const msg_id = await platformMessageService.getMessageIdFromResponse(message_to_platform);
+                const payloadObj = typeof msg.payload === "string" ? JSON.parse(msg.payload) : msg.payload;
                 const reminder_info = {
-                    userId         : msg.payload?.userId,
+                    userId         : payloadObj.userId,
                     MessageId      : msg_id,
-                    ReminderId     : msg.payload?.ReminderId,
-                    ReminderDate   : msg.payload?.ReminderDate,
-                    ReminderTime   : msg.payload?.ReminderTime,
-                    ParentActionId : msg.payload?.ParentActionId
+                    ReminderId     : payloadObj.ReminderId,
+                    ReminderDate   : payloadObj.ReminderDate,
+                    ReminderTime   : payloadObj.ReminderTime,
+                    ParentActionId : payloadObj.ParentActionId
                 };
                 await reminderMessage.create(reminder_info);
             } catch (error) {
