@@ -121,7 +121,7 @@ export class ChatBotController {
             const event: WorkflowEvent = requestBody;
 
             const userPlatformId = event.UserMessage?.Phone ?? null;
-            const chatSessionId = await this.getChatSessionId(userPlatformId);
+            const chatSessionId = await this.getChatSessionId(userPlatformId, clientEnvironmentProviderService);
 
             const workflowEventEntiry = {
                 TenantId          : event.TenantId,
@@ -335,8 +335,12 @@ export class ChatBotController {
         }
     };
 
-    getChatSessionId = async (platformUserId: string) => {
-        const entManager = await this._entityProvider.getEntityManager(this.environmentProviderService);
+    getChatSessionId = async (
+        platformUserId: string,
+        clientEnv?: ClientEnvironmentProviderService
+    ) => {
+        const envProvider = clientEnv ?? this.environmentProviderService;
+        const entManager = await this._entityProvider.getEntityManager(envProvider);
         const chatSessionRepository = entManager.getRepository(ChatSession);
         const chatSession = await chatSessionRepository.findOne({
             where : {

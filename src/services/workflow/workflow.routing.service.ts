@@ -58,13 +58,19 @@ DECISION PROCESS:
 3. Evaluate if the message intent matches any workflow's purpose
 4. If multiple workflows could match, choose the most specific/appropriate one
 5. Default to LLM SERVICE for purely informational queries
+6. After selecting a workflow, locate its CONFIRMATION_REQUIRED clause within the RoutingPrompt:
+   - If the clause states confirmation is required, set requiredConfirmation to "true"
+   - If the clause states confirmation is NOT required, set requiredConfirmation to "false"
+   - If the clause is missing or ambiguous, default requiredConfirmation to "true" (fail-safe)
+7. If flag is "false" (no workflow matched), set requiredConfirmation to "false"
 
 OUTPUT FORMAT:
 Respond with ONLY valid JSON, no markdown formatting:
 {{
     "flag": "true or false",
     "reason": "brief explanation",
-    "matchedSchemaId": "Provide the matching WORKFLOW SCHEMA ID or null"
+    "matchedSchemaId": "Provide the matching WORKFLOW SCHEMA ID or null",
+    "requiredConfirmation": "true or false"
 }}
 
 USER MESSAGE: {user_message}
@@ -85,7 +91,7 @@ Analyze and provide your routing decision.
             throw new Error("OpenAI or Azure OpenAI API key not found. Set OpenAiApiKey in tenant secrets or OPENAI_API_KEY in .env.");
         }
         return new ChatOpenAI({
-            modelName : "gpt-5-mini",
+            modelName    : "gpt-5-mini",
             openAIApiKey : apiKey
         });
     }
@@ -127,14 +133,16 @@ Analyze and provide your routing decision.
 
         if (schemas.length === 0) {
             return {
-                shouldTrigger   : false,
-                reason          : "No workflows available, routing to LLM service",
-                matchedSchemaId : null
+                shouldTrigger        : false,
+                reason               : "No workflows available, routing to LLM service",
+                matchedSchemaId      : null,
+                requiredConfirmation : false
             };
         }
 
         try {
             const model = await this.getModel();
+
             // Create the chain
             const chain = this.promptTemplate.pipe(model);
 
@@ -153,20 +161,25 @@ Analyze and provide your routing decision.
             const matchedSchemaId = parsedResult.matchedSchemaId;
 
             const matchedSchema = matchedSchemaId ? findSchemaById(schemas, matchedSchemaId) : undefined;
+            const requiredConfirmation = parsedResult.requiredConfirmation?.toLowerCase() === "false"
+                ? false
+                : true;
 
             return {
                 shouldTrigger,
                 reason : parsedResult.reason,
                 matchedSchemaId,
-                matchedSchema
+                matchedSchema,
+                requiredConfirmation,
             };
         } catch (error) {
             console.error("Error in workflow routing decision:", error);
 
             return {
-                shouldTrigger   : false,
-                reason          : "Error occurred, defaulting to LLM Service",
-                matchedSchemaId : null
+                shouldTrigger        : false,
+                reason               : "Error occurred, defaulting to LLM Service",
+                matchedSchemaId      : null,
+                requiredConfirmation : false
             };
         }
     }
