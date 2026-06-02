@@ -314,5 +314,4 @@ export class WhatsappWatiPostResponseFunctionalities {
         const base64Data = Buffer.from(response.data, 'binary').toString('base64');
         return base64Data;
     };
-
 }
