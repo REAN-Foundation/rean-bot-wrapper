@@ -1,4 +1,4 @@
-import { inject, Lifecycle, scoped } from 'tsyringe';
+import { autoInjectable, inject } from 'tsyringe';
 import { NeedleService } from './needle.service';
 import { translateService } from './translate.service';
 import { Iresponse } from '../refactor/interface/message.interface';
@@ -7,7 +7,7 @@ import { sendTelegramButtonService } from '../services/telegram.button.service';
 import { commonResponseMessageFormat } from '../services/common.response.format.object';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 
-@scoped(Lifecycle.ContainerScoped)
+@autoInjectable()
 export class sendExtraMessages{
     private _platformMessageService?: platformServiceInterface;
 
@@ -33,6 +33,28 @@ export class sendExtraMessages{
         } catch (error) {
             console.log(error);
             throw new Error("sending addtional button message error");
+        }
+    }
+
+    async sendImageMessage(imageUrl, eventObj, caption = ""){
+        try {
+            const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
+            let sourceChannel = eventObj.body.originalDetectIntentRequest.payload.source;
+            if (sourceChannel !== "whatsappMeta") {
+                sourceChannel = sourceChannel.toLowerCase();
+            }
+            const platformMessageService = eventObj.container.resolve(sourceChannel);
+            const response_format: Iresponse = commonResponseMessageFormat();
+            response_format.sessionId = userId;
+            response_format.messageBody = imageUrl;
+            response_format.messageImageUrl = imageUrl;
+            response_format.messageText = caption;
+            response_format.message_type = "image";
+            await this.delay(250);
+            await platformMessageService.SendMediaMessage(response_format, null);
+        }
+        catch (error) {
+            console.log("While sending image message", error);
         }
     }
 
