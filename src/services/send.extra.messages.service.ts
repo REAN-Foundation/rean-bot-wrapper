@@ -1,4 +1,4 @@
-import { autoInjectable, inject } from 'tsyringe';
+import { inject, Lifecycle, scoped } from 'tsyringe';
 import { NeedleService } from './needle.service';
 import { translateService } from './translate.service';
 import { Iresponse } from '../refactor/interface/message.interface';
@@ -7,7 +7,7 @@ import { sendTelegramButtonService } from '../services/telegram.button.service';
 import { commonResponseMessageFormat } from '../services/common.response.format.object';
 import { platformServiceInterface } from '../refactor/interface/platform.interface';
 
-@autoInjectable()
+@scoped(Lifecycle.ContainerScoped)
 export class sendExtraMessages{
     private _platformMessageService?: platformServiceInterface;
 
