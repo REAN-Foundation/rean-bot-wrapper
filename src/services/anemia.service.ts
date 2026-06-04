@@ -40,7 +40,8 @@ export class AnemiaModelCommunication {
             }
             cacheData["SegmentedImagePath"] = imageURL;
             CacheMemory.set(`Anemia:${userId}`, cacheData);
-            this.sendExtraMessagesobj.sendSecondaryButtonMessage(imageURL, "AnemiaImageCorrect", "AnemiaImageIncorrect", eventObj);
+            await this.sendExtraMessagesobj?.sendImageMessage(imageURL, eventObj);
+            await this.sendExtraMessagesobj?.sendSecondaryButtonMessage("Is this image correct?", "AnemiaImageCorrect", "AnemiaImageIncorrect", eventObj);
     
         } catch (error) {
             console.log("segmentation Service Error");

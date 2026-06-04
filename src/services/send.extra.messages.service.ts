@@ -36,6 +36,28 @@ export class sendExtraMessages{
         }
     }
 
+    async sendImageMessage(imageUrl, eventObj, caption = ""){
+        try {
+            const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
+            let sourceChannel = eventObj.body.originalDetectIntentRequest.payload.source;
+            if (sourceChannel !== "whatsappMeta") {
+                sourceChannel = sourceChannel.toLowerCase();
+            }
+            const platformMessageService = eventObj.container.resolve(sourceChannel);
+            const response_format: Iresponse = commonResponseMessageFormat();
+            response_format.sessionId = userId;
+            response_format.messageBody = imageUrl;
+            response_format.messageImageUrl = imageUrl;
+            response_format.messageText = caption;
+            response_format.message_type = "image";
+            await this.delay(250);
+            await platformMessageService.SendMediaMessage(response_format, null);
+        }
+        catch (error) {
+            console.log("While sending image message", error);
+        }
+    }
+
     async sendResponsebyButton(message, eventObj, userId, buttonArray){
         try {
             let sourceChannel = eventObj.body.originalDetectIntentRequest.payload.source;
