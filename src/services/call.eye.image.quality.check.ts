@@ -44,7 +44,6 @@ export class CallEyeImageQualityCheckModel {
         let message = null;
         if (response.statusCode === 200) {
             console.log("got results successfully");
-
             if (response.body.result)
             {
                 message = "It is a *Good Quality* image as " + response.body.message  ;
@@ -86,7 +85,6 @@ export class CallEyeImageQualityCheckModel {
             Logger.instance()
                 .log_error(error.message, 500, 'error in sending message to telegram');
         }
-
     };
 
 }

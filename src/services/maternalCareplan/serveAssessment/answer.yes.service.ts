@@ -80,7 +80,6 @@ export class AnswerYesMsgService {
         else {
             message = null;
         }
-
         return message;
     }
 
@@ -104,7 +103,6 @@ export class AnswerYesMsgService {
         const seed = now.getTime();
         const min = 0;
         const max = maxNumber - 1; // 10 + 1 (to include 10)
-
         // Use the seed to generate a random number
         const random = (seed % (max - min)) + min;
         return random;
