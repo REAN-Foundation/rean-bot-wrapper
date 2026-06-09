@@ -63,7 +63,12 @@ export class WorkflowEventListener {
         return previousMessage;
     };
 
-    async commence(message: Imessage, platformMessageService,matchedWorkflowId?: string){
+    async commence(
+        message: Imessage,
+        platformMessageService,
+        matchedWorkflowId?: string,
+        requiredConfirmation = false
+    ){
         try {
             console.log("Message ->", message);
             console.log("Client name", await this.environmentProviderService.getClientEnvironmentVariable("Name"));
@@ -85,6 +90,11 @@ export class WorkflowEventListener {
                         await platformMessageService.SendMediaMessage(response_format, payload);
                     }
                     return null;
+                }
+                else if (matchedWorkflowId && !requiredConfirmation)
+                {
+
+                    console.log(`Starting matched workflow ${matchedWorkflowId} without confirmation prompt`);
                 }
                 else {
                     try {

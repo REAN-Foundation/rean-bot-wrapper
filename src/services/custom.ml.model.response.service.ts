@@ -52,7 +52,7 @@ export class CustomMLModelResponseService{
             if (infoProvided.dataValues.infoProvided) {
                 const userInfo = infoProvided.dataValues.userInfo;
                 const addUserInfo = `User information: ${userInfo} || User Question: `;
-                message =  message + addUserInfo ;
+                message =  addUserInfo + message;
             } else {
                 message = "User Question: " + message;
             }

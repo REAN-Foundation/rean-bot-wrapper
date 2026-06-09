@@ -95,9 +95,9 @@ export class DecisionRouter {
             throw new Error("OpenAI or Azure OpenAI API key not found. Set OpenAiApiKey in tenant secrets or OPENAI_API_KEY in .env.");
         }
         return new ChatOpenAI({
-            temperature : 0,
-            modelName   : "gpt-3.5-turbo",
-            openAIApiKey: apiKey
+            temperature  : 0,
+            modelName    : "gpt-3.5-turbo",
+            openAIApiKey : apiKey
         });
     }
 
@@ -497,6 +497,7 @@ export class DecisionRouter {
                 if (workflowFlag.shouldTrigger) {
                     this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.WorkflowService;
                     this.outgoingMessage.Alert.AlertId = workflowFlag.matchedSchemaId;
+                    this.outgoingMessage.Alert.RequiredConfirmation = workflowFlag.requiredConfirmation;
                     return this.outgoingMessage;
 
                 } else {
@@ -507,6 +508,7 @@ export class DecisionRouter {
                         console.log('### WORKFLOW MODE: First interaction today — routing to WorkflowService', this.environmentProviderService?.getClientName());
                         this.outgoingMessage.PrimaryMessageHandler = MessageHandlerType.WorkflowService;
                         this.outgoingMessage.Alert.AlertId = workflowFlag.matchedSchemaId;
+                        this.outgoingMessage.Alert.RequiredConfirmation = true;
                         return this.outgoingMessage;
                     }
                     console.log('### WORKFLOW MODE: Routing to QnA service as workflow flag is false', this.environmentProviderService?.getClientName());
@@ -707,9 +709,10 @@ export class DecisionRouter {
         } catch (error) {
             console.log("ERROR WHILE CHECKING THE WORKFLOW MODE", error);
             const result: RoutingDecision = {
-                shouldTrigger   : false,
-                reason          : "Error while checking for workflow mode",
-                matchedSchemaId : null
+                shouldTrigger        : false,
+                reason               : "Error while checking for workflow mode",
+                matchedSchemaId      : null,
+                requiredConfirmation : false
             };
             return result;
         }

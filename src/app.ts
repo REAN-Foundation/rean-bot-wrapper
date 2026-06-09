@@ -75,8 +75,10 @@ export default class Application {
             const whatsappToken = whatsappSecrets ? whatsappSecrets['ApiToken'] : null;
             console.log(telegramToken);
             if (telegramToken) {
-                await telegram.setWebhook(clientName);
-                console.log("Telegram webhook is set");
+                if (process.env.SKIP_TELEGRAM_WEBHOOK_SETUP !== 'true') {
+                    await telegram.setWebhook(clientName);
+                    console.log("Telegram webhook is set");
+                } 
             } else {
                 console.log("Telegram webhook need not to be set");
             }
@@ -181,7 +183,6 @@ export default class Application {
 
         }
     };
-
 
     private listen = () => {
         return new Promise((resolve, reject) => {

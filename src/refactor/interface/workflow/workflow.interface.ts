@@ -124,6 +124,7 @@ export interface WorkflowRoutingResult {
     flag: string;
     reason: string;
     matchedSchemaId: string | null;
+    requiredConfirmation?: string;
 }
 
 export interface RoutingDecision {
@@ -131,4 +132,5 @@ export interface RoutingDecision {
     reason: string;
     matchedSchemaId: string | null;
     matchedSchema?: Schema;
+    requiredConfirmation: boolean;
 }

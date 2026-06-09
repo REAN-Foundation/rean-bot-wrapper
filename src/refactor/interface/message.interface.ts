@@ -228,8 +228,8 @@ export interface QnADetails {
 }
 
 export interface AlertDetails {
-    AlertId         ?: string;
-
+    AlertId              ?: string;
+    RequiredConfirmation ?: boolean;
 }
 
 export interface OutgoingMessage {
