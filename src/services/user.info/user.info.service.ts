@@ -5,6 +5,7 @@ import { UserInfo } from '../../models/user.info.model';
 import { userInfoPayload } from '../../refactor/interface/user.info.interface';
 import { EntityManagerProvider } from '../entity.manager.provider.service';
 import { ClientEnvironmentProviderService } from '../set.client/client.environment.provider.service';
+import { BlockUserService } from '../block.user.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class UserInfoService {
@@ -16,7 +17,8 @@ export class UserInfoService {
     constructor(
         @inject(ClientEnvironmentProviderService)
             private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
-        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider
+        @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
+        @inject(BlockUserService) private blockUserService?: BlockUserService
     ){}
 
     async checkUserProvidedInfo(userPlatformID: string){
@@ -83,6 +85,11 @@ export class UserInfoService {
                 });
                 userInfoObj.userID = userID.autoIncrementalID;
                 await UserInfoRepository.create(userInfoObj);
+            }
+
+            const userAge = Number(payload.Age);
+            if (!isNaN(userAge) && userAge < 18) {
+                await this.blockUserService.blockUser(userPlatformID);
             }
         } catch (error) {
             console.log('Error while updating user info: ', error);
