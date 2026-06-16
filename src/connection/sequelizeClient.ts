@@ -41,8 +41,8 @@ export class SequelizeClient {
             const dbHost = process.env.DB_HOST;
             const sequelizeClient = new Sequelize(dbName, dbUser, dbPassword, {
                 host           : dbHost,
-                dialect        : 'mysql',
-                port           : 3306,
+                dialect        : (process.env.DB_DIALECT || 'mysql') as any,
+                port           : process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 3306,
                 logging        : false,
                 repositoryMode : true
             });
