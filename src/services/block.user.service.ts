@@ -50,6 +50,26 @@ export class BlockUserService {
         }
     }
 
+    async isUserBlockedByPlatformId(userPlatformId: string): Promise<boolean> {
+        try {
+
+            const blockRepository =
+                (await this.entityManagerProvider
+                    .getEntityManager(this.clientEnvironment))
+                    .getRepository(BlockList);
+
+            const blockedUser = await blockRepository.findOne({
+                where: { userPlatformID: userPlatformId }
+            });
+
+            return blockedUser ? true : false;
+
+        } catch (error) {
+            Logger.instance().log_error(error.message, 500, "Block user check error");
+            return false;
+        }
+    }
+
     async blockUser(userPlatformId: string): Promise<void> {
         try {
 
