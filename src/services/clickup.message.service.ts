@@ -141,10 +141,52 @@ export class ClickUpMessageService implements platformServiceInterface {
                 : `Response from Expert : ${filterText}`;
             console.log("textToUser", textToUser);
             const commentId = requestBody.history_items[0].comment.id;
+
+            await this.maybeSendActivationTemplate(entityManager, platform, userId);
+
             await this.slackClickupCommonFunctions.sendCustomMessage(platform, userId, textToUser);
 
         } catch (error) {
             console.log(error);
+        }
+    }
+
+    // When the ClickupTemplate client setting is configured, WhatsApp blocks the expert's
+    // plain-text reply if the user has been inactive for 24h. To re-open the window we first
+    // send the configured template. Any failure here is logged and never blocks the reply.
+    async maybeSendActivationTemplate(entityManager, platform, userId) {
+        try {
+            const clickupTemplateSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("ClickupTemplate");
+            const clickupTemplateName = (clickupTemplateSetting && typeof clickupTemplateSetting === "object")
+                ? clickupTemplateSetting.Value
+                : clickupTemplateSetting;
+
+            if (!clickupTemplateName || String(clickupTemplateName).trim() === "") {
+                return;
+            }
+
+            const whatsappChannels = ["whatsapp", "whatsappMeta", "WhatsappMeta"];
+            if (!whatsappChannels.includes(platform)) {
+                console.log("ClickupTemplate set but platform does not support templates, skipping:", platform);
+                return;
+            }
+
+            const chatMessageRepository = entityManager.getRepository(ChatMessage);
+            const lastInboundMessage = await chatMessageRepository.findOne({
+                where : { userPlatformID: userId, direction: "In" },
+                order : [['createdAt', 'DESC']]
+            });
+
+            const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+            const lastInboundTime = lastInboundMessage ? new Date(lastInboundMessage.createdAt).getTime() : null;
+            const isWindowExpired = lastInboundTime === null || (Date.now() - lastInboundTime) > ONE_DAY_MS;
+
+            if (isWindowExpired) {
+                console.log("24h window expired, sending activation template before expert reply:", clickupTemplateName);
+                await this.slackClickupCommonFunctions.sendTemplateMessage(platform, userId, String(clickupTemplateName).trim());
+            }
+        } catch (error) {
+            console.log("Error while sending activation template, continuing with expert reply", error);
         }
     }
 
