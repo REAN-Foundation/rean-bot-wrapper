@@ -51,7 +51,8 @@ export class getAdditionalInfoSevice {
             const container = eventObj.container;
             console.log('## Storing user additional info for userPlatformID:', userPlatformID, 'EHRNumber:', ehrNumber, 'Age:', ageParam, 'Gender:', genderParam);
 
-            const parsedAge = ageParam !== undefined && ageParam !== null && ageParam !== '' ? Number(ageParam) : undefined;
+            const ageRaw = ageParam && typeof ageParam === 'object' ? ageParam.amount : ageParam;
+            const parsedAge = ageRaw !== undefined && ageRaw !== null && ageRaw !== '' ? Number(ageRaw) : undefined;
             const isEhrProvided = ehrNumber !== undefined && ehrNumber !== null && String(ehrNumber).trim() !== '';
             const isAgeProvided = parsedAge !== undefined && !isNaN(parsedAge);
             const isGenderProvided = genderParam !== undefined && genderParam !== null && String(genderParam).trim() !== '';
