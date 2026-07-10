@@ -1,8 +1,8 @@
 import type { ICache } from './cache.interface';
 import type { CacheEntry, CacheMetrics, CacheOptions } from './cache.types';
 import { InMemoryCache } from './inmemory.cache';
+import { RedisCache } from './redis.cache';
 import { StrategyManager } from './cache.strategies';
-const REQUEST_CACHE_TYPE = 'InMemory';
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -11,12 +11,14 @@ export class RequestResponseCacheService {
     private static _cache: ICache = RequestResponseCacheService.getCache();
 
     private static getCache(): ICache {
-        if (REQUEST_CACHE_TYPE === 'InMemory') {
-            return new InMemoryCache();
+        // CACHE_PROVIDER=redis uses the shared Redis (survives restarts / works across
+        // replicas); anything else keeps the in-process in-memory cache.
+        if ((process.env.CACHE_PROVIDER || '').toLowerCase() === 'redis') {
+            console.log('RequestResponseCacheService: using Redis cache backend');
+            return new RedisCache();
         }
+        console.log('RequestResponseCacheService: using in-memory cache backend');
         return new InMemoryCache();
-
-        // return new RedisCache();
     }
 
     // Enhanced get with strategy support and stale-while-revalidate
