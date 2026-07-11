@@ -11,6 +11,8 @@ import { DialogflowResponseFormat } from './response.format/dialogflow.response.
 import { NeedleService } from './needle.service';
 import { GetPatientInfoService } from './support.app.service';
 import { TimeHelper } from '../common/time.helper';
+import { ContainerService } from './container/container.service';
+import { UserInfoRepo } from '../database/repositories/user.info/user.info.repo';
 
 @scoped(Lifecycle.ContainerScoped)
 export class DialogflowResponseService {
@@ -29,6 +31,38 @@ export class DialogflowResponseService {
             return "en-US";
         }
 
+    }
+
+    async getPrefillParameters(userPlatformID: string, clientName: string) {
+        try {
+            const prefillEnabled = await this.clientEnvironment?.getClientEnvironmentVariable("PrefillDialogflowParameters");
+            console.log(`##PrefillDialogflowParameters for clientName : ${clientName}, userPlatformID: ${userPlatformID} & prefillEnabled: ${prefillEnabled}`);
+            if (!prefillEnabled) {
+                return null;
+            }
+            const childContainer = ContainerService.createChildContainer(clientName);
+            const storedUserInfo = childContainer ? await UserInfoRepo.getUserInfoByPlatformId(childContainer, userPlatformID) : null;
+            
+            console.log(`##Stored user info for clientName : ${clientName}, userPlatformID: ${userPlatformID} & storedUserInfo: ${storedUserInfo}`);
+            if (!storedUserInfo) {
+                return null;
+            }
+            const params: any = {};
+            if (storedUserInfo.userName !== undefined && storedUserInfo.userName !== null) {
+                params["patientId"] = storedUserInfo.userName;
+            }
+            if (storedUserInfo.userAge !== undefined && storedUserInfo.userAge !== null) {
+                params["Age"] = storedUserInfo.userAge;
+            }
+            if (storedUserInfo.userGender !== undefined && storedUserInfo.userGender !== null) {
+                params["Gender"] = storedUserInfo.userGender;
+            }
+            console.log(`##PrefillDialogflowParameters for clientName : ${clientName}, userPlatformID: ${userPlatformID} & params: ${JSON.stringify(params)}`);
+            return Object.keys(params).length > 0 ? params : null;
+        } catch (lookupError) {
+            console.log("Could not fetch stored user info for Dialogflow params:", lookupError);
+            return null;
+        }
     }
 
     getDialogflowMessage = async (message: string, platform: string = null, intent: string = null, completeMessage:Imessage = null ) => {
@@ -98,12 +132,14 @@ export class DialogflowResponseService {
             };
             let request_intent = null;
             if (intent !== null){
+                const userParameters = await this.getPrefillParameters(userId, env_name);
                 request_intent = {
                     session    : sessionPath,
                     queryInput : {
                         event : {
                             name         : intent,
                             languageCode : dialogflow_language,
+                            ...(userParameters ? { parameters: struct.encode(userParameters) } : {})
                         },
                     },
                     queryParams : {
