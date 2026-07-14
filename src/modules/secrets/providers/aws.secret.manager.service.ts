@@ -33,12 +33,6 @@ export class AwsSecretsManager implements ISecretsService {
 
     async getSecrets(secretName) {
 
-        const responseCredentials: any = await this.getCrossAccountCredentials();
-        const region = process.env.region;
-
-        // eslint-disable-next-line max-len
-        const client = new AWS.SecretsManager({ region: region, accessKeyId: responseCredentials.accessKeyId, secretAccessKey: responseCredentials.secretAccessKey, sessionToken: responseCredentials.sessionToken });
-
         // eslint-disable-next-line init-declarations
         // let error: any;
 
@@ -61,6 +55,12 @@ export class AwsSecretsManager implements ISecretsService {
         // return secretStringToObj;
 
         try {
+            const responseCredentials: any = await this.getCrossAccountCredentials();
+            const region = process.env.region;
+
+            // eslint-disable-next-line max-len
+            const client = new AWS.SecretsManager({ region: region, accessKeyId: responseCredentials.accessKeyId, secretAccessKey: responseCredentials.secretAccessKey, sessionToken: responseCredentials.sessionToken });
+
             const response = await client.getSecretValue({ SecretId: secretName }).promise();
 
             if (!response?.SecretString) {
