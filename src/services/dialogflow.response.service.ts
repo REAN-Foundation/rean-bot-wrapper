@@ -52,7 +52,7 @@ export class DialogflowResponseService {
                 params["patientId"] = storedUserInfo.userName;
             }
             if (storedUserInfo.userAge !== undefined && storedUserInfo.userAge !== null) {
-                params["Age"] = storedUserInfo.userAge;
+                params["Age"] = { amount: storedUserInfo.userAge, unit: "year" };
             }
             if (storedUserInfo.userGender !== undefined && storedUserInfo.userGender !== null) {
                 params["Gender"] = storedUserInfo.userGender;
