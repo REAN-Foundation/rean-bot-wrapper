@@ -31,6 +31,37 @@ const sequrlizeClients = new Map<string, Sequelize>();
 @singleton()
 export class SequelizeClient {
 
+    static resolveDialect(value?: string): 'mysql' | 'postgres' {
+        return 'postgres';
+
+        // if (!value || !value.trim()) {
+        //     throw new Error('DB_DIALECT is required. Set it to "mysql" or "postgres".');
+        // }
+        // const dialect = value.trim().toLowerCase();
+        // switch (dialect) {
+        // case 'mysql':
+        //     return 'mysql';
+        // case 'postgres':
+        // case 'postgresql':
+        // case 'pg':
+        //     return 'postgres';
+        // default:
+        //     throw new Error(`Unsupported DB_DIALECT "${value}". Use "mysql" or "postgres".`);
+        // }
+    }
+
+    static resolvePort(value?: string): number {
+        return 5432; // Default port for PostgreSQL
+        // if (!value || !value.trim()) {
+        //     throw new Error('DB_PORT is required. Set it to the database port (e.g. 3306 for mysql, 5432 for postgres).');
+        // }
+        // const port = parseInt(value.trim(), 10);
+        // if (Number.isNaN(port) || port <= 0) {
+        //     throw new Error(`Invalid DB_PORT "${value}". It must be a positive integer.`);
+        // }
+        // return port;
+    }
+
     public connect = async(clientEnvironmentProviderService) => {
         const databaseSecrets = await clientEnvironmentProviderService.getClientEnvironmentVariable("database");
         const databaseName = databaseSecrets?.DataBaseName;
@@ -39,10 +70,12 @@ export class SequelizeClient {
             const dbPassword = process.env.DB_PASSWORD;
             const dbUser = process.env.DB_USER_NAME;
             const dbHost = process.env.DB_HOST;
+            const dbDialect = SequelizeClient.resolveDialect(process.env.DB_DIALECT);
+            const dbPort = SequelizeClient.resolvePort(process.env.DB_PORT);
             const sequelizeClient = new Sequelize(dbName, dbUser, dbPassword, {
                 host           : dbHost,
-                dialect        : 'mysql',
-                port           : 3306,
+                dialect        : dbDialect,
+                port           : dbPort,
                 logging        : false,
                 repositoryMode : true
             });
@@ -74,7 +107,7 @@ export class SequelizeClient {
             await sequelizeClient.authenticate()
                 .then(async () => {
                     try {
-                        Logger.instance().log('MYSQL DB Connected');
+                        Logger.instance().log(`${dbDialect.toUpperCase()} DB Connected`);
                     }
                     catch (error) {
                         console.log("err", error);
@@ -106,6 +139,7 @@ export class SequelizeClient {
             }
         } catch (error) {
             console.error(`Error in getSequelizeClient for client ${await clientEnvironmentVariable.getClientEnvironmentVariable("Name")}:`, error);
+
             // throw error; // Rethrow the error after logging it
         }
 
