@@ -32,6 +32,7 @@ const sequrlizeClients = new Map<string, Sequelize>();
 export class SequelizeClient {
 
     static resolveDialect(value?: string): 'mysql' | 'postgres' {
+        console.log("DB_DIALECT", value);
         return 'postgres';
 
         // if (!value || !value.trim()) {
@@ -51,6 +52,7 @@ export class SequelizeClient {
     }
 
     static resolvePort(value?: string): number {
+        console.log("DB_PORT", value);
         return 5432; // Default port for PostgreSQL
         // if (!value || !value.trim()) {
         //     throw new Error('DB_PORT is required. Set it to the database port (e.g. 3306 for mysql, 5432 for postgres).');
