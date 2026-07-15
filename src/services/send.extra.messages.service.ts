@@ -20,7 +20,7 @@ export class sendExtraMessages{
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    async sendSecondaryButtonMessage(inputMessage, yesIntentName, noIntentName,  eventObj) {
+    async sendSecondaryButtonMessage(inputMessage, yesIntentName, noIntentName,  eventObj, imageUrl?, whatsappBodyText?) {
         try {
             let message = inputMessage;
             const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
@@ -29,21 +29,30 @@ export class sendExtraMessages{
             const button_no = await this.translationServiceObj.translatestring("No",languageCode);
             message  = await this.translationServiceObj.translatestring(message,languageCode);
             const buttonArray = [button_yes,  yesIntentName ,button_no, noIntentName ];
-            this.sendResponsebyButton( message,eventObj, userId,buttonArray);
+            this.sendResponsebyButton( message,eventObj, userId,buttonArray, imageUrl, whatsappBodyText);
         } catch (error) {
             console.log(error);
             throw new Error("sending addtional button message error");
         }
     }
 
-    async sendResponsebyButton(message, eventObj, userId, buttonArray){
+    async sendResponsebyButton(message, eventObj, userId, buttonArray, imageUrl?, whatsappBodyText?){
         try {
             let sourceChannel = eventObj.body.originalDetectIntentRequest.payload.source;
             let payload = null;
             let messageType = null;
+            let bodyText = message;
+            let headerImageUrl = null;
             if (sourceChannel === "whatsappMeta"){
                 payload = await sendApiButtonService(buttonArray);
                 messageType = "interactivebuttons";
+                // WhatsApp caps interactive body text at 1024 chars, so a long signed image URL
+                // cannot be used as the body (error 131009). When an image is provided, show it
+                // in the interactive header and use a short question as the body text instead.
+                if (imageUrl) {
+                    headerImageUrl = imageUrl;
+                    bodyText = whatsappBodyText ?? message;
+                }
             }
             else {
                 sourceChannel = sourceChannel.toLowerCase();
@@ -51,21 +60,24 @@ export class sendExtraMessages{
                 messageType = "inline_keyboard";
             }
             this._platformMessageService = eventObj.container.resolve(sourceChannel);
-            await this.sendButton(this._platformMessageService,message, messageType, userId ,payload);
+            await this.sendButton(this._platformMessageService, bodyText, messageType, userId, payload, headerImageUrl);
         }
         catch (error) {
             console.log("While formulating button response", error);
-        
+
         }
-    
+
     }
 
-    async sendButton(_platformMessageService , message, messageType, sessionId, payload){
+    async sendButton(_platformMessageService , message, messageType, sessionId, payload, imageUrl?){
         try {
             const response_format: Iresponse = commonResponseMessageFormat();
             response_format.sessionId = sessionId;
             response_format.messageText = message;
             response_format.message_type = messageType;
+            if (imageUrl) {
+                response_format.messageImageUrl = imageUrl;
+            }
             await this.delay(250);
             _platformMessageService.SendMediaMessage(response_format, payload );
         }
