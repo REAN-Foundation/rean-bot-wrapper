@@ -43,7 +43,6 @@ export class GetCalories {
 
             const query_result = request;
             const meta_data = [];
-
             const food_names = [];
             const calories_array = [];
             const reply_text = [];
@@ -79,7 +78,6 @@ export class GetCalories {
                 const food_details = JSON.parse(JSON.stringify(await this.mainGetFood(access_token,food_id)));
                 const food = JSON.parse(food_details.body);
                 const servings = food.food.servings;
-
                 if (!foodName.value && !foodName.unit) {
                     console.log("No quantity has been defined");
                     let calories = '0';
@@ -135,7 +133,6 @@ export class GetCalories {
 
                 } else {
                     console.log("Here in else of unit");
-
                     const matched_serving = await this.getUnitData(servings.serving,foodName.unit);
                     let match = {
                         "calories"            : "0",
@@ -151,7 +148,6 @@ export class GetCalories {
                     }
                     serving_data = match;
                     const volumes = ["ml","g","kg"];
-
                     const calories = match.calories;
                     var temp_cal = 0;
                     if (!foodName.value){
@@ -185,7 +181,6 @@ export class GetCalories {
             }
 
             const total_calories = calories_array.reduce((a,b) => a + b);
-
             const text = 'The calorie content for ' +  reply_text.join(',') + '. Your total calorie intake based on the provided food items  and quantity is ' + total_calories + ' kcal (estimated).';
             const findit = await calorieInfoRepository.findOne(
                 {
@@ -231,7 +226,6 @@ export class GetCalories {
             }
         };
         const  res = await this.doRequest(options);
-
         return res;
     }
 
@@ -249,7 +243,6 @@ export class GetCalories {
             }
         };
         const  res = await this.doRequest(options);
-
         return res;
     }
 
@@ -265,7 +258,6 @@ export class GetCalories {
             "number_of_units"     : "1",
         };
         for (var unit of servings){
-
             if (unit['measurement_description'].match(serving_unit)){
                 unit_found =  unit;
                 break;
@@ -319,7 +311,6 @@ export class GetCalories {
             json : true
         };
         const  res = await this.doRequest(options);
-
         return res;
     }
 
@@ -338,4 +329,3 @@ export class GetCalories {
         });
     }
 }
-

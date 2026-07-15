@@ -44,7 +44,6 @@ export class WorkflowEventListener {
                 ['CreatedAt', 'DESC']
             ]
         });
-
         if (previousMessage?.SchemaInstanceId) {
             const url = '/engine/schema-instances/' + previousMessage.SchemaInstanceId;
             const response = await this.callWorkflowApi('get', url);
@@ -147,7 +146,6 @@ export class WorkflowEventListener {
             const prevMessage: WorkflowUserData = await this.getPreviousMessageFromWorkflow(message.platformId);
             if (!prevMessage) {
                 schemaId = matchedWorkflowId;
-
                 //when no routing prompt and matched workflowid present
                 // var baseSchema = schemaList.find((schema) => schema.ParentSchemaId === null);
                 // if (baseSchema) {

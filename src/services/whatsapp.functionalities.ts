@@ -102,7 +102,6 @@ export class MessageFunctionalities implements getMessageFunctionalities {
         } else {
             throw new Error("Unable to find the image file path");
         }
-
     }
 
     async interactiveMessageFormat(messageObj: Message) {
@@ -178,7 +177,6 @@ export class MessageFunctionalities implements getMessageFunctionalities {
                     res.pipe(filePath);
                     resolve(uploadpath);
                 });
-
             }
 
             else {
@@ -195,7 +193,6 @@ export class MessageFunctionalities implements getMessageFunctionalities {
                         });
                     });
                 });
-
                 request.on('error', (e) => {
                     reject(e);
                 });
