@@ -40,7 +40,10 @@ export class AnemiaModelCommunication {
             }
             cacheData["SegmentedImagePath"] = imageURL;
             CacheMemory.set(`Anemia:${userId}`, cacheData);
-            this.sendExtraMessagesobj.sendSecondaryButtonMessage(imageURL, "AnemiaImageCorrect", "AnemiaImage", eventObj);
+            // Telegram receives the signed URL as the message text (renders a link preview).
+            // WhatsApp shows the image in the interactive header with a short body question,
+            // because its interactive body text is capped at 1024 chars (error 131009).
+            this.sendExtraMessagesobj.sendSecondaryButtonMessage(imageURL, "AnemiaImageCorrect", "AnemiaImage", eventObj, imageURL, "Is this the correct segmented image?");
     
         } catch (error) {
             console.log("segmentation Service Error");
