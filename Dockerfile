@@ -1,15 +1,15 @@
 FROM node:24-alpine3.22 AS builder
-RUN apk add bash
-RUN apk add --no-cache \
-        python3 \
-    && rm -rf /var/cache/apk/*
-RUN apk add --update alpine-sdk
-RUN apk add chromium \
-    harfbuzz \
-    libsodium>=1.0.20-r1
 
-RUN apk update
-RUN apk upgrade
+RUN apk update && apk upgrade && \
+    apk add --no-cache \
+        bash \
+        python3 \
+        chromium \
+        harfbuzz \
+        libsodium \
+        alpine-sdk \
+        openssl \
+        libxml2
 
 ADD . /app
 WORKDIR /app
@@ -19,22 +19,22 @@ COPY package*.json /app/
 RUN npm cache clean --force
 RUN rm -rf node_modules
 # RUN npm install --no-package-lock
-RUN npm install
+RUN npm ci
 RUN npm run build
 
 # RUN npm run build
 
 FROM node:24-alpine3.22
-RUN apk add bash
+
 RUN apk add --no-cache \
-        python3 \
-        py3-pip \
+    bash \
+    python3 \
+    py3-pip \
+    chromium \
+    harfbuzz \
+    libsodium \
     && pip3 install --break-system-packages awscli \
     && rm -rf /var/cache/apk/*
-RUN apk add --update alpine-sdk
-RUN apk add chromium \
-    harfbuzz \
-    libsodium>=1.0.20-r1
 
 RUN apk update
 RUN apk upgrade

@@ -108,6 +108,17 @@ export class WhatsappPostResponseFunctionalities{
                 "buttons" : buttons
             }
         };
+        // Attach an image header when a media URL is supplied (e.g. anemia segmented image).
+        // This shows the image alongside the buttons without putting the long signed URL in
+        // the body text, which WhatsApp limits to 1-1024 chars (error 131009).
+        if (response_format.messageImageUrl) {
+            postDataMeta["interactive"]["header"] = {
+                "type"  : "image",
+                "image" : {
+                    "link" : response_format.messageImageUrl
+                }
+            };
+        }
         postDataMeta.type = "interactive";
         return postDataMeta;
 

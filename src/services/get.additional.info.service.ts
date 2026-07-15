@@ -7,6 +7,10 @@ import { ContactList } from '../models/contact.list';
 import { NeedleService } from './needle.service';
 import { kerotoplastyService } from './kerotoplasty.service';
 import { sendExtraMessages } from './send.extra.messages.service';
+import { UserInfoRepo } from '../database/repositories/user.info/user.info.repo';
+import { UserInfoDomainModel } from '../domain.types/user.info/user.info.domain.model';
+import { ContactListRepo } from '../database/repositories/contact.list/contact.list.repo';
+import { Gender } from '../refactor/messageTypes/user.info.types';
 @scoped(Lifecycle.ContainerScoped)
 export class getAdditionalInfoSevice {
 
@@ -22,11 +26,15 @@ export class getAdditionalInfoSevice {
     async   processAdditionalInfo(eventObj){
         try {
             console.log("additional info  intent is trigered");
+            console.log('## params in processAdditionalInfo ', eventObj?.body?.queryResult?.parameters);
             const userName = eventObj.body.originalDetectIntentRequest.payload.userName;
             const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
             const languageCode = eventObj.body.queryResult.languageCode;
             const ehrSystemCode = eventObj.body.queryResult.parameters.EHRNumber;
+            const ageParam = eventObj?.body?.queryResult?.parameters?.Age;
+            const genderParam = eventObj?.body?.queryResult?.parameters?.Gender;
             if (ehrSystemCode){
+                await this.storeUserAdditionalInfo(eventObj, userId, ehrSystemCode, ageParam, genderParam);
                 this.SaveEHRNumber(ehrSystemCode,userId);
                 this.SendValidEHRResponse(ehrSystemCode,userId,userName,languageCode,eventObj);
             }
@@ -36,6 +44,62 @@ export class getAdditionalInfoSevice {
             console.log("WhileStoring the additional info", error);
 
         }
+    }
+
+    async storeUserAdditionalInfo(eventObj, userPlatformID, ehrNumber, ageParam, genderParam){
+        try {
+            const container = eventObj.container;
+            console.log('## Storing user additional info for userPlatformID:', userPlatformID, 'EHRNumber:', ehrNumber, 'Age:', ageParam, 'Gender:', genderParam);
+
+            const ageRaw = ageParam && typeof ageParam === 'object' ? ageParam.amount : ageParam;
+            const parsedAge = ageRaw !== undefined && ageRaw !== null && ageRaw !== '' ? Number(ageRaw) : undefined;
+            const isEhrProvided = ehrNumber !== undefined && ehrNumber !== null && String(ehrNumber).trim() !== '';
+            const isAgeProvided = parsedAge !== undefined && !isNaN(parsedAge);
+            const isGenderProvided = genderParam !== undefined && genderParam !== null && String(genderParam).trim() !== '';
+
+            if (!isEhrProvided || !isAgeProvided || !isGenderProvided) {
+                console.log("Missing required additional info (EHR/Age/Gender); skipping user_info storage", userPlatformID);
+                return;
+            }
+
+            const userGender = this.normalizeGender(genderParam);
+
+            const model: UserInfoDomainModel = {
+                userPlatformID : userPlatformID,
+                userName       : ehrNumber,
+                userAge        : parsedAge,
+                userGender     : userGender,
+                userInfo       : JSON.stringify({ EHRNumber: ehrNumber, Age: ageParam, Gender: genderParam }),
+                infoProvided   : true
+            };
+
+            const existing = await UserInfoRepo.getUserInfoByPlatformId(container, userPlatformID);
+            console.log('## Existing user info for userPlatformID:', userPlatformID, 'is', existing);
+            if (existing) {
+                await UserInfoRepo.updateUserInfo(container, userPlatformID, model);
+                return;
+            }
+            const contact = await ContactListRepo.findContactByMobileNumber(container, userPlatformID);
+            if (!contact) {
+                console.log("No contact_list entry for user; cannot create user_info", userPlatformID);
+                return;
+            }
+            model.userID = contact.autoIncrementalID;
+            await UserInfoRepo.createUserInfo(container, model);
+
+        } catch (error) {
+            console.log("Error while storing user additional info", error);
+        }
+    }
+
+    // Accepts male/female in any case; anything that is not male/female/unknown defaults to unknown
+    normalizeGender(rawGender): Gender {
+        const gender = String(rawGender).trim()
+            .toLowerCase();
+        if (gender === Gender.Male || gender === Gender.Female || gender === Gender.Unknown) {
+            return gender as Gender;
+        }
+        return Gender.Unknown;
     }
 
     async SendValidEHRResponse(EHRNumber,userId,userName,languageCode,eventObj){

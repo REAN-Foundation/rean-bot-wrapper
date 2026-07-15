@@ -71,6 +71,7 @@ export class ConfigurationManager {
     public static DatabaseFlavour = (): DatabaseFlavour => {
         return ConfigurationManager._config.Database.Flavour;
     };
+    
     public static EhrSpecification = (): EHRSpecification => {
         return ConfigurationManager._config.Ehr.Specification;
     };

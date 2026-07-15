@@ -50,4 +50,40 @@ export class SlackClickupCommonFunctions {
         }
     };
 
+    // Sends an approved WhatsApp template (no body variables, "en") purely to re-open the
+    // 24-hour customer service window. Only WhatsApp channels support templates.
+    sendTemplateMessage = async(channel, contact, templateName) => {
+        console.log("sendTemplateMessage", channel, contact, templateName);
+        const response_format: Iresponse = commonResponseMessageFormat();
+        response_format.platform = channel;
+        response_format.sessionId = contact.toString();
+        response_format.messageText = templateName;
+        response_format.message_type = "template";
+        const payload = {
+            templateName       : templateName,
+            languageForSession : "en",
+            variables          : []
+        };
+        const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
+        const chatSessionModel = await chatSessionRepository.findOne({ where: { userPlatformID: response_format.sessionId } });
+        const chatMessageRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatMessage);
+        await chatMessageRepository.create({
+            chatSessionID  : chatSessionModel ? chatSessionModel.autoIncrementalID : null,
+            platform       : channel,
+            direction      : "Out",
+            messageType    : "template",
+            messageContent : templateName,
+            userPlatformID : contact
+        });
+        if (channel === "whatsapp"){
+            await this.whatsappMessageService.SendMediaMessage(response_format, payload);
+        }
+        else if (channel === "whatsappMeta" || channel === "WhatsappMeta"){
+            await this.whatsappNewMessageService.SendMediaMessage(response_format, payload);
+        }
+        else {
+            console.log("Template send skipped, channel does not support templates:", channel);
+        }
+    };
+
 }

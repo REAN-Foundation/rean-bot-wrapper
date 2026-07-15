@@ -40,7 +40,10 @@ export class AnemiaModelCommunication {
             }
             cacheData["SegmentedImagePath"] = imageURL;
             CacheMemory.set(`Anemia:${userId}`, cacheData);
-            this.sendExtraMessagesobj.sendSecondaryButtonMessage(imageURL, "AnemiaImageCorrect", "AnemiaImageIncorrect", eventObj);
+            // Telegram receives the signed URL as the message text (renders a link preview).
+            // WhatsApp shows the image in the interactive header with a short body question,
+            // because its interactive body text is capped at 1024 chars (error 131009).
+            this.sendExtraMessagesobj.sendSecondaryButtonMessage(imageURL, "AnemiaImageCorrect", "AnemiaImage", eventObj, imageURL, "Is this the correct segmented image?");
     
         } catch (error) {
             console.log("segmentation Service Error");
@@ -114,8 +117,13 @@ export class AnemiaModelCommunication {
         try {
             const userId = eventObj.body.originalDetectIntentRequest.payload.userId;
             const parameters = eventObj.body.queryResult.parameters;
+            console.log("Parameter type:", typeof parameters);
+            console.log("Parameters:", parameters);
+            console.log("Parameters.Age:", parameters.Age);
+            console.log("Type of Parameters.Age:", typeof parameters.Age);
             const age = String(parameters.Age?.amount ?? "");
             const gender = String(parameters.Gender ?? "");
+            console.log(`Regression called for user ${userId} with age ${age} and gender ${gender}`);
             const cacheData = await CacheMemory.get(`Anemia:${userId}`);
             const segmentedImagePath = cacheData?.["SegmentedImagePath"];
             if (!segmentedImagePath) {

@@ -66,6 +66,7 @@ export class TenantSettingService {
             return [];
         }
     }
+    
     static async isBasicCareplanEnabled (tenantCode: string, apiKey: string, baseUrl: string): Promise<boolean> {
         try {
             const tenantSetting: TenantSettingsDomainModel =

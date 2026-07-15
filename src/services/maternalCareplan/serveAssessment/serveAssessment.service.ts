@@ -21,6 +21,7 @@ import { SystemGeneratedMessagesService } from '../../../services/system.generat
 import { AssessmentIdentifiers } from '../../../models/assessment/assessment.identifiers.model';
 import { CountryCodeService } from '../../../utils/phone.number.formatting';
 import { UserInfoService } from '../../../services/user.info/user.info.service';
+import { BlockUserService } from '../../../services/block.user.service';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ServeAssessmentService {
@@ -34,7 +35,8 @@ export class ServeAssessmentService {
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(SystemGeneratedMessagesService) private systemGeneratedMessageService?: SystemGeneratedMessagesService,
         @inject(CountryCodeService ) private countryCodeService ?:CountryCodeService,
-        @inject(UserInfoService) private userInfoService ?: UserInfoService
+        @inject(UserInfoService) private userInfoService ?: UserInfoService,
+        @inject(BlockUserService) private blockUserService ?: BlockUserService
     ){}
 
     async startAssessment (platformUserId:any, channel: any, userTaskData: any, assessmentLanguage: string = null) {
@@ -289,6 +291,15 @@ export class ServeAssessmentService {
                         "Gender" : result.Data.Patients.Items[0].Gender
                     };
                     await this.userInfoService.updateUserInfo(assessmentSession.userPlatformId, userInfoPayload);
+                }
+                const isBlocked = await this.blockUserService.isUserBlockedByPlatformId(assessmentSession.userPlatformId);
+                if (isBlocked) {
+                    const blockMessage = await this.systemGeneratedMessageService.getMessage("BLOCK_MESSAGE");
+                    if (blockMessage) {
+                        message = blockMessage;
+                    } else {
+                        message = "Thank you for your responses. Since you are below 18 years of age, I won't be able to continue with this chat. This chatbot is intended only for users who are 18 years of age or older.";
+                    }
                 }
 
                 console.log("    inside complete////// question block");

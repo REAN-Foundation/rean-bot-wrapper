@@ -50,6 +50,50 @@ export class BlockUserService {
         }
     }
 
+    async isUserBlockedByPlatformId(userPlatformId: string): Promise<boolean> {
+        try {
+
+            const blockRepository =
+                (await this.entityManagerProvider
+                    .getEntityManager(this.clientEnvironment))
+                    .getRepository(BlockList);
+
+            const blockedUser = await blockRepository.findOne({
+                where: { userPlatformID: userPlatformId }
+            });
+
+            return blockedUser ? true : false;
+
+        } catch (error) {
+            Logger.instance().log_error(error.message, 500, "Block user check error");
+            return false;
+        }
+    }
+
+    async blockUser(userPlatformId: string): Promise<void> {
+        try {
+
+            const blockRepository =
+                (await this.entityManagerProvider
+                    .getEntityManager(this.clientEnvironment))
+                    .getRepository(BlockList);
+
+            const existingUser = await blockRepository.findOne({
+                where: { userPlatformID: userPlatformId }
+            });
+
+            if (!existingUser) {
+                await blockRepository.create({
+                    userPlatformID: userPlatformId
+                });
+                Logger.instance().log(`User ${userPlatformId} added to block list`);
+            }
+
+        } catch (error) {
+            Logger.instance().log_error(error.message, 500, "Block user add error");
+        }
+    }
+
     async handleBlockMessage(req, userPlatformId: string, res) {
         try {
 

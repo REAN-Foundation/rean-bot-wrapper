@@ -1,5 +1,6 @@
 export interface ContactListDto {
     id?: number;
+    autoIncrementalID?: number;
     mobileNumber?: string;
     patientUserId?: string;
     ehrSystemCode?: string;

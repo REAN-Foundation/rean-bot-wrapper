@@ -57,10 +57,10 @@ export class AssessmentHandlingService {
                         AssessmentTemplateTitle : assessmentDetails.Title
                     }
                 };
-                this.assessmentService.createAssessment(assessmentBody, eventObj);
                 const startAssessmentMessage = await this.systemGeneratedMessageService.getMessage("INITIALIZE_ASSESSMENT_MESSAGE");
                 message = startAssessmentMessage ?? "We are starting an assessment for you please answer few of our questions.";
                 responseMessage = this.getResponseMessage(message, "StartAssessment");
+                this.assessmentService.createAssessment(assessmentBody, eventObj);
             } else {
                 message = `Sorry for the inconvenience. Please try again or contact the team for further assistance.`;
                 responseMessage = this.getResponseMessage(message, "AssessmentFailure");
