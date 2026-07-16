@@ -14,7 +14,7 @@ export class UserConsentRepo {
             const entityManager = await RepositoryHelper.resolveEntityManager(container);
             const userConsentRepository = entityManager.getRepository(UserConsent);
             const result: UserConsent | null = await userConsentRepository.findOne(
-                { where: { userPlatformID: platformId } }
+                { where: { userPlatformID: platformId != null ? String(platformId) : platformId } }
             );
             const userConsentDto: UserConsentDto = UserConsentMapper.toDto(result);
             return userConsentDto;
@@ -29,7 +29,7 @@ export class UserConsentRepo {
             const entityManager = await RepositoryHelper.resolveEntityManager(container);
             const userConsentRepository = entityManager.getRepository(UserConsent);
             const result: UserConsent | null = await userConsentRepository.findOne(
-                { where: { userPlatformID: platformId } }
+                { where: { userPlatformID: platformId != null ? String(platformId) : platformId } }
             );
             const userConsentDto: UserConsentDto = UserConsentMapper.toDto(result);
             return userConsentDto;
@@ -45,7 +45,7 @@ export class UserConsentRepo {
             const entityManager = await RepositoryHelper.resolveEntityManager(container);
             const userConsentRepository = entityManager.getRepository(UserConsent);
             const result: UserConsent | null = await userConsentRepository.findOne(
-                { where: { userPlatformID: platformId } }
+                { where: { userPlatformID: platformId != null ? String(platformId) : platformId } }
             );
             if (result){
                 const updatedUserConsent: UserConsent = await result.update({ consentGiven: consentGiven });

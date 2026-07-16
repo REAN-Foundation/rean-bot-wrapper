@@ -72,7 +72,8 @@ export class UserLanguage {
     async getPreferredLanguageofSession(sessionId){
         return new Promise<string>(async(resolve) => {
             const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ChatSession);
-            const userLanguageTableResponse = await chatSessionRepository.findAll({ where: { userPlatformID: sessionId } });
+            const userPlatformID = sessionId != null ? String(sessionId) : sessionId;
+            const userLanguageTableResponse = await chatSessionRepository.findAll({ where: { userPlatformID } });
             //console.log("userLanguageTableResponse",userLanguageTableResponse);
             try {
                 console.log(`Push notification language table response length ${userLanguageTableResponse.length}`);

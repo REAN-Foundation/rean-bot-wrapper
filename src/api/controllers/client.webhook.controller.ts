@@ -351,11 +351,11 @@ export class ClientWebhookController {
             let userId = null;
             let userName = null;
             if (reqBody.callback_query){
-                userId = reqBody.callback_query.message.chat.id;
+                userId = reqBody.callback_query.message.chat.id?.toString();
                 userName = reqBody.callback_query.message.chat.first_name;
             }
             else {
-                userId = reqBody.message.chat.id;
+                userId = reqBody.message.chat.id?.toString();
                 userName = reqBody.message.chat.first_name;
 
             }
