@@ -109,7 +109,7 @@ export class SequelizeClient {
                         Logger.instance().log(`${dbDialect.toUpperCase()} DB Connected`);
                     }
                     catch (error) {
-                        console.log("err", error);
+                        console.log("err:", error);
                     }
                 })
                 .catch(error => console.log("DB connection failed", error));
