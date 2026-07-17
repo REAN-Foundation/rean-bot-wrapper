@@ -7,6 +7,7 @@ import { getRequestOptions } from '../utils/helper';
 import { EntityManagerProvider } from './entity.manager.provider.service';
 import { ChatSession } from '../models/chat.session';
 import { ChatMessage } from '../models/chat.message.model';
+import { toDbString } from '../utils/db.value.util';
 
 @scoped(Lifecycle.ContainerScoped)
 export class NeedleService {
@@ -154,7 +155,7 @@ export class NeedleService {
         const chatSessionRepository = (await this.entityManagerProvider.getEntityManager(this.environmentProviderService)).getRepository(ChatSession);
         const chatSessionModel = await chatSessionRepository.findOne({
             where : {
-                userPlatformID : responseObject.chat_id
+                userPlatformID : toDbString(responseObject.chat_id)
             }
         });
         let chatSessionId = null;
