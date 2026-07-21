@@ -50,8 +50,7 @@ export class WorkflowEventListener {
             const response = await this.callWorkflowApi('get', url);
             if (response) {
                 console.log("Workflow event acknowledged", response);
-                if (response.Data === null || (response.Data.Terminated === true &&
-                    response.Data.ParentSchemaInstanceId === null)) {
+                if (response.Data === null || response.Data.Terminated === true) {
                     previousMessage = null;
                 }
             }
