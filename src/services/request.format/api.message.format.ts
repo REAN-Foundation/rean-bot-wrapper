@@ -38,7 +38,9 @@ export class Message implements IApiRequestMessageEntities {
     }
 
     getUserId() {
-        const userId: string = this.list.contacts[0].id;
+        const userId: string = this.list.contacts[0].id != null
+            ? String(this.list.contacts[0].id)
+            : this.list.contacts[0].id;
         return userId;
     }
 

@@ -11,7 +11,8 @@ export class ContactListRepo {
         try {
             const entityManager = await RepositoryHelper.resolveEntityManager(container);
             const contactListRepository = entityManager.getRepository(ContactList);
-            const result: ContactList | null = await contactListRepository.findOne({ where: { mobileNumber } });
+            const mobileNumberValue = mobileNumber != null ? String(mobileNumber) : mobileNumber;
+            const result: ContactList | null = await contactListRepository.findOne({ where: { mobileNumber: mobileNumberValue } });
 
             const contactListDto: ContactListDto = ContactListMapper.toDto(result);
             return contactListDto;

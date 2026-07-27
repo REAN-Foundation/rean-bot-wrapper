@@ -20,7 +20,7 @@ export class ChatMessageRepo {
             startOfToday.setHours(0, 0, 0, 0);
             const record = await chatMessageRepository.findOne({
                 where : {
-                    userPlatformID : platformId,
+                    userPlatformID : platformId != null ? String(platformId) : platformId,
                     direction      : 'Out',
                     createdAt      : { [Op.gte]: startOfToday }
                 }
@@ -43,7 +43,7 @@ export class ChatMessageRepo {
             startOfToday.setHours(0, 0, 0, 0);
             const count = await chatMessageRepository.count({
                 where : {
-                    userPlatformID : platformId,
+                    userPlatformID : platformId != null ? String(platformId) : platformId,
                     direction      : 'In',
                     createdAt      : { [Op.gte]: startOfToday }
                 }
@@ -63,7 +63,7 @@ export class ChatMessageRepo {
             const entityManager = await RepositoryHelper.resolveEntityManager(container);
             const chatMessageRepository = entityManager.getRepository(ChatMessage);
             const record = await chatMessageRepository.findOne({
-                where : { userPlatformID: platformId },
+                where : { userPlatformID: platformId != null ? String(platformId) : platformId },
                 order : [['createdAt', 'DESC']]
             });
             return ChatMessageMapper.toDto(record);

@@ -14,7 +14,7 @@ export class UserInfoRepo {
             const entityManager = await RepositoryHelper.resolveEntityManager(container);
             const userInfoRepository = entityManager.getRepository(UserInfo);
             const result: UserInfo | null = await userInfoRepository.findOne(
-                { where: { userPlatformID: platformId } }
+                { where: { userPlatformID: platformId != null ? String(platformId) : platformId } }
             );
             const userInfoDto: UserInfoDto | null = UserInfoMapper.toDto(result);
             return userInfoDto;
@@ -44,7 +44,7 @@ export class UserInfoRepo {
             const entityManager = await RepositoryHelper.resolveEntityManager(container);
             const userInfoRepository = entityManager.getRepository(UserInfo);
             const result: UserInfo | null = await userInfoRepository.findOne(
-                { where: { userPlatformID: platformId } }
+                { where: { userPlatformID: platformId != null ? String(platformId) : platformId } }
             );
             if (result) {
                 const updated: UserInfo = await result.update(model as Partial<UserInfo>);

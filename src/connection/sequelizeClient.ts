@@ -20,6 +20,7 @@ import { Intents } from '../models/intents/intents.model';
 import { SystemGeneratedMessages } from '../models/system.generated.messages.model';
 import { AssessmentIdentifiers } from '../models/assessment/assessment.identifiers.model';
 import { AnemiaDataRecord } from '../models/anemia.data.model';
+import { registerStringCoercionHooks } from '../utils/db.value.util';
 
 //////////////////////////////////////////////////////////////////////////////////////
 
@@ -102,6 +103,8 @@ export class SequelizeClient {
                     AnemiaDataRecord
                 ]);
             }
+
+            registerStringCoercionHooks(sequelizeClient);
 
             await sequelizeClient.authenticate()
                 .then(async () => {
