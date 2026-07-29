@@ -1,11 +1,11 @@
 import csv from 'csv-parser';
 import streamifier from 'streamifier';
 
-// import fetch from 'node-fetch';
 import haversine from 'haversine-distance';
 import { AwsS3manager } from '../services/aws.file.upload.service';
 import { inject, injectable } from 'tsyringe';
 import { ClientEnvironmentProviderService } from '../services/set.client/client.environment.provider.service';
+import { GeocodingService } from '../services/geocoding.service';
 
 interface Center {
     latitude: number;
@@ -39,7 +39,8 @@ interface Center {
 export class NearestLocation {
 
     constructor(@inject(AwsS3manager) private awsS3manager?: AwsS3manager,
-    @inject(ClientEnvironmentProviderService) private clientEnvironment?: ClientEnvironmentProviderService) {
+    @inject(ClientEnvironmentProviderService) private clientEnvironment?: ClientEnvironmentProviderService,
+    @inject(GeocodingService) private geocodingService?: GeocodingService) {
     }
 
     async formatLoctionResponse(locationResponse) {
@@ -89,27 +90,14 @@ export class NearestLocation {
     async getLatLong(value: string): Promise<string> {
         const latlongCheck = value.split(':')[0];
         if (latlongCheck === 'latlong') {
+
+            // The user shared a GPS pin, so the coordinates are already known - no geocoding needed.
             const latlongString = value.split(':')[1];
             return latlongString;
         } else {
-            const address = value;
-            const response = await fetch(
-                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`,
-                {
-                    headers : {
-                        "User-Agent" : "ReanBotWrapper/1.0 (services@reanfoundation.org)"
-                    }
-                }
-            );
-            const data = await response.json();
-            if (data.length === 0) {
-                throw new Error("Unable to get location, try sharing your live location");
-            } else {
-                const latitude = data[0].lat;
-                const longitude = data[0].lon;
-                const latlongString = `${latitude}|${longitude}`;
-                return latlongString;
-            }
+            const coordinates = await this.geocodingService.geocode(value);
+            const latlongString = `${coordinates.lat}|${coordinates.lng}`;
+            return latlongString;
         }
     }
 
