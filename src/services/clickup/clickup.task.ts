@@ -187,6 +187,7 @@ export class ClickUpTask{
             console.log("Error while updating the clickup tags.");
         }
     }
+    
     async updateTagInFeedback(taskID: string, intent = '') {
         try {
             const updateTaskUrl = `https://api.clickup.com/api/v2/task/${taskID}/tag/${intent}`;

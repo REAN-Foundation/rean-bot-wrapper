@@ -564,6 +564,7 @@ export class ServeAssessmentService {
                 .log_error(error.message, 500, 'Create assessment session and identifier error.');
         }
     }
+    
     public async sendAssessmentMessage(
         doSend: boolean,
         eventObj: any,
