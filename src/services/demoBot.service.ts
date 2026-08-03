@@ -108,12 +108,10 @@ export class demoBotService {
                     const part = {
                         text : messages[phrase]
                     };
-
                     const trainingPhrase = {
                         type  : 'EXAMPLE',
                         parts : [part],
                     };
-
                     trainingPhrases.push(trainingPhrase);
                 }
 

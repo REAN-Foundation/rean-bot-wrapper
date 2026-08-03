@@ -13,7 +13,6 @@ import { Iresponse } from '../../refactor/interface/message.interface';
 export class kobotoolboxController{
 
     private _platformMessageService?: platformServiceInterface;
-
     constructor(
         @inject(ResponseHandler) private responseHandler?: ResponseHandler,
         @inject(AwsS3manager) private awss3manager?: AwsS3manager,
@@ -102,5 +101,4 @@ export class kobotoolboxController{
         }
 
     };
-
 }

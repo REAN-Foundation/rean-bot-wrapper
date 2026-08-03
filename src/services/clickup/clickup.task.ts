@@ -37,7 +37,6 @@ export class ClickUpTask{
             let topic:any = null;
             if (postTopic){
                 topic = postTopic;
-
             }
             else if (responseChatMessage?.length >= 1 ){
                 topic = responseChatMessage[responseChatMessage.length - 1].dataValues.messageContent;
@@ -188,7 +187,7 @@ export class ClickUpTask{
             console.log("Error while updating the clickup tags.");
         }
     }
-
+    
     async updateTagInFeedback(taskID: string, intent = '') {
         try {
             const updateTaskUrl = `https://api.clickup.com/api/v2/task/${taskID}/tag/${intent}`;
