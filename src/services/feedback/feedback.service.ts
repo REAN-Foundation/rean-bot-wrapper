@@ -190,16 +190,10 @@ export  class FeedbackService implements feedbackInterface {
                     const topic = responseChatMessage[responseChatMessage.length - 2].messageContent;
                     await this.supportChannel(preferredSupportChannel,responseChatMessage,messageContent,topic,"Positive Feedback",description,userId);
                 }
+                const fulfillmentMessages =
+                    await this.systemGeneratedMessageService.buildFulfillmentMessages("POSITIVE_FEEDBACK_MESSAGE", reply);
                 const data = {
-                    "fulfillmentMessages" : [
-                        {
-                            "text" : {
-                                "text" : [
-                                    reply
-                                ]
-                            }
-                        }
-                    ]
+                    "fulfillmentMessages" : fulfillmentMessages
                 };
                 resolve(data);
             }

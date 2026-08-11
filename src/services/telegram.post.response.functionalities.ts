@@ -6,6 +6,7 @@ import needle from 'needle';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { inject, Lifecycle, scoped } from "tsyringe";
 import { EntityManagerProvider } from "./entity.manager.provider.service";
+import { HandleMessagetypePayload } from "./handle.messagetype.payload";
 
 @scoped(Lifecycle.ContainerScoped)
 export class TelegramPostResponseFunctionalities {
@@ -13,7 +14,8 @@ export class TelegramPostResponseFunctionalities {
     constructor(
         // eslint-disable-next-line max-len
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?:ClientEnvironmentProviderService,
-        @inject(EntityManagerProvider) private entityManagerProvider?:EntityManagerProvider
+        @inject(EntityManagerProvider) private entityManagerProvider?:EntityManagerProvider,
+        @inject(HandleMessagetypePayload) private handleMessagetypePayload?:HandleMessagetypePayload
     ){}
 
     sendtextResponse = async(response_format:Iresponse, telegram, payload) => {
@@ -168,5 +170,47 @@ export class TelegramPostResponseFunctionalities {
 
         return responseData;
     };
+
+    // A custom payload carries several messages in one response. Each entry is sent as its own
+    // Telegram message, in order, mirroring how whatsapp.meta handles custom payloads.
+    sendcustom_payloadResponse = async (response_format: Iresponse, telegram, payload) => {
+        const payloadContent = this.handleMessagetypePayload.getPayloadContent(payload);
+        let telegramResponseData = null;
+        for (let i = 0; i < payloadContent.length; i++) {
+            const payloadEntry = payloadContent[i];
+            const payloadEntryMessageType = payloadEntry.fields.messagetype.stringValue;
+            if (i > 0) {
+                await this.delay();
+            }
+            if (payloadEntryMessageType === "interactive-buttons") {
+                const entryResponseFormat = {
+                    ...response_format,
+                    messageText : payloadEntry.fields.message.stringValue
+                };
+                telegramResponseData =
+                    await this.sendinline_keyboardResponse(entryResponseFormat, telegram, payloadEntry);
+            }
+            else if (payloadEntryMessageType === "image") {
+                const entryResponseFormat = {
+                    ...response_format,
+                    messageText : payloadEntry.fields.title.stringValue,
+                    messageBody : payloadEntry.fields.url.stringValue
+                };
+                telegramResponseData = this.sendimageResponse(entryResponseFormat, telegram, payloadEntry);
+            }
+            else {
+                const entryResponseFormat = {
+                    ...response_format,
+                    messageText : payloadEntry.fields.content
+                };
+                telegramResponseData = await this.sendtextResponse(entryResponseFormat, telegram, payloadEntry);
+            }
+        }
+        return telegramResponseData;
+    };
+
+    private async delay(ms = 250) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
 }

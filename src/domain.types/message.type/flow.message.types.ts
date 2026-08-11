@@ -27,7 +27,6 @@ export interface FlowMessageParts {
     Cta?: string;
     Screen?: string;
   }
-  
 export enum FlowActionType {
     Navigate = 'navigate',
     DataExchange = 'data_exchange',
