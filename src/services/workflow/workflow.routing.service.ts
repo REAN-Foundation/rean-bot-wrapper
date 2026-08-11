@@ -142,7 +142,6 @@ Analyze and provide your routing decision.
 
         try {
             const model = await this.getModel();
-
             // Create the chain
             const chain = this.promptTemplate.pipe(model);
 

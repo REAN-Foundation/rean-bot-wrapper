@@ -137,7 +137,6 @@ export class AwsS3manager{
         {
             var filename = filePath.replace(/^.*[\\/]/, '');
             this.fileName = filename;
-
         }
         else {
             this.fileName = newFilename;
@@ -154,7 +153,6 @@ export class AwsS3manager{
             ContentType : Helper.getMimeType(extension),
         };
         this.params = params;
-
         // fs.stat(filePath, function (err) {
         //     try {
         //         if (err === null) {
@@ -163,7 +161,6 @@ export class AwsS3manager{
         //             var filename = filePath.replace(/^.*[\\/]/, '');
         //             this.fileName = filename;
         //             const extension = path.parse(filename).ext;
-
         //             // Setting up S3 upload parameters
         //             const params = {
         //                 Bucket        : BucketName,
@@ -171,7 +168,6 @@ export class AwsS3manager{
         //                 Body          : fileContent,
         //                 'ContentType' : 'image/jpeg'
         //             };
-
         //             if (extension === '.ogg' || extension === '.mp3' || extension === '.oga'){
         //                 console.log("Detected as an Audio file");
         //                 params.ContentType = 'audio/ogg';

@@ -121,6 +121,9 @@ export default class Application {
 
             this._IndexCreation.createIndexes();
 
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            await this.setWebhooksForClients(clientList);
+
             await Loader.scheduler.schedule();
 
             //Start listening
@@ -135,8 +138,6 @@ export default class Application {
             const minutes = date_ob.getMinutes();
             const seconds = date_ob.getSeconds();
             console.log("time of restart", year + "-" + month + "-" + date + " " + hours + ":" + minutes + ":" + seconds);
-
-            await this.setWebhooksForClients(clientList);
 
         }
         catch (error) {

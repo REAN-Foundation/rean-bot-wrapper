@@ -45,7 +45,6 @@ export class consentController {
                     Language       : req.body.language,
                     MessageContent : req.body.message,
                     WebsiteURL     : req.body.link,
-
                 };
                 await consentRepository.create(consentObj);
                 this.responseHandler.sendSuccessResponse(res, 200, 'Info is successfully stored', "");
