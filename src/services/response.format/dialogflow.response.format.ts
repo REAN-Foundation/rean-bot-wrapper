@@ -63,9 +63,15 @@ export class DialogflowResponseFormat implements IserviceResponseFunctionalities
 
     getPayload() {
         let payload = null;
-        if (this.response[0].queryResult.fulfillmentMessages.length > 1) {
-            if (this.response[0].queryResult.fulfillmentMessages[1].payload !== undefined) {
-                payload = this.response[0].queryResult.fulfillmentMessages[1].payload;
+        const fulfillmentMessages = this.response[0].queryResult.fulfillmentMessages;
+
+        // The payload is normally the second fulfillment message, but the agent can add its own
+        // responses to the array. Take the first message that actually carries a payload so the
+        // position in the array does not matter. Index 0 is skipped - that slot holds the text.
+        for (let i = 1; i < fulfillmentMessages.length; i++) {
+            if (fulfillmentMessages[i].payload !== undefined && fulfillmentMessages[i].payload !== null) {
+                payload = fulfillmentMessages[i].payload;
+                break;
             }
         }
         return payload;

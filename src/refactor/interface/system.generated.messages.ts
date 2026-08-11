@@ -4,3 +4,9 @@ export interface ISystemGeneratedMessages {
     messageContent : string;
     languageCode?: string;
 }
+
+export interface ISystemGeneratedMessageMetadata {
+    id : string | undefined | null;
+    messageId : string;
+    customPayload?: any;
+}

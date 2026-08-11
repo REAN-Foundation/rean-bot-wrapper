@@ -18,6 +18,7 @@ import WorkflowUserData from '../models/workflow.user.data.model';
 import { ReminderMessage } from '../models/reminder.model';
 import { Intents } from '../models/intents/intents.model';
 import { SystemGeneratedMessages } from '../models/system.generated.messages.model';
+import { SystemGeneratedMessageMetadata } from '../models/system.generated.message.metadata.model';
 import { AssessmentIdentifiers } from '../models/assessment/assessment.identifiers.model';
 import { AnemiaDataRecord } from '../models/anemia.data.model';
 import { registerStringCoercionHooks } from '../utils/db.value.util';
@@ -99,6 +100,7 @@ export class SequelizeClient {
                     ReminderMessage,
                     Intents,
                     SystemGeneratedMessages,
+                    SystemGeneratedMessageMetadata,
                     AssessmentIdentifiers,
                     AnemiaDataRecord
                 ]);
