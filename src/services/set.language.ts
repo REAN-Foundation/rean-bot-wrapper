@@ -46,9 +46,11 @@ export class UserLanguage {
             // }
             const translateSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("TranslateSetting");
             const translateSettingValue = translateSetting?.Value;
+            console.log("translateSettingValue is:", translateSettingValue);
             if (translateSettingValue) {
                 this.translateSetting = translateSettingValue;
             } else {
+                console.log("translateSettingValue is null or undefined");
                 this.translateSetting = 10;
             }
 
