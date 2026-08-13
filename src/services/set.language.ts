@@ -54,6 +54,11 @@ export class UserLanguage {
                 this.translateSetting = 10;
             }
 
+            if (typeof this.translateSetting === "string") {
+                this.translateSetting = Number(this.translateSetting);
+            }
+            console.log("translateSetting resolved to:", this.translateSetting, "message length:", message.length);
+
             if (message.length < this.translateSetting) {
                 console.log('when preffered Language is not null');
                 console.log('666', preferredLanguage);
