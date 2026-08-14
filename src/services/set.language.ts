@@ -46,11 +46,18 @@ export class UserLanguage {
             // }
             const translateSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("TranslateSetting");
             const translateSettingValue = translateSetting?.Value;
+            console.log("translateSettingValue is:", translateSettingValue);
             if (translateSettingValue) {
                 this.translateSetting = translateSettingValue;
             } else {
+                console.log("translateSettingValue is null or undefined");
                 this.translateSetting = 10;
             }
+
+            if (typeof this.translateSetting === "string") {
+                this.translateSetting = Number(this.translateSetting);
+            }
+            console.log("translateSetting resolved to:", this.translateSetting, "message length:", message.length);
 
             if (message.length < this.translateSetting) {
                 console.log('when preffered Language is not null');
