@@ -200,7 +200,6 @@ export class translateService{
             const [response] = await translationClient.translateText(request);
 
             const glossary_response = response.glossaryTranslations[0].translatedText;
-
             return [glossary_response];
         } catch {
             const translated_response = await translate.translate(message, { to: target_language, format: "text" });
