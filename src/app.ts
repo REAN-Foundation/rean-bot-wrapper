@@ -76,16 +76,24 @@ export default class Application {
             console.log(telegramToken);
             if (telegramToken) {
                 if (process.env.SKIP_TELEGRAM_WEBHOOK_SETUP !== 'true') {
-                    await telegram.setWebhook(clientName);
-                    console.log("Telegram webhook is set");
-                } 
+                    try {
+                        await telegram.setWebhook(clientName);
+                        console.log("Telegram webhook is set");
+                    } catch (error) {
+                        Logger.instance().log(`Failed to set Telegram webhook for client ${clientName}: ${error.message}`);
+                    }
+                }
             } else {
                 console.log("Telegram webhook need not to be set");
             }
 
             if (whatsappToken) {
-                await whatsapp.setWebhook(clientName);
-                console.log(`Whatsapp webhook is set for client ${clientName}`);
+                try {
+                    await whatsapp.setWebhook(clientName);
+                    console.log(`Whatsapp webhook is set for client ${clientName}`);
+                } catch (error) {
+                    Logger.instance().log(`Failed to set Whatsapp webhook for client ${clientName}: ${error.message}`);
+                }
             }
             else {
                 console.log("whatsapp webhook need not to be set");
