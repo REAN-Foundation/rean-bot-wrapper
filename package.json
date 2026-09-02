@@ -67,7 +67,7 @@
     "json-bigint": "^1.0.0",
     "jsonwebtoken": "^9.0.0",
     "langchain": "^0.0.203",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.23",
     "luxon": "^3.4.3",
     "moment-timezone": "^0.5.45",
     "mysql2": "^3.9.8",
