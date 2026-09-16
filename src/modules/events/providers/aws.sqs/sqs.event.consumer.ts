@@ -9,6 +9,7 @@ import { injectable } from 'tsyringe';
 
 @injectable()
 export class AwsSqsEventConsumer implements IEventConsumer {
+    
     private sqsClient: SQSClient | null = null;
 
     private isListening = false;

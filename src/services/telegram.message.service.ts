@@ -84,7 +84,7 @@ export class TelegramMessageService implements platformServiceInterface{
         this._telegram = new TelegramBot(telegramBotToken);
         const urlToken = await this.clientAuthenticator.urlToken();
         const webhookUrl = process.env.BASE_URL + '/v1/' + clientName + '/telegram/' + urlToken + '/receive';
-        this._telegram.setWebHook(webhookUrl);
+        await this._telegram.setWebHook(webhookUrl);
         console.log("Telegram webhook set", webhookUrl);
     }
 

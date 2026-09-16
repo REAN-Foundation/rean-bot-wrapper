@@ -12,6 +12,8 @@ import { ApiMessageToDialogflow } from './api.messagetodialogflow';
 import request from 'request';
 import { EntityManagerProvider } from './entity.manager.provider.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
+import { Registration } from './registrationsAndEnrollements/patient.registration.service';
+import { ContactList } from '../models/contact.list';
 
 @scoped(Lifecycle.ContainerScoped)
 export class MockMessageService implements platformServiceInterface {
@@ -25,7 +27,8 @@ export class MockMessageService implements platformServiceInterface {
         @inject(MockCHannelMessageFunctionalities) private messageFunctionalitiesmockchannel?: MockCHannelMessageFunctionalities,
         @inject(ApiMessageToDialogflow) public apiMessageToDialogflow?: ApiMessageToDialogflow,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
-        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService){}
+        @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
+        @inject(Registration) private registrationService?: Registration){}
 
     getMessageIdFromResponse(responseBody: any) {
         throw new Error('Method not implemented.');
@@ -48,6 +51,7 @@ export class MockMessageService implements platformServiceInterface {
         for (mockMessagetoDialogflow of mockMessages){
             if (mockMessagetoDialogflow) {
                 //mockMessagetoDialogflow.platform = 'MockChannel';
+                await this.registerUserOnReanCareIfRequired(mockMessagetoDialogflow.platformId, mockMessagetoDialogflow.name);
                 const response = await this.messageFlow.checkTheFlowRouter(mockMessagetoDialogflow, channel, this);
                 return response;
             }
@@ -86,6 +90,26 @@ export class MockMessageService implements platformServiceInterface {
         //     await this.messageFlow.checkTheFlow(messagetoDialogflow, channel, this);
         // }
         
+    }
+
+    private async registerUserOnReanCareIfRequired(platformId: string, platformUserName: string) {
+        if (!platformId) {
+            return;
+        }
+        try {
+            const contactListRepository =
+                (await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService)).getRepository(ContactList);
+            const existingContact = await contactListRepository.findOne({ where: { mobileNumber: String(platformId) } });
+            const firstTimeUser = !existingContact;
+            const patientUserId = existingContact ? existingContact.patientUserId : null;
+            if (firstTimeUser || !patientUserId) {
+                const results = await this.registrationService.getPatientUserId("MockChannel", platformId, platformUserName);
+                await this.registrationService.wrapperRegistration(
+                    this.entityManagerProvider, platformId, platformUserName, "MockChannel", results.patientUserId);
+            }
+        } catch (error) {
+            console.log("[MockMessageService] Error registering user on ReanCare:", error);
+        }
     }
 
     sendManualMesage(msg: any) {
