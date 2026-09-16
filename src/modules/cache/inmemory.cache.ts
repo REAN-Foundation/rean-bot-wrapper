@@ -82,7 +82,6 @@ export class InMemoryCache implements ICache {
 
     async get(key: string): Promise<CacheEntry | undefined> {
         const entry = this.cache.get(key);
-
         if (!entry) {
             this.recordMiss();
             return undefined;

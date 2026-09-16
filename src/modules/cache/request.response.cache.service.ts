@@ -23,7 +23,6 @@ export class RequestResponseCacheService {
     static async get(key: string, strategy?: string): Promise<any | undefined> {
         try {
             console.log('CacheService.get', key, strategy);
-
             const entry = await RequestResponseCacheService._cache.get(key);
             if (!entry) return undefined;
 

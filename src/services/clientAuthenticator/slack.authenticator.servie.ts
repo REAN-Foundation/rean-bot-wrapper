@@ -7,7 +7,6 @@ import { ClientEnvironmentProviderService } from '../set.client/client.environme
 export class SlackAuthenticator implements clientAuthenticator{
 
     constructor(
-
         // eslint-disable-next-line max-len
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService
     ){}

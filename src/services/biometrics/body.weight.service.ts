@@ -104,7 +104,6 @@ export class BodyWeightService {
         result = await this.getPatientInfoService.getPatientsByPhoneNumberservice(eventObj);
         const patientUserId = result.message[0].UserId;
         const accessToken = result.message[0].accessToken;
-
         return { patientUserId, accessToken, BodyWeight_Unit, BodyWeight };
     }
 

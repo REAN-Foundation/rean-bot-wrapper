@@ -49,7 +49,6 @@ export class HowDoYouFeelWorseService {
             };
             const resp1 = await needle('post', url, obj, options);
             const assessmentId = resp1.body.Data.SymptomAssessment.id;
-
             symptomList.forEach(async (symptom, index) => {
                 const sta = state[index];
                 const len = resp.body.Data.SymptomAssessmentTemplates.Items[0].TemplateSymptomTypes.length;
@@ -62,7 +61,6 @@ export class HowDoYouFeelWorseService {
                         break;
                     }
                 }
-
                 //create symptom
                 url = `${ReanBackendBaseUrl}clinical/symptoms`;
                 const obj1 = {
@@ -80,7 +78,6 @@ export class HowDoYouFeelWorseService {
                     obj1.Interpretation = 'better';
                 }
                 const resp2 = await needle('post', url, obj1, options);
-
                 if (resp2.statusCode !== 201) {
                     throw new Error('Failed to get response from API.');
                 }
@@ -93,5 +90,4 @@ export class HowDoYouFeelWorseService {
             throw new Error(`500, How do you feel worse Info Service Error!`);
         }
     };
-
 }

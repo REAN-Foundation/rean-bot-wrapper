@@ -76,7 +76,6 @@ export class GeneralReminderService {
 
             // extract whentime and whenday from schedule timestamp
             // const { whenDay, whenTime } = await this.extractWhenDateTime(jsonFormat.StartDateTime);
-
             if (jsonFormat.TaskType === 'medication' && frequency === "" ) {
                 console.log(`trigerring the ${jsonFormat.TaskType} reminder event`);
                 return await this.dialoflowMessageFormattingService.triggerIntent("Reminder_Ask_Frequency",eventObj);
@@ -148,14 +147,12 @@ export class GeneralReminderService {
                 apiURL = `reminders/repeat-every-hour`;
                 obj.ReminderType = ReminderType.RepeatEveryHour;
                 obj.EndAfterNRepetitions = 10;
-
             } else if (frequency === "Yearly"){
                 apiURL = `reminders/repeat-after-every-n`;
                 obj.ReminderType = ReminderType.RepeatAfterEveryN;
                 obj.EndAfterNRepetitions = 3;
                 obj.RepeatAfterEvery = 1;
                 obj.RepeatAfterEveryNUnit = RepeatAfterEveryNUnit.Year;
-
             } else if (frequency === "Quarterly"){
                 apiURL = `reminders/repeat-every-quarter-on`;
                 obj.ReminderType = ReminderType.RepeatEveryQuarterOn;
@@ -230,7 +227,6 @@ export class GeneralReminderService {
 
         variables = { en: commonStructure, kn: kannadaVariables, sw: commonStructure };
         let buttonsIds = jsonFormat.TaskType === 'medication' ? [ "App_Reminder_Yes", "Medication_Taken_No" ] : [ "App_Reminder_Yes", "App_Reminder_No"] ;
-
         if (channel === "telegram" || channel === "Telegram"){
             buttonsIds = jsonFormat.TaskType === 'medication' ? [ "Yes", "App_Reminder_Yes", "No","Medication_Taken_No" ] : [ "Yes","App_Reminder_Yes", "No","App_Reminder_No"] ;
         }

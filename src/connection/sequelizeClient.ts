@@ -143,7 +143,6 @@ export class SequelizeClient {
             }
         } catch (error) {
             console.error(`Error in getSequelizeClient for client ${await clientEnvironmentVariable.getClientEnvironmentVariable("Name")}:`, error);
-
             // throw error; // Rethrow the error after logging it
         }
 
