@@ -1,19 +1,19 @@
 {
     "LOCAL":{
         "STATS":{
-            "scheduleChatDailyRollup": "0 1 * * *"
+            "scheduleChatDailyRollup": "0 0 30 9 *"
         }
     },
 
     "DEVELOPMENT":{
         "STATS":{
-            "scheduleChatDailyRollup": "0 1 * * *"
+            "scheduleChatDailyRollup": "0 0 30 9 *"
         }
     },
 
     "UAT":{
         "STATS":{
-            "scheduleChatDailyRollup": "0 */1 * * *"
+            "scheduleChatDailyRollup": "0 0 30 9 *"
         }
     },
 
@@ -22,7 +22,7 @@
             "scheduleDataBackup": "0 0 * * * "
         },
         "STATS":{
-            "scheduleChatDailyRollup": "0 1 * * *"
+            "scheduleChatDailyRollup": "0 0 30 9 *"
         }
     }
 }
