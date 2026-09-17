@@ -1,17 +1,28 @@
-{ 
+{
     "LOCAL":{
-
+        "STATS":{
+            "scheduleChatDailyRollup": "0 1 * * *"
+        }
     },
 
     "DEVELOPMENT":{
+        "STATS":{
+            "scheduleChatDailyRollup": "0 1 * * *"
+        }
     },
 
     "UAT":{
+        "STATS":{
+            "scheduleChatDailyRollup": "0 */1 * * *"
+        }
     },
 
     "PROD":{
         "PENPLUS":{
             "scheduleDataBackup": "0 0 * * * "
+        },
+        "STATS":{
+            "scheduleChatDailyRollup": "0 1 * * *"
         }
     }
 }
