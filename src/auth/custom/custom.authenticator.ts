@@ -48,9 +48,45 @@ export class CustomAuthenticator implements IAuthenticator {
         return res;
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    authenticateClient(request: any, response: any): Promise<AuthenticationResult> {
-        return Promise.resolve(undefined);
-    }
+    public authenticateClient = async (
+        request: any
+    ): Promise<AuthenticationResult> => {
+        try {
+            var res: AuthenticationResult = {
+                Result        : true,
+                Message       : 'Authenticated',
+                HttpErrorCode : 200,
+            };
+
+            let apiKey: string = request.headers['x-api-key'];
+
+            if (!apiKey) {
+                res = {
+                    Result        : false,
+                    Message       : 'Missing API key for the client',
+                    HttpErrorCode : 401,
+                };
+                return res;
+            }
+            apiKey = apiKey.trim();
+
+            if (apiKey !== process.env.CLIENT_API_KEY) {
+                res = {
+                    Result        : false,
+                    Message       : 'Invalid API Key: Forbidden access',
+                    HttpErrorCode : 403,
+                };
+                return res;
+            }
+        } catch (err) {
+            Logger.instance().log(JSON.stringify(err, null, 2));
+            res = {
+                Result        : false,
+                Message       : 'Error authenticating client',
+                HttpErrorCode : 401,
+            };
+        }
+        return res;
+    };
 
 }

@@ -21,6 +21,8 @@ import { SystemGeneratedMessages } from '../models/system.generated.messages.mod
 import { SystemGeneratedMessageMetadata } from '../models/system.generated.message.metadata.model';
 import { AssessmentIdentifiers } from '../models/assessment/assessment.identifiers.model';
 import { AnemiaDataRecord } from '../models/anemia.data.model';
+import { ChatDailyStat } from '../models/chat.daily.stat.model';
+import { ChatDailyContentStat } from '../models/chat.daily.content.stat.model';
 import { registerStringCoercionHooks } from '../utils/db.value.util';
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -102,7 +104,9 @@ export class SequelizeClient {
                     SystemGeneratedMessages,
                     SystemGeneratedMessageMetadata,
                     AssessmentIdentifiers,
-                    AnemiaDataRecord
+                    AnemiaDataRecord,
+                    ChatDailyStat,
+                    ChatDailyContentStat
                 ]);
             }
 

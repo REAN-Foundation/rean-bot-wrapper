@@ -8,6 +8,7 @@ import { IntentRoutes } from "./intents.routes";
 import { FrontendRoutes } from "./Frontend.routes";
 import { ConsentRoutes } from "./consent.routes";
 import { UserRegistrationRoutes } from "./user.registration.routes";
+import { StatsRoutes } from "./stats.routes";
 
 // import { ClientEnvironmentProviderService } from "../../services/set.client/client.environment.provider.service";
 
@@ -23,7 +24,8 @@ export class Router {
                 private consentRoutes?: ConsentRoutes,
                 private  userRegistrationRoutes?: UserRegistrationRoutes,
                 private systemGeneratedMessagesRoutes?: SystemGeneratedMessagesRoutes,
-                private intentRoutes?: IntentRoutes
+                private intentRoutes?: IntentRoutes,
+                private statsRoutes?: StatsRoutes
     ){
         this._app = app;
     }
@@ -45,6 +47,7 @@ export class Router {
                 this.userRegistrationRoutes.register(this._app);
                 this.systemGeneratedMessagesRoutes.register(this._app);
                 this.intentRoutes.register(this._app);
+                this.statsRoutes.register(this._app);
                 resolve(true);
 
             } catch (error) {
