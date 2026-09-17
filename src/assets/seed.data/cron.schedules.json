@@ -7,13 +7,13 @@
 
     "DEVELOPMENT":{
         "STATS":{
-            "scheduleChatDailyRollup": "0 0 30 9 *"
+            "scheduleChatDailyRollup": "0 */1 * * *"
         }
     },
 
     "UAT":{
         "STATS":{
-            "scheduleChatDailyRollup": "0 0 30 9 *"
+            "scheduleChatDailyRollup": "0 */1 * * *"
         }
     },
 
@@ -22,7 +22,7 @@
             "scheduleDataBackup": "0 0 * * * "
         },
         "STATS":{
-            "scheduleChatDailyRollup": "0 0 30 9 *"
+            "scheduleChatDailyRollup": "0 */1 * * *"
         }
     }
 }

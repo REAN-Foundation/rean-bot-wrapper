@@ -1,5 +1,6 @@
 /* eslint-disable indent */
-import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, PrimaryKey, IsUUID } from 'sequelize-typescript';
+import { v4 } from 'uuid';
 
 @Table(
     {
@@ -10,13 +11,16 @@ import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from 'seque
 )
 export class ChatDailyStat extends Model {
 
-    @AutoIncrement
+    @IsUUID(4)
     @PrimaryKey
     @Column({
-        type      : DataType.INTEGER,
+        type         : DataType.UUID,
+        defaultValue : () => {
+            return v4();
+        },
         allowNull : false
     })
-        id?: number;
+        id: string;
 
     @Column({
         type      : DataType.DATEONLY,
