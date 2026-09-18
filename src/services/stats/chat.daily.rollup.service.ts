@@ -79,7 +79,7 @@ export class ChatDailyRollupService {
             return;
         }
 
-        for (const tenant of [{ Code: 'Testing30' },]) {
+        for (const tenant of tenants) {
             if (tenant.Code === 'default') {
                 continue;
             }
