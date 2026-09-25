@@ -2,7 +2,6 @@
 import AWS from 'aws-sdk';
 import { ISecretsService } from '../interfaces/secrets.provider.interface';
 
-
 // Load the AWS SDK
 console.log("start---------");
 
@@ -12,7 +11,8 @@ export class AwsSecretsManager implements ISecretsService {
 
     async getCrossAccountCredentials() {
         return new Promise((resolve, reject) => {
-            const sts = new AWS.STS();
+
+            const sts = new AWS.STS({ httpOptions: { connectTimeout: 120000 } });
             const timestamp = Date.now();
             const params = {
                 RoleArn         : process.env.ROLE_ARN,
@@ -59,7 +59,7 @@ export class AwsSecretsManager implements ISecretsService {
             const region = process.env.region;
 
             // eslint-disable-next-line max-len
-            const client = new AWS.SecretsManager({ region: region, accessKeyId: responseCredentials.accessKeyId, secretAccessKey: responseCredentials.secretAccessKey, sessionToken: responseCredentials.sessionToken });
+            const client = new AWS.SecretsManager({ region: region, accessKeyId: responseCredentials.accessKeyId, secretAccessKey: responseCredentials.secretAccessKey, sessionToken: responseCredentials.sessionToken, httpOptions: { connectTimeout: 120000 } });
 
             const response = await client.getSecretValue({ SecretId: secretName }).promise();
 
