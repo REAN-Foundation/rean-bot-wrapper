@@ -37,7 +37,6 @@ export class AppointmentUserReplyService {
                 raw: true
             });
             const appointment_id = appRecord ? appRecord.ParentActionId : null;
-            console.log(`[APPT-DEBUG] Reminder reply listener: intent=${intentName}, contextId=${previousMessageContextID}, reminderRecordFound=${!!appRecord}, appointment_id=${appointment_id}`);
 
             const docProcessBaseURL = process.env.DOCUMENT_PROCESSOR_BASE_URL;
 
