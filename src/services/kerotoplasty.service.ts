@@ -211,12 +211,16 @@ export class kerotoplastyService {
         const taskId = personContactList.dataValues.cmrCaseTaskID;
         let user_details = null;
         let EMRNumber  = personContactList.dataValues.ehrSystemCode;
+        console.log(`[APPT-DEBUG] UpdatingAppointmentOnClickup start: intent=${intent}, userId=${userId}, existingTaskId=${taskId}, EMRNumber=${EMRNumber}`);
+        console.log(`[APPT-DEBUG] Dialogflow parameters: ${JSON.stringify(parameters)}`);
         if (EMRNumber) {
             EMRNumber = EMRNumber.toUpperCase();
             user_details = await this.getEMRDetails(EMRNumber,eventObj);
         } else {
             const shareableDetailsSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("ShareableDetailsSetting");
             const shareable_details_raw = shareableDetailsSetting?.Value;
+            console.log(`[APPT-DEBUG] ShareableDetailsSetting full: ${JSON.stringify(shareableDetailsSetting)}`);
+            console.log(`[APPT-DEBUG] ShareableDetailsSetting.Value typeof=${typeof shareable_details_raw}, value=${JSON.stringify(shareable_details_raw)}`);
             if (shareable_details_raw){
                 const shareable_details = JSON.parse(shareable_details_raw);
                 if (shareable_details.Name){
@@ -230,13 +234,18 @@ export class kerotoplastyService {
 
         const clickupSecrets = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("clickup");
         const ClickupListId = clickupSecrets?.CaseListId;
+        console.log(`[APPT-DEBUG] Reached ClickUp section: user_details=${JSON.stringify(user_details)}, ClickupListId=${ClickupListId}, existingTaskId=${taskId}`);
         if (taskId){
+            console.log(`[APPT-DEBUG] Updating existing ClickUp task ${taskId}`);
             await this.clickUpTask.updateTask(taskId,null,user_details,EMRNumber, "Appointment");
             await this.clickUpTask.postCommentOnTask(taskId,symptomComment);
+            console.log(`[APPT-DEBUG] Existing ClickUp task ${taskId} updated and comment posted`);
         }
         else
         {
+            console.log(`[APPT-DEBUG] Creating new ClickUp task in list ${ClickupListId}`);
             const taskId = await this.clickUpTask.createTask(null, EMRNumber , user_details , 1 , ClickupListId,"Appoinment");
+            console.log(`[APPT-DEBUG] ClickUp createTask returned taskId=${taskId}`);
             await contactList.update({ cmrCaseTaskID: taskId }, { where: { mobileNumber: userId } });
             await this.clickUpTask.postCommentOnTask(taskId, symptomComment);
             console.log("we are Here");
