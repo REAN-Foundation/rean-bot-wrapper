@@ -222,7 +222,11 @@ export class kerotoplastyService {
             console.log(`[APPT-DEBUG] ShareableDetailsSetting full: ${JSON.stringify(shareableDetailsSetting)}`);
             console.log(`[APPT-DEBUG] ShareableDetailsSetting.Value typeof=${typeof shareable_details_raw}, value=${JSON.stringify(shareable_details_raw)}`);
             if (shareable_details_raw){
-                const shareable_details = JSON.parse(shareable_details_raw);
+                // Tenant settings API may return Value already parsed as an object
+                const shareable_details = typeof shareable_details_raw === "string"
+                    ? JSON.parse(shareable_details_raw)
+                    : shareable_details_raw;
+                console.log(`[APPT-DEBUG] ShareableDetailsSetting parsed: ${JSON.stringify(shareable_details)}`);
                 if (shareable_details.Name){
                     user_details = `Name : ${personContactList.username}`;
                 }
