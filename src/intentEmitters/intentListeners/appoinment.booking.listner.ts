@@ -17,6 +17,7 @@ export const AppointmentBookingListner = async ( intent, eventObj ) => {
         const customRemSettings = await clientEnvironmentProviderServiceObj.getClientEnvironmentVariable("CustomRemSetting");
         const customRemSetting: boolean =  customRemSettings?.Value === "True";
         console.log("Type of Custom Reminder Setting:", typeof customRemSetting);
+        console.log(`[APPT-DEBUG] CustomRemSetting raw=${JSON.stringify(customRemSettings)}, resolved=${customRemSetting}`);
         let response = null;
         const parameters =  eventObj.body.queryResult.parameters;
         const date_time = eventObj.body.queryResult.parameters.Date.date_time;
@@ -42,7 +43,9 @@ export const AppointmentBookingListner = async ( intent, eventObj ) => {
             `\n\n*Disclaimer:* While we’ll do our best to accommodate your preferred time, it may not always be possible due to scheduling constraints.`;
         }
         response = await dialoflowMessageFormattingObj.making_response(message);
-        kerotoplastyServiceObj.UpdatingAppointmentOnClickup(intent, eventObj);
+        console.log(`[APPT-DEBUG] Booking listener reply prepared: ${message}`);
+        kerotoplastyServiceObj.UpdatingAppointmentOnClickup(intent, eventObj)
+            .catch((err) => console.log(`[APPT-DEBUG] UpdatingAppointmentOnClickup FAILED: ${err?.message}`, err?.stack));
         if (!customRemSetting) {
             const repetitionFlag  = await kerotoplastyServiceObj.CheckRepetitionFlag(eventObj);
             if (repetitionFlag !== "False"){
