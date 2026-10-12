@@ -15,6 +15,7 @@ export class UserRegistrationRoutes{
     register (app: express.Application) {
         const router = express.Router();
         router.post(`/:client`, this._userRegistrationController.register);
+        router.post(`/:client/users/register`, this._userRegistrationController.registerUser);
         router.post(`/:client/maternity/careplans/enrollments/:careplanId`,this._userRegistrationController.enrollToCareplan);
         router.delete(`/:client/maternity/careplans/enrollments/:careplanId`,this._userRegistrationController.unenrollFromCareplan);
         app.use('/v1/', router);

@@ -1,7 +1,8 @@
 import { Logger } from '../common/logger';
 import * as cron from 'node-cron';
 import * as CronSchedules from '../assets/seed.data/cron.schedules.json';
-import {databackup} from '../services/scheduleDataBackup.service';
+import { databackup } from '../services/scheduleDataBackup.service';
+import { ChatDailyRollupService } from '../services/stats/chat.daily.rollup.service';
 
 export class Scheduler {
 
@@ -26,6 +27,7 @@ export class Scheduler {
             try {
                 console.log("starting the schedular service");
                 this.scheduleDataBackup();
+                this.scheduleChatDailyRollup();
                 resolve(true);
             } catch (error) {
                 Logger.instance().log('Error initializing the schedular.: ' + error.message);
@@ -33,9 +35,30 @@ export class Scheduler {
             }
         });
     };
+
+    private scheduleChatDailyRollup = () => {
+        const cronExpression = Scheduler.envSchedules?.STATS?.scheduleChatDailyRollup;
+        console.log(`scheduleChatDailyRollup: cron expression for this environment is "${cronExpression}".`);
+        if (!cronExpression) {
+            Logger.instance().log('scheduleChatDailyRollup: no cron expression configured for this environment, skipping.');
+            return;
+        }
+        cron.schedule(cronExpression, () => {
+            (async () => {
+                Logger.instance().log('Running scheduled job: ChatDailyRollupService.runForYesterday');
+                await ChatDailyRollupService.runForYesterday();
+            })();
+        });
+    };
+
     private scheduleDataBackup = () => {
         for (const clientName in Scheduler.envSchedules){
-            cron.schedule(Scheduler.envSchedules[clientName]['scheduleDataBackup'], () => {
+            const cronExpression = Scheduler.envSchedules[clientName]['scheduleDataBackup'];
+            if (!cronExpression) {
+                console.log(`scheduleDataBackup: no cron expression configured for client ${clientName}, skipping.`);
+                continue;
+            }
+            cron.schedule(cronExpression, () => {
                 (async () => {
                     Logger.instance().log(`Running scheducled jobs: DataBackup in S3 ${clientName}`);
                     var databackupobj = new databackup();
@@ -48,6 +71,5 @@ export class Scheduler {
         }
 
     };
-
 
 }

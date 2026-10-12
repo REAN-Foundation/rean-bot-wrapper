@@ -12,6 +12,7 @@ import { Iresponse } from '../../refactor/interface/message.interface';
 import { commonResponseMessageFormat } from '../../services/common.response.format.object';
 import { Registration } from '../../services/registrationsAndEnrollements/patient.registration.service';
 import { careplanEnrollment } from '../../services/registrationsAndEnrollements/careplan.enrollement.service';
+import { UserInfoService } from '../../services/user.info/user.info.service';
 @scoped(Lifecycle.ContainerScoped)
 export class UserRegistrationController{
 
@@ -61,6 +62,60 @@ export class UserRegistrationController{
             }
         }
         catch (error){ this.errorHandler.handleControllerError(error, response, request); }
+    };
+
+    registerUser = async (request, response) => {
+        try {
+            const { model: userDetails, errors } = this._validator.validateUserRegistrationDetails(request);
+            if (errors.length > 0) {
+                this.responseHandler.sendFailureResponse(response, 400, 'Invalid request', request, null, errors);
+                return;
+            }
+            const registrationService: Registration = request.container.resolve(Registration);
+            const userInfoService: UserInfoService = request.container.resolve(UserInfoService);
+            const entityManagerProvider = request.container.resolve(EntityManagerProvider);
+            const authenticationKey = request.headers['x-api-key'];
+
+            const result = await registrationService.getPatientUserId(
+                userDetails.platform,
+                userDetails.platformUserId,
+                userDetails.userName,
+                undefined,
+                authenticationKey
+            );
+            if (result.statusCode !== 200 || !result.patientUserId) {
+                this.responseHandler.sendFailureResponse(response, result.statusCode || 500,
+                    `Registration failed: ${result.errorMessage ?? 'patient user id not received from ReanCare'}`, request);
+                return;
+            }
+
+            // Adds the contact list entry (and chat session for new users) or updates the patient user id
+            await registrationService.wrapperRegistration(
+                entityManagerProvider,
+                userDetails.platformUserId,
+                userDetails.userName,
+                userDetails.platform,
+                result.patientUserId
+            );
+
+            const userInfoProvided = userDetails.age !== undefined || userDetails.gender !== undefined;
+            if (userInfoProvided) {
+                await userInfoService.updateUserInfo(userDetails.platformUserId, {
+                    Name   : userDetails.userName,
+                    Age    : userDetails.age,
+                    Gender : userDetails.gender
+                });
+            }
+
+            this.responseHandler.sendSuccessResponseForApp(response, 200, 'Registration Successful', {
+                platformUserId : userDetails.platformUserId,
+                patientUserId  : result.patientUserId,
+                userInfoSaved  : userInfoProvided
+            });
+        }
+        catch (error) {
+            this.errorHandler.handleControllerError(error, response, request);
+        }
     };
 
     enrollToCareplan = async(request, response)=>{
