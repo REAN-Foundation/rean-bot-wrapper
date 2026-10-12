@@ -8,10 +8,12 @@
 name: Harbor-PROD-CI-CD
 
 on:
-  
   push:
-    branches: 
-        - 'feature/prod-pipeline'
+    branches:
+      - 'main'
+  pull_request:
+    branches:
+      - 'main'
 
 jobs:
   Build-Push-Harbor:
