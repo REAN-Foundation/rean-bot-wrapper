@@ -39,7 +39,7 @@ export class userHistoryDeletionService {
             }
             const deletion_endpoint = `patients/${patientUserId}`;
             const deleteResponse = await this.needleService.needleRequestForREAN("delete", deletion_endpoint, null, null);
-            console.log(`Deletion response for patientUserId ${userPlatformId}:`, deleteResponse);
+            console.log('Deletion response for userPlatformId %s (patientUserId %s):', userPlatformId, patientUserId, deleteResponse);
 
             if (deleteResponse?.HttpCode === 200) {
                 return { status: 'deleted', patientUserId };
