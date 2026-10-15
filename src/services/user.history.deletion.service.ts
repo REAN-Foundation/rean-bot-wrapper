@@ -4,6 +4,12 @@ import { EntityManagerProvider } from "./entity.manager.provider.service";
 import { ContactList } from '../models/contact.list';
 import { NeedleService } from "./needle.service";
 
+export interface UserDeletionResult {
+    status         : 'deleted' | 'contact_not_found' | 'patient_not_found' | 'failed',
+    patientUserId? : string,
+    message?       : string
+}
+
 @scoped(Lifecycle.ContainerScoped)
 export class userHistoryDeletionService {
 
@@ -13,30 +19,40 @@ export class userHistoryDeletionService {
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService: ClientEnvironmentProviderService,
     ){}
 
-    async deleteUserFromAllServices(userPlatformId) {
+    async deleteUserFromAllServices(userPlatformId): Promise<UserDeletionResult> {
         try {
             const entityManager = await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService);
             const contactListRepo = entityManager.getRepository(ContactList);
             const contact = await contactListRepo.findOne({
                 where: { mobileNumber: userPlatformId }
             });
-            
+
             if (!contact) {
                 console.log(`No ContactList entry found for userPlatformId: ${userPlatformId}`);
-                return;
+                return { status: 'contact_not_found' };
             }
             const patientUserId = contact.patientUserId;
 
             if (!patientUserId) {
                 console.log(`No patientUserId found for userPlatformId: ${userPlatformId}`);
-                return;
+                return { status: 'patient_not_found' };
             }
             const deletion_endpoint = `patients/${patientUserId}`;
             const deleteResponse = await this.needleService.needleRequestForREAN("delete", deletion_endpoint, null, null);
             console.log(`Deletion response for patientUserId ${userPlatformId}:`, deleteResponse);
 
+            if (deleteResponse?.HttpCode === 200) {
+                return { status: 'deleted', patientUserId };
+            }
+            return {
+                status        : 'failed',
+                patientUserId : patientUserId,
+                message      : deleteResponse?.Message ?? 'No valid response from ReanCare'
+            };
+
         } catch (error) {
             console.log(error);
+            return { status: 'failed', message: error?.message };
         }
     }
 

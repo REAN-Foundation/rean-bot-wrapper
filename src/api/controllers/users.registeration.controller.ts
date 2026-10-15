@@ -14,6 +14,7 @@ import { Registration } from '../../services/registrationsAndEnrollements/patien
 import { careplanEnrollment } from '../../services/registrationsAndEnrollements/careplan.enrollement.service';
 import { UserInfoService } from '../../services/user.info/user.info.service';
 import { clientAuthenticator } from '../../services/clientAuthenticator/client.authenticator.interface';
+import { userHistoryDeletionService } from '../../services/user.history.deletion.service';
 @scoped(Lifecycle.ContainerScoped)
 export class UserRegistrationController{
 
@@ -65,14 +66,21 @@ export class UserRegistrationController{
         catch (error){ this.errorHandler.handleControllerError(error, response, request); }
     };
 
+    // Same x-api-key check as the 'api' channel webhook (WEBHOOK_MOCK_CHANNEL_CLIENT_API_KEY)
+    private async isAuthenticated(request, response): Promise<boolean> {
+        const authenticator: clientAuthenticator = request.container.resolve('api.authenticator');
+        try {
+            await authenticator.authenticate(request, response);
+            return true;
+        } catch (authError) {
+            this.responseHandler.sendFailureResponse(response, 401, authError.message, request);
+            return false;
+        }
+    }
+
     registerUser = async (request, response) => {
         try {
-            // Same x-api-key check as the 'api' channel webhook (WEBHOOK_MOCK_CHANNEL_CLIENT_API_KEY)
-            const authenticator: clientAuthenticator = request.container.resolve('api.authenticator');
-            try {
-                await authenticator.authenticate(request, response);
-            } catch (authError) {
-                this.responseHandler.sendFailureResponse(response, 401, authError.message, request);
+            if (!(await this.isAuthenticated(request, response))) {
                 return;
             }
 
@@ -120,6 +128,44 @@ export class UserRegistrationController{
                 patientUserId  : result.patientUserId,
                 userInfoSaved  : userInfoProvided
             });
+        }
+        catch (error) {
+            this.errorHandler.handleControllerError(error, response, request);
+        }
+    };
+
+    // Same deletion as the 'deleteHistory - custom' intent: removes the user's patient record on ReanCare
+    deleteUserHistory = async (request, response) => {
+        try {
+            if (!(await this.isAuthenticated(request, response))) {
+                return;
+            }
+
+            const platformUserId = request.params.platformUserId?.trim();
+            if (!platformUserId) {
+                this.responseHandler.sendFailureResponse(response, 400, "'platformUserId' is required", request);
+                return;
+            }
+
+            const deletionService: userHistoryDeletionService = request.container.resolve(userHistoryDeletionService);
+            const result = await deletionService.deleteUserFromAllServices(platformUserId);
+
+            switch (result.status) {
+            case 'deleted':
+                this.responseHandler.sendSuccessResponseForApp(response, 200, 'User History Deleted Successfully', {
+                    platformUserId,
+                    patientUserId : result.patientUserId
+                });
+                return;
+            case 'contact_not_found':
+                this.responseHandler.sendFailureResponse(response, 404, `No user found for platformUserId: ${platformUserId}`, request);
+                return;
+            case 'patient_not_found':
+                this.responseHandler.sendFailureResponse(response, 404, `No patient user id linked to platformUserId: ${platformUserId}`, request);
+                return;
+            default:
+                this.responseHandler.sendFailureResponse(response, 502, `Deletion failed on ReanCare: ${result.message ?? 'unknown error'}`, request);
+            }
         }
         catch (error) {
             this.errorHandler.handleControllerError(error, response, request);
