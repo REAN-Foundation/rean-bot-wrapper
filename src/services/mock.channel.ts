@@ -234,7 +234,6 @@ export class MockMessageService implements platformServiceInterface {
                     // }
                 }
                 else {
-                    reaponse_message = { name: mock_user_name, platform: "website", platformId: platformId, chat_message_id: mock_chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: mock_whatsapp_id, input_message: mock_input_message, messageText: processedResponse.processed_message[0], similarDoc: similarDoc };
                     reaponse_message = { name: mock_user_name, platform: "website", platformId: platformId, chat_message_id: mock_chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: mock_whatsapp_id, input_message: mock_input_message, messageText: processedResponse.processed_message[1], similarDoc: similarDoc };
                 }
             }
