@@ -42,7 +42,7 @@ export class UserDeleteQueueService {
             this.entityManagerProvider = this.childContainer.resolve(EntityManagerProvider);
             this.clientEnvironmentProviderService.setClientName(client);
             Logger.instance().log(
-                `Registered client-specific services for client=${client?.name || client?.id || "unknown"}`
+                `Registered client-specific services for client=${client ?? "unknown"}`
             );
         } catch (error) {
             Logger.instance().log(
@@ -52,13 +52,11 @@ export class UserDeleteQueueService {
         }
     }
 
-    public _q = asyncLib.queue(async (patientUserId: string, onCompleted) => {
-        try {
+    public _q = asyncLib.queue((patientUserId: string, onCompleted: asyncLib.ErrorCallback<Error>) => {
+        (async () => {
             await this.deleteUser(patientUserId);
             onCompleted();
-        } catch (error) {
-            onCompleted(error);
-        }
+        })().catch(error => onCompleted(error));
     }, ASYNC_TASK_COUNT);
 
     public enqueueDeleteUser = async (patientUserId: string, client) => {
@@ -88,38 +86,29 @@ export class UserDeleteQueueService {
     }
 
     private deleteUser = async (patientUserId: string) => {
-        try {
-            await this.deleteUserProfile(patientUserId);
-        } catch (error) {
-            Logger.instance().log(`Delete error for PatientUserId=${patientUserId}: ${JSON.stringify(error.message, null, 2)}`);
-        }
+        await this.deleteUserProfile(patientUserId);
     };
 
     async deleteUserProfile(patientUserId) {
-        try {
-            Logger.instance().log("Inside delete user profile function.");
-            const entityManager = await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService);
-            const contactListRepo = entityManager.getRepository(ContactList);
-            const contact = await contactListRepo.findOne({
-                where: { patientUserId }
-            });
+        Logger.instance().log("Inside delete user profile function.");
+        const entityManager = await this.entityManagerProvider.getEntityManager(this.clientEnvironmentProviderService);
+        const contactListRepo = entityManager.getRepository(ContactList);
+        const contact = await contactListRepo.findOne({
+            where: { patientUserId }
+        });
 
-            if (!contact) {
-                Logger.instance().log(`No ContactList entry found for patientUserId: ${patientUserId}`);
-                return;
-            }
-            const userPlatformId = contact.mobileNumber;
-            Logger.instance().log("Deleting data for " + userPlatformId);
-
-            await this.deleteChatHistory(userPlatformId);
-            await this.deleteAssessmentHistory(userPlatformId);
-            await this.deleteUserData(userPlatformId);
-
-            Logger.instance().log("User deletion complete");
-
-        } catch (error) {
-            Logger.instance().log(JSON.stringify(error, null, 2));
+        if (!contact) {
+            Logger.instance().log(`No ContactList entry found for patientUserId: ${patientUserId}`);
+            return;
         }
+        const userPlatformId = contact.mobileNumber;
+        Logger.instance().log("Deleting data for " + userPlatformId);
+
+        await this.deleteChatHistory(userPlatformId);
+        await this.deleteAssessmentHistory(userPlatformId);
+        await this.deleteUserData(userPlatformId);
+
+        Logger.instance().log("User deletion complete");
     }
 
     async deleteUserData(userPlatformId: string) {
@@ -138,7 +127,7 @@ export class UserDeleteQueueService {
                 const contactListId = contact.autoIncrementalID;
 
                 await userInfoRepo.destroy({
-                    where: { userId: contactListId }
+                    where: { userID: contactListId }
                 });
 
                 await contactListRepo.destroy({
@@ -149,12 +138,13 @@ export class UserDeleteQueueService {
             }
 
             await userConsentRepo.destroy({
-                where: { userPlatformId }
+                where: { userPlatformID: userPlatformId }
             });
 
             Logger.instance().log("User data deleted successfully.");
         } catch (error) {
             Logger.instance().log("Error deleting user data: " + JSON.stringify(error, null, 2));
+            throw error;
         }
     }
 
@@ -185,7 +175,7 @@ export class UserDeleteQueueService {
                 if (messageIds.length > 0) {
 
                     await chatMessageSensitivityRepo.destroy({
-                        where: { chatMessageId: messageIds }
+                        where: { chatMessageID: messageIds }
                     });
 
                     await messageStatusRepo.destroy({
@@ -201,13 +191,31 @@ export class UserDeleteQueueService {
                     where: { autoIncrementalID: sessionId }
                 });
             }
-            await chatMessageRepo.destroy({
+            const orphanMessages = await chatMessageRepo.findAll({
                 where: { chatSessionID: null, userPlatformID }
             });
+
+            const orphanMessageIds = orphanMessages.map(msg => msg.id);
+
+            if (orphanMessageIds.length > 0) {
+
+                await chatMessageSensitivityRepo.destroy({
+                    where: { chatMessageID: orphanMessageIds }
+                });
+
+                await messageStatusRepo.destroy({
+                    where: { chatMessageId: orphanMessageIds }
+                });
+
+                await chatMessageRepo.destroy({
+                    where: { id: orphanMessageIds }
+                });
+            }
             Logger.instance().log("User chat history deleted successfully.");
 
         } catch (error) {
             Logger.instance().log("Error deleting chat history: " + JSON.stringify(error, null, 2));
+            throw error;
         }
     }
 
@@ -237,6 +245,7 @@ export class UserDeleteQueueService {
             Logger.instance().log("User assessment history deleted successfully.");
         } catch (error) {
             Logger.instance().log("Error deleting assessment history: " + JSON.stringify(error, null, 2));
+            throw error;
         }
     }
 }
