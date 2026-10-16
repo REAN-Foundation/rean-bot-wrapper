@@ -13,6 +13,9 @@ import { commonResponseMessageFormat } from '../../services/common.response.form
 import { Registration } from '../../services/registrationsAndEnrollements/patient.registration.service';
 import { careplanEnrollment } from '../../services/registrationsAndEnrollements/careplan.enrollement.service';
 import { UserInfoService } from '../../services/user.info/user.info.service';
+import { clientAuthenticator } from '../../services/clientAuthenticator/client.authenticator.interface';
+import { userHistoryDeletionService } from '../../services/user.history.deletion.service';
+import { ContactList } from '../../models/contact.list';
 @scoped(Lifecycle.ContainerScoped)
 export class UserRegistrationController{
 
@@ -64,8 +67,24 @@ export class UserRegistrationController{
         catch (error){ this.errorHandler.handleControllerError(error, response, request); }
     };
 
+    // Same x-api-key check as the 'api' channel webhook (WEBHOOK_MOCK_CHANNEL_CLIENT_API_KEY)
+    private async isAuthenticated(request, response): Promise<boolean> {
+        const authenticator: clientAuthenticator = request.container.resolve('api.authenticator');
+        try {
+            await authenticator.authenticate(request, response);
+            return true;
+        } catch (authError) {
+            this.responseHandler.sendFailureResponse(response, 401, authError.message, request);
+            return false;
+        }
+    }
+
     registerUser = async (request, response) => {
         try {
+            if (!(await this.isAuthenticated(request, response))) {
+                return;
+            }
+
             const { model: userDetails, errors } = this._validator.validateUserRegistrationDetails(request);
             if (errors.length > 0) {
                 this.responseHandler.sendFailureResponse(response, 400, 'Invalid request', request, null, errors);
@@ -74,14 +93,27 @@ export class UserRegistrationController{
             const registrationService: Registration = request.container.resolve(Registration);
             const userInfoService: UserInfoService = request.container.resolve(UserInfoService);
             const entityManagerProvider = request.container.resolve(EntityManagerProvider);
-            const authenticationKey = request.headers['x-api-key'];
+            const clientEnvironmentProviderService = request.container.resolve(ClientEnvironmentProviderService);
 
+            // Already registered: contact exists and is linked to a ReanCare patient
+            const contactListRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService))
+                .getRepository(ContactList);
+            const existingContact = await contactListRepository.findOne({ where: { mobileNumber: userDetails.platformUserId } });
+            if (existingContact?.patientUserId) {
+                this.responseHandler.sendSuccessResponseForApp(response, 200, 'User already registered', {
+                    platformUserId    : userDetails.platformUserId,
+                    patientUserId     : existingContact.patientUserId,
+                    alreadyRegistered : true,
+                    userInfoSaved     : false
+                });
+                return;
+            }
+
+            // x-api-key is the wrapper's key here, so ReanCare is called with the default REANCARE_API_KEY
             const result = await registrationService.getPatientUserId(
                 userDetails.platform,
                 userDetails.platformUserId,
-                userDetails.userName,
-                undefined,
-                authenticationKey
+                userDetails.userName
             );
             if (result.statusCode !== 200 || !result.patientUserId) {
                 this.responseHandler.sendFailureResponse(response, result.statusCode || 500,
@@ -108,10 +140,49 @@ export class UserRegistrationController{
             }
 
             this.responseHandler.sendSuccessResponseForApp(response, 200, 'Registration Successful', {
-                platformUserId : userDetails.platformUserId,
-                patientUserId  : result.patientUserId,
-                userInfoSaved  : userInfoProvided
+                platformUserId    : userDetails.platformUserId,
+                patientUserId     : result.patientUserId,
+                alreadyRegistered : false,
+                userInfoSaved     : userInfoProvided
             });
+        }
+        catch (error) {
+            this.errorHandler.handleControllerError(error, response, request);
+        }
+    };
+
+    // Same deletion as the 'deleteHistory - custom' intent: removes the user's patient record on ReanCare
+    deleteUserHistory = async (request, response) => {
+        try {
+            if (!(await this.isAuthenticated(request, response))) {
+                return;
+            }
+
+            const platformUserId = request.params.platformUserId?.trim();
+            if (!platformUserId) {
+                this.responseHandler.sendFailureResponse(response, 400, "'platformUserId' is required", request);
+                return;
+            }
+
+            const deletionService: userHistoryDeletionService = request.container.resolve(userHistoryDeletionService);
+            const result = await deletionService.deleteUserFromAllServices(platformUserId);
+
+            switch (result.status) {
+            case 'deleted':
+                this.responseHandler.sendSuccessResponseForApp(response, 200, 'User History Deleted Successfully', {
+                    platformUserId,
+                    patientUserId : result.patientUserId
+                });
+                return;
+            case 'contact_not_found':
+                this.responseHandler.sendFailureResponse(response, 404, `No user found for platformUserId: ${platformUserId}`, request);
+                return;
+            case 'patient_not_found':
+                this.responseHandler.sendFailureResponse(response, 404, `No patient user id linked to platformUserId: ${platformUserId}`, request);
+                return;
+            default:
+                this.responseHandler.sendFailureResponse(response, 502, `Deletion failed on ReanCare: ${result.message ?? 'unknown error'}`, request);
+            }
         }
         catch (error) {
             this.errorHandler.handleControllerError(error, response, request);
