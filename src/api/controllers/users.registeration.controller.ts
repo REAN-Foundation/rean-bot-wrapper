@@ -15,6 +15,7 @@ import { careplanEnrollment } from '../../services/registrationsAndEnrollements/
 import { UserInfoService } from '../../services/user.info/user.info.service';
 import { clientAuthenticator } from '../../services/clientAuthenticator/client.authenticator.interface';
 import { userHistoryDeletionService } from '../../services/user.history.deletion.service';
+import { ContactList } from '../../models/contact.list';
 @scoped(Lifecycle.ContainerScoped)
 export class UserRegistrationController{
 
@@ -92,6 +93,21 @@ export class UserRegistrationController{
             const registrationService: Registration = request.container.resolve(Registration);
             const userInfoService: UserInfoService = request.container.resolve(UserInfoService);
             const entityManagerProvider = request.container.resolve(EntityManagerProvider);
+            const clientEnvironmentProviderService = request.container.resolve(ClientEnvironmentProviderService);
+
+            // Already registered: contact exists and is linked to a ReanCare patient
+            const contactListRepository = (await entityManagerProvider.getEntityManager(clientEnvironmentProviderService))
+                .getRepository(ContactList);
+            const existingContact = await contactListRepository.findOne({ where: { mobileNumber: userDetails.platformUserId } });
+            if (existingContact?.patientUserId) {
+                this.responseHandler.sendSuccessResponseForApp(response, 200, 'User already registered', {
+                    platformUserId    : userDetails.platformUserId,
+                    patientUserId     : existingContact.patientUserId,
+                    alreadyRegistered : true,
+                    userInfoSaved     : false
+                });
+                return;
+            }
 
             // x-api-key is the wrapper's key here, so ReanCare is called with the default REANCARE_API_KEY
             const result = await registrationService.getPatientUserId(
@@ -124,9 +140,10 @@ export class UserRegistrationController{
             }
 
             this.responseHandler.sendSuccessResponseForApp(response, 200, 'Registration Successful', {
-                platformUserId : userDetails.platformUserId,
-                patientUserId  : result.patientUserId,
-                userInfoSaved  : userInfoProvided
+                platformUserId    : userDetails.platformUserId,
+                patientUserId     : result.patientUserId,
+                alreadyRegistered : false,
+                userInfoSaved     : userInfoProvided
             });
         }
         catch (error) {
