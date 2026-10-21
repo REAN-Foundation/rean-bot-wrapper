@@ -65,7 +65,6 @@ export class RegistrationService {
                 const dffMessage = `Hi ${name}, \nYour phone number already registered with us.`;
                 FireAndForgetService.enqueue(body);
                 return { fulfillmentMessages: [{ text: { text: [dffMessage] } }]  };
-
             } else if (registrationResponse.statusCode === 201) {
                 body.Body.PatientUserId = registrationResponse.body.Data.Patient.UserId;
                 const registrationMessage = `Hi ${name}, \nYour Last Mensuration Period(LMP) date is ${new Date(lmp.split("T")[0]).toDateString()}.\nYou will get periodic notifications based on your LMP.`;

@@ -187,7 +187,6 @@ export class WhatsappMessageService extends CommonWhatsappService {
                     console.log("resp", resp.body);
                     resolve(resp.body);
                 });
-
             }
             catch (error) {
                 console.log("error", error);
@@ -214,7 +213,6 @@ export class WhatsappMessageService extends CommonWhatsappService {
                     .catch(error => console.log("error on update", error));
                 return needleResp;
             }
-
         }
     }
 

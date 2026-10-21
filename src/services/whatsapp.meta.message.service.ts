@@ -116,7 +116,6 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
                             await chatMessageRepository.update({ responseMessageID: needleResp.body.messages[0].id }, { where: { id: id } } )
                                 .then(() => { console.log("updated"); })
                                 .catch(error => console.log("error on update", error));
-
                             //Added else for those who haven't send any message on bot(blood warrior)
                         } else {
                             const chatMessageObj = {
@@ -138,13 +137,11 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
                         return needleResp;
                     }
                 }
-
             }
         } catch (error) {
             console.log("error", error);
             return null;
         }
-
     };
 
     delay = async() => {
@@ -161,5 +158,4 @@ export class WhatsappMetaMessageService extends CommonWhatsappService {
         await delay(delayClientPreference);
 
     };
-
 }

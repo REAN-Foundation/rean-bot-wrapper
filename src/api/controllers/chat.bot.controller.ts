@@ -174,7 +174,6 @@ export class ChatBotController {
                 {
                     response_format.message_type = 'template';
                     console.log("An emergency incident message");
-
                     payload["templateName"] = "incident_code";
                     payload["languageForSession"] = "en";
                     payload["variables"] = [
@@ -183,7 +182,6 @@ export class ChatBotController {
                             text : event.UserMessage.TextMessage
                         },
                     ];
-
                 }
             }
 
@@ -261,7 +259,6 @@ export class ChatBotController {
                 event.UserMessage.MessageChannel === 'whatsappWati') {
                     payload = await sendApiInteractiveListService(availabliltyButton);
                     response_format.message_type = 'interactivelist';
-
                 } else {
                     payload = await sendTelegramButtonService(availabliltyButton);
                     response_format.message_type = 'inline_keyboard';
@@ -296,7 +293,6 @@ export class ChatBotController {
                     }
                 }
             }
-
             console.log("PAYLOAD", JSON.stringify(payload, null, 2));
             const res = await this._platformMessageService.SendMediaMessage(response_format, payload);
             if (res) {

@@ -59,7 +59,6 @@ export class EnrollPatientService {
                 const apiURL = `patients/${patientUserId}`;
                 const obj = { "IsRemindersLoaded": true };
                 await this.needleService.needleRequestForREAN("put", apiURL, null, obj);
-
                 const dffMessage = `Thank you for confirmation. We will remind you before expected blood transfusion date.`;
                 return ( { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } });
 
@@ -67,11 +66,9 @@ export class EnrollPatientService {
                 const dffMessage = `You already have scheduled reminders. Or Change your blood transfusion date then, you will able to load the reminders again.`;
                 return { sendDff: true, message: { fulfillmentMessages: [{ text: { text: [dffMessage] } }] } };
             }
-
         } catch (error) {
             Logger.instance()
                 .log_error(error.message,500,'Register patient with blood warrior messaging service error');
         }
     };
-
 }

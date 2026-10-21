@@ -268,12 +268,10 @@ export class ClientWebhookController {
             if (firstTimeUser && !consentReply) {
                 this.consentService.sendLanguageSelectionMessage(req, userId, buttonKeyName);
             }
-
             // Handle language selection callback
             else if (consentReply && consentReply.startsWith("language_select-")) {
                 this.consentService.handleConsentRequest(req, userId, consentReply, languageCode, consentRepository, res, buttonKeyName);
             }
-
             // Handle consent flow (existing logic)
             else {
                 if (consentRequired && consentReply !== "consent_yes") {
@@ -300,7 +298,6 @@ export class ClientWebhookController {
                     consentReply = reqBody.messages[0]?.interactive[interactiveType]?.id;
 
                     if (consentReply) {
-
                         // Handle both language_select-{code} and consent_changeLanguge-{code}
                         if (consentReply.includes("-")) {
                             languageCode = consentReply.split("-")[1];
