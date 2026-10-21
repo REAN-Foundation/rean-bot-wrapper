@@ -42,7 +42,9 @@ export const AppointmentBookingListner = async ( intent, eventObj ) => {
             `\n\n*Disclaimer:* While we’ll do our best to accommodate your preferred time, it may not always be possible due to scheduling constraints.`;
         }
         response = await dialoflowMessageFormattingObj.making_response(message);
-        kerotoplastyServiceObj.UpdatingAppointmentOnClickup(intent, eventObj);
+        kerotoplastyServiceObj.UpdatingAppointmentOnClickup(intent, eventObj)
+            .catch((error) => Logger.instance()
+                .log_error(error.message, 500, 'Appointment ClickUp update error'));
         if (!customRemSetting) {
             const repetitionFlag  = await kerotoplastyServiceObj.CheckRepetitionFlag(eventObj);
             if (repetitionFlag !== "False"){
