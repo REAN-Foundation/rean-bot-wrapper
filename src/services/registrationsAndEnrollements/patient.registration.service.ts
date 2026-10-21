@@ -145,7 +145,7 @@ export class Registration{
                 channel === "whatsappMeta" ||
                 channel === "whatsapp" ||
                 channel === "whatsappWati" ||
-                channel === "MockChannel" ||
+                channel === "website" ||
                 channel === "REAN_SUPPORT" ||
                 channel === "SNEHA_SUPPORT") {
                 console.log("platformUser ID IS:",PlatformUserId);

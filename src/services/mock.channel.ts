@@ -14,6 +14,8 @@ import { EntityManagerProvider } from './entity.manager.provider.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { Registration } from './registrationsAndEnrollements/patient.registration.service';
 import { ContactList } from '../models/contact.list';
+import { LogsQAService } from './logs.for.qa';
+import { Logger } from '../common/logger';
 
 @scoped(Lifecycle.ContainerScoped)
 export class MockMessageService implements platformServiceInterface {
@@ -28,7 +30,8 @@ export class MockMessageService implements platformServiceInterface {
         @inject(ApiMessageToDialogflow) public apiMessageToDialogflow?: ApiMessageToDialogflow,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
-        @inject(Registration) private registrationService?: Registration){}
+        @inject(Registration) private registrationService?: Registration,
+        @inject(LogsQAService) private logsQAService?: LogsQAService){}
 
     getMessageIdFromResponse(responseBody: any) {
         throw new Error('Method not implemented.');
@@ -103,9 +106,9 @@ export class MockMessageService implements platformServiceInterface {
             const firstTimeUser = !existingContact;
             const patientUserId = existingContact ? existingContact.patientUserId : null;
             if (firstTimeUser || !patientUserId) {
-                const results = await this.registrationService.getPatientUserId("MockChannel", platformId, platformUserName);
+                const results = await this.registrationService.getPatientUserId("website", platformId, platformUserName);
                 await this.registrationService.wrapperRegistration(
-                    this.entityManagerProvider, platformId, platformUserName, "MockChannel", results.patientUserId);
+                    this.entityManagerProvider, platformId, platformUserName, "website", results.patientUserId);
             }
         } catch (error) {
             console.log("[MockMessageService] Error registering user on ReanCare:", error);
@@ -149,6 +152,13 @@ export class MockMessageService implements platformServiceInterface {
         const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.sessionId } });
         const lastMessageDate = respChatMessage[respChatMessage.length - 1].createdAt;
         const obj = { timeStamp: lastMessageDate, message: response_format.messageText };
+        const qaService = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("QnA");
+        if (qaService) {
+            if (response_format.name !== "ReanCare") {
+                Logger.instance().log("Providing QA service through clickUp");
+                await this.logsQAService.logMesssages(response_format);
+            }
+        }
         if (this.req.test_method === "RAGAS") {
             return {
                 "answer" : response_format.messageText,
@@ -217,7 +227,7 @@ export class MockMessageService implements platformServiceInterface {
 
         if (processedResponse) {
             if (image && image.url) {
-                reaponse_message = { name: mock_user_name, platform: "MockChannel", platformId: platformId, chat_message_id: mock_chat_message_id, direction: "Out", message_type: "image", intent: intent, messageBody: image.url, messageImageUrl: image.url, messageImageCaption: image.caption, sessionId: mock_whatsapp_id, input_message: mock_input_message, messageText: image.caption, similarDoc: similarDoc };
+                reaponse_message = { name: mock_user_name, platform: "website", platformId: platformId, chat_message_id: mock_chat_message_id, direction: "Out", message_type: "image", intent: intent, messageBody: image.url, messageImageUrl: image.url, messageImageCaption: image.caption, sessionId: mock_whatsapp_id, input_message: mock_input_message, messageText: image.caption, similarDoc: similarDoc };
             }
             else if (processedResponse.processed_message.length > 1) {
                 if (pasrseMode && pasrseMode === 'HTML') {
@@ -234,8 +244,7 @@ export class MockMessageService implements platformServiceInterface {
                     // }
                 }
                 else {
-                    reaponse_message = { name: mock_user_name, platform: "MockChannel", platformId: platformId, chat_message_id: mock_chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: mock_whatsapp_id, input_message: mock_input_message, messageText: processedResponse.processed_message[0], similarDoc: similarDoc };
-                    reaponse_message = { name: mock_user_name, platform: "MockChannel", platformId: platformId, chat_message_id: mock_chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: mock_whatsapp_id, input_message: mock_input_message, messageText: processedResponse.processed_message[1], similarDoc: similarDoc };
+                    reaponse_message = { name: mock_user_name, platform: "website", platformId: platformId, chat_message_id: mock_chat_message_id, direction: "Out", message_type: "text", intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: mock_whatsapp_id, input_message: mock_input_message, messageText: processedResponse.processed_message[1], similarDoc: similarDoc };
                 }
             }
             else {
@@ -243,7 +252,7 @@ export class MockMessageService implements platformServiceInterface {
                 if (payload !== null){
                     message_type = payload.fields.messagetype.stringValue;
                 }
-                reaponse_message = { name: mock_user_name, platform: "MockChannel", platformId: platformId, chat_message_id: mock_chat_message_id, direction: "Out", message_type: message_type, intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: mock_whatsapp_id, input_message: mock_input_message, messageText: processedResponse.processed_message[0], similarDoc: similarDoc };
+                reaponse_message = { name: mock_user_name, platform: "website", platformId: platformId, chat_message_id: mock_chat_message_id, direction: "Out", message_type: message_type, intent: intent, messageBody: null, messageImageUrl: null, messageImageCaption: null, sessionId: mock_whatsapp_id, input_message: mock_input_message, messageText: processedResponse.processed_message[0], similarDoc: similarDoc };
             }
         }
         return reaponse_message;
