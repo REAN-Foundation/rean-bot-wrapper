@@ -14,6 +14,8 @@ import { EntityManagerProvider } from './entity.manager.provider.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { Registration } from './registrationsAndEnrollements/patient.registration.service';
 import { ContactList } from '../models/contact.list';
+import { LogsQAService } from './logs.for.qa';
+import { Logger } from '../common/logger';
 
 @scoped(Lifecycle.ContainerScoped)
 export class MockMessageService implements platformServiceInterface {
@@ -28,7 +30,8 @@ export class MockMessageService implements platformServiceInterface {
         @inject(ApiMessageToDialogflow) public apiMessageToDialogflow?: ApiMessageToDialogflow,
         @inject(EntityManagerProvider) private entityManagerProvider?: EntityManagerProvider,
         @inject(ClientEnvironmentProviderService) private clientEnvironmentProviderService?: ClientEnvironmentProviderService,
-        @inject(Registration) private registrationService?: Registration){}
+        @inject(Registration) private registrationService?: Registration,
+        @inject(LogsQAService) private logsQAService?: LogsQAService){}
 
     getMessageIdFromResponse(responseBody: any) {
         throw new Error('Method not implemented.');
@@ -149,6 +152,13 @@ export class MockMessageService implements platformServiceInterface {
         const respChatMessage = await chatMessageRepository.findAll({ where: { userPlatformID: response_format.sessionId } });
         const lastMessageDate = respChatMessage[respChatMessage.length - 1].createdAt;
         const obj = { timeStamp: lastMessageDate, message: response_format.messageText };
+        const qaService = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("QnA");
+        if (qaService) {
+            if (response_format.name !== "ReanCare") {
+                Logger.instance().log("Providing QA service through clickUp");
+                await this.logsQAService.logMesssages(response_format);
+            }
+        }
         if (this.req.test_method === "RAGAS") {
             return {
                 "answer" : response_format.messageText,
