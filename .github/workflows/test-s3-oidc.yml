@@ -2,6 +2,9 @@
 name: Test S3 Access with OIDC
 
 on:
+  push:
+    branches:
+      - oidc-test
   workflow_dispatch:
 
 permissions:
