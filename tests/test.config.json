@@ -1,0 +1,93 @@
+{
+    "FileStorage": {
+        "Provider": "AWS-S3"
+    },
+    "TemporaryFolders": {
+        "Download": "./tests/data",
+        "HtmlReport": "./playwright-report",
+        "Reports": "./test-reports"
+    },
+    "Similarity": {
+        "Threshold": 70,
+        "Model": "Xenova/all-MiniLM-L6-v2"
+    },
+    "Evaluation": {
+        "Method": "SemanticSimilarity"
+    },
+    "Reports": {
+        "Provider": "AWS-S3",
+        "Location": "rf-automation-test-results/playwright-reports"
+    },
+    "ReportRetention": {
+        "Policy": "Daily",
+        "RetentionDays": 7
+    },
+    "Environments": {
+        "uat": {
+            "Clients": {
+                "alert": "ALERTAID_UAT"
+            }
+        },
+        "production": {
+            "Clients": {
+                "alert": "ALERTAID_PROD"
+            }
+        }
+    },
+    "DataSources": [
+        {
+            "Name": "alert_test_case.xlsx",
+            "Provider": "AWS-S3",
+            "StorageKey": "rf-automation-test-results/test-cases/alert_test_case.xlsx",
+            "Format": "XLSX"
+        },
+        {
+            "Name": "gghnAnemia_test_case.xlsx",
+            "Provider": "AWS-S3",
+            "StorageKey": "rf-automation-test-results/test-cases/gghnAnemia_test_case.xlsx",
+            "Format": "XLSX"
+        },
+        {
+            "Name": "hei_test_case.xlsx",
+            "Provider": "AWS-S3",
+            "StorageKey": "rf-automation-test-results/test-cases/hei_test_case.xlsx",
+            "Format": "XLSX"
+        },
+        {
+            "Name": "loveMatters_test_case.xlsx",
+            "Provider": "AWS-S3",
+            "StorageKey": "rf-automation-test-results/test-cases/loveMatters_test_case.xlsx",
+            "Format": "XLSX"
+        },
+        {
+            "Name": "nims_test_case.xlsx",
+            "Provider": "AWS-S3",
+            "StorageKey": "rf-automation-test-results/test-cases/nims_test_case.xlsx",
+            "Format": "XLSX"
+        },
+        {
+            "Name": "prayas_test_case.xlsx",
+            "Provider": "AWS-S3",
+            "StorageKey": "rf-automation-test-results/test-cases/prayas_test_case.xlsx",
+            "Format": "XLSX"
+        },
+        {
+            "Name": "sowchan_test_case.xlsx",
+            "Provider": "AWS-S3",
+            "StorageKey": "rf-automation-test-results/test-cases/sowchan_test_case.xlsx",
+            "Format": "XLSX"
+        },
+        {
+            "Name": "sphsd_test_case.xlsx",
+            "Provider": "AWS-S3",
+            "StorageKey": "rf-automation-test-results/test-cases/sphsd_test_case.xlsx",
+            "Format": "XLSX"
+        },
+        {
+            "Name": "ulagos_test_case.xlsx",
+            "Provider": "AWS-S3",
+            "StorageKey": "rf-automation-test-results/test-cases/ulagos_test_case.xlsx",
+            "Format": "XLSX"
+        }
+    ]
+}
