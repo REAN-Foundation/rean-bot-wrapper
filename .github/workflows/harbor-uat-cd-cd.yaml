@@ -8,13 +8,19 @@
 name: Harbor-UAT-CI-CD
 
 on:
-  
+
   push:
-    branches: 
+    branches:
         - 'release/**'
+
+  schedule:
+    - cron: '0 21 * * *'
+
+  workflow_dispatch:
 
 jobs:
   Build-Push-Harbor:
+    if: github.event_name == 'push'
     environment: uat
     runs-on: ubuntu-latest
 
@@ -113,3 +119,64 @@ jobs:
           # keep only the 5 latest in Harbor for this repo
           curl -sk "${A[@]}" -X POST -H 'Content-Type: application/json' -d '{"dry_run":false}' "${HARBOR}/api/v2.0/retentions/${RETENTION_ID}/executions"
           echo "Mirrored ${ECR_REPO}:${TAG} to Harbor (${HARBOR_PROJECT}); triggered keep-5."
+
+  Playwright-UAT-Tests:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    environment: uat
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 240
+
+    permissions:
+      id-token: write
+      contents: read
+
+    env:
+      TEST_ENV: ${{ vars.TEST_ENV }}
+      TEST_BASE_URL: ${{ secrets.TEST_BASE_URL }}
+      TEST_API_KEY: ${{ secrets.TEST_API_KEY }}
+      TEST_PLATFORM_ID: ${{ secrets.TEST_PLATFORM_ID }}
+      CI: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache similarity model
+        uses: actions/cache@v4
+        with:
+          path: .cache/transformers
+          key: transformers-${{ runner.os }}-all-MiniLM-L6-v2
+
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          role-session-name: playwright-uat-${{ github.run_id }}
+          aws-region: ${{ vars.AWS_REGION }}
+          role-duration-seconds: 14400
+
+      - name: Type-check tests
+        run: npm run test:e2e:typecheck
+
+      - name: Run Playwright tests
+        run: npx playwright test
+
+      - name: Upload reports as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-reports-${{ github.run_number }}
+          path: |
+            test-reports/
+            playwright-report/
+          retention-days: 7
