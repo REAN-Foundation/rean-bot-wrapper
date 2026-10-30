@@ -13,9 +13,6 @@ on:
     branches:
         - 'release/**'
 
-  schedule:
-    - cron: '0 21 * * *'
-
   workflow_dispatch:
 
 jobs:
@@ -121,7 +118,7 @@ jobs:
           echo "Mirrored ${ECR_REPO}:${TAG} to Harbor (${HARBOR_PROJECT}); triggered keep-5."
 
   Playwright-UAT-Tests:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch'
     environment: uat
     runs-on: ubuntu-latest
 
@@ -160,7 +157,7 @@ jobs:
       - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           role-session-name: playwright-uat-${{ github.run_id }}
           aws-region: ${{ vars.AWS_REGION }}
           role-duration-seconds: 14400
