@@ -118,3 +118,11 @@ ENV2.json
 #docs to be removed for now
 docs/feature-development/
 docs/plans/
+
+# Playwright
+/playwright-report/
+/test-results/
+/test-reports/
+/published-reports/
+/tests/data/
+/.cache/
