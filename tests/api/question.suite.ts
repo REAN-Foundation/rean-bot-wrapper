@@ -47,8 +47,6 @@ export function defineQuestionSuite(title: string, key: string) {
 
     test.describe(title, () => {
 
-        test.describe.configure({ mode: 'default' });
-
         test.beforeAll(async () => {
             test.setTimeout(300000);
             await evaluator.prepare();
