@@ -1,4 +1,5 @@
 import { ConfigurationManager } from './config/configuration.manager';
+import { AnswerEvaluatorFactory } from './modules/evaluation/answer.evaluator.factory';
 import { StorageService } from './modules/storage/storage.service';
 
 ////////////////////////////////////////////////////////////////////////////
@@ -14,6 +15,9 @@ export class Application {
 
         await StorageService.downloadAll();
         console.log('[sequence] Application.start(): all test data downloaded.');
+
+        await AnswerEvaluatorFactory.create().prepare();
+        console.log('[sequence] Application.start(): answer evaluator ready.');
     };
 
     public static stop = async (): Promise<void> => {

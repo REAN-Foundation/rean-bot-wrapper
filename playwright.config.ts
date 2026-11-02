@@ -10,9 +10,8 @@ export default defineConfig({
     testDir: './tests',
     testMatch: '**/*.spec.ts',
 
-    fullyParallel: false,
-    // Run tests in files in parallel. Constraints: 1) llm service limitations
-    workers: 1,
+    fullyParallel: true,
+    workers: Number(process.env.TEST_WORKERS ?? 4),
     retries: 0,
 
     timeout: 30000,
