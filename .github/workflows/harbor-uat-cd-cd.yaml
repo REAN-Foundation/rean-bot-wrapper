@@ -134,6 +134,7 @@ jobs:
       TEST_API_KEY: ${{ secrets.TEST_API_KEY }}
       TEST_PLATFORM_ID: ${{ secrets.TEST_PLATFORM_ID }}
       TEST_WORKERS: ${{ vars.TEST_WORKERS || 4 }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       CI: true
 
     steps:
