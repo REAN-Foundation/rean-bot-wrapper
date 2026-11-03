@@ -10,7 +10,7 @@ export default defineConfig({
     testDir: './tests',
     testMatch: '**/*.spec.ts',
 
-    fullyParallel: true,
+    fullyParallel: false,
     workers: Number(process.env.TEST_WORKERS ?? 4),
     retries: 0,
 

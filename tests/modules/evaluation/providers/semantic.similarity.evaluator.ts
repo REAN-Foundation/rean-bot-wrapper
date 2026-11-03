@@ -23,7 +23,7 @@ export class SemanticSimilarityEvaluator implements IAnswerEvaluator {
         await loadModel();
     };
 
-    score = async (expected: string, actual: string): Promise<number> => {
+    score = async (_question: string, expected: string, actual: string): Promise<number> => {
         const extract = await loadModel();
         const embeddings = await extract([expected, actual], { pooling: 'mean', normalize: true });
         const [a, b] = embeddings.tolist() as number[][];

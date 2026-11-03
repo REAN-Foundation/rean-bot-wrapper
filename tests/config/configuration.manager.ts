@@ -47,6 +47,9 @@ export class ConfigurationManager {
         ConfigurationManager.ApiKey();
         ConfigurationManager.PlatformId();
         ConfigurationManager.SimilarityThreshold();
+        if (ConfigurationManager.EvaluationMethod() === 'LLM') {
+            ConfigurationManager.LlmApiKey();
+        }
         ConfigurationManager.ReportsLocation();
         ConfigurationManager.DownloadTemporaryFolder();
         ConfigurationManager.HtmlReportTemporaryFolder();
@@ -54,16 +57,11 @@ export class ConfigurationManager {
         ConfigurationManager.TestDataSources();
     };
 
-    // From .env ////////////////////////////////////////////////////////////
-
     public static TestEnv = (): string => {
         return requiredEnv('TEST_ENV');
     };
 
-    // Trailing slash matters: APIRequestContext resolves a relative path like
-    // 'rean/api/x/receive' against this the same way a browser resolves an
-    // <a href>. Without it, the path would replace the last segment of
-    // baseURL instead of appending to it.
+
     public static BaseUrl = (): string => {
         return requiredEnv('TEST_BASE_URL').replace(/\/*$/, '/');
     };
@@ -76,16 +74,23 @@ export class ConfigurationManager {
         return requiredEnv('TEST_PLATFORM_ID');
     };
 
-    // From test.config.json ////////////////////////////////////////////////
+    public static ClientKeys = (): string[] => {
+        return Object.keys(ConfigurationManager.config().Environments?.[ConfigurationManager.TestEnv()]?.Clients ?? {});
+    };
 
-    // Tenant name of a client in the current TEST_ENV, or undefined when the
-    // client isn't configured for it (its tests are then skipped).
+
     public static ClientName = (key: string): string | undefined => {
         return ConfigurationManager.config().Environments?.[ConfigurationManager.TestEnv()]?.Clients?.[key];
     };
 
-    // Default minimum similarity (%) for a question to pass; a question's
-    // own Threshold cell (column C of its test-case file) overrides it.
+    public static ClientPlatformId = (key: string): string => {
+        const base = ConfigurationManager.PlatformId();
+        const index = Math.max(0, ConfigurationManager.ClientKeys().indexOf(key));
+        return /^\d+$/.test(base)
+            ? (BigInt(base) + BigInt(index)).toString()
+            : `${base}-${index}`;
+    };
+
     public static SimilarityThreshold = (): number => {
         const threshold = Number(ConfigurationManager.config().Similarity?.Threshold ?? 85);
         if (!(threshold >= 0 && threshold <= 100)) {
@@ -102,12 +107,18 @@ export class ConfigurationManager {
         return ConfigurationManager.config().Evaluation?.Method ?? 'SemanticSimilarity';
     };
 
+    public static LlmModel = (): string => {
+        return ConfigurationManager.config().LLM?.Model || 'gpt-5-mini';
+    };
+
+    public static LlmApiKey = (): string => {
+        return requiredEnv('OPENAI_API_KEY');
+    };
+
     public static FileStorageProvider = (): FileStorageProvider | undefined => {
         return ConfigurationManager.config().FileStorage.Provider;
     };
 
-    // Local working folders, each relative to the repository root. Keep
-    // .gitignore and the CI artifact paths in step when changing them.
     private static temporaryFolder = (name: keyof TemporaryFoldersConfig): string => {
         const location = ConfigurationManager.config().TemporaryFolders?.[name]?.trim();
         if (!location) {
@@ -116,17 +127,14 @@ export class ConfigurationManager {
         return path.join(Helper.rootDir(), location);
     };
 
-    // Where the test-case files are downloaded to and read from.
     public static DownloadTemporaryFolder = (): string => {
         return ConfigurationManager.temporaryFolder('Download');
     };
 
-    // Where Playwright writes its HTML report.
     public static HtmlReportTemporaryFolder = (): string => {
         return ConfigurationManager.temporaryFolder('HtmlReport');
     };
 
-    // Where the Excel reports are built before an AWS-S3 upload.
     public static ReportsTemporaryFolder = (): string => {
         return ConfigurationManager.temporaryFolder('Reports');
     };
@@ -135,8 +143,6 @@ export class ConfigurationManager {
         return ConfigurationManager.config().Reports?.Provider;
     };
 
-    // Where reports go: '<bucket>/<prefix>' for AWS-S3, or a folder
-    // (absolute, or relative to the repository root) for Local.
     public static ReportsLocation = (): string => {
         const location = ConfigurationManager.config().Reports?.Location?.trim();
         if (!location) {
@@ -157,21 +163,12 @@ export class ConfigurationManager {
         return ConfigurationManager.DataSources().find((d) => d.Name === name);
     };
 
-    // File name of a client's test-case workbook: both its DataSources Name
-    // and its file name in the TemporaryFolders.Download folder.
     public static TestDataFileName = (key: string): string => {
         return `${key}_test_case.xlsx`;
     };
 
-    // The DataSources holding the test cases of every client configured for
-    // the current TEST_ENV - the ones globalSetup downloads. Throws when a
-    // configured client has no DataSources entry, so the run stops before
-    // any download or test starts.
     public static TestDataSources = (): DataSourceConfig[] => {
-        const clientKeys = Object.keys(
-            ConfigurationManager.config().Environments?.[ConfigurationManager.TestEnv()]?.Clients ?? {});
-
-        return clientKeys.map((key) => {
+        return ConfigurationManager.ClientKeys().map((key) => {
             const name = ConfigurationManager.TestDataFileName(key);
             const dataSource = ConfigurationManager.getDataSource(name);
             if (!dataSource) {
