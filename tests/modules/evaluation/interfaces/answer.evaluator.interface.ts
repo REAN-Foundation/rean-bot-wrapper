@@ -3,5 +3,5 @@ export interface IAnswerEvaluator {
 
     prepare(): Promise<void>;
 
-    score(expected: string, actual: string): Promise<number>;
+    score(question: string, expected: string, actual: string): Promise<number>;
 }

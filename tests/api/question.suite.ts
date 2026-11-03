@@ -1,6 +1,5 @@
 import { test, expect } from '../api.fixtures';
 import { BotClient, resolveClient, testDataFile } from '../config/clients';
-import { ConfigurationManager } from '../config/configuration.manager';
 import { sendTextMessage, readReply, replyText, ApiChannelUser } from '../helpers/api.channel';
 import { loadTestCases } from '../helpers/test.data';
 import { AnswerEvaluatorFactory } from '../modules/evaluation/answer.evaluator.factory';
@@ -41,8 +40,8 @@ export function defineQuestionSuite(title: string, key: string) {
     const testCases = loadTestCases(testDataFile(key));
     const evaluator = AnswerEvaluatorFactory.create();
     const user: ApiChannelUser = {
-        platformId : ConfigurationManager.PlatformId(),
-        name       : 'Playwright User',
+        platformId : botClient.platformId,
+        name       : `Playwright User ${botClient.client}`,
     };
 
     test.describe(title, () => {
@@ -94,7 +93,7 @@ export function defineQuestionSuite(title: string, key: string) {
                 }
 
                 const scorable = status === 200 && actual !== EMPTY_BODY && !actual.startsWith('<html>');
-                const score = scorable ? await evaluator.score(expected, actual) : 0;
+                const score = scorable ? await evaluator.score(question, expected, actual) : 0;
                 const { outcome, remarks } = outcomeOf(status, actual, score, threshold);
 
                 const result: QuestionResult = {

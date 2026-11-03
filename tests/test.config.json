@@ -11,8 +11,11 @@
         "Threshold": 70,
         "Model": "Xenova/all-MiniLM-L6-v2"
     },
+    "LLM": {
+        "Model": "gpt-5-mini"
+    },
     "Evaluation": {
-        "Method": "SemanticSimilarity"
+        "Method": "LLM"
     },
     "Reports": {
         "Provider": "AWS-S3",
@@ -25,7 +28,15 @@
     "Environments": {
         "uat": {
             "Clients": {
-                "alert": "ALERTAID_UAT"
+                "alert": "ALERTAID_UAT",
+                "hei": "HEI_WORKFLOW",
+                "nims": "NIMS",
+                "sowchan": "SOWCHAN_UAT",
+                "loveMatters": "LOVE_MATTERS",
+                "prayas": "PRAYAS",
+                "ulagos": "ULAGOS",
+                "gghnAnemia": "GGHN_ANEMIA",
+                "sphsd": "SPHSD"
             }
         },
         "production": {

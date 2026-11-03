@@ -1,7 +1,7 @@
 export type FileStorageProvider = 'AWS-S3' | 'Local';
 export type DataFormat = 'CSV' | 'JSON' | 'XLSX';
 export type ReportRetentionPolicy = 'Daily' | 'OnlyLatest';
-export type EvaluationMethod = 'SemanticSimilarity';
+export type EvaluationMethod = 'SemanticSimilarity' | 'LLM';
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -18,6 +18,10 @@ export interface TemporaryFoldersConfig {
 export interface SimilarityConfig {
     Threshold: number;
     Model    : string;
+}
+
+export interface LlmConfig {
+    Model: string;
 }
 
 export interface EvaluationConfig {
@@ -49,6 +53,7 @@ export interface TestConfigurations {
     FileStorage      : FileStorageConfig;
     TemporaryFolders?: TemporaryFoldersConfig;
     Similarity       : SimilarityConfig;
+    LLM?             : LlmConfig;
     Evaluation       : EvaluationConfig;
     Reports          : ReportsConfig;
     ReportRetention  : ReportRetentionConfig;
