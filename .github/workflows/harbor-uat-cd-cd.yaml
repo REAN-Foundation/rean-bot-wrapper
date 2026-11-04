@@ -179,3 +179,40 @@ jobs:
             test-reports/
             playwright-report/
           retention-days: 7
+
+  Email-Test-Report:
+    needs: Playwright-UAT-Tests
+    if: always() && (needs.Playwright-UAT-Tests.result == 'success' || needs.Playwright-UAT-Tests.result == 'failure')
+    environment: uat
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download reports
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: playwright-reports-${{ github.run_number }}
+
+      - name: Build summary
+        id: summary
+        env:
+          TEST_ENV: ${{ vars.TEST_ENV }}
+          TEST_JOB_RESULT: ${{ needs.Playwright-UAT-Tests.result }}
+        run: node .github/scripts/test-report-summary.js test-reports email-body.html
+
+      - name: Send email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ vars.SMTP_PORT || 465 }}
+          secure: ${{ (vars.SMTP_PORT || '465') == '465' }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          from: ${{ vars.TEST_REPORT_EMAIL_FROM }}
+          to: ${{ vars.TEST_REPORT_EMAIL_TO }}
+          subject: ${{ steps.summary.outputs.subject }}
+          html_body: file://email-body.html
+          attachments: test-reports/${{ steps.summary.outputs.report_folder }}/*.xlsx
