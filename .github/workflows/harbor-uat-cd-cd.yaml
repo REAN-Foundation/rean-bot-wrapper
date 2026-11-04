@@ -117,107 +117,107 @@ jobs:
           curl -sk "${A[@]}" -X POST -H 'Content-Type: application/json' -d '{"dry_run":false}' "${HARBOR}/api/v2.0/retentions/${RETENTION_ID}/executions"
           echo "Mirrored ${ECR_REPO}:${TAG} to Harbor (${HARBOR_PROJECT}); triggered keep-5."
 
-  Playwright-UAT-Tests:
-    if: github.event_name == 'workflow_dispatch'
-    environment: uat
-    runs-on: ubuntu-latest
+  # Playwright-UAT-Tests:
+  #   if: github.event_name == 'workflow_dispatch'
+  #   environment: uat
+  #   runs-on: ubuntu-latest
 
-    timeout-minutes: 240
+  #   timeout-minutes: 240
 
-    permissions:
-      id-token: write
-      contents: read
+  #   permissions:
+  #     id-token: write
+  #     contents: read
 
-    outputs:
-      reports_url: ${{ steps.upload_reports.outputs.artifact-url }}
+  #   outputs:
+  #     reports_url: ${{ steps.upload_reports.outputs.artifact-url }}
 
-    env:
-      TEST_ENV: ${{ vars.TEST_ENV }}
-      TEST_BASE_URL: ${{ secrets.TEST_BASE_URL }}
-      TEST_API_KEY: ${{ secrets.TEST_API_KEY }}
-      TEST_PLATFORM_ID: ${{ secrets.TEST_PLATFORM_ID }}
-      TEST_WORKERS: ${{ vars.TEST_WORKERS || 4 }}
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      CI: true
+  #   env:
+  #     TEST_ENV: ${{ vars.TEST_ENV }}
+  #     TEST_BASE_URL: ${{ secrets.TEST_BASE_URL }}
+  #     TEST_API_KEY: ${{ secrets.TEST_API_KEY }}
+  #     TEST_PLATFORM_ID: ${{ secrets.TEST_PLATFORM_ID }}
+  #     TEST_WORKERS: ${{ vars.TEST_WORKERS || 4 }}
+  #     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  #     CI: true
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 24
+  #         cache: npm
 
-      - name: Install dependencies
-        run: npm ci
+  #     - name: Install dependencies
+  #       run: npm ci
 
-      - name: Cache similarity model
-        uses: actions/cache@v4
-        with:
-          path: .cache/transformers
-          key: transformers-${{ runner.os }}-all-MiniLM-L6-v2
+  #     - name: Cache similarity model
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: .cache/transformers
+  #         key: transformers-${{ runner.os }}-all-MiniLM-L6-v2
 
-      - name: Configure AWS credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          role-session-name: playwright-uat-${{ github.run_id }}
-          aws-region: ${{ vars.AWS_REGION }}
-          role-duration-seconds: 14400
+  #     - name: Configure AWS credentials using OIDC
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+  #         role-session-name: playwright-uat-${{ github.run_id }}
+  #         aws-region: ${{ vars.AWS_REGION }}
+  #         role-duration-seconds: 14400
 
-      - name: Type-check tests
-        run: npm run test:e2e:typecheck
+  #     - name: Type-check tests
+  #       run: npm run test:e2e:typecheck
 
-      - name: Run Playwright tests
-        run: npx playwright test
+  #     - name: Run Playwright tests
+  #       run: npx playwright test
 
-      - name: Upload reports as artifact
-        id: upload_reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-reports-${{ github.run_number }}
-          path: |
-            test-reports/
-            playwright-report/
-          retention-days: 7
+  #     - name: Upload reports as artifact
+  #       id: upload_reports
+  #       if: always()
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: playwright-reports-${{ github.run_number }}
+  #         path: |
+  #           test-reports/
+  #           playwright-report/
+  #         retention-days: 7
 
-  Email-Test-Report:
-    needs: Playwright-UAT-Tests
-    if: always() && (needs.Playwright-UAT-Tests.result == 'success' || needs.Playwright-UAT-Tests.result == 'failure')
-    environment: uat
-    runs-on: ubuntu-latest
+  # Email-Test-Report:
+  #   needs: Playwright-UAT-Tests
+  #   if: always() && (needs.Playwright-UAT-Tests.result == 'success' || needs.Playwright-UAT-Tests.result == 'failure')
+  #   environment: uat
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
 
-      - name: Download reports
-        continue-on-error: true
-        uses: actions/download-artifact@v4
-        with:
-          name: playwright-reports-${{ github.run_number }}
+  #     - name: Download reports
+  #       continue-on-error: true
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: playwright-reports-${{ github.run_number }}
 
-      - name: Build summary
-        id: summary
-        env:
-          TEST_ENV: ${{ vars.TEST_ENV }}
-          TEST_JOB_RESULT: ${{ needs.Playwright-UAT-Tests.result }}
-          REPORTS_URL: ${{ needs.Playwright-UAT-Tests.outputs.reports_url }}
-        run: node .github/scripts/test-report-summary.js test-reports email-body.html
+  #     - name: Build summary
+  #       id: summary
+  #       env:
+  #         TEST_ENV: ${{ vars.TEST_ENV }}
+  #         TEST_JOB_RESULT: ${{ needs.Playwright-UAT-Tests.result }}
+  #         REPORTS_URL: ${{ needs.Playwright-UAT-Tests.outputs.reports_url }}
+  #       run: node .github/scripts/test-report-summary.js test-reports email-body.html
 
-      - name: Send email
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: ${{ secrets.SMTP_SERVER }}
-          server_port: ${{ vars.SMTP_PORT || 465 }}
-          secure: ${{ (vars.SMTP_PORT || '465') == '465' }}
-          username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
-          from: ${{ vars.TEST_REPORT_EMAIL_FROM }}
-          to: ${{ vars.TEST_REPORT_EMAIL_TO }}
-          subject: ${{ steps.summary.outputs.subject }}
-          html_body: file://email-body.html
-          attachments: test-reports/${{ steps.summary.outputs.report_folder }}/*.xlsx
+  #     - name: Send email
+  #       uses: dawidd6/action-send-mail@v3
+  #       with:
+  #         server_address: ${{ secrets.SMTP_SERVER }}
+  #         server_port: ${{ vars.SMTP_PORT || 465 }}
+  #         secure: ${{ (vars.SMTP_PORT || '465') == '465' }}
+  #         username: ${{ secrets.SMTP_USERNAME }}
+  #         password: ${{ secrets.SMTP_PASSWORD }}
+  #         from: ${{ vars.TEST_REPORT_EMAIL_FROM }}
+  #         to: ${{ vars.TEST_REPORT_EMAIL_TO }}
+  #         subject: ${{ steps.summary.outputs.subject }}
+  #         html_body: file://email-body.html
+  #         attachments: test-reports/${{ steps.summary.outputs.report_folder }}/*.xlsx

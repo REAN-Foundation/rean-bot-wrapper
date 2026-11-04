@@ -1,0 +1,163 @@
+
+name: Playwright UAT Tests
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    # Daily at 10:30 PM UTC (4:00 AM IST)
+    - cron: "30 22 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  Playwright-UAT-Tests:
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+
+    # Manual dispatch uses the protected UAT environment.
+    # Scheduled tests use the approval-free test environment.
+    environment:
+      name: ${{ github.event_name == 'schedule' && 'automated-tests-uat' || 'uat' }}
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+
+    permissions:
+      id-token: write
+      contents: read
+
+    outputs:
+      reports_url: ${{ steps.upload_reports.outputs.artifact-url }}
+      selected_branch: ${{ steps.latest-release.outputs.branch || github.ref_name }}
+
+    env:
+      TEST_ENV: ${{ vars.TEST_ENV }}
+      TEST_BASE_URL: ${{ secrets.TEST_BASE_URL }}
+      TEST_API_KEY: ${{ secrets.TEST_API_KEY }}
+      TEST_PLATFORM_ID: ${{ secrets.TEST_PLATFORM_ID }}
+      TEST_WORKERS: ${{ vars.TEST_WORKERS || 4 }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      CI: true
+
+    steps:
+      # For manual dispatch, check out the branch selected in GitHub.
+      - name: Checkout selected branch
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@v4
+
+      # For scheduled runs, first check out the default branch
+      # to access the branch-selection script.
+      - name: Checkout workflow repository
+        if: github.event_name == 'schedule'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Find latest UAT release branch
+        if: github.event_name == 'schedule'
+        id: latest-release
+        shell: bash
+        run: bash .github/scripts/get-latest-uat-release.sh
+
+      # Switch to the latest release branch for scheduled tests.
+      - name: Checkout latest UAT release
+        if: github.event_name == 'schedule'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.latest-release.outputs.branch }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache similarity model
+        uses: actions/cache@v4
+        with:
+          path: .cache/transformers
+          key: transformers-${{ runner.os }}-all-MiniLM-L6-v2
+
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: playwright-uat-${{ github.run_id }}
+          aws-region: ${{ vars.AWS_REGION }}
+          role-duration-seconds: 14400
+
+      - name: Type-check tests
+        run: npm run test:e2e:typecheck
+
+      - name: Run Playwright tests
+        run: npx playwright test
+
+      - name: Upload reports as artifact
+        id: upload_reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-reports-${{ github.run_number }}
+          path: |
+            test-reports/
+            playwright-report/
+          retention-days: 7
+
+  Email-Test-Report:
+    needs: Playwright-UAT-Tests
+
+    if: >-
+      always() &&
+      (
+        needs.Playwright-UAT-Tests.result == 'success' ||
+        needs.Playwright-UAT-Tests.result == 'failure'
+      )
+
+    # Use the same environment as the test job so scheduled
+    # report emails don't wait for UAT reviewer approval.
+    environment:
+      name: ${{ github.event_name == 'schedule' && 'automated-tests-uat' || 'uat' }}
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout test report scripts
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.Playwright-UAT-Tests.outputs.selected_branch || github.event.repository.default_branch }}
+
+      - name: Download reports
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: playwright-reports-${{ github.run_number }}
+          path: .
+
+      - name: Build summary
+        id: summary
+        env:
+          TEST_ENV: ${{ vars.TEST_ENV }}
+          TEST_JOB_RESULT: ${{ needs.Playwright-UAT-Tests.result }}
+          REPORTS_URL: ${{ needs.Playwright-UAT-Tests.outputs.reports_url }}
+        run: node .github/scripts/test-report-summary.js test-reports email-body.html
+
+      - name: Send email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ vars.SMTP_PORT || 465 }}
+          secure: ${{ (vars.SMTP_PORT || '465') == '465' }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          from: ${{ vars.TEST_REPORT_EMAIL_FROM }}
+          to: ${{ vars.TEST_REPORT_EMAIL_TO }}
+          subject: ${{ steps.summary.outputs.subject }}
+          html_body: file://email-body.html
+          attachments: test-reports/${{ steps.summary.outputs.report_folder }}/*.xlsx
