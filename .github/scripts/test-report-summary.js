@@ -37,6 +37,7 @@ const results = resultsFile
     : [];
 
 const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+const reportsUrl = process.env.REPORTS_URL || runUrl;
 const testEnv = process.env.TEST_ENV || 'uat';
 const jobResult = process.env.TEST_JOB_RESULT || 'unknown';
 
@@ -80,8 +81,8 @@ ${rows}
 ${totalsRow}
 </table>
 <p>The Excel report for each bot is attached. The full HTML report and the Excel files are also in S3 under
-<code>${escapeHtml(reportsLocation)}/${escapeHtml(reportFolder)}</code> and in the run's artifacts.</p>
-<p>Run: <a href="${runUrl}">${runUrl}</a></p>`;
+<code>${escapeHtml(reportsLocation)}/${escapeHtml(reportFolder)}</code>.</p>
+<p>Download all reports (zip): <a href="${reportsUrl}">${reportsUrl}</a></p>`;
 
 fs.writeFileSync(bodyFile, body);
 
