@@ -6,7 +6,7 @@ on:
 
   schedule:
     # Daily at 10:30 PM UTC (4:00 AM IST)
-    - cron: "30 22 * * *"
+    - cron: "30 9 * * *"
 
 permissions:
   contents: read
