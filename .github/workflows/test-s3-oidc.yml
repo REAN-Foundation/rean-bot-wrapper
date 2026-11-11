@@ -1,0 +1,38 @@
+
+name: Test S3 Access with OIDC
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  test-s3-access:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Create dummy test file
+        run: |
+          echo "GitHub OIDC to S3 is working!" > test-result.txt
+          cat test-result.txt
+
+      - name: Upload dummy file to S3
+        env:
+          STORAGE_BUCKET: ${{ vars.STORAGE_BUCKET }}
+        run: |
+          aws s3 cp test-result.txt \
+            "s3://${STORAGE_BUCKET}/oidc-test/test-result-${GITHUB_RUN_ID}.txt"
+
+      - name: Verify uploaded file
+        env:
+          STORAGE_BUCKET: ${{ vars.STORAGE_BUCKET }}
+        run: |
+          aws s3 ls "s3://${STORAGE_BUCKET}/oidc-test/"
