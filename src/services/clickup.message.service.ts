@@ -9,6 +9,9 @@ import { EntityManagerProvider } from './entity.manager.provider.service';
 import { ClientEnvironmentProviderService } from './set.client/client.environment.provider.service';
 import { ContactList } from '../models/contact.list';
 import { SystemGeneratedMessagesService } from '../services/system.generated.message.service';
+import { ChatSession } from '../models/chat.session';
+import { getRequestOptions } from '../utils/helper';
+import needle from 'needle';
 
 @scoped(Lifecycle.ContainerScoped)
 export class ClickUpMessageService implements platformServiceInterface {
@@ -142,6 +145,12 @@ export class ClickUpMessageService implements platformServiceInterface {
             console.log("textToUser", textToUser);
             const commentId = requestBody.history_items[0].comment.id;
 
+            const replyWebhookUrl = await this.getReplyWebhookUrl();
+            if (replyWebhookUrl) {
+                await this.forwardReplyToWebhook(entityManager, replyWebhookUrl, commentId, platform, userId, textToUser);
+                return;
+            }
+
             await this.maybeSendActivationTemplate(entityManager, platform, userId);
 
             await this.slackClickupCommonFunctions.sendCustomMessage(platform, userId, textToUser);
@@ -149,6 +158,73 @@ export class ClickUpMessageService implements platformServiceInterface {
         } catch (error) {
             console.log(error);
         }
+    }
+
+    async getReplyWebhookUrl() {
+        const replyWebhookSetting = await this.clientEnvironmentProviderService.getClientEnvironmentVariable("ClickupReplyWebhookUrl");
+        const replyWebhookUrl = (replyWebhookSetting && typeof replyWebhookSetting === "object")
+            ? replyWebhookSetting.Value
+            : replyWebhookSetting;
+
+        return replyWebhookUrl ? String(replyWebhookUrl).trim() : null;
+    }
+
+    // When the ClickupReplyWebhookUrl client setting is configured, the expert's reply goes to
+    // that webhook instead of WhatsApp/Telegram. The ClickUp comment id is sent as messageId so the
+    // receiver can drop repeats. A 429, 5xx or network error is retried with the same messageId,
+    // up to 3 attempts. A failed call is logged and does not fall back to the user's channel.
+    // The reply is added to the chat history only once it is accepted.
+    async forwardReplyToWebhook(entityManager, replyWebhookUrl, commentId, platform, userId, message) {
+        if (!userId) {
+            console.log("User not found, reply not forwarded to webhook for comment:", commentId);
+            return;
+        }
+
+        const options = getRequestOptions();
+        options.headers["Content-Type"] = `application/json`;
+        const obj = {
+            messageId      : String(commentId),
+            platformUserId : String(userId),
+            text           : message
+        };
+
+        const MAX_ATTEMPTS = 3;
+        let accepted = false;
+        for (let attempt = 1; attempt <= MAX_ATTEMPTS && !accepted; attempt++) {
+            let retryable = true;
+            try {
+                const response = await needle("post", replyWebhookUrl, obj, options);
+                accepted = response.statusCode >= 200 && response.statusCode < 300;
+                retryable = response.statusCode === 429 || response.statusCode >= 500;
+                if (!accepted) {
+                    console.log(`Webhook rejected reply for comment ${commentId}, attempt ${attempt}. Status: ${response.statusCode}, Body:`, JSON.stringify(response.body));
+                }
+            } catch (error) {
+                console.log(`Error forwarding reply for comment ${commentId} to webhook, attempt ${attempt}:`, error.message || error);
+            }
+            if (!accepted && !retryable) {
+                break;
+            }
+            if (!accepted && attempt < MAX_ATTEMPTS) {
+                await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+            }
+        }
+        if (!accepted) {
+            console.log("Reply not forwarded to webhook for comment:", commentId);
+            return;
+        }
+
+        const chatSessionRepository = entityManager.getRepository(ChatSession);
+        const chatSessionModel = await chatSessionRepository.findOne({ where: { userPlatformID: userId } });
+        const chatMessageRepository = entityManager.getRepository(ChatMessage);
+        await chatMessageRepository.create({
+            chatSessionID  : chatSessionModel ? chatSessionModel.autoIncrementalID : null,
+            platform       : platform,
+            direction      : "Out",
+            messageType    : "text",
+            messageContent : message,
+            userPlatformID : userId
+        });
     }
 
     // When the ClickupTemplate client setting is configured, WhatsApp blocks the expert's
