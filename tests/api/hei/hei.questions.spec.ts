@@ -1,0 +1,5 @@
+import { defineQuestionSuite } from '../question.suite';
+
+////////////////////////////////////////////////////////////////////////////////
+
+defineQuestionSuite('HEI client - questions', 'hei');
