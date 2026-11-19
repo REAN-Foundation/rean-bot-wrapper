@@ -50,7 +50,7 @@ export const PLATFORM_LABELS: Record<string, string> = {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Temporary default, used only when CUSTOM_STATS_TENANTS is missing or empty in the env.
-export const DEFAULT_CUSTOM_STATS_TENANTS = ['Testing30'];
+export const DEFAULT_CUSTOM_STATS_TENANTS = ['Testing30', 'LOVE_MATTERS'];
 
 let parsedFrom: string | null = null;
 let parsedTenants: string[] = [];
