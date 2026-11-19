@@ -2,9 +2,7 @@
 name: Harbor-UAT-GHR
 
 on:
-  push:
-    branches:
-      - 'release/**'
+  workflow_dispatch:
 
 jobs:
   Build-Push-Harbor:
