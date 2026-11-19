@@ -7,7 +7,8 @@ import { ChatDailyContentStatRepo } from '../../database/repositories/chat.daily
 import { TenantService } from '../tenant/tenant.service';
 import { ContainerService } from '../container/container.service';
 import { Logger } from '../../common/logger';
-import { MAX_CONTENT_NORMALIZED_LENGTH } from './stats.constants';
+import { MAX_CONTENT_NORMALIZED_LENGTH, isCustomStatsTenant } from './stats.constants';
+import { CustomStatsRollupService } from './custom/custom.stats.rollup.service';
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -93,6 +94,21 @@ export class ChatDailyRollupService {
                 Logger.instance().log(
                     `ChatDailyRollupService: failed for tenant "${tenant.Code}", date ${targetDate}: ${error.message}`
                 );
+            }
+
+            if (isCustomStatsTenant(tenant.Code)) {
+                try {
+                    const customContainer = ContainerService.createChildContainer(tenant.Code);
+                    const updated = await CustomStatsRollupService.computeAndStore(customContainer, targetDate);
+                    Logger.instance().log(
+                        `ChatDailyRollupService: custom stats for tenant "${tenant.Code}", date ${targetDate}: ` +
+                        (updated ? 'updated.' : 'skipped (no daily stat row).')
+                    );
+                } catch (error) {
+                    Logger.instance().log(
+                        `ChatDailyRollupService: custom stats failed for tenant "${tenant.Code}", date ${targetDate}: ${error.message}`
+                    );
+                }
             }
         }
     };
