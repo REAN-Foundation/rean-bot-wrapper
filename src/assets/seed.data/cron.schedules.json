@@ -1,13 +1,13 @@
 {
     "LOCAL":{
         "STATS":{
-            "scheduleChatDailyRollup": "0 0 30 9 *"
+            "scheduleChatDailyRollup": "0 */6 * * *"
         }
     },
 
     "DEVELOPMENT":{
         "STATS":{
-            "scheduleChatDailyRollup": "0 */1 * * *"
+            "scheduleChatDailyRollup": "0 */6 * * *"
         }
     },
 
@@ -22,7 +22,7 @@
             "scheduleDataBackup": "0 0 * * * "
         },
         "STATS":{
-            "scheduleChatDailyRollup": "0 */6 * * *"
+            "scheduleChatDailyRollup": "30 0 * * *"
         }
     }
 }
