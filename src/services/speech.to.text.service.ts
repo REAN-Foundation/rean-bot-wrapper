@@ -32,7 +32,6 @@ export class Speechtotext {
         return new Promise(async (resolve) => {
             if (chatServiceName === 'telegram') {
                 http.get(fileUrl, async (res) => {
-
                     //add time stamp - pending
                     const filename = path.basename(fileUrl);
 

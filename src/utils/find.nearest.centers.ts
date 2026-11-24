@@ -17,13 +17,11 @@ interface Center {
     priority: number;
     pincode: string;
   }
-
   interface Location {
     cityA: string;
     latitudeA: number;
     longitudeA: number;
   }
-
   interface Distance {
     [x: string]: any;
     postalAddress: string;
@@ -63,7 +61,6 @@ export class NearestLocation {
         return new Promise((resolve, reject) => {
             const centers: Center[] = [];
             const stream = streamifier.createReadStream(buffer);
-
             stream
                 .pipe(csv())
                 .on('data', (row) => {
@@ -163,7 +160,6 @@ export class NearestLocation {
 
         // Combine preferred centers at the top with the sorted non-preferred centers
         const finalCenters = [...preferredCenters, ...nonPreferredCenters];
-
         return finalCenters;
     }
 

@@ -5,7 +5,7 @@ import { CareplanEnrollmentDomainModel } from "../../domain.types/basic.careplan
 
 @injectable()
 export class ReancareCareplanService {
-
+    
     private _clientEnvironmentProviderService: ClientEnvironmentProviderService;
 
     public EnrollCareplan = async (container: DependencyContainer, patientUserId: string, model: CareplanEnrollmentDomainModel) => {
@@ -31,5 +31,4 @@ export class ReancareCareplanService {
             }
         };
     };
-
 }
