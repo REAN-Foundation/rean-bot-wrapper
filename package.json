@@ -8,7 +8,10 @@
     "start": "tsc && ts-node --files ./src/index.ts",
     "lint": "eslint ./src/**",
     "lint:fix": "eslint ./src/** --fix",
-    "test": ""
+    "test": "",
+    "test:e2e": "playwright test",
+    "test:e2e:report": "playwright show-report",
+    "test:e2e:typecheck": "tsc -p tsconfig.tests.json"
   },
   "repository": {
     "type": "git",
@@ -93,6 +96,9 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@aws-sdk/client-s3": "^3.1158.0",
+    "@huggingface/transformers": "^4.3.2",
+    "@playwright/test": "^1.64.1",
     "@types/body-parser": "^1.19.0",
     "@types/express": "^4.17.11",
     "@types/fs-extra": "^9.0.11",
