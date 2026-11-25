@@ -116,7 +116,6 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
             messagetoDialogflow.type = 'image';
             messagetoDialogflow.messageBody = imageUrl;
             messagetoDialogflow.imageUrl = location;
-
             return messagetoDialogflow;
         } catch (error) {
             console.error('Error processing photo message:', error.message);
@@ -191,7 +190,6 @@ export class TelegramMessageServiceFunctionalities implements getMessageFunction
                 filePath.on('finish', () => resolve());
                 filePath.on('error', (error) => reject(error));
             });
-
             return uploadpath;
         } catch (error) {
             console.error('Error downloading media:', error.message);

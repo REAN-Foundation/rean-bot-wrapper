@@ -24,7 +24,7 @@ import { MAX_TELEGRAM_BUTTONS, MAX_WHATSAPP_BUTTONS } from '../domain.types/user
 
 @scoped(Lifecycle.ContainerScoped)
 export class ConsentService {
-
+    
     private _platformMessageService?: platformServiceInterface;
 
     constructor(
@@ -144,7 +144,6 @@ export class ConsentService {
             console.log("While updating Consent Status", error);
 
         }
-
     }
 
     async handleConsentNoreply(userId,req): Promise<any> {

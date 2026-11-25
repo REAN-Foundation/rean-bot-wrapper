@@ -6,7 +6,6 @@ import needle from "needle";
 
 @scoped(Lifecycle.ContainerScoped)
 export class BodyTemperatureService {
-
     constructor(
         @inject(GetHeaders) private getHeaders: GetHeaders,
         @inject(GetPatientInfoService) private getPatientInfoService: GetPatientInfoService,

@@ -49,7 +49,6 @@ export class WatiMessageFunctionalities implements getMessageFunctionalities {
     }
 
     async locationMessageFormat(messageObj: Message) {
-
         // Method not implemented yet
     }
 
@@ -203,5 +202,4 @@ export class WatiMessageFunctionalities implements getMessageFunctionalities {
             return messageToDialogflow;
         }
     }
-
 }
