@@ -2,4 +2,4 @@ import { defineQuestionSuite } from '../question.suite';
 
 ////////////////////////////////////////////////////////////////////////////////
 
-defineQuestionSuite('GGHN_ANEMIA client - questions', 'gghnAnemia');
+defineQuestionSuite('GGHN_HIVTB client - questions', 'gghnHivtb');
