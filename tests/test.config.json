@@ -35,7 +35,7 @@
                 "loveMatters": "LOVE_MATTERS",
                 "prayas": "PRAYAS",
                 "ulagos": "ULAGOS",
-                "gghnAnemia": "GGHN_ANEMIA",
+                "gghnHivtb": "GGHN_HIVTB",
                 "sphsd": "SPHSD"
             }
         },
@@ -53,9 +53,9 @@
             "Format": "XLSX"
         },
         {
-            "Name": "gghnAnemia_test_case.xlsx",
+            "Name": "gghnHivtb_test_case.xlsx",
             "Provider": "AWS-S3",
-            "StorageKey": "rf-automation-test-results/test-cases/gghnAnemia_test_case.xlsx",
+            "StorageKey": "rf-automation-test-results/test-cases/gghnHivtb_test_case.xlsx",
             "Format": "XLSX"
         },
         {
